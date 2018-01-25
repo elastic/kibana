@@ -9,10 +9,41 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
           commands: [
             'modules:',
             '  - name: netflow',
-            '    var.input.udp.port: <udp_port_for_receving_netflow_data>',
+            '    var.input.udp.port: <udp_port>',
+          ],
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.'
+
+        }
+      ],
+      WINDOWS: [
+        {
+          title: 'Edit the configuration',
+          textPre: 'Modify `config\\logstash.yml` to set the configuration parameters:',
+          commands: [
+            'modules:',
+            '  - name: netflow',
+            '    var.input.udp.port: <udp_port>',
+          ],
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.'
+        }
+      ]
+    },
+    ON_PREM_ELASTIC_CLOUD: {
+      OSX: [
+        {
+          title: 'Edit the configuration',
+          textPre: 'Modify `config/logstash.yml` to set the configuration parameters:',
+          commands: [
+            'modules:',
+            '  - name: netflow',
+            '    var.input.udp.port: <udp_port>',
             '    var.elasticsearch.hosts: [ "<es_url>" ]',
-            '    var.kibana.host: "<kibana_hostname>:<kibana_port>"'
-          ]
+            '    var.elasticsearch.username: elastic',
+            '    var.elasticsearch.password: <password>',
+          ],
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
+                  + '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and '
+                  + '`<password>` is the password of the `elastic` user.'
         }
       ],
       WINDOWS: [
@@ -23,10 +54,15 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
           commands: [
             'modules:',
             '  - name: netflow',
-            '    var.input.udp.port: <udp_port_for_receving_netflow_data>',
+            '    var.input.udp.port: <udp_port>',
             '    var.elasticsearch.hosts: [ "<es_url>" ]',
-            '    var.kibana.host: "<kibana_hostname>:<kibana_port>"'
-          ]
+            '    var.elasticsearch.username: elastic',
+            '    var.elasticsearch.password: <password>',
+          ],
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
+                  + '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and '
+                  + '`<password>` is the password of the `elastic` user.'
+
         }
       ]
     },
@@ -37,13 +73,15 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
           textPre: 'In the Logstash installation directory, modify `config/logstash.yml` to set the'
             + ' configuration parameters for the Netflow module.',
           commands: [
+            'cloud.id: "{config.cloud.id}"',
+            'cloud.auth: "elastic:<password>"',
+            ' ',
             'modules:',
             '  - name: netflow',
-            '    var.input.udp.port: <udp_port_for_receving_netflow_data>',
-            '    cloud.id: "{config.cloud.id}"',
-            '    cloud.auth: "elastic:<password>"'
+            '    var.input.udp.port: <udp_port>',
           ],
-          textPost: 'Where `<password>` is the password of the `elastic` user.'
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and '
+                  + '`<password>` is the password of the `elastic` user.'
         }
       ],
       WINDOWS: [
@@ -52,12 +90,15 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
           textPre: 'While in the Logstash install directory, modify `config\\logstash.yml` to set the'
             + ' configuration parameters for the Netflow module:',
           commands: [
+            'cloud.id: "{config.cloud.id}"',
+            'cloud.auth: "elastic:<password>"',
+            ' ',
             'modules:',
             '  - name: netflow',
-            '    var.input.udp.port: <udp_port_for_receving_netflow_data>',
-            '    cloud.id: "{config.cloud.id}"',
-            '    cloud.auth: "elastic:<password>"'
-          ]
+            '    var.input.udp.port: <udp_port>',
+          ],
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and '
+                  + '`<password>` is the password of the `elastic` user.'
         }
       ]
     }
