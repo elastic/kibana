@@ -2,10 +2,10 @@
 `Add Data` in the Kibana Home application contains a collection of tutorials for setting up data flows in the Elastic stack.
 
 Each tutorial contains 3 sets of instructions
-1. `On Premise` Instructions for setting up a data flow when both Kibana and ElasticSearch are running on premise
+1. `On Premise` Instructions for setting up a data flow when both Kibana and Elasticsearch are running on premise
 2. `On Premise Elastic Cloud` Instructions for setting up a data flow when Kibana is running on premise but
-ElasticSearch is running on cloud.
-3. `Elastic Cloud` Instructions for setting up a data flow when both Kibana and ElasticSearch are running on cloud.
+Elasticsearch is running on cloud.
+3. `Elastic Cloud` Instructions for setting up a data flow when both Kibana and Elasticsearch are running on cloud.
 
 ## Creating a new tutorial
 1. Create a new directory in the [tutorials directory](https://github.com/elastic/kibana/tree/master/src/core_plugins/kibana/server/tutorials).
