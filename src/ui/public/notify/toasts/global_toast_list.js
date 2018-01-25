@@ -67,8 +67,10 @@ export class GlobalToastList extends Component {
 
   startDismissingToast(toast) {
     this.setState(prevState => {
-      const toastIdToDismissedMap = { ...prevState.toastIdToDismissedMap };
-      toastIdToDismissedMap[toast.id] = true;
+      const toastIdToDismissedMap = {
+        ...prevState.toastIdToDismissedMap,
+        [toast.id]: true,
+      };
 
       return {
         toastIdToDismissedMap,
@@ -81,7 +83,7 @@ export class GlobalToastList extends Component {
   }
 
   componentWillUnmount() {
-    this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
+    this.timeoutIds.forEach(clearTimeout);
   }
 
   componentDidUpdate() {
