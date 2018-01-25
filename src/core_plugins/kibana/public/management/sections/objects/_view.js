@@ -219,10 +219,8 @@ uiModules.get('apps/management')
             })
           });
 
-          toastNotifications.add({
+          toastNotifications.addSuccess({
             title: `${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`,
-            color: 'success',
-            iconType: 'check',
           });
         }
       }

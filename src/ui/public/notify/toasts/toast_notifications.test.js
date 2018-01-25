@@ -36,5 +36,26 @@ describe('ToastNotifications', () => {
         expect(toastNotifications.list.length).toBe(0);
       });
     });
+
+    describe('addSuccess method', () => {
+      test('adds a success toast', () => {
+        toastNotifications.addSuccess({});
+        expect(toastNotifications.list[0].color).toBe('success');
+      });
+    });
+
+    describe('addWarning method', () => {
+      test('adds a warning toast', () => {
+        toastNotifications.addWarning({});
+        expect(toastNotifications.list[0].color).toBe('warning');
+      });
+    });
+
+    describe('addDanger method', () => {
+      test('adds a danger toast', () => {
+        toastNotifications.addDanger({});
+        expect(toastNotifications.list[0].color).toBe('danger');
+      });
+    });
   });
 });

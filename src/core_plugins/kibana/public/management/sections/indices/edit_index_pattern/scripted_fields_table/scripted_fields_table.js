@@ -81,20 +81,16 @@ uiModules.get('apps/management')
           });
 
           if (fieldsAdded > 0) {
-            toastNotifications.add({
+            toastNotifications.addSuccess({
               title: 'Created script fields',
               text: `Created ${fieldsAdded}`,
-              color: 'success',
-              iconType: 'check',
             });
           }
 
           if (conflictFields.length > 0) {
-            toastNotifications.add({
+            toastNotifications.addWarning({
               title: `Didn't add duplicate fields`,
               text: `${conflictFields.length} fields: ${conflictFields.join(', ')}`,
-              color: 'warning',
-              iconType: 'alert',
             });
           }
         };

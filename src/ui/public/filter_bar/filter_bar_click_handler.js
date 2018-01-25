@@ -43,10 +43,8 @@ export function FilterBarClickHandlerProvider(Private) {
               return result.createFilter();
             } catch (e) {
               if (!simulate) {
-                toastNotifications.add({
+                toastNotifications.addSuccess({
                   title: e.message,
-                  color: 'warning',
-                  iconType: 'alert',
                 });
               }
             }

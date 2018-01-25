@@ -251,10 +251,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         $scope.kbnTopNav.close('save');
 
         if (id) {
-          toastNotifications.add({
+          toastNotifications.addSuccess({
             title: `Saved '${savedVis.title}'`,
-            color: 'success',
-            iconType: 'check',
             'data-test-subj': 'saveVisualizationSuccess',
           });
 
@@ -287,10 +285,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    toastNotifications.add({
+    toastNotifications.addSuccess({
       title: `Unlinked from saved search '${savedVis.savedSearch.title}'`,
-      color: 'success',
-      iconType: 'check',
     });
 
     $state.linked = false;

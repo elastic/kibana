@@ -45,7 +45,6 @@ uiRoutes
         if (!this.field) {
           toastNotifications.add({
             title: `'${this.indexPattern.title}' index pattern doesn't have a scripted field called '${fieldName}'`,
-            color: 'primary',
           });
 
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');

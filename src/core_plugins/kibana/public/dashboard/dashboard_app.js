@@ -184,20 +184,16 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          toastNotifications.add({
+          toastNotifications.addSuccess({
             title: 'Added visualization to your dashboard',
-            color: 'success',
-            iconType: 'check',
           });
         }
       };
 
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
-        toastNotifications.add({
+        toastNotifications.addSuccess({
           title: 'Added saved search to your dashboard',
-          color: 'success',
-          iconType: 'check',
           'data-test-subj': 'addSavedSearchToDashboardSuccess',
         });
       };
@@ -279,10 +275,8 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
-              toastNotifications.add({
+              toastNotifications.addSuccess({
                 title: `Saved '${dash.title}'`,
-                color: 'success',
-                iconType: 'check',
                 'data-test-subj': 'saveDashboardSuccess',
               });
 
