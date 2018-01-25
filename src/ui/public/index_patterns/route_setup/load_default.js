@@ -50,6 +50,7 @@ export default function (opts) {
         // Avoid being hostile to new users who don't have an index pattern setup yet
         // give them a friendly info message instead of a terse error message
         missingIndicesMessage.show();
+        setTimeout(missingIndicesMessage.hide, 15000);
       }
     );
 }
