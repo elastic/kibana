@@ -1,13 +1,23 @@
+const normalizeToast = toastOrTitle => {
+  if (typeof toastOrTitle === 'string') {
+    return {
+      title: toastOrTitle,
+    };
+  }
+
+  return toastOrTitle;
+};
+
 export class ToastNotifications {
   constructor() {
     this.list = [];
     this.idCounter = 0;
   }
 
-  add = toast => {
+  add = toastOrTitle => {
     this.list.push({
       id: this.idCounter++,
-      ...toast
+      ...normalizeToast(toastOrTitle),
     });
   };
 
@@ -16,27 +26,27 @@ export class ToastNotifications {
     this.list.splice(index, 1);
   };
 
-  addSuccess = toast => {
+  addSuccess = toastOrTitle => {
     this.add({
       color: 'success',
       iconType: 'check',
-      ...toast,
+      ...normalizeToast(toastOrTitle),
     });
   };
 
-  addWarning = toast => {
+  addWarning = toastOrTitle => {
     this.add({
       color: 'warning',
       iconType: 'help',
-      ...toast,
+      ...normalizeToast(toastOrTitle),
     });
   };
 
-  addDanger = toast => {
+  addDanger = toastOrTitle => {
     this.add({
       color: 'danger',
       iconType: 'alert',
-      ...toast,
+      ...normalizeToast(toastOrTitle),
     });
   };
 }

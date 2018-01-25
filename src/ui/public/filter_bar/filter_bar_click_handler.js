@@ -43,9 +43,7 @@ export function FilterBarClickHandlerProvider(Private) {
               return result.createFilter();
             } catch (e) {
               if (!simulate) {
-                toastNotifications.addSuccess({
-                  title: e.message,
-                });
+                toastNotifications.addSuccess(e.message);
               }
             }
           })

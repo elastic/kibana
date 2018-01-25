@@ -184,9 +184,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          toastNotifications.addSuccess({
-            title: 'Added visualization to your dashboard',
-          });
+          toastNotifications.addSuccess('Added visualization to your dashboard');
         }
       };
 

@@ -219,9 +219,7 @@ uiModules.get('apps/management')
             })
           });
 
-          toastNotifications.addSuccess({
-            title: `${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`,
-          });
+          toastNotifications.addSuccess(`${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`);
         }
       }
     };

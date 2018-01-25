@@ -285,9 +285,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    toastNotifications.addSuccess({
-      title: `Unlinked from saved search '${savedVis.savedSearch.title}'`,
-    });
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
     const parent = searchSource.getParent(true);

@@ -26,6 +26,11 @@ describe('ToastNotifications', () => {
         toastNotifications.add({});
         expect(toastNotifications.list[1].id).toBe(1);
       });
+
+      test('accepts a string', () => {
+        toastNotifications.add('New toast');
+        expect(toastNotifications.list[0].title).toBe('New toast');
+      });
     });
 
     describe('remove method', () => {
