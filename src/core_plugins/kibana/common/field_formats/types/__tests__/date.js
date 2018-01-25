@@ -43,6 +43,8 @@ describe('Date Format', function () {
   });
 
   it('should parse date math values', function () {
+    console.log('should parse date math values....');
+    console.log(convert('2015-01-01||+1M/d'));
     expect(convert('2015-01-01||+1M/d')).to.be('January 1st 2015, 00:00:00.000');
   });
 });
