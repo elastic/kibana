@@ -115,7 +115,7 @@
     "commander": "2.8.1",
     "compare-versions": "3.1.0",
     "css-loader": "0.28.7",
-    "custom-event-polyfill": "^0.3.0",
+    "custom-event-polyfill": "0.3.0",
     "d3": "3.5.6",
     "d3-cloud": "1.2.1",
     "dragula": "3.7.0",
