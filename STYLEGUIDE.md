@@ -12,7 +12,6 @@ recommended for the development of all Kibana plugins.
 - [API](style_guides/api_style_guide.md)
 - [Architecture](style_guides/architecture_style_guide.md)
 - [Accessibility](style_guides/accessibility_guide.md)
-- [Add Data tutorial](style_guides/add_data_tutorial_guide.md)
 
 ## Filenames
 
