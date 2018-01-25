@@ -1,5 +1,5 @@
 import 'plugins/markdown_vis/markdown_vis.less';
-import { MarkdownVisComponent } from './markdown_vis_controller';
+import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
@@ -26,7 +26,7 @@ function MarkdownVisProvider(Private) {
     description: 'Create a document using markdown syntax',
     category: CATEGORY.OTHER,
     visConfig: {
-      component: MarkdownVisComponent,
+      component: MarkdownVisWrapper,
       defaults: {
         fontSize: 12
       }

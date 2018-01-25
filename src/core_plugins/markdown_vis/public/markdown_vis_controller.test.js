@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from 'enzyme';
-import { MarkdownVisComponent } from './markdown_vis_controller';
+import { render, mount } from 'enzyme';
+import { MarkdownVisWrapper } from './markdown_vis_controller';
 
 describe('markdown vis controller', () => {
   it('should set html from markdown params', () => {
@@ -10,7 +10,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisComponent vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
     expect(wrapper.find('a').text()).toBe('markdown');
   });
 
@@ -21,7 +21,43 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisComponent vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
+  });
+
+  it('should update the HTML when params change', () => {
+    const vis = {
+      params: {
+        markdown: 'Initial'
+      }
+    };
+
+    const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
+    expect(wrapper.text().trim()).toBe('Initial');
+    vis.params.markdown = 'Updated';
+    wrapper.setProps({
+      updateStatus: {
+        params: true
+      }
+    });
+    expect(wrapper.text().trim()).toBe('Updated');
+  });
+
+  it('should not update the HTML when updateStatus reports params have not changed', () => {
+    const vis = {
+      params: {
+        markdown: 'Initial'
+      }
+    };
+
+    const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
+    expect(wrapper.text().trim()).toBe('Initial');
+    vis.params.markdown = 'Updated';
+    wrapper.setProps({
+      updateStatus: {
+        params: false
+      }
+    });
+    expect(wrapper.text().trim()).toBe('Initial');
   });
 });
