@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { missingIndicesMessage } from 'ui/notify';
+import { createFirstIndexPatternPrompt } from 'ui/notify';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
@@ -49,8 +49,8 @@ export default function (opts) {
 
         // Avoid being hostile to new users who don't have an index pattern setup yet
         // give them a friendly info message instead of a terse error message
-        missingIndicesMessage.show();
-        setTimeout(missingIndicesMessage.hide, 15000);
+        createFirstIndexPatternPrompt.show();
+        setTimeout(createFirstIndexPatternPrompt.hide, 15000);
       }
     );
 }

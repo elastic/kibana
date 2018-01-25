@@ -1,4 +1,4 @@
-class MissingIndicesMessage {
+class CreateFirstIndexPatternPrompt {
   constructor() {
     this.isVisible = false;
   }
@@ -12,4 +12,4 @@ class MissingIndicesMessage {
   }
 }
 
-export const missingIndicesMessage = new MissingIndicesMessage();
+export const createFirstIndexPatternPrompt = new CreateFirstIndexPatternPrompt();

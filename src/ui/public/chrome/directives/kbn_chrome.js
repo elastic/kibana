@@ -8,7 +8,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify, toastNotifications, missingIndicesMessage } from 'ui/notify';
+import { notify, toastNotifications, createFirstIndexPatternPrompt } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -73,7 +73,7 @@ export function kbnChromeProvider(chrome, internals) {
           $scope.dismissToast = toastNotifications.remove;
           $scope.TOAST_LIFE_TIME_MS = 6000;
 
-          $scope.missingIndicesMessage = missingIndicesMessage;
+          $scope.createFirstIndexPatternPrompt = createFirstIndexPatternPrompt;
 
           return chrome;
         }
