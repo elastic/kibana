@@ -10,7 +10,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '  - name: netflow',
             '    var.input.udp.port: <udp_port>',
           ],
-          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data'
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.'
 
         }
       ],
@@ -23,7 +23,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '  - name: netflow',
             '    var.input.udp.port: <udp_port>',
           ],
-          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data'
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data.'
         }
       ]
     },
@@ -41,7 +41,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '    var.elasticsearch.password: <password>',
           ],
           textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
-                  + '`<es_url>` is the URL of Elasticsearch running in Elastic Cloud, and '
+                  + '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and '
                   + '`<password>` is the password of the `elastic` user.'
         }
       ],
@@ -58,7 +58,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '    var.elasticsearch.password: <password>',
           ],
           textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
-                  + '`<es_url>` is the URL of Elasticsearch running in Elastic Cloud, and '
+                  + '`<es_url>` is the URL of Elasticsearch running on Elastic Cloud, and '
                   + '`<password>` is the password of the `elastic` user.'
 
         }
@@ -77,7 +77,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '  - name: netflow',
             '    var.input.udp.port: <udp_port>',
           ],
-          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and '
                   + '`<password>` is the password of the `elastic` user.'
         }
       ],
@@ -93,7 +93,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
             '  - name: netflow',
             '    var.input.udp.port: <udp_port>',
           ],
-          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data, '
+          textPost: 'Where `<udp_port>` is the UDP port on which Logstash will receive Netflow data and '
                   + '`<password>` is the password of the `elastic` user.'
         }
       ]
