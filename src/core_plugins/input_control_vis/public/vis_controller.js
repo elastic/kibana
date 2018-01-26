@@ -14,7 +14,7 @@ class VisController {
   }
 
   async render(visData, status) {
-    if (status.params) {
+    if (status.params || (this.vis.params.useTimeFilter && status.time)) {
       this.controls = [];
       this.controls = await this.initControls();
       this.drawVis();
@@ -51,7 +51,7 @@ class VisController {
       })
         .map((controlParams) => {
           const factory = controlFactory(controlParams);
-          return factory(controlParams, this.vis.API);
+          return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
         })
     );
   }
@@ -87,7 +87,7 @@ class VisController {
       });
     });
 
-    this.vis.API.queryFilter.addFilters(newFilters);
+    this.vis.API.queryFilter.addFilters(newFilters, this.vis.params.pinFilters);
   }
 
   clearControls() {

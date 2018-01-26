@@ -27,8 +27,10 @@ export function VislibVisTypeProvider(Private) {
         this.vis.refreshLegend = 0;
       }
 
-      return new Promise((resolve, reject) => {
-        if (!this._response) return reject();
+      return new Promise((resolve) => {
+        if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
+          return resolve();
+        }
         this.vis.vislibVis = new vislib.Vis(this.el, this.vis.params);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
         this.vis.vislibVis.on('click', this.vis.API.events.filter);

@@ -37,8 +37,11 @@ module.exports = function (grunt) {
 
       // list of files / patterns to load in the browser
       files: [
+        'http://localhost:5610/bundles/vendors.bundle.js',
         'http://localhost:5610/bundles/commons.bundle.js',
         'http://localhost:5610/bundles/tests.bundle.js',
+
+        'http://localhost:5610/bundles/vendors.style.css',
         'http://localhost:5610/bundles/commons.style.css',
         'http://localhost:5610/bundles/tests.style.css'
       ],
@@ -102,11 +105,11 @@ module.exports = function (grunt) {
    *  (&shard_num=Y), are added to the testing bundle url and read by the
    *  test_harness/setup_test_sharding[1] module. This allows us to use a
    *  different number of shards in different scenarios (ie. running
-   *  `npm run test:browser` runs the tests in a single shard, effectively
+   *  `yarn test:browser` runs the tests in a single shard, effectively
    *  disabling sharding)
    *
    *  These same parameters can also be defined in the URL/query string of the
-   *  karma debug page (started when you run `npm run test:dev`).
+   *  karma debug page (started when you run `yarn test:dev`).
    *
    *  ## debugging
    *
@@ -126,8 +129,11 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
+          'http://localhost:5610/bundles/vendors.bundle.js',
           'http://localhost:5610/bundles/commons.bundle.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
+
+          'http://localhost:5610/bundles/vendors.style.css',
           'http://localhost:5610/bundles/commons.style.css',
           'http://localhost:5610/bundles/tests.style.css'
         ]

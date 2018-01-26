@@ -1,7 +1,5 @@
 import chrome from 'ui/chrome';
 
-let i = 0;
-
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggConfigResult(aggConfig, parent, value, key, filters) {
   this.key = key;
@@ -9,7 +7,6 @@ export default function AggConfigResult(aggConfig, parent, value, key, filters) 
   this.aggConfig = aggConfig;
   this.filters = filters;
   this.$parent = parent;
-  this.$order = ++i;
 
   if (aggConfig.schema.group === 'buckets') {
     this.type = 'bucket';

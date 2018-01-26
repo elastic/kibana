@@ -152,6 +152,9 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.clickEditVisualization();
+
+      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();
 

@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#buildProjectGraph builds full project graph 1`] = `
+Object {
+  "bar": Array [
+    "foo",
+  ],
+  "baz": Array [],
+  "foo": Array [],
+  "kibana": Array [
+    "foo",
+  ],
+  "quux": Array [
+    "bar",
+    "baz",
+  ],
+}
+`;
+
+exports[`#topologicallyBatchProjects batches projects topologically based on their project dependencies 1`] = `
+Array [
+  Array [
+    "foo",
+    "baz",
+  ],
+  Array [
+    "kibana",
+    "bar",
+  ],
+  Array [
+    "quux",
+  ],
+]
+`;

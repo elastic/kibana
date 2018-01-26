@@ -170,7 +170,8 @@ describe('CLI cluster manager', function () {
         sinon.assert.calledWith(worker.on, 'fork:online');
       });
 
-      it('listens for cluster and process "exit" events', async function () {
+      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
+      it.skip('listens for cluster and process "exit" events', async function () {
         const worker = setup({ log: new Log(false, true) });
 
         sinon.spy(process, 'on');

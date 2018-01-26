@@ -1,3 +1,5 @@
+import { calculateObjectHash } from './lib/calculate_object_hash';
+
 // adapted from https://github.com/isaacs/json-stringify-safe/blob/02cfafd45f06d076ac4bf0dd28be6738a07a72f9/stringify.js
 function serializer() {
   const stack = [];
@@ -50,16 +52,26 @@ const getUpdateStatus = ($scope) => {
     return false;
   }
 
-  const time = $scope.vis.params.timeRange ? $scope.vis.params.timeRange : $scope.vis.API.timeFilter.getBounds();
+  function hasDataChanged(visData) {
+    const hash = calculateObjectHash(visData);
+    if (hash !== $scope._oldStatus.data) {
+      $scope._oldStatus.data = hash;
+      return true;
+    }
+    return false;
+  }
 
+  const time = $scope.vis.params.timeRange ? $scope.vis.params.timeRange : $scope.vis.API.timeFilter.getBounds();
+  const width = $scope.vis.size ? $scope.vis.size[0] : 0;
+  const height = $scope.vis.size ? $scope.vis.size[1] : 0;
   return {
     aggs: hasChangedUsingGenericHashComparison('aggs', $scope.vis.aggs),
-    data: hasChangedUsingGenericHashComparison('data', $scope.visData),
+    data: hasDataChanged($scope.visData),
     params: hasChangedUsingGenericHashComparison('param', $scope.vis.params),
-    resize: hasSizeChanged($scope.vis.size),
+    resize: hasSizeChanged(width, height),
     time: hasChangedUsingGenericHashComparison('time', time),
     uiState: hasChangedUsingGenericHashComparison('uiState', $scope.uiState)
   };
 };
 
-module.exports = { getUpdateStatus };
+export { getUpdateStatus };

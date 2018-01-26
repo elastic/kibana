@@ -24,6 +24,44 @@ exports[`renders OptionsTab 1`] = `
         </KuiFieldGroupSection>
       </KuiFieldGroup>
     </div>
+    <div
+      className="vis-editor-agg-header"
+    >
+      <KuiFieldGroup
+        isAlignedTop={false}
+      >
+        <KuiFieldGroupSection
+          isWide={false}
+        >
+          <KuiCheckBoxLabel
+            data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+            isChecked={false}
+            isDisabled={false}
+            onChange={[Function]}
+            text="Use time filter"
+          />
+        </KuiFieldGroupSection>
+      </KuiFieldGroup>
+    </div>
+    <div
+      className="vis-editor-agg-header"
+    >
+      <KuiFieldGroup
+        isAlignedTop={false}
+      >
+        <KuiFieldGroupSection
+          isWide={false}
+        >
+          <KuiCheckBoxLabel
+            data-test-subj="inputControlEditorPinFiltersCheckbox"
+            isChecked={false}
+            isDisabled={false}
+            onChange={[Function]}
+            text="Pin filters to global state"
+          />
+        </KuiFieldGroupSection>
+      </KuiFieldGroup>
+    </div>
   </div>
 </div>
 `;

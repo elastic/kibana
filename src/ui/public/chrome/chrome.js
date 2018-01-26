@@ -3,6 +3,8 @@ import angular from 'angular';
 
 import { metadata } from 'ui/metadata';
 import 'babel-polyfill';
+import 'whatwg-fetch';
+import 'custom-event-polyfill';
 import 'ui/timefilter';
 import 'ui/notify';
 import 'ui/private';

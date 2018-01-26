@@ -41,7 +41,7 @@ export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
   );
 }
 
-KuiListingTableToolBarFooter.PropTypes = {
+KuiListingTableToolBarFooter.propTypes = {
   pager: PropTypes.node,
   itemsSelectedCount: PropTypes.number,
 };

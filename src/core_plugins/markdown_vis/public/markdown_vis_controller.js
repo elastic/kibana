@@ -1,18 +1,21 @@
 import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
+import React from 'react';
 
 const markdownIt = new MarkdownIt({
   html: false,
   linkify: true
 });
 
-const module = uiModules.get('kibana/markdown_vis', ['kibana', 'ngSanitize']);
-module.controller('KbnMarkdownVisController', function ($scope) {
-  $scope.$watch('vis.params.markdown', function (html) {
-    if (html) {
-      $scope.html = markdownIt.render(html);
-    }
-    $scope.renderComplete();
-  });
-});
+export function MarkdownVisComponent(props) {
+  const visParams = props.vis.params;
+  return (
+    <div className="markdown-vis">
+      <div
+        className="markdown-body"
+        data-test-subj="markdownBody"
+        style={{ fontSize: `${visParams.fontSize}pt` }}
+        dangerouslySetInnerHTML={{ __html: markdownIt.render(visParams.markdown || '') }}
+      />
+    </div>
+  );
+}

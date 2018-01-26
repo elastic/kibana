@@ -3,6 +3,7 @@ module.exports = function () {
     devSource: {
       options: { mode: true },
       src: [
+        'yarn.lock',
         'src/**',
         '!src/**/__tests__/**',
         '!src/test_utils/**',
