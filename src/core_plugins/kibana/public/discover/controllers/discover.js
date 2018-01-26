@@ -19,7 +19,6 @@ import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
-import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -129,7 +128,6 @@ function discoverController(
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
-  const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const responseHandler = Private(BasicResponseHandlerProvider).handler;
   const filterManager = Private(FilterManagerProvider);
@@ -461,6 +459,7 @@ function discoverController(
       .then(setupVisualization)
       .then(function () {
         $state.save();
+        $scope.fetchStatus = true;
         return courier.fetch();
       })
       .catch(notify.error);
@@ -471,124 +470,43 @@ function discoverController(
     $scope.fetch();
   };
 
-
-  function handleSegmentedFetch(segmented) {
-    function flushResponseData() {
-      $scope.fetchError = undefined;
-      $scope.hits = 0;
-      $scope.faliures = [];
-      $scope.rows = [];
-      $scope.fieldCounts = {};
-    }
-
-    if (!$scope.rows) flushResponseData();
-
-    const sort = $state.sort;
-    const timeField = $scope.indexPattern.timeFieldName;
-
-    /**
-     * Basically an emum.
-     *
-     * opts:
-     *   "time" - sorted by the timefield
-     *   "non-time" - explicitly sorted by a non-time field, NOT THE SAME AS `sortBy !== "time"`
-     *   "implicit" - no sorting set, NOT THE SAME AS "non-time"
-     *
-     * @type {String}
-     */
-    const sortBy = (function () {
-      if (!Array.isArray(sort)) return 'implicit';
-      else if (sort[0] === '_score') return 'implicit';
-      else if (sort[0] === timeField) return 'time';
-      else return 'non-time';
-    }());
-
-    let sortFn = null;
-    if (sortBy !== 'implicit') {
-      sortFn = new HitSortFn(sort[1]);
-    }
-
-    $scope.updateTime();
-    if (sort[0] === '_score') segmented.setMaxSegments(1);
-    segmented.setDirection(sortBy === 'time' ? (sort[1] || 'desc') : 'desc');
-    segmented.setSortFn(sortFn);
-    segmented.setSize($scope.opts.sampleSize);
-
-    // triggered when the status updated
-    segmented.on('status', function (status) {
-      $scope.fetchStatus = status;
-    });
-
-    segmented.on('first', function () {
-      flushResponseData();
-    });
-
-    segmented.on('segment', notify.timed('handle each segment', function (resp) {
-      if (resp._shards.failed > 0) {
-        $scope.failures = _.union($scope.failures, resp._shards.failures);
-        $scope.failures = _.uniq($scope.failures, false, function (failure) {
-          return failure.index + failure.shard + failure.reason;
+  function onResults(resp) {
+    if ($scope.opts.timefield) {
+      Promise
+        .resolve(responseHandler($scope.vis, resp))
+        .then(resp => {
+          $scope.visData = resp;
         });
-      }
-    }));
+    }
 
-    segmented.on('mergedSegment', function (merged) {
-      $scope.mergedEsResp = merged;
+    // Abort if something changed
+    if ($scope.searchSource !== $scope.searchSource) return;
 
-      if ($scope.opts.timefield) {
-        $scope.searchSource.rawResponse = merged;
-        Promise
-          .resolve(responseHandler($scope.vis, merged))
-          .then(resp => {
-            $scope.visData = resp;
-          });
-      }
+    $scope.hits = resp.hits.total;
+    $scope.rows = resp.hits.hits;
 
-      $scope.hits = merged.hits.total;
+    notify.event('flatten hit and count fields', function () {
+      // if we haven't counted yet, reset the counts
+      const counts = $scope.fieldCounts = $scope.fieldCounts || {};
 
-      const indexPattern = $scope.searchSource.get('index');
-
-      // the merge rows, use a new array to help watchers
-      $scope.rows = merged.hits.hits.slice();
-
-      notify.event('flatten hit and count fields', function () {
-        let counts = $scope.fieldCounts;
-
-        // if we haven't counted yet, or need a fresh count because we are sorting, reset the counts
-        if (!counts || sortFn) counts = $scope.fieldCounts = {};
-
-        $scope.rows.forEach(function (hit) {
-          // skip this work if we have already done it
-          if (hit.$$_counted) return;
-
-          // when we are sorting results, we need to redo the counts each time because the
-          // "top 500" may change with each response, so don't mark this as counted
-          if (!sortFn) hit.$$_counted = true;
-
-          const fields = _.keys(indexPattern.flattenHit(hit));
-          let n = fields.length;
-          let field;
-          while (field = fields[--n]) {
-            if (counts[field]) counts[field] += 1;
-            else counts[field] = 1;
-          }
+      $scope.rows.forEach(function (hit) {
+        const fields = Object.keys($scope.indexPattern.flattenHit(hit));
+        fields.forEach((fieldName) => {
+          counts[fieldName] = counts[fieldName] || 0;
+          counts[fieldName] += 1;
         });
       });
     });
 
-    segmented.on('complete', function () {
-      if ($scope.fetchStatus.hitCount === 0) {
-        flushResponseData();
-      }
+    $scope.fetchStatus = false;
 
-      $scope.fetchStatus = null;
-    });
+    return $scope.searchSource.onResults().then(onResults);
   }
 
-
-  function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
-      .catch((error) => {
+  function startSearching() {
+    $scope.searchSource.onResults()
+      .then(onResults)
+      .catch(error => {
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
@@ -598,10 +516,11 @@ function discoverController(
         }
 
         // Restart. This enables auto-refresh functionality.
-        beginSegmentedFetch();
+        startSearching();
       });
   }
-  beginSegmentedFetch();
+  startSearching();
+
 
   $scope.updateTime = function () {
     $scope.timeRange = {
