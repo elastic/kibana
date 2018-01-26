@@ -116,8 +116,8 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
         throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
 any custom setting value for "${key}" may fix this issue.
-You can also save an step using \`config.get("${key}", defaultValue)\`, which
-will set the initial value if one is not already set.`);
+You can use \`config.get("${key}", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized.`);
       }
       // the key is not a declared setting
       // pass through the caller's desired default value
