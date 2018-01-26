@@ -3,7 +3,7 @@ import { PARAM_TYPES } from './param_types';
 import { TUTORIAL_CATEGORY } from './tutorial_category';
 
 const dashboardSchema = Joi.object({
-  title: Joi.string().required(),
+  id: Joi.string().required(), // Dashboard saved object id
   linkLabel: Joi.string().when('isOverview', {
     is: true,
     then: Joi.required(),
