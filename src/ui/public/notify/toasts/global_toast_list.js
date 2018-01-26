@@ -22,7 +22,7 @@ export class GlobalToastList extends Component {
     };
 
     this.timeoutIds = [];
-    this.toastsScheduledForDismissal = {};
+    this.toastIdToScheduledForDismissalMap = {};
   }
 
   static propTypes = {
@@ -37,13 +37,14 @@ export class GlobalToastList extends Component {
 
   scheduleAllToastsForDismissal = () => {
     this.props.toasts.forEach(toast => {
-      if (!this.toastsScheduledForDismissal[toast.id]) {
+      if (!this.toastIdToScheduledForDismissalMap[toast.id]) {
         this.scheduleToastForDismissal(toast);
       }
     });
   };
 
   scheduleToastForDismissal = (toast, isImmediate = false) => {
+    this.toastIdToScheduledForDismissalMap[toast.id] = true;
     const toastLifeTimeMs = isImmediate ? 0 : this.props.toastLifeTimeMs;
 
     // Start fading the toast out once its lifetime elapses.
@@ -57,6 +58,7 @@ export class GlobalToastList extends Component {
       this.setState(prevState => {
         const toastIdToDismissedMap = { ...prevState.toastIdToDismissedMap };
         delete toastIdToDismissedMap[toast.id];
+        delete this.toastIdToScheduledForDismissalMap[toast.id];
 
         return {
           toastIdToDismissedMap,
