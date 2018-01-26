@@ -89,7 +89,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.dashboard.clickNewDashboard();
@@ -101,7 +100,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -121,7 +119,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();

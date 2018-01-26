@@ -416,7 +416,10 @@ function discoverController(
             $scope.kbnTopNav.close('save');
 
             if (id) {
-              toastNotifications.addSuccess(`Saved '${savedSearch.title}'`);
+              toastNotifications.addSuccess({
+                title: `Saved '${savedSearch.title}'`,
+                'data-test-subj': 'saveSearchSuccess',
+              });
 
               if (savedSearch.id !== $route.current.params.id) {
                 kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
