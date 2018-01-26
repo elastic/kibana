@@ -121,8 +121,17 @@ will set the initial value if one is not already set.`);
       }
       config.set(key, defaultValueForGetter);
     }
+
     const { userValue, value: defaultValue, type } = settings[key];
-    const currentValue = config.isDefault(key) ? defaultValue : userValue;
+    let currentValue;
+
+    if (config.isDefault(key)) {
+      // honor the second parameter if it was passed
+      currentValue = defaultValueForGetter === undefined ? defaultValue : defaultValueForGetter;
+    } else {
+      currentValue = userValue;
+    }
+
     if (type === 'json') {
       return JSON.parse(currentValue);
     } else if (type === 'number') {
