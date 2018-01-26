@@ -3,7 +3,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
-import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { addControl, moveControl, newControl, removeControl, setControl, getTitle } from '../../editor_utils';
 
 import {
   EuiButton,
@@ -84,9 +84,66 @@ export class ControlsTab extends Component {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
-  renderControls() {
-    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
+  getControlParams = (controlId) => {
+    this.props.scope.vis.params.controls.find((controlParams) => {
+      return controlParams.id === controlId;
+    });
+  }
 
+  getLineageMap = () => {
+    const lineageMap = new Map();
+    this.props.scope.vis.params.controls.forEach((controlParams) => {
+      const lineage = [];
+      const getLineage = (controlParams) => {
+        if (_.has(controlParams, 'parent') && !lineage.includes(controlParams.parent)) {
+          lineage.push(controlParams.parent);
+          const parent = this.getControlParams(controlParams.parent);
+          getLineage(parent);
+        }
+      };
+
+      getLineage(controlParams);
+      lineageMap.set(controlParams.id, lineage);
+    });
+    return lineageMap;
+  }
+
+  getParentCandidates = (controlId, lineageMap) => {
+    return this.props.scope.vis.params.controls.filter((controlParams) => {
+      // not itself
+      if (controlParams.id === controlId) {
+        return false;
+      }
+
+      // has index pattern and field
+      if (!controlParams.indexPattern || !controlParams.fieldName) {
+        return false;
+      }
+
+      // does not create a circlar dependency
+      const lineage = lineageMap.get(controlParams.id);
+      if (lineage.includes(controlId)) {
+        return false;
+      }
+
+      return true;
+    }).map((controlParams, controlIndex) => {
+      return {
+        value: controlParams.id,
+        text: getTitle(controlParams, controlIndex)
+      };
+    });
+  }
+
+  handleParentChange = (controlIndex, evt) => {
+    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    updatedControl.parent = evt.target.value;
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+  }
+
+  renderControls() {
+    const lineageMap = this.getLineageMap();
+    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
       return (
         <ControlEditor
           key={controlParams.id}
@@ -101,6 +158,8 @@ export class ControlsTab extends Component {
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}
+          parentCandidates={this.getParentCandidates(controlParams.id, lineageMap)}
+          handleParentChange={this.handleParentChange}
         />
       );
     });

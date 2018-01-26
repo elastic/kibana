@@ -7,6 +7,7 @@ import {
   EuiFormRow,
   EuiFieldNumber,
   EuiSwitch,
+  EuiSelect,
 } from '@elastic/eui';
 
 function filterField(field) {
@@ -22,6 +23,30 @@ export function ListControlEditor(props) {
   const handleSizeChange = (evt) => {
     props.handleNumberOptionChange(props.controlIndex, 'size', evt);
   };
+  const handleParentChange = (evt) => {
+    props.handleParentChange(props.controlIndex, evt);
+  };
+
+  let parentSelect;
+  if (props.parentCandidates && props.parentCandidates.length > 0) {
+    const options = [
+      { value: '', text: '' },
+      ...props.parentCandidates,
+    ];
+    parentSelect = (
+      <EuiFormRow
+        id={`parentSelect-${props.controlIndex}`}
+        label="Parent"
+        helpText="Filter options list by parent's value. Control is disabled when parent is unset."
+      >
+        <EuiSelect
+          options={options}
+          value={props.controlParams.parent}
+          onChange={handleParentChange}
+        />
+      </EuiFormRow>
+    );
+  }
 
   return (
     <div>
@@ -39,6 +64,8 @@ export function ListControlEditor(props) {
         onChange={props.handleFieldNameChange}
         getIndexPattern={props.getIndexPattern}
       />
+
+      { parentSelect }
 
       <EuiFormRow
         id={multiselectId}
@@ -75,5 +102,10 @@ ListControlEditor.propTypes = {
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired,
+  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  handleParentChange: PropTypes.func.isRequired,
 };

@@ -62,6 +62,7 @@ export const newControl = (type) => ({
   id: (new Date()).getTime().toString(),
   indexPattern: '',
   fieldName: '',
+  parent: '',
   label: '',
   type: type,
   options: getDefaultOptions(type),
@@ -70,9 +71,9 @@ export const newControl = (type) => ({
 export const getTitle = (controlParams, controlIndex) => {
   let title = `${controlParams.type}: ${controlIndex}`;
   if (controlParams.label) {
-    title = `${controlParams.type}: ${controlParams.label}`;
+    title = `${controlParams.label}`;
   } else if (controlParams.fieldName) {
-    title = `${controlParams.type}: ${controlParams.fieldName}`;
+    title = `${controlParams.fieldName}`;
   }
   return title;
 };

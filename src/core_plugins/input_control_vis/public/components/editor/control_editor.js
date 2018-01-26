@@ -55,6 +55,8 @@ export class ControlEditor extends Component {
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
             handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
+            parentCandidates={this.props.parentCandidates}
+            handleParentChange={this.props.handleParentChange}
           />
         );
         break;
@@ -151,5 +153,10 @@ ControlEditor.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired,
+  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  handleParentChange: PropTypes.func.isRequired,
 };
