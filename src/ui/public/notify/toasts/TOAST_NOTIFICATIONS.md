@@ -8,15 +8,56 @@ Use this service to surface toasts in the bottom-right corner of the screen. Aft
 import { toastNotifications } from 'ui/notify';
 ```
 
-## Adding a toast
+## Interface
 
-The simplest way to display a toast is to call `add` and pass in a string. This will display the string as the title of the toast, and give the toast a neutral appearance.
+### Adding toasts
+
+For convenience, there are several methods which predefine the appearance of different types of toasts. Use these methods so that the same types of toasts look similar to the user.
+
+#### Default
+
+Neutral toast. Tell the user a change in state has occurred, which is not necessarily good or bad.
 
 ```js
-toastNotifications.add('Saved document');
+toastNotifications.add('Copied to clipboard');
 ```
 
-You can provide an object to configure the toast further. The properties of this object correspond to the `propTypes` accepted by the `EuiToast` component. Refer to [the EUI docs](elastic.github.io/eui/) for info on these `propTypes`.
+#### Success
+
+Let the user know that an action was successful, such as saving or deleting an object.
+
+```js
+toastNotifications.addSuccess('Saved document');
+```
+
+#### Warning
+
+If something OK or good happened, but perhaps wasn't perfect, show a warning toast.
+
+```js
+toastNotifications.addWarning('Saved document, but not edit history');
+```
+
+#### Danger
+
+When the user initiated an action but the action failed, show them a danger toast.
+
+```js
+toastNotifications.addDanger('An error caused your document to be lost');
+```
+
+### Removing a toast
+
+Toasts will automatically be dismissed after a brief delay, but if for some reason you want to dismiss a toast, you can use the returned toast from one of the `add` methods and then pass it to `remove`.
+
+```js
+const toast = toastNotifications.add('Saved document');
+toastNotifications.remove(toast);
+```
+
+### Configuration options
+
+If you want to configure the toast further you can provide an object instead of a string. The properties of this object correspond to the `propTypes` accepted by the `EuiToast` component. Refer to [the EUI docs](elastic.github.io/eui/) for info on these `propTypes`.
 
 ```js
 toastNotifications.add({
@@ -45,37 +86,6 @@ toastNotifications.add({
     </div>
   ),
 });
-```
-
-## Adding different types of toasts
-
-For convenience, there are several methods which predefine the appearance of different types of toasts. Use these methods so that the same types of toasts look similar to the user.
-
-Let the user know that an action was successful, such as saving or deleting an object.
-
-```js
-toastNotifications.addSuccess('Saved document');
-```
-
-If something OK or good happened, but perhaps wasn't perfect, show a warning toast.
-
-```js
-toastNotifications.addWarning('Saved document, but not edit history');
-```
-
-When the user initiated an action but the action failed, show them a danger toast.
-
-```js
-toastNotifications.addDanger('An error caused your document to be lost');
-```
-
-## Removing a toast
-
-Toasts will automatically be dismissed after a brief delay, but if for some reason you want to dismiss a toast, you can use the returned toast from one of the `add` methods and then pass it to `remove`.
-
-```js
-const toast = toastNotifications.add('Saved document');
-toastNotifications.remove(toast);
 ```
 
 ## Use in functional tests
