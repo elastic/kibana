@@ -33,7 +33,7 @@ export function Footer({ overviewDashboard }) {
           >
             <KuiLinkButton
               buttonType="primary"
-              href={`#/dashboards?title=${overviewDashboard.title}`}
+              href={`#/dashboard/${overviewDashboard.id}`}
             >
               {overviewDashboard.linkLabel}
             </KuiLinkButton>
@@ -48,7 +48,7 @@ export function Footer({ overviewDashboard }) {
 
 Footer.propTypes = {
   overviewDashboard: PropTypes.shape({
-    title: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     linkLabel: PropTypes.string.isRequired,
   })
 };

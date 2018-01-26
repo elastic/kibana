@@ -16,7 +16,7 @@ export function mysqlMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: '66881e90-0006-11e7-bf7f-c9acc3d3e306',
+          id: '66881e90-0006-11e7-bf7f-c9acc3d3e306',
           linkLabel: 'MySQL metrics dashboard',
           isOverview: true
         }

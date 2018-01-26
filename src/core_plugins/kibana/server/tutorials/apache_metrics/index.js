@@ -16,7 +16,7 @@ export function apacheMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Metricbeat-Apache-HTTPD-server-status',
+          id: 'Metricbeat-Apache-HTTPD-server-status',
           linkLabel: 'Apache metrics dashboard',
           isOverview: true
         }
