@@ -16,7 +16,7 @@ export function dockerMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'AV4REOpp5NkDleZmzKkE',
+          id: 'AV4REOpp5NkDleZmzKkE',
           linkLabel: 'Docker metrics dashboard',
           isOverview: true
         }

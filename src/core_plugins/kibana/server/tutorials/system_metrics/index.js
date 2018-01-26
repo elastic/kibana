@@ -17,7 +17,7 @@ export function systemMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Metricbeat-system-overview',
+          id: 'Metricbeat-system-overview',
           linkLabel: 'System metrics dashboard',
           isOverview: true
         }

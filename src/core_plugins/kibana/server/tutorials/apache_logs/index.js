@@ -16,7 +16,7 @@ export function apacheLogsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Filebeat-Apache2-Dashboard',
+          id: 'Filebeat-Apache2-Dashboard',
           linkLabel: 'Apache2 logs dashboard',
           isOverview: true
         }

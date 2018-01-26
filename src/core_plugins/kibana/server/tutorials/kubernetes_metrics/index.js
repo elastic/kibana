@@ -16,7 +16,7 @@ export function kubernetesMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'AV4RGUqo5NkDleZmzKuZ',
+          id: 'AV4RGUqo5NkDleZmzKuZ',
           linkLabel: 'Kubernetes metrics dashboard',
           isOverview: true
         }
