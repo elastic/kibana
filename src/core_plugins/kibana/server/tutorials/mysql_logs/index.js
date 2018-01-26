@@ -15,7 +15,7 @@ export function mysqlLogsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Filebeat-MySQL-Dashboard',
+          id: 'Filebeat-MySQL-Dashboard',
           linkLabel: 'MySQL logs dashboard',
           isOverview: true
         }
