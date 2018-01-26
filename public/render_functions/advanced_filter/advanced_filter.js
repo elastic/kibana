@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { AdvancedFilter } from './component';
 
-export const advancedFilter = {
+export const advancedFilter = () => ({
   name: 'advanced_filter',
   displayName: 'Advanced Filter',
   help: 'Render a Canvas filter expression',
@@ -16,4 +16,4 @@ export const advancedFilter = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

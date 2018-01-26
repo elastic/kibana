@@ -1,4 +1,4 @@
-export const getCell = {
+export const getCell = () => ({
   name: 'getCell',
   help: 'Fetch a single cell in a table',
   context: {
@@ -26,4 +26,4 @@ export const getCell = {
 
     return value;
   },
-};
+});

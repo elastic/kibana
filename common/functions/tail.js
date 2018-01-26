@@ -1,6 +1,6 @@
 import { takeRight } from 'lodash';
 
-export const tail = {
+export const tail = () => ({
   name: 'tail',
   aliases: [],
   type: 'datatable',
@@ -18,4 +18,4 @@ export const tail = {
     ...context,
     rows: takeRight(context.rows, args._),
   }),
-};
+});

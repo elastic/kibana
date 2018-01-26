@@ -1,6 +1,6 @@
 import { buildESRequest } from './esdocs/lib/build_es_request';
 
-export const escount = {
+export const escount = () => ({
   name: 'escount',
   type: 'number',
   help: 'Query elasticsearch for a count of the number of hits matching a query',
@@ -47,4 +47,4 @@ export const escount = {
       return resp.hits.total;
     });
   },
-};
+});

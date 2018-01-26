@@ -1,4 +1,4 @@
-export const string = {
+export const string = () => ({
   name: 'string',
   aliases: [],
   type: 'string',
@@ -13,4 +13,4 @@ export const string = {
     },
   },
   fn: (context, args) => args._.join(''),
-};
+});

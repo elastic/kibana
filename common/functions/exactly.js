@@ -1,4 +1,4 @@
-export const exactly = {
+export const exactly = () => ({
   name: 'exactly',
   aliases: [],
   type: 'filter',
@@ -29,4 +29,4 @@ export const exactly = {
 
     return context;
   },
-};
+});

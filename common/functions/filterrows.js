@@ -1,4 +1,4 @@
-export const filterrows = {
+export const filterrows = () => ({
   name: 'filterrows',
   aliases: [],
   type: 'datatable',
@@ -30,4 +30,4 @@ export const filterrows = {
         rows,
       }));
   },
-};
+});

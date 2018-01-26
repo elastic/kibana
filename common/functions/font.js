@@ -1,6 +1,6 @@
 import inlineStyle from 'inline-style';
 
-export const font = {
+export const font = () => ({
   name: 'font',
   aliases: [],
   type: 'style',
@@ -63,4 +63,4 @@ export const font = {
       css: inlineStyle(spec),
     };
   },
-};
+});

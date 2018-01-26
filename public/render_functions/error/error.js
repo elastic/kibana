@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
 import './error.less';
 
-export const error = {
+export const error = () => ({
   name: 'error',
   displayName: 'Error Information',
   help: 'Render error data in a way that is helpful to users',
@@ -34,4 +34,4 @@ export const error = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

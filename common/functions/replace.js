@@ -1,4 +1,4 @@
-export const replace = {
+export const replace = () => ({
   name: 'replace',
   type: 'string',
   help: 'Use a regular expression to replace parts of a string',
@@ -17,4 +17,4 @@ export const replace = {
     },
   },
   fn: (context, args) => context.replace(new RegExp(args.regex), args.replacement),
-};
+});

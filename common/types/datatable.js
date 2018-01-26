@@ -1,6 +1,6 @@
 import { map } from 'lodash';
 
-export const datatable = {
+export const datatable = () => ({
   name: 'datatable',
   validate: datatable => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
@@ -44,4 +44,4 @@ export const datatable = {
       };
     },
   },
-};
+});

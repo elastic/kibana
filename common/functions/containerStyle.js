@@ -1,4 +1,4 @@
-export const containerStyle = {
+export const containerStyle = () => ({
   name: 'containerStyle',
   aliases: [],
   context: {
@@ -37,4 +37,4 @@ export const containerStyle = {
   fn: (context, args) => {
     return { type: 'containerStyle', ...args };
   },
-};
+});

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { times } from 'lodash';
 
-export const repeatImage = {
+export const repeatImage = () => ({
   name: 'repeatImage',
   displayName: 'Image Repeat',
   help: 'Repeat an image a given number of times',
@@ -50,4 +50,4 @@ export const repeatImage = {
 
     img.src = settings.image;
   },
-};
+});

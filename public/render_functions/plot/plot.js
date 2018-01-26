@@ -42,9 +42,9 @@ const render = (domNode, config, handlers) => {
   return handlers.done();
 };
 
-export const plot = {
+export const plot = () => ({
   name: 'plot',
   displayName: 'Coordinate plot',
   help: 'Render an XY plot from your data',
   render,
-};
+});

@@ -1,6 +1,6 @@
-export const nullType = {
+export const nullType = () => ({
   name: 'null',
   from: {
     '*': () => null,
   },
-};
+});

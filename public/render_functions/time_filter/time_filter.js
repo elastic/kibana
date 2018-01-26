@@ -4,7 +4,7 @@ import { get, set } from 'lodash';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { TimeFilter } from './components/time_filter';
 
-export const timeFilter = {
+export const timeFilter = () => ({
   name: 'time_filter',
   displayName: 'Time Filter',
   help: 'Set a time window',
@@ -32,4 +32,4 @@ export const timeFilter = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

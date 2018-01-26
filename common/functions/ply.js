@@ -55,7 +55,7 @@ function combineAcross(datatableArray) {
   };
 }
 
-export const ply = {
+export const ply = () => ({
   name: 'ply',
   type: 'datatable',
   help:
@@ -124,4 +124,4 @@ export const ply = {
       };
     });
   },
-};
+});

@@ -2,7 +2,7 @@ import fetch from 'axios';
 import { flatten } from 'lodash';
 import { buildBoolArray } from './esdocs/lib/build_bool_array';
 
-export const timelion = {
+export const timelion = () => ({
   name: 'timelion',
   context: {
     types: ['filter'],
@@ -95,4 +95,4 @@ export const timelion = {
       };
     });
   },
-};
+});

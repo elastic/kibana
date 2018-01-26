@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export const rounddate = {
+export const rounddate = () => ({
   name: 'rounddate',
   type: 'number',
   help:
@@ -18,4 +18,4 @@ export const rounddate = {
   fn: (context, args) => {
     return moment(moment(context).format(args._), args._).valueOf();
   },
-};
+});

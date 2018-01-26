@@ -50,7 +50,7 @@ function getType(columns, mathExpression) {
   return symbolTypes.length === 1 ? symbolTypes[0] : 'string';
 }
 
-export const pointseries = {
+export const pointseries = () => ({
   name: 'pointseries',
   type: 'pointseries',
   help:
@@ -178,4 +178,4 @@ export const pointseries = {
       rows: resultingRows,
     };
   },
-};
+});

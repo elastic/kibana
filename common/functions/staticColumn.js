@@ -1,6 +1,6 @@
 import { getType } from '../lib/get_type';
 
-export const staticColumn = {
+export const staticColumn = () => ({
   name: 'staticColumn',
   type: 'datatable',
   help: 'Add a column with a static value.',
@@ -29,4 +29,4 @@ export const staticColumn = {
       rows,
     };
   },
-};
+});

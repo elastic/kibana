@@ -10,9 +10,14 @@ export class Registry {
     return obj;
   }
 
-  register(obj) {
+  register(fn) {
+    if (typeof fn !== 'function') {
+      throw new Error(`Register requires an function`);
+    }
+    const obj = fn();
+
     if (typeof obj !== 'object' || !obj[this._prop]) {
-      throw new Error(`Register requires an object with a ${this._prop} property`);
+      throw new Error(`Registered functions must return an object with a ${this._prop} property`);
     }
     this._indexed[obj[this._prop]] = this.wrapper(obj);
   }

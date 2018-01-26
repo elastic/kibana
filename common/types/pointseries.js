@@ -1,6 +1,6 @@
 import { datatable } from './datatable';
 
-export const pointseries = {
+export const pointseries = () => ({
   name: 'pointseries',
   from: {
     null: () => {
@@ -27,4 +27,4 @@ export const pointseries = {
       };
     },
   },
-};
+});

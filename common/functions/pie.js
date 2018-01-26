@@ -2,7 +2,7 @@ import { get, map, groupBy, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
 import chroma from 'chroma-js';
 
-export const pie = {
+export const pie = () => ({
   name: 'pie',
   aliases: [],
   type: 'render',
@@ -121,4 +121,4 @@ export const pie = {
       },
     };
   },
-};
+});

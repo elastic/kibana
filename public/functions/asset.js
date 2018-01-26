@@ -1,7 +1,7 @@
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
 
-export const asset = {
+export const asset = () => ({
   name: 'asset',
   aliases: [],
   context: {
@@ -20,4 +20,4 @@ export const asset = {
     const assetId = args._;
     return getAssetById(getState(), assetId);
   },
-};
+});

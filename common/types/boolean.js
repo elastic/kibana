@@ -1,4 +1,4 @@
-export const boolean = {
+export const boolean = () => ({
   name: 'boolean',
   from: {
     null: () => 0,
@@ -9,4 +9,4 @@ export const boolean = {
     string: n => String(n),
     number: n => Number(n),
   },
-};
+});

@@ -1,4 +1,4 @@
-export const style = {
+export const style = () => ({
   name: 'style',
   from: {
     null: () => {
@@ -16,4 +16,4 @@ export const style = {
       value,
     }),
   },
-};
+});

@@ -1,6 +1,6 @@
 import { parse } from 'url';
 
-export const urlparam = {
+export const urlparam = () => ({
   name: 'urlparam',
   aliases: [],
   type: 'string',
@@ -26,4 +26,4 @@ export const urlparam = {
     const query = parse(window.location.href, true).query;
     return query[args._] || args.default;
   },
-};
+});

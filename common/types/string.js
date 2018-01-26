@@ -1,4 +1,4 @@
-export const string = {
+export const string = () => ({
   name: 'string',
   from: {
     null: () => '',
@@ -16,4 +16,4 @@ export const string = {
       };
     },
   },
-};
+});

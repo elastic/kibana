@@ -1,6 +1,6 @@
 import { parse } from '../lib/dataurl';
 
-export const dataurl = {
+export const dataurl = () => ({
   name: 'dataurl',
   from: {
     null: () => '',
@@ -21,4 +21,4 @@ export const dataurl = {
       return dataurl.value;
     },
   },
-};
+});

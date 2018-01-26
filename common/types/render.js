@@ -1,4 +1,4 @@
-export const render = {
+export const render = () => ({
   name: 'render',
   from: {
     null: () => ({
@@ -8,4 +8,4 @@ export const render = {
     }),
   },
   to: {},
-};
+});

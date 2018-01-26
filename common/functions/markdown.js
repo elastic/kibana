@@ -1,6 +1,6 @@
 import { Handlebars } from '../lib/handlebars.js';
 
-export const markdown = {
+export const markdown = () => ({
   name: 'markdown',
   aliases: [],
   type: 'render',
@@ -41,4 +41,4 @@ export const markdown = {
       },
     };
   },
-};
+});

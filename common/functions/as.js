@@ -1,6 +1,6 @@
 import { getType } from '../lib/get_type';
 
-export const asFn = {
+export const asFn = () => ({
   name: 'as',
   type: 'datatable',
   context: {
@@ -30,4 +30,4 @@ export const asFn = {
       ],
     };
   },
-};
+});

@@ -3,11 +3,11 @@ import { Registry } from '../registry';
 
 function validateRegistry(registry, elements) {
   it('gets items by lookup property', () => {
-    expect(registry.get('__test2')).to.eql(elements[1]);
+    expect(registry.get('__test2')).to.eql(elements[1]());
   });
 
   it('gets a shallow clone', () => {
-    expect(registry.get('__test2')).to.not.equal(elements[1]);
+    expect(registry.get('__test2')).to.not.equal(elements[1]());
   });
 
   it('is null with no match', () => {
@@ -17,22 +17,22 @@ function validateRegistry(registry, elements) {
   it('returns shallow clone of the whole registry via toJS', () => {
     const regAsJs = registry.toJS();
     expect(regAsJs).to.eql({
-      __test1: elements[0],
-      __test2: elements[1],
+      __test1: elements[0](),
+      __test2: elements[1](),
     });
-    expect(regAsJs.__test1).to.eql(elements[0]);
-    expect(regAsJs.__test1).to.not.equal(elements[0]);
+    expect(regAsJs.__test1).to.eql(elements[0]());
+    expect(regAsJs.__test1).to.not.equal(elements[0]());
   });
 
   it('returns shallow clone array via toArray', () => {
     const regAsArray = registry.toArray();
     expect(regAsArray).to.be.an(Array);
-    expect(regAsArray[0]).to.eql(elements[0]);
-    expect(regAsArray[0]).to.not.equal(elements[0]);
+    expect(regAsArray[0]).to.eql(elements[0]());
+    expect(regAsArray[0]).to.not.equal(elements[0]());
   });
 
   it('resets the registry', () => {
-    expect(registry.get('__test2')).to.eql(elements[1]);
+    expect(registry.get('__test2')).to.eql(elements[1]());
     registry.reset();
     expect(registry.get('__test2')).to.equal(null);
   });
@@ -41,15 +41,15 @@ function validateRegistry(registry, elements) {
 describe('Registry', () => {
   describe('name registry', () => {
     const elements = [
-      {
+      () => ({
         name: '__test1',
         prop1: 'some value',
-      },
-      {
+      }),
+      () => ({
         name: '__test2',
         prop2: 'some other value',
         type: 'unused',
-      },
+      }),
     ];
 
     const registry = new Registry();
@@ -63,22 +63,22 @@ describe('Registry', () => {
     });
 
     it('throws when object is missing the lookup prop', () => {
-      const check = () => registry.register({ hello: 'world' });
-      expect(check).to.throwException(/requires an object with a name property/i);
+      const check = () => registry.register(() => ({ hello: 'world' }));
+      expect(check).to.throwException(/object with a name property/i);
     });
   });
 
   describe('type registry', () => {
     const elements = [
-      {
+      () => ({
         type: '__test1',
         prop1: 'some value',
-      },
-      {
+      }),
+      () => ({
         type: '__test2',
         prop2: 'some other value',
         name: 'unused',
-      },
+      }),
     ];
 
     const registry = new Registry('type');
@@ -92,23 +92,23 @@ describe('Registry', () => {
     });
 
     it('throws when object is missing the lookup prop', () => {
-      const check = () => registry.register({ hello: 'world' });
-      expect(check).to.throwException(/requires an object with a type property/i);
+      const check = () => registry.register(() => ({ hello: 'world' }));
+      expect(check).to.throwException(/object with a type property/i);
     });
   });
 
   describe('wrapped registry', () => {
     let idx = 0;
     const elements = [
-      {
+      () => ({
         name: '__test1',
         prop1: 'some value',
-      },
-      {
+      }),
+      () => ({
         name: '__test2',
         prop2: 'some other value',
         type: 'unused',
-      },
+      }),
     ];
 
     class CustomRegistry extends Registry {
@@ -127,8 +127,8 @@ describe('Registry', () => {
 
     it('contains wrapped elements', () => {
       // test for the custom prop on the returned elements
-      expect(registry.get(elements[0].name)).to.have.property('__CUSTOM_PROP__', 1);
-      expect(registry.get(elements[1].name)).to.have.property('__CUSTOM_PROP__', 2);
+      expect(registry.get(elements[0]().name)).to.have.property('__CUSTOM_PROP__', 1);
+      expect(registry.get(elements[1]().name)).to.have.property('__CUSTOM_PROP__', 2);
     });
   });
 
@@ -155,12 +155,12 @@ describe('Registry', () => {
         }
       }
 
-      thing = new Thing(name);
+      thing = () => new Thing(name);
       registry.register(thing);
     });
 
     it('get contains the full prototype', () => {
-      expect(thing.baseFunc).to.be.a('function');
+      expect(thing().baseFunc).to.be.a('function');
       expect(registry.get(name).baseFunc).to.be.a('function');
     });
 

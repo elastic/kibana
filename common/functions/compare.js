@@ -1,4 +1,4 @@
-export const compare = {
+export const compare = () => ({
   name: 'compare',
   help:
     'Compare the input to something else to determine true or false. Usually used in combination with `{if}`',
@@ -39,4 +39,4 @@ export const compare = {
         return a >= b;
     }
   },
-};
+});

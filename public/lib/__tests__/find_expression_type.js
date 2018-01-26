@@ -34,10 +34,10 @@ describe('findExpressionType', () => {
       const reg = registries[key];
       reg.reset();
 
-      const expObj = {
+      const expObj = () => ({
         name: `__test_${key}`,
         key,
-      };
+      });
       expTypes.push(expObj);
       reg.register(expObj);
     });
@@ -46,7 +46,7 @@ describe('findExpressionType', () => {
   describe('all types', () => {
     it('returns the matching item, by name', () => {
       const match = findExpressionType('__test_model');
-      expect(match).to.eql(expTypes[2]);
+      expect(match).to.eql(expTypes[2]());
     });
 
     it('returns null when nothing is found', () => {
@@ -56,12 +56,12 @@ describe('findExpressionType', () => {
 
     it('throws with multiple matches', () => {
       const commonName = 'commonName';
-      registries.transform.register({
+      registries.transform.register(() => ({
         name: commonName,
-      });
-      registries.model.register({
+      }));
+      registries.model.register(() => ({
         name: commonName,
-      });
+      }));
 
       const check = () => {
         findExpressionType(commonName);
@@ -73,7 +73,7 @@ describe('findExpressionType', () => {
   describe('specific type', () => {
     it('return the match item, by name and type', () => {
       const match = findExpressionType('__test_view', 'view');
-      expect(match).to.eql(expTypes[3]);
+      expect(match).to.eql(expTypes[3]());
     });
 
     it('returns null with no match by name and type', () => {

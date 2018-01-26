@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import '../lib/flot-charts';
 import $ from 'jquery';
 
-export const pie = {
+export const pie = () => ({
   name: 'pie',
   displayName: 'Pie chart',
   help: 'Render a pie chart from data',
@@ -39,4 +39,4 @@ export const pie = {
 
     return handlers.done();
   },
-};
+});

@@ -4,7 +4,7 @@ import { queryDatatable } from '../../../common/lib/datatable/query';
 import ci from './ci.json';
 import shirts from './shirts.json';
 
-export const demodata = {
+export const demodata = () => ({
   name: 'demodata',
   aliases: [],
   type: 'datatable',
@@ -59,4 +59,4 @@ export const demodata = {
       context
     );
   },
-};
+});

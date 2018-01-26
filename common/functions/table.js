@@ -1,4 +1,4 @@
-export const table = {
+export const table = () => ({
   name: 'table',
   aliases: [],
   type: 'render',
@@ -37,4 +37,4 @@ export const table = {
       },
     };
   },
-};
+});

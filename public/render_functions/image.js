@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 
-export const image = {
+export const image = () => ({
   name: 'image',
   displayName: 'Image',
   help: 'Render an image',
@@ -21,4 +21,4 @@ export const image = {
 
     handlers.done();
   },
-};
+});

@@ -35,8 +35,8 @@ function addExpressionType(typeName, expObj) {
 }
 
 // register default args, arg types, and expression types
-argTypeSpecs.forEach(expFn => addArgType(expFn()));
-datasourceSpecs.forEach(expFn => addExpressionType('datasource', expFn()));
-modelSpecs.forEach(expFn => addExpressionType('model', expFn()));
-transformSpecs.forEach(expFn => addExpressionType('transform', expFn()));
-viewSpecs.forEach(expFn => addExpressionType('view', expFn()));
+argTypeSpecs.forEach(expFn => addArgType(expFn));
+datasourceSpecs.forEach(expFn => addExpressionType('datasource', expFn));
+modelSpecs.forEach(expFn => addExpressionType('model', expFn));
+transformSpecs.forEach(expFn => addExpressionType('transform', expFn));
+viewSpecs.forEach(expFn => addExpressionType('view', expFn));

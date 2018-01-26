@@ -3,7 +3,7 @@ import React from 'react';
 import { get } from 'lodash';
 import { Datatable } from '../components/datatable';
 
-export const table = {
+export const table = () => ({
   name: 'table',
   displayName: 'Data Table',
   help: 'Render tabluar data as HTML',
@@ -20,4 +20,4 @@ export const table = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

@@ -12,7 +12,7 @@ const getInputDate = input => {
   return input;
 };
 
-export const date = {
+export const date = () => ({
   name: 'date',
   type: 'number',
   context: {
@@ -41,4 +41,4 @@ export const date = {
 
     return outputDate.valueOf();
   },
-};
+});

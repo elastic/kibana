@@ -2,7 +2,7 @@ import { map } from 'lodash';
 import { math as mathjs } from '../lib/math.js';
 import { pivotObjectArray } from '../lib/pivot_object_array.js';
 
-export const math = {
+export const math = () => ({
   name: 'math',
   type: 'number',
   help:
@@ -28,4 +28,4 @@ export const math = {
       throw new Error('Failed to execute math expression. Check your column names');
     return result;
   },
-};
+});

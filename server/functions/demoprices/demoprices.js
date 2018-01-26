@@ -9,7 +9,7 @@ function mapRecord(row, i, adjustedTime) {
   };
 }
 
-export const demoprices = {
+export const demoprices = () => ({
   name: 'demoprices',
   aliases: [],
   type: 'datatable',
@@ -84,4 +84,4 @@ export const demoprices = {
       context
     );
   },
-};
+});

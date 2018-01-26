@@ -1,4 +1,4 @@
-export const render = {
+export const render = () => ({
   name: 'render',
   aliases: [],
   type: 'render',
@@ -31,4 +31,4 @@ export const render = {
 
     return context;
   },
-};
+});

@@ -2,7 +2,7 @@ import { includes } from 'lodash';
 import { fetchImage } from '../../lib/fetch_image';
 import { elasticLogo } from './elastic_logo';
 
-export const image = {
+export const image = () => ({
   name: 'image',
   aliases: [],
   type: 'image',
@@ -49,4 +49,4 @@ export const image = {
 
     return wrapImage(args.dataurl);
   },
-};
+});

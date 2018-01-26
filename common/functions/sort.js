@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash';
 
-export const sort = {
+export const sort = () => ({
   name: 'sort',
   aliases: [],
   type: 'datatable',
@@ -24,4 +24,4 @@ export const sort = {
     ...context,
     rows: args.reverse ? sortBy(context.rows, args._).reverse() : sortBy(context.rows, args._),
   }),
-};
+});

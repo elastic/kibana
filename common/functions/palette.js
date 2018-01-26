@@ -1,5 +1,5 @@
 import { palettes } from '../lib/palettes';
-export const palette = {
+export const palette = () => ({
   name: 'palette',
   aliases: [],
   type: 'palette',
@@ -26,4 +26,4 @@ export const palette = {
       gradient: args.gradient,
     };
   },
-};
+});

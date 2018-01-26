@@ -5,7 +5,7 @@ import { get } from 'lodash';
 // We need *some* way of accessing the data in tables, that could be via a collection of our own functions
 // Or via something like this. I'm using JSON Query for the moment because it is easy, but we should make
 // an actual decision, and replace this if needed.
-export const jsonquery = {
+export const jsonquery = () => ({
   name: 'jsonquery',
   aliases: [],
   type: 'string',
@@ -33,4 +33,4 @@ export const jsonquery = {
     if (Array.isArray(result)) return result.map(item => String(item)).join(', ');
     return String(result);
   },
-};
+});

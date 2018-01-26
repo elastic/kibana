@@ -1,6 +1,6 @@
 import './reveal_image.less';
 
-export const revealImage = {
+export const revealImage = () => ({
   name: 'revealImage',
   displayName: 'Image Reveal',
   help: 'Reveal a percentage of an image to make a custom gauge-style chart',
@@ -57,4 +57,4 @@ export const revealImage = {
       }
     }
   },
-};
+});

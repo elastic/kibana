@@ -1,4 +1,4 @@
-export const image = {
+export const image = () => ({
   name: 'image',
   to: {
     render: input => {
@@ -9,4 +9,4 @@ export const image = {
       };
     },
   },
-};
+});

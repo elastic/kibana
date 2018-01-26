@@ -1,6 +1,6 @@
 import { take } from 'lodash';
 
-export const head = {
+export const head = () => ({
   name: 'head',
   aliases: [],
   type: 'datatable',
@@ -18,4 +18,4 @@ export const head = {
     ...context,
     rows: take(context.rows, args._),
   }),
-};
+});

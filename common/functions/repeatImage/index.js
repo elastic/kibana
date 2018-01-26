@@ -1,6 +1,6 @@
 import { elasticOutline } from './elastic_outline';
 
-export const repeatImage = {
+export const repeatImage = () => ({
   name: 'repeatImage',
   aliases: [],
   type: 'render',
@@ -41,4 +41,4 @@ export const repeatImage = {
       },
     };
   },
-};
+});

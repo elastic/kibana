@@ -1,4 +1,4 @@
-export const filter = {
+export const filter = () => ({
   name: 'filter',
   from: {
     null: () => {
@@ -22,4 +22,4 @@ export const filter = {
       value,
     }),
   },
-};
+});

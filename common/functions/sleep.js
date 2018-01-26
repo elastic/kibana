@@ -1,4 +1,4 @@
-export const sleep = {
+export const sleep = () => ({
   name: 'sleep',
   help:
     'This pass-through function introduces a delay to expressions. We mostly use it to simulate slow data sources. ' +
@@ -16,4 +16,4 @@ export const sleep = {
       setTimeout(() => resolve(context), args._);
     });
   },
-};
+});

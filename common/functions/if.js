@@ -1,4 +1,4 @@
-export const ifFn = {
+export const ifFn = () => ({
   name: 'if',
   help: 'Perform conditional logic',
   args: {
@@ -33,4 +33,4 @@ export const ifFn = {
     }
     return context;
   },
-};
+});

@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 
-export const debug = {
+export const debug = () => ({
   name: 'debug',
   displayName: 'Debug',
   help: 'Render debug output as formatted JSON',
@@ -17,4 +17,4 @@ export const debug = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

@@ -1,6 +1,6 @@
 const noop = () => {};
 
-export const location = {
+export const location = () => ({
   name: 'location',
   type: 'location',
   context: {
@@ -23,4 +23,4 @@ export const location = {
       });
     });
   },
-};
+});

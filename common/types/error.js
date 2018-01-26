@@ -1,4 +1,4 @@
-export const error = {
+export const error = () => ({
   name: 'error',
   to: {
     render: input => {
@@ -13,4 +13,4 @@ export const error = {
       };
     },
   },
-};
+});

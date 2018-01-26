@@ -1,6 +1,6 @@
 import dateMath from '@elastic/datemath';
 
-export const timefilter = {
+export const timefilter = () => ({
   name: 'timefilter',
   aliases: [],
   type: 'filter',
@@ -54,4 +54,4 @@ export const timefilter = {
 
     return context;
   },
-};
+});

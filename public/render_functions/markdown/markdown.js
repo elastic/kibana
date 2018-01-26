@@ -5,7 +5,7 @@ import './markdown.less';
 
 const md = new Markdown();
 
-export const markdown = {
+export const markdown = () => ({
   name: 'markdown',
   displayName: 'Markdown',
   help: 'Render HTML Markup using Markdown input',
@@ -26,4 +26,4 @@ export const markdown = {
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
-};
+});

@@ -4,7 +4,7 @@ import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
 import { interpretAst } from '../lib/interpreter';
 
-export const filters = {
+export const filters = () => ({
   name: 'filters',
   type: 'filter',
   context: {
@@ -22,4 +22,4 @@ export const filters = {
       return filterType.from(null);
     }
   },
-};
+});

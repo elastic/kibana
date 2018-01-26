@@ -3,7 +3,7 @@ import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
 import { flattenHit } from './lib/flatten_hit';
 import { buildESRequest } from './lib/build_es_request';
 
-export const esdocs = {
+export const esdocs = () => ({
   name: 'esdocs',
   type: 'datatable',
   help:
@@ -95,4 +95,4 @@ export const esdocs = {
       );
     });
   },
-};
+});

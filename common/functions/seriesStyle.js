@@ -1,6 +1,6 @@
 const name = 'seriesStyle';
 
-export const seriesStyle = {
+export const seriesStyle = () => ({
   name,
   help:
     'Creates an object used for describing the properties of a series on a chart.' +
@@ -52,4 +52,4 @@ export const seriesStyle = {
     },
   },
   fn: (context, args) => ({ type: name, ...args }),
-};
+});

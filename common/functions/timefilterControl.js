@@ -1,4 +1,4 @@
-export const timefilterControl = {
+export const timefilterControl = () => ({
   name: 'timefilterControl',
   aliases: [],
   type: 'render',
@@ -25,4 +25,4 @@ export const timefilterControl = {
       value: args,
     };
   },
-};
+});

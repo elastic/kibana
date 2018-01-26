@@ -1,6 +1,6 @@
 import { elasticOutline } from './elastic_outline';
 
-export const revealImage = {
+export const revealImage = () => ({
   name: 'revealImage',
   aliases: [],
   type: 'render',
@@ -36,4 +36,4 @@ export const revealImage = {
       },
     };
   },
-};
+});

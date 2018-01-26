@@ -1,6 +1,6 @@
 import { omit, pick, find } from 'lodash';
 
-export const columns = {
+export const columns = () => ({
   name: 'columns',
   type: 'datatable',
   help:
@@ -47,4 +47,4 @@ export const columns = {
 
     return result;
   },
-};
+});

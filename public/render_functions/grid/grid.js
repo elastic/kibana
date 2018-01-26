@@ -108,10 +108,10 @@ const render = (domNode, config, handlers) => {
   handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 };
 
-export const grid = {
+export const grid = () => ({
   name: 'grid',
   displayName: 'Grid',
   help: 'Render data as a grid',
   reuseDomNode: true,
   render,
-};
+});
