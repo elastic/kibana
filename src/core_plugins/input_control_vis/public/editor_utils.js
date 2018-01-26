@@ -1,3 +1,8 @@
+export const CONTROL_TYPES = {
+  LIST: 'list',
+  RANGE: 'range'
+};
+
 export const setControl = (controls, controlIndex, control) => [
   ...controls.slice(0, controlIndex),
   control,
@@ -44,11 +49,11 @@ export const removeControl = (controls, controlIndex) => [
 export const getDefaultOptions = (type) => {
   const defaultOptions = {};
   switch (type) {
-    case 'range':
+    case CONTROL_TYPES.RANGE:
       defaultOptions.decimalPlaces = 0;
       defaultOptions.step = 1;
       break;
-    case 'list':
+    case CONTROL_TYPES.LIST:
       defaultOptions.type = 'terms';
       defaultOptions.multiselect = true;
       defaultOptions.size = 5;

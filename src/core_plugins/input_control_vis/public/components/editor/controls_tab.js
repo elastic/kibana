@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl, getTitle } from '../../editor_utils';
+import { getLineageMap } from './lineage_map';
 
 import {
   EuiButton,
@@ -84,48 +85,17 @@ export class ControlsTab extends Component {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
-  getControlParams = (controlId) => {
-    this.props.scope.vis.params.controls.find((controlParams) => {
-      return controlParams.id === controlId;
-    });
-  }
-
-  getLineageMap = () => {
-    const lineageMap = new Map();
-    this.props.scope.vis.params.controls.forEach((controlParams) => {
-      const lineage = [];
-      const getLineage = (controlParams) => {
-        if (_.has(controlParams, 'parent') && !lineage.includes(controlParams.parent)) {
-          lineage.push(controlParams.parent);
-          const parent = this.getControlParams(controlParams.parent);
-          getLineage(parent);
-        }
-      };
-
-      getLineage(controlParams);
-      lineageMap.set(controlParams.id, lineage);
-    });
-    return lineageMap;
-  }
-
   getParentCandidates = (controlId, lineageMap) => {
     return this.props.scope.vis.params.controls.filter((controlParams) => {
-      // not itself
-      if (controlParams.id === controlId) {
-        return false;
-      }
-
-      // has index pattern and field
+      // Ignore controls that do not have index pattern and field set
       if (!controlParams.indexPattern || !controlParams.fieldName) {
         return false;
       }
-
-      // does not create a circlar dependency
+      // Ignore controls that would create a circlar graph
       const lineage = lineageMap.get(controlParams.id);
       if (lineage.includes(controlId)) {
         return false;
       }
-
       return true;
     }).map((controlParams, controlIndex) => {
       return {
@@ -142,7 +112,7 @@ export class ControlsTab extends Component {
   }
 
   renderControls() {
-    const lineageMap = this.getLineageMap();
+    const lineageMap = getLineageMap(this.props.scope.vis.params.controls);
     return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
       return (
         <ControlEditor
