@@ -15,10 +15,12 @@ export class ToastNotifications {
   }
 
   add = toastOrTitle => {
-    this.list.push({
+    const toast = {
       id: this.idCounter++,
       ...normalizeToast(toastOrTitle),
-    });
+    };
+    this.list.push(toast);
+    return toast;
   };
 
   remove = toast => {
@@ -27,7 +29,7 @@ export class ToastNotifications {
   };
 
   addSuccess = toastOrTitle => {
-    this.add({
+    return this.add({
       color: 'success',
       iconType: 'check',
       ...normalizeToast(toastOrTitle),
@@ -35,7 +37,7 @@ export class ToastNotifications {
   };
 
   addWarning = toastOrTitle => {
-    this.add({
+    return this.add({
       color: 'warning',
       iconType: 'help',
       ...normalizeToast(toastOrTitle),
@@ -43,7 +45,7 @@ export class ToastNotifications {
   };
 
   addDanger = toastOrTitle => {
-    this.add({
+    return this.add({
       color: 'danger',
       iconType: 'alert',
       ...normalizeToast(toastOrTitle),
