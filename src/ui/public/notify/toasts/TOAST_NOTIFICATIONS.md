@@ -77,3 +77,14 @@ Toasts will automatically be dismissed after a brief delay, but if for some reas
 const toast = toastNotifications.add('Saved document');
 toastNotifications.remove(toast);
 ```
+
+## Use in functional tests
+
+Functional tests are commonly used to verify that a user action yielded a sucessful outcome. if you surface a toast to notify the user of this successful outcome, you can place a `data-test-subj` attribute on the toast and use it to check if the toast exists inside of your functional test. This acts as a proxy for verifying the sucessful outcome.
+
+```js
+toastNotifications.addSuccess({
+  title: 'Saved document',
+  'data-test-subj': 'saveDocumentSuccess',
+});
+```
