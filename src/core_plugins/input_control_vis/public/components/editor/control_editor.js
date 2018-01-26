@@ -155,8 +155,8 @@ ControlEditor.propTypes = {
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,
   parentCandidates: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
   })).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };

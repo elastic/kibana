@@ -3,7 +3,7 @@ import { getLineageMap } from './lineage_map';
 import {
   CONTROL_TYPES,
   newControl,
-} from '../../editor_utils';
+} from '../editor_utils';
 
 test('creates lineage map', () => {
   const control1 = newControl(CONTROL_TYPES.LIST);

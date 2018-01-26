@@ -3,8 +3,8 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
-import { addControl, moveControl, newControl, removeControl, setControl, getTitle } from '../../editor_utils';
-import { getLineageMap } from './lineage_map';
+import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { getLineageMap, getParentCandidates } from '../../lineage';
 
 import {
   EuiButton,
@@ -85,26 +85,6 @@ export class ControlsTab extends Component {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
-  getParentCandidates = (controlId, lineageMap) => {
-    return this.props.scope.vis.params.controls.filter((controlParams) => {
-      // Ignore controls that do not have index pattern and field set
-      if (!controlParams.indexPattern || !controlParams.fieldName) {
-        return false;
-      }
-      // Ignore controls that would create a circlar graph
-      const lineage = lineageMap.get(controlParams.id);
-      if (lineage.includes(controlId)) {
-        return false;
-      }
-      return true;
-    }).map((controlParams, controlIndex) => {
-      return {
-        value: controlParams.id,
-        text: getTitle(controlParams, controlIndex)
-      };
-    });
-  }
-
   handleParentChange = (controlIndex, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.parent = evt.target.value;
@@ -114,6 +94,10 @@ export class ControlsTab extends Component {
   renderControls() {
     const lineageMap = getLineageMap(this.props.scope.vis.params.controls);
     return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
+      const parentCandidates = getParentCandidates(
+        this.props.scope.vis.params.controls,
+        controlParams.id,
+        lineageMap);
       return (
         <ControlEditor
           key={controlParams.id}
@@ -128,7 +112,7 @@ export class ControlsTab extends Component {
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}
-          parentCandidates={this.getParentCandidates(controlParams.id, lineageMap)}
+          parentCandidates={parentCandidates}
           handleParentChange={this.handleParentChange}
         />
       );

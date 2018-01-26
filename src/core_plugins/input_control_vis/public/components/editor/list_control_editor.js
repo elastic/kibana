@@ -37,7 +37,7 @@ export function ListControlEditor(props) {
       <EuiFormRow
         id={`parentSelect-${props.controlIndex}`}
         label="Parent"
-        helpText="Filter options list by parent's value. Control is disabled when parent is unset."
+        helpText="Filter options by parent's value. Control is disabled when parent is unset."
       >
         <EuiSelect
           options={options}
@@ -104,8 +104,8 @@ ListControlEditor.propTypes = {
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,
   parentCandidates: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
   })).isRequired,
   handleParentChange: PropTypes.func.isRequired,
 };
