@@ -119,7 +119,10 @@ any custom setting value for "${key}" may fix this issue.
 You can also save an step using \`config.get("${key}", defaultValue)\`, which
 will set the initial value if one is not already set.`);
       }
-      config.set(key, defaultValueForGetter);
+      // the key is not a declared setting
+      // pass through the caller's desired default value
+      // without persisting anything in the config document
+      return defaultValueForGetter;
     }
     const { userValue, value: defaultValue, type } = settings[key];
     const currentValue = config.isDefault(key) ? defaultValue : userValue;
