@@ -58,7 +58,6 @@ import 'ui/promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
 import { SearchRequestProvider } from '../fetch/request';
-import { SegmentedRequestProvider } from '../fetch/request/segmented';
 
 import { requestQueue } from '../_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -82,7 +81,6 @@ function isIndexPattern(val) {
 
 export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
-  const SegmentedRequest = Private(SegmentedRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const buildESQuery = Private(BuildESQueryProvider);
@@ -225,27 +223,6 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      */
     enable() {
       this._fetchDisabled = false;
-    }
-
-    onBeginSegmentedFetch(initFunction) {
-      const self = this;
-      return new Promise((resolve, reject) => {
-        function addRequest() {
-          const defer = Promise.defer();
-          const req = new SegmentedRequest(self, defer, initFunction);
-
-          req.setErrorHandler((request, error) => {
-            reject(error);
-            request.abort();
-          });
-
-          // Return promises created by the completion handler so that
-          // errors will bubble properly
-          return req.getCompletePromise().then(addRequest);
-        }
-
-        addRequest();
-      });
     }
 
     addFilterPredicate(predicate) {
