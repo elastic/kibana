@@ -16,7 +16,7 @@ export function apmSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: '[APM] Services',
+          id: '[APM] Services',
           linkLabel: 'APM Services dashboard',
           isOverview: true
         }
