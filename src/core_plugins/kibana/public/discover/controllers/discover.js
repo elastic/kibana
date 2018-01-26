@@ -33,6 +33,12 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 
+const fetchStatuses = {
+  UNINITIALIZED: 'uninitialized',
+  LOADING: 'loading',
+  COMPLETE: 'complete',
+};
+
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
   'kibana/courier',
@@ -139,6 +145,7 @@ function discoverController(
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
+  $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';
@@ -193,18 +200,16 @@ function discoverController(
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
-    if (!$scope.fetchStatus) {
+    if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
     }
 
     return await new Promise(resolve => {
       const unwatch = $scope.$watch('fetchStatus', (newValue) => {
-        if (newValue) {
-          return;
+        if (newValue === fetchStatuses.COMPLETE) {
+          unwatch();
+          resolve($scope.fieldCounts);
         }
-
-        unwatch();
-        resolve($scope.fieldCounts);
       });
     });
   };
@@ -379,13 +384,9 @@ function discoverController(
               if (rows == null && oldRows == null) return status.LOADING;
 
               const rowsEmpty = _.isEmpty(rows);
-              // An undefined fetchStatus means the requests are still being
-              // prepared to be sent. When all requests are completed,
-              // fetchStatus is set to null, so it's important that we
-              // specifically check for undefined to determine a loading status.
-              const preparingForFetch = _.isUndefined(fetchStatus);
+              const preparingForFetch = fetchStatus === fetchStatuses.UNINITIALIZED;
               if (preparingForFetch) return status.LOADING;
-              else if (rowsEmpty && fetchStatus) return status.LOADING;
+              else if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
               else if (!rowsEmpty) return status.READY;
               else return status.NO_RESULTS;
             }
@@ -459,7 +460,7 @@ function discoverController(
       .then(setupVisualization)
       .then(function () {
         $state.save();
-        $scope.fetchStatus = true;
+        $scope.fetchStatus = fetchStatuses.LOADING;
         return courier.fetch();
       })
       .catch(notify.error);
@@ -498,7 +499,7 @@ function discoverController(
       });
     });
 
-    $scope.fetchStatus = false;
+    $scope.fetchStatus = fetchStatuses.COMPLETE;
 
     return $scope.searchSource.onResults().then(onResults);
   }
