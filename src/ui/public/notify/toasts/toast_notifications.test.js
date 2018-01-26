@@ -35,8 +35,7 @@ describe('ToastNotifications', () => {
 
     describe('remove method', () => {
       test('removes a toast', () => {
-        const toast = {};
-        toastNotifications.add(toast);
+        const toast = toastNotifications.add('Test');
         toastNotifications.remove(toast);
         expect(toastNotifications.list.length).toBe(0);
       });
