@@ -47,14 +47,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('save query should show toast message and display query name', async function () {
         await PageObjects.discover.saveSearch(queryName1);
-        const toastMessage = await PageObjects.header.getToastMessage();
-
-        const expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
-        expect(toastMessage).to.be(expectedToastMessage);
-
-        await PageObjects.header.waitForToastMessageGone();
         const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
-
         expect(actualQueryNameString).to.be(queryName1);
       });
 

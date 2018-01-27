@@ -8,7 +8,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify } from 'ui/notify';
+import { notify, toastNotifications, createFirstIndexPatternPrompt } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -66,7 +66,14 @@ export function kbnChromeProvider(chrome, internals) {
 
           // and some local values
           chrome.httpActive = $http.pendingRequests;
+
+          // Notifications
           $scope.notifList = notify._notifs;
+          $scope.toastNotifications = toastNotifications.list;
+          $scope.dismissToast = toastNotifications.remove;
+          $scope.TOAST_LIFE_TIME_MS = 6000;
+
+          $scope.createFirstIndexPatternPrompt = createFirstIndexPatternPrompt;
 
           return chrome;
         }
