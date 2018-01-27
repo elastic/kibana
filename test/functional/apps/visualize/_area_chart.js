@@ -62,9 +62,12 @@ export default function ({ getService, getPageObjects }) {
       it('should save and load with special characters', function () {
         const vizNamewithSpecialChars = vizName1 + '/?&=%';
         return PageObjects.visualize.saveVisualization(vizNamewithSpecialChars)
-          .then(function (message) {
-            log.debug(`Saved viz message = ${message}`);
-            expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizNamewithSpecialChars);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();
@@ -73,19 +76,22 @@ export default function ({ getService, getPageObjects }) {
 
       it('should save and load with non-ascii characters', async function () {
         const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
-        const message = await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars);
+        const pageTitle = await PageObjects.visualize.saveVisualization(vizNamewithSpecialChars).then(() => {
+          return PageObjects.common.getBreadcrumbPageTitle();
+        });
 
-        log.debug(`Saved viz message with umlaut = ${message}`);
-        expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
-
-        await PageObjects.header.waitForToastMessageGone();
+        log.debug(`Saved viz page title with umlaut is ${pageTitle}`);
+        expect(pageTitle).to.contain(vizNamewithSpecialChars);
       });
 
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Saved viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();
@@ -96,9 +102,9 @@ export default function ({ getService, getPageObjects }) {
           .then(function () {
             return PageObjects.visualize.waitForVisualization();
           })
-        // We have to sleep sometime between loading the saved visTitle
-        // and trying to access the chart below with getXAxisLabels
-        // otherwise it hangs.
+          // We have to sleep sometime between loading the saved visTitle
+          // and trying to access the chart below with getXAxisLabels
+          // otherwise it hangs.
           .then(function sleep() {
             return PageObjects.common.sleep(2000);
           });

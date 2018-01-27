@@ -13,9 +13,9 @@ export function TestSubjectsProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector) {
+    async exists(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector));
+      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async append(selector, text) {
