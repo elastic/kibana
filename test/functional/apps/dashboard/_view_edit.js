@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
 
-        it('when time changed is stored with dashboard', async function () {
+        it.skip('when time changed is stored with dashboard', async function () {
           const originalFromTime = '2015-09-19 06:31:44.000';
           const originalToTime = '2015-09-19 06:31:44.000';
           await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('and preserves edits on cancel', function () {
-        it('when time changed is stored with dashboard', async function () {
+        it.skip('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
           const newFromTime = '2015-09-19 06:31:44.000';
           const newToTime = '2015-09-19 06:31:44.000';
