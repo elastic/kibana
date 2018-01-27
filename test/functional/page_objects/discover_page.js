@@ -200,8 +200,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('sharedSnapshotShortUrlButton');
     }
 
-    clickCopyToClipboard() {
-      return testSubjects.click('sharedSnapshotCopyButton');
+    async clickCopyToClipboard() {
+      testSubjects.click('sharedSnapshotCopyButton');
+
+      // Confirm that the content was copied to the clipboard.
+      return await testSubjects.exists('shareCopyToClipboardSuccess');
     }
 
     async getShareCaption() {

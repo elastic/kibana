@@ -152,12 +152,21 @@ app.directive('share', function (Private) {
         try {
           const isCopied = document.execCommand('copy');
           if (isCopied) {
-            toastNotifications.add('URL copied to clipboard.');
+            toastNotifications.add({
+              title: 'URL copied to clipboard',
+              'data-test-subj': 'shareCopyToClipboardSuccess',
+            });
           } else {
-            toastNotifications.add('URL selected. Press Ctrl+C to copy.');
+            toastNotifications.add({
+              title: 'URL selected. Press Ctrl+C to copy.',
+              'data-test-subj': 'shareCopyToClipboardSuccess',
+            });
           }
         } catch (err) {
-          toastNotifications.add('URL selected. Press Ctrl+C to copy.');
+          toastNotifications.add({
+            title: 'URL selected. Press Ctrl+C to copy.',
+            'data-test-subj': 'shareCopyToClipboardSuccess',
+          });
         }
       };
     }
