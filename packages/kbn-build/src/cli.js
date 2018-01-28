@@ -31,8 +31,8 @@ function help() {
 export async function run(argv) {
   const options = getopts(argv, {
     alias: {
-      h: 'help'
-    }
+      h: 'help',
+    },
   });
 
   const args = options._;

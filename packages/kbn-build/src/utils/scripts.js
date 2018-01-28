@@ -8,13 +8,13 @@ export function installInDir(directory, extraArgs = []) {
     'install',
     '--non-interactive',
     '--mutex file',
-    ...extraArgs
+    ...extraArgs,
   ];
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
   return spawn('yarn', options, {
-    cwd: directory
+    cwd: directory,
   });
 }
 
@@ -23,10 +23,10 @@ export function installInDir(directory, extraArgs = []) {
  */
 export function runScriptInPackageStreaming(script, args, pkg) {
   const execOpts = {
-    cwd: pkg.path
+    cwd: pkg.path,
   };
 
   return spawnStreaming('yarn', ['run', script, ...args], execOpts, {
-    prefix: pkg.name
+    prefix: pkg.name,
   });
 }

@@ -19,7 +19,6 @@ target
 
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
-/packages/kbn-build
 
 /src/babel-preset
 /src/babel-register
