@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { fatalError } from 'ui/notify';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';
@@ -289,7 +288,7 @@ uiModules.get('apps/management')
           return notify.error(`Couldn't locate any indices matching that pattern. Please add the index to Elasticsearch`);
         }
 
-        fatalError(err);
+        notify.fatal(err);
       }).finally(() => {
         this.isCreatingIndexPattern = false;
       });

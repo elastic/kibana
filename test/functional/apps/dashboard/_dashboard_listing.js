@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }) {
       it('creates a new dashboard', async function () {
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.header.clickToastOK();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
@@ -71,6 +72,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clearSearchValue();
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard('Two Words');
+        await PageObjects.header.clickToastOK();
       });
 
       it('matches on the first word', async function () {

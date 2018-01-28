@@ -3,7 +3,6 @@ import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { applyTheme } from 'ui/theme';
-import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
 
@@ -184,18 +183,14 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          toastNotifications.addSuccess('Added visualization to your dashboard');
+          notify.info(`Visualization successfully added to your dashboard`);
         }
       };
 
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
-        toastNotifications.addSuccess({
-          title: 'Added saved search to your dashboard',
-          'data-test-subj': 'addSavedSearchToDashboardSuccess',
-        });
+        notify.info(`Search successfully added to your dashboard`);
       };
-
       $scope.$watch('model.hidePanelTitles', () => {
         dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
       });
@@ -273,11 +268,7 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
-              toastNotifications.addSuccess({
-                title: `Saved '${dash.title}'`,
-                'data-test-subj': 'saveDashboardSuccess',
-              });
-
+              notify.info(`Saved Dashboard as "${dash.title}"`);
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change(createDashboardEditUrl(dash.id));
               } else {

@@ -1,12 +1,11 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
 import { uiModules } from 'ui/modules';
-import { fatalError } from 'ui/notify';
 import { keyCodes } from '@elastic/eui';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')
-  .directive('advancedRow', function (config) {
+  .directive('advancedRow', function (config, Notifier) {
     return {
       restrict: 'A',
       replace: true,
@@ -16,6 +15,8 @@ uiModules.get('apps/management')
         configs: '='
       },
       link: function ($scope) {
+        const notify = new Notifier();
+
         // To allow passing form validation state back
         $scope.forms = {};
 
@@ -26,7 +27,7 @@ uiModules.get('apps/management')
             .then(function () {
               conf.loading = conf.editing = false;
             })
-            .catch(fatalError);
+            .catch(notify.fatal);
         };
 
         $scope.maybeCancel = function ($event, conf) {

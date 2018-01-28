@@ -290,7 +290,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(searchName);
 
       await find.clickByPartialLinkText(searchName);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
+      await PageObjects.header.clickToastOK();
       await this.clickAddVisualization();
     }
 
@@ -299,6 +299,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('filter visualization (' + vizName + ')');
       await this.filterEmbeddableNames(vizName);
       await this.clickVizNameLink(vizName);
+      await PageObjects.header.clickToastOK();
       // this second click of 'Add' collapses the Add Visualization pane
       await this.clickAddVisualization();
     }
@@ -323,8 +324,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // Confirm that the Dashboard has been saved.
-      return await testSubjects.exists('saveDashboardSuccess');
+      // verify that green message at the top of the page.
+      // it's only there for about 5 seconds
+      return await PageObjects.header.getToastMessage();
     }
 
     /**

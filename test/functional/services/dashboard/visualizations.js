@@ -1,7 +1,6 @@
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
   return new class DashboardVisualizations {
@@ -15,6 +14,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickAddNewVisualizationLink();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualization(name);
+      await PageObjects.header.clickToastOK();
     }
 
     async createSavedSearch({ name, query, fields }) {
@@ -36,7 +36,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
 
       await PageObjects.discover.saveSearch(name);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.exists('saveSearchSuccess');
+      await PageObjects.header.clickToastOK();
     }
 
     async createAndAddSavedSearch({ name, query, fields }) {

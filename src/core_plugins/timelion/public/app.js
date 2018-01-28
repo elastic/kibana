@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify, fatalError, toastNotifications } from 'ui/notify';
+import { notify } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('ui/autoload/all');
@@ -47,8 +47,6 @@ require('ui/routes')
     }
   });
 
-const location = 'Timelion';
-
 app.controller('timelion', function (
   $http,
   $route,
@@ -77,7 +75,7 @@ app.controller('timelion', function (
   timefilter.enableTimeRangeSelector();
 
   const notify = new Notifier({
-    location
+    location: 'Timelion'
   });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
@@ -112,9 +110,9 @@ app.controller('timelion', function (
       const title = savedSheet.title;
       function doDelete() {
         savedSheet.delete().then(() => {
-          toastNotifications.addSuccess(`Deleted '${title}'`);
+          notify.info('Deleted ' + title);
           kbnUrl.change('/');
-        }).catch(error => fatalError(error, location));
+        }).catch(notify.fatal);
       }
 
       const confirmModalOptions = {
@@ -263,7 +261,7 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        toastNotifications.addSuccess(`Saved sheet '${savedSheet.title}'`);
+        notify.info('Saved sheet as "' + savedSheet.title + '"');
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
@@ -280,9 +278,7 @@ app.controller('timelion', function (
       savedExpression.title = title;
       savedExpression.visState.title = title;
       savedExpression.save().then(function (id) {
-        if (id) {
-          toastNotifications.addSuccess(`Saved expression '${savedExpression.title}'`);
-        }
+        if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
       });
     });
   }

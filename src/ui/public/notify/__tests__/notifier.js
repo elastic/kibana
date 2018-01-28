@@ -2,7 +2,7 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { Notifier } from 'ui/notify';
+import { Notifier } from 'ui/notify/notifier';
 
 describe('Notifier', function () {
   let $interval;
@@ -176,6 +176,58 @@ describe('Notifier', function () {
       expect(notify('warning').getAlertClass()).to.equal('toast alert alert-warning');
       expect(notify('warning').getButtonGroupClass()).to.equal('toast-controls');
       expect(notify('warning').getToastMessageClass()).to.equal('toast-message');
+    });
+  });
+
+  describe('#info', function () {
+    testVersionInfo('info');
+
+    it('prepends location to message for content', function () {
+      expect(notify('info').content).to.equal(params.location + ': ' + message);
+    });
+
+    it('sets type to "info"', function () {
+      expect(notify('info').type).to.equal('info');
+    });
+
+    it('sets icon to "info-circle"', function () {
+      expect(notify('info').icon).to.equal('info-circle');
+    });
+
+    it('sets title to "Debug"', function () {
+      expect(notify('info').title).to.equal('Debug');
+    });
+
+    it('defaults lifetime to 5000', function () {
+      expect(notify('info').lifetime).to.equal(5000);
+    });
+
+    it('allows setting custom lifetime with opts', function () {
+      const customLifetime = 10000;
+      expect(notify('info', { lifetime: customLifetime }).lifetime).to.equal(customLifetime);
+    });
+
+    it('does not allow reporting', function () {
+      const includesReport = _.includes(notify('info').actions, 'report');
+      expect(includesReport).to.false;
+    });
+
+    it('allows accepting', function () {
+      const includesAccept = _.includes(notify('info').actions, 'accept');
+      expect(includesAccept).to.true;
+    });
+
+    it('does not include stack', function () {
+      expect(notify('info').stack).not.to.be.defined;
+    });
+
+    it('has css class helper functions', function () {
+      expect(notify('info').getIconClass()).to.equal('fa fa-info-circle');
+      expect(notify('info').getButtonClass()).to.equal('kuiButton--primary');
+      expect(notify('info').getAlertClassStack()).to.equal('toast-stack alert alert-info');
+      expect(notify('info').getAlertClass()).to.equal('toast alert alert-info');
+      expect(notify('info').getButtonGroupClass()).to.equal('toast-controls');
+      expect(notify('info').getToastMessageClass()).to.equal('toast-message');
     });
   });
 

@@ -3,7 +3,7 @@ import chrome from 'ui/chrome';
 
 import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
-import { Notifier } from 'ui/notify';
+import { Notifier } from 'ui/notify/notifier';
 
 import './test_harness.less';
 import 'ng_mock';
