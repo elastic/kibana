@@ -42,6 +42,7 @@
   ],
   "scripts": {
     "kbn": "node scripts/kbn",
+    "prettier": "prettier --write '**/*.js'",
     "test": "grunt test",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
@@ -291,6 +292,7 @@
     "nock": "8.0.0",
     "node-sass": "4.5.3",
     "pixelmatch": "4.0.2",
+    "prettier": "^1.10.2",
     "proxyquire": "1.7.10",
     "sass-loader": "6.0.6",
     "simple-git": "1.37.0",
