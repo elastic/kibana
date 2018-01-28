@@ -1,3 +1,5 @@
+node_modules
+/packages/kbn-build/dist
 /optimize
 /src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap

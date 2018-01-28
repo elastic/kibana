@@ -6,9 +6,11 @@ import { resolve } from 'path';
 import * as commands from './commands';
 import { runCommand } from './run';
 
+const getCommand = name => commands[name]; // eslint-disable-line import/namespace
+
 function help() {
   const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName])
+    .map(commandName => getCommand(commandName))
     .map(command => `${command.name} - ${command.description}`);
 
   console.log(dedent`
@@ -51,7 +53,7 @@ export async function run(argv) {
 
   const commandOptions = { options, extraArgs, rootPath };
 
-  const command = commands[commandName];
+  const command = getCommand(commandName);
   if (command === undefined) {
     console.log(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)

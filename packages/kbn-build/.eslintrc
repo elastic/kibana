@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "../../.eslintrc",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "error"
+  }
+}
