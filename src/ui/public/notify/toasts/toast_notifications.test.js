@@ -41,6 +41,12 @@ describe('ToastNotifications', () => {
         toastNotifications.remove(toast);
         expect(toastNotifications.list.length).toBe(0);
       });
+
+      test('ignores unknown toast', () => {
+        toastNotifications.add('Test');
+        toastNotifications.remove({});
+        expect(toastNotifications.list.length).toBe(1);
+      });
     });
 
     describe('onChange method', () => {

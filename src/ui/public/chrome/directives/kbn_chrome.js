@@ -10,7 +10,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify, GlobalToastList, toastNotifications, createFirstIndexPatternPrompt } from 'ui/notify';
+import { notify, GlobalToastList, toastNotifications, topBanners } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -69,6 +69,9 @@ export function kbnChromeProvider(chrome, internals) {
           // and some local values
           chrome.httpActive = $http.pendingRequests;
 
+          // Banners
+          $scope.topBanners = topBanners.list;
+
           // Notifications
           $scope.notifList = notify._notifs;
 
@@ -87,8 +90,6 @@ export function kbnChromeProvider(chrome, internals) {
             />,
             document.getElementById('globalToastList')
           );
-
-          $scope.createFirstIndexPatternPrompt = createFirstIndexPatternPrompt;
 
           return chrome;
         }

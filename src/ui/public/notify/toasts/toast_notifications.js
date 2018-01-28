@@ -37,10 +37,13 @@ export class ToastNotifications {
 
   remove = toast => {
     const index = this.list.indexOf(toast);
-    this.list.splice(index, 1);
 
-    if (onChangeCallback) {
-      onChangeCallback();
+    if (index !== -1) {
+      this.list.splice(index, 1);
+
+      if (onChangeCallback) {
+        onChangeCallback();
+      }
     }
   };
 
