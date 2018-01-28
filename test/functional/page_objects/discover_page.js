@@ -42,6 +42,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .then(() => {
           log.debug('--find save button');
           return testSubjects.click('discoverSaveSearchButton');
+        })
+        .then(async () => {
+          return await testSubjects.exists('saveSearchSuccess', 2000);
         });
     }
 
@@ -197,8 +200,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('sharedSnapshotShortUrlButton');
     }
 
-    clickCopyToClipboard() {
-      return testSubjects.click('sharedSnapshotCopyButton');
+    async clickCopyToClipboard() {
+      testSubjects.click('sharedSnapshotCopyButton');
+
+      // Confirm that the content was copied to the clipboard.
+      return await testSubjects.exists('shareCopyToClipboardSuccess');
     }
 
     async getShareCaption() {
