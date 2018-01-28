@@ -1,25 +1,9 @@
 import { uiModules } from 'ui/modules';
-import { fatalError } from './fatal_error';
-import { Notifier } from './notifier';
+import { Notifier } from 'ui/notify/notifier';
+import 'ui/notify/directives';
 import { metadata } from 'ui/metadata';
-import template from './partials/toaster.html';
-import './notify.less';
-import 'ui/filters/markdown';
-import 'ui/directives/truncated';
 
 const module = uiModules.get('kibana/notify');
-
-module.directive('kbnNotifications', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      list: '=list'
-    },
-    replace: true,
-    template
-  };
-});
-
 export const notify = new Notifier();
 
 module.factory('createNotifier', function () {
@@ -62,7 +46,7 @@ function applyConfig(config) {
 }
 
 window.onerror = function (err, url, line) {
-  fatalError(new Error(`${err} (${url}:${line})`));
+  notify.fatal(new Error(err + ' (' + url + ':' + line + ')'));
   return true;
 };
 
@@ -75,4 +59,3 @@ if (window.addEventListener) {
     notifier.log(`Detected an unhandled Promise rejection.\n${e.reason}`);
   });
 }
-

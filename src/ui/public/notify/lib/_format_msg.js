@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { formatESMsg } from './format_es_msg';
+import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
 const has = _.has;
 
 /**

@@ -149,7 +149,6 @@ module.exports = function (grunt) {
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
-        '--dev_mode.enabled=false',
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',

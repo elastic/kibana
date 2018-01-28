@@ -1,7 +1,5 @@
-import { Notifier } from 'ui/notify';
-
-export const location = 'Courier fetch';
+import { Notifier } from 'ui/notify/notifier';
 
 export const courierNotifier = new Notifier({
-  location,
+  location: 'Courier Fetch'
 });

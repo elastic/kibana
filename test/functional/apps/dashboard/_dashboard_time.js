@@ -23,6 +23,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        await PageObjects.header.clickToastOK();
       });
 
       it('Does not set the time picker on open', async function () {
@@ -42,6 +43,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setQuickTime('Today');
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
       });
 
       it('sets quick time on open', async function () {
@@ -57,6 +59,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
       });
 
       it('sets absolute time on open', async function () {

@@ -1,8 +1,16 @@
 import _ from 'lodash';
-import { createFirstIndexPatternPrompt } from 'ui/notify';
+import { Notifier } from 'ui/notify/notifier';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
+const notify = new Notifier({
+  location: 'Index Patterns'
+});
+
+const NO_DEFAULT_INDEX_PATTERN_MSG = `
+In order to visualize and explore data in Kibana,
+you'll need to create an index pattern to retrieve data from Elasticsearch.
+`;
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function (opts) {
@@ -49,8 +57,7 @@ export default function (opts) {
 
         // Avoid being hostile to new users who don't have an index pattern setup yet
         // give them a friendly info message instead of a terse error message
-        createFirstIndexPatternPrompt.show();
-        setTimeout(createFirstIndexPatternPrompt.hide, 15000);
+        notify.info(NO_DEFAULT_INDEX_PATTERN_MSG, { lifetime: 15000 });
       }
     );
 }

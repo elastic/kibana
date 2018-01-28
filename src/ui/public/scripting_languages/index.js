@@ -1,5 +1,5 @@
 import chrome from 'ui/chrome';
-import { Notifier } from 'ui/notify';
+import { Notifier } from 'ui/notify/notifier';
 
 const notify = new Notifier({ location: 'Scripting Language Service' });
 

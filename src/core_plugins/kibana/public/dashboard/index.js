@@ -3,7 +3,7 @@ import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
 import 'plugins/kibana/dashboard/styles/index.less';
 import 'plugins/kibana/dashboard/dashboard_config';
 import uiRoutes from 'ui/routes';
-import { toastNotifications } from 'ui/notify';
+import { notify } from 'ui/notify';
 
 import dashboardTemplate from 'plugins/kibana/dashboard/dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing.html';
@@ -71,7 +71,8 @@ uiRoutes
             if (error instanceof SavedObjectNotFound && id === 'create') {
               // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              toastNotifications.addWarning('The url "dashboard/create" was removed in 6.0. Please update your bookmarks.');
+              notify.error(
+                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
             } else {
               throw error;
             }

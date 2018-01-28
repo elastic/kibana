@@ -11,14 +11,14 @@ import labDisabledTemplate from './visualize_lab_disabled.html';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor(savedVisualizations, timefilter, Promise, Private, config) {
+  constructor(savedVisualizations, timefilter, Notifier, Promise, Private, config) {
     super();
     this._config = config;
     this.savedVisualizations = savedVisualizations;
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
-    this.filterBarClickHandler = filterBarClickHandlerProvider(Private);
+    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier, Private);
   }
 
   getEditPath(panelId) {

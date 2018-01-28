@@ -58,7 +58,7 @@ export const schema = Joi.object().keys({
     bail: Joi.boolean().default(false),
     grep: Joi.string(),
     slow: Joi.number().default(30000),
-    timeout: Joi.number().default(INSPECTING ? Infinity : 180000),
+    timeout: Joi.number().default(INSPECTING ? Infinity : 120000),
     ui: Joi.string().default('bdd'),
   }).default(),
 

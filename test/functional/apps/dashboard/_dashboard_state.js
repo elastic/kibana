@@ -68,6 +68,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.dashboard.clickEdit();
       await PageObjects.visualize.clickLegendOption('Count');
@@ -89,17 +90,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.dashboard.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -114,11 +118,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard('Has local edits');
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -136,6 +142,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
       await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
 
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.visualize.openSpyPanel();
@@ -152,6 +159,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
 
       await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
 

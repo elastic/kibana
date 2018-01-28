@@ -6,6 +6,7 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
+import 'ui/notify';
 import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
@@ -15,7 +16,6 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
-import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -416,11 +416,7 @@ function discoverController(
             $scope.kbnTopNav.close('save');
 
             if (id) {
-              toastNotifications.addSuccess({
-                title: `Saved '${savedSearch.title}'`,
-                'data-test-subj': 'saveSearchSuccess',
-              });
-
+              notify.info('Saved Data Source "' + savedSearch.title + '"');
               if (savedSearch.id !== $route.current.params.id) {
                 kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
               } else {

@@ -9,6 +9,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('shared links', function describeIndexTests() {
     let baseUrl;
+    // The message changes for Firefox < 41 and Firefox >= 41
+    // var expectedToastMessage = 'Share search: URL selected. Press Ctrl+C to copy.';
+    // var expectedToastMessage = 'Share search: URL copied to clipboard.';
+    // Pass either one.
+    const expectedToastMessage = /Share search: URL (selected\. Press Ctrl\+C to copy\.|copied to clipboard\.)/;
 
     before(function () {
       baseUrl = PageObjects.common.getHostPort();
@@ -78,8 +83,17 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('gets copied to clipboard', async function () {
-        return await PageObjects.discover.clickCopyToClipboard();
+      it('should show toast message for copy to clipboard', function () {
+        return PageObjects.discover.clickCopyToClipboard()
+          .then(function () {
+            return PageObjects.header.getToastMessage();
+          })
+          .then(function (toastMessage) {
+            expect(toastMessage).to.match(expectedToastMessage);
+          })
+          .then(function () {
+            return PageObjects.header.waitForToastMessageGone();
+          });
       });
 
       // TODO: verify clipboard contents
@@ -97,8 +111,17 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // NOTE: This test has to run immediately after the test above
-      it('copies short URL to clipboard', async function () {
-        return await PageObjects.discover.clickCopyToClipboard();
+      it('should show toast message for copy to clipboard of short URL', function () {
+        return PageObjects.discover.clickCopyToClipboard()
+          .then(function () {
+            return PageObjects.header.getToastMessage();
+          })
+          .then(function (toastMessage) {
+            expect(toastMessage).to.match(expectedToastMessage);
+          })
+          .then(function () {
+            return PageObjects.header.waitForToastMessageGone();
+          });
       });
     });
   });

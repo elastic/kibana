@@ -5,10 +5,11 @@ export function visualizeEmbeddableFactoryProvider(Private) {
   const VisualizeEmbeddableFactoryProvider = (
     savedVisualizations,
     timefilter,
+    Notifier,
     Promise,
     Private,
     config) => {
-    return new VisualizeEmbeddableFactory(savedVisualizations, timefilter, Promise, Private, config);
+    return new VisualizeEmbeddableFactory(savedVisualizations, timefilter, Notifier, Promise, Private, config);
   };
   return Private(VisualizeEmbeddableFactoryProvider);
 }

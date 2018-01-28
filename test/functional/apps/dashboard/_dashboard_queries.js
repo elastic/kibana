@@ -36,6 +36,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
+      await PageObjects.header.clickToastOK();
+
       await PageObjects.header.clickDashboard();
 
       await dashboardExpect.pieSliceCount(2);
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('memory');
       await PageObjects.visualize.clickGo();
       await PageObjects.visualize.saveVisualization('memory with bytes < 90 pie');
+      await PageObjects.header.clickToastOK();
 
       await dashboardExpect.pieSliceCount(3);
     });
