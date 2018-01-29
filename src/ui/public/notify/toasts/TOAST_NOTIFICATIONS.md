@@ -1,6 +1,6 @@
 # Toast notifications
 
-Use this service to surface toasts in the bottom-right corner of the screen. After a brief delay, they'll disappear. They're useful for notifying the user of state changes. See [the EUI docs](elastic.github.io/eui/) for more information on toasts and their role within the UI.
+Use this service to surface toasts in the bottom-right corner of the screen. After a brief delay, they'll disappear. They're useful for notifying the user of state changes. See [the EUI docs](https://elastic.github.io/eui/) for more information on toasts and their role within the UI.
 
 ## Importing the module
 
@@ -57,7 +57,7 @@ toastNotifications.remove(toast);
 
 ### Configuration options
 
-If you want to configure the toast further you can provide an object instead of a string. The properties of this object correspond to the `propTypes` accepted by the `EuiToast` component. Refer to [the EUI docs](elastic.github.io/eui/) for info on these `propTypes`.
+If you want to configure the toast further you can provide an object instead of a string. The properties of this object correspond to the `propTypes` accepted by the `EuiToast` component. Refer to [the EUI docs](https://elastic.github.io/eui/) for info on these `propTypes`.
 
 ```js
 toastNotifications.add({
