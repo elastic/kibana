@@ -22,7 +22,11 @@ export class Control {
     this.disable('Control has not been initialized');
   }
 
-  async init() {
+  /**
+   *
+   * @param ancestors {array of Controls}
+   */
+  async init(/* ancestors */) {
     throw new Error('init method not defined');
   }
 

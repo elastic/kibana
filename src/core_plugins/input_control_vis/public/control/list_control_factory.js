@@ -40,7 +40,14 @@ class ListControl extends Control {
     return this.filterManager.delimiter;
   }
 
-  async init() {
+  async init(ancestors) {
+    if (ancestors.length > 0) {
+      if (!ancestors[0].hasValue()) {
+        this.disable(`Disabled until '${ancestors[0].label}' is set.`);
+        return 'done';
+      }
+    }
+
     const indexPattern = this.filterManager.getIndexPattern();
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {

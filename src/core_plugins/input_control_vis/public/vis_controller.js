@@ -2,6 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
+import { getLineageMap } from './lineage';
 
 class VisController {
   constructor(el, vis) {
@@ -55,9 +56,23 @@ class VisController {
     });
     const controls = await Promise.all(controlFactoryPromises);
 
-    const controlInitPromises = controls.map((control) => {
-      return control.init();
+    const getControl = (id) => {
+      return controls.find(control => {
+        return id === control.id;
+      });
+    };
+
+    const controlInitPromises = [];
+    getLineageMap(controlParamsList).forEach((lineage, controlId) => {
+      // first lineage item is the control. remove it
+      lineage.shift();
+      const ancestors = [];
+      lineage.forEach(ancestorId => {
+        ancestors.push(getControl(ancestorId));
+      });
+      controlInitPromises.push(getControl(controlId).init(ancestors));
     });
+
     await Promise.all(controlInitPromises);
     return controls;
   }
