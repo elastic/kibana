@@ -82,7 +82,7 @@ export const FILEBEAT_INSTRUCTIONS = {
                 'omit this command.',
       commands: [
         'PS C:\\Program Files\\Filebeat> filebeat.exe setup',
-        'PS C:\\Program Files\\Filebeat> Service-Start filebeat',
+        'PS C:\\Program Files\\Filebeat> Start-Service filebeat',
       ]
     }
   },
