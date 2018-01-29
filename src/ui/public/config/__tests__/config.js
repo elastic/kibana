@@ -19,10 +19,15 @@ describe('config component', function () {
     it('supports the default value overload', function () {
       // default values are consumed and returned atomically
       expect(config.get('obscureProperty', 'default')).to.be('default');
-      // default values are consumed only if setting was previously unset
-      expect(config.get('obscureProperty', 'another')).to.be('default');
-      // default values are persisted
-      expect(config.get('obscureProperty')).to.be('default');
+      // after a get, default values are NOT persisted. See next test
+      expect(config.get).withArgs('obscureProperty').to.throwException();
+    });
+
+    it('after a get for an unknown property, the property is not persisted', function () {
+      // same as previous tests
+      expect(config.get('obscureProperty', 'default')).to.be('default');
+      // after a get, default values are NOT persisted
+      expect(config.get).withArgs('obscureProperty').to.throwException();
     });
 
     it('throws on unknown properties that don\'t have a value yet.', function () {
