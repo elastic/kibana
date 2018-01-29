@@ -47,7 +47,7 @@ describe('ast toExpression', () => {
       const errMsg = 'Arguments can only be an object';
       const astObject = {
         type: 'function',
-        functoin: 'pointseries',
+        function: 'pointseries',
         arguments: null,
       };
       expect(() => toExpression(astObject)).to.throwException(errMsg);
