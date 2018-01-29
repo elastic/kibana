@@ -1,5 +1,4 @@
 import { resolve, join } from 'path';
-import { indexBy } from 'lodash';
 import exec from '../utils/exec';
 
 export default (grunt) => {
