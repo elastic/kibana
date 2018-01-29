@@ -7,15 +7,23 @@ Choose a different field or index documents that contain values for this field.`
 }
 
 export class Control {
-  constructor(controlParams, filterManager) {
+  constructor(controlParams, filterManager, kbnApi) {
     this.id = controlParams.id;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
+    this.useTimeFilter = controlParams.useTimeFilter;
     this.filterManager = filterManager;
-    this.enable = true;
+    this.kbnApi = kbnApi;
+
     // restore state from kibana filter context
     this.reset();
+    // disable until initialized
+    this.disable('Control has not been initialized');
+  }
+
+  async init() {
+    throw new Error('init method not defined');
   }
 
   isEnabled() {

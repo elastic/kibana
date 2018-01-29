@@ -35,44 +35,53 @@ const termsAgg = (field, size, direction) => {
 const listControlDelimiter = '$$kbn_delimiter$$';
 
 class ListControl extends Control {
-  constructor(controlParams, filterManager, selectOptions) {
-    super(controlParams, filterManager);
-
-    this.selectOptions = selectOptions;
-  }
 
   getMultiSelectDelimiter() {
     return this.filterManager.delimiter;
   }
+
+  async init() {
+    const indexPattern = this.filterManager.getIndexPattern();
+    const fieldName = this.filterManager.fieldName;
+    const initialSearchSourceState = {
+      timeout: '1s',
+      terminate_after: 100000
+    };
+    const aggs = termsAgg(
+      indexPattern.fields.byName[fieldName],
+      _.get(this.options, 'size', 5),
+      'desc');
+    const searchSource = createSearchSource(
+      this.kbnApi,
+      initialSearchSourceState,
+      indexPattern,
+      aggs,
+      this.useTimeFilter);
+
+    const resp = await searchSource.fetch();
+    const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
+      return { label: bucket.key.toString(), value: bucket.key.toString() };
+    }).sort((a, b) => {
+      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+    });
+
+    if(selectOptions.length === 0) {
+      this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
+    } else {
+      this.selectOptions = selectOptions;
+      this.enable = true;
+    }
+
+    return 'done';
+  }
 }
 
-export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
 
-  const initialSearchSourceState = {
-    timeout: '1s',
-    terminate_after: 100000
-  };
-  const aggs = termsAgg(
-    indexPattern.fields.byName[controlParams.fieldName],
-    _.get(controlParams, 'options.size', 5),
-    'desc');
-  const searchSource = createSearchSource(kbnApi, initialSearchSourceState, indexPattern, aggs, useTimeFilter);
-
-  const resp = await searchSource.fetch();
-  const termsSelectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-    return { label: bucket.key.toString(), value: bucket.key.toString() };
-  }).sort((a, b) => {
-    return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
-  });
-
-  const listControl = new ListControl(
+  return new ListControl(
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
-    termsSelectOptions
+    kbnApi
   );
-  if (termsSelectOptions.length === 0) {
-    listControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
-  }
-  return listControl;
 }

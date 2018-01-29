@@ -27,38 +27,44 @@ const minMaxAgg = (field) => {
 };
 
 class RangeControl extends Control {
-  constructor(controlParams, filterManager, min, max) {
-    super(controlParams, filterManager);
-    this.min = min;
-    this.max = max;
+
+  async init() {
+    const indexPattern = this.filterManager.getIndexPattern();
+    const fieldName = this.filterManager.fieldName;
+
+    const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
+    const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
+
+    const resp = await searchSource.fetch();
+
+    let minMaxReturnedFromAggregation = true;
+    let min = _.get(resp, 'aggregations.minAgg.value');
+    let max = _.get(resp, 'aggregations.maxAgg.value');
+    if (min === null || max === null) {
+      min = 0;
+      max = 1;
+      minMaxReturnedFromAggregation = false;
+    }
+
+    if (!minMaxReturnedFromAggregation) {
+      this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
+    } else {
+      this.unsetValue = { min: min, max: min };
+      this.min = min;
+      this.max = max;
+      this.enable = true;
+    }
+
+    return 'done';
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function rangeControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-
-  const aggs = minMaxAgg(indexPattern.fields.byName[controlParams.fieldName]);
-  const searchSource = createSearchSource(kbnApi, null, indexPattern, aggs, useTimeFilter);
-
-  const resp = await searchSource.fetch();
-
-  let minMaxReturnedFromAggregation = true;
-  let min = _.get(resp, 'aggregations.minAgg.value');
-  let max = _.get(resp, 'aggregations.maxAgg.value');
-  if (min === null || max === null) {
-    min = 0;
-    max = 1;
-    minMaxReturnedFromAggregation = false;
-  }
-  const emptyValue = { min: min, max: min };
-  const rangeControl = new RangeControl(
+  const unsetValue = { min: 0, max: 1 };
+  return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
-    min,
-    max
+    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, unsetValue),
+    kbnApi
   );
-  if (!minMaxReturnedFromAggregation) {
-    rangeControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
-  }
-  return rangeControl;
 }

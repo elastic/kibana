@@ -44,16 +44,22 @@ class VisController {
   }
 
   async initControls() {
-    return await Promise.all(
-      this.vis.params.controls.filter((controlParams) => {
-        // ignore controls that do not have indexPattern or field
-        return controlParams.indexPattern && controlParams.fieldName;
-      })
-        .map((controlParams) => {
-          const factory = controlFactory(controlParams);
-          return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
-        })
-    );
+    const controlParamsList = this.vis.params.controls.filter((controlParams) => {
+      // ignore controls that do not have indexPattern or field
+      return controlParams.indexPattern && controlParams.fieldName;
+    });
+
+    const controlFactoryPromises = controlParamsList.map((controlParams) => {
+      const factory = controlFactory(controlParams);
+      return factory(controlParams, this.vis.API);
+    });
+    const controls = await Promise.all(controlFactoryPromises);
+
+    const controlInitPromises = controls.map((control) => {
+      return control.init();
+    });
+    await Promise.all(controlInitPromises);
+    return controls;
   }
 
   stageFilter(controlIndex, newValue) {
