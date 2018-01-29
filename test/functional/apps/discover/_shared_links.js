@@ -79,7 +79,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('gets copied to clipboard', async function () {
-        return await PageObjects.discover.clickCopyToClipboard();
+        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
+        expect(isCopiedToClipboard).to.eql(true);
       });
 
       // TODO: verify clipboard contents
@@ -98,7 +99,8 @@ export default function ({ getService, getPageObjects }) {
 
       // NOTE: This test has to run immediately after the test above
       it('copies short URL to clipboard', async function () {
-        return await PageObjects.discover.clickCopyToClipboard();
+        const isCopiedToClipboard = await PageObjects.discover.clickCopyToClipboard();
+        expect(isCopiedToClipboard).to.eql(true);
       });
     });
   });
