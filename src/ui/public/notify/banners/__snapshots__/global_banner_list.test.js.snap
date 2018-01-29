@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GlobalBannerList is rendered 1`] = ``;
+exports[`GlobalBannerList is rendered 1`] = `null`;
 
 exports[`GlobalBannerList props banners is rendered 1`] = `
 <div
   class="euiPanel euiPanel--paddingMedium"
-  style="border: none"
+  style="border:none"
 >
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--responsive"
-    style="flex-direction: column"
+    style="flex-direction:column"
   >
     <div
       class="euiFlexItem"
@@ -19,8 +19,7 @@ exports[`GlobalBannerList props banners is rendered 1`] = `
     </div>
     <div
       class="euiFlexItem"
-      data-test-priority="0"
-      data-test-subject="b"
+      data-test-subj="b"
     >
       b good
     </div>
