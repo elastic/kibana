@@ -164,5 +164,39 @@ describe('Config schema', function () {
       });
     });
 
+    describe('xsrf', () => {
+      it('disableProtection is `false` by default.', () => {
+        const { error, value: { server: { xsrf: { disableProtection } } } } = validate({});
+        expect(error).to.be(null);
+        expect(disableProtection).to.be(false);
+      });
+
+      it('whitelist is empty by default.', () => {
+        const { value: { server: { xsrf: { whitelist } } } } = validate({});
+        expect(whitelist).to.be.an(Array);
+        expect(whitelist).to.have.length(0);
+      });
+
+      it('whitelist rejects paths that do not start with a slash.', () => {
+        const config = {};
+        set(config, 'server.xsrf.whitelist', ['path/to']);
+
+        const { error } = validate(config);
+        expect(error).to.be.an(Object);
+        expect(error).to.have.property('details');
+        expect(error.details[0]).to.have.property('path', 'server.xsrf.whitelist.0');
+      });
+
+      it('whitelist accepts paths that start with a slash.', () => {
+        const config = {};
+        set(config, 'server.xsrf.whitelist', ['/path/to']);
+
+        const { error, value: { server: { xsrf: { whitelist } } } } = validate(config);
+        expect(error).to.be(null);
+        expect(whitelist).to.be.an(Array);
+        expect(whitelist).to.have.length(1);
+        expect(whitelist).to.contain('/path/to');
+      });
+    });
   });
 });
