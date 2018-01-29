@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName);
+      expect(isDashboardSaved).to.eql(true);
     });
 
     it('existing dashboard opens in view mode', async function () {

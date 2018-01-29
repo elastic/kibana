@@ -201,7 +201,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickCopyToClipboard() {
-      testSubjects.click('sharedSnapshotCopyButton');
+      await testSubjects.click('sharedSnapshotCopyButton');
 
       // Confirm that the content was copied to the clipboard.
       return await testSubjects.exists('shareCopyToClipboardSuccess');
