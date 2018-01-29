@@ -7,4 +7,5 @@ export const TopNavIds = {
   ENTER_EDIT_MODE: 'enterEditMode',
   CLONE: 'clone',
   FULL_SCREEN: 'fullScreenMode',
+  REFRESH: 'refresh'
 };

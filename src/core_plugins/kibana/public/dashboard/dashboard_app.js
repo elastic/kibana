@@ -302,6 +302,7 @@ app.directive('dashboardApp', function ($injector) {
       const navActions = {};
       navActions[TopNavIds.FULL_SCREEN] = () =>
         dashboardStateManager.setFullScreenMode(true);
+      navActions[TopNavIds.REFRESH] = () => $scope.refresh();
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {
