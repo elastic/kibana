@@ -15,7 +15,7 @@ export function nginxLogsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
+          id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
           linkLabel: 'Nginx logs dashboard',
           isOverview: true
         }

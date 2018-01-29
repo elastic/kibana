@@ -261,6 +261,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('spyToggleButton');
     }
 
+    async getSideEditorExists() {
+      return await find.existsByCssSelector('.collapsible-sidebar');
+    }
+
     async openSpyPanel() {
       log.debug('openSpyPanel');
       const isOpen = await testSubjects.exists('spyContentContainer');
@@ -461,8 +465,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      return await PageObjects.header.getToastMessage();
+      return await testSubjects.exists('saveVisualizationSuccess');
     }
 
     async clickLoadSavedVisButton() {

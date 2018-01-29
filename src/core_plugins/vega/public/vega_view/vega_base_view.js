@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import * as vega from 'vega';
+import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 

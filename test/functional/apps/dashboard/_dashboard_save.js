@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }) {
     it('warns on duplicate name for new dashboard', async function () {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(dashboardName);
-      await PageObjects.header.clickToastOK();
 
       let isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isConfirmOpen).to.equal(false);
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
 
       await PageObjects.common.clickConfirmOnModal();
-      await PageObjects.header.clickToastOK();
 
       // This is important since saving a new dashboard will cause a refresh of the page. We have to
       // wait till it finishes reloading or it might reload the url after simulating the
@@ -61,7 +59,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.isGlobalLoadingIndicatorHidden();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.header.clickToastOK();
 
         const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
         expect(isConfirmOpen).to.equal(false);

@@ -8,7 +8,7 @@ const basic = fnName => targetSeries => {
   const data = [];
   _.zip(...targetSeries).forEach(row => {
     const key = row[0][0];
-    const values = row.map(r => r[1]);
+    const values = row.map(r => r && r[1] || 0);
     const fn = _[fnName] || (() => null);
     data.push([key, fn(values)]);
   });
@@ -21,7 +21,7 @@ const overall = fnName => targetSeries => {
   const values = [];
   _.zip(...targetSeries).forEach(row => {
     keys.push(row[0][0]);
-    values.push(fn(row.map(r => r[1])));
+    values.push(fn(row.map(r => r && r[1] || 0)));
   });
   return [keys.map(k => [k, fn(values)])];
 };
@@ -35,7 +35,7 @@ export default {
     const data = [];
     _.zip(...targetSeries).forEach(row => {
       const key = row[0][0];
-      const values = row.map(r => r[1]);
+      const values = row.map(r => r && r[1] || 0);
       data.push([key, mean(values)]);
     });
     return [data];
@@ -52,7 +52,7 @@ export default {
     const values = [];
     _.zip(...targetSeries).forEach(row => {
       keys.push(row[0][0]);
-      values.push(_.sum(row.map(r => r[1])));
+      values.push(_.sum(row.map(r => r && r[1] || 0)));
     });
     return [keys.map(k => [k, fn(values)])];
   },
@@ -62,7 +62,7 @@ export default {
     let sum = 0;
     _.zip(...targetSeries).forEach(row => {
       const key = row[0][0];
-      sum += _.sum(row.map(r => r[1]));
+      sum += _.sum(row.map(r => r && r[1] || 0));
       data.push([key, sum]);
     });
     return [data];
