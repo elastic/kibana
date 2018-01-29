@@ -7,7 +7,7 @@ export default (grunt) => {
   const rootDir = config.get('root');
   const packageScriptsDir = join(rootDir, '/tasks/build/package_scripts');
   const configDir = join(rootDir, '/tasks/build/config');
-  const servicesDir = join(rootDir, '/tasks/build/config');
+  const servicesDir = join(rootDir, '/tasks/build/services');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
