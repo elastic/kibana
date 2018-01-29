@@ -1,8 +1,8 @@
-import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
+import { formatESMsg } from './format_es_msg';
 import expect from 'expect.js';
-describe('formatESMsg', function () {
 
-  it('should return undefined if passed a basic error', function () {
+describe('formatESMsg', () => {
+  test('should return undefined if passed a basic error', () => {
     const err = new Error('This is a normal error');
 
     const actual = formatESMsg(err);
@@ -10,7 +10,7 @@ describe('formatESMsg', function () {
     expect(actual).to.be(undefined);
   });
 
-  it('should return undefined if passed a string', function () {
+  test('should return undefined if passed a string', () => {
     const err = 'This is a error string';
 
     const actual = formatESMsg(err);
@@ -18,7 +18,7 @@ describe('formatESMsg', function () {
     expect(actual).to.be(undefined);
   });
 
-  it('should return the root_cause if passed an extended elasticsearch', function () {
+  test('should return the root_cause if passed an extended elasticsearch', () => {
     const err = new Error('This is an elasticsearch error');
     err.resp = {
       error: {
@@ -35,7 +35,7 @@ describe('formatESMsg', function () {
     expect(actual).to.equal('I am the detailed message');
   });
 
-  it('should combine the reason messages if more than one is returned.', function () {
+  test('should combine the reason messages if more than one is returned.', () => {
     const err = new Error('This is an elasticsearch error');
     err.resp = {
       error: {

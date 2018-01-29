@@ -36,16 +36,6 @@ export const ON_PREM_INSTRUCTIONS = {
             ENABLE_INSTRUCTIONS.RPM,
             FILEBEAT_INSTRUCTIONS.START.RPM
           ]
-        },
-        {
-          id: INSTRUCTION_VARIANT.WINDOWS,
-          instructions: [
-            FILEBEAT_INSTRUCTIONS.PLUGINS.GEOIP,
-            FILEBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-            FILEBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
-            ENABLE_INSTRUCTIONS.WINDOWS,
-            FILEBEAT_INSTRUCTIONS.START.WINDOWS
-          ]
         }
       ]
     }

@@ -7,6 +7,7 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
+import { toastNotifications } from 'ui/notify';
 import '../directives/documentation_href';
 import './field_editor.less';
 import {
@@ -38,9 +39,8 @@ uiModules
         getField: '&field'
       },
       controllerAs: 'editor',
-      controller: function ($scope, Notifier, kbnUrl) {
+      controller: function ($scope, kbnUrl) {
         const self = this;
-        const notify = new Notifier({ location: 'Field Editor' });
 
         getScriptingLangs().then((langs) => {
           self.scriptingLangs = langs;
@@ -81,7 +81,7 @@ uiModules
 
           return indexPattern.save()
             .then(function () {
-              notify.info('Saved Field "' + self.field.name + '"');
+              toastNotifications.addSuccess(`Saved '${self.field.name}'`);
               redirectAway();
             });
         };
@@ -94,7 +94,7 @@ uiModules
             indexPattern.fields.remove({ name: field.name });
             return indexPattern.save()
               .then(function () {
-                notify.info('Deleted Field "' + field.name + '"');
+                toastNotifications.addSuccess(`Deleted '${self.field.name}'`);
                 redirectAway();
               });
           }

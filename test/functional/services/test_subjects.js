@@ -13,9 +13,9 @@ export function TestSubjectsProvider({ getService }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector) {
+    async exists(selector, timeout = 1000) {
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector));
+      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async append(selector, text) {
@@ -39,7 +39,7 @@ export function TestSubjectsProvider({ getService }) {
       return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
-    async find(selector, timeout = defaultFindTimeout) {
+    async find(selector, timeout = 1000) {
       log.debug(`TestSubjects.find(${selector})`);
       return await find.byCssSelector(testSubjSelector(selector), timeout);
     }
