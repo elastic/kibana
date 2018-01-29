@@ -1,5 +1,4 @@
 import applyFiltersToKeys from '../apply_filters_to_keys';
-import expect from 'expect.js';
 
 describe('applyFiltersToKeys(obj, actionsByKey)', function () {
   it('applies for each key+prop in actionsByKey', function () {
@@ -23,7 +22,7 @@ describe('applyFiltersToKeys(obj, actionsByKey)', function () {
       authorization: '/([^\\s]+)$/'
     });
 
-    expect(data).to.eql({
+    expect(data).toEqual({
       a: {
         d: {
           e: 'XXXXXX',

@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { transformDeprecations } from '../transform_deprecations';
 
@@ -16,7 +15,7 @@ describe('server/config', function () {
         };
 
         const result = transformDeprecations(settings);
-        expect(result.server.ssl.enabled).to.be(true);
+        expect(result.server.ssl.enabled).toBe(true);
       });
 
       it('logs a message when automatically setting enabled to true', function () {
@@ -31,7 +30,7 @@ describe('server/config', function () {
 
         const log = sinon.spy();
         transformDeprecations(settings, log);
-        expect(log.calledOnce).to.be(true);
+        expect(log.calledOnce).toBe(true);
       });
 
       it(`doesn't set enabled when key and cert aren't set`, function () {
@@ -42,7 +41,7 @@ describe('server/config', function () {
         };
 
         const result = transformDeprecations(settings);
-        expect(result.server.ssl.enabled).to.be(undefined);
+        expect(result.server.ssl.enabled).toBe(undefined);
       });
 
       it(`doesn't log a message when not automatically setting enabled`, function () {
@@ -54,7 +53,7 @@ describe('server/config', function () {
 
         const log = sinon.spy();
         transformDeprecations(settings, log);
-        expect(log.called).to.be(false);
+        expect(log.called).toBe(false);
       });
     });
 
@@ -66,7 +65,7 @@ describe('server/config', function () {
           }
         };
 
-        expect(transformDeprecations(settings)).to.eql({});
+        expect(transformDeprecations(settings)).toEqual({});
       });
 
       it('keeps the savedObjects property if it has other keys', () => {
@@ -77,7 +76,7 @@ describe('server/config', function () {
           }
         };
 
-        expect(transformDeprecations(settings)).to.eql({
+        expect(transformDeprecations(settings)).toEqual({
           savedObjects: {
             foo: 'bar'
           }

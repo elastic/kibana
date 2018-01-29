@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import Chance from 'chance';
 
 import { IndexMappings } from '../index_mappings';
@@ -11,9 +10,9 @@ describe('server/mapping/index_mapping', function () {
     it('initializes with a default mapping when no args', () => {
       const mapping = new IndexMappings();
       const dsl = mapping.getDsl();
-      expect(dsl).to.be.an('object');
-      expect(getRootType(dsl)).to.be.a('string');
-      expect(dsl[getRootType(dsl)]).to.be.an('object');
+      expect(typeof dsl).toBe('object');
+      expect(typeof getRootType(dsl)).toBe('string');
+      expect(typeof dsl[getRootType(dsl)]).toBe('object');
     });
 
     it('accepts a default mapping dsl as the only argument', () => {
@@ -24,7 +23,7 @@ describe('server/mapping/index_mapping', function () {
         }
       });
 
-      expect(mapping.getDsl()).to.eql({
+      expect(mapping.getDsl()).toEqual({
         foobar: {
           dynamic: false,
           properties: {}
@@ -39,7 +38,7 @@ describe('server/mapping/index_mapping', function () {
             type: chance.pickone(['string', 'keyword', 'geo_point'])
           }
         });
-      }).to.throwException(/non-object/);
+      }).toThrowError(/non-object/);
     });
 
     it('throws if root type has no type and no properties', () => {
@@ -47,7 +46,7 @@ describe('server/mapping/index_mapping', function () {
         new IndexMappings({
           root: {}
         });
-      }).to.throwException(/non-object/);
+      }).toThrowError(/non-object/);
     });
 
     it('initialized root type with properties object if not set', () => {
@@ -57,7 +56,7 @@ describe('server/mapping/index_mapping', function () {
         }
       });
 
-      expect(mapping.getDsl()).to.eql({
+      expect(mapping.getDsl()).toEqual({
         root: {
           type: 'object',
           properties: {}
@@ -84,7 +83,7 @@ describe('server/mapping/index_mapping', function () {
       ];
 
       const mapping = new IndexMappings(initialMapping, extensions);
-      expect(mapping.getDsl()).to.eql({
+      expect(mapping.getDsl()).toEqual({
         x: {
           properties: {
             y: {
@@ -113,7 +112,7 @@ describe('server/mapping/index_mapping', function () {
 
       expect(() => {
         new IndexMappings(initialMapping, extensions);
-      }).to.throwException(/foo/);
+      }).toThrowError(/foo/);
     });
 
     it('includes the pluginId from the extension in the error message if defined', () => {
@@ -131,7 +130,7 @@ describe('server/mapping/index_mapping', function () {
 
       expect(() => {
         new IndexMappings(initialMapping, extensions);
-      }).to.throwException(/plugin abc123/);
+      }).toThrowError(/plugin abc123/);
     });
   });
 
@@ -139,7 +138,7 @@ describe('server/mapping/index_mapping', function () {
     // tests are light because this method is used all over these tests
     it('returns mapping as es dsl', function () {
       const mapping = new IndexMappings();
-      expect(mapping.getDsl()).to.be.an('object');
+      expect(typeof mapping.getDsl()).toBe('object');
     });
   });
 });

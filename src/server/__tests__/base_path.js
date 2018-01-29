@@ -1,14 +1,9 @@
-import expect from 'expect.js';
-
 import * as kbnTestServer from '../../test_utils/kbn_server';
 const basePath = '/kibana';
 
 describe('Server basePath config', function () {
-  this.slow(10000);
-  this.timeout(60000);
-
   let kbnServer;
-  before(async function () {
+  beforeAll(async function () {
     kbnServer = kbnTestServer.createServer({
       server: { basePath }
     });
@@ -16,7 +11,7 @@ describe('Server basePath config', function () {
     return kbnServer;
   });
 
-  after(async function () {
+  afterAll(async function () {
     await kbnServer.close();
   });
 
@@ -26,7 +21,7 @@ describe('Server basePath config', function () {
       method: 'GET'
     });
 
-    expect(resp).to.have.property('statusCode', 302);
-    expect(resp.headers).to.have.property('location', `${basePath}/app/kibana`);
+    expect(resp).toHaveProperty('statusCode', 302);
+    expect(resp.headers).toHaveProperty('location', `${basePath}/app/kibana`);
   });
 });

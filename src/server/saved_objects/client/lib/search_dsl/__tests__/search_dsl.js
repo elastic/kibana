@@ -1,5 +1,4 @@
 import sinon from 'sinon';
-import expect from 'expect.js';
 import { getSearchDsl } from '../search_dsl';
 import * as queryParamsNS from '../query_params';
 import * as sortParamsNS from '../sorting_params';
@@ -15,7 +14,7 @@ describe('getSearchDsl', () => {
           type: undefined,
           sortField: 'title'
         });
-      }).to.throwException(/sort without .+ type/);
+      }).toThrowError(/sort without .+ type/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
@@ -23,7 +22,7 @@ describe('getSearchDsl', () => {
           type: 'foo',
           sortOrder: 'desc'
         });
-      }).to.throwException(/sortOrder requires a sortField/);
+      }).toThrowError(/sortOrder requires a sortField/);
     });
   });
 
@@ -71,7 +70,7 @@ describe('getSearchDsl', () => {
     it('returns combination of getQueryParams and getSortingParams', () => {
       sandbox.stub(queryParamsNS, 'getQueryParams').returns({ a: 'a' });
       sandbox.stub(sortParamsNS, 'getSortingParams').returns({ b: 'b' });
-      expect(getSearchDsl({})).to.eql({ a: 'a', b: 'b' });
+      expect(getSearchDsl({})).toEqual({ a: 'a', b: 'b' });
     });
   });
 });

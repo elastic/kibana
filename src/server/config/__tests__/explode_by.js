@@ -1,5 +1,4 @@
 import explodeBy from '../explode_by';
-import expect from 'expect.js';
 
 describe('explode_by(dot, flatObject)', function () {
 
@@ -8,7 +7,7 @@ describe('explode_by(dot, flatObject)', function () {
       'test.enable': true,
       'test.hosts': ['host-01', 'host-02']
     };
-    expect(explodeBy('.', flatObject)).to.eql({
+    expect(explodeBy('.', flatObject)).toEqual({
       test: {
         enable: true,
         hosts: ['host-01', 'host-02']
@@ -21,7 +20,7 @@ describe('explode_by(dot, flatObject)', function () {
       'test/enable': true,
       'test/hosts': ['host-01', 'host-02']
     };
-    expect(explodeBy('/', flatObject)).to.eql({
+    expect(explodeBy('/', flatObject)).toEqual({
       test: {
         enable: true,
         hosts: ['host-01', 'host-02']

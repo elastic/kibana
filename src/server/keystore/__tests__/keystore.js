@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import mockFs from 'mock-fs';
 import sinon from 'sinon';
 import { readFileSync } from 'fs';
@@ -35,16 +34,16 @@ describe('Keystore', () => {
 
   describe('save', () => {
     it('thows permission denied', () => {
+      expect.assertions(1);
       const path = '/inaccessible/test.keystore';
 
       try {
         const keystore = new Keystore(path);
         keystore.save();
-
-        expect().fail('should throw error');
       } catch(e) {
-        expect(e.code).to.eql('EACCES');
+        expect(e.code).toEqual('EACCES');
       }
+
     });
 
     it('creates keystore with version', () => {
@@ -57,8 +56,8 @@ describe('Keystore', () => {
       const contents = fileBuffer.toString();
       const [version, data] = contents.split(':');
 
-      expect(version).to.eql(1);
-      expect(data.length).to.be.greaterThan(100);
+      expect(version).toEqual('1');
+      expect(data.length).toBeGreaterThan(100);
     });
   });
 
@@ -68,21 +67,20 @@ describe('Keystore', () => {
 
       new Keystore('/data/protected.keystore', 'changeme');
 
-      expect(load.calledOnce).to.be(true);
+      expect(load.calledOnce).toBe(true);
     });
 
     it('can load a password protected keystore', () => {
       const keystore = new Keystore('/data/protected.keystore', 'changeme');
-      expect(keystore.data).to.eql({ 'a1.b2.c3': 'foo', 'a2': 'bar' });
+      expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', 'a2': 'bar' });
     });
 
     it('throws unable to read keystore', () => {
+      expect.assertions(1);
       try {
         new Keystore('/data/protected.keystore', 'wrongpassword');
-
-        expect().fail('should throw error');
       } catch(e) {
-        expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);
+        expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
 
@@ -95,7 +93,7 @@ describe('Keystore', () => {
     it('clears the data', () => {
       const keystore = new Keystore('/data/protected.keystore', 'changeme');
       keystore.reset();
-      expect(keystore.data).to.eql([]);
+      expect(keystore.data).toEqual({});
     });
   });
 
@@ -104,7 +102,7 @@ describe('Keystore', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
       const keys = keystore.keys();
 
-      expect(keys).to.eql(['a1.b2.c3', 'a2']);
+      expect(keys).toEqual(['a1.b2.c3', 'a2']);
     });
   });
 
@@ -112,13 +110,13 @@ describe('Keystore', () => {
     it('returns true if key exists', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
 
-      expect(keystore.has('a2')).to.be(true);
+      expect(keystore.has('a2')).toBe(true);
     });
 
     it('returns false if key does not exist', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
 
-      expect(keystore.has('invalid')).to.be(false);
+      expect(keystore.has('invalid')).toBe(false);
     });
   });
 
@@ -127,7 +125,7 @@ describe('Keystore', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
       keystore.add('a3', 'baz');
 
-      expect(keystore.data).to.eql({
+      expect(keystore.data).toEqual({
         'a1.b2.c3': 'foo',
         'a2': 'bar',
         'a3': 'baz',
@@ -140,7 +138,7 @@ describe('Keystore', () => {
       const keystore = new Keystore('/data/unprotected.keystore');
       keystore.remove('a1.b2.c3');
 
-      expect(keystore.data).to.eql({
+      expect(keystore.data).toEqual({
         'a2': 'bar',
       });
     });
@@ -154,7 +152,7 @@ describe('Keystore', () => {
       const dataOne = Keystore.encrypt(text, password);
       const dataTwo = Keystore.encrypt(text, password);
 
-      expect(dataOne).to.not.eql(dataTwo);
+      expect(dataOne).not.toEqual(dataTwo);
     });
 
     it('can immediately be decrypted', () => {
@@ -164,7 +162,7 @@ describe('Keystore', () => {
       const data = Keystore.encrypt(secretText, password);
       const text = Keystore.decrypt(data, password);
 
-      expect(text).to.eql(secretText);
+      expect(text).toEqual(secretText);
     });
   });
 
@@ -177,24 +175,24 @@ describe('Keystore', () => {
 
     it('can decrypt data', () => {
       const data = Keystore.decrypt(ciphertext, password);
-      expect(data).to.eql(text);
+      expect(data).toEqual(text);
     });
 
     it('throws error for invalid password', () => {
+      expect.assertions(1);
       try {
         Keystore.decrypt(ciphertext, 'invalid');
-        expect().fail('should throw error');
       } catch(e) {
-        expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);
+        expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
 
     it('throws error for corrupt ciphertext', () => {
+      expect.assertions(1);
       try {
         Keystore.decrypt('thisisinvalid', password);
-        expect().fail('should throw error');
       } catch(e) {
-        expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);
+        expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
   });

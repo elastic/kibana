@@ -1,5 +1,4 @@
 import { find } from 'lodash';
-import expect from 'expect.js';
 import sinon from 'sinon';
 
 import * as states from '../states';
@@ -20,38 +19,38 @@ describe('ServerStatus class', function () {
   describe('#create(id)', () => {
     it('should create a new plugin with an id', () => {
       const status = serverStatus.create('someid');
-      expect(status).to.be.a(Status);
+      expect(status).toBeInstanceOf(Status);
     });
   });
 
   describe('#createForPlugin(plugin)', function () {
     it('should create a new status by plugin', function () {
       const status = serverStatus.createForPlugin(plugin);
-      expect(status).to.be.a(Status);
+      expect(status).toBeInstanceOf(Status);
     });
   });
 
   describe('#get(id)', () => {
     it('exposes statuses by their id', () => {
       const status = serverStatus.create('statusid');
-      expect(serverStatus.get('statusid')).to.be(status);
+      expect(serverStatus.get('statusid')).toBe(status);
     });
 
     it('does not get the status for a plugin', () => {
       serverStatus.createForPlugin(plugin);
-      expect(serverStatus.get(plugin)).to.be(undefined);
+      expect(serverStatus.get(plugin)).toBe(undefined);
     });
   });
 
   describe('#getForPluginId(plugin)', function () {
     it('exposes plugin status for the plugin', function () {
       const status = serverStatus.createForPlugin(plugin);
-      expect(serverStatus.getForPluginId(plugin.id)).to.be(status);
+      expect(serverStatus.getForPluginId(plugin.id)).toBe(status);
     });
 
     it('does not get plain statuses by their id', function () {
       serverStatus.create('someid');
-      expect(serverStatus.getForPluginId('someid')).to.be(undefined);
+      expect(serverStatus.getForPluginId('someid')).toBe(undefined);
     });
   });
 
@@ -59,7 +58,7 @@ describe('ServerStatus class', function () {
     it('should expose the state of a status by id', function () {
       const status = serverStatus.create('someid');
       status.green();
-      expect(serverStatus.getState('someid')).to.be('green');
+      expect(serverStatus.getState('someid')).toBe('green');
     });
   });
 
@@ -67,7 +66,7 @@ describe('ServerStatus class', function () {
     it('should expose the state of a plugin by id', function () {
       const status = serverStatus.createForPlugin(plugin);
       status.green();
-      expect(serverStatus.getStateForPluginId(plugin.id)).to.be('green');
+      expect(serverStatus.getStateForPluginId(plugin.id)).toBe('green');
     });
   });
 
@@ -75,14 +74,13 @@ describe('ServerStatus class', function () {
     it('considers each status to produce a summary', function () {
       const status = serverStatus.createForPlugin(plugin);
 
-      expect(serverStatus.overall().state).to.be('uninitialized');
+      expect(serverStatus.overall().state).toBe('uninitialized');
 
       const match = function (overall, state) {
-        expect(overall).to.have.property('state', state.id);
-        expect(overall).to.have.property('title', state.title);
-        expect(overall).to.have.property('icon', state.icon);
-        expect(overall).to.have.property('icon', state.icon);
-        expect(state.nicknames).contain(overall.nickname);
+        expect(overall).toHaveProperty('state', state.id);
+        expect(overall).toHaveProperty('title', state.title);
+        expect(overall).toHaveProperty('icon', state.icon);
+        expect(state.nicknames).toContain(overall.nickname);
       };
 
       status.green();
@@ -111,14 +109,14 @@ describe('ServerStatus class', function () {
       p2.red();
 
       const json = JSON.parse(JSON.stringify(serverStatus));
-      expect(json).to.have.property('overall');
-      expect(json.overall.state).to.eql(serverStatus.overall().state);
-      expect(json.statuses).to.have.length(3);
+      expect(json).toHaveProperty('overall');
+      expect(json.overall.state).toEqual(serverStatus.overall().state);
+      expect(json.statuses).toHaveLength(3);
 
       const out = status => find(json.statuses, { id: status.id });
-      expect(out(service)).to.have.property('state', 'green');
-      expect(out(p1)).to.have.property('state', 'yellow');
-      expect(out(p2)).to.have.property('state', 'red');
+      expect(out(service)).toHaveProperty('state', 'green');
+      expect(out(p1)).toHaveProperty('state', 'yellow');
+      expect(out(p2)).toHaveProperty('state', 'red');
     });
   });
 

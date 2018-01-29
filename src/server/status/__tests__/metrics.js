@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import expect from 'expect.js';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
-import { cGroups as cGroupsFsStub } from './fs_stubs';
+import { cGroups as cGroupsFsStub } from './_fs_stubs';
 
 import { Metrics } from '../metrics';
 
@@ -39,7 +38,7 @@ describe('Metrics', function () {
       sinon.stub(process, 'uptime').returns(5000);
 
       const capturedMetrics = await metrics.capture();
-      expect(capturedMetrics).to.eql({
+      expect(capturedMetrics).toEqual({
         last_updated: '2017-04-14T18:35:41.534Z',
         collection_interval_in_millis: 5000,
         uptime_in_millis: 5000000,
@@ -67,7 +66,7 @@ describe('Metrics', function () {
         'host': '123'
       };
 
-      expect(metrics.captureEvent(hapiEvent)).to.eql({
+      expect(metrics.captureEvent(hapiEvent)).toEqual({
         'concurrent_connections': 0,
         'os': {
           'cpu': {
@@ -109,7 +108,7 @@ describe('Metrics', function () {
 
       const stats = await metrics.captureCGroups();
 
-      expect(stats).to.be(undefined);
+      expect(stats).toBe(undefined);
     });
 
     it('returns cgroups', async () => {
@@ -118,7 +117,7 @@ describe('Metrics', function () {
 
       const capturedMetrics = await metrics.captureCGroups();
 
-      expect(capturedMetrics).to.eql({
+      expect(capturedMetrics).toEqual({
         os: {
           cgroup: {
             cpuacct: {
@@ -150,10 +149,10 @@ describe('Metrics', function () {
       mockFs();
       sinon.spy(metrics, 'captureCGroups');
 
-      expect(metrics.checkCGroupStats).to.be(true);
+      expect(metrics.checkCGroupStats).toBe(true);
 
       await metrics.captureCGroupsIfAvailable();
-      expect(metrics.checkCGroupStats).to.be(false);
+      expect(metrics.checkCGroupStats).toBe(false);
 
       await metrics.captureCGroupsIfAvailable();
       sinon.assert.calledOnce(metrics.captureCGroups);
@@ -164,10 +163,10 @@ describe('Metrics', function () {
       mockFs(fsStub.files);
       sinon.spy(metrics, 'captureCGroups');
 
-      expect(metrics.checkCGroupStats).to.be(true);
+      expect(metrics.checkCGroupStats).toBe(true);
 
       await metrics.captureCGroupsIfAvailable();
-      expect(metrics.checkCGroupStats).to.be(true);
+      expect(metrics.checkCGroupStats).toBe(true);
 
       await metrics.captureCGroupsIfAvailable();
       sinon.assert.calledTwice(metrics.captureCGroups);

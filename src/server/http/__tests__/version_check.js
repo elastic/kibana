@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import { fromNode } from 'bluebird';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
@@ -46,8 +45,8 @@ describe('version_check request filter', function () {
       },
     });
 
-    expect(resp.statusCode).to.be(200);
-    expect(resp.payload).to.be('ok');
+    expect(resp.statusCode).toBe(200);
+    expect(resp.payload).toBe('ok');
   });
 
   it('rejects requests with an incorrect version passed in the version header', async function () {
@@ -59,9 +58,9 @@ describe('version_check request filter', function () {
       },
     });
 
-    expect(resp.statusCode).to.be(400);
-    expect(resp.headers).to.have.property(versionHeader, version);
-    expect(resp.payload).to.match(/"Browser client is out of date/);
+    expect(resp.statusCode).toBe(400);
+    expect(resp.headers).toHaveProperty(versionHeader, version);
+    expect(resp.payload).toMatch(/"Browser client is out of date/);
   });
 
   it('accepts requests that do not include a version header', async function () {
@@ -70,7 +69,7 @@ describe('version_check request filter', function () {
       method: 'GET'
     });
 
-    expect(resp.statusCode).to.be(200);
-    expect(resp.payload).to.be('ok');
+    expect(resp.statusCode).toBe(200);
+    expect(resp.payload).toBe('ok');
   });
 });

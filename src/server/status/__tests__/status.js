@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import ServerStatus from '../server_status';
 
@@ -13,23 +12,23 @@ describe('Status class', function () {
     serverStatus = new ServerStatus(server);
   });
 
-  it('should have an "uninitialized" state initially', function () {
-    expect(serverStatus.createForPlugin(plugin)).to.have.property('state', 'uninitialized');
+  it('should have an "uninitialized" state initially', () => {
+    expect(serverStatus.createForPlugin(plugin)).toHaveProperty('state', 'uninitialized');
   });
 
   it('emits change when the status is set', function (done) {
     const status = serverStatus.createForPlugin(plugin);
 
     status.once('change', function (prevState, prevMsg, newState, newMsg) {
-      expect(newState).to.be('green');
-      expect(newMsg).to.be('GREEN');
-      expect(prevState).to.be('uninitialized');
+      expect(newState).toBe('green');
+      expect(newMsg).toBe('GREEN');
+      expect(prevState).toBe('uninitialized');
 
       status.once('change', function (prevState, prevMsg, newState, newMsg) {
-        expect(newState).to.be('red');
-        expect(newMsg).to.be('RED');
-        expect(prevState).to.be('green');
-        expect(prevMsg).to.be('GREEN');
+        expect(newState).toBe('red');
+        expect(newMsg).toBe('RED');
+        expect(prevState).toBe('green');
+        expect(prevMsg).toBe('GREEN');
 
         done();
       });
@@ -55,9 +54,9 @@ describe('Status class', function () {
     status.green('Ready');
 
     const json = status.toJSON();
-    expect(json.id).to.eql(status.id);
-    expect(json.state).to.eql('green');
-    expect(json.message).to.eql('Ready');
+    expect(json.id).toEqual(status.id);
+    expect(json.state).toEqual('green');
+    expect(json.message).toEqual('Ready');
   });
 
   it('should call on handler if status is already matched', function (done) {
@@ -66,10 +65,10 @@ describe('Status class', function () {
     status.green(msg);
 
     status.on('green', function (prev, prevMsg) {
-      expect(arguments.length).to.equal(2);
-      expect(prev).to.be('green');
-      expect(prevMsg).to.be(msg);
-      expect(status.message).to.equal(msg);
+      expect(arguments.length).toBe(2);
+      expect(prev).toBe('green');
+      expect(prevMsg).toBe(msg);
+      expect(status.message).toBe(msg);
       done();
     });
   });
@@ -80,10 +79,10 @@ describe('Status class', function () {
     status.green(msg);
 
     status.once('green', function (prev, prevMsg) {
-      expect(arguments.length).to.equal(2);
-      expect(prev).to.be('green');
-      expect(prevMsg).to.be(msg);
-      expect(status.message).to.equal(msg);
+      expect(arguments.length).toBe(2);
+      expect(prev).toBe('green');
+      expect(prevMsg).toBe(msg);
+      expect(status.message).toBe(msg);
       done();
     });
   });
@@ -93,19 +92,19 @@ describe('Status class', function () {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status[color](message);
-      expect(status).to.have.property('state', color);
-      expect(status).to.have.property('message', message);
+      expect(status).toHaveProperty('state', color);
+      expect(status).toHaveProperty('message', message);
     });
 
     it(`should trigger the "change" listner when #${color}() is called`, function (done) {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status.on('change', function (prev, prevMsg) {
-        expect(status.state).to.be(color);
-        expect(status.message).to.be(message);
+        expect(status.state).toBe(color);
+        expect(status.message).toBe(message);
 
-        expect(prev).to.be('uninitialized');
-        expect(prevMsg).to.be('uninitialized');
+        expect(prev).toBe('uninitialized');
+        expect(prevMsg).toBe('uninitialized');
         done();
       });
       status[color](message);
@@ -115,8 +114,8 @@ describe('Status class', function () {
       const status = serverStatus.createForPlugin(plugin);
       const message = 'testing ' + color;
       status.on(color, function () {
-        expect(status.state).to.be(color);
-        expect(status.message).to.be(message);
+        expect(status.state).toBe(color);
+        expect(status.message).toBe(message);
         done();
       });
       status[color](message);

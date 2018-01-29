@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createGetRoute } from '../get';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
   const savedObjectsClient = { get: sinon.stub() };
@@ -43,8 +42,8 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(clientResponse);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.get', async () => {
@@ -54,10 +53,10 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.get.calledOnce).to.be(true);
+    expect(savedObjectsClient.get.calledOnce).toBe(true);
 
     const args = savedObjectsClient.get.getCall(0).args;
-    expect(args).to.eql(['index-pattern', 'logstash-*']);
+    expect(args).toEqual(['index-pattern', 'logstash-*']);
   });
 
 });

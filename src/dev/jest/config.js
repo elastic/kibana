@@ -1,8 +1,9 @@
 export default {
   rootDir: '../../..',
   roots: [
-    '<rootDir>/src/ui',
+    '<rootDir>/src/ui/public',
     '<rootDir>/src/core_plugins',
+    '<rootDir>/src/server',
     '<rootDir>/ui_framework/',
     '<rootDir>/packages',
   ],
@@ -42,18 +43,23 @@ export default {
     'json',
     'ts',
   ],
-  modulePathIgnorePatterns: [
-    '__fixtures__/',
-  ],
   testMatch: [
     '**/*.test.js',
     '**/*.test.ts',
+    '**/src/server/**/__tests__/**/*.js',
+  ],
+  modulePathIgnorePatterns: [
+    '__fixtures__/',
+    '__tests__/fixtures/',
   ],
   testPathIgnorePatterns: [
+    '(.*)/__tests__/_(.*)',
+    '<rootDir>/src/core_plugins/(.*)/public',
     '<rootDir>/ui_framework/dist/',
     '<rootDir>/ui_framework/doc_site/',
     '<rootDir>/ui_framework/generator-kui/',
     '<rootDir>/packages/kbn-pm/(dist|vendor)/',
+    '<rootDir>/packages/(.*)/target/',
     'integration_tests/'
   ],
   transform: {

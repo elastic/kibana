@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import shortUrlLookupProvider from '../short_url_lookup';
 import { SavedObjectsClient } from '../../saved_objects/client';
@@ -33,7 +32,7 @@ describe('shortUrlLookupProvider', () => {
   describe('generateUrlId', () => {
     it('returns the document id', async () => {
       const id = await shortUrl.generateUrlId(URL, req);
-      expect(id).to.eql(ID);
+      expect(id).toEqual(ID);
     });
 
     it('provides correct arguments to savedObjectsClient', async () => {
@@ -42,10 +41,10 @@ describe('shortUrlLookupProvider', () => {
       sinon.assert.calledOnce(savedObjectsClient.create);
       const [type, attributes, options] = savedObjectsClient.create.getCall(0).args;
 
-      expect(type).to.eql(TYPE);
-      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate');
-      expect(attributes.url).to.eql(URL);
-      expect(options.id).to.eql(ID);
+      expect(type).toEqual(TYPE);
+      expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate', 'createDate', 'url']);
+      expect(attributes.url).toEqual(URL);
+      expect(options.id).toEqual(ID);
     });
 
     it('passes persists attributes', async () => {
@@ -54,16 +53,16 @@ describe('shortUrlLookupProvider', () => {
       sinon.assert.calledOnce(savedObjectsClient.create);
       const [type, attributes] = savedObjectsClient.create.getCall(0).args;
 
-      expect(type).to.eql(TYPE);
-      expect(attributes).to.only.have.keys('url', 'accessCount', 'createDate', 'accessDate');
-      expect(attributes.url).to.eql(URL);
+      expect(type).toEqual(TYPE);
+      expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate', 'createDate', 'url']);
+      expect(attributes.url).toEqual(URL);
     });
 
     it('gracefully handles version conflict', async () => {
       const error = savedObjectsClient.errors.decorateConflictError(new Error());
       savedObjectsClient.create.throws(error);
       const id = await shortUrl.generateUrlId(URL, req);
-      expect(id).to.eql(ID);
+      expect(id).toEqual(ID);
     });
   });
 
@@ -79,13 +78,13 @@ describe('shortUrlLookupProvider', () => {
       sinon.assert.calledOnce(savedObjectsClient.get);
       const [type, id] = savedObjectsClient.get.getCall(0).args;
 
-      expect(type).to.eql(TYPE);
-      expect(id).to.eql(ID);
+      expect(type).toEqual(TYPE);
+      expect(id).toEqual(ID);
     });
 
     it('returns the url', async () => {
       const response = await shortUrl.getUrl(ID, req);
-      expect(response).to.eql(URL);
+      expect(response).toEqual(URL);
     });
 
     it('increments accessCount', async () => {
@@ -94,10 +93,10 @@ describe('shortUrlLookupProvider', () => {
       sinon.assert.calledOnce(savedObjectsClient.update);
       const [type, id, attributes] = savedObjectsClient.update.getCall(0).args;
 
-      expect(type).to.eql(TYPE);
-      expect(id).to.eql(ID);
-      expect(attributes).to.only.have.keys('accessCount', 'accessDate');
-      expect(attributes.accessCount).to.eql(3);
+      expect(type).toEqual(TYPE);
+      expect(id).toEqual(ID);
+      expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate']);
+      expect(attributes.accessCount).toEqual(3);
     });
   });
 });

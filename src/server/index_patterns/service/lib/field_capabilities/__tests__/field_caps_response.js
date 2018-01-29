@@ -1,6 +1,5 @@
 /* eslint import/no-duplicates: 0 */
 import { cloneDeep } from 'lodash';
-import expect from 'expect.js';
 import sinon from 'sinon';
 
 import * as shouldReadFieldFromDocValuesNS from '../should_read_field_from_doc_values';
@@ -19,7 +18,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).to.have.length(19);
+        expect(fields).toHaveLength(19);
       });
 
       it('includes only name, type, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions of each field', () => {
@@ -33,7 +32,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
             delete field.conflictDescriptions;
           }
 
-          expect(Object.keys(field)).to.eql([
+          expect(Object.keys(field)).toEqual([
             'name',
             'type',
             'searchable',
@@ -61,7 +60,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
       it('returns fields with multiple types as conflicts', () => {
         const fields = readFieldCapsResponse(esResponse);
         const conflicts = fields.filter(f => f.type === 'conflict');
-        expect(conflicts).to.eql([
+        expect(conflicts).toEqual([
           {
             name: 'success',
             type: 'conflict',
@@ -84,24 +83,24 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(esResponse);
         const resolvableToString = fields.find(f => f.name === 'resolvable_to_string');
         const resolvableToNumber = fields.find(f => f.name === 'resolvable_to_number');
-        expect(resolvableToString.type).to.be('string');
-        expect(resolvableToNumber.type).to.be('number');
+        expect(resolvableToString.type).toBe('string');
+        expect(resolvableToNumber.type).toBe('number');
       });
 
       it('returns aggregatable if at least one field is aggregatable', () => {
         const fields = readFieldCapsResponse(esResponse);
         const mixAggregatable = fields.find(f => f.name === 'mix_aggregatable');
         const mixAggregatableOther = fields.find(f => f.name === 'mix_aggregatable_other');
-        expect(mixAggregatable.aggregatable).to.be(true);
-        expect(mixAggregatableOther.aggregatable).to.be(true);
+        expect(mixAggregatable.aggregatable).toBe(true);
+        expect(mixAggregatableOther.aggregatable).toBe(true);
       });
 
       it('returns searchable if at least one field is searchable', () => {
         const fields = readFieldCapsResponse(esResponse);
         const mixSearchable = fields.find(f => f.name === 'mix_searchable');
         const mixSearchableOther = fields.find(f => f.name === 'mix_searchable_other');
-        expect(mixSearchable.searchable).to.be(true);
-        expect(mixSearchableOther.searchable).to.be(true);
+        expect(mixSearchable.searchable).toBe(true);
+        expect(mixSearchableOther.searchable).toBe(true);
       });
     });
   });

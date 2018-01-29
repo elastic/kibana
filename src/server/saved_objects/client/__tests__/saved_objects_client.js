@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { delay } from 'bluebird';
 import { SavedObjectsClient } from '../saved_objects_client';
@@ -110,7 +109,7 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       });
 
-      expect(response).to.eql({
+      expect(response).toEqual({
         type: 'index-pattern',
         id: 'logstash-*',
         ...mockTimestampFields,
@@ -249,7 +248,7 @@ describe('SavedObjectsClient', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).to.eql([
+      expect(response).toEqual([
         {
           id: 'one',
           type: 'config',
@@ -287,7 +286,7 @@ describe('SavedObjectsClient', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(response).to.eql([
+      expect(response).toEqual([
         {
           id: 'one',
           type: 'config',
@@ -307,18 +306,17 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document',  async () => {
+      expect.assertions(1);
+
       callAdminCluster.returns(Promise.resolve({
         result: 'not_found'
       }));
 
       try {
         await savedObjectsClient.delete('index-pattern', 'logstash-*');
-        sinon.assert.calledOnce(onBeforeWrite);
-        expect().fail('should throw error');
       } catch(e) {
-        expect(e.output.statusCode).to.eql(404);
+        expect(e.output.statusCode).toEqual(404);
       }
-
     });
 
     it('passes the parameters to callAdminCluster', async () => {
@@ -352,7 +350,7 @@ describe('SavedObjectsClient', () => {
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
         sinon.assert.notCalled(onBeforeWrite);
-        expect(error).to.have.property('message').contain('must be an array');
+        expect(error.message).toMatch('must be an array');
       }
     });
 
@@ -363,7 +361,7 @@ describe('SavedObjectsClient', () => {
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
         sinon.assert.notCalled(onBeforeWrite);
-        expect(error).to.have.property('message').contain('must be an array');
+        expect(error.message).toMatch('must be an array');
       }
     });
 
@@ -399,11 +397,11 @@ describe('SavedObjectsClient', () => {
 
       const response = await savedObjectsClient.find();
 
-      expect(response.total).to.be(count);
-      expect(response.saved_objects).to.have.length(count);
+      expect(response.total).toBe(count);
+      expect(response.saved_objects).toHaveLength(count);
 
       searchResults.hits.hits.forEach((doc, i) => {
-        expect(response.saved_objects[i]).to.eql({
+        expect(response.saved_objects[i]).toEqual({
           id: doc._id.replace(/(index-pattern|config)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
@@ -458,7 +456,7 @@ describe('SavedObjectsClient', () => {
     it('formats Elasticsearch response', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
       sinon.assert.notCalled(onBeforeWrite);
-      expect(response).to.eql({
+      expect(response).toEqual({
         id: 'logstash-*',
         type: 'index-pattern',
         updated_at: mockTimestamp,
@@ -508,7 +506,7 @@ describe('SavedObjectsClient', () => {
 
       const response = await savedObjectsClient.bulkGet([]);
 
-      expect(response.saved_objects).to.have.length(0);
+      expect(response.saved_objects).toHaveLength(0);
       sinon.assert.notCalled(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
     });
@@ -535,15 +533,15 @@ describe('SavedObjectsClient', () => {
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledOnce(callAdminCluster);
 
-      expect(savedObjects).to.have.length(2);
-      expect(savedObjects[0]).to.eql({
+      expect(savedObjects).toHaveLength(2);
+      expect(savedObjects[0]).toEqual({
         id: 'good',
         type: 'config',
         ...mockTimestampFields,
         version: 2,
         attributes: { title: 'Test' }
       });
-      expect(savedObjects[1]).to.eql({
+      expect(savedObjects[1]).toEqual({
         id: 'bad',
         type: 'config',
         error: { statusCode: 404, message: 'Not found' }
@@ -568,7 +566,7 @@ describe('SavedObjectsClient', () => {
 
     it('returns current ES document version', async () => {
       const response = await savedObjectsClient.update('index-pattern', 'logstash-*', attributes);
-      expect(response).to.eql({
+      expect(response).toEqual({
         id,
         type,
         ...mockTimestampFields,
@@ -626,17 +624,18 @@ describe('SavedObjectsClient', () => {
     });
 
     it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
+      expect.assertions(3);
+
       const es401 = new elasticsearch.errors[401];
-      expect(SavedObjectsClient.errors.isNotAuthorizedError(es401)).to.be(false);
+      expect(SavedObjectsClient.errors.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.throws(es401);
 
       try {
         await savedObjectsClient.delete('type', 'id');
-        throw new Error('expected savedObjectsClient.delete() to reject');
       } catch (error) {
         sinon.assert.calledOnce(onBeforeWrite);
-        expect(error).to.be(es401);
-        expect(SavedObjectsClient.errors.isNotAuthorizedError(error)).to.be(true);
+        expect(error).toBe(es401);
+        expect(SavedObjectsClient.errors.isNotAuthorizedError(error)).toBe(true);
       }
     });
   });

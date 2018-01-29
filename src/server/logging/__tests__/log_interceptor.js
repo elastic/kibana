@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import { LogInterceptor } from '../log_interceptor';
 
 function stubClientErrorEvent(errorMeta) {
@@ -19,10 +17,10 @@ const stubEpipeEvent = () => stubClientErrorEvent({ errno: 'EPIPE' });
 const stubEcanceledEvent = () => stubClientErrorEvent({ errno: 'ECANCELED' });
 
 function assertDowngraded(transformed) {
-  expect(!!transformed).to.be(true);
-  expect(transformed).to.have.property('event', 'log');
-  expect(transformed).to.have.property('tags');
-  expect(transformed.tags).to.not.contain('error');
+  expect(!!transformed).toBe(true);
+  expect(transformed).toHaveProperty('event', 'log');
+  expect(transformed).toHaveProperty('tags');
+  expect(transformed.tags).not.toContain('error');
 }
 
 describe('server logging LogInterceptor', () => {
@@ -37,20 +35,20 @@ describe('server logging LogInterceptor', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
       event.tags = [...event.tags.slice(1), event.tags[0]];
-      expect(interceptor.downgradeIfEconnreset(event)).to.be(null);
+      expect(interceptor.downgradeIfEconnreset(event)).toBe(null);
     });
 
     it('ignores non ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ errno: 'not ECONNRESET' });
-      expect(interceptor.downgradeIfEconnreset(event)).to.be(null);
+      expect(interceptor.downgradeIfEconnreset(event)).toBe(null);
     });
 
     it('ignores if tags are wrong', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
       event.tags = ['different', 'tags'];
-      expect(interceptor.downgradeIfEconnreset(event)).to.be(null);
+      expect(interceptor.downgradeIfEconnreset(event)).toBe(null);
     });
   });
 
@@ -65,20 +63,20 @@ describe('server logging LogInterceptor', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
       event.tags = [...event.tags.slice(1), event.tags[0]];
-      expect(interceptor.downgradeIfEpipe(event)).to.be(null);
+      expect(interceptor.downgradeIfEpipe(event)).toBe(null);
     });
 
     it('ignores non EPIPE events', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ errno: 'not EPIPE' });
-      expect(interceptor.downgradeIfEpipe(event)).to.be(null);
+      expect(interceptor.downgradeIfEpipe(event)).toBe(null);
     });
 
     it('ignores if tags are wrong', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
       event.tags = ['different', 'tags'];
-      expect(interceptor.downgradeIfEpipe(event)).to.be(null);
+      expect(interceptor.downgradeIfEpipe(event)).toBe(null);
     });
   });
 
@@ -93,20 +91,20 @@ describe('server logging LogInterceptor', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
       event.tags = [...event.tags.slice(1), event.tags[0]];
-      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
 
     it('ignores non ECANCELED events', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ errno: 'not ECANCELLED' });
-      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
 
     it('ignores if tags are wrong', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
       event.tags = ['different', 'tags'];
-      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
   });
 
@@ -120,7 +118,7 @@ describe('server logging LogInterceptor', () => {
     it('ignores non events', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message: 'Parse Error', code: 'NOT_HPE_INVALID_METHOD' });
-      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
   });
 
@@ -135,7 +133,7 @@ describe('server logging LogInterceptor', () => {
     it('ignores non events', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message: 'Not error' });
-      expect(interceptor.downgradeIfEcanceled(event)).to.be(null);
+      expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
   });
 });

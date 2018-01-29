@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createCreateRoute } from '../create';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/{type}', () => {
   const savedObjectsClient = { create: sinon.stub() };
@@ -47,8 +46,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(clientResponse);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(clientResponse);
   });
 
   it('requires attributes', async () => {
@@ -61,10 +60,10 @@ describe('POST /api/saved_objects/{type}', () => {
     const { statusCode, payload } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(response.validation.keys).to.contain('attributes');
-    expect(response.message).to.match(/is required/);
-    expect(response.statusCode).to.be(400);
-    expect(statusCode).to.be(400);
+    expect(response.validation.keys).toContain('attributes');
+    expect(response.message).toMatch(/is required/);
+    expect(response.statusCode).toBe(400);
+    expect(statusCode).toBe(400);
   });
 
   it('calls upon savedObjectClient.create', async () => {
@@ -79,13 +78,13 @@ describe('POST /api/saved_objects/{type}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.create.calledOnce).to.be(true);
+    expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
     const options = { overwrite: false, id: undefined };
     const attributes = { title: 'Testing' };
 
-    expect(args).to.eql(['index-pattern', attributes, options]);
+    expect(args).toEqual(['index-pattern', attributes, options]);
   });
 
   it('can specify an id', async () => {
@@ -100,12 +99,12 @@ describe('POST /api/saved_objects/{type}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.create.calledOnce).to.be(true);
+    expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
     const options = { overwrite: false, id: 'logstash-*' };
     const attributes = { title: 'Testing' };
 
-    expect(args).to.eql(['index-pattern', attributes, options]);
+    expect(args).toEqual(['index-pattern', attributes, options]);
   });
 });

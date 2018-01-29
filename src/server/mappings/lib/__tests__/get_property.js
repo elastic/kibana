@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import { getProperty } from '../get_property';
 
 const MAPPINGS = {
@@ -32,10 +30,10 @@ const MAPPINGS = {
 };
 
 function test(key, mapping) {
-  expect(typeof key === 'string' || Array.isArray(key)).to.be.ok();
-  expect(mapping).to.be.an('object');
+  expect(typeof key === 'string' || Array.isArray(key)).toBeTruthy();
+  expect(typeof mapping).toBe('object');
 
-  expect(getProperty(MAPPINGS, key)).to.be(mapping);
+  expect(getProperty(MAPPINGS, key)).toBe(mapping);
 }
 
 describe('getProperty(mappings, path)', () => {

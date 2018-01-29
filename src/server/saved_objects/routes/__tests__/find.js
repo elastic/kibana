@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createFindRoute } from '../find';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type?}', () => {
   const savedObjectsClient = { find: sinon.stub() };
@@ -56,8 +55,8 @@ describe('GET /api/saved_objects/{type?}', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(clientResponse);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {
@@ -68,10 +67,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1 });
+    expect(options).toEqual({ perPage: 20, page: 1 });
   });
 
   it('accepts the query parameter page/per_page', async () => {
@@ -82,10 +81,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 10, page: 50 });
+    expect(options).toEqual({ perPage: 10, page: 50 });
   });
 
   it('accepts the query parameter search_fields', async () => {
@@ -96,10 +95,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, searchFields: ['title'] });
+    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'] });
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -110,10 +109,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, fields: ['title'] });
+    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'] });
   });
 
   it('accepts the query parameter fields as an array', async () => {
@@ -124,10 +123,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({
+    expect(options).toEqual({
       perPage: 20, page: 1, fields: ['title', 'description']
     });
   });
@@ -140,10 +139,10 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, type: 'index-pattern' });
+    expect(options).toEqual({ perPage: 20, page: 1, type: 'index-pattern' });
   });
 
   it('accepts the type as a URL parameter', async () => {
@@ -154,9 +153,9 @@ describe('GET /api/saved_objects/{type?}', () => {
 
     await server.inject(request);
 
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
+    expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, type: 'index-pattern' });
+    expect(options).toEqual({ perPage: 20, page: 1, type: 'index-pattern' });
   });
 });

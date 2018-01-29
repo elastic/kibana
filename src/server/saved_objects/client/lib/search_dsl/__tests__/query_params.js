@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import { getQueryParams } from '../query_params';
 
 const MAPPINGS = {
@@ -42,14 +40,14 @@ describe('searchDsl/queryParams', () => {
   describe('{}', () => {
     it('searches for everything', () => {
       expect(getQueryParams(MAPPINGS))
-        .to.eql({});
+        .toEqual({});
     });
   });
 
   describe('{type}', () => {
     it('includes just a terms filter', () => {
       expect(getQueryParams(MAPPINGS, 'saved'))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
@@ -66,7 +64,7 @@ describe('searchDsl/queryParams', () => {
   describe('{search}', () => {
     it('includes just a sqs query', () => {
       expect(getQueryParams(MAPPINGS, null, 'us*'))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               must: [
@@ -86,7 +84,7 @@ describe('searchDsl/queryParams', () => {
   describe('{type,search}', () => {
     it('includes bool with sqs query and term filter for type', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*'))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
@@ -109,7 +107,7 @@ describe('searchDsl/queryParams', () => {
   describe('{search,searchFields}', () => {
     it('includes all types for field', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               must: [
@@ -130,7 +128,7 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports field boosting', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title^3']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               must: [
@@ -151,7 +149,7 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports field and multi-field', () => {
       expect(getQueryParams(MAPPINGS, null, 'y*', ['title', 'title.raw']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               must: [
@@ -178,7 +176,7 @@ describe('searchDsl/queryParams', () => {
   describe('{type,search,searchFields}', () => {
     it('includes bool, and sqs with field list', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
@@ -200,7 +198,7 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports fields pointing to multi-fields', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title.raw']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
@@ -222,7 +220,7 @@ describe('searchDsl/queryParams', () => {
     });
     it('supports multiple search fields', () => {
       expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title', 'title.raw']))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [

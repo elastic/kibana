@@ -1,6 +1,5 @@
 /* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
-import expect from 'expect.js';
 
 import { convertEsError } from '../errors';
 import * as convertEsErrorNS from '../errors';
@@ -25,7 +24,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const callCluster = sinon.stub();
       await callIndexAliasApi(callCluster, football);
       sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0][1].index).to.be(football);
+      expect(callCluster.args[0][1].index).toBe(football);
     });
 
     it('returns the es response directly', async () => {
@@ -33,7 +32,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const callCluster = sinon.stub().returns(football);
       const resp = await callIndexAliasApi(callCluster);
       sinon.assert.calledOnce(callCluster);
-      expect(resp).to.be(football);
+      expect(resp).toBe(football);
     });
 
     it('sets ignoreUnavailable and allowNoIndices params', async () => {
@@ -42,8 +41,8 @@ describe('server/index_patterns/service/lib/es_api', () => {
       sinon.assert.calledOnce(callCluster);
 
       const passedOpts = callCluster.args[0][1];
-      expect(passedOpts).to.have.property('ignoreUnavailable', true);
-      expect(passedOpts).to.have.property('allowNoIndices', false);
+      expect(passedOpts).toHaveProperty('ignoreUnavailable', true);
+      expect(passedOpts).toHaveProperty('allowNoIndices', false);
     });
 
     it('handles errors with convertEsError()', async () => {
@@ -57,10 +56,10 @@ describe('server/index_patterns/service/lib/es_api', () => {
         await callIndexAliasApi(callCluster, indices);
         throw new Error('expected callIndexAliasApi() to throw');
       } catch (error) {
-        expect(error).to.be(convertedError);
+        expect(error).toBe(convertedError);
         sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).to.be(indices);
-        expect(convertEsError.args[0][1]).to.be(esError);
+        expect(convertEsError.args[0][0]).toBe(indices);
+        expect(convertEsError.args[0][1]).toBe(esError);
       }
     });
   });
@@ -82,7 +81,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const callCluster = sinon.stub();
       await callFieldCapsApi(callCluster, football);
       sinon.assert.calledOnce(callCluster);
-      expect(callCluster.args[0][1].index).to.be(football);
+      expect(callCluster.args[0][1].index).toBe(football);
     });
 
     it('returns the es response directly', async () => {
@@ -90,7 +89,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const callCluster = sinon.stub().returns(football);
       const resp = await callFieldCapsApi(callCluster);
       sinon.assert.calledOnce(callCluster);
-      expect(resp).to.be(football);
+      expect(resp).toBe(football);
     });
 
     it('sets ignoreUnavailable, allowNoIndices, and fields params', async () => {
@@ -99,9 +98,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       sinon.assert.calledOnce(callCluster);
 
       const passedOpts = callCluster.args[0][1];
-      expect(passedOpts).to.have.property('fields', '*');
-      expect(passedOpts).to.have.property('ignoreUnavailable', true);
-      expect(passedOpts).to.have.property('allowNoIndices', false);
+      expect(passedOpts).toHaveProperty('fields', '*');
+      expect(passedOpts).toHaveProperty('ignoreUnavailable', true);
+      expect(passedOpts).toHaveProperty('allowNoIndices', false);
     });
 
     it('handles errors with convertEsError()', async () => {
@@ -115,10 +114,10 @@ describe('server/index_patterns/service/lib/es_api', () => {
         await callFieldCapsApi(callCluster, indices);
         throw new Error('expected callFieldCapsApi() to throw');
       } catch (error) {
-        expect(error).to.be(convertedError);
+        expect(error).toBe(convertedError);
         sinon.assert.calledOnce(convertEsError);
-        expect(convertEsError.args[0][0]).to.be(indices);
-        expect(convertEsError.args[0][1]).to.be(esError);
+        expect(convertEsError.args[0][0]).toBe(indices);
+        expect(convertEsError.args[0][1]).toBe(esError);
       }
     });
   });

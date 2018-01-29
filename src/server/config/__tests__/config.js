@@ -1,5 +1,4 @@
 import { Config } from '../config';
-import expect from 'expect.js';
 import _ from 'lodash';
 import Joi from 'joi';
 
@@ -48,7 +47,7 @@ describe('lib/config/config', function () {
         const run = function () {
           config.set('something.enable', true);
         };
-        expect(run).to.throwException();
+        expect(run).toThrow();
       });
 
       it('should allow keys in the schema', function () {
@@ -56,7 +55,7 @@ describe('lib/config/config', function () {
         const run = function () {
           config.set('test.client.host', 'http://localhost');
         };
-        expect(run).to.not.throwException();
+        expect(run).not.toThrow();
       });
 
       it('should not allow keys not in the schema', function () {
@@ -64,7 +63,7 @@ describe('lib/config/config', function () {
         const run = function () {
           config.set('paramNotDefinedInTheSchema', true);
         };
-        expect(run).to.throwException();
+        expect(run).toThrow();
       });
 
       it('should not allow child keys not in the schema', function () {
@@ -72,13 +71,13 @@ describe('lib/config/config', function () {
         const run = function () {
           config.set('test.client.paramNotDefinedInTheSchema', true);
         };
-        expect(run).to.throwException();
+        expect(run).toThrow();
       });
 
       it('should set defaults', function () {
         const config = new Config(schema);
-        expect(config.get('test.enable')).to.be(true);
-        expect(config.get('test.client.type')).to.be('datastore');
+        expect(config.get('test.enable')).toBe(true);
+        expect(config.get('test.client.type')).toBe('datastore');
       });
 
     });
@@ -95,7 +94,7 @@ describe('lib/config/config', function () {
         const newData = config.get();
         newData.test.enable = false;
         config.resetTo(newData);
-        expect(config.get()).to.eql(newData);
+        expect(config.get()).toEqual(newData);
       });
 
     });
@@ -108,15 +107,15 @@ describe('lib/config/config', function () {
       });
 
       it('should return true for fields that exist in the schema', function () {
-        expect(config.has('test.undefValue')).to.be(true);
+        expect(config.has('test.undefValue')).toBe(true);
       });
 
       it('should return true for partial objects that exist in the schema', function () {
-        expect(config.has('test.client')).to.be(true);
+        expect(config.has('test.client')).toBe(true);
       });
 
       it('should return false for fields that do not exist in the schema', function () {
-        expect(config.has('test.client.pool')).to.be(false);
+        expect(config.has('test.client.pool')).toBe(false);
       });
 
     });
@@ -130,21 +129,21 @@ describe('lib/config/config', function () {
 
       it('should use a key and value to set a config value', function () {
         config.set('test.enable', false);
-        expect(config.get('test.enable')).to.be(false);
+        expect(config.get('test.enable')).toBe(false);
       });
 
       it('should use an object to set config values', function () {
         const hosts = ['host-01', 'host-02'];
         config.set({ test: { enable: false, hosts: hosts } });
-        expect(config.get('test.enable')).to.be(false);
-        expect(config.get('test.hosts')).to.eql(hosts);
+        expect(config.get('test.enable')).toBe(false);
+        expect(config.get('test.hosts')).toEqual(hosts);
       });
 
       it('should use a flatten object to set config values', function () {
         const hosts = ['host-01', 'host-02'];
         config.set({ 'test.enable': false, 'test.hosts': hosts });
-        expect(config.get('test.enable')).to.be(false);
-        expect(config.get('test.hosts')).to.eql(hosts);
+        expect(config.get('test.enable')).toBe(false);
+        expect(config.get('test.hosts')).toEqual(hosts);
       });
 
       it('should override values with just the values present', function () {
@@ -152,20 +151,25 @@ describe('lib/config/config', function () {
         config.set(data);
         newData.test.enable = false;
         config.set({ test: { enable: false } });
-        expect(config.get()).to.eql(newData);
+        expect(config.get()).toEqual(newData);
       });
 
       it('should thow an exception when setting a value with the wrong type', function (done) {
+        expect.assertions(2);
+
         const run = function () {
           config.set('test.enable', 'something');
         };
-        expect(run).to.throwException(function (err) {
-          expect(err).to.have.property('name', 'ValidationError');
-          expect(err.details[0].message).to.be('"enable" must be a boolean');
-          done();
-        });
-      });
 
+        try {
+          run();
+        } catch (err) {
+          expect(err).toHaveProperty('name', 'ValidationError');
+          expect(err.details[0].message).toBe('"enable" must be a boolean');
+        }
+
+        done();
+      });
 
     });
 
@@ -181,30 +185,30 @@ describe('lib/config/config', function () {
       it('should return the whole config object when called without a key', function () {
         const newData = _.cloneDeep(data);
         newData.test.enable = true;
-        expect(config.get()).to.eql(newData);
+        expect(config.get()).toEqual(newData);
       });
 
       it('should return the value using dot notation', function () {
-        expect(config.get('test.enable')).to.be(true);
+        expect(config.get('test.enable')).toBe(true);
       });
 
       it('should return the clone of partial object using dot notation', function () {
-        expect(config.get('test.client')).to.not.be(data.test.client);
-        expect(config.get('test.client')).to.eql(data.test.client);
+        expect(config.get('test.client')).not.toBe(data.test.client);
+        expect(config.get('test.client')).toEqual(data.test.client);
       });
 
       it('should throw exception for unknown config values', function () {
         const run = function () {
           config.get('test.does.not.exist');
         };
-        expect(run).to.throwException(/Unknown config key: test.does.not.exist/);
+        expect(run).toThrowError(/Unknown config key: test.does.not.exist/);
       });
 
       it('should not throw exception for undefined known config values', function () {
         const run = function getUndefValue() {
           config.get('test.undefValue');
         };
-        expect(run).to.not.throwException();
+        expect(run).not.toThrow();
       });
 
     });
@@ -218,15 +222,15 @@ describe('lib/config/config', function () {
       it('should allow you to extend the schema at the top level', function () {
         const newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         config.extendSchema(newSchema, {}, 'myTest');
-        expect(config.get('myTest.test')).to.be(true);
+        expect(config.get('myTest.test')).toBe(true);
       });
 
       it('should allow you to extend the schema with a prefix', function () {
         const newSchema = Joi.object({ test: Joi.boolean().default(true) }).default();
         config.extendSchema(newSchema, {}, 'prefix.myTest');
-        expect(config.get('prefix')).to.eql({ myTest: { test: true } });
-        expect(config.get('prefix.myTest')).to.eql({ test: true });
-        expect(config.get('prefix.myTest.test')).to.be(true);
+        expect(config.get('prefix')).toEqual({ myTest: { test: true } });
+        expect(config.get('prefix.myTest')).toEqual({ test: true });
+        expect(config.get('prefix.myTest.test')).toBe(true);
       });
 
       it('should NOT allow you to extend the schema if somethign else is there', function () {
@@ -234,7 +238,7 @@ describe('lib/config/config', function () {
         const run = function () {
           config.extendSchema('test', newSchema);
         };
-        expect(run).to.throwException();
+        expect(run).toThrow();
       });
 
     });
@@ -245,15 +249,15 @@ describe('lib/config/config', function () {
           a: Joi.number().default(1)
         }));
 
-        expect(config.get('a')).to.be(1);
+        expect(config.get('a')).toBe(1);
         config.removeSchema('a');
-        expect(() => config.get('a')).to.throwException('Unknown config key');
+        expect(() => config.get('a')).toThrowError('Unknown config key');
       });
 
       it('only removes existing keys', function () {
         const config = new Config(Joi.object());
 
-        expect(() => config.removeSchema('b')).to.throwException('Unknown schema');
+        expect(() => config.removeSchema('b')).toThrowError('Unknown schema');
       });
     });
 

@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import { getSortingParams } from '../sorting_params';
 
 const MAPPINGS = {
@@ -39,21 +37,21 @@ describe('searchDsl/getSortParams', () => {
   describe('no sortField, type, or order', () => {
     it('returns no params', () => {
       expect(getSortingParams(MAPPINGS))
-        .to.eql({});
+        .toEqual({});
     });
   });
 
   describe('type, no sortField', () => {
     it('returns no params', () => {
       expect(getSortingParams(MAPPINGS, 'pending'))
-        .to.eql({});
+        .toEqual({});
     });
   });
 
   describe('type, order, no sortField', () => {
     it('returns no params', () => {
       expect(getSortingParams(MAPPINGS, 'saved', null, 'desc'))
-        .to.eql({});
+        .toEqual({});
     });
   });
 
@@ -61,7 +59,7 @@ describe('searchDsl/getSortParams', () => {
     describe('search field is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
-          .to.eql({
+          .toEqual({
             sort: [
               {
                 'saved.title': {
@@ -76,7 +74,7 @@ describe('searchDsl/getSortParams', () => {
     describe('search field is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
-          .to.eql({
+          .toEqual({
             sort: [
               {
                 'saved.title.raw': {
@@ -94,7 +92,7 @@ describe('searchDsl/getSortParams', () => {
     describe('search field is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
-          .to.eql({
+          .toEqual({
             sort: [
               {
                 'saved.title': {
@@ -109,7 +107,7 @@ describe('searchDsl/getSortParams', () => {
     describe('search field is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc'))
-          .to.eql({
+          .toEqual({
             sort: [
               {
                 'saved.title.raw': {

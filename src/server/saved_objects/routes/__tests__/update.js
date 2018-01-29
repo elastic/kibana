@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createUpdateRoute } from '../update';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
   const savedObjectsClient = { update: sinon.stub() };
@@ -42,8 +41,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(true);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(true);
   });
 
   it('calls upon savedObjectClient.update', async () => {
@@ -59,9 +58,9 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.update.calledOnce).to.be(true);
+    expect(savedObjectsClient.update.calledOnce).toBe(true);
 
     const args = savedObjectsClient.update.getCall(0).args;
-    expect(args).to.eql(['index-pattern', 'logstash-*', attributes, options]);
+    expect(args).toEqual(['index-pattern', 'logstash-*', attributes, options]);
   });
 });

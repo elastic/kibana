@@ -1,5 +1,4 @@
 import moment from 'moment';
-import expect from 'expect.js';
 
 import {
   createListStream,
@@ -30,7 +29,7 @@ describe('KbnLoggerStringFormat', () => {
     ]);
 
     expect(String(result))
-      .to.contain(moment.utc(time).format('HH:mm:ss.SSS'));
+      .toContain(moment.utc(time).format('HH:mm:ss.SSS'));
   });
 
   it('logs in local timezone when useUTC is false', async () => {
@@ -43,7 +42,7 @@ describe('KbnLoggerStringFormat', () => {
       format
     ]);
 
-    expect(String(result)).to
-      .contain(moment(time).format('HH:mm:ss.SSS'));
+    expect(String(result))
+      .toContain(moment(time).format('HH:mm:ss.SSS'));
   });
 });

@@ -1,6 +1,5 @@
 /* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
-import expect from 'expect.js';
 import { identity, shuffle, sortBy } from 'lodash';
 
 import { getFieldCapabilities } from '../field_capabilities';
@@ -73,7 +72,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       });
 
       const fieldNames = (await getFieldCapabilities()).map(field => field.name);
-      expect(fieldNames).to.eql(sortedLetters);
+      expect(fieldNames).toEqual(sortedLetters);
     });
   });
 
@@ -87,8 +86,8 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       });
 
       const resp = await getFieldCapabilities(undefined, undefined, ['meta1', 'meta2']);
-      expect(resp).to.have.length(4);
-      expect(resp.map(field => field.name)).to.eql(['bar', 'foo', 'meta1', 'meta2']);
+      expect(resp).toHaveLength(4);
+      expect(resp.map(field => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
     });
   });
 
@@ -120,15 +119,15 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
           });
 
           const resp = await getFieldCapabilities();
-          expect(resp).to.have.length(1);
-          expect(resp[0]).to.have.property(property);
-          expect(resp[0][property]).to.not.be(footballs[0]);
+          expect(resp).toHaveLength(1);
+          expect(resp[0]).toHaveProperty(property);
+          expect(resp[0][property]).not.toBe(footballs[0]);
 
           // ensure field object was not mutated
-          expect(field).to.not.have.property(property);
+          expect(field).not.toHaveProperty(property);
           Object.keys(field).forEach(key => {
             // ensure response field has original values from field
-            expect(resp[0][key]).to.be(footballs[0]);
+            expect(resp[0][key]).toBe(footballs[0]);
           });
         });
       });
@@ -149,9 +148,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       await getFieldCapabilities();
       sinon.assert.calledThrice(mergeOverrides);
 
-      expect(mergeOverrides.args[0][0]).to.have.property('name', 'foo');
-      expect(mergeOverrides.args[1][0]).to.have.property('name', 'bar');
-      expect(mergeOverrides.args[2][0]).to.have.property('name', 'baz');
+      expect(mergeOverrides.args[0][0]).toHaveProperty('name', 'foo');
+      expect(mergeOverrides.args[1][0]).toHaveProperty('name', 'bar');
+      expect(mergeOverrides.args[2][0]).toHaveProperty('name', 'baz');
     });
 
     it('replaces field with return value', async () => {
@@ -167,7 +166,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         }
       });
 
-      expect(await getFieldCapabilities()).to.eql([
+      expect(await getFieldCapabilities()).toEqual([
         { notFieldAnymore: 1 },
         { notFieldAnymore: 1 }
       ]);

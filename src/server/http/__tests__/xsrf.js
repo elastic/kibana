@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import { fromNode as fn } from 'bluebird';
 import { resolve } from 'path';
 import * as kbnTestServer from '../../../test_utils/kbn_server';
@@ -88,8 +87,8 @@ describe('xsrf request filter', function () {
         method: 'GET'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('ok');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('ok');
     });
 
     it('accepts requests with the xsrf header', async function () {
@@ -101,8 +100,8 @@ describe('xsrf request filter', function () {
         },
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('ok');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('ok');
     });
   });
 
@@ -113,8 +112,8 @@ describe('xsrf request filter', function () {
         method: 'HEAD'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be.empty();
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toHaveLength(0);
     });
 
     it('accepts requests with the xsrf header', async function () {
@@ -126,8 +125,8 @@ describe('xsrf request filter', function () {
         },
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be.empty();
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toHaveLength(0);
     });
   });
 
@@ -142,8 +141,8 @@ describe('xsrf request filter', function () {
           },
         });
 
-        expect(resp.statusCode).to.be(200);
-        expect(resp.payload).to.be('ok');
+        expect(resp.statusCode).toBe(200);
+        expect(resp.payload).toBe('ok');
       });
 
       // this is still valid for existing csrf protection support
@@ -157,8 +156,8 @@ describe('xsrf request filter', function () {
           },
         });
 
-        expect(resp.statusCode).to.be(200);
-        expect(resp.payload).to.be('ok');
+        expect(resp.statusCode).toBe(200);
+        expect(resp.payload).toBe('ok');
       });
 
       it('rejects requests without either an xsrf or version header', async function () {
@@ -167,8 +166,8 @@ describe('xsrf request filter', function () {
           method: method
         });
 
-        expect(resp.statusCode).to.be(400);
-        expect(resp.result.message).to.be('Request must contain a kbn-xsrf header.');
+        expect(resp.statusCode).toBe(400);
+        expect(resp.result.message).toBe('Request must contain a kbn-xsrf header.');
       });
 
       it('accepts whitelisted requests without either an xsrf or version header', async function () {
@@ -177,8 +176,8 @@ describe('xsrf request filter', function () {
           method: method
         });
 
-        expect(resp.statusCode).to.be(200);
-        expect(resp.payload).to.be('ok');
+        expect(resp.statusCode).toBe(200);
+        expect(resp.payload).toBe('ok');
       });
     });
   }

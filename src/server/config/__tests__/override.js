@@ -1,5 +1,4 @@
 import override from '../override';
-import expect from 'expect.js';
 
 describe('override(target, source)', function () {
 
@@ -14,7 +13,7 @@ describe('override(target, source)', function () {
       }
     };
     const source = { test: { client: { type: 'nosql' } } };
-    expect(override(target, source)).to.eql({
+    expect(override(target, source)).toEqual({
       test: {
         enable: true,
         host: ['host-01', 'host-02'],

@@ -1,6 +1,5 @@
 /* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
-import expect from 'expect.js';
 import { noop } from 'lodash';
 
 import { callIndexAliasApi } from '../es_api';
@@ -34,7 +33,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(timePatternToWildcard);
-        expect(timePatternToWildcard.firstCall.args).to.eql([timePattern]);
+        expect(timePatternToWildcard.firstCall.args).toEqual([timePattern]);
       });
 
       it('passes the converted wildcard as the index to callIndexAliasApi()', async () => {
@@ -47,7 +46,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
         await resolveTimePattern(noop, timePattern);
         sinon.assert.calledOnce(callIndexAliasApi);
-        expect(callIndexAliasApi.firstCall.args[1]).to.be(wildcard);
+        expect(callIndexAliasApi.firstCall.args[1]).toBe(wildcard);
       });
     });
 
@@ -64,8 +63,8 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);
-        expect(resp).to.have.property('all');
-        expect(resp.all).to.eql([
+        expect(resp).toHaveProperty('all');
+        expect(resp.all).toEqual([
           'logs-Saturday-2017.1',
           'logs-Friday-2017.1',
           'logs-Sunday-2017.1',
@@ -88,8 +87,8 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);
-        expect(resp).to.have.property('matches');
-        expect(resp.matches).to.eql([
+        expect(resp).toHaveProperty('matches');
+        expect(resp.matches).toEqual([
           'logs-Saturday-2017.1',
           'logs-Friday-2017.1',
           'logs-Sunday-2017.1'

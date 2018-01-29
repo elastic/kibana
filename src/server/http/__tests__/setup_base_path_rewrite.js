@@ -1,5 +1,4 @@
 import { Server } from 'hapi';
-import expect from 'expect.js';
 import sinon from 'sinon';
 
 import { setupBasePathRewrite } from '../setup_base_path_rewrite';
@@ -40,15 +39,15 @@ describe('server / setup_base_path_rewrite', () => {
 
   describe('no base path', () => {
     let server;
-    before(() => server = createServer({ basePath: '', rewriteBasePath: false }));
-    after(() => server = undefined);
+    beforeAll(() => server = createServer({ basePath: '', rewriteBasePath: false }));
+    afterAll(() => server = undefined);
 
     it('/bar => 404', async () => {
       const resp = await server.inject({
         url: '/bar'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/bar/ => 404', async () => {
@@ -56,7 +55,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/bar/foo => 404', async () => {
@@ -64,7 +63,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/foo'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/ => /', async () => {
@@ -72,8 +71,8 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/');
     });
 
     it('/foo => /foo', async () => {
@@ -81,22 +80,22 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/foo'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/foo');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/foo');
     });
   });
 
   describe('base path /bar, rewrite = false', () => {
     let server;
-    before(() => server = createServer({ basePath: '/bar', rewriteBasePath: false }));
-    after(() => server = undefined);
+    beforeAll(() => server = createServer({ basePath: '/bar', rewriteBasePath: false }));
+    afterAll(() => server = undefined);
 
     it('/bar => 404', async () => {
       const resp = await server.inject({
         url: '/bar'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/bar/ => 404', async () => {
@@ -104,7 +103,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/bar/foo => 404', async () => {
@@ -112,7 +111,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/foo'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/ => /', async () => {
@@ -120,8 +119,8 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/');
     });
 
     it('/foo => /foo', async () => {
@@ -129,23 +128,23 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/foo'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/foo');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/foo');
     });
   });
 
   describe('base path /bar, rewrite = true', () => {
     let server;
-    before(() => server = createServer({ basePath: '/bar', rewriteBasePath: true }));
-    after(() => server = undefined);
+    beforeAll(() => server = createServer({ basePath: '/bar', rewriteBasePath: true }));
+    afterAll(() => server = undefined);
 
     it('/bar => /', async () => {
       const resp = await server.inject({
         url: '/bar'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/');
     });
 
     it('/bar/ => 404', async () => {
@@ -153,8 +152,8 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/');
     });
 
     it('/bar/foo => 404', async () => {
@@ -162,8 +161,8 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/bar/foo'
       });
 
-      expect(resp.statusCode).to.be(200);
-      expect(resp.payload).to.be('resp:/foo');
+      expect(resp.statusCode).toBe(200);
+      expect(resp.payload).toBe('resp:/foo');
     });
 
     it('/ => 404', async () => {
@@ -171,7 +170,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
 
     it('/foo => 404', async () => {
@@ -179,7 +178,7 @@ describe('server / setup_base_path_rewrite', () => {
         url: '/foo'
       });
 
-      expect(resp.statusCode).to.be(404);
+      expect(resp.statusCode).toBe(404);
     });
   });
 });

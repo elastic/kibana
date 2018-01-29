@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { callPluginHook } from '../call_plugin_hook';
 
@@ -51,7 +50,7 @@ describe('server/plugins/callPluginHook', () => {
       await callPluginHook('init', plugins, 'foo', []);
       throw new Error('expected callPluginHook to throw');
     } catch (error) {
-      expect(error.message).to.contain('"bar" for plugin "foo"');
+      expect(error.message).toContain('"bar" for plugin "foo"');
     }
   });
 
@@ -81,7 +80,7 @@ describe('server/plugins/callPluginHook', () => {
       await callPluginHook('init', plugins, 'foo', []);
       throw new Error('expected callPluginHook to throw');
     } catch (error) {
-      expect(error.message).to.contain('foo -> bar -> baz -> foo');
+      expect(error.message).toContain('foo -> bar -> baz -> foo');
     }
   });
 });

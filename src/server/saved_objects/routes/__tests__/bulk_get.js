@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createBulkGetRoute } from '../bulk_get';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/bulk_get', () => {
   const savedObjectsClient = { bulkGet: sinon.stub() };
@@ -50,8 +49,8 @@ describe('POST /api/saved_objects/bulk_get', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(clientResponse);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.bulkGet', async () => {
@@ -67,10 +66,10 @@ describe('POST /api/saved_objects/bulk_get', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.bulkGet.calledOnce).to.be(true);
+    expect(savedObjectsClient.bulkGet.calledOnce).toBe(true);
 
     const args = savedObjectsClient.bulkGet.getCall(0).args;
-    expect(args[0]).to.eql(docs);
+    expect(args[0]).toEqual(docs);
   });
 
 });

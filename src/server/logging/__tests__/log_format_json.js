@@ -1,5 +1,4 @@
 import moment from 'moment';
-import expect from 'expect.js';
 
 import {
   createListStream,
@@ -31,8 +30,8 @@ describe('KbnLoggerJsonFormat', () => {
       ]);
       const { type, message } = JSON.parse(result);
 
-      expect(type).to.be('log');
-      expect(message).to.be('undefined');
+      expect(type).toBe('log');
+      expect(message).toBe('undefined');
     });
 
     it('response', async () => {
@@ -56,10 +55,10 @@ describe('KbnLoggerJsonFormat', () => {
       ]);
       const { type, method, statusCode, message } = JSON.parse(result);
 
-      expect(type).to.be('response');
-      expect(method).to.be('GET');
-      expect(statusCode).to.be(200);
-      expect(message).to.be('GET /path/to/resource 200 12000ms - 13.0B');
+      expect(type).toBe('response');
+      expect(method).toBe('GET');
+      expect(statusCode).toBe(200);
+      expect(message).toBe('GET /path/to/resource 200 12000ms - 13.0B');
     });
 
     it('ops', async () => {
@@ -75,8 +74,8 @@ describe('KbnLoggerJsonFormat', () => {
       ]);
       const { type, message } = JSON.parse(result);
 
-      expect(type).to.be('ops');
-      expect(message).to.be('memory: 0.0B uptime: 0:00:00 load: [1.00 1.00 2.00] delay: 0.000');
+      expect(type).toBe('ops');
+      expect(message).toBe('memory: 0.0B uptime: 0:00:00 load: [1.00 1.00 2.00] delay: 0.000');
     });
 
     describe('errors', () => {
@@ -93,9 +92,9 @@ describe('KbnLoggerJsonFormat', () => {
         ]);
         const { level, message, error } = JSON.parse(result);
 
-        expect(level).to.be('error');
-        expect(message).to.be('test error 0');
-        expect(error).to.eql({ message: 'test error 0' });
+        expect(level).toBe('error');
+        expect(message).toBe('test error 0');
+        expect(error).toEqual({ message: 'test error 0' });
       });
 
       it('with no message', async () => {
@@ -109,9 +108,9 @@ describe('KbnLoggerJsonFormat', () => {
         ]);
         const { level, message, error } = JSON.parse(result);
 
-        expect(level).to.be('error');
-        expect(message).to.be('Unknown error (no message)');
-        expect(error).to.eql({});
+        expect(level).toBe('error');
+        expect(message).toBe('Unknown error (no message)');
+        expect(error).toEqual({});
       });
 
       it('event data instanceof Error', async () => {
@@ -124,14 +123,14 @@ describe('KbnLoggerJsonFormat', () => {
         ]);
         const { level, message, error } = JSON.parse(result);
 
-        expect(level).to.be('error');
-        expect(message).to.be('test error 2');
+        expect(level).toBe('error');
+        expect(message).toBe('test error 2');
 
-        expect(error.message).to.be(event.data.message);
-        expect(error.name).to.be(event.data.name);
-        expect(error.stack).to.be(event.data.stack);
-        expect(error.code).to.be(event.data.code);
-        expect(error.signal).to.be(event.data.signal);
+        expect(error.message).toBe(event.data.message);
+        expect(error.name).toBe(event.data.name);
+        expect(error.stack).toBe(event.data.stack);
+        expect(error.code).toBe(event.data.code);
+        expect(error.signal).toBe(event.data.signal);
       });
 
       it('event data instanceof Error - fatal', async () => {
@@ -145,15 +144,15 @@ describe('KbnLoggerJsonFormat', () => {
         ]);
         const { tags, level, message, error } = JSON.parse(result);
 
-        expect(tags).to.eql(['fatal', 'tag2']);
-        expect(level).to.be('fatal');
-        expect(message).to.be('test error 2');
+        expect(tags).toEqual(['fatal', 'tag2']);
+        expect(level).toBe('fatal');
+        expect(message).toBe('test error 2');
 
-        expect(error.message).to.be(event.data.message);
-        expect(error.name).to.be(event.data.name);
-        expect(error.stack).to.be(event.data.stack);
-        expect(error.code).to.be(event.data.code);
-        expect(error.signal).to.be(event.data.signal);
+        expect(error.message).toBe(event.data.message);
+        expect(error.name).toBe(event.data.name);
+        expect(error.stack).toBe(event.data.stack);
+        expect(error.code).toBe(event.data.code);
+        expect(error.signal).toBe(event.data.signal);
       });
 
       it('event data instanceof Error, no message', async () => {
@@ -166,14 +165,14 @@ describe('KbnLoggerJsonFormat', () => {
         ]);
         const { level, message, error } = JSON.parse(result);
 
-        expect(level).to.be('error');
-        expect(message).to.be('Unknown error object (no message)');
+        expect(level).toBe('error');
+        expect(message).toBe('Unknown error object (no message)');
 
-        expect(error.message).to.be(event.data.message);
-        expect(error.name).to.be(event.data.name);
-        expect(error.stack).to.be(event.data.stack);
-        expect(error.code).to.be(event.data.code);
-        expect(error.signal).to.be(event.data.signal);
+        expect(error.message).toBe(event.data.message);
+        expect(error.name).toBe(event.data.name);
+        expect(error.stack).toBe(event.data.stack);
+        expect(error.code).toBe(event.data.code);
+        expect(error.signal).toBe(event.data.signal);
       });
     });
   });
@@ -190,7 +189,7 @@ describe('KbnLoggerJsonFormat', () => {
       ]);
 
       const { '@timestamp': timestamp } = JSON.parse(result);
-      expect(timestamp).to.be(moment.utc(time).format());
+      expect(timestamp).toBe(moment.utc(time).format());
     });
 
     it('logs in local timezone when useUTC is false', async () => {
@@ -204,7 +203,7 @@ describe('KbnLoggerJsonFormat', () => {
       ]);
 
       const { '@timestamp': timestamp } = JSON.parse(result);
-      expect(timestamp).to.be(moment(time).format());
+      expect(timestamp).toBe(moment(time).format());
     });
   });
 });

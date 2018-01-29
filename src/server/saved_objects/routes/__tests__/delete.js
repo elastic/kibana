@@ -1,7 +1,6 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import { createDeleteRoute } from '../delete';
-import { MockServer } from './mock_server';
+import { MockServer } from './_mock_server';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
   const savedObjectsClient = { delete: sinon.stub() };
@@ -38,8 +37,8 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
-    expect(statusCode).to.be(200);
-    expect(response).to.eql(clientResponse);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.delete', async () => {
@@ -49,9 +48,9 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     };
 
     await server.inject(request);
-    expect(savedObjectsClient.delete.calledOnce).to.be(true);
+    expect(savedObjectsClient.delete.calledOnce).toBe(true);
 
     const args = savedObjectsClient.delete.getCall(0).args;
-    expect(args).to.eql(['index-pattern', 'logstash-*']);
+    expect(args).toEqual(['index-pattern', 'logstash-*']);
   });
 });
