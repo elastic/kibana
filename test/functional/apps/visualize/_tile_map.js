@@ -160,7 +160,6 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.closeSpyPanel();
         await PageObjects.visualize.saveVisualization(vizName1);
-        await PageObjects.header.waitForToastMessageGone();
 
         const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 

@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
 import 'ui/private';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier, fatalErrorInternals } from 'ui/notify';
 import { StateProvider } from 'ui/state_management/state';
 import {
   unhashQueryString,
@@ -266,18 +266,13 @@ describe('State Management', () => {
           expect(notifier._notifs[0].content).to.match(/use the share functionality/i);
         });
 
-        it('presents fatal error linking to github when setting item fails', () => {
-          const { state, hashedItemStore, notifier } = setup({ storeInHash: true });
-          const fatalStub = sinon.stub(notifier, 'fatal').throws();
+        it('throws error linking to github when setting item fails', () => {
+          const { state, hashedItemStore } = setup({ storeInHash: true });
+          sinon.stub(fatalErrorInternals, 'show');
           sinon.stub(hashedItemStore, 'setItem').returns(false);
-
           expect(() => {
             state.toQueryParam();
-          }).to.throwError();
-
-          sinon.assert.calledOnce(fatalStub);
-          expect(fatalStub.firstCall.args[0]).to.be.an(Error);
-          expect(fatalStub.firstCall.args[0].message).to.match(/github\.com/);
+          }).to.throwError(/github\.com/);
         });
 
         it('translateHashToRison should gracefully fallback if parameter can not be parsed', () => {
