@@ -58,14 +58,12 @@ class MarkdownVisComponent extends Component {
    * or if we know that the render method wouldn't produce anything different and
    * we don't need it to be called (false).
    *
-   * We only need to update if the parameters actually changed. So we use the passed
-   * in updateStatus.params property which will be set to true if the parameters
-   * has changed, and that caused the render. We actually also need to render
-   * when the renderedMarkdown in state updates, but this only will happen when
-   * the params update, so this check will be enough.
+   * We only need to render if one of the parameters used in the render function
+   * actually changed. So we prevent calling render if none of it changed.
    */
-  shouldComponentUpdate(props) {
-    return props.updateStatus.params;
+  shouldComponentUpdate(props, state) {
+    return props.fontSize !== this.props.fontSize ||
+        state.renderedMarkdown !== this.state.renderedMarkdown;
   }
 
   /**
@@ -105,7 +103,6 @@ export function MarkdownVisWrapper(props) {
     <MarkdownVisComponent
       fontSize={props.vis.params.fontSize}
       markdown={props.vis.params.markdown}
-      updateStatus={props.updateStatus}
     />
   );
 }
