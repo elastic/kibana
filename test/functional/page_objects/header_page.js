@@ -37,6 +37,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.isGlobalLoadingIndicatorHidden();
     }
 
+    async clickManagement() {
+      log.debug('click Management tab');
+      await this.clickSelector('a[href*=\'management\']');
+      await this.isGlobalLoadingIndicatorHidden();
+    }
+
     async clickSettings() {
       log.debug('click Settings tab');
       await this.clickSelector('a[href*=\'settings\']');
