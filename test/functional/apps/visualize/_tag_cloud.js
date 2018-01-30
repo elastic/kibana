@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(true);
       });
 
-      it('should show correct tag cloud data', async function () {
+      it.skip('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
