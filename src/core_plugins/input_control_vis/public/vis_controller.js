@@ -122,7 +122,7 @@ class VisController {
   }
 
   async updateControlsFromKbn() {
-    this.controls.map(async (control) => {
+    this.controls.forEach(async (control) => {
       control.reset();
     });
     await this.updateNestedControls();
