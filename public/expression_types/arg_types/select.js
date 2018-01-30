@@ -14,7 +14,7 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue }) => {
   return (
     <FormControl componentClass="select" value={choice} onChange={handleChange}>
       <option value="" disabled>
-        select column
+        select
       </option>
       {choices.map(choice => (
         <option value={choice.value} key={choice.value}>

@@ -1,4 +1,4 @@
-@import (reference) "./main";
+@import (reference) './main';
 
 /*
   This file contains all the global scope and bootstrap garbage that should be removed
@@ -19,15 +19,17 @@
   .btn {
     margin-right: @spacingXS;
   }
-
 }
 
-.btn-link, .btn-link:focus, .btn-link:hover {
+.btn-link,
+.btn-link:focus,
+.btn-link:hover {
   background-color: transparent;
   color: @kibanaBlue2;
 }
 
-.btn-link:focus, .btn-link:hover {
+.btn-link:focus,
+.btn-link:hover {
   text-decoration: underline;
 }
 
@@ -47,11 +49,8 @@
   overflow: auto;
 }
 
-.form-control {
-  box-shadow: none !important;
-}
-
-:focus {
+.form-control[type='checkbox'],
+button:focus {
   box-shadow: none !important;
 }
 
@@ -65,16 +64,4 @@
 
 .popover {
   max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
-}
-
-.has-error .form-control, .has-error .form-control:focus {
-  border: 0;
-  box-shadow: none;
-  border-bottom: 2px solid @red !important;
-}
-
-.has-warning .form-control, .has-warning .form-control:focus {
-  border: 0;
-  box-shadow: none;
-  border-bottom: 2px solid @orange !important;
 }
