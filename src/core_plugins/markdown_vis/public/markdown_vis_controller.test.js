@@ -25,7 +25,7 @@ describe('markdown vis controller', () => {
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
   });
 
-  it('should update the HTML when params change', () => {
+  it('should update the HTML when render again with changed params', () => {
     const vis = {
       params: {
         markdown: 'Initial'
@@ -35,29 +35,7 @@ describe('markdown vis controller', () => {
     const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
     expect(wrapper.text().trim()).toBe('Initial');
     vis.params.markdown = 'Updated';
-    wrapper.setProps({
-      updateStatus: {
-        params: true
-      }
-    });
+    wrapper.setProps({ vis });
     expect(wrapper.text().trim()).toBe('Updated');
-  });
-
-  it('should not update the HTML when updateStatus reports params have not changed', () => {
-    const vis = {
-      params: {
-        markdown: 'Initial'
-      }
-    };
-
-    const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
-    expect(wrapper.text().trim()).toBe('Initial');
-    vis.params.markdown = 'Updated';
-    wrapper.setProps({
-      updateStatus: {
-        params: false
-      }
-    });
-    expect(wrapper.text().trim()).toBe('Initial');
   });
 });
