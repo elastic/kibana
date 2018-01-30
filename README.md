@@ -120,3 +120,46 @@ Canvas is a functional area within Kibana with Rashid Khan as lead, Joe Fleming 
 **Can customers that saw a demo at Canvas at Keynote provide feedback and get an update?**
 
 Absolutely. Kibana team is open to feedback on the concept of Canvas. Please contact pm@elastic.co to schedule a conversation about your use case and how you envision using Canvas.
+
+### Releases
+
+Releases are uploaded to AWS S3. These instructions assume you have already setup MFA and have installed the AWS CLI tools. To get your release credentials run:
+
+```
+aws sts get-session-token --serial-number <AWS Assigned MFA Device ID> --token-code <Token Code>
+```
+
+You can find the MFA Device ID at:
+
+```
+AWS Console -> IAM -> Find your username -> Security Credentials -> Assign MFA Device (string starting with arn:aws....)
+```
+
+That will dump something that looks like:
+
+```
+[default]
+{
+    "Credentials": {
+        "SecretAccessKey": "<Your new secret access key>",
+        "SessionToken": "<Your new big long session token>",
+        "Expiration": "2018-01-31T09:22:34Z",
+        "AccessKeyId": "<Your new access key id>"
+    }
+}
+```
+
+You can then move this information to your `~/.aws/credentials` file:
+
+```
+[default]
+aws_secret_access_key = <Your new secret access key>
+aws_session_token = <Your new big long session token>
+aws_access_key_id = <Your new access key id>
+```
+
+To publish the release run:
+
+```
+npm run release
+```
