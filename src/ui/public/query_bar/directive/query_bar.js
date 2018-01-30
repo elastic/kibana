@@ -23,6 +23,7 @@ module.directive('queryBar', function () {
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
+      this.searchPlaceholder = config.get('search:placeholder');
       this.typeaheadKey = () => `${this.appName}-${this.query.language}`;
 
       this.submit = () => {

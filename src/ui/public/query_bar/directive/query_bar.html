@@ -14,7 +14,7 @@
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           ng-model="queryBar.localQuery.query"
-          placeholder="Search... (e.g. status:200 AND extension:PHP)"
+          ng-attr-placeholder="{{queryBar.searchPlaceholder}}"
           aria-label="Search input"
           aria-describedby="discoverLuceneSyntaxHint"
           type="text"
@@ -44,7 +44,7 @@
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
-          placeholder="Search... (e.g. status:200 AND extension:PHP)"
+          ng-attr-placeholder="{{queryBar.searchPlaceholder}}"
           aria-label="Search input"
           aria-describedby="discoverKuerySyntaxHint"
           type="text"
@@ -74,7 +74,7 @@
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
-          placeholder="Search... (e.g. status:200 AND extension:PHP)"
+          ng-attr-placeholder="{{queryBar.searchPlaceholder}}"
           aria-label="Search input"
           aria-describedby="discoverKuerySyntaxHint"
           type="text"
