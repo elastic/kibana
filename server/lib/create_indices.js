@@ -14,7 +14,7 @@ function createWorkpadType(client, kibanaIndex) {
               },
             },
           },
-          id: { type: 'keyword', index: false },
+          id: { type: 'text', index: false },
           '@timestamp': { type: 'date' },
           '@created': { type: 'date' },
         },
