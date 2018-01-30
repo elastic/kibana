@@ -116,7 +116,7 @@ export class ControlsTab extends Component {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
-                id="slectControlType"
+                id="selectControlType"
               >
                 <EuiSelect
                   options={[

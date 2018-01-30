@@ -75,7 +75,7 @@ exports[`renders ControlsTab 1`] = `
         <EuiFormRow
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          id="slectControlType"
+          id="selectControlType"
         >
           <EuiSelect
             fullWidth={false}

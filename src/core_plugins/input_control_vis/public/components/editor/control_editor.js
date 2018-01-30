@@ -123,7 +123,7 @@ export class ControlEditor extends Component {
 
   render() {
     return (
-      <EuiPanel grow={false} className="controlEditorPanel" style={{ zIndex: 1 }}>
+      <EuiPanel grow={false} className="controlEditorPanel">
 
         <EuiAccordion
           id="controlEditorAccordion"
