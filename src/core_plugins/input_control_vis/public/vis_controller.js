@@ -79,13 +79,20 @@ class VisController {
     return controls;
   }
 
-  stageFilter(controlIndex, newValue) {
+  async stageFilter(controlIndex, newValue) {
     this.controls[controlIndex].set(newValue);
     if (this.vis.params.updateFiltersOnChange) {
       // submit filters on each control change
       this.submitFilters();
     } else {
       // Do not submit filters, just update vis so controls are updated with latest value
+      const fetchPromises = this.controls.map(async (control) => {
+        if (control.hasAncestors()) {
+          await control.fetch();
+        }
+        return 'done';
+      });
+      await Promise.all(fetchPromises);
       this.drawVis();
     }
   }
@@ -120,13 +127,15 @@ class VisController {
     this.drawVis();
   }
 
-  updateControlsFromKbn() {
-    this.controls.forEach((control) => {
+  async updateControlsFromKbn() {
+    const refreshPromises = this.controls.map(async (control) => {
       control.reset();
       if (control.hasAncestors()) {
-        control.fetch();
+        await control.fetch();
       }
+      return 'done';
     });
+    await Promise.all(refreshPromises);
     this.drawVis();
   }
 

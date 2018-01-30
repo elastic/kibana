@@ -83,6 +83,7 @@ class ListControl extends Control {
     } else {
       this.selectOptions = selectOptions;
       this.enable = true;
+      this.disabledReason = '';
     }
 
     return 'done';
