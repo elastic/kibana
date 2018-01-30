@@ -22,12 +22,45 @@ export class Control {
     this.disable('Control has not been initialized');
   }
 
+  async fetch() {
+    throw new Error('fetch method not defined');
+  }
+
   /**
    *
    * @param ancestors {array of Controls}
    */
-  async init(/* ancestors */) {
-    throw new Error('init method not defined');
+  setAncestors(ancestors) {
+    this.ancestors = ancestors;
+  }
+
+  hasAncestors() {
+    const hasValue = this.ancestors && this.ancestors.length > 0;
+    console.log('hasAncestors', hasValue);
+    return hasValue;
+  }
+
+  getParentSearchSource() {
+    let previousAncestorSearchSource;
+    this.ancestors.forEach(ancestor => {
+      if (!previousAncestorSearchSource) {
+        previousAncestorSearchSource = new this.kbnApi.SearchSource();
+        previousAncestorSearchSource.inherits(false);
+        previousAncestorSearchSource.index(ancestor.filterManager.getIndexPattern());
+        previousAncestorSearchSource.filter(() => {
+          return ancestor.filterManager.createFilter(ancestor.value);
+        });
+      } else {
+        const ancestorSearchSource = new this.kbnApi.SearchSource();
+        ancestorSearchSource.inherits(previousAncestorSearchSource);
+        ancestorSearchSource.index(ancestor.filterManager.getIndexPattern());
+        ancestorSearchSource.filter(() => {
+          return ancestor.filterManager.createFilter(ancestor.value);
+        });
+        previousAncestorSearchSource = ancestorSearchSource;
+      }
+    });
+    return previousAncestorSearchSource;
   }
 
   isEnabled() {

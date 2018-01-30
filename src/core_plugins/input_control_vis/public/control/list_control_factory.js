@@ -40,12 +40,15 @@ class ListControl extends Control {
     return this.filterManager.delimiter;
   }
 
-  async init(ancestors) {
-    if (ancestors.length > 0) {
-      if (!ancestors[0].hasValue()) {
-        this.disable(`Disabled until '${ancestors[0].label}' is set.`);
+  async fetch() {
+    let parentSearchSource;
+    if (this.hasAncestors()) {
+      if (!this.ancestors[0].hasValue()) {
+        this.disable(`Disabled until '${this.ancestors[0].label}' is set.`);
         return 'done';
       }
+
+      parentSearchSource = this.getParentSearchSource();
     }
 
     const indexPattern = this.filterManager.getIndexPattern();
@@ -64,6 +67,9 @@ class ListControl extends Control {
       indexPattern,
       aggs,
       this.useTimeFilter);
+    if (parentSearchSource) {
+      searchSource.inherits(parentSearchSource);
+    }
 
     const resp = await searchSource.fetch();
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {

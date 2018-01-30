@@ -70,7 +70,9 @@ class VisController {
       lineage.forEach(ancestorId => {
         ancestors.push(getControl(ancestorId));
       });
-      controlInitPromises.push(getControl(controlId).init(ancestors));
+      const control = getControl(controlId);
+      control.setAncestors(ancestors);
+      controlInitPromises.push(control.fetch());
     });
 
     await Promise.all(controlInitPromises);
@@ -121,6 +123,9 @@ class VisController {
   updateControlsFromKbn() {
     this.controls.forEach((control) => {
       control.reset();
+      if (control.hasAncestors()) {
+        control.fetch();
+      }
     });
     this.drawVis();
   }

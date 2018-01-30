@@ -28,7 +28,7 @@ const minMaxAgg = (field) => {
 
 class RangeControl extends Control {
 
-  async init() {
+  async fetch() {
     const indexPattern = this.filterManager.getIndexPattern();
     const fieldName = this.filterManager.fieldName;
 
