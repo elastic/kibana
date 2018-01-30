@@ -54,7 +54,7 @@ uiModules
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.createInheritedSearchSource = () => {
           if (!$scope.savedObj.searchSource) {
-            throw new Error('Unable to inherite search source, visualize saved object does not have search source.');
+            throw new Error('Unable to inherit search source, visualize saved object does not have search source.');
           }
           const searchSource = new $scope.vis.API.SearchSource().inherits($scope.savedObj.searchSource);
           return searchSource;
