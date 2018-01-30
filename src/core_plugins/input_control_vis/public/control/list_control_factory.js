@@ -41,14 +41,21 @@ class ListControl extends Control {
   }
 
   async fetch() {
-    let parentSearchSource;
+    let ancestorSearchSource;
     if (this.hasAncestors()) {
-      if (!this.ancestors[0].hasValue()) {
+      if (this.hasUnsetAncestor()) {
         this.disable(`Disabled until '${this.ancestors[0].label}' is set.`);
-        return 'done';
+        // Remove any existing filters for control.
+        this.filterManager.findFilters().forEach((existingFilter) => {
+          this.kbnApi.queryFilter.removeFilter(existingFilter);
+        });
+        return;
       }
 
-      parentSearchSource = this.getParentSearchSource();
+      ancestorSearchSource = this.getAncestorSearchSource();
+
+      // Do not re-fetch same ancestor filters
+
     }
 
     const indexPattern = this.filterManager.getIndexPattern();
@@ -67,8 +74,8 @@ class ListControl extends Control {
       indexPattern,
       aggs,
       this.useTimeFilter);
-    if (parentSearchSource) {
-      searchSource.inherits(parentSearchSource);
+    if (ancestorSearchSource) {
+      searchSource.inherits(ancestorSearchSource);
     }
 
     const resp = await searchSource.fetch();
@@ -80,13 +87,12 @@ class ListControl extends Control {
 
     if(selectOptions.length === 0) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
-    } else {
-      this.selectOptions = selectOptions;
-      this.enable = true;
-      this.disabledReason = '';
+      return;
     }
 
-    return 'done';
+    this.selectOptions = selectOptions;
+    this.enable = true;
+    this.disabledReason = '';
   }
 }
 

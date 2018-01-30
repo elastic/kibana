@@ -35,12 +35,20 @@ export class Control {
   }
 
   hasAncestors() {
-    const hasValue = this.ancestors && this.ancestors.length > 0;
-    console.log('hasAncestors', hasValue);
-    return hasValue;
+    return this.ancestors && this.ancestors.length > 0;
   }
 
-  getParentSearchSource() {
+  hasUnsetAncestor() {
+    return this.ancestors.reduce((accumulator, ancestor) => {
+      return accumulator || !ancestor.hasValue();
+    }, false);
+  }
+
+  hasNewAncestorValues(ancestorSearchSource) {
+
+  }
+
+  getAncestorSearchSource() {
     let previousAncestorSearchSource;
     this.ancestors.forEach(ancestor => {
       if (!previousAncestorSearchSource) {
@@ -62,6 +70,8 @@ export class Control {
     });
     return previousAncestorSearchSource;
   }
+
+
 
   isEnabled() {
     return this.enable;

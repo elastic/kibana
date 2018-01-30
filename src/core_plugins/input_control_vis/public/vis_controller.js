@@ -86,13 +86,7 @@ class VisController {
       this.submitFilters();
     } else {
       // Do not submit filters, just update vis so controls are updated with latest value
-      const fetchPromises = this.controls.map(async (control) => {
-        if (control.hasAncestors()) {
-          await control.fetch();
-        }
-        return 'done';
-      });
-      await Promise.all(fetchPromises);
+      await this.updateNestedControls();
       this.drawVis();
     }
   }
@@ -128,15 +122,20 @@ class VisController {
   }
 
   async updateControlsFromKbn() {
-    const refreshPromises = this.controls.map(async (control) => {
+    this.controls.map(async (control) => {
       control.reset();
+    });
+    await this.updateNestedControls();
+    this.drawVis();
+  }
+
+  async updateNestedControls() {
+    const fetchPromises = this.controls.map(async (control) => {
       if (control.hasAncestors()) {
         await control.fetch();
       }
-      return 'done';
     });
-    await Promise.all(refreshPromises);
-    this.drawVis();
+    return await Promise.all(fetchPromises);
   }
 
   hasChanges() {
