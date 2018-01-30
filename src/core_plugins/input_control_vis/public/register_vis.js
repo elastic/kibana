@@ -20,7 +20,7 @@ function InputControlVisProvider(Private) {
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
     stage: 'lab',
-    requiresUpdateStatus: [Status.TIME],
+    requiresUpdateStatus: [Status.PARAMS, Status.TIME],
     feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,
     visConfig: {
