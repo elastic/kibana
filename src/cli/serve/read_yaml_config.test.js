@@ -1,16 +1,15 @@
-import expect from 'expect.js';
 import { join, relative, resolve } from 'path';
-import { readYamlConfig } from '../read_yaml_config';
+import { readYamlConfig } from './read_yaml_config';
 
 function fixture(name) {
-  return resolve(__dirname, 'fixtures', name);
+  return resolve(__dirname, '__fixtures__', name);
 }
 
 describe('cli/serve/read_yaml_config', function () {
   it('reads a single config file', function () {
     const config = readYamlConfig(fixture('one.yml'));
 
-    expect(config).to.eql({
+    expect(config).toEqual({
       foo: 1,
       bar: true,
     });
@@ -22,7 +21,7 @@ describe('cli/serve/read_yaml_config', function () {
       fixture('two.yml')
     ]);
 
-    expect(config).to.eql({
+    expect(config).toEqual({
       foo: 2,
       bar: true,
       baz: 'bonkers'
@@ -33,14 +32,14 @@ describe('cli/serve/read_yaml_config', function () {
     const oldCwd = process.cwd();
     const newCwd = join(oldCwd, '..');
 
-    before(function () {
+    beforeAll(function () {
       process.chdir(newCwd);
     });
 
     it('resolves relative files based on the cwd', function () {
       const relativePath = relative(newCwd, fixture('one.yml'));
       const config = readYamlConfig(relativePath);
-      expect(config).to.eql({
+      expect(config).toEqual({
         foo: 1,
         bar: true,
       });
@@ -49,10 +48,10 @@ describe('cli/serve/read_yaml_config', function () {
     it('fails to load relative paths, not found because of the cwd', function () {
       expect(function () {
         readYamlConfig(relative(oldCwd, fixture('one.yml')));
-      }).to.throwException(/ENOENT/);
+      }).toThrowError(/ENOENT/);
     });
 
-    after(function () {
+    afterAll(function () {
       process.chdir(oldCwd);
     });
   });

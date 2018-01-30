@@ -1,6 +1,5 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
-import Logger from '../logger';
+import Logger from './logger';
 
 describe('kibana cli', function () {
 
@@ -26,8 +25,8 @@ describe('kibana cli', function () {
           logger.log(message);
 
           const callCount = process.stdout.write.callCount;
-          expect(process.stdout.write.getCall(callCount - 2).args[0]).to.be(message);
-          expect(process.stdout.write.getCall(callCount - 1).args[0]).to.be('\n');
+          expect(process.stdout.write.getCall(callCount - 2).args[0]).toBe(message);
+          expect(process.stdout.write.getCall(callCount - 1).args[0]).toBe('\n');
         });
 
         it('should log messages to the console and append not append a new line', function () {
@@ -37,20 +36,20 @@ describe('kibana cli', function () {
           }
           logger.log('Done!');
 
-          expect(process.stdout.write.callCount).to.be(13);
-          expect(process.stdout.write.getCall(0).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(1).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(2).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(3).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(4).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(5).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(6).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(7).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(8).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(9).args[0]).to.be('.');
-          expect(process.stdout.write.getCall(10).args[0]).to.be('\n');
-          expect(process.stdout.write.getCall(11).args[0]).to.be('Done!');
-          expect(process.stdout.write.getCall(12).args[0]).to.be('\n');
+          expect(process.stdout.write.callCount).toBe(13);
+          expect(process.stdout.write.getCall(0).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(1).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(2).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(3).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(4).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(5).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(6).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(7).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(8).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(9).args[0]).toBe('.');
+          expect(process.stdout.write.getCall(10).args[0]).toBe('\n');
+          expect(process.stdout.write.getCall(11).args[0]).toBe('Done!');
+          expect(process.stdout.write.getCall(12).args[0]).toBe('\n');
         });
 
         it('should not log any messages when quiet is set', function () {
@@ -64,7 +63,7 @@ describe('kibana cli', function () {
           }
           logger.log('Done!');
 
-          expect(process.stdout.write.callCount).to.be(0);
+          expect(process.stdout.write.callCount).toBe(0);
         });
 
         it('should not log any messages when silent is set', function () {
@@ -78,7 +77,7 @@ describe('kibana cli', function () {
           }
           logger.log('Done!');
 
-          expect(process.stdout.write.callCount).to.be(0);
+          expect(process.stdout.write.callCount).toBe(0);
         });
 
       });
@@ -98,7 +97,7 @@ describe('kibana cli', function () {
           const message = 'this is my error';
 
           logger.error(message);
-          expect(process.stderr.write.calledWith(message + '\n')).to.be(true);
+          expect(process.stderr.write.calledWith(message + '\n')).toBe(true);
         });
 
         it('should log error messages to the console when quiet is set', function () {
@@ -106,7 +105,7 @@ describe('kibana cli', function () {
           const message = 'this is my error';
 
           logger.error(message);
-          expect(process.stderr.write.calledWith(message + '\n')).to.be(true);
+          expect(process.stderr.write.calledWith(message + '\n')).toBe(true);
         });
 
         it('should not log any error messages when silent is set', function () {
@@ -114,7 +113,7 @@ describe('kibana cli', function () {
           const message = 'this is my error';
 
           logger.error(message);
-          expect(process.stderr.write.callCount).to.be(0);
+          expect(process.stderr.write.callCount).toBe(0);
         });
 
       });
