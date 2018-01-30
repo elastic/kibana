@@ -58,8 +58,6 @@ include::setup/access.asciidoc[]
 
 include::setup/connect-to-elasticsearch.asciidoc[]
 
-include::setup/tribe.asciidoc[]
-
 include::setup/production.asciidoc[]
 
 include::setup/upgrade.asciidoc[]

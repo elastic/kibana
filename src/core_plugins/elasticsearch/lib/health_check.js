@@ -2,7 +2,6 @@ import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { ensureNotTribe } from './ensure_not_tribe';
 import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
@@ -10,7 +9,6 @@ const NoConnections = elasticsearch.errors.NoConnections;
 export default function (plugin, server) {
   const config = server.config();
   const callAdminAsKibanaUser = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const callDataAsKibanaUser = server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
   const REQUEST_DELAY = config.get('elasticsearch.healthCheck.delay');
 
   plugin.status.yellow('Waiting for Elasticsearch');
@@ -44,20 +42,12 @@ export default function (plugin, server) {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
         .then(waitForEsVersion)
-        .then(() => ensureNotTribe(callAdminAsKibanaUser))
         .then(() => patchKibanaIndex({
           callCluster: callAdminAsKibanaUser,
           log: (...args) => server.log(...args),
           indexName: config.get('kibana.index'),
           kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }))
-        .then(() => {
-          const tribeUrl = config.get('elasticsearch.tribe.url');
-          if (tribeUrl) {
-            return waitForPong(callDataAsKibanaUser, tribeUrl)
-              .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
-          }
-        });
+        }));
 
     return healthCheck
       .then(setGreenStatus)
