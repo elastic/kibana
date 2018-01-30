@@ -25,6 +25,28 @@ describe('config component', function () {
       expect(config.get('obscureProperty')).to.be('default');
     });
 
+    it('honors the default parameter for unset options that are exported', () => {
+      if (config.isDefault('dateFormat')) {
+        const defaultDateFormat = config.get('dateFormat');
+
+        expect(config.get('dateFormat', 'xyz')).to.be('xyz');
+        // shouldn't change other usages
+        expect(config.get('dateFormat')).to.be(defaultDateFormat);
+        expect(config.get('dataFormat', defaultDateFormat)).to.be(defaultDateFormat);
+      } else {
+        const original = config.get('dateFormat');
+        expect(config.get('dateFormat', 'xyz')).to.not.be('xyz');
+
+        // unset it
+        config.remove('dateFormat');
+        expect(config.get('dateFormat', 'xyz')).to.be('xyz');
+
+        // reset it
+        config.set('dateFormat', original);
+        expect(config.get('dateFormat', 'xyz')).to.not.be('xyz');
+      }
+    });
+
     it('throws on unknown properties that don\'t have a value yet.', function () {
       const msg = 'Unexpected `config.get("throwableProperty")` call on unrecognized configuration setting';
       expect(config.get).withArgs('throwableProperty').to.throwException(msg);
