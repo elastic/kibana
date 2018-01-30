@@ -122,6 +122,10 @@
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
 
+"@types/json-stable-stringify@^1.0.32":
+  version "1.0.32"
+  resolved "https://registry.yarnpkg.com/@types/json-stable-stringify/-/json-stable-stringify-1.0.32.tgz#121f6917c4389db3923640b2e68de5fa64dda88e"
+
 "@types/node@*":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
@@ -11839,10 +11843,11 @@ vega-lib@3.0.10:
     vega-voronoi "2"
     vega-wordcloud "^2.1"
 
-vega-lite@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.1.0.tgz#8e6c1d438da6400eebdb53f0da7f9801b9da96f9"
+vega-lite@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.1.2.tgz#ca94eb1d9633763ec6465e40fec7ed040779f695"
   dependencies:
+    "@types/json-stable-stringify" "^1.0.32"
     json-stable-stringify "^1.0.1"
     tslib "^1.9.0"
     vega-event-selector "^2.0.0"
