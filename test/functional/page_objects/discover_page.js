@@ -50,6 +50,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await Promise.all(headerElements.map(el => el.getVisibleText()));
     }
 
+    async hasSavedSearch(searchName) {
+      await this.clickLoadSavedSearchButton();
+      const searchLink = await find.byPartialLinkText(searchName);
+      return searchLink.isDisplayed();
+    }
+
     async loadSavedSearch(searchName) {
       await this.clickLoadSavedSearchButton();
       const searchLink = await find.byPartialLinkText(searchName);
