@@ -23,7 +23,7 @@ export class Project {
 
     this.allDependencies = {
       ...(this._json.devDependencies || {}),
-      ...(this._json.dependencies || {})
+      ...(this._json.dependencies || {}),
     };
 
     this.scripts = this._json.scripts || {};
@@ -47,7 +47,7 @@ export class Project {
     const meta = {
       package: `${this.name} (${this.packageJsonLocation})`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      actual: `"${project.name}": "${versionInPackageJson}"`
+      actual: `"${project.name}": "${versionInPackageJson}"`,
     };
 
     if (versionInPackageJson.startsWith(PREFIX)) {

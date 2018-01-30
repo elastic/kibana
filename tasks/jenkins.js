@@ -30,6 +30,7 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'run:eslint',
+    'run:prettier',
     'licenses',
     'test:server',
     'test:jest',
