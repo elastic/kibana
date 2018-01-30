@@ -3,12 +3,11 @@ import React, { Component } from 'react';
 import { RangeControl } from './range_control';
 import { ListControl } from './list_control';
 import {
-  KuiFieldGroup,
-  KuiFieldGroupSection,
-  KuiButton,
-  KuiFlexGroup,
-  KuiFlexItem
-} from 'ui_framework/components';
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+} from '@elastic/eui';
 
 export class InputControlVis extends Component {
   constructor(props) {
@@ -58,50 +57,55 @@ export class InputControlVis extends Component {
           throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
-        <KuiFlexItem key={control.id} style={{ minWidth: '250px' }}>
+        <EuiFlexItem
+          key={control.id}
+          style={{ minWidth: '250px' }}
+          data-test-subj="inputControlItem"
+        >
           {controlComponent}
-        </KuiFlexItem>
+        </EuiFlexItem>
       );
     });
   }
 
   renderStagingButtons() {
     return (
-      <KuiFieldGroup className="actions">
-        <KuiFieldGroupSection>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            onClick={this.handleSubmit}
-            disabled={!this.props.hasChanges()}
-            data-test-subj="inputControlSubmitBtn"
-          >
-            Apply changes
-          </KuiButton>
-        </KuiFieldGroupSection>
-        <KuiFieldGroupSection>
-          <KuiButton
-            buttonType="basic"
-            type="button"
-            onClick={this.handleReset}
-            disabled={!this.props.hasChanges()}
-            data-test-subj="inputControlCancelBtn"
-          >
-            Cancel changes
-          </KuiButton>
-        </KuiFieldGroupSection>
-        <KuiFieldGroupSection>
-          <KuiButton
-            buttonType="basic"
-            type="button"
-            onClick={this.handleClearAll}
-            disabled={!this.props.hasValues()}
-            data-test-subj="inputControlClearBtn"
-          >
-            Clear form
-          </KuiButton>
-        </KuiFieldGroupSection>
-      </KuiFieldGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow>
+            <EuiButton
+              onClick={this.handleClearAll}
+              disabled={!this.props.hasValues()}
+              data-test-subj="inputControlClearBtn"
+            >
+              Clear form
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow>
+            <EuiButton
+              onClick={this.handleReset}
+              disabled={!this.props.hasChanges()}
+              data-test-subj="inputControlCancelBtn"
+            >
+              Cancel changes
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow>
+            <EuiButton
+              fill
+              onClick={this.handleSubmit}
+              disabled={!this.props.hasChanges()}
+              data-test-subj="inputControlSubmitBtn"
+            >
+              Apply changes
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -113,9 +117,9 @@ export class InputControlVis extends Component {
 
     return (
       <div className="inputControlVis">
-        <KuiFlexGroup wrap>
+        <EuiFlexGroup wrap>
           {this.renderControls()}
-        </KuiFlexGroup>
+        </EuiFlexGroup>
         {stagingButtons}
       </div>
     );
