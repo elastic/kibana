@@ -308,8 +308,7 @@
     "yo": "2.0.0"
   },
   "resolutions": {
-    "angular": "1.6.5",
-    "moment": "2.13.0"
+    "angular": "1.6.5"
   },
   "engines": {
     "node": "6.12.2",
