@@ -2,6 +2,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const remote = getService('remote');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
@@ -180,6 +181,15 @@ export default function ({ getService, getPageObjects }) {
             log.debug('getDataTableData = ' + data.split('\n'));
             expect(data.trim().split('\n')).to.eql(expectedTableData);
           });
+      });
+
+      it('should hide side editor if embed is set to true in url', async () => {
+        const url = await remote.getCurrentUrl();
+        const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+        await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
+        expect(sideEditorExists).to.be(false);
       });
     });
   });

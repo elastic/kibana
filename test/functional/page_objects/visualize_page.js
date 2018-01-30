@@ -261,6 +261,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('spyToggleButton');
     }
 
+    async getSideEditorExists() {
+      return await find.existsByCssSelector('.collapsible-sidebar');
+    }
+
     async openSpyPanel() {
       log.debug('openSpyPanel');
       const isOpen = await testSubjects.exists('spyContentContainer');
