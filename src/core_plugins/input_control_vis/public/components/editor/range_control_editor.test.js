@@ -1,6 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
   RangeControlEditor,
@@ -77,8 +78,7 @@ test('handleNumberOptionChange - step', () => {
     handleIndexPatternChange={handleIndexPatternChange}
     handleNumberOptionChange={handleNumberOptionChange}
   />);
-  const input = component.find('#stepSize-0');
-  input.simulate('change', { target: { value: 0.5 } });
+  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', { target: { value: 0.5 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
@@ -105,8 +105,7 @@ test('handleNumberOptionChange - decimalPlaces', () => {
     handleIndexPatternChange={handleIndexPatternChange}
     handleNumberOptionChange={handleNumberOptionChange}
   />);
-  const input = component.find('#decimalPlaces-0');
-  input.simulate('change', { target: { value: 2 } });
+  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', { target: { value: 2 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;

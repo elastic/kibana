@@ -6,6 +6,7 @@ import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
+import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
@@ -116,7 +117,7 @@ uiModules.get('apps/management')
           .then(function () {
             $location.url('/management/kibana/index');
           })
-          .catch(notify.fatal);
+          .catch(fatalError);
       }
 
       const confirmModalOptions = {

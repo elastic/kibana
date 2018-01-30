@@ -1,7 +1,7 @@
 import angular from 'angular';
 import { cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 import { ConfigDelayedUpdaterProvider } from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 
@@ -116,10 +116,13 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
         throw new Error(`Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
 Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
 any custom setting value for "${key}" may fix this issue.
-You can also save an step using \`config.get("${key}", defaultValue)\`, which
-will set the initial value if one is not already set.`);
+You can use \`config.get("${key}", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized.`);
       }
-      config.set(key, defaultValueForGetter);
+      // the key is not a declared setting
+      // pass through the caller's desired default value
+      // without persisting anything in the config document
+      return defaultValueForGetter;
     }
     const { userValue, value: defaultValue, type } = settings[key];
     const currentValue = config.isDefault(key) ? defaultValue : userValue;

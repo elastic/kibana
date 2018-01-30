@@ -15,7 +15,7 @@ export function redisMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'AV4YjZ5pux-M-tCAunxK',
+          id: 'AV4YjZ5pux-M-tCAunxK',
           linkLabel: 'Redis metrics dashboard',
           isOverview: true
         }

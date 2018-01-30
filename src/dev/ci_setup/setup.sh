@@ -84,4 +84,4 @@ hash -r
 ###
 echo " -- installing node.js dependencies"
 yarn config set cache-folder "$cacheDir/yarn"
-yarn --frozen-lockfile
+yarn kbn bootstrap -- --frozen-lockfile
