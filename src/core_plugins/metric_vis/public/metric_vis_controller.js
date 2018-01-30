@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
+import { isColorDark } from '@elastic/eui';
+import classNames from 'classnames';
 
 export class MetricVisComponent extends Component {
 
@@ -54,6 +56,14 @@ export class MetricVisComponent extends Component {
     return colors[label];
   }
 
+  _needsLightText(bgColor) {
+    const color = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
+    if (!color) {
+      return false;
+    }
+    return isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]));
+  }
+
   _processTableGroups(tableGroups) {
     const config = this.props.vis.params.metric;
     const isPercentageMode = config.percentageMode;
@@ -101,7 +111,8 @@ export class MetricVisComponent extends Component {
             label: title,
             value: value,
             color: shouldColor && config.style.labelColor ? color : null,
-            bgColor: shouldColor && config.style.bgColor ? color : null
+            bgColor: shouldColor && config.style.bgColor ? color : null,
+            lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
           });
         });
       });
@@ -116,10 +127,14 @@ export class MetricVisComponent extends Component {
       color: metric.color
     };
 
+    const containerClassName = classNames('metric-container', {
+      'metric-container--light': metric.lightText
+    });
+
     return (
       <div
         key={index}
-        className="metric-container"
+        className={containerClassName}
         style={{ backgroundColor: metric.bgColor }}
       >
         <div
