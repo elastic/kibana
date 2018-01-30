@@ -45,8 +45,9 @@ export function getQueryParams(mappings, type, search, searchFields) {
   if (search) {
     bool.must = [
       {
-        simple_query_string: {
+        query_string: {
           query: search,
+          default_operator: 'AND',
           ...getFieldsForTypes(
             searchFields,
             type ? [type] : Object.keys(getRootProperties(mappings))

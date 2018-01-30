@@ -1,8 +1,10 @@
 import {
   getTypes,
   getRootType,
-  getRootProperties
 } from '../../../server/mappings';
+
+import { patchMissingProperties } from './kibana_index_patches/patch_missing_properties';
+import { patchMissingTitleKeywordFields } from './kibana_index_patches/patch_missing_title_keyword_fields';
 
 /**
  *  Checks that the root type in the kibana index has all of the
@@ -17,10 +19,10 @@ import {
  */
 export async function patchKibanaIndex(options) {
   const {
-    log,
     indexName,
     callCluster,
-    kibanaIndexMappingsDsl
+    kibanaIndexMappingsDsl,
+    log,
   } = options;
 
   const rootEsType = getRootType(kibanaIndexMappingsDsl);
@@ -31,29 +33,61 @@ export async function patchKibanaIndex(options) {
     return;
   }
 
-  const missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
+  const context = {
+    ...options,
+    currentMappingsDsl,
+    rootEsType,
+  };
 
-  const missingPropertyNames = Object.keys(missingProperties);
-  if (!missingPropertyNames.length) {
-    // all expected properties are in current mapping
-    return;
+  const patchesToApply = [
+    patchMissingProperties,
+    patchMissingTitleKeywordFields,
+  ];
+
+  for (const patch of patchesToApply) {
+    const patchMappings = await patch.getUpdatedPatchMappings(context);
+    if (!patchMappings) {
+      continue;
+    }
+
+    try {
+      // log about new properties
+      log(['info', 'elasticsearch'], {
+        tmpl: `Adding mappings to kibana index for SavedObject types "<%= names.join('", "') %>"`,
+        names: Object.keys(patchMappings),
+      });
+
+      // add the new properties to the index mapping
+      await callCluster('indices.putMapping', {
+        index: indexName,
+        type: rootEsType,
+        body: {
+          properties: patchMappings,
+        },
+        update_all_types: true
+      });
+    }
+    catch (e) {
+      log(['error', 'elasticsearch'], {
+        tmpl: `Unable to patch mappings for "<%= cls %>"`,
+        cls: patch.id,
+      });
+      continue;
+    }
+
+    try {
+      await patch.applyChanges({
+        ...context,
+        patchMappings,
+      });
+    }
+    catch (e) {
+      log(['error', 'elasticsearch'], {
+        tmpl: `Unable to apply patch changes for "<%= cls %>"`,
+        cls: patch.id,
+      });
+    }
   }
-
-  // log about new properties
-  log(['info', 'elasticsearch'], {
-    tmpl: `Adding mappings to kibana index for SavedObject types "<%= names.join('", "') %>"`,
-    names: missingPropertyNames
-  });
-
-  // add the new properties to the index mapping
-  await callCluster('indices.putMapping', {
-    index: indexName,
-    type: rootEsType,
-    body: {
-      properties: missingProperties
-    },
-    update_all_types: true
-  });
 }
 
 /**
@@ -87,27 +121,4 @@ async function getCurrentMappings(callCluster, indexName, rootEsType) {
   }
 
   return currentMappingsDsl;
-}
-
-/**
- *  Get the properties that are in the expectedMappingsDsl but not the
- *  currentMappingsDsl. Properties will be an object of properties normally
- *  found at `[index]mappings[typeName].properties` is es mapping responses
- *
- *  @param  {EsMappingsDsl} currentMappingsDsl
- *  @param  {EsMappingsDsl} expectedMappingsDsl
- *  @return {PropertyMappings}
- */
-async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl) {
-  const expectedProps = getRootProperties(expectedMappingsDsl);
-  const existingProps = getRootProperties(currentMappingsDsl);
-
-  return Object.keys(expectedProps)
-    .reduce((acc, prop) => {
-      if (existingProps[prop]) {
-        return acc;
-      } else {
-        return { ...acc, [prop]: expectedProps[prop] };
-      }
-    }, {});
 }

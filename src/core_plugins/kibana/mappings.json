@@ -20,7 +20,12 @@
         "type": "keyword"
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -40,7 +45,12 @@
         "type": "keyword"
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "uiStateJSON": {
         "type": "text"
@@ -75,7 +85,12 @@
         "type": "keyword"
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "version": {
         "type": "integer"
@@ -129,7 +144,12 @@
         "type": "keyword"
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "uiStateJSON": {
         "type": "text"
