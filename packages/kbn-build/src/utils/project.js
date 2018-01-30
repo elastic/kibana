@@ -34,7 +34,7 @@ export class Project {
   }
 
   ensureValidProjectDependency(project) {
-    const relativePathToProject = path.relative(this.path, project.path);
+    const relativePathToProject = normalizePath(path.relative(this.path, project.path));
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `${PREFIX}${relativePathToProject}`;
@@ -87,4 +87,9 @@ export class Project {
     );
     return installInDir(this.path, extraArgs);
   }
+}
+
+// We normalize all path separators to `/` in generated files
+function normalizePath(path) {
+  return path.replace(/[\\\/]+/g, '/');
 }
