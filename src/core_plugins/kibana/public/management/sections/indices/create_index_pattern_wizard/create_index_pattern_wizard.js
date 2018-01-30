@@ -221,9 +221,7 @@ uiModules.get('apps/management')
       const dateFields = fields.filter(field => field.type === 'date');
 
       if (dateFields.length === 0) {
-        return [{
-          display: `The indices which match this index pattern don't contain any time fields.`,
-        }];
+        return [];
       }
 
       return [
