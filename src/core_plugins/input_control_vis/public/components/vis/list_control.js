@@ -3,6 +3,10 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
 
+import {
+  EuiFieldText,
+} from '@elastic/eui';
+
 export class ListControl extends Component {
   constructor(props) {
     super(props);
@@ -30,10 +34,8 @@ export class ListControl extends Component {
     if (!this.props.control.isEnabled()) {
       // react-select clobbers the tooltip, so just returning a disabled input instead
       return (
-        <input
+        <EuiFieldText
           disabled={true}
-          className="kuiTextInput"
-          style={{ width: '100%' }}
         />
       );
     }

@@ -44,8 +44,10 @@ export class Control {
     }, false);
   }
 
-  hasNewAncestorValues(ancestorSearchSource) {
-
+  getAncestorSignature() {
+    return this.ancestors.map(ancestor => {
+      return ancestor.value;
+    }).join(',');
   }
 
   getAncestorSearchSource() {

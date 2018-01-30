@@ -52,10 +52,14 @@ class ListControl extends Control {
         return;
       }
 
+      const ancestorSignature = this.getAncestorSignature();
+      if (ancestorSignature === this.lastAncestorSignature) {
+        // short circuit to avoid fetching options list for same ancestor values
+        return;
+      }
+      this.lastAncestorSignature = ancestorSignature;
+
       ancestorSearchSource = this.getAncestorSearchSource();
-
-      // Do not re-fetch same ancestor filters
-
     }
 
     const indexPattern = this.filterManager.getIndexPattern();
