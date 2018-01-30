@@ -2,8 +2,6 @@ import React, {
   Component,
 } from 'react';
 import PropTypes from 'prop-types';
-import 'ngreact';
-import { uiModules } from 'ui/modules';
 
 import {
   EuiGlobalToastList,
@@ -125,13 +123,3 @@ export class GlobalToastList extends Component {
     );
   }
 }
-
-const app = uiModules.get('app/kibana', ['react']);
-
-app.directive('globalToastList', function (reactDirective) {
-  return reactDirective(GlobalToastList, [
-    'toasts',
-    'toastLifeTimeMs',
-    ['dismissToast', { watchDepth: 'reference' }],
-  ]);
-});
