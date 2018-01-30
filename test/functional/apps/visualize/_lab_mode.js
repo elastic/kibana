@@ -9,6 +9,7 @@ export default function ({ getService, getPageObjects }) {
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '');
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const hasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
       expect(hasSaved).to.be(true);
 
