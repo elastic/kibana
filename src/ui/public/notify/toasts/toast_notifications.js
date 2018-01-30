@@ -8,24 +8,40 @@ const normalizeToast = toastOrTitle => {
   return toastOrTitle;
 };
 
+let onChangeCallback;
+
 export class ToastNotifications {
   constructor() {
     this.list = [];
     this.idCounter = 0;
   }
 
+  onChange = callback => {
+    onChangeCallback = callback;
+  };
+
   add = toastOrTitle => {
     const toast = {
       id: this.idCounter++,
       ...normalizeToast(toastOrTitle),
     };
+
     this.list.push(toast);
+
+    if (onChangeCallback) {
+      onChangeCallback();
+    }
+
     return toast;
   };
 
   remove = toast => {
     const index = this.list.indexOf(toast);
     this.list.splice(index, 1);
+
+    if (onChangeCallback) {
+      onChangeCallback();
+    }
   };
 
   addSuccess = toastOrTitle => {
