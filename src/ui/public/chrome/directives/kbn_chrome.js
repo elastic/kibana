@@ -1,3 +1,5 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import { remove } from 'lodash';
 
@@ -8,7 +10,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify } from 'ui/notify';
+import { notify, GlobalToastList, toastNotifications, createFirstIndexPatternPrompt } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -66,7 +68,27 @@ export function kbnChromeProvider(chrome, internals) {
 
           // and some local values
           chrome.httpActive = $http.pendingRequests;
+
+          // Notifications
           $scope.notifList = notify._notifs;
+
+          const globalToastList = instance => {
+            toastNotifications.onChange(() => {
+              instance.forceUpdate();
+            });
+          };
+
+          ReactDOM.render(
+            <GlobalToastList
+              ref={globalToastList}
+              toasts={toastNotifications.list}
+              dismissToast={toastNotifications.remove}
+              toastLifeTimeMs={6000}
+            />,
+            document.getElementById('globalToastList')
+          );
+
+          $scope.createFirstIndexPatternPrompt = createFirstIndexPatternPrompt;
 
           return chrome;
         }

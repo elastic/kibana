@@ -4,6 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const remote = getService('remote');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard grid', () => {
@@ -66,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
             .releaseMouseButton();
 
           await retry.try(async () => {
-            const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
+            const controls = await testSubjects.findAll('inputControlItem');
             expect(controls.length).to.equal(3);
             const control0Position = await controls[0].getPosition();
             const control1Position = await controls[1].getPosition();
@@ -86,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
             .releaseMouseButton();
 
           await retry.try(async () => {
-            const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
+            const controls = await testSubjects.findAll('inputControlItem');
             expect(controls.length).to.equal(3);
             const control0Position = await controls[0].getPosition();
             const control1Position = await controls[1].getPosition();
@@ -98,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('Should position controls inside panel', async () => {
-          const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
+          const controls = await testSubjects.findAll('inputControlItem');
           expect(controls.length).to.equal(3);
           const control0Size = await controls[0].getSize();
           const control1Size = await controls[1].getSize();

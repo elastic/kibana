@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
@@ -10,14 +11,14 @@ import labDisabledTemplate from './visualize_lab_disabled.html';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor(savedVisualizations, timefilter, Notifier, Promise, Private, config) {
+  constructor(savedVisualizations, timefilter, Promise, Private, config) {
     super();
     this._config = config;
     this.savedVisualizations = savedVisualizations;
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
-    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier, Private);
+    this.filterBarClickHandler = filterBarClickHandlerProvider(Private);
   }
 
   getEditPath(panelId) {
@@ -33,7 +34,9 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+          const template = $(labDisabledTemplate);
+          template.find('.disabledLabVisualization__title').text(savedObject.title);
+          $(domNode).html(template);
 
           return new Embeddable({
             title: savedObject.title

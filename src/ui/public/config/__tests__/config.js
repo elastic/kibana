@@ -18,11 +18,13 @@ describe('config component', function () {
 
     it('supports the default value overload', function () {
       // default values are consumed and returned atomically
-      expect(config.get('obscureProperty', 'default')).to.be('default');
-      // default values are consumed only if setting was previously unset
-      expect(config.get('obscureProperty', 'another')).to.be('default');
-      // default values are persisted
-      expect(config.get('obscureProperty')).to.be('default');
+      expect(config.get('obscureProperty1', 'default')).to.be('default');
+    });
+
+    it('after a get for an unknown property, the property is not persisted', function () {
+      const throwaway = config.get('obscureProperty2', 'default'); //eslint-disable-line no-unused-vars
+      // after a get, default values are NOT persisted
+      expect(config.get).withArgs('obscureProperty2').to.throwException();
     });
 
     it('throws on unknown properties that don\'t have a value yet.', function () {

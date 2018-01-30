@@ -90,13 +90,13 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('1442901600000');
       });
 
-      it('should allow printing raw value of data', async () => {
+      it.skip('should allow printing raw value of data', async () => {
         await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
       });
 
-      describe('allow time offsets', () => {
+      describe.skip('allow time offsets', () => {
         before(async () => {
           await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
           await PageObjects.visualBuilder.clickMarkdownData();

@@ -14,48 +14,34 @@ exports[`renders RangeControlEditor 1`] = `
     onChange={[Function]}
     value="numberField"
   />
-  <div
-    className="kuiSideBarFormRow"
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="stepSize-0"
+    label="Step Size"
   >
-    <label
-      className="kuiSideBarFormRow__label"
-      htmlFor="stepSize-0"
-    >
-      Step Size
-    </label>
-    <div
-      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
-    >
-      <input
-        className="kuiTextInput"
-        id="stepSize-0"
-        onChange={[Function]}
-        type="number"
-        value={1}
-      />
-    </div>
-  </div>
-  <div
-    className="kuiSideBarFormRow"
+    <EuiFieldNumber
+      data-test-subj="rangeControlSizeInput0"
+      fullWidth={false}
+      isLoading={false}
+      onChange={[Function]}
+      value={1}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="decimalPlaces-0"
+    label="Decimal Places"
   >
-    <label
-      className="kuiSideBarFormRow__label"
-      htmlFor="decimalPlaces-0"
-    >
-      Decimal Places
-    </label>
-    <div
-      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
-    >
-      <input
-        className="kuiTextInput"
-        id="decimalPlaces-0"
-        min="0"
-        onChange={[Function]}
-        type="number"
-        value={0}
-      />
-    </div>
-  </div>
+    <EuiFieldNumber
+      data-test-subj="rangeControlDecimalPlacesInput0"
+      fullWidth={false}
+      isLoading={false}
+      min={0}
+      onChange={[Function]}
+      value={0}
+    />
+  </EuiFormRow>
 </div>
 `;

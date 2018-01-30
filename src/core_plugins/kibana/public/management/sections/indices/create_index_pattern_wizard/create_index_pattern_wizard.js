@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { fatalError } from 'ui/notify';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';
@@ -220,9 +221,7 @@ uiModules.get('apps/management')
       const dateFields = fields.filter(field => field.type === 'date');
 
       if (dateFields.length === 0) {
-        return [{
-          display: `The indices which match this index pattern don't contain any time fields.`,
-        }];
+        return [];
       }
 
       return [
@@ -288,7 +287,7 @@ uiModules.get('apps/management')
           return notify.error(`Couldn't locate any indices matching that pattern. Please add the index to Elasticsearch`);
         }
 
-        notify.fatal(err);
+        fatalError(err);
       }).finally(() => {
         this.isCreatingIndexPattern = false;
       });

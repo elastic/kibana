@@ -41,4 +41,27 @@ describe('IndicesList', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  describe('updating props', () => {
+    it('should render all new indices', () => {
+      const component = shallow(
+        <IndicesList indices={indices}/>
+      );
+
+      const moreIndices = [
+        ...indices,
+        ...indices,
+        ...indices,
+        ...indices,
+        ...indices,
+        ...indices,
+        ...indices,
+        ...indices,
+      ];
+
+      component.setProps({ indices: moreIndices });
+      component.update();
+      expect(component).toMatchSnapshot();
+    });
+  });
 });

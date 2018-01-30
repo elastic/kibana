@@ -82,7 +82,7 @@ export const METRICBEAT_INSTRUCTIONS = {
                 'omit this command.',
       commands: [
         'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup',
-        'PS C:\\Program Files\\Metricbeat> Service-Start metricbeat',
+        'PS C:\\Program Files\\Metricbeat> Start-Service metricbeat',
       ]
     }
   },

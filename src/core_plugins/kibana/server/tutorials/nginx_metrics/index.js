@@ -18,7 +18,7 @@ export function nginxMetricsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: '023d2930-f1a5-11e7-a9ef-93c69af7b129',
+          id: '023d2930-f1a5-11e7-a9ef-93c69af7b129',
           linkLabel: 'Nginx metrics dashboard',
           isOverview: true
         }

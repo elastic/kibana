@@ -1,11 +1,9 @@
 let SenseEditor = require('../sense_editor/editor');
-import { useResizeCheckerProvider } from '../sense_editor_resize';
+import { useResizeChecker } from '../sense_editor_resize';
 
 require('ui/modules')
 .get('app/sense')
-.directive('senseHistoryViewer', function (Private) {
-  const useResizeChecker = Private(useResizeCheckerProvider);
-
+.directive('senseHistoryViewer', function () {
   return {
     restrict: 'E',
     scope: {
