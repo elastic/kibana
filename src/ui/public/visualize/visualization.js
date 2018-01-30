@@ -99,7 +99,7 @@ uiModules
             // we want to render the chart, so it know about the legend size.
             await new Promise(resolve => $timeout(resolve));
             vis.size = [container.width(), container.height()];
-            const status = getUpdateStatus($scope);
+            const status = getUpdateStatus(vis, $scope);
             const renderPromise = visualization.render(visData, status);
             $scope.$apply();
             return renderPromise;
