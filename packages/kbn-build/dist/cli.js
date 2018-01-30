@@ -23514,7 +23514,7 @@ class Project {
   }
 
   ensureValidProjectDependency(project) {
-    const relativePathToProject = _path2.default.relative(this.path, project.path);
+    const relativePathToProject = normalizePath(_path2.default.relative(this.path, project.path));
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `${PREFIX}${relativePathToProject}`;
@@ -23554,7 +23554,12 @@ class Project {
     return (0, _scripts.installInDir)(this.path, extraArgs);
   }
 }
-exports.Project = Project;
+
+exports.Project = Project; // We normalize all path separators to `/` in generated files
+
+function normalizePath(path) {
+  return path.replace(/[\\\/]+/g, '/');
+}
 
 /***/ }),
 /* 175 */
