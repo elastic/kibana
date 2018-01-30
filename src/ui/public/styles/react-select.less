@@ -18,20 +18,22 @@
   opacity: 0.35;
 }
 .Select-control {
-  background-color: #fff;
-  border-radius: 4px;
-  border: 1px solid #DEDEDE;
-  color: #191E23;
+  background: #fbfbfb;
+  color: #3F3F3F;
   cursor: default;
   display: table;
   border-spacing: 0;
   border-collapse: separate;
-  height: 36px;
+  height: 40px;
   outline: none;
   overflow: hidden;
   position: relative;
   width: 100%;
   font-size: 14px;
+  border: none;
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
+  transition: box-shadow 250ms ease-in, background 250ms ease-in, -webkit-box-shadow 250ms ease-in;
+  border-radius: 0;
 }
 .Select-control .Select-input:focus {
   outline: none;
