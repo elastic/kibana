@@ -41,20 +41,6 @@ describe('plugins/elasticsearch', function () {
       expect(createCluster.getCall(0).args[1].url).to.eql('http://localhost:9200');
     });
 
-    it('creates the cluster with elasticsearch.tribe config', () => {
-      config.elasticsearch.tribe = {
-        url: 'http://localhost:9201'
-      };
-
-      createDataCluster(server);
-
-      const { createCluster } = server.plugins.elasticsearch;
-
-      sinon.assert.calledOnce(createCluster);
-      expect(createCluster.getCall(0).args[0]).to.eql('data');
-      expect(createCluster.getCall(0).args[1].url).to.eql('http://localhost:9201');
-    });
-
     it('sets client logger for cluster options', () => {
       createDataCluster(server);
 

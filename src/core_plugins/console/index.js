@@ -32,11 +32,7 @@ export default function (kibana) {
     require: [ 'elasticsearch' ],
 
     isEnabled(config) {
-      // console must be disabled when tribe mode is configured
-      return (
-        config.get('console.enabled') &&
-        !config.get('elasticsearch.tribe.url')
-      );
+      return config.get('console.enabled');
     },
 
     config: function (Joi) {

@@ -120,7 +120,7 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
-          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
@@ -144,7 +144,7 @@ describe('plugins/elasticsearch', () => {
           );
 
           sinon.assert.calledTwice(ping);
-          sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
+          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });
