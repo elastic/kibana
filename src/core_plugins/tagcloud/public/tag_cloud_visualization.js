@@ -14,7 +14,6 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
-
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tagcloud-vis');
     this._containerNode.appendChild(cloudContainer);
@@ -60,16 +59,14 @@ export class TagCloudVisualization {
 
     await this._renderComplete$.take(1).toPromise();
 
-    const truncatedMessage = this._containerNode.querySelector('.tagcloud-truncated-message');
-    const incompleteMessage = this._containerNode.querySelector('.tagcloud-incomplete-message');
-
     const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
     if (!hasAggDefined) {
-      incompleteMessage.style.display = 'none';
-      truncatedMessage.style.display = 'none';
+      this._feedbackMessage.setState({
+        shouldShowTruncate: false,
+        shouldShowIncomplete: false
+      });
       return;
     }
-
     this._label.setState({
       label: `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`,
       shouldShowLabel: this._vis.params.showLabel
