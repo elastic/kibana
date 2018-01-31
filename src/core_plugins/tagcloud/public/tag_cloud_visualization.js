@@ -1,6 +1,11 @@
 import TagCloud from './tag_cloud';
-import tagCloudContainer from './tag_cloud_container.html';
 import { Observable } from 'rxjs';
+import { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
+
+
+import { Label } from './label';
+import { FeedbackMessage } from './feedback_message';
 
 const MAX_TAG_COUNT = 200;
 
@@ -9,14 +14,14 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
-    const nodeContents = document.createElement('div');
-    nodeContents.innerHTML = tagCloudContainer;
-    this._containerNode.appendChild(nodeContents);
+
+    const cloudContainer = document.createElement('div');
+    cloudContainer.classList.add('tagcloud-vis');
+    this._containerNode.appendChild(cloudContainer);
 
     this._vis = vis;
     this._bucketAgg = null;
     this._truncated = false;
-    const cloudContainer = this._containerNode.querySelector('.tagcloud-vis');
     this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
       if (!this._bucketAgg) {
@@ -27,10 +32,18 @@ export class TagCloudVisualization {
     });
     this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
 
+
+    this._feedbackNode = document.createElement('div');
+    this._containerNode.appendChild(this._feedbackNode);
+    this._feedbackMessage = render(<FeedbackMessage />, this._feedbackNode);
+
+    this._labelNode = document.createElement('div');
+    this._containerNode.appendChild(this._labelNode);
+    this._label = render(<Label />, this._labelNode);
+
   }
 
   async render(data, status) {
-
 
     if (status.params || status.aggs) {
       this._updateParams();
@@ -57,27 +70,22 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucketName = this._containerNode.querySelector('.tagcloud-custom-label');
-    bucketName.textContent = `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`;
-    truncatedMessage.style.display = this._truncated ? 'block' : 'none';
-
-    const tagCloudStatus = this._tagCloud.getStatus();
-    if (TagCloud.STATUS.COMPLETE === tagCloudStatus) {
-      incompleteMessage.style.display = 'none';
-    } else if (TagCloud.STATUS.INCOMPLETE === tagCloudStatus) {
-      incompleteMessage.style.display = 'block';
-    }
-
-    if (this._vis.params.showLabel) {
-      bucketName.style.display = 'block';
-    } else {
-      bucketName.style.display = 'none';
-    }
+    this._label.setState({
+      label: `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`,
+      shouldShowLabel: this._vis.params.showLabel
+    });
+    this._feedbackMessage.setState({
+      shouldShowTruncate: this._truncated,
+      shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE
+    });
   }
 
 
   destroy() {
     this._tagCloud.destroy();
+    unmountComponentAtNode(this._feedbackNode);
+    unmountComponentAtNode(this._labelNode);
+
   }
 
   _updateData(response) {
