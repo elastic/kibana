@@ -26,25 +26,15 @@ describe('config component', function () {
     });
 
     it('honors the default parameter for unset options that are exported', () => {
-      if (config.isDefault('dateFormat')) {
-        const defaultDateFormat = config.get('dateFormat');
+      // if you are hitting this error, then a test is setting this config value globally and not unsetting it!
+      expect(config.isDefault('dateFormat')).to.be(true);
 
-        expect(config.get('dateFormat', 'xyz')).to.be('xyz');
-        // shouldn't change other usages
-        expect(config.get('dateFormat')).to.be(defaultDateFormat);
-        expect(config.get('dataFormat', defaultDateFormat)).to.be(defaultDateFormat);
-      } else {
-        const original = config.get('dateFormat');
-        expect(config.get('dateFormat', 'xyz')).to.not.be('xyz');
+      const defaultDateFormat = config.get('dateFormat');
 
-        // unset it
-        config.remove('dateFormat');
-        expect(config.get('dateFormat', 'xyz')).to.be('xyz');
-
-        // reset it
-        config.set('dateFormat', original);
-        expect(config.get('dateFormat', 'xyz')).to.not.be('xyz');
-      }
+      expect(config.get('dateFormat', 'xyz')).to.be('xyz');
+      // shouldn't change other usages
+      expect(config.get('dateFormat')).to.be(defaultDateFormat);
+      expect(config.get('dataFormat', defaultDateFormat)).to.be(defaultDateFormat);
     });
 
     it('throws on unknown properties that don\'t have a value yet.', function () {
