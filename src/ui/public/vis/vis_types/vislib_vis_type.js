@@ -37,7 +37,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.destroy();
       }
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise(async (resolve) => {
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }
