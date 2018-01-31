@@ -307,9 +307,6 @@
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   },
-  "resolutions": {
-    "angular": "1.6.5"
-  },
   "engines": {
     "node": "6.12.2",
     "yarn": "^1.3.2"
