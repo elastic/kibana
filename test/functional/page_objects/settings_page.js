@@ -176,8 +176,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getFieldsTabCount() {
       return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        log.debug(text);
-        return text;
+        return text.replace(/\((.*)\)/, '$1');
       });
     }
 

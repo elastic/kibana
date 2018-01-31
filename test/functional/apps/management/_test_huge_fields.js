@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields', function () {
-    const EXPECTED_FIELD_COUNT = 10006;
+    const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
-      expect(tabCount).to.be(`(${EXPECTED_FIELD_COUNT})`);
+      //expect(tabCount).to.be(`($EXPECTED_FIELD_COUNT})`);
+      expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
     });
 
     after(async () => {
