@@ -158,8 +158,8 @@
     "markdown-it": "8.3.2",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
-    "moment": "2.13.0",
-    "moment-timezone": "0.5.4",
+    "moment": "^2.20.1",
+    "moment-timezone": "^0.5.14",
     "mustache": "2.3.0",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
@@ -309,8 +309,7 @@
     "yo": "2.0.0"
   },
   "resolutions": {
-    "angular": "1.6.5",
-    "moment": "2.13.0"
+    "angular": "1.6.5"
   },
   "engines": {
     "node": "6.12.2",
