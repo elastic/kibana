@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/babel-preset-kibana",
+  "name": "@kbn/babel-preset",
   "private": true,
   "version": "1.0.0",
   "license": "Apache-2.0",

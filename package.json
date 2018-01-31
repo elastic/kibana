@@ -75,7 +75,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/babel-preset-kibana": "link:packages/babel-preset-kibana",
+    "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@elastic/datemath": "4.0.2",
     "@elastic/eui": "0.0.14",
     "@elastic/filesaver": "1.1.2",

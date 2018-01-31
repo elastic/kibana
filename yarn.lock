@@ -63,10 +63,6 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@elastic/babel-preset-kibana@link:packages/babel-preset-kibana":
-  version "0.0.0"
-  uid ""
-
 "@elastic/datemath@4.0.2":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-4.0.2.tgz#91417763fa4ec93ad1426cb69aaf2de2e9914a68"
@@ -125,6 +121,10 @@
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
+
+"@kbn/babel-preset@link:packages/kbn-babel-preset":
+  version "0.0.0"
+  uid ""
 
 "@types/json-stable-stringify@^1.0.32":
   version "1.0.32"

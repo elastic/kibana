@@ -32,7 +32,7 @@ module.exports = {
       exclude: /node_modules/,
       query: {
         presets: [
-          require.resolve('@elastic/babel-preset-kibana/webpack')
+          require.resolve('@kbn/babel-preset/webpack')
         ],
       },
     }, {
