@@ -77,9 +77,9 @@ function getUpdateStatus(requiresUpdateStatus, $scope) {
 
   const status = {};
 
-  for (const status of requiresUpdateStatus) {
+  for (const requiredStatus of requiresUpdateStatus) {
     // Calculate all required status updates for this visualization
-    switch (status) {
+    switch (requiredStatus) {
       case Status.AGGS:
         status.aggs = hasChangedUsingGenericHashComparison('aggs', $scope.vis.aggs);
         break;
