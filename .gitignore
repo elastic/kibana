@@ -21,7 +21,7 @@ target
 .htpasswd
 .eslintcache
 /plugins/
-data
+/data
 disabledPlugins
 webpackstats.json
 /config/*

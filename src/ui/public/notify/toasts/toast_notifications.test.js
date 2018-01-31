@@ -1,3 +1,5 @@
+import sinon from 'sinon';
+
 import {
   ToastNotifications,
 } from './toast_notifications';
@@ -38,6 +40,23 @@ describe('ToastNotifications', () => {
         const toast = toastNotifications.add('Test');
         toastNotifications.remove(toast);
         expect(toastNotifications.list.length).toBe(0);
+      });
+    });
+
+    describe('onChange method', () => {
+      test('callback is called when a toast is added', () => {
+        const onChangeSpy = sinon.spy();
+        toastNotifications.onChange(onChangeSpy);
+        toastNotifications.add({});
+        expect(onChangeSpy.callCount).toBe(1);
+      });
+
+      test('callback is called when a toast is removed', () => {
+        const onChangeSpy = sinon.spy();
+        toastNotifications.onChange(onChangeSpy);
+        const toast = toastNotifications.add({});
+        toastNotifications.remove(toast);
+        expect(onChangeSpy.callCount).toBe(2);
       });
     });
 

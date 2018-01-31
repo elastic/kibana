@@ -76,7 +76,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "4.0.2",
-    "@elastic/eui": "0.0.13",
+    "@elastic/eui": "0.0.14",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.1",
     "@elastic/test-subj-selector": "0.2.1",
@@ -159,8 +159,8 @@
     "markdown-it": "8.3.2",
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
-    "moment": "2.13.0",
-    "moment-timezone": "0.5.4",
+    "moment": "^2.20.1",
+    "moment-timezone": "^0.5.14",
     "mustache": "2.3.0",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
@@ -212,7 +212,7 @@
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "3.0.10",
-    "vega-lite": "2.1.0",
+    "vega-lite": "2.1.2",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
@@ -306,10 +306,6 @@
     "xmlbuilder": "9.0.4",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
-  },
-  "resolutions": {
-    "angular": "1.6.5",
-    "moment": "2.13.0"
   },
   "engines": {
     "node": "6.12.2",

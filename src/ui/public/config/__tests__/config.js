@@ -27,6 +27,18 @@ describe('config component', function () {
       expect(config.get).withArgs('obscureProperty2').to.throwException();
     });
 
+    it('honors the default parameter for unset options that are exported', () => {
+      // if you are hitting this error, then a test is setting this config value globally and not unsetting it!
+      expect(config.isDefault('dateFormat')).to.be(true);
+
+      const defaultDateFormat = config.get('dateFormat');
+
+      expect(config.get('dateFormat', 'xyz')).to.be('xyz');
+      // shouldn't change other usages
+      expect(config.get('dateFormat')).to.be(defaultDateFormat);
+      expect(config.get('dataFormat', defaultDateFormat)).to.be(defaultDateFormat);
+    });
+
     it('throws on unknown properties that don\'t have a value yet.', function () {
       const msg = 'Unexpected `config.get("throwableProperty")` call on unrecognized configuration setting';
       expect(config.get).withArgs('throwableProperty').to.throwException(msg);

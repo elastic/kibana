@@ -87,9 +87,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.13":
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.13.tgz#aa3a71c6bfc41978366c29a4254b3a8d1953108f"
+"@elastic/eui@0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.14.tgz#18842465e11ee96d1b90813e7fd38bef2c65bc8b"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -121,6 +121,10 @@
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
+
+"@types/json-stable-stringify@^1.0.32":
+  version "1.0.32"
+  resolved "https://registry.yarnpkg.com/@types/json-stable-stringify/-/json-stable-stringify-1.0.32.tgz#121f6917c4389db3923640b2e68de5fa64dda88e"
 
 "@types/node@*":
   version "9.3.0"
@@ -7784,15 +7788,15 @@ module-not-found-error@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/module-not-found-error/-/module-not-found-error-1.0.1.tgz#cf8b4ff4f29640674d6cdd02b0e3bc523c2bbdc0"
 
-moment-timezone@0.5.4:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.4.tgz#b6188b8f08557ea9ffb0d42899f5b171e1858e93"
+moment-timezone@^0.5.14:
+  version "0.5.14"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.14.tgz#4eb38ff9538b80108ba467a458f3ed4268ccfcb1"
   dependencies:
-    moment ">= 2.6.0"
+    moment ">= 2.9.0"
 
-moment@2.13.0, moment@2.x.x, "moment@>= 2.6.0", moment@^2.10.3, moment@^2.10.6, moment@^2.13.0, moment@^2.7.0:
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.13.0.tgz#24162d99521e6d40f99ae6939e806d2139eaac52"
+moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.3, moment@^2.10.6, moment@^2.13.0, moment@^2.20.1, moment@^2.7.0:
+  version "2.20.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
 
 mri@1.1.0:
   version "1.1.0"
@@ -11807,10 +11811,11 @@ vega-lib@3.0.10:
     vega-voronoi "2"
     vega-wordcloud "^2.1"
 
-vega-lite@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.1.0.tgz#8e6c1d438da6400eebdb53f0da7f9801b9da96f9"
+vega-lite@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.1.2.tgz#ca94eb1d9633763ec6465e40fec7ed040779f695"
   dependencies:
+    "@types/json-stable-stringify" "^1.0.32"
     json-stable-stringify "^1.0.1"
     tslib "^1.9.0"
     vega-event-selector "^2.0.0"
