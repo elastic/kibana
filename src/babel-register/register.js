@@ -30,6 +30,6 @@ require('babel-register')({
   ignore,
   babelrc: false,
   presets: [
-    require.resolve('../babel-preset/node')
+    require.resolve('@elastic/babel-preset-kibana/node')
   ],
 });
