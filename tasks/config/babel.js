@@ -2,7 +2,7 @@ module.exports = {
   build: {
     options: {
       presets: [
-        require.resolve('../../src/babel-preset/node')
+        require.resolve('@elastic/babel-preset-kibana/node')
       ]
     },
     src: [
