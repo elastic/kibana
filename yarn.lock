@@ -295,39 +295,39 @@ ammo@2.x.x:
     boom "5.x.x"
     hoek "4.x.x"
 
-angular-aria@1.6.6:
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.6.6.tgz#58dd748e09564bc8409f739bde57b35fbee5b6a5"
+angular-aria@^1.6.6:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.6.8.tgz#f5dfcdd69c0dddcb8b691749285613caa7e6cca5"
 
-angular-bootstrap-colorpicker@3.0.19:
-  version "3.0.19"
-  resolved "https://registry.yarnpkg.com/angular-bootstrap-colorpicker/-/angular-bootstrap-colorpicker-3.0.19.tgz#557609636b33e1b5c83e2742cbfd0e4ea14c042c"
+angular-bootstrap-colorpicker@^3.0.19:
+  version "3.0.32"
+  resolved "https://registry.yarnpkg.com/angular-bootstrap-colorpicker/-/angular-bootstrap-colorpicker-3.0.32.tgz#1080b1ab9802c1bae1919badb26417de6758ef3d"
 
-angular-elastic@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/angular-elastic/-/angular-elastic-2.5.0.tgz#07736ac290ea955b9fe511aac84020df623c87ec"
+angular-elastic@^2.5.0:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/angular-elastic/-/angular-elastic-2.5.1.tgz#e938ab1bd8c76415b8ca6514b15fe3593a5df535"
   dependencies:
     angular ">=1.0.6"
 
-angular-mocks@1.4.7:
-  version "1.4.7"
-  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.4.7.tgz#d7343ee0a033f9216770bda573950f6814d95227"
+angular-mocks@^1.4.7:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.8.tgz#ba2120057b4edaa56492d8789ddfbc8f18afa3c5"
 
-angular-route@1.4.7:
-  version "1.4.7"
-  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.4.7.tgz#9796ac2527547158cd42d757d69d90a891a6d95f"
+angular-route@~1.4.7:
+  version "1.4.14"
+  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.4.14.tgz#2e5dbfe1239423c678165c39bb38601ad66a0794"
 
-angular-sanitize@1.5.7:
-  version "1.5.7"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.5.7.tgz#36e78b7bba6e90233a9b908e597a05770356f290"
+angular-sanitize@^1.5.7:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.8.tgz#68175a1a5853a6439fffcb251a88a538a44a8e70"
 
-angular-sortable-view@0.0.15:
+angular-sortable-view@^0.0.15:
   version "0.0.15"
   resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.15.tgz#e8463df909db83d641b028f0773a10d50292874f"
 
-angular@1.6.5, angular@>=1.0.6:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.5.tgz#37f788eebec5ce2e3fa02b17bbcb2a231576a0d6"
+angular@>=1.0.6, angular@^1.6.5:
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.8.tgz#5be378a58be91a5489e78b59c4518cd9fd273ffb"
 
 ansi-align@^2.0.0:
   version "2.0.0"
