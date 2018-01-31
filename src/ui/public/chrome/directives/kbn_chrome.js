@@ -10,8 +10,34 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify, GlobalToastList, toastNotifications, topBanners } from 'ui/notify';
+import {
+  notify,
+  GlobalToastList,
+  toastNotifications,
+  GlobalBannerList,
+  topBanners,
+} from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
+
+function renderGlobalBannerList() {
+  ReactDOM.render(
+    <GlobalBannerList
+      banners={topBanners.list}
+    />,
+    document.getElementById('globalBannerList')
+  );
+}
+
+function renderGlobalToastList() {
+  ReactDOM.render(
+    <GlobalToastList
+      toasts={toastNotifications.list}
+      dismissToast={toastNotifications.remove}
+      toastLifeTimeMs={6000}
+    />,
+    document.getElementById('globalToastList')
+  );
+}
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -69,27 +95,15 @@ export function kbnChromeProvider(chrome, internals) {
           // and some local values
           chrome.httpActive = $http.pendingRequests;
 
-          // Banners
-          $scope.topBanners = topBanners.list;
-
           // Notifications
           $scope.notifList = notify._notifs;
 
-          const globalToastList = instance => {
-            toastNotifications.onChange(() => {
-              instance.forceUpdate();
-            });
-          };
+          // Non-scope based code (e.g., React)
 
-          ReactDOM.render(
-            <GlobalToastList
-              ref={globalToastList}
-              toasts={toastNotifications.list}
-              dismissToast={toastNotifications.remove}
-              toastLifeTimeMs={6000}
-            />,
-            document.getElementById('globalToastList')
-          );
+          // Banners
+          topBanners.onChange(renderGlobalBannerList);
+          // Toast Notifications
+          toastNotifications.onChange(renderGlobalToastList);
 
           return chrome;
         }

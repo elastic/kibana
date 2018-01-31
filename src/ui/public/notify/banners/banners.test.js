@@ -1,13 +1,48 @@
+import sinon from 'sinon';
+
 import {
   Banners,
 } from './banners';
 
 describe('Banners', () => {
+
   describe('interface', () => {
     let banners;
 
     beforeEach(() => {
       banners = new Banners();
+    });
+
+    describe('onChange method', () => {
+
+      test('callback is called immediately', () => {
+        const onChangeSpy = sinon.spy();
+        banners.onChange(onChangeSpy);
+        expect(onChangeSpy.callCount).toBe(1);
+      });
+
+      test('callback is called when a toast is added', () => {
+        const onChangeSpy = sinon.spy();
+        banners.onChange(onChangeSpy);
+        banners.set({ id: 'bruce-banner' });
+        expect(onChangeSpy.callCount).toBe(2);
+      });
+
+      test('callback is called when a toast is removed', () => {
+        const onChangeSpy = sinon.spy();
+        banners.onChange(onChangeSpy);
+        banners.set({ id: 'bruce-banner' });
+        banners.remove('bruce-banner');
+        expect(onChangeSpy.callCount).toBe(3);
+      });
+
+      test('callback is not called when remove is ignored', () => {
+        const onChangeSpy = sinon.spy();
+        banners.onChange(onChangeSpy);
+        banners.remove('hulk'); // should not invoke callback
+        expect(onChangeSpy.callCount).toBe(1);
+      });
+
     });
 
     describe('set method', () => {

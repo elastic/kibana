@@ -6,9 +6,16 @@ export class Banners {
   constructor() {
     // sorted in descending order (100, 99, 98...) so that higher priorities are in front
     this.list = [];
+    this.onChangeCallback = null;
   }
 
-  _replaceIfExists(bannerDetails) {
+  _changed = () => {
+    if (this.onChangeCallback) {
+      this.onChangeCallback();
+    }
+  }
+
+  _replaceIfExists = bannerDetails => {
     const index = this.list.findIndex(details => details.id === bannerDetails.id);
 
     // we found the banner
@@ -20,14 +27,19 @@ export class Banners {
         return true;
       }
 
-      // the oriority did change, so we just remove it and let add do its magic
-      this.remove(bannerDetails.id);
+      // the priority did change, so we just remove it and let 'set' do its magic
+      this.list.splice(index, 1);
     }
 
     return false;
   }
 
-  set({ id, component, priority = 0 }) {
+  onChange = callback => {
+    this.onChangeCallback = callback;
+    this._changed();
+  }
+
+  set = ({ id, component, priority = 0 }) => {
     const bannerDetails = { id, component, priority };
 
     if (this._replaceIfExists(bannerDetails) === false) {
@@ -42,13 +54,16 @@ export class Banners {
         this.list.push(bannerDetails);
       }
     }
+
+    this._changed();
   }
 
-  remove(id) {
+  remove = id => {
     const index = this.list.findIndex(details => details.id === id);
 
     if (index !== -1) {
       this.list.splice(index, 1);
+      this._changed();
 
       return true;
     }

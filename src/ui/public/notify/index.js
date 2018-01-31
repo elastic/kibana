@@ -2,4 +2,4 @@ export { notify } from './notify';
 export { Notifier } from './notifier';
 export { fatalError, fatalErrorInternals, addFatalErrorCallback } from './fatal_error';
 export { GlobalToastList, toastNotifications } from './toasts';
-export { topBanners } from './banners';
+export { GlobalBannerList, topBanners } from './banners';

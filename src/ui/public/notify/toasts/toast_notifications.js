@@ -8,16 +8,22 @@ const normalizeToast = toastOrTitle => {
   return toastOrTitle;
 };
 
-let onChangeCallback;
-
 export class ToastNotifications {
   constructor() {
     this.list = [];
     this.idCounter = 0;
+    this.onChangeCallback = null;
+  }
+
+  _changed = () => {
+    if (this.onChangeCallback) {
+      this.onChangeCallback();
+    }
   }
 
   onChange = callback => {
-    onChangeCallback = callback;
+    this.onChangeCallback = callback;
+    this._changed();
   };
 
   add = toastOrTitle => {
@@ -27,10 +33,7 @@ export class ToastNotifications {
     };
 
     this.list.push(toast);
-
-    if (onChangeCallback) {
-      onChangeCallback();
-    }
+    this._changed();
 
     return toast;
   };
@@ -40,10 +43,7 @@ export class ToastNotifications {
 
     if (index !== -1) {
       this.list.splice(index, 1);
-
-      if (onChangeCallback) {
-        onChangeCallback();
-      }
+      this._changed();
     }
   };
 

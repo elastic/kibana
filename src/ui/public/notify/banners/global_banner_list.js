@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import 'ngreact';
-import { uiModules } from 'ui/modules';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -71,11 +69,3 @@ GlobalBannerList.propTypes = {
 GlobalBannerList.defaultProps = {
   banners: []
 };
-
-const app = uiModules.get('app/kibana', ['react']);
-
-app.directive('globalBannerList', (reactDirective) => {
-  return reactDirective(GlobalBannerList, [
-    'banners',
-  ]);
-});
