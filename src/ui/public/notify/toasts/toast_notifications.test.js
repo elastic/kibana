@@ -50,17 +50,11 @@ describe('ToastNotifications', () => {
     });
 
     describe('onChange method', () => {
-      test('callback is called immediately', () => {
-        const onChangeSpy = sinon.spy();
-        toastNotifications.onChange(onChangeSpy);
-        expect(onChangeSpy.callCount).toBe(1);
-      });
-
       test('callback is called when a toast is added', () => {
         const onChangeSpy = sinon.spy();
         toastNotifications.onChange(onChangeSpy);
         toastNotifications.add({});
-        expect(onChangeSpy.callCount).toBe(2);
+        expect(onChangeSpy.callCount).toBe(1);
       });
 
       test('callback is called when a toast is removed', () => {
@@ -68,14 +62,14 @@ describe('ToastNotifications', () => {
         toastNotifications.onChange(onChangeSpy);
         const toast = toastNotifications.add({});
         toastNotifications.remove(toast);
-        expect(onChangeSpy.callCount).toBe(3);
+        expect(onChangeSpy.callCount).toBe(2);
       });
 
       test('callback is not called when remove is ignored', () => {
         const onChangeSpy = sinon.spy();
         toastNotifications.onChange(onChangeSpy);
         toastNotifications.remove({});
-        expect(onChangeSpy.callCount).toBe(1);
+        expect(onChangeSpy.callCount).toBe(0);
       });
     });
 

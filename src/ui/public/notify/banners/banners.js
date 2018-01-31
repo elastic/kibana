@@ -36,7 +36,6 @@ export class Banners {
 
   onChange = callback => {
     this.onChangeCallback = callback;
-    this._changed();
   }
 
   set = ({ id, component, priority = 0 }) => {

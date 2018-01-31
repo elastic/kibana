@@ -19,26 +19,6 @@ import {
 } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
-function renderGlobalBannerList() {
-  ReactDOM.render(
-    <GlobalBannerList
-      banners={topBanners.list}
-    />,
-    document.getElementById('globalBannerList')
-  );
-}
-
-function renderGlobalToastList() {
-  ReactDOM.render(
-    <GlobalToastList
-      toasts={toastNotifications.list}
-      dismissToast={toastNotifications.remove}
-      toastLifeTimeMs={6000}
-    />,
-    document.getElementById('globalToastList')
-  );
-}
-
 export function kbnChromeProvider(chrome, internals) {
 
   uiModules
@@ -101,9 +81,24 @@ export function kbnChromeProvider(chrome, internals) {
           // Non-scope based code (e.g., React)
 
           // Banners
-          topBanners.onChange(renderGlobalBannerList);
+          ReactDOM.render(
+            <GlobalBannerList
+              banners={topBanners.list}
+              subscribe={topBanners.onChange}
+            />,
+            document.getElementById('globalBannerList')
+          );
+
           // Toast Notifications
-          toastNotifications.onChange(renderGlobalToastList);
+          ReactDOM.render(
+            <GlobalToastList
+              toasts={toastNotifications.list}
+              dismissToast={toastNotifications.remove}
+              toastLifeTimeMs={6000}
+              subscribe={toastNotifications.onChange}
+            />,
+            document.getElementById('globalToastList')
+          );
 
           return chrome;
         }

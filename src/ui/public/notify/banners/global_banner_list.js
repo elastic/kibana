@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -16,56 +16,67 @@ import {
  *
  * @param {Array} banners The array of banners represented by objects in the form of { id, component }.
  */
-export const GlobalBannerList = ({ banners }) => {
-  if (banners.length === 0) {
-    return null;
+export class GlobalBannerList extends Component {
+
+  static propTypes = {
+    banners: PropTypes.array,
+  };
+
+  static defaultProps = {
+    banners: [],
+  };
+
+  constructor(props) {
+    super(props);
+
+    if (this.props.subscribe) {
+      this.props.subscribe(() => this.forceUpdate());
+    }
   }
 
-  const panelStyle = {
-    border: 'none'
-  };
-  const flexStyle = {
-    flexDirection: 'column'
-  };
+  render() {
+    if (this.props.banners.length === 0) {
+      return null;
+    }
 
-  const flexBanners = banners.map(banner => {
-    const {
-      id,
-      component,
-      priority,
-      ...rest
-    } = banner;
+    const panelStyle = {
+      border: 'none'
+    };
+    const flexStyle = {
+      flexDirection: 'column'
+    };
+
+    const flexBanners = this.props.banners.map(banner => {
+      const {
+        id,
+        component,
+        priority,
+        ...rest
+      } = banner;
+
+      return (
+        <EuiFlexItem
+          grow={true}
+          key={id}
+          data-test-priority={priority}
+          {...rest}
+        >
+          { component }
+        </EuiFlexItem>
+      );
+    });
 
     return (
-      <EuiFlexItem
-        grow={true}
-        key={id}
-        data-test-priority={priority}
-        {...rest}
+      <EuiPanel
+        style={panelStyle}
       >
-        { component }
-      </EuiFlexItem>
+        <EuiFlexGroup
+          style={flexStyle}
+          gutterSize="s"
+        >
+          {flexBanners}
+        </EuiFlexGroup>
+      </EuiPanel>
     );
-  });
-
-  return (
-    <EuiPanel
-      style={panelStyle}
-    >
-      <EuiFlexGroup
-        style={flexStyle}
-        gutterSize="s"
-      >
-        {flexBanners}
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-GlobalBannerList.propTypes = {
-  banners: PropTypes.array
-};
-
-GlobalBannerList.defaultProps = {
-  banners: []
-};
+  }
+}

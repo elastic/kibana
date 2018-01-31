@@ -23,7 +23,6 @@ export class ToastNotifications {
 
   onChange = callback => {
     this.onChangeCallback = callback;
-    this._changed();
   };
 
   add = toastOrTitle => {
