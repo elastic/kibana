@@ -1,6 +1,6 @@
 import React from 'react';
-import { render } from 'enzyme';
-import { MarkdownVisComponent } from './markdown_vis_controller';
+import { render, mount } from 'enzyme';
+import { MarkdownVisWrapper } from './markdown_vis_controller';
 
 describe('markdown vis controller', () => {
   it('should set html from markdown params', () => {
@@ -10,7 +10,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisComponent vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
     expect(wrapper.find('a').text()).toBe('markdown');
   });
 
@@ -21,7 +21,21 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisComponent vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
+  });
+
+  it('should update the HTML when render again with changed params', () => {
+    const vis = {
+      params: {
+        markdown: 'Initial'
+      }
+    };
+
+    const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
+    expect(wrapper.text().trim()).toBe('Initial');
+    vis.params.markdown = 'Updated';
+    wrapper.setProps({ vis });
+    expect(wrapper.text().trim()).toBe('Updated');
   });
 });
