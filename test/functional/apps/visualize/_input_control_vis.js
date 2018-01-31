@@ -214,16 +214,16 @@ export default function ({ getService, getPageObjects }) {
           expect(hasChildControlFilter).to.equal(true);
         });
 
-        /*it('should clear child control dropdown when parent control value is removed', async () => {
-          await PageObjects.visualize.clearReactSelect('#inputControl0-row');
-          await PageObjects.common.sleep(10000); // give time for filter to be removed and event handlers to fire
+        it('should clear child control dropdown when parent control value is removed', async () => {
+          await PageObjects.visualize.clearReactSelect('[data-test-subj="inputControl0"]');
+          await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
           const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
           const isDisabled = await childControlInput.getProperty('disabled');
           expect(isDisabled).to.equal(true);
 
           await testSubjects.click('inputControlCancelBtn');
-        });*/
+        });
 
         it('should clear child control dropdown when parent control filter pill removed', async () => {
           await filterBar.removeFilter('geo.src');

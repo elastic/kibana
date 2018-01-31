@@ -3,11 +3,13 @@
 exports[`renders ListControlEditor 1`] = `
 <div>
   <IndexPatternSelect
+    controlIndex={0}
     getIndexPatterns={[Function]}
     onChange={[Function]}
     value="indexPattern1"
   />
   <FieldSelect
+    controlIndex={0}
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"

@@ -36,8 +36,8 @@ export function ListControlEditor(props) {
     parentSelect = (
       <EuiFormRow
         id={`parentSelect-${props.controlIndex}`}
-        label="Parent"
-        helpText="Filter options by parent's value. Control is disabled when parent is unset."
+        label="Parent control"
+        helpText="Options are based on the value of parent control. Disabled if parent is not set."
       >
         <EuiSelect
           options={options}
