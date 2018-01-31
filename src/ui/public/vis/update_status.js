@@ -32,10 +32,9 @@ function serializer() {
   };
 }
 
-function getUpdateStatus(vis, $scope) {
+function getUpdateStatus(requiresUpdateStatus, $scope) {
 
   // If the vis type doesn't need update status, skip all calculations
-  const requiresUpdateStatus = vis.type.requiresUpdateStatus;
   if (!requiresUpdateStatus) {
     return {};
   }
