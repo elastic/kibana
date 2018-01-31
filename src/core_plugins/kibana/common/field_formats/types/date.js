@@ -33,10 +33,14 @@ export function createDateFormat(FieldFormat) {
             return '-';
           }
 
-          const date = moment(val);
+          console.log('pattern', pattern);
+          const date = moment(val, pattern);
           if (date.isValid()) {
+            console.log('date', date);
             return date.format(pattern);
           } else {
+            console.log('invalid date');
+            console.log('val', val);
             return val;
           }
         });
