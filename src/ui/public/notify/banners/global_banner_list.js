@@ -20,6 +20,7 @@ export class GlobalBannerList extends Component {
 
   static propTypes = {
     banners: PropTypes.array,
+    subscribe: PropTypes.func,
   };
 
   static defaultProps = {

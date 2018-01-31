@@ -29,6 +29,7 @@ export class GlobalToastList extends Component {
 
   static propTypes = {
     toasts: PropTypes.array,
+    subscribe: PropTypes.func,
     dismissToast: PropTypes.func.isRequired,
     toastLifeTimeMs: PropTypes.number.isRequired,
   };
