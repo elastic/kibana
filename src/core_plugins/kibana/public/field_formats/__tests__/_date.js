@@ -47,8 +47,7 @@ describe('Date Format', function () {
     off();
   });
 
-  it('should return the value itself when it cannot successfully be formatted', function () {
-    const dateMath = 'now+1M/d';
-    expect(convert(dateMath)).to.be(dateMath);
+  it('should parse date math values', function () {
+    expect(convert('2015-01-01||+1M/d')).to.be('January 1st 2015, 00:00:00.000');
   });
 });
