@@ -21,133 +21,66 @@ import * as Rx from 'rxjs';
 import { tap, debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import './visualize.less';
 import _ from 'lodash';
-import { uiModules } from '../modules';
-import { ResizeChecker } from '../resize_checker';
-import visualizationTemplate from './visualization.html';
-import { getUpdateStatus } from '../vis/update_status';
-import 'angular-sanitize';
-import { dispatchRenderComplete, dispatchRenderStart } from '../render_complete';
+import React, { Component } from 'react';
+import { VisualizationNoResults, VisualizationChart } from './components';
 
-uiModules
-  .get('kibana/directive', ['ngSanitize'])
-  .directive('visualization', function ($timeout, Notifier, SavedVis, indexPatterns, Private, config) {
+const _showNoResultsMessage = (vis, visData) => {
+  const requiresSearch = _.get(vis, 'type.requiresSearch');
+  const isZeroHits = _.get(visData, 'hits.total') === 0;
+  const shouldShowMessage = !_.get(vis, 'params.handleNoResults');
 
-    return {
-      restrict: 'E',
-      scope: {
-        vis: '=',
-        visData: '=',
-        uiState: '=?',
-        // If set to true (default) the visualization directive will listen for
-        // several changes in the data and uiState to trigger a render. If set to
-        // false (boolean value, not a falsy value), this directive won't listen
-        // for any changes and require to be notified by the 'render' event broadcasted
-        // to its scope, that it needs to rerender this. Usually when using this as
-        // a consumer you don't want to change the default behavior.
-        listenOnChange: '<',
-        searchSource: '='
-      },
-      template: visualizationTemplate,
-      link: function ($scope, $el) {
-        //todo: lets make this a simple function call.
-        const getVisEl = jQueryGetter('.visualize-chart');
-        const getVisContainer = jQueryGetter('.vis-container');
+  return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
+};
 
-        // Set the passed in uiState to the vis object. uiState reference should never be changed
-        if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
-        else $scope.vis._setUiState($scope.uiState);
+export class Visualization extends Component {
+  constructor(props) {
+    super(props);
+    props.vis.initialized = true;
 
+    props.vis._setUiState(props.uiState);
+    if (props.listenOnChange) {
+      props.uiState.on('change', this._onChangeListener);
+    }
 
-        // Show no results message when isZeroHits is true and it requires search
-        $scope.showNoResultsMessage = function () {
-          const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
-          const isZeroHits = _.get($scope, 'visData.hits.total') === 0;
-          const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
-
-          return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
-        };
-
-        $scope.visElement = getVisContainer();
-
-        const loadingDelay = config.get('visualization:loadingDelay');
-        $scope.loadingStyle = {
-          '-webkit-transition-delay': loadingDelay,
-          'transition-delay': loadingDelay
-        };
-
-        const Visualization = $scope.vis.type.visualization;
-        const visualization = new Visualization(getVisEl()[0], $scope.vis);
-
-        $scope.vis.initialized = true;
-
-        const render$ = Rx.Observable.create(observer => {
-          $scope.$on('render', () => {
-            observer.next({
-              vis: $scope.vis,
-              visData: $scope.visData,
-              container: getVisContainer(),
-            });
-          });
-        }).pipe(
-          share()
-        );
-
-        const success$ = render$.pipe(
-          tap(() => {
-            dispatchRenderStart($el[0]);
-          }),
-          filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData)),
-          debounceTime(100),
-          switchMap(async ({ vis, visData, container }) => {
-            vis.size = [container.width(), container.height()];
-            const status = getUpdateStatus(vis.type.requiresUpdateStatus, $scope);
-            const renderPromise = visualization.render(visData, status);
-            $scope.$apply();
-            return renderPromise;
-          })
-        );
-
-        const requestError$ = render$.pipe(
-          filter(({ vis }) => vis.requestError)
-        );
-
-        const renderSubscription = Rx.merge(success$, requestError$)
-          .subscribe(() => {
-            dispatchRenderComplete($el[0]);
-          });
-
-        $scope.$on('$destroy', () => {
-          visualization.destroy();
-          renderSubscription.unsubscribe();
-        });
-
-        // Listen on changes to trigger a render if listenOnChange is not false
-        // i.e. true or has not been used (undefined in that case)
-        if ($scope.listenOnChange !== false) {
-          const onChangeListener = () => {
-            $scope.$emit('render');
-          };
-
-          $scope.$watchGroup(['visData', 'vis.params'], onChangeListener);
-
-          const resizeChecker = new ResizeChecker($el);
-          resizeChecker.on('resize', () => {
-            $scope.$emit('render');
-          });
-
-          $scope.uiState.on('change', onChangeListener);
-          $scope.$on('$destroy', () => {
-            resizeChecker.destroy();
-            $scope.uiState.off('change', onChangeListener);
-          });
-        }
-
-        function jQueryGetter(selector) {
-          return function () {
-            const $sel = $el.find(selector);
-            if ($sel.length) return $sel;
-          };
-        }
-      }
+    this.state = {
+      listenOnChange: props.listenOnChange,
+      showNoResultsMessage: _showNoResultsMessage(props.vis, props.visData)
     };
-  });
+  }
+
+  render() {
+    return (
+      <div className="visualization">
+        {this.state.showNoResultsMessage ? (<VisualizationNoResults />) :
+          (<VisualizationChart
+            vis={this.props.vis}
+            visData={this.props.visData}
+            listenOnChange={this.props.listenOnChange}
+          />)
+        }
+      </div>
+    );
+  }
+
+  _onChangeListener = () => {
+    this.forceUpdate();
+  };
+
+  static getDerivedStateFromProps(props, prevState) {
+    const listenOnChangeChanged = props.listenOnChange !== prevState.listenOnChange;
+    const uiStateChanged = props.uiState !== props.vis.getUiState();
+    if (listenOnChangeChanged || uiStateChanged) {
+      throw new Error('Changing listenOnChange or uiState props is not allowed!');
+    }
+
+    const showNoResultsMessage = _showNoResultsMessage(props.vis, props.visData);
+    if (prevState.showNoResultsMessage !== showNoResultsMessage) {
+      return { showNoResultsMessage };
+    }
+    return null;
+  }
+
+  componentWillUnmount() {
+    this.props.uiState.off('change', this._onChangeListener);
+  }
+}

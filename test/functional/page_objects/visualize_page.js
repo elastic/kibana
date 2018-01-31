@@ -843,7 +843,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      return await find.byCssSelector('visualization');
+      return await find.byCssSelector('.visualization');
     }
 
     async getZoomSelectors(zoomSelector) {

@@ -129,15 +129,11 @@
 
               </header>
 
-              <visualization
+              <div class="visualization-container"
                  ng-if="vis && rows.length != 0"
-                 vis="vis"
-                 ui-state="uiState"
-                 vis-data="visData"
-                 search-source="searchSource"
-                 style="height: 200px"
+                 style="display: flex; height: 200px"
                 >
-              </visualization>
+              </div>
             </section>
 
             <section class="discover-table" fixed-scroll aria-label="Documents">
