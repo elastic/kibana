@@ -7,12 +7,12 @@ Choose a different field or index documents that contain values for this field.`
 }
 
 export class Control {
-  constructor(controlParams, filterManager, kbnApi) {
+  constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
     this.id = controlParams.id;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
-    this.useTimeFilter = controlParams.useTimeFilter;
+    this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
     this.kbnApi = kbnApi;
 

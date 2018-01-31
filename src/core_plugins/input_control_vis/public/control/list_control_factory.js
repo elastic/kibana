@@ -100,12 +100,13 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi) {
+export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
 
   return new ListControl(
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
-    kbnApi
+    kbnApi,
+    useTimeFilter
   );
 }

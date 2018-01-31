@@ -59,12 +59,13 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi) {
+export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const unsetValue = { min: 0, max: 1 };
   return new RangeControl(
     controlParams,
     new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, unsetValue),
-    kbnApi
+    kbnApi,
+    useTimeFilter
   );
 }

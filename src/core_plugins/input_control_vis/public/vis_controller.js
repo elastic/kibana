@@ -52,7 +52,7 @@ class VisController {
 
     const controlFactoryPromises = controlParamsList.map((controlParams) => {
       const factory = controlFactory(controlParams);
-      return factory(controlParams, this.vis.API);
+      return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
     });
     const controls = await Promise.all(controlFactoryPromises);
 
