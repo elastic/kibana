@@ -6,7 +6,7 @@
       "index": {
         "mapping": {
           "total_fields": {
-            "limit": "10500"
+            "limit": "50000"
           }
         },
         "number_of_shards": "5",
