@@ -79,11 +79,6 @@ export function FieldParamTypeProvider(Private, $filter) {
 
     const validField = this.getFieldOptions(aggConfig).byName[fieldName];
     if (!validField) {
-      // check to see if a .raw field exists and use it if it does
-      const validRawField = this.getFieldOptions(aggConfig).byName[`${fieldName}.raw`];
-      if (validRawField) {
-        return validRawField;
-      }
       notifier.error(`Field "${fieldName}" is not aggregatable. Please replace it with a keyword version of the field.`);
     }
 
