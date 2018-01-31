@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('test_huge data should have expected number of fields', async function () {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
-      //expect(tabCount).to.be(`($EXPECTED_FIELD_COUNT})`);
       expect(tabCount).to.be(EXPECTED_FIELD_COUNT);
     });
 
