@@ -6,6 +6,7 @@ export class Banners {
   constructor() {
     // sorted in descending order (100, 99, 98...) so that higher priorities are in front
     this.list = [];
+    this.uniqueId = 0;
     this.onChangeCallback = null;
   }
 
@@ -34,11 +35,30 @@ export class Banners {
     return false;
   }
 
+  /**
+   * Set the {@code callback} to invoke whenever changes are made to the banner list.
+   *
+   * Use {@code null} or {@code undefined} to unset it.
+   *
+   * @param {Function} callback The callback to use.
+   */
   onChange = callback => {
     this.onChangeCallback = callback;
   }
 
-  set = ({ id, component, priority = 0 }) => {
+  /**
+   * Add a new banner or replace an existing one with the optional {@code id}.
+   *
+   * @param {Object} component The React component to display.
+   * @param {String} id The optional ID of the banner to replace.
+   * @param {Number} priority The optional priority order to display this banner. Higher priority values are shown first.
+   * @return {String} The supplied ID if {@code id} was not undefined. This value can be used to remove the banner.
+   */
+  add = ({ component, id, priority = 0 }) => {
+    if (id === undefined) {
+      id = `banner-${++this.uniqueId}`;
+    }
+
     const bannerDetails = { id, component, priority };
 
     if (this._replaceIfExists(bannerDetails) === false) {
@@ -55,8 +75,16 @@ export class Banners {
     }
 
     this._changed();
+
+    return id;
   }
 
+  /**
+   * Remove an existing banner.
+   *
+   * @param {String} id The ID of the banner to remove.
+   * @return {Boolean} {@code true} if the ID is recognized and the banner is removed. {@code false} otherwise.
+   */
   remove = id => {
     const index = this.list.findIndex(details => details.id === id);
 
@@ -73,7 +101,6 @@ export class Banners {
 }
 
 /**
- * A singleton instance meant to represent all Kibana banners. We may want top and bottom banners in the future, at which point it would
- * be easiest to create a separate singleton.
+ * A singleton instance meant to represent all Kibana banners.
  */
-export const topBanners = new Banners();
+export const banners = new Banners();

@@ -1,12 +1,42 @@
 import _ from 'lodash';
 import React from 'react';
-import { topBanners } from 'ui/notify';
+import { banners } from 'ui/notify';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
 import {
   EuiCallOut,
 } from '@elastic/eui';
+import { clearTimeout } from 'timers';
+
+let bannerId;
+let timeoutId;
+
+function displayBanner() {
+  clearTimeout(timeoutId);
+
+  // Avoid being hostile to new users who don't have an index pattern setup yet
+  // give them a friendly info message instead of a terse error message
+  bannerId = banners.add({
+    id: bannerId, // initially undefined, but reused after first set
+    component: (
+      <EuiCallOut
+        color="warning"
+        iconType="iInCircle"
+        title={
+          `In order to visualize and explore data in Kibana,
+          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+        }
+      />
+    )
+  });
+
+  // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
+  timeoutId = setTimeout(() => {
+    banners.remove(bannerId);
+    timeoutId = undefined;
+  }, 15000);
+}
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function (opts) {
@@ -51,24 +81,7 @@ export default function (opts) {
 
         kbnUrl.change(whenMissingRedirectTo);
 
-        // Avoid being hostile to new users who don't have an index pattern setup yet
-        // give them a friendly info message instead of a terse error message
-        topBanners.set({
-          id: 'first-index-pattern',
-          component: (
-            <EuiCallOut
-              color="warning"
-              iconType="iInCircle"
-              title={
-                `In order to visualize and explore data in Kibana,
-                you'll need to create an index pattern to retrieve data from Elasticsearch.`
-              }
-            />
-          )
-        });
-
-        // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
-        setTimeout(() => topBanners.remove('first-index-pattern'), 6000);
+        displayBanner();
       }
     );
 }

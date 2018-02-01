@@ -1,31 +1,81 @@
 # Banners
 
 Use this service to surface banners at the top of the screen. The expectation is that the banner will used an
-`<EuiCallOut />` to render, but that is not a requirement. See [the EUI docs](elastic.github.io/eui/) for more information on toasts and their role within the UI.
+`<EuiCallOut />` to render, but that is not a requirement. See [the EUI docs](https://elastic.github.io/eui/) for
+more information on toasts and their role within the UI.
 
 ## Importing the module
 
 ```js
-import { topBanners } from 'ui/notify';
+import { banners } from 'ui/notify';
 ```
 
 ## Interface
 
-### Adding banners
+There are only two methods defined to manipulate the list of banners: `add` and `remove`. A third method, `onChange`
+exists to listen to changes made via `add` and `remove`.
 
-There are only two methods defined to manipulate the list of banners: `add` and `remove`. All banners must be added with an `id` field so that they can be removed.
+### `add`
 
-#### `set`
+Banners can be added with or without an `id`. If one is supplied, then the ID will be used to replace any banner with
+the same ID.
 
-To add a banner, you only need to define an `id` and a `component`. If the `id` already exists, then it replaces the
-existing banner. If the `id` does not exist, then an optional `priority` controls where the banner is placed, which uses an descending order (highest first) for sorting.
+You should only consider using an ID when the banner is manipulated frequently in the lifecycle of the page, where
+maintaining the banner's `id` can be a burden. It is easier to allow `banners` to create the ID for you in most
+situations where a banner is useful (e.g., set once), which safely avoids any chance to have an ID-based collision.
+
+#### Syntax
+
+```js
+const id = banners.add({
+  // required:
+  component,
+  // optional:
+  id,
+  priority,
+});
+```
+
+##### Parameters
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `component` | Any | The value displayed as   |
+| `id`  | String | Optional ID used to replace an existing banner. |
+| `priority` | Number | Optional priority, which defaults to `0` used to place the banner. |
+
+To add a banner, you only need to define the `component` field. As noted, you can set the `id` to replace an existing
+banner or explicitly use a pre-defined ID (not recommended to avoid collisions).
+
+The `priority` sorts in descending order. Items sharing the same priority are sorted from oldest to newest. For example:
+
+```js
+const banner1 = banners.add({ component: <EuiCallOut title="fake1" /> });
+const banner2 = banners.add({ component: <EuiCallOut title="fake2" />, priority: 0 });
+const banner3 = banners.add({ component: <EuiCallOut title="fake3" />, priority: 1 });
+```
+
+That would be displayed as:
+
+```
+[ fake3 ]
+[ fake1 ]
+[ fake2 ]
+```
+
+##### Returns
+
+| Type | Description |
+|------|-------------|
+| String | The passed in ID. If no ID was supplied, then a generated ID is returned. Never `undefined`. |
+
+#### Example 1
 
 This example includes buttons that allow the user to remove the banner. In some cases, you may not want any buttons
 and in other cases you will want an action to proceed the banner's removal (e.g., apply an Advanced Setting).
 
 ```js
-topBanners.set({
-  id: 'my-banner',
+const bannerId = banners.add({
   component: (
     <EuiCallOut
       iconType="iInCircle"
@@ -41,7 +91,7 @@ topBanners.set({
           <EuiButton
             size="s"
             fill
-            onClick={() => topBanners.remove('my-banner')}
+            onClick={() => banners.remove(bannerId)}
           >
             Dismiss
           </EuiButton>
@@ -62,7 +112,41 @@ topBanners.set({
 });
 ```
 
-### Removing
+#### Example 2
+
+This example does not include any way for the user to clear the banner directly. Instead, it is cleared based on
+time.
+
+```js
+let bannerId;
+let timeoutId;
+
+function displayBanner() {
+  clearTimeout(timeoutId);
+
+  bannerId = banners.add({
+    id: bannerId, // the first time it will be undefined, but reused as long as this is in the same lifecycle
+    component: (
+      <EuiCallOut
+        color="warning"
+        iconType="iInCircle"
+        title={
+          `In order to visualize and explore data in Kibana,
+          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+        }
+      />
+    )
+  });
+
+  // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
+  banner.timeoutId = setTimeout(() => {
+    banners.remove(bannerId);
+    timeoutId = undefined;
+  }, 6000);
+}
+```
+
+### `remove`
 
 Unlike toast notifications, banners stick around until they are explicitly removed. Using the example above, you can
 remove it by calling `remove`.
@@ -70,45 +154,82 @@ remove it by calling `remove`.
 Note: They will stick around as long as the scope is remembered by whatever set it; navigating away won't remove it
 unless the scope is forgotten (e.g., when the "app" changes)!
 
-#### `remove`
+#### Syntax
+
+```js
+const removed = banners.remove(id);
+```
+
+##### Parameters
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id`  | String | ID of a banner. |
+
+##### Returns
+
+| Type | Description |
+|------|-------------|
+| Boolean | `true` if the ID was recognized and the banner was removed. `false` otherwise. |
+
+#### Example
 
 To remove a banner, you need to pass the `id` of the banner.
 
 ```js
-if (topBanners.remove('my-banner')) {
+if (banners.remove(bannerId)) {
   // removed; otherwise it didn't exist (maybe it was already removed)
 }
 ```
 
-Note: It is safe to remove a banner more than once. Calls to remove unknown banner IDs return `false`.
+Note: It is safe to remove a banner more than once as unknown IDs will be ignored.
 
-##### Scheduled removal
+#### Scheduled removal
 
-Like toast notifications do automatically, you can have a banner automatically removed after a set of time, by setting
-a timer:
-
-```js
-setTimeout(() => topBanners.remove('my-banner'), 15000);
-```
-
-### Configuration options
-
-The only configuration option for banners is to control its location in the list. To do that, you set a numeric
-`priority`, which is sorted in ascending order. If not specified, then the default priority is `0`. Items sharing the
-same priority are sorted from oldest to newest. For example:
+Like toast notifications do automatically, you can have a banner automatically removed after a set of time, by
+setting a timer:
 
 ```js
-topBanners.set({ id: 'fake1', component: <EuiCallOut title="fake1" /> });
-topBanners.set({ id: 'fake2', component: <EuiCallOut title="fake2" />, priority: 0 });
-topBanners.set({ id: 'fake3', component: <EuiCallOut title="fake3" />, priority: 1 });
+setTimeout(() => banners.remove(bannerId), 15000);
 ```
 
-That example would be displayed as:
+### `onChange`
 
+For React components that intend to display the banners, it is not enough to simply `render` the `banners.list`
+values. Because they can change after being rendered, the React component that renders the list must be alerted
+to changes to the list.
+
+#### Syntax
+
+```js
+// inside your React component
+banners.onChange(() => this.forceUpdate());
 ```
-[ fake3 ]
-[ fake1 ]
-[ fake2 ]
+
+##### Parameters
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `callback` | Function | The function to invoke whenever the internal banner list is changed. |
+
+Every new `callback` replaces the previous callback. So calling this with `null` or `undefined` will unset the
+callback.
+
+##### Returns
+
+Nothing.
+
+#### Example
+
+This can be used inside of a React component to trigger a re-`render` of the banners.
+
+```js
+import { GlobalBannerList } from 'ui/notify';
+
+<GlobalBannerList
+  banners={banners.list}
+  subscribe={banners.onChange}
+/>
 ```
 
 ## Use in functional tests
@@ -119,7 +240,7 @@ This acts as a proxy for verifying the sucessful outcome. Any unrecognized field
 containing element.
 
 ```js
-topBanners.set({
+banners.add({
   id: 'my-tested-banner'
   component: (
     <EuiCallOut
@@ -136,7 +257,7 @@ will exclusively be the specified `component`.
 Given that `component` is expected to be a React component, you could also add the `data-test-subj` directly to it:
 
 ```js
-topBanners.set({
+banners.add({
   id: 'my-tested-banner'
   component: (
     <EuiCallOut

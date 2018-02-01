@@ -15,7 +15,7 @@ import {
   GlobalToastList,
   toastNotifications,
   GlobalBannerList,
-  topBanners,
+  banners,
 } from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
@@ -83,8 +83,8 @@ export function kbnChromeProvider(chrome, internals) {
           // Banners
           ReactDOM.render(
             <GlobalBannerList
-              banners={topBanners.list}
-              subscribe={topBanners.onChange}
+              banners={banners.list}
+              subscribe={banners.onChange}
             />,
             document.getElementById('globalBannerList')
           );

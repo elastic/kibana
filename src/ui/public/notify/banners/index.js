@@ -1,2 +1,2 @@
 export { GlobalBannerList } from './global_banner_list';
-export { topBanners } from './banners';
+export { banners } from './banners';

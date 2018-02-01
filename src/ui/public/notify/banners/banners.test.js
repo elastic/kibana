@@ -15,17 +15,17 @@ describe('Banners', () => {
 
     describe('onChange method', () => {
 
-      test('callback is called when a toast is added', () => {
+      test('callback is called when a banner is added', () => {
         const onChangeSpy = sinon.spy();
         banners.onChange(onChangeSpy);
-        banners.set({ id: 'bruce-banner' });
+        banners.add({ id: 'bruce-banner' });
         expect(onChangeSpy.callCount).toBe(1);
       });
 
-      test('callback is called when a toast is removed', () => {
+      test('callback is called when a banner is removed', () => {
         const onChangeSpy = sinon.spy();
         banners.onChange(onChangeSpy);
-        banners.set({ id: 'bruce-banner' });
+        banners.add({ id: 'bruce-banner' });
         banners.remove('bruce-banner');
         expect(onChangeSpy.callCount).toBe(2);
       });
@@ -39,25 +39,27 @@ describe('Banners', () => {
 
     });
 
-    describe('set method', () => {
+    describe('add method', () => {
 
       test('adds a banner', () => {
-        banners.set({});
+        const id = banners.add({});
         expect(banners.list.length).toBe(1);
+        expect(id).to.match(/banner-\d+/);
       });
 
       test('adds a banner with an ID property', () => {
-        banners.set({ id: 'bruce-banner' });
+        const id = banners.add({ id: 'bruce-banner' });
         expect(banners.list[0].id).toBe('bruce-banner');
+        expect(id).toBe('bruce-banner');
       });
 
       test('sorts banners based on priority', () => {
-        banners.set({ id: 'test0' });
+        banners.add({ id: 'test0' });
         // the fact that it was set explicitly is irrelevant; that it was added second means it should be after test0
-        banners.set({ id: 'test0explicit', priority: 0 });
-        banners.set({ id: 'test1', priority: 1 });
-        banners.set({ id: 'test-1', priority: -1 });
-        banners.set({ id: 'test1000', priority: 1000 });
+        banners.add({ id: 'test0explicit', priority: 0 });
+        banners.add({ id: 'test1', priority: 1 });
+        banners.add({ id: 'test-1', priority: -1 });
+        banners.add({ id: 'test1000', priority: 1000 });
 
         expect(banners.list.length).toBe(5);
         expect(banners.list[0].id).toBe('test1000');
@@ -68,16 +70,16 @@ describe('Banners', () => {
       });
 
       test('replaces a banner with the same ID property', () => {
-        banners.set({ id: 'test0' });
-        banners.set({ id: 'test0explicit', priority: 0 });
-        banners.set({ id: 'test1', priority: 1, component: 'old' });
-        banners.set({ id: 'test-1', priority: -1 });
-        banners.set({ id: 'test1000', priority: 1000, component: 'old' });
+        banners.add({ id: 'test0' });
+        banners.add({ id: 'test0explicit', priority: 0 });
+        banners.add({ id: 'test1', priority: 1, component: 'old' });
+        banners.add({ id: 'test-1', priority: -1 });
+        banners.add({ id: 'test1000', priority: 1000, component: 'old' });
 
         // change one with the same priority
-        banners.set({ id: 'test1', priority: 1, component: 'new' });
+        banners.add({ id: 'test1', priority: 1, component: 'new' });
         // change one with a different priority
-        banners.set({ id: 'test1000', priority: 1, component: 'new' });
+        banners.add({ id: 'test1000', priority: 1, component: 'new' });
 
         expect(banners.list.length).toBe(5);
         expect(banners.list[0].id).toBe('test1');
@@ -94,13 +96,13 @@ describe('Banners', () => {
     describe('remove method', () => {
 
       test('removes a banner', () => {
-        banners.set({ id: 'bruce-banner' });
+        banners.add({ id: 'bruce-banner' });
         banners.remove('bruce-banner');
         expect(banners.list.length).toBe(0);
       });
 
       test('ignores unknown id', () => {
-        banners.set({ id: 'bruce-banner' });
+        banners.add({ id: 'bruce-banner' });
         banners.remove('hulk');
         expect(banners.list.length).toBe(1);
       });
