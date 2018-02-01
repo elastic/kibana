@@ -31,7 +31,6 @@ export const timelion = () => ({
   type: 'datatable',
   help: 'Use timelion to extract one or more timeseries from many sources.',
   fn: (context, args, handlers) => {
-    // TODO: Find time range, or just request a giant single bucket?
     function findTimeRangeInFilterContext() {
       const timeFilter = context.and.find(and => and.type === 'time');
       if (!timeFilter) throw new Error('No time filter found');

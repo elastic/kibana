@@ -16,7 +16,7 @@ export const ifFn = () => ({
         'The return value if false. If else is not specified, and the condition is false' +
         'then the input context to the function will be returned',
     },
-    // TODO: When we add "action" functions, this could be used a perform an action without
+    // When we add "action" functions, this could be used a perform an action without
     passthru: {
       help:
         'Instead of returning the value of then, simply execute it and pass the input context through',

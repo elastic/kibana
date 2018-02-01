@@ -60,7 +60,6 @@ export function interpretProvider(config) {
 
     try {
       // Resolve arguments before passing to function
-      // TODO: handle errors here
       const resolvedArgs = await resolveArgs(fnName, context, fnArgs);
       const newContext = await invokeFunction(fnName, context, resolvedArgs);
 

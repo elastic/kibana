@@ -87,6 +87,7 @@ Thanks for understanding,
   }
 }
 
+// TODO: Respect the user's existing formatting
 export function toExpression(astObj, type = 'expression') {
   if (type === 'argument') return getArgumentString(astObj);
 

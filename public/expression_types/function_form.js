@@ -43,8 +43,7 @@ export class FunctionForm extends BaseForm {
     return argValues && argValues.map(renderArgWithProps);
   }
 
-  // TODO: What a complete disaster. This is terribly hard to read. Ask Rashid why this is so bad, it's his fault. I hate that guy.
-  // This was done at the end of a 15hr day. I'm so tired. I hate this. The Kibana dev server has a memory leak. I hate it.
+  // TODO: Argument adding isn't very good, we should improve this UI
   getAddableArg(props, dataArg) {
     const { onValueAdd } = props;
     const { arg, argValues, skipRender } = dataArg;
