@@ -13,7 +13,7 @@ function escapeRegExp(string) {
  */
 export function getFieldsByWildcard(pattern, indexPattern) {
   if (pattern.includes('*')) {
-    const userInputLiterals = pattern.split('*');
+    const userInputLiterals = pattern.split('\\*');
     const escapedUserInputLiterals = userInputLiterals.map(escapeRegExp);
     const regexPattern = `^${escapedUserInputLiterals.join('.*')}$`;
     const regex = new RegExp(regexPattern);
