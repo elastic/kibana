@@ -5,8 +5,6 @@ import { FormControl } from 'react-bootstrap';
 const getArgValueString = argValue => (typeof argValue === 'string' ? argValue : argValue.value);
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue }) => {
-  // TODO: why is this neccesary? Does the dialog really need to know what parameter it is setting?
-  // passing in simply the select choices is probably better here
   const choices = typeInstance.options.choices;
   const handleChange = ev => onValueChange(ev.target.value);
   const choice = choices.map(c => c.value).find(n => n === getArgValueString(argValue)) || '';

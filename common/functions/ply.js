@@ -1,4 +1,3 @@
-// TODO: pointseries performs poorly, that's why we run it on the server.
 import { groupBy, flatten, pick, map } from 'lodash';
 import { getType } from '../lib/get_type';
 
@@ -90,7 +89,6 @@ export const ply = () => ({
       return column;
     });
 
-    // TODO: Need to handle multiple expressions. So much Promise.all
     const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
     const originalDatatables = Object.values(keyedDatatables).map(rows => ({
       ...context,

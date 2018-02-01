@@ -43,7 +43,6 @@ export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, wor
 export const createWorkpad = createThunk('createWorkpad', ({ dispatch }) => {
   const newWorkpad = getDefaultWorkpad();
 
-  // TODO: handle the failed loading state
   workpadService.create(newWorkpad).then(() => {
     dispatch(setWorkpad(newWorkpad));
     dispatch(resetAssets());

@@ -174,7 +174,6 @@ export const duplicateElement = createThunk(
     const _duplicateElement = createAction(type);
     dispatch(_duplicateElement({ pageId, element: newElement }));
 
-    // TODO: should something special happen to filters when duplicating an element?
     // refresh all elements if there's a filter, otherwise just render the new element
     if (element.filter) dispatch(fetchAllRenderables());
     else dispatch(fetchRenderable(newElement));

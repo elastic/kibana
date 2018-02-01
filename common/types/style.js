@@ -5,7 +5,7 @@ export const style = () => ({
       return {
         type: 'style',
         spec: {},
-        css: 'TODO implement css conversion',
+        css: '',
       };
     },
   },

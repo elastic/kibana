@@ -1,4 +1,3 @@
-// TODO: add the url input and handling
 export const render = () => ({
   name: 'render',
   displayName: 'Element Style',
