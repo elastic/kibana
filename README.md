@@ -29,6 +29,10 @@ Then `backport` might save you a lot of time and effort.
 
 The CLI will ask you a few questions and then do those steps for you. You can even save a configuration with your preferences to make the process even more automated. See below for instructions on how to use and configure it.
 
+## Requirements
+
+ - Node 6 or higher
+
 ## Install
 
 ```
