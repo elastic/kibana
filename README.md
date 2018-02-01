@@ -30,6 +30,7 @@ Now that you've configured an index pattern, you're ready to hop over to the [Di
 ## Documentation
 
 Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
+For information about building the documentation, see the README in [elastic/docs](https://github.com/elastic/docs).
 
 ## Snapshot Builds
 
