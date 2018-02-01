@@ -9,3 +9,7 @@
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
 /ui_framework/doc_site/build
 /tasks/vendor
+/packages/*/node_modules
+/packages/eslint-config-kibana
+/packages/eslint-plugin-kibana-custom
+/packages/kbn-build/dist
