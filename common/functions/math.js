@@ -1,5 +1,5 @@
 import { map } from 'lodash';
-import { math as mathjs } from '../lib/math.js';
+import mathjs from 'mathjs';
 import { pivotObjectArray } from '../lib/pivot_object_array.js';
 
 export const math = () => ({

@@ -2,7 +2,7 @@ import { groupBy, zipObject, omit, uniq, map, mapValues } from 'lodash';
 import uniqBy from 'lodash.uniqby';
 import pickBy from 'lodash.pickby';
 import moment from 'moment';
-import { math } from '../../common/lib/math.js';
+import { math } from 'mathjs';
 import { findInObject } from '../../common/lib/find_in_object';
 import { pivotObjectArray } from '../../common/lib/pivot_object_array.js';
 
