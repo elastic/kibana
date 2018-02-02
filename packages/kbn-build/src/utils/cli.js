@@ -11,9 +11,7 @@ export const parseArgv = argv =>
     }
   });
 
-export const hasDashDash = args => args.includes('--');
-
-export const createExtraArgs = (options) =>
+export const createExtraArgs = options =>
   options._.slice(1).concat(toArgs(options));
 
 function toArgs(options) {
@@ -28,7 +26,8 @@ function toArgs(options) {
     if (value === true) {
       args.push(`--${key}`);
     } else {
-      args.push(`--${key} ${value}`);
+      args.push(`--${key}`);
+      args.push(value);
     }
   }
 
