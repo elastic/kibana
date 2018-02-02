@@ -103,7 +103,7 @@ describe('config component', function () {
 
     it('returns false for failure', async () => {
       // immediately resolve to avoid timing issues
-      const delayedUpdate = () => Promise.reject();
+      const delayedUpdate = () => Promise.reject(new Error('TEST - EXPECTED'));
 
       expect(await config._change('expected_false', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
     });
