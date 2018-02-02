@@ -129,7 +129,9 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      expect(callCompleteMixin).to.throwError('"unused" not applied');
+      expect(callCompleteMixin).to.throwError(error => {
+        expect(error.message).to.contain('"unused" setting was not applied');
+      });
     });
 
     describe('error thrown', () => {
