@@ -26,6 +26,34 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
+  const origConfigGet = kbnServer.config.get;
+  kbnServer.config.get = (key, ...rest) => {
+    if (key === 'server.basePath') {
+      server.log(['warning', 'deprecation'], {
+        tmpl: 'Accessing server.basePath directly via config is deprecated. Use request.getBasePath() instead. <%= location %>',
+        location: (new Error()).stack.split('\n')[2].trim()
+      });
+    }
+
+    return origConfigGet.call(kbnServer.config, key, ...rest);
+  };
+
+  server.decorate('server', 'getRootBasePath', () => (
+    origConfigGet.call(kbnServer.config, 'server.basePath')
+  ));
+
+  const reqAltBasePaths = new WeakMap();
+  server.decorate('request', 'extendBasePath', function (extension) {
+    reqAltBasePaths.set(this, `${server.getRootBasePath()}${extension}`);
+  });
+
+  server.decorate('request', 'getBasePath', function () {
+    return (
+      reqAltBasePaths.get(this) ||
+      origConfigGet.call(kbnServer.config, 'server.basePath')
+    );
+  });
+
   const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get())
     .map(key => `"${key}"`);
 
