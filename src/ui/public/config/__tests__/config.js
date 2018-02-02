@@ -57,13 +57,6 @@ describe('config component', function () {
       expect(config.set).withArgs('unrecognizedProperty', 'somevalue').to.not.throwException();
       expect(config.get('unrecognizedProperty')).to.be('somevalue');
     });
-
-    // there is currently no way to make it return false without significant changes to the code
-    it('returns true for success', async () => {
-      expect(await config.set('random', 'value')).to.be(true);
-      // setting to the same should set it to true as well
-      expect(await config.set('random', 'value')).to.be(true);
-    });
   });
 
   describe('#$bind', function () {
@@ -74,7 +67,7 @@ describe('config component', function () {
       expect($scope).to.have.property('dateFormat', dateFormat);
     });
 
-    it('alows overriding the property name', function () {
+    it('allows overriding the property name', function () {
       const dateFormat = config.get('dateFormat');
       config.bindToScope($scope, 'dateFormat', 'defaultDateFormat');
       expect($scope).to.not.have.property('dateFormat');
@@ -91,6 +84,26 @@ describe('config component', function () {
       expect($scope).to.have.property('dateFormat', newDateFormat);
       config.set('dateFormat', original);
 
+    });
+
+  });
+
+  describe('#_change', () => {
+
+    it('returns true for success', async () => {
+      // immediately resolve to avoid timing issues
+      const delayedUpdate = Promise.resolve();
+
+      expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(true);
+      // setting to the same should set it to true as well
+      expect(await config._change('random', 'value')).to.be(true);
+    });
+
+    it('returns false for failure', async () => {
+      // immediately resolve to avoid timing issues
+      const delayedUpdate = Promise.reject();
+
+      expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
     });
 
   });
