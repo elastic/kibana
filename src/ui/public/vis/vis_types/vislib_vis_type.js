@@ -15,6 +15,13 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
 
+  const legendClassName = {
+    top: 'vislib-container--legend-top',
+    bottom: 'vislib-container--legend-bottom',
+    left: 'vislib-container--legend-left',
+    right: 'vislib-container--legend-right',
+  };
+
   class VislibVisController {
     constructor(el, vis) {
       this.el = el;
@@ -28,11 +35,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
       this.chartEl.className = 'vislib-chart';
       this.container.appendChild(this.chartEl);
 
-      //this.el.className = 'vis-container';
     }
 
     render(esResponse) {
-      this._response = esResponse;
       if (this.vis.vislibVis) {
         this.destroy();
       }
@@ -44,21 +49,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
 
         let $scope;
         if (this.vis.params.addLegend) {
-          const legendPositionToVisContainerClassMap = {
-            top: 'vislib-container--legend-top',
-            bottom: 'vislib-container--legend-bottom',
-            left: 'vislib-container--legend-left',
-            right: 'vislib-container--legend-right',
-          };
-
-          const getVisContainerClasses = () => {
-            return legendPositionToVisContainerClassMap[this.vis.params.legendPosition];
-          };
-
-          // update the legend class on the parent element
           $(this.container).attr('class', (i, cls) => {
             return cls.replace(/vislib-container--legend-\S+/g, '');
-          }).addClass(getVisContainerClasses());
+          }).addClass(legendClassName[this.vis.params.legendPosition]);
 
           $scope = $rootScope.$new();
           $scope.refreshLegend = 0;
