@@ -38,6 +38,7 @@
   <filter-bar
     ng-show="showFilterBar()"
     state="state"
+    index-patterns="indexPatterns"
     ng-if="['lucene', 'kql'].includes(model.query.language)"
   ></filter-bar>
 
