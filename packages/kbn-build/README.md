@@ -106,7 +106,7 @@ yarn kbn bootstrap
 You can specify additional arguments to `yarn`, e.g.
 
 ```
-yarn kbn bootstrap --frozen-lockfile
+yarn kbn bootstrap -- --frozen-lockfile
 ```
 
 By default, `kbn-build` will bootstrap all packages within Kibana, plus all
