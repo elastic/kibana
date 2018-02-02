@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 import * as commands from './commands';
 import { runCommand } from './run';
-import { parseArgv, createExtraArgs } from './utils/cli';
+import { parseArgv, hasDashDash, createExtraArgs } from './utils/cli';
 
 const getCommand = name => commands[name]; // eslint-disable-line import/namespace
 
@@ -36,12 +36,12 @@ export async function run(argv) {
   // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
-  if (argv.includes('--')) {
+  if (hasDashDash(argv)) {
     console.log(
       chalk.red(
         `Using "--" is not allowed, as it doesn't work with 'yarn kbn'. You ` +
-          `can however call the command without "--" and the extra args will ` +
-          `be forwarded`
+        `can however call the command without "--" and the extra args will be` +
+        `forwarded`
       )
     );
     process.exit(1);
