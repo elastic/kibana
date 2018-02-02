@@ -1,11 +1,13 @@
 import React from 'react';
 
+import './time_field.css';
+
 import {
   EuiForm,
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiLink,
   EuiSelect,
   EuiText,
   EuiLoadingSpinner,
@@ -29,15 +31,15 @@ export const TimeField = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               { isLoading ? (
-                <EuiLoadingSpinner size="m"/>
+                <EuiLoadingSpinner size="s"/>
               )
                 : (
-                  <EuiButtonEmpty
-                    size="s"
+                  <EuiLink
+                    className="timeFieldRefreshButton"
                     onClick={fetchTimeFields}
                   >
                     Refresh
-                  </EuiButtonEmpty>
+                  </EuiLink>
                 )
               }
             </EuiFlexItem>
