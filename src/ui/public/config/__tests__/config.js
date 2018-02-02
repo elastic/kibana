@@ -94,16 +94,18 @@ describe('config component', function () {
       // immediately resolve to avoid timing issues
       const delayedUpdate = () => Promise.resolve();
 
-      expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(true);
+      expect(await config._change('expect_true', 'value', { _delayedUpdate: delayedUpdate })).to.be(true);
       // setting to the same should set it to true as well
-      expect(await config._change('random', 'value')).to.be(true);
+      expect(await config._change('expect_true', 'value')).to.be(true);
+
+      config.remove('expect_true');
     });
 
     it('returns false for failure', async () => {
       // immediately resolve to avoid timing issues
       const delayedUpdate = () => Promise.reject();
 
-      expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
+      expect(await config._change('expected_false', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
     });
 
   });
