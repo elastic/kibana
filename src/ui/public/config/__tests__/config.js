@@ -92,7 +92,7 @@ describe('config component', function () {
 
     it('returns true for success', async () => {
       // immediately resolve to avoid timing issues
-      const delayedUpdate = Promise.resolve();
+      const delayedUpdate = () => Promise.resolve();
 
       expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(true);
       // setting to the same should set it to true as well
@@ -101,7 +101,7 @@ describe('config component', function () {
 
     it('returns false for failure', async () => {
       // immediately resolve to avoid timing issues
-      const delayedUpdate = Promise.reject();
+      const delayedUpdate = () => Promise.reject();
 
       expect(await config._change('random', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
     });
