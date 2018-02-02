@@ -57,7 +57,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return scope.$on(`change:config`, update);
   }
 
-  config._change = (key, value, { _delayedUpdate = delayedUpdate }) => {
+  config._change = (key, value, { _delayedUpdate = delayedUpdate } = { }) => {
     const declared = config.isDeclared(key);
     const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
