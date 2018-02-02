@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should render normally 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="l"
+    justifyContent="center"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle>
+        <EuiTextColor
+          color="subdued"
+        >
+          <h2
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            Couldn't find any Elasticsearch data
+          </h2>
+        </EuiTextColor>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText>
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            You'll need to index some data into Elasticsearch before you can create an index pattern.
+          </EuiTextColor>
+           
+          <EuiLink
+            color="primary"
+            href="http://www.elastic.co"
+            target="_blank"
+            type="button"
+          >
+            Learn how.
+          </EuiLink>
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xs"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        component="div"
+        gutterSize="l"
+        justifyContent="center"
+        responsive={true}
+        wrap={false}
+      >
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            fill={false}
+            iconSide="left"
+            iconType="faceHappy"
+            type="button"
+          >
+            Check for new data
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
