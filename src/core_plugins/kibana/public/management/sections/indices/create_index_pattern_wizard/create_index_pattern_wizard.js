@@ -6,11 +6,11 @@ import 'ui/directives/auto_select_if_only_one';
 import 'ui/directives/documentation_href';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import template from './create_index_pattern_wizard.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { renderStepIndexPattern, destroyStepIndexPattern } from './components/step_index_pattern';
-import './step_time_field';
-import './matching_indices_list';
+import { renderStepTimeField, destroyStepTimeField } from './components/step_time_field';
 import './create_index_pattern_wizard.less';
 
 uiRoutes
@@ -28,7 +28,8 @@ uiModules.get('apps/management')
     indexPatterns,
     kbnUrl,
     Notifier,
-    Promise
+    Promise,
+    Private,
   ) {
   // This isn't ideal. We want to avoid searching for 20 indices
   // then filtering out the majority of them because they are sysetm indices.
@@ -38,18 +39,11 @@ uiModules.get('apps/management')
     const MAX_NUMBER_OF_MATCHING_INDICES = 20;
     const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
     const notify = new Notifier();
-    const disabledDividerOption = {
-      isDisabled: true,
-      display: '───',
-    };
-    const noTimeFieldOption = {
-      display: `I don't want to use the Time Filter`,
-    };
-
-    const REACT_DOM_ELEMENT_ID = 'stepIndexPatternReact';
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     $scope.$on('$destroy', () => {
-      destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
+      destroyStepIndexPattern();
+      destroyStepTimeField();
     });
 
     // Configure the new index pattern we're going to create.
@@ -192,13 +186,13 @@ uiModules.get('apps/management')
 
     this.renderStepIndexPatternReact = () => {
       $scope.$$postDigest(() => renderStepIndexPattern(
-        REACT_DOM_ELEMENT_ID,
         allIndices,
         this.formValues.name,
         this.doesIncludeSystemIndices,
         es,
+        savedObjectsClient,
         query => {
-          destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
+          destroyStepIndexPattern();
           this.formValues.name = query;
           this.goToTimeFieldStep();
           $scope.$apply();
@@ -206,71 +200,37 @@ uiModules.get('apps/management')
       ));
     };
 
+    this.renderStepTimeFieldReact = () => {
+      $scope.$$postDigest(() => renderStepTimeField(
+        this.formValues.name,
+        indexPatterns,
+        () => {
+          destroyStepTimeField();
+          this.goToIndexPatternStep();
+          $scope.$apply();
+        },
+        this.createIndexPattern
+      ));
+    };
+
     this.goToTimeFieldStep = () => {
-    // Re-initialize this step.
-      this.formValues.timeFieldOption = undefined;
-      this.fetchTimeFieldOptions();
       this.wizardStep = 'timeField';
+      this.renderStepTimeFieldReact();
     };
 
     this.hasIndices = () => (
       this.allIndices.length
     );
 
-    const extractTimeFieldsFromFields = fields => {
-      const dateFields = fields.filter(field => field.type === 'date');
-
-      if (dateFields.length === 0) {
-        return [];
-      }
-
-      return [
-        ...dateFields.map(field => ({
-          display: field.name,
-          fieldName: field.name
-        })),
-        disabledDividerOption,
-        noTimeFieldOption,
-      ];
-    };
-
-    this.fetchTimeFieldOptions = () => {
-      this.isFetchingTimeFieldOptions = true;
-      this.formValues.timeFieldOption = undefined;
-      this.timeFieldOptions = [];
-
-      Promise.all([
-        indexPatterns.fieldsFetcher.fetchForWildcard(this.formValues.name),
-        createReasonableWait(),
-      ])
-        .then(([fields]) => {
-          this.timeFieldOptions = extractTimeFieldsFromFields(fields);
-        })
-        .catch(error => {
-          notify.error(error);
-        })
-        .finally(() => {
-          this.isFetchingTimeFieldOptions = false;
-        });
-    };
-
-    this.createIndexPattern = () => {
+    this.createIndexPattern = (timeFieldName, id) => {
       this.isCreatingIndexPattern = true;
 
-      const {
-        id,
-        name,
-        timeFieldOption,
-      } = this.formValues;
-
-      const timeFieldName = timeFieldOption
-        ? timeFieldOption.fieldName
-        : undefined;
+      const { name } = this.formValues;
 
       sendCreateIndexPatternRequest(indexPatterns, {
         id,
         name,
-        timeFieldName,
+        timeFieldName: timeFieldName === '-1' ? null : timeFieldName,
       }).then(createdId => {
         if (!createdId) {
           return;
