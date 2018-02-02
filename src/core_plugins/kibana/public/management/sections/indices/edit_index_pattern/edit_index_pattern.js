@@ -9,6 +9,7 @@ import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+import { destroyIndexedFieldsTable, renderIndexedFieldsTable } from './components/indexed_fields_table';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -127,8 +128,32 @@ uiModules.get('apps/management')
       $state.save();
     };
 
+    const REACT_DOM_ELEMENT_ID = 'indexFieldsTableReact';
+    const renderIndexedFieldsTableReact = () => {
+      $scope.$$postDigest(() => {
+        renderIndexedFieldsTable(
+          REACT_DOM_ELEMENT_ID,
+          $scope.indexPattern,
+          // allIndices,
+          // this.formValues.name,
+          // this.doesIncludeSystemIndices,
+          // es,
+          // query => {
+          //   destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
+          //   this.formValues.name = query;
+          //   this.goToTimeFieldStep();
+          //   $scope.$apply();
+          // }
+        );
+      });
+    };
+
     $scope.$watch('state.tab', function (tab) {
       if (!tab) $scope.changeTab($scope.editSections[0]);
+      else {
+        if($state.tab === 'indexedFields') renderIndexedFieldsTableReact();
+        // else destroyIndexedFieldsTable();
+      }
     });
 
     $scope.$watchCollection('indexPattern.fields', function () {
@@ -200,6 +225,7 @@ uiModules.get('apps/management')
 
     $scope.$on('$destory', () => {
       destroyScriptedFieldsTable();
+      destroyIndexedFieldsTable(REACT_DOM_ELEMENT_ID);
     });
 
     updateScriptedFieldsTable($scope, $state);
