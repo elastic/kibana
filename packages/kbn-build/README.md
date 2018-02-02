@@ -140,11 +140,18 @@ And if needed, you can skip packages in the same way as for bootstrapping, e.g.
 yarn kbn run build --skip-kibana
 ```
 
+## Building packages for production
+
+The production build process relies on both the Grunt setup at the root of the
+Kibana project and code in `kbn-build`. The full process is described in
+`tasks/build/packages.js`.
+
 ## Development
 
 This package is run from Kibana root, using `yarn kbn`. This will run the
 "pre-built" (aka built and committed to git) version of this tool, which is
-located in the `dist/` folder.
+located in the `dist/` folder. This will also use the included version of Yarn
+instead of using your local install of Yarn.
 
 If you need to build a new version of this package, run `yarn build` in this
 folder.
@@ -213,6 +220,10 @@ _libraries_, so it's focused on publishing packages and other use-cases that are
 not necessarily optimized for our use-cases. It's also not ideal for the setup
 we currently have, with one app that "owns everything" and the rest being
 packages for that app.
+
+### Why a local version of Yarn?
+
+See the [vendor readme](./vendor/README.md).
 
 [npm-link]: https://docs.npmjs.com/cli/link
 [npm5-file]: https://github.com/npm/npm/pull/15900
