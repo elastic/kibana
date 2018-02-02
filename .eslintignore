@@ -10,6 +10,9 @@
 /ui_framework/doc_site/build
 /tasks/vendor
 /packages/*/node_modules
+/packages/*/target
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-build/dist
+/packages/kbn-build/vendor
+/packages/kbn-build/**/fixtures
