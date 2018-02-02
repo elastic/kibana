@@ -57,6 +57,13 @@ describe('config component', function () {
       expect(config.set).withArgs('unrecognizedProperty', 'somevalue').to.not.throwException();
       expect(config.get('unrecognizedProperty')).to.be('somevalue');
     });
+
+    // there is currently no way to make it return false without significant changes to the code
+    it('returns true for success', async () => {
+      expect(await config.set('random', 'value')).to.be(true);
+      // setting to the same should set it to true as well
+      expect(await config.set('random', 'value')).to.be(true);
+    });
   });
 
   describe('#$bind', function () {

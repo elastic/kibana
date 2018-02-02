@@ -63,7 +63,7 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
     const unchanged = oldVal === newVal;
     if (unchanged) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
     const initialVal = declared ? config.get(key) : undefined;
     localUpdate(key, newVal, initialVal);
@@ -71,10 +71,12 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return delayedUpdate(key, newVal)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
+        return true;
       })
       .catch(reason => {
         localUpdate(key, initialVal, config.get(key));
         notify.error(reason);
+        return false;
       });
   }
 
