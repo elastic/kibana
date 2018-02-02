@@ -87,9 +87,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.14.tgz#18842465e11ee96d1b90813e7fd38bef2c65bc8b"
+"@elastic/eui@0.0.18":
+  version "0.0.18"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.18.tgz#eeae6e93ead3bd014f401f577f06af75fff60898"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -99,9 +99,11 @@
     html "^1.0.0"
     jquery "^3.2.1"
     keymirror "^0.1.1"
-    lodash "^4.17.4"
+    lodash "^3.10.1"
+    numeral "^2.0.6"
     prop-types "^15.6.0"
     react-ace "^5.5.0"
+    react-color "^2.13.8"
     serve "^6.3.1"
     tabbable "^1.1.0"
     uuid "^3.1.0"
@@ -8190,6 +8192,10 @@ num2fraction@^1.2.2:
 number-is-nan@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/number-is-nan/-/number-is-nan-1.0.1.tgz#097b602b53422a522c1afb8790318336941a011d"
+
+numeral@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/numeral/-/numeral-2.0.6.tgz#4ad080936d443c2561aed9f2197efffe25f4e506"
 
 "nwmatcher@>= 1.3.9 < 2.0.0", nwmatcher@^1.4.3:
   version "1.4.3"
