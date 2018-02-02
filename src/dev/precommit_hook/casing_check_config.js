@@ -20,6 +20,17 @@ export const IGNORE_FILE_GLOBS = [
 
 /**
  * These patterns are matched against directories and indicate
+ * folders that must use kebab case.
+ *
+ * @type {Array}
+ */
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+];
+
+
+/**
+ * These patterns are matched against directories and indicate
  * explicit folders that are NOT supposed to use snake_case.
  *
  * When a file in one of these directories is checked, the directory
@@ -33,9 +44,9 @@ export const IGNORE_FILE_GLOBS = [
  * @type {Array}
  */
 export const IGNORE_DIRECTORY_GLOBS = [
+  ...KEBAB_CASE_DIRECTORY_GLOBS,
   '**/webpackShims',
   'src/babel-*',
-  'packages/eslint-*',
   'ui_framework/generator-kui',
   'src/ui/public/angular-bootstrap',
   'src/ui/public/flot-charts',

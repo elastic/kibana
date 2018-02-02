@@ -2,18 +2,16 @@ import _ from 'lodash';
 import { dedupFilters } from './lib/dedup_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { findByParam } from 'ui/utils/find_by_param';
+import { toastNotifications } from 'ui/notify';
 import { AddFiltersToKueryProvider } from './lib/add_filters_to_kuery';
 
-export function FilterBarClickHandlerProvider(Notifier, Private) {
+export function FilterBarClickHandlerProvider(Private) {
   const addFiltersToKuery = Private(AddFiltersToKueryProvider);
 
   return function ($state) {
     return function (event, simulate) {
       if (!$state) return;
 
-      const notify = new Notifier({
-        location: 'Filter bar'
-      });
       let aggConfigResult;
 
       // Hierarchical and tabular data set their aggConfigResult parameter
@@ -45,7 +43,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
               return result.createFilter();
             } catch (e) {
               if (!simulate) {
-                notify.warning(e.message);
+                toastNotifications.addSuccess(e.message);
               }
             }
           })

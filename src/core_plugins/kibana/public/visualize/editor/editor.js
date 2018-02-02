@@ -8,7 +8,7 @@ import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier, toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -251,7 +251,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         $scope.kbnTopNav.close('save');
 
         if (id) {
-          notify.info('Saved Visualization "' + savedVis.title + '"');
+          toastNotifications.addSuccess({
+            title: `Saved '${savedVis.title}'`,
+            'data-test-subj': 'saveVisualizationSuccess',
+          });
+
           if ($scope.isAddToDashMode()) {
             const savedVisualizationParsedUrl = new KibanaParsedUrl({
               basePath: chrome.getBasePath(),
@@ -281,7 +285,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
     const parent = searchSource.getParent(true);

@@ -22,6 +22,10 @@ module.exports = function (grunt) {
     '--logging.json=false',
   ];
 
+  const testUIArgs = [
+    '--server.maxPayloadBytes=1648576', //default is 1048576
+  ];
+
   const buildTestsArgs = [
     ...stdDevArgs,
     '--plugins.initialize=false',
@@ -113,6 +117,7 @@ module.exports = function (grunt) {
       args: [
         ...binArgs,
         ...stdDevArgs,
+        ...testUIArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
@@ -129,6 +134,7 @@ module.exports = function (grunt) {
       cmd: releaseBinScript,
       args: [
         ...stdDevArgs,
+        ...testUIArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
         ...kbnServerFlags,
@@ -146,9 +152,11 @@ module.exports = function (grunt) {
       args: [
         ...binArgs,
         ...stdDevArgs,
+        ...testUIArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
+        '--dev_mode.enabled=false',
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',

@@ -5,12 +5,12 @@
  */
 
 import _ from 'lodash';
-import { Notifier } from 'ui/notify/notifier';
+import { fatalError } from 'ui/notify';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
-export function EventsProvider(Private, Promise) {
-  const notify = new Notifier({ location: 'EventEmitter' });
+const location = 'EventEmitter';
 
+export function EventsProvider(Private, Promise) {
   _.class(Events).inherits(SimpleEmitter);
   function Events() {
     Events.Super.call(this);
@@ -40,7 +40,7 @@ export function EventsProvider(Private, Promise) {
         rebuildDefer();
 
         // we ignore the completion of handlers, just watch for unhandled errors
-        Promise.resolve(handler.apply(handler, args)).catch(notify.fatal);
+        Promise.resolve(handler.apply(handler, args)).catch(error => fatalError(error, location));
       });
     }());
 
