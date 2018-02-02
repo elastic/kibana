@@ -37,7 +37,7 @@ exports[`TimeField should render a loading state 1`] = `
           grow={false}
         >
           <EuiLoadingSpinner
-            size="m"
+            size="s"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -98,15 +98,14 @@ exports[`TimeField should render a selected time field 1`] = `
           component="div"
           grow={false}
         >
-          <EuiButtonEmpty
+          <EuiLink
+            className="timeFieldRefreshButton"
             color="primary"
-            iconSide="left"
             onClick={[Function]}
-            size="s"
             type="button"
           >
             Refresh
-          </EuiButtonEmpty>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     }
@@ -168,15 +167,14 @@ exports[`TimeField should render normally 1`] = `
           component="div"
           grow={false}
         >
-          <EuiButtonEmpty
+          <EuiLink
+            className="timeFieldRefreshButton"
             color="primary"
-            iconSide="left"
             onClick={[Function]}
-            size="s"
             type="button"
           >
             Refresh
-          </EuiButtonEmpty>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     }
