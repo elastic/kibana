@@ -9,6 +9,7 @@ import { exactly } from './exactly';
 import { filterrows } from './filterrows';
 import { font } from './font';
 import { formatdate } from './formatdate';
+import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
 import { grid } from './grid';
 import { head } from './head';
@@ -50,6 +51,7 @@ export const commonFunctions = [
   filterrows,
   font,
   formatdate,
+  formatnumber,
   getCell,
   grid,
   head,
