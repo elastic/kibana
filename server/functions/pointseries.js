@@ -2,21 +2,21 @@ import { groupBy, zipObject, omit, uniq, map, mapValues } from 'lodash';
 import uniqBy from 'lodash.uniqby';
 import pickBy from 'lodash.pickby';
 import moment from 'moment';
-import { math } from 'mathjs';
+import mathjs from 'mathjs';
 import { findInObject } from '../../common/lib/find_in_object';
 import { pivotObjectArray } from '../../common/lib/pivot_object_array.js';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
 function isColumnReference(mathExpression) {
-  const parsedMath = math.parse(mathExpression);
+  const parsedMath = mathjs.parse(mathExpression);
   if (parsedMath.type === 'SymbolNode') return true;
 }
 
 function isMeasure(mathScope, mathExpression) {
   if (isColumnReference(mathExpression)) return false;
 
-  const parsedMath = math.parse(mathExpression);
+  const parsedMath = mathjs.parse(mathExpression);
 
   if (parsedMath.type !== 'FunctionNode' && parsedMath.type !== 'ConstantNode') {
     throw new Error('Expressions must be wrapped in a function such as sum()');
@@ -26,7 +26,7 @@ function isMeasure(mathScope, mathExpression) {
 
   // This will throw if the field isn't found on scope.
   // Must be a function node!
-  const evaluated = math.eval(mathExpression, mathScope);
+  const evaluated = mathjs.eval(mathExpression, mathScope);
   if (typeof evaluated !== 'number') return false;
 
   return true;
@@ -41,7 +41,7 @@ function getFieldType(columns, field) {
 function getType(columns, mathExpression) {
   if (isColumnReference(mathExpression)) return getFieldType(columns, mathExpression);
 
-  const parsedMath = math.parse(mathExpression);
+  const parsedMath = mathjs.parse(mathExpression);
   const symbolNames = map(
     findInObject(parsedMath, (val, name) => val.type === 'SymbolNode' && name !== 'fn'),
     'name'
@@ -125,7 +125,7 @@ export const pointseries = () => ({
           const colName = args[dimension];
           try {
             acc[dimension] = colName
-              ? normalizeValue(colName, math.eval(colName, mathScope)[i])
+              ? normalizeValue(colName, mathjs.eval(colName, mathScope)[i])
               : '_all';
           } catch (e) {
             // TODO: handle invalid column names...
@@ -155,7 +155,7 @@ export const pointseries = () => ({
       const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
       const measureValues = measureNames.map(measure => {
         try {
-          return math.eval(args[measure], subScope);
+          return mathjs.eval(args[measure], subScope);
         } catch (e) {
           return null;
         }

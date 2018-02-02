@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import mockKibana from './fixtures/kibana';
 import plugin from '../';
+import mockKibana from './fixtures/kibana';
 
 describe('canvas plugin', () => {
   let instance;
