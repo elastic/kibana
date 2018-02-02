@@ -20,7 +20,7 @@ export const KuiTitle = ({ size, children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiTitle.PropTypes = {
+KuiTitle.propTypes = {
   children: PropTypes.node.isRequired,
   size: PropTypes.oneOf(SIZES),
 };
@@ -36,6 +36,6 @@ export const KuiText = ({ children, className, ...rest }) => {
   return cloneElement(children, props);
 };
 
-KuiText.PropTypes = {
+KuiText.propTypes = {
   children: PropTypes.node.isRequired,
 };

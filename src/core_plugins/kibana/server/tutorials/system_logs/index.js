@@ -11,13 +11,12 @@ export function systemLogsSpecProvider() {
     shortDescription: 'Collect and parse logs written by the local Syslog server.',
     longDescription: 'The `system` Filebeat module collects and parses logs created by the system logging service of common ' +
                      ' Unix/Linux based distributions. This module is not available on Windows.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-system.html)' +
-                     ' about the `system` module.',
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-system.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
         {
-          title: 'Filebeat-syslog-dashboard',
+          id: 'Filebeat-syslog-dashboard',
           linkLabel: 'System logs dashboard',
           isOverview: true
         }

@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.header.clickToastOK();
         const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
         expect(panelToggleMenu).to.equal(false);
       });
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
 
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
       // controls.
-      it ('are shown in edit mode after a hard refresh', async () => {
+      it('are shown in edit mode after a hard refresh', async () => {
         const currentUrl = await remote.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
         await remote.get(currentUrl.toString(), true);
@@ -79,7 +78,6 @@ export default function ({ getService, getPageObjects }) {
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
-          await PageObjects.header.clickToastOK();
           await PageObjects.dashboard.toggleExpandPanel();
 
           const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
@@ -127,7 +125,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.discover.clickFieldListItemAdd('bytes');
           await PageObjects.discover.saveSearch('my search');
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.header.clickToastOK();
           await PageObjects.header.clickDashboard();
           await PageObjects.dashboard.addSavedSearch('my search');
 

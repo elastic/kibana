@@ -1,5 +1,6 @@
 import html from 'ui/timepicker/timepicker.html';
 import './quick_panel';
+import './recent_panel';
 import './relative_panel';
 import './absolute_panel';
 import _ from 'lodash';
@@ -7,20 +8,21 @@ import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
 import 'ui/timepicker/refresh_intervals';
-import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
 import { uiModules } from 'ui/modules';
+import { TIME_MODES } from './modes';
+import { timeUnits } from './time_units';
 const module = uiModules.get('ui/timepicker');
 const notify = new Notifier({
   location: 'timepicker',
 });
 
-module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (refreshIntervals) {
   return {
     restrict: 'E',
     scope: {
@@ -35,10 +37,10 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
     template: html,
     controller: function ($scope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
-      $scope.modes = ['quick', 'relative', 'absolute'];
+      $scope.modes = Object.values(TIME_MODES);
       $scope.activeTab = $scope.activeTab || 'filter';
 
-      if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+      if (_.isUndefined($scope.mode)) $scope.mode = TIME_MODES.QUICK;
 
       $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
@@ -67,13 +69,13 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.relativeOptions = relativeOptions;
 
       $scope.$watch('from', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.mode === TIME_MODES.ABSOLUTE) {
           $scope.absolute.from = date;
         }
       });
 
       $scope.$watch('to', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.mode === TIME_MODES.ABSOLUTE) {
           $scope.absolute.to = date;
         }
       });
@@ -125,16 +127,18 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
 
       $scope.setMode = function (thisMode) {
         switch (thisMode) {
-          case 'quick':
+          case TIME_MODES.QUICK:
             break;
-          case 'relative':
+          case TIME_MODES.RECENT:
+            break;
+          case TIME_MODES.RELATIVE:
             $scope.relative = parseRelativeParts($scope.from, $scope.to);
             $scope.formatRelative('from');
             $scope.formatRelative('to');
             break;
-          case 'absolute':
+          case TIME_MODES.ABSOLUTE:
             $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
-            $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
+            $scope.absolute.to = dateMath.parse($scope.to || moment(), { roundUp: true });
             break;
         }
 
@@ -158,7 +162,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.checkRelative = function () {
         if ($scope.relative.from.count != null && $scope.relative.to.count != null) {
           const from = dateMath.parse(getRelativeString('from'));
-          const to = dateMath.parse(getRelativeString('to'), true);
+          const to = dateMath.parse(getRelativeString('to'), { roundUp: true });
           if (to && from) return to.isBefore(from);
           return true;
         }
@@ -166,7 +170,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
 
       $scope.formatRelative = function (key) {
         const relativeString = getRelativeString(key);
-        const parsed = dateMath.parse(relativeString, key === 'to');
+        const parsed = dateMath.parse(relativeString, { roundUp: key === 'to' });
         let preview;
         if (relativeString === 'now') {
           preview = 'Now';

@@ -21,6 +21,10 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
 
 export function replaceTemplateStrings(text, params = {}) {
   const variables = {
+    // '{' and '}' can not be used in template since they are used as template tags.
+    // Must use '{curlyOpen}'' and '{curlyClose}'
+    curlyOpen: '{',
+    curlyClose: '}',
     config: {
       cloud: {
         id: chrome.getInjected('cloudId')

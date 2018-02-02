@@ -8,16 +8,15 @@ export function systemMetricsSpecProvider() {
     id: 'systemMetrics',
     name: 'System metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Collects CPU, memory, network, and disk statistics from the host.',
+    shortDescription: 'Collect CPU, memory, network, and disk statistics from the host.',
     longDescription: 'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host.' +
-                     ' It collects system wide statistics as well as per process and per filesystem statistics.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-system.html)' +
-                     ' about the system module.',
+                     ' It collects system wide statistics and statistics per process and filesystem.' +
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-system.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
         {
-          title: 'Metricbeat-system-overview',
+          id: 'Metricbeat-system-overview',
           linkLabel: 'System metrics dashboard',
           isOverview: true
         }

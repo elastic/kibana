@@ -28,7 +28,7 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise
 
       url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${err.savedObjectType}`;
 
-      notify.info(err);
+      notify.warning(err);
       kbnUrl.redirect(url);
       return Promise.halt();
     };

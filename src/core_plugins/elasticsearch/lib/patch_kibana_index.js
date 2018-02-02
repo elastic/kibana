@@ -51,8 +51,7 @@ export async function patchKibanaIndex(options) {
     type: rootEsType,
     body: {
       properties: missingProperties
-    },
-    update_all_types: true
+    }
   });
 }
 

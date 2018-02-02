@@ -6,6 +6,7 @@ import {
 } from '../../test';
 
 import { KuiContextMenu } from './context_menu';
+import { setTimeout } from 'timers';
 
 const panel2 = {
   id: 2,
@@ -43,6 +44,10 @@ const panels = [
   panel2,
 ];
 
+const tick = (ms = 0) => new Promise(resolve => {
+  setTimeout(resolve, ms);
+});
+
 describe('KuiContextMenu', () => {
   test('is rendered', () => {
     const component = render(
@@ -67,7 +72,7 @@ describe('KuiContextMenu', () => {
           .toMatchSnapshot();
       });
 
-      it('allows you to click the title button to go back to the previous panel', () => {
+      it('allows you to click the title button to go back to the previous panel', async () => {
         const component = mount(
           <KuiContextMenu
             panels={panels}
@@ -75,17 +80,18 @@ describe('KuiContextMenu', () => {
           />
         );
 
+        await tick(20);
+
         expect(takeMountedSnapshot(component))
           .toMatchSnapshot();
 
         // Navigate to a different panel.
         component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
 
-        setTimeout(() => {
-          expect(takeMountedSnapshot(component))
-            .toMatchSnapshot();
-          done();
-        });
+        await tick(20);
+
+        expect(takeMountedSnapshot(component))
+          .toMatchSnapshot();
       });
     });
   });

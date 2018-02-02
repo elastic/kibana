@@ -47,6 +47,7 @@ increase request processing time.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
+`visualize:enableLabs`:: Enables experimental visualizations. Default is `true`. If this is turned off, users will not be able to create visualizations that are considered experimental. They will also not be able to add or view these visualizations on a dashboard. 
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
 12 is the maximum. {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
 `visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.

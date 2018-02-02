@@ -49,7 +49,11 @@
 
       <div class="euiSpacer euiSpacer--m"></div>
 
-      <div class="euiPanel euiPanel--paddingLarge">
+      <div
+        ng-class="{
+          'euiPanel euiPanel--paddingLarge': !controller.hasIndices()
+        }"
+      >
         <!-- User has no data -->
         <div ng-if="!controller.hasIndices()">
           <div class="euiPageContentBody">
@@ -125,32 +129,14 @@
           ng-switch="controller.wizardStep"
         >
           <!-- Specify index pattern -->
-          <step-index-pattern
-            ng-switch-when="indexPattern"
-            fetch-existing-indices="controller.fetchExistingIndices()"
-            is-fetching-existing-indices="controller.isFetchingExistingIndices"
-            fetch-matching-indices="controller.fetchMatchingIndices()"
-            is-fetching-matching-indices="controller.isFetchingMatchingIndices"
-            has-indices="controller.hasIndices()"
-            index-pattern-name="controller.formValues.name"
-            all-indices="controller.allIndices"
-            partial-matching-indices="controller.partialMatchingIndices"
-            matching-indices="controller.matchingIndices"
-            go-to-next-step="controller.goToTimeFieldStep()"
-          ></step-index-pattern>
+          <div ng-switch-when="indexPattern">
+            <div id="stepIndexPatternReact"></div>
+          </div>
 
           <!-- Specify optional time field -->
-          <step-time-field
-            ng-switch-when="timeField"
-            index-pattern-id="controller.formValues.id"
-            index-pattern-name="controller.formValues.name"
-            time-field-options="controller.timeFieldOptions"
-            selected-time-field-option="controller.formValues.timeFieldOption"
-            fetch-time-field-options="controller.fetchTimeFieldOptions()"
-            is-fetching-time-field-options="controller.isFetchingTimeFieldOptions"
-            go-to-previous-step="controller.goToIndexPatternStep()"
-            create-index-pattern="controller.createIndexPattern()"
-          ></step-time-field>
+          <div ng-switch-when="timeField">
+            <div id="stepTimeFieldReact"></div>
+          </div>
         </div>
       </div>
     </div>

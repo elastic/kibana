@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import {
   KuiBar,
   KuiBarSection,
-  KuiLinkButton,
 } from 'ui_framework/components';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
@@ -14,10 +13,6 @@ import {
   EuiTab,
   EuiSpacer,
   EuiSteps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
 } from '@elastic/eui';
 
 export class InstructionSet extends React.Component {
@@ -148,39 +143,6 @@ export class InstructionSet extends React.Component {
       );
     }
 
-    let launchDashboard;
-    if (this.props.overviewDashboard) {
-      launchDashboard = (
-        <div>
-          <EuiHorizontalRule />
-
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <p>
-                  {`Once all steps are completed, you're ready to explore your data`}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem
-              grow={false}
-            >
-              <KuiLinkButton
-                buttonType="primary"
-                href={`#/dashboards?title=${this.props.overviewDashboard.title}`}
-              >
-                {this.props.overviewDashboard.linkLabel}
-              </KuiLinkButton>
-            </EuiFlexItem>
-
-          </EuiFlexGroup>
-
-        </div>
-      );
-    }
-
     return (
       <div className="kuiVerticalRhythmLarge">
 
@@ -195,8 +157,6 @@ export class InstructionSet extends React.Component {
         <EuiSpacer size="m" />
 
         {this.renderInstructions()}
-
-        {launchDashboard}
 
       </div>
     );
@@ -223,8 +183,4 @@ InstructionSet.propTypes = {
   paramValues: PropTypes.object.isRequired,
   setParameter: PropTypes.func,
   replaceTemplateStrings: PropTypes.func.isRequired,
-  overviewDashboard: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    linkLabel: PropTypes.string.isRequired,
-  }),
 };
