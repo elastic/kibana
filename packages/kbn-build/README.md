@@ -103,12 +103,6 @@ To bootstrap Kibana:
 yarn kbn bootstrap
 ```
 
-You can specify additional arguments to `yarn`, e.g.
-
-```
-yarn kbn bootstrap -- --frozen-lockfile
-```
-
 By default, `kbn-build` will bootstrap all packages within Kibana, plus all
 Kibana plugins located in `../kibana-extra`. There are several options for
 skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
