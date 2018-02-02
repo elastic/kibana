@@ -23,7 +23,7 @@ export class Control {
   }
 
   async fetch() {
-    throw new Error('fetch method not defined');
+    throw new Error('fetch method not defined, subclass are required to implement');
   }
 
   /**
