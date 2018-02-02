@@ -10,7 +10,13 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { notify, GlobalToastList, toastNotifications, createFirstIndexPatternPrompt } from 'ui/notify';
+import {
+  notify,
+  GlobalToastList,
+  toastNotifications,
+  GlobalBannerList,
+  banners,
+} from 'ui/notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -72,23 +78,27 @@ export function kbnChromeProvider(chrome, internals) {
           // Notifications
           $scope.notifList = notify._notifs;
 
-          const globalToastList = instance => {
-            toastNotifications.onChange(() => {
-              instance.forceUpdate();
-            });
-          };
+          // Non-scope based code (e.g., React)
 
+          // Banners
+          ReactDOM.render(
+            <GlobalBannerList
+              banners={banners.list}
+              subscribe={banners.onChange}
+            />,
+            document.getElementById('globalBannerList')
+          );
+
+          // Toast Notifications
           ReactDOM.render(
             <GlobalToastList
-              ref={globalToastList}
               toasts={toastNotifications.list}
               dismissToast={toastNotifications.remove}
               toastLifeTimeMs={6000}
+              subscribe={toastNotifications.onChange}
             />,
             document.getElementById('globalToastList')
           );
-
-          $scope.createFirstIndexPatternPrompt = createFirstIndexPatternPrompt;
 
           return chrome;
         }
