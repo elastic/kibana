@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    cli: './src/cli.js'
+    index: './src/index.js'
   },
   target: 'node',
 
