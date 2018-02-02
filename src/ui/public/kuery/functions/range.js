@@ -51,7 +51,8 @@ export function toElasticsearchQuery(node, indexPattern) {
   else {
     return {
       bool: {
-        filter: fields.map(field => createRangeDSL(field, queryParams))
+        should: fields.map(field => createRangeDSL(field, queryParams)),
+        minimum_should_match: 1,
       }
     };
   }

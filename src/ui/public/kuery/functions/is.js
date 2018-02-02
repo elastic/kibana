@@ -47,13 +47,12 @@ export function toElasticsearchQuery(node, indexPattern) {
   });
 
   if (!_.isEmpty(nonScriptedFields)) {
-    queries.push({
-      multi_match: {
-        query: value,
-        fields: nonScriptedFields.map(field => field.name),
-        type: 'phrase',
-        lenient: true,
-      }
+    nonScriptedFields.forEach((field) => {
+      queries.push({
+        match_phrase: {
+          [field.name]: value
+        }
+      });
     });
   }
 
@@ -63,7 +62,8 @@ export function toElasticsearchQuery(node, indexPattern) {
   else {
     return {
       bool: {
-        filter: queries
+        should: queries,
+        minimum_should_match: 1,
       }
     };
   }

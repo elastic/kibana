@@ -13,10 +13,12 @@ function escapeRegExp(string) {
  */
 export function getFieldsByWildcard(pattern, indexPattern) {
   if (pattern.includes('*')) {
-    const userInputLiterals = pattern.split('\\*');
+    const replacedWildcardPattern = pattern.replace('\\*', '_KBN_WILDCARD_');
+    const userInputLiterals = replacedWildcardPattern.split('*');
     const escapedUserInputLiterals = userInputLiterals.map(escapeRegExp);
     const regexPattern = `^${escapedUserInputLiterals.join('.*')}$`;
-    const regex = new RegExp(regexPattern);
+    const regexPatternWithEscapes = regexPattern.replace('_KBN_WILDCARD_', '\\*');
+    const regex = new RegExp(regexPatternWithEscapes);
 
     const fields = indexPattern.fields.filter((field) => {
       return regex.test(field.name);
