@@ -75,7 +75,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "4.0.2",
-    "@elastic/eui": "0.0.14",
+    "@elastic/eui": "0.0.18",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.0",
     "@elastic/test-subj-selector": "0.2.1",
