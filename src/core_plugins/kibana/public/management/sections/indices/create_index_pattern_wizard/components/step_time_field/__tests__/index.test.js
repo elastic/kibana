@@ -3,9 +3,9 @@ const unmountComponentAtNode = jest.fn();
 
 jest.doMock('react-dom', () => ({ render, unmountComponentAtNode }));
 
-const { renderStepIndexPattern, destroyStepIndexPattern } = require('../index');
+const { renderStepTimeField, destroyStepTimeField } = require('../index');
 
-describe('StepIndexPatternRender', () => {
+describe('StepTimeFieldRender', () => {
   beforeEach(() => {
     jest.spyOn(document, 'getElementById').mockImplementation(() => ({}));
     render.mockClear();
@@ -13,20 +13,18 @@ describe('StepIndexPatternRender', () => {
   });
 
   it('should call render', () => {
-    renderStepIndexPattern(
-      [],
+    renderStepTimeField(
       '',
-      false,
       {},
-      {},
-      () => {}
+      () => {},
+      () => {},
     );
 
     expect(render.mock.calls.length).toBe(1);
   });
 
   it('should call unmountComponentAtNode', () => {
-    destroyStepIndexPattern();
+    destroyStepTimeField();
     expect(unmountComponentAtNode.mock.calls.length).toBe(1);
   });
 });
