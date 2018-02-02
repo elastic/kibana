@@ -2,7 +2,7 @@
 
 Use this service to surface banners at the top of the screen. The expectation is that the banner will used an
 `<EuiCallOut />` to render, but that is not a requirement. See [the EUI docs](https://elastic.github.io/eui/) for
-more information on toasts and their role within the UI.
+more information on banners and their role within the UI.
 
 Banners should be considered with respect to their lifecycle. Most banners are best served by using the `add` and
 `remove` functions.
@@ -334,7 +334,6 @@ containing element.
 
 ```js
 banners.add({
-  id: 'my-tested-banner'
   component: (
     <EuiCallOut
       title="Look at me!"
@@ -351,7 +350,6 @@ Given that `component` is expected to be a React component, you could also add t
 
 ```js
 banners.add({
-  id: 'my-tested-banner'
   component: (
     <EuiCallOut
       title="Look at me!"

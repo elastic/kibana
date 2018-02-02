@@ -51,7 +51,7 @@ describe('Banners', () => {
       test('adds a banner', () => {
         const id = banners.add({});
         expect(banners.list.length).toBe(1);
-        expect(id).toEqual(expect.stringMatching(/banner-\d+/));
+        expect(id).toEqual(expect.stringMatching(/^\d+$/));
       });
 
       test('adds a banner and ignores an ID property', () => {

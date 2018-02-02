@@ -47,7 +47,7 @@ export class Banners {
    * @return {String} A newly generated ID. This value can be used to remove/replace the banner.
    */
   add = ({ component, priority = 0 }) => {
-    const id = `banner-${++this.uniqueId}`;
+    const id = `${++this.uniqueId}`;
     const bannerDetails = { id, component, priority };
 
     // find the lowest priority item to put this banner in front of
