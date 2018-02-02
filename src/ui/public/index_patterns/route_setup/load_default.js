@@ -17,7 +17,7 @@ function displayBanner() {
 
   // Avoid being hostile to new users who don't have an index pattern setup yet
   // give them a friendly info message instead of a terse error message
-  bannerId = banners.add({
+  bannerId = banners.set({
     id: bannerId, // initially undefined, but reused after first set
     component: (
       <EuiCallOut
