@@ -1,10 +1,10 @@
-import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
 import { resolve } from 'path';
 
 import * as commands from './commands';
 import { runCommand } from './run';
+import { parseArgv, hasDashDash, createExtraArgs } from './utils/cli';
 
 const getCommand = name => commands[name]; // eslint-disable-line import/namespace
 
@@ -31,11 +31,21 @@ function help() {
 }
 
 export async function run(argv) {
-  const options = getopts(argv, {
-    alias: {
-      h: 'help'
-    }
-  });
+  const options = parseArgv(argv);
+
+  // We can simplify this setup (and remove this extra handling) once Yarn
+  // starts forwarding the `--` directly to this script, see
+  // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
+  if (hasDashDash(argv)) {
+    console.log(
+      chalk.red(
+        `Using "--" is not allowed, as it doesn't work with 'yarn kbn'. You ` +
+        `can however call the command without "--" and the extra args will be` +
+        `forwarded`
+      )
+    );
+    process.exit(1);
+  }
 
   const args = options._;
 
@@ -49,9 +59,6 @@ export async function run(argv) {
   const rootPath = resolve(__dirname, '../../../');
 
   const commandName = args[0];
-  const extraArgs = args.slice(1);
-
-  const commandOptions = { options, extraArgs, rootPath };
 
   const command = getCommand(commandName);
   if (command === undefined) {
@@ -61,5 +68,7 @@ export async function run(argv) {
     process.exit(1);
   }
 
-  await runCommand(command, commandOptions);
+  const extraArgs = createExtraArgs(options);
+
+  await runCommand(command, { options, extraArgs, rootPath });
 }
