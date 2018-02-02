@@ -347,6 +347,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await testSubjects.find('createIndexPatternCreateButton');
     }
 
+    async clickOnOnlyIndexPattern() {
+      return await testSubjects.click('indexPatternLink');
+    }
+
     async removeIndexPattern() {
       let alertText;
       await retry.try(async () => {
