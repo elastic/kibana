@@ -1,6 +1,8 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
+import { Notifier } from 'ui/notify';
+
 describe('config component', function () {
   let config;
   let $scope;
@@ -102,10 +104,15 @@ describe('config component', function () {
     });
 
     it('returns false for failure', async () => {
+      const message = 'TEST - _change - EXPECTED';
       // immediately resolve to avoid timing issues
-      const delayedUpdate = () => Promise.reject(new Error('TEST - EXPECTED'));
+      const delayedUpdate = () => Promise.reject(new Error(message));
 
       expect(await config._change('expected_false', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
+
+      // cleanup the notification so that the test harness does not complain
+      const notif = Notifier.prototype._notifs.find(notif => notif.content.indexOf(message) !== -1);
+      notif.close();
     });
 
   });
