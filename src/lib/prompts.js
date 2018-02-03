@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const isEmpty = require('lodash.isempty');
 
 function prompt(options) {
   return inquirer
@@ -31,7 +32,7 @@ function listCommits(commits, isMultipleChoice) {
     .then(commit => (isMultipleChoice ? commit.reverse() : [commit]))
     .then(
       selectedCommits =>
-        selectedCommits.length === 0
+        isEmpty(selectedCommits)
           ? listCommits(commits, isMultipleChoice)
           : selectedCommits
     );
@@ -46,7 +47,7 @@ function listBranches(branches, isMultipleChoice) {
     .then(res => (isMultipleChoice ? res : [res]))
     .then(
       selectedBranches =>
-        selectedBranches.length === 0
+        isEmpty(selectedBranches)
           ? listBranches(branches, isMultipleChoice)
           : selectedBranches
     );

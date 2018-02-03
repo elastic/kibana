@@ -18,7 +18,6 @@ describe('run through steps', () => {
     axios.defaults.host = 'http://localhost';
     axios.defaults.adapter = httpAdapter;
 
-    os.homedir = jest.fn(() => '/homefolder');
     rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
     rpc.writeFile = jest.fn().mockReturnValue(Promise.resolve());
     rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());

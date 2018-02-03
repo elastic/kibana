@@ -1,4 +1,10 @@
-// Mock logger and ora (spinner) globally in all tests
+// Mock the following dependencies globally (in all tests)
+
+jest.mock('os', () => {
+  return {
+    homedir: () => '/myHomeDir'
+  };
+});
 
 jest.mock('../src/lib/logger', () => {
   return {

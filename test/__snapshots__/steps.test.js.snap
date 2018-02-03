@@ -5,37 +5,37 @@ Array [
   Array [
     "git clone git@github.com:elastic/kibana",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic",
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
     },
   ],
   Array [
     "git remote add sqren git@github.com:sqren/kibana",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick mySha",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git push sqren backport/6.2/pr-myPullRequest --force",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
 ]

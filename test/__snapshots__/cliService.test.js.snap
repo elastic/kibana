@@ -32,31 +32,31 @@ Array [
   Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest_pr-myOtherPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest_pr-myOtherPullRequest ",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick mySha",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick mySha2",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git push sqren backport/6.x/pr-myPullRequest_pr-myOtherPullRequest --force",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
 ]
@@ -94,25 +94,25 @@ Array [
   Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git fetch origin 6.x && git branch backport/6.x/commit-mySha origin/6.x --force && git checkout backport/6.x/commit-mySha ",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick mySha",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git push sqren backport/6.x/commit-mySha --force",
     Object {
-      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
 ]

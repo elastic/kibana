@@ -1,5 +1,6 @@
 const ora = require('ora');
 const chalk = require('chalk');
+const isEmpty = require('lodash.isempty');
 
 const prompts = require('../lib/prompts');
 const github = require('../lib/github');
@@ -130,6 +131,15 @@ function getCommitBySha({ owner, repoName, sha }) {
     });
 }
 
+class MissingDataError extends Error {
+  constructor(message) {
+    super();
+    Error.captureStackTrace(this, MissingDataError);
+    this.code = constants.MISSING_DATA_ERROR;
+    this.message = message;
+  }
+}
+
 function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
   const spinner = ora('Loading commits...').start();
   return github
@@ -139,6 +149,20 @@ function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
       throw e;
     })
     .then(commits => {
+      if (isEmpty(commits)) {
+        spinner.stopAndPersist({
+          symbol: chalk.green('?'),
+          text: `${chalk.bold('Select commit')} `
+        });
+
+        throw new MissingDataError(
+          chalk.red(
+            author
+              ? 'There are no commits by you in this repository'
+              : 'There are no commits in this repository'
+          )
+        );
+      }
       spinner.stop();
       return prompts.listCommits(commits, multipleCommits);
     });
@@ -153,6 +177,10 @@ function handleErrors(e) {
     // Handled exceptions
     case constants.GITHUB_ERROR:
       logger.error(JSON.stringify(e.message, null, 4));
+      break;
+
+    case constants.MISSING_DATA_ERROR:
+      logger.error(e.message);
       break;
 
     // Unhandled exceptions

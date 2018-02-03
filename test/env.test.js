@@ -7,10 +7,6 @@ const {
 } = require('../src/lib/env');
 
 describe('env.js', () => {
-  beforeEach(() => {
-    os.homedir = jest.fn(() => '/myHomeDir');
-  });
-
   test('getGlobalConfigPath', () => {
     expect(getGlobalConfigPath()).toBe('/myHomeDir/.backport/config.json');
   });

@@ -1,7 +1,6 @@
 const configs = require('../src/lib/configs');
 const rpc = require('../src/lib/rpc');
 const inquirer = require('inquirer');
-const os = require('os');
 
 describe('config.js', () => {
   afterEach(() => jest.restoreAllMocks());
@@ -61,7 +60,6 @@ describe('config.js', () => {
 
   describe('getGlobalConfig', () => {
     beforeEach(() => {
-      jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
       jest.spyOn(rpc, 'mkdirp').mockReturnValue(Promise.resolve());
       jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
       jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
@@ -116,7 +114,6 @@ describe('config.js', () => {
 
   describe('maybeCreateGlobalConfig', () => {
     it('should create config and succeed', () => {
-      jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
       jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
 
       return configs.maybeCreateGlobalConfig().then(() => {
@@ -216,7 +213,9 @@ describe('config.js', () => {
       it('should throw InvalidConfigError', () => {
         expect.assertions(1);
         return configs._getCombinedConfig(null, {}).catch(e => {
-          expect(e.message).toEqual('.backportrc.json was not found');
+          expect(e.message).toEqual(
+            'Global config (/myHomeDir/.backport/config.json) does not contain any valid projects, and no project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport#global-configuration'
+          );
         });
       });
     });

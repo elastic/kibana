@@ -12,7 +12,6 @@ axios.defaults.adapter = httpAdapter;
 
 describe('doBackportVersion', () => {
   beforeEach(() => {
-    os.homedir = jest.fn(() => '/homefolder');
     rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
     rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());
 
