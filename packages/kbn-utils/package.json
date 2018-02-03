@@ -1,6 +1,8 @@
 {
   "name": "@kbn/utils",
   "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
   "main": "./target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {

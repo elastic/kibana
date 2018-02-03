@@ -1,6 +1,8 @@
 {
   "name": "@kbn/internal-native-observable",
   "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
   "main": "./target/index.js",
   "types": "./index.d.ts",
   "scripts": {
