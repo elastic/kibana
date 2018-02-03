@@ -112,10 +112,6 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
-"@elastic/kbn-build@link:packages/kbn-build":
-  version "0.0.0"
-  uid ""
-
 "@elastic/numeral@2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.1.tgz#743801971d8f0c975f9a122867d0e8939d31b3eb"
@@ -129,6 +125,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
 
 "@kbn/babel-preset@link:packages/kbn-babel-preset":
+  version "0.0.0"
+  uid ""
+
+"@kbn/build@link:packages/kbn-build":
   version "0.0.0"
   uid ""
 

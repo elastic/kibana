@@ -21967,6 +21967,14 @@ exports.run = undefined;
 
 let run = exports.run = (() => {
   var _ref = _asyncToGenerator(function* (argv) {
+    // We can simplify this setup (and remove this extra handling) once Yarn
+    // starts forwarding the `--` directly to this script, see
+    // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
+    if (argv.includes('--')) {
+      console.log(_chalk2.default.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
+      process.exit(1);
+    }
+
     const options = (0, _getopts2.default)(argv, {
       alias: {
         h: 'help'
@@ -23114,8 +23122,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.run = exports.description = exports.name = undefined;
 
 let run = exports.run = (() => {
-  var _ref = _asyncToGenerator(function* (projects, projectGraph, { extraArgs }) {
+  var _ref = _asyncToGenerator(function* (projects, projectGraph, { options }) {
     const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
+
+    const frozenLockfile = options['frozen-lockfile'] === true;
+    const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
     console.log(_chalk2.default.bold('\nRunning installs in topological order'));
 
