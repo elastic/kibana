@@ -1,4 +1,4 @@
-const promisify = require('es6-promisify');
+const { promisify } = require('es6-promisify');
 const process = require('child_process');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
