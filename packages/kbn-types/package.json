@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "types": "./types/packages/kbn-types/index.d.ts",
   "scripts": {
-    "prepare": "npm run build",
     "build": "tsc",
     "start": "tsc --watch"
   },
   "devDependencies": {
+    "@elastic/kbn-observable": "link:../kbn-observable",
+    "@elastic/kbn-utils": "link:../kbn-utils",
     "typescript": "2.6.1"
   }
 }

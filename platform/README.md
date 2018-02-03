@@ -4,39 +4,15 @@
 
 ## Running code
 
-To get this stuff running locally (as we don't have a proper build system yet):
-
-From a clean setup locally (the best is probably to just `rm` your
-`node_modules`), run:
-
 ```sh
-#  in root directory
-yarn
-
-cd packages/kbn-internal-native-observable
-yarn
-cd -
-
-cd packages/kbn-observable
-yarn
-cd -
-
-cd packages/kbn-utils
-yarn
-cd -
-
-cd packages/kbn-types
-yarn
-cd -
-
-# in root directory
+# all commands from the root directory
+yarn kbn bootstrap
+yarn kbn run build --skip-kibana --skip-kibana-extra
 yarn ts:build
 ```
 
-(Yeah, this is horrible. Working on fixing it!)
-
 If you get into a weird state you might clean the `target` directories,
-`find . -name "target"`, or the `node_modules` directories.
+`yarn kbn clean`.
 
 When this completes you can start the server and plugins as a standalone Node application:
 
