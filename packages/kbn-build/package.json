@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/kbn-build",
+  "name": "@kbn/build",
   "kibana": {
     "build": {
       "skip": true
