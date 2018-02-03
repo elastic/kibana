@@ -112,7 +112,7 @@ describe('config component', function () {
 
       // cleanup the notification so that the test harness does not complain
       const notif = Notifier.prototype._notifs.find(notif => notif.content.indexOf(message) !== -1);
-      notif.close();
+      notif.clear();
     });
 
   });
