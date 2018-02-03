@@ -26,7 +26,8 @@
     "format": "prettier \"./src/**/*.js\" --write",
     "lint": "eslint ./src",
     "prepush": "npm run lint",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "postinstall": "scripts/postinstall.js"
   },
   "lint-staged": {
     "*.js": [
