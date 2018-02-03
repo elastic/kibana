@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 
 import { Headers, filterHeaders } from './headers';
 import { RouteSchemas } from './Route';

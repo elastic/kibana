@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/kbn-utils",
+  "name": "@kbn/utils",
   "version": "0.0.1",
   "main": "./target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",

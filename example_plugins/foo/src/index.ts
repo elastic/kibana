@@ -1,5 +1,5 @@
-import { KibanaPluginConfig } from '@elastic/kbn-types';
-import { k$, first, toPromise } from '@elastic/kbn-observable';
+import { KibanaPluginConfig } from '@kbn/types';
+import { k$, first, toPromise } from '@kbn/observable';
 import { BarPluginType } from 'example-plugin-bar';
 import { FooConfig } from './FooConfig';
 

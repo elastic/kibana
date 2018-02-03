@@ -5,9 +5,9 @@ import {
   map,
   first,
   toPromise,
-} from '@elastic/kbn-observable';
+} from '@kbn/observable';
 
-import { ScopedDataClient, KibanaConfig } from '@elastic/kbn-types';
+import { ScopedDataClient, KibanaConfig } from '@kbn/types';
 
 export class BazService {
   constructor(

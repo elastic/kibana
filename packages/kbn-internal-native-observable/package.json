@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/kbn-internal-native-observable",
+  "name": "@kbn/internal-native-observable",
   "version": "0.0.1",
   "main": "./target/index.js",
   "types": "./index.d.ts",

@@ -1,10 +1,10 @@
-import { Observable } from '@elastic/kbn-observable';
+import { Observable } from '@kbn/observable';
 import {
   Router,
   LoggerFactory,
   ElasticsearchService,
   KibanaConfig,
-} from '@elastic/kbn-types';
+} from '@kbn/types';
 import { BazService } from './BazService';
 
 export function registerEndpoints(

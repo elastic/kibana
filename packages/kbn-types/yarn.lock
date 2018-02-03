@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@elastic/kbn-internal-native-observable@link:../kbn-internal-native-observable":
+"@kbn/internal-native-observable@link:../kbn-internal-native-observable":
   version "0.0.0"
   uid ""
 
-"@elastic/kbn-observable@link:../kbn-observable":
+"@kbn/observable@link:../kbn-observable":
   version "0.0.0"
   uid ""
 
-"@elastic/kbn-utils@link:../kbn-utils":
+"@kbn/utils@link:../kbn-utils":
   version "0.0.0"
   uid ""
 

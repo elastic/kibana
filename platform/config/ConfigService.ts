@@ -5,12 +5,12 @@ import {
   first,
   skipRepeats,
   toPromise,
-} from '@elastic/kbn-observable';
+} from '@kbn/observable';
 import { isEqual } from 'lodash';
 
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logging';
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 import { ConfigWithSchema } from './ConfigWithSchema';
 import { RawConfig } from './RawConfig';
 

@@ -10,7 +10,7 @@ import {
   first,
   toPromise,
   $combineLatest,
-} from '@elastic/kbn-observable';
+} from '@kbn/observable';
 
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { AdminClient } from './AdminClient';

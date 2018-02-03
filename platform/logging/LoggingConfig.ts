@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
 
 const { literal, oneOf, object, string, arrayOf, mapOf } = schema;

@@ -8,7 +8,7 @@ import { ElasticsearchService } from '../ElasticsearchService';
 import { AdminClient } from '../AdminClient';
 import { ScopedDataClient } from '../ScopedDataClient';
 import { logger } from '../../../logging/__mocks__';
-import { k$, BehaviorSubject, first, toPromise } from '@elastic/kbn-observable';
+import { k$, BehaviorSubject, first, toPromise } from '@kbn/observable';
 
 test('should not create multiple clients while service is running', async () => {
   const createElasticsearchConfig = (type: string) => ({

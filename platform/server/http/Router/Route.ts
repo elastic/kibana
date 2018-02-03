@@ -1,4 +1,4 @@
-import { schema, Schema } from '@elastic/kbn-utils';
+import { schema, Schema } from '@kbn/utils';
 export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RouteConfig<

@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 
 import { assertNever } from '../../lib/utils';
 import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';

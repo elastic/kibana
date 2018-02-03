@@ -112,18 +112,6 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
-"@elastic/kbn-internal-native-observable@link:packages/kbn-internal-native-observable":
-  version "0.0.0"
-  uid ""
-
-"@elastic/kbn-observable@link:packages/kbn-observable":
-  version "0.0.0"
-  uid ""
-
-"@elastic/kbn-utils@link:packages/kbn-utils":
-  version "0.0.0"
-  uid ""
-
 "@elastic/numeral@2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.1.tgz#743801971d8f0c975f9a122867d0e8939d31b3eb"
@@ -141,6 +129,18 @@
   uid ""
 
 "@kbn/build@link:packages/kbn-build":
+  version "0.0.0"
+  uid ""
+
+"@kbn/internal-native-observable@link:packages/kbn-internal-native-observable":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observable@link:packages/kbn-observable":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utils@link:packages/kbn-utils":
   version "0.0.0"
   uid ""
 

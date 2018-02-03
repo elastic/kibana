@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 
 import { RouteMethod, RouteSchemas, RouteConfig } from './Route';
 import { KibanaRequest } from './Request';

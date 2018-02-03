@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 
 import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';

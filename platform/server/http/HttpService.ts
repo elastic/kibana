@@ -4,7 +4,7 @@ import {
   k$,
   first,
   toPromise,
-} from '@elastic/kbn-observable';
+} from '@kbn/observable';
 
 import { Env } from '../../config';
 import { HttpServer } from './HttpServer';

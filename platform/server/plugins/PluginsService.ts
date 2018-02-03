@@ -11,7 +11,7 @@ import {
   toPromise,
   $bindNodeCallback,
   $fromPromise,
-} from '@elastic/kbn-observable';
+} from '@kbn/observable';
 
 import { Plugin } from './Plugin';
 import { PluginName } from './types';

@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@elastic/kbn-types@link:../../packages/kbn-types":
+"@kbn/types@link:../../packages/kbn-types":
   version "0.0.0"
   uid ""
 

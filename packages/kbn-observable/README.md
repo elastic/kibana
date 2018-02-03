@@ -17,7 +17,7 @@ library they want, if they don't want to use `kbn-observable`.
 ## Example
 
 ```js
-import { Observable, k$, map, last } from '@elastic/kbn-observable';
+import { Observable, k$, map, last } from '@kbn/observable';
 
 const source = Observable.of(1, 2, 3);
 

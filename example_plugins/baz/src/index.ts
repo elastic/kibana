@@ -1,4 +1,4 @@
-import { KibanaPluginConfig } from '@elastic/kbn-types';
+import { KibanaPluginConfig } from '@kbn/types';
 import { registerEndpoints } from './registerEndpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {

@@ -1,4 +1,4 @@
-import { Observable } from '@elastic/kbn-observable';
+import { Observable } from '@kbn/observable';
 
 import { KibanaConfig } from './KibanaConfig';
 

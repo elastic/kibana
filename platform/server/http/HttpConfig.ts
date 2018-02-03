@@ -1,6 +1,6 @@
 import { SslConfig } from './SslConfig';
 import { Env } from '../../config';
-import { schema, ByteSizeValue } from '@elastic/kbn-utils';
+import { schema, ByteSizeValue } from '@kbn/utils';
 
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;

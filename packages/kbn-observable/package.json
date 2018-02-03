@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/kbn-observable",
+  "name": "@kbn/observable",
   "version": "0.0.1",
   "main": "target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
@@ -7,7 +7,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@elastic/kbn-internal-native-observable": "link:../kbn-internal-native-observable",
+    "@kbn/internal-native-observable": "link:../kbn-internal-native-observable",
     "rxjs": "5.4.3"
   },
   "devDependencies": {

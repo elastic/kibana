@@ -1,5 +1,5 @@
 // TODO inline all of these
-import { schema } from '@elastic/kbn-utils';
+import { schema } from '@kbn/utils';
 import { Env } from './Env';
 
 /**
