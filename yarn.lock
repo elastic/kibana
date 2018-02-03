@@ -112,10 +112,6 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
-"@elastic/kbn-build@link:packages/kbn-build":
-  version "0.0.0"
-  uid ""
-
 "@elastic/kbn-internal-native-observable@link:packages/kbn-internal-native-observable":
   version "0.0.0"
   uid ""
@@ -139,6 +135,10 @@
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
+
+"@kbn/build@link:packages/kbn-build":
+  version "0.0.0"
+  uid ""
 
 "@types/bluebird@^3.5.19":
   version "3.5.19"

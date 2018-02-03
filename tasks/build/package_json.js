@@ -1,4 +1,4 @@
-import { transformDependencies } from '@elastic/kbn-build';
+import { transformDependencies } from '@kbn/build';
 
 module.exports = function (grunt) {
   const pkg = grunt.config.get('pkg');
