@@ -19,17 +19,17 @@ export class GuideDemo extends Component {
     }
 
     // Inject HTML.
-    this.content.innerHTML = this.props.html;
+    this.content.innerHTML = this.props.html; // eslint-disable-line no-unsanitized/property
 
     // Inject JS.
     const js = document.createElement('script');
     js.type = 'text/javascript';
-    js.innerHTML = this.props.js;
+    js.innerHTML = this.props.js; // eslint-disable-line no-unsanitized/property
     this.content.appendChild(js);
 
     // Inject CSS.
     const css = document.createElement('style');
-    css.innerHTML = this.props.css;
+    css.innerHTML = this.props.css; // eslint-disable-line no-unsanitized/property
     this.content.appendChild(css);
   }
 
