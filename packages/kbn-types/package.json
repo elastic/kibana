@@ -11,6 +11,6 @@
   "devDependencies": {
     "@kbn/observable": "link:../kbn-observable",
     "@kbn/utils": "link:../kbn-utils",
-    "typescript": "2.6.1"
+    "typescript": "^2.7.1"
   }
 }
