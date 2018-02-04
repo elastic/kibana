@@ -37,7 +37,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     async handler(request, reply) {
       try {
         const { id } = request.params;
-        const app = server.getUiAppById(id);
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
         if (!app) {
           throw Boom.notFound(`Unknown app: ${id}`);
         }
