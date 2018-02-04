@@ -6,9 +6,11 @@ import { resolve } from 'path';
 import * as commands from './commands';
 import { runCommand } from './run';
 
+const getCommand = name => commands[name]; // eslint-disable-line import/namespace
+
 function help() {
   const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName]) // eslint-disable-line import/namespace
+    .map(commandName => getCommand(commandName))
     .map(command => `${command.name} - ${command.description}`);
 
   console.log(dedent`
@@ -29,6 +31,18 @@ function help() {
 }
 
 export async function run(argv) {
+  // We can simplify this setup (and remove this extra handling) once Yarn
+  // starts forwarding the `--` directly to this script, see
+  // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
+  if (argv.includes('--')) {
+    console.log(
+      chalk.red(
+        `Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`
+      )
+    );
+    process.exit(1);
+  }
+
   const options = getopts(argv, {
     alias: {
       h: 'help'
@@ -51,7 +65,7 @@ export async function run(argv) {
 
   const commandOptions = { options, extraArgs, rootPath };
 
-  const command = commands[commandName]; // eslint-disable-line import/namespace
+  const command = getCommand(commandName);
   if (command === undefined) {
     console.log(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)

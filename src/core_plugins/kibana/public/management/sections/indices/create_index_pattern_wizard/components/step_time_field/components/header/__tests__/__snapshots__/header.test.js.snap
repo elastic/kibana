@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      Step 2 of 2: Configure settings
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText
+    color="subdued"
+  >
+    <span>
+      You've defined 
+      <strong>
+        ki*
+      </strong>
+       as your index pattern. Now you can specify some settings before we create it.
+    </span>
+  </EuiText>
+</div>
+`;
