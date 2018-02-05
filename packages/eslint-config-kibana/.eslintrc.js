@@ -8,6 +8,7 @@ module.exports = {
     'babel',
     'react',
     'import',
+    'no-unsanitized',
     'prefer-object-spread',
   ],
 
@@ -69,6 +70,8 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-undef': 'error',
     'no-underscore-dangle': 'off',
+    'no-unsanitized/method': 'error',
+    'no-unsanitized/property': 'error',
     'no-unused-expressions': 'off',
     'no-unused-vars': [ 'error' ],
     'no-use-before-define': [ 'error', 'nofunc' ],

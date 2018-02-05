@@ -31,7 +31,11 @@
         ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
         class="sidebar-item"
       >
-        <a href="{{::pattern.url}}" class="euiLink euiLink--primary show">
+        <a
+          href="{{::pattern.url}}"
+          class="euiLink euiLink--primary show"
+          data-test-subj="indexPatternLink"
+        >
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
             <span ng-bind="::pattern.title"></span>

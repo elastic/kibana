@@ -1,3 +1,5 @@
+import { transformDependencies } from '@kbn/build';
+
 module.exports = function (grunt) {
   const pkg = grunt.config.get('pkg');
 
@@ -20,7 +22,7 @@ module.exports = function (grunt) {
         engines: {
           node: pkg.engines.node
         },
-        dependencies: pkg.dependencies
+        dependencies: transformDependencies(pkg.dependencies)
       }, null, '  ')
     );
   });

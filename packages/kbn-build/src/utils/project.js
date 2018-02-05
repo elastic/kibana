@@ -1,7 +1,11 @@
 import path from 'path';
 import chalk from 'chalk';
 
-import { installInDir, runScriptInPackageStreaming } from './scripts';
+import {
+  installInDir,
+  runScriptInPackage,
+  runScriptInPackageStreaming,
+} from './scripts';
 import { readPackageJson } from './package_json';
 import { CliError } from './errors';
 
@@ -14,7 +18,7 @@ export class Project {
   }
 
   constructor(packageJson, projectPath) {
-    this._json = packageJson;
+    this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
     this.packageJsonLocation = path.resolve(this.path, 'package.json');
@@ -22,19 +26,21 @@ export class Project {
     this.targetLocation = path.resolve(this.path, 'target');
 
     this.allDependencies = {
-      ...(this._json.devDependencies || {}),
-      ...(this._json.dependencies || {})
+      ...(this.json.devDependencies || {}),
+      ...(this.json.dependencies || {}),
     };
 
-    this.scripts = this._json.scripts || {};
+    this.scripts = this.json.scripts || {};
   }
 
   get name() {
-    return this._json.name;
+    return this.json.name;
   }
 
   ensureValidProjectDependency(project) {
-    const relativePathToProject = normalizePath(path.relative(this.path, project.path));
+    const relativePathToProject = normalizePath(
+      path.relative(this.path, project.path)
+    );
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `${PREFIX}${relativePathToProject}`;
@@ -47,7 +53,7 @@ export class Project {
     const meta = {
       package: `${this.name} (${this.packageJsonLocation})`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      actual: `"${project.name}": "${versionInPackageJson}"`
+      actual: `"${project.name}": "${versionInPackageJson}"`,
     };
 
     if (versionInPackageJson.startsWith(PREFIX)) {
@@ -67,11 +73,27 @@ export class Project {
     );
   }
 
+  skipFromBuild() {
+    const json = this.json;
+    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+  }
+
   hasScript(name) {
     return name in this.scripts;
   }
 
-  runScriptStreaming(scriptName, args = []) {
+  async runScript(scriptName, args = []) {
+    console.log(
+      chalk.bold(
+        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
+          this.name
+        )}]:\n`
+      )
+    );
+    return runScriptInPackage(scriptName, args, this);
+  }
+
+  async runScriptStreaming(scriptName, args = []) {
     return runScriptInPackageStreaming(scriptName, args, this);
   }
 
@@ -79,7 +101,7 @@ export class Project {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  installDependencies({ extraArgs }) {
+  async installDependencies({ extraArgs }) {
     console.log(
       chalk.bold(
         `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`

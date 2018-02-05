@@ -1,5 +1,10 @@
 {
   "name": "@elastic/eslint-config-kibana",
+  "kibana": {
+    "build": {
+      "skip": true
+    }
+  },
   "version": "0.15.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",
@@ -24,6 +29,7 @@
     "eslint-plugin-import": "^2.6.0",
     "eslint-plugin-jest": "^21.0.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-no-unsanitized": "^2.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.1.0"
   }
