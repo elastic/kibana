@@ -41,18 +41,15 @@ Expression
 
 FieldListExpression
   = field:Literal Space* ':' Space* list:SubList {
-    function buildNodeWithField(field, list) {
-      if (list.hasOwnProperty('and')) {
-        return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
-      } else if (list.hasOwnProperty('or')) {
-        return buildNode('or', list.or.map(node => buildNodeWithField(field, node)));
-      } else if (list.hasOwnProperty('not')) {
-        return buildNode('not', buildNodeWithField(field, list.not));
+    function buildNodeWithField(node) {
+      if (node.hasOwnProperty('arguments')) {
+        const args = node.arguments.map(buildNodeWithField);
+        return { ...list, arguments: args };
       } else {
-        return buildNode('is', field, list);
+        return buildNode('is', field, node);
       }
     }
-    return buildNodeWithField(field, list);
+    return buildNodeWithField(list);
   }
 
 FieldRangeExpression
@@ -67,19 +64,19 @@ ValueExpression
 
 OrList
   = left:AndList Or right:OrList {
-    return { or: [left, right] };
+    return buildNode('or', [left, right]);
   }
   / AndList
 
 AndList
   = left:NotList And right:AndList{
-    return { and: [left, right] };
+    return buildNode('and', [left, right]);
   }
   / NotList
 
 NotList
   = Not list:SubList {
-    return { not: list };
+    return buildNode('not', query);;
   }
   / SubList
 
