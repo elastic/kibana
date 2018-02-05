@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import {
   getProjects,
   buildProjectGraph,
-  topologicallyBatchProjects
+  topologicallyBatchProjects,
 } from './projects';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
@@ -53,7 +53,7 @@ describe('#buildProjectGraph', () => {
     const projects = await getProjects(rootPath, [
       '.',
       'packages/*',
-      '../plugins/*'
+      '../plugins/*',
     ]);
     const graph = buildProjectGraph(projects);
 
@@ -71,7 +71,7 @@ describe('#topologicallyBatchProjects', () => {
     const projects = await getProjects(rootPath, [
       '.',
       'packages/*',
-      '../plugins/*'
+      '../plugins/*',
     ]);
     const graph = buildProjectGraph(projects);
 

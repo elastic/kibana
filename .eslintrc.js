@@ -17,6 +17,8 @@ module.exports = {
     // Enable Prettier
     {
       files: [
+        '.eslintrc.js',
+        'packages/kbn-build/**/*.js',
       ],
       plugins: [
         'prettier',
@@ -24,7 +26,7 @@ module.exports = {
       rules: Object.assign(
         { 'prettier/prettier': 'error' },
         require('eslint-config-prettier').rules,
-        require('eslint-config-prettier/react').rules
+        require('eslint-config-prettier/react').rules,
       ),
     },
   ]
