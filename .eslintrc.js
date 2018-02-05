@@ -16,18 +16,21 @@ module.exports = {
   overrides: [
     // Enable Prettier
     {
-      files: [
-        '.eslintrc.js',
-        'packages/kbn-build/**/*.js',
-      ],
-      plugins: [
-        'prettier',
-      ],
+      files: ['.eslintrc.js', 'packages/kbn-build/**/*.js'],
+      plugins: ['prettier'],
       rules: Object.assign(
         { 'prettier/prettier': 'error' },
         require('eslint-config-prettier').rules,
-        require('eslint-config-prettier/react').rules,
+        require('eslint-config-prettier/react').rules
       ),
     },
-  ]
-}
+
+    // files not transpiled by babel can't using things like object-spread
+    {
+      files: ['.eslintrc.js'],
+      rules: {
+        'prefer-object-spread/prefer-object-spread': 'off',
+      },
+    },
+  ],
+};
