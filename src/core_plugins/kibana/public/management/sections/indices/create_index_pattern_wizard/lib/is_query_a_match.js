@@ -20,5 +20,9 @@ export const isQueryAMatch = (query, name) => {
     return false;
   }
 
+  if (query.includes(',')) {
+    return query.split(',').reduce((isMatch, subQuery) => isMatch || isQueryAMatch(subQuery, name), false);
+  }
+
   return false;
 };
