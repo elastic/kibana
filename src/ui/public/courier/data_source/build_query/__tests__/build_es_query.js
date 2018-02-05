@@ -36,8 +36,8 @@ describe('build query', function () {
 
     it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
       const queries = [
-        { query: 'foo:bar', language: 'kuery' },
-        { query: 'bar:baz', language: 'lucene' },
+        { query: 'machine.os:bar', language: 'kuery' },
+        { query: 'extension:baz', language: 'lucene' },
       ];
       const filters = [
         {
@@ -49,11 +49,11 @@ describe('build query', function () {
       const expectedResult = {
         bool: {
           must: [
-            decorateQuery(luceneStringToDsl('bar:baz')),
+            decorateQuery(luceneStringToDsl('extension:baz')),
             { match_all: {} },
           ],
           filter: [
-            toElasticsearchQuery(fromKueryExpression('foo:bar'), indexPattern),
+            toElasticsearchQuery(fromKueryExpression('machine.os:bar'), indexPattern),
           ],
           should: [],
           must_not: [],

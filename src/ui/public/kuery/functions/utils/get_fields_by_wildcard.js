@@ -31,7 +31,13 @@ export function getFieldsByWildcard(pattern, indexPattern) {
     return fields;
   }
   else {
-    return [indexPattern.fields.byName[pattern]];
+    const field = indexPattern.fields.byName[pattern];
+
+    if (!field) {
+      throw new Error(`Field ${pattern} does not exist in index pattern ${indexPattern.title}`);
+    }
+
+    return [field];
   }
 }
 
