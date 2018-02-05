@@ -1,0 +1,31 @@
+@import (reference) "~ui/styles/variables";
+
+.suggestion-type, .suggestion-text, .suggestion-description {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.suggestion-type {
+  height: 32px;
+  width: 32px;
+  background: @globalColorLightGray;
+  font-size: 12px;
+  text-align: center;
+  font-family: monospace;
+  margin-right: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-value {
+  font-family: monospace;
+  margin-right: 32px;
+  font-weight: bold;
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-description {
+  color: @globalColorDarkGray;
+}

@@ -4,7 +4,7 @@
 .typeahead {
   position: relative;
 
-  .typeahead-items {
+  .typeahead-popover {
     border: 1px solid;
     border-color: @typeahead-item-border;
     color: @typeahead-item-color;
@@ -16,10 +16,17 @@
     width: 100%;
     border-radius: 4px;
 
+    .typeahead-items {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
     .typeahead-item {
-      border-bottom: 1px solid;
-      border-bottom-color: @globalColorLightestGray;
-      padding: @padding-base-vertical @padding-base-horizontal;
+      height: 32px;
+      line-height: 32px;
+      white-space: nowrap;
+      font-size: 12px;
+      vertical-align: middle;
     }
 
     .typeahead-item:last-child {
@@ -33,8 +40,7 @@
     }
 
     .typeahead-item.active {
-      color: @globalColorWhite;
-      background-color: @typeahead-item-active-bg;
+      background-color: @globalColorLightestGray;
     }
   }
 }

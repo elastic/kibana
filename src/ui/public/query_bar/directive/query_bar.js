@@ -1,8 +1,10 @@
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
+import suggestionTemplate from './suggestion.html';
 import { queryLanguages } from '../lib/queryLanguages';
 import { getSuggestionsProvider } from '../../kuery';
+import './suggestion.less';
 import '../../directives/documentation_href';
 import '../../directives/match_pairs';
 
@@ -45,23 +47,27 @@ module.directive('queryBar', function () {
         this.submit();
       };
 
-      this.typeaheadItemTemplate = '{{item.suggestion}}';
+      this.suggestionTemplate = suggestionTemplate;
 
-      const getSuggestions = getSuggestionsProvider($http, this.indexPattern, persistedLog);
+      const { indexPattern } = this;
+      const getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
 
-      this.updateSuggestions = async () => {
+      this.updateSuggestions = () => {
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd, value } = inputEl;
-        this.typeaheadItems = await getSuggestions(value, selectionStart, selectionEnd);
+        const query = value;
+        return getSuggestions({ query, selectionStart, selectionEnd })
+          .then(suggestions => {
+            $scope.$apply(() => this.suggestions = suggestions);
+          });
       };
 
       // TODO: Figure out a better way to set selection
-      this.onTypeaheadSelect = (item) => {
+      this.onSuggestionSelect = ({ text, start, end }) => {
         const { query } = this.localQuery;
-        const { start, end, suggestion } = item;
         const inputEl = $element.find('input')[0];
-        this.localQuery.query = inputEl.value = query.substr(0, start) + suggestion + query.substr(end);
-        inputEl.setSelectionRange(start + suggestion.length, start + suggestion.length);
+        this.localQuery.query = inputEl.value = query.substr(0, start) + text + query.substr(end);
+        inputEl.setSelectionRange(start + text.length, start + text.length);
         this.updateSuggestions();
       };
 

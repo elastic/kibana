@@ -1,7 +1,7 @@
 // Initialization block
 {
-  const { nodeTypes: { function: { buildNode }}} = options.helpers;
-  const parseCursor = Boolean(options.parseCursor);
+  const { helpers, parseCursor } = options;
+  const { nodeTypes: { function: { buildNode }}} = helpers;
 
   function getCursor(chars, location) {
     const i = chars.findIndex(char => char.type === 'cursor');
@@ -10,7 +10,7 @@
       prefix: chars.slice(0, i).join(''),
       suffix: chars.slice(i + 1).join(''),
       start: location.start.offset,
-      end: location.end.offset - '@kibana-cursor@'.length
+      end: location.end.offset - '@kql-cursor@'.length
     };
   }
 }
@@ -62,8 +62,8 @@ FieldListExpression
       if (list.type === 'cursor') {
         return {
           ...list,
-          field,
-          suggest: ['values', 'conjunctions']
+          fieldName: field,
+          suggestionTypes: ['value', 'conjunction']
         };
       } else if (list.hasOwnProperty('and')) {
         return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
@@ -86,11 +86,11 @@ FieldRangeExpression
 ValueExpression
   = value:Literal {
     if (value.type === 'cursor') {
-      const field = (value.prefix + value.suffix).trim();
+      const fieldName = (value.prefix + value.suffix).trim();
       return {
         ...value,
-        field,
-        suggest: ['fields', 'operators']
+        fieldName,
+        suggestionTypes: ['field', 'operator']
       };
     }
     return buildNode('is', '*', value);
@@ -102,7 +102,7 @@ OrList
     if (cursor) {
       return {
         ...cursor,
-        suggest: ['values']
+        suggestionTypes: ['value']
       };
     }
     return { or: [head, tail] };
@@ -115,7 +115,7 @@ AndList
     if (cursor) {
       return {
         ...cursor,
-        suggest: ['values']
+        suggestionTypes: ['value']
       };
     }
     return { and: [head, tail] };
@@ -127,7 +127,7 @@ NotList
     if (list.type === 'cursor') {
       return {
         ...list,
-        suggest: ['values']
+        suggestionTypes: ['value']
       };
     }
     return { not: list };
@@ -139,7 +139,7 @@ SubList
     if (list.type === 'cursor') {
       return {
         ...list,
-        suggest: ['values']
+        suggestionTypes: ['value']
       };
     }
     return list;
@@ -219,6 +219,6 @@ Space
   = [\ \t\r\n]
 
 Cursor
-  = &{ return parseCursor; } '@kibana-cursor@' {
+  = &{ return parseCursor; } '@kql-cursor@' {
     return { type: 'cursor' };
   }
