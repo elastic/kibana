@@ -77,18 +77,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickEditorSidebarCollapse();
       });
 
-      it('should still show all tags after sidebar has been collapsed', async function () {
-        await PageObjects.visualize.clickEditorSidebarCollapse();
-        // Give d3 tag cloud some time to rearrange tags
-        await PageObjects.common.sleep(1000);
-        await PageObjects.visualize.clickEditorSidebarCollapse();
-        // Give d3 tag cloud some time to rearrange tags
-        await PageObjects.common.sleep(1000);
-        const data = await PageObjects.visualize.getTextTag();
-        log.debug(data);
-        expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
-      });
-
       it('should still show all tags after browser was resized very small', async function () {
         await remote.setWindowSize(200, 200);
         await PageObjects.common.sleep(1000);
