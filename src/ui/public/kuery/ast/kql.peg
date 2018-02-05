@@ -122,7 +122,7 @@ UnquotedLiteral
   }
 
 EscapedQuote
-  = '\\' quote:('"' / '"') { return quote; }
+  = '\\' quote:('"' / "'") { return quote; }
 
 UnquotedCharacter
   = EscapedSpecialCharacter
