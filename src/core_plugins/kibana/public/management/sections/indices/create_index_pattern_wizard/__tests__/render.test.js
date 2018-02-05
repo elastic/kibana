@@ -22,7 +22,6 @@ describe('CreateIndexPatternWizardRender', () => {
         savedObjectsClient: {},
         config: {},
         kbnUrl: {},
-        notify: {},
       }
     );
 

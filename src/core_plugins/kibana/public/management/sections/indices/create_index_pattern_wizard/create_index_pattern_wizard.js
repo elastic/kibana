@@ -20,7 +20,6 @@ export class CreateIndexPatternWizard extends Component {
       savedObjectsClient: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       kbnUrl: PropTypes.object.isRequired,
-      notify: PropTypes.object.isRequired,
     }).isRequired,
   }
 

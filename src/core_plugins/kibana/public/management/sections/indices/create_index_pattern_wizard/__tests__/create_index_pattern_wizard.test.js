@@ -24,7 +24,6 @@ const services = {
   savedObjectsClient: {},
   config: {},
   kbnUrl: {},
-  notify: {},
 };
 
 describe('CreateIndexPatternWizard', () => {

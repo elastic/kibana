@@ -11,7 +11,6 @@ uiRoutes.when('/management/kibana/index', {
   controller: function ($scope, $injector) {
     // Wait for the directives to execute
     $scope.$$postDigest(() => {
-      const Notifier = $injector.get('Notifier');
       const $routeParams = $injector.get('$routeParams');
       const services = {
         config: $injector.get('config'),
@@ -19,7 +18,6 @@ uiRoutes.when('/management/kibana/index', {
         indexPatterns: $injector.get('indexPatterns'),
         savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
         kbnUrl: $injector.get('kbnUrl'),
-        notify: new Notifier(),
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;
