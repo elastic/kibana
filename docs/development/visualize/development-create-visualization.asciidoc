@@ -6,9 +6,7 @@ source code and the existing visualizations provided with it.
 
 - <<development-visualization-factory>>
 * <<development-base-visualization-type>>
-* <<development-angular-visualization-type>>
 * <<development-react-visualization-type>>
-* <<development-vislib-visualization-type>>
 - <<development-vis-editors>>
 * <<development-default-editor>>
 * <<development-custom-editor>>
@@ -145,38 +143,13 @@ const MyNewVisType = (Private) => {
 VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
-[[development-angular-visualization-type]]
-==== AngularJS Visualization Type
-The AngularJS visualization type assumes you are using angular as your rendering technology. Instead of providing the
-controller we need to provide the angular template to render. 
-
-The visualization will receive `vis`, `uiState` and `visData` on the $scope and needs to 
-call `$scope.renderComplete()` once it is done rendering.
-
-["source","js"]
------------
-const MyNewVisType = (Private) => {
-  const VisFactory = Private(VisFactoryProvider);
-  
-  return VisFactory.createAngularVisualization({
-    name: 'my_new_vis',
-    title: 'My New Vis',
-    icon: 'my_icon',
-    description: 'Cool new chart',
-    visConfig: {
-       template: '<div ng-controller="MyAngularController"></div>`
-    }
-  });
-}
------------
-
 [[development-react-visualization-type]]
 ==== React Visualization Type
-React visualization type assumes you are using React as your rendering technology. Instead of passing it an AngularJS
-template you need to pass a React component.
+React visualization type assumes you are using React as your rendering technology.
+Just pass in a React component to `visConfig.template`.
 
-The visualization will receive `vis`, `uiState` and `visData` as props.
-It also has a `renderComplete` function, which needs to be called once the rendering has completed.
+The visualization will receive `vis`, `appState`, `updateStatus` and `visData` as props.
+It also has a `renderComplete` property, which needs to be called once the rendering has completed.
 
 ["source","js"]
 -----------
@@ -196,11 +169,6 @@ const MyNewVisType = (Private) => {
   });
 }
 -----------
-
-[[development-vislib-visualization-type]]
-==== Vislib Visualization Type
-This visualization type should only be used for `vislib` visualizations. Vislib is kibana's D3 library which can produce
-point series charts and pie charts.
 
 [[development-vis-editors]]
 === Visualization Editors
