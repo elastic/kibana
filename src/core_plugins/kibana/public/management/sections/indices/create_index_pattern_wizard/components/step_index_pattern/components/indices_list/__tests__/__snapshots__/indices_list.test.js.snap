@@ -212,15 +212,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
           textOnly={true}
         >
           <span>
-            <span
-              style={
-                Object {
-                  "fontWeight": "bold",
-                }
-              }
-            >
+            <strong>
               ki
-            </span>
+            </strong>
             bana
           </span>
         </EuiTableRowCell>

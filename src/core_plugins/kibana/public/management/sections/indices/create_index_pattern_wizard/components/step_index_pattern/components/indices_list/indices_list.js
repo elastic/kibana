@@ -142,7 +142,7 @@ export class IndicesList extends Component {
     return (
       <span>
         {preStr}
-        <span style={{ fontWeight: 'bold' }}>{query}</span>
+        <strong>{query}</strong>
         {postStr}
       </span>
     );
