@@ -23339,7 +23339,7 @@ let run = exports.run = (() => {
     const frozenLockfile = options['frozen-lockfile'] === true;
     const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
-    console.log(_chalk2.default.bold('\nRunning installs in topological order'));
+    console.log(_chalk2.default.bold('\nRunning installs in topological order:'));
 
     for (const batch of batchedProjects) {
       for (const project of batch) {
@@ -23350,11 +23350,44 @@ let run = exports.run = (() => {
     }
 
     console.log(_chalk2.default.bold('\nInstalls completed, linking package executables:\n'));
+
     yield (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
+
+    /**
+     * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
+     * in the list of projects. We do this because some projects need to be
+     * transpiled before they can be used. Ideally we shouldn't do this unless we
+     * have to, as it will slow down the bootstrapping process.
+     */
+    yield parallelizeBatches(batchedProjects, function (pkg) {
+      if (pkg.hasScript('kbn:bootstrap')) {
+        return pkg.runScriptStreaming('kbn:bootstrap');
+      }
+    });
+
+    console.log(_chalk2.default.green.bold('\nBootstrapping completed!\n'));
   });
 
   return function run(_x, _x2, _x3) {
     return _ref.apply(this, arguments);
+  };
+})();
+
+let parallelizeBatches = (() => {
+  var _ref2 = _asyncToGenerator(function* (batchedProjects, fn) {
+    for (const batch of batchedProjects) {
+      const running = batch.map(function (pkg) {
+        return fn(pkg);
+      });
+
+      // We need to make sure the entire batch has completed before we can move on
+      // to the next batch
+      yield Promise.all(running);
+    }
+  });
+
+  return function parallelizeBatches(_x4, _x5) {
+    return _ref2.apply(this, arguments);
   };
 })();
 
