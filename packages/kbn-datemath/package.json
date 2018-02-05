@@ -2,42 +2,17 @@
   "name": "@elastic/datemath",
   "version": "5.0.0",
   "description": "elasticsearch datemath parser, used in kibana",
-  "main": "lib/index.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "lint": "eslint \"src/*.js\" \"test/*.js\"",
-    "test": "npm run lint && npm run build && mocha --require babel-core/register",
-    "build": "babel src --out-dir lib",
-    "prepublishOnly": "npm run test"
-  },
-  "author": "Elastic",
   "license": "Apache-2.0",
-  "engines": {
-    "node": ">=6.0.0"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/elastic/datemath-js.git"
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel src --out-dir lib"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.7.2",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-prettier": "^2.4.0",
-    "expect.js": "^0.3.1",
-    "mocha": "^4.1.0",
-    "prettier": "^1.9.2",
-    "sinon": "^4.1.4"
+    "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
     "moment": "^2.13.0"
