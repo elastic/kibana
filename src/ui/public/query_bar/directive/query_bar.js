@@ -24,14 +24,9 @@ module.directive('queryBar', function () {
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
 
-      const persistedLog = new PersistedLog(`typeahead:${this.appName}-${this.query.language}`, {
-        maxLength: config.get('history:limit'),
-        filterDuplicates: true
-      });
-
       this.submit = () => {
         if (this.localQuery.query) {
-          persistedLog.add(this.localQuery.query);
+          this.persistedLog.add(this.localQuery.query);
         }
         this.onSubmit({ $query: this.localQuery });
       };
@@ -46,8 +41,15 @@ module.directive('queryBar', function () {
         this.submit();
       };
 
+      $scope.$watch('queryBar.localQuery.language', (language) => {
+        this.persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
+          maxLength: config.get('history:limit'),
+          filterDuplicates: true
+        });
+      });
+
       $scope.$watch('queryBar.localQuery.query', (query) => {
-        this.typeaheadItems = filterFilter(persistedLog.get(), query);
+        this.typeaheadItems = filterFilter(this.persistedLog.get(), query);
       });
 
       $scope.$watch('queryBar.query', (newQuery) => {

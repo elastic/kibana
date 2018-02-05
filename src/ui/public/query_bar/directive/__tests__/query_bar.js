@@ -130,5 +130,18 @@ describe('queryBar directive', function () {
 
   });
 
+  describe('typeahead key', function () {
+
+    it('should use a unique typeahead key for each appName/language combo', function () {
+      init({ query: 'foo', language: 'lucene' }, 'discover', true);
+      expect($elem.isolateScope().queryBar.persistedLog.name).to.be('typeahead:discover-lucene');
+
+      $parentScope.query = { query: 'foo', language: 'kuery' };
+      $parentScope.$digest();
+      expect($elem.isolateScope().queryBar.persistedLog.name).to.be('typeahead:discover-kuery');
+    });
+
+  });
+
 
 });
