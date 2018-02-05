@@ -49,6 +49,14 @@ module.exports = function (grunt) {
       ]
     },
 
+    prettier: {
+      cmd: 'node_modules/.bin/prettier',
+      args: [
+        '--list-different',
+        '**/*.js',
+      ]
+    },
+
     testServer: {
       options: {
         wait: false,

@@ -36,6 +36,7 @@ module.exports = function (grunt) {
     'buildPackages',
 
     'run:eslint',
+    'run:prettier',
     'licenses',
     'test:server',
     'test:jest',
