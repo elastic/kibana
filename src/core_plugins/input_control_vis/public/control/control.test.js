@@ -20,26 +20,7 @@ const mockFilterManager = {
   getUnsetValue: () => { return UNSET_VALUE; },
   getIndexPattern: () => { return 'mockIndexPattern'; }
 };
-
-class MockSearchSource {
-  inherits(parent) {
-    if (parent) {
-      this._parent = parent;
-    }
-  }
-
-  index() {
-    // noop
-  }
-
-  filter(func) {
-    this._createFilterFn = func;
-  }
-}
-
-const mockKbnApi = {
-  SearchSource: MockSearchSource
-};
+const mockKbnApi = {};
 
 describe('ancestors', () => {
 
@@ -104,15 +85,15 @@ describe('ancestors', () => {
     });
   });
 
-  test('should build inherited SearchSource chain for ancestors', function () {
+  test('should build filters from ancestors', function () {
     grandParentControl.set('myGrandParentValue');
     parentControl.set('myParentValue');
 
     childControl.setAncestors([parentControl, grandParentControl]);
 
-    const ancestorSearchSource = childControl.getAncestorSearchSource();
-    expect(ancestorSearchSource._createFilterFn()).to.eql('mockKbnFilter:myGrandParentValue');
-    const nextAncestorSearchSource = ancestorSearchSource._parent;
-    expect(nextAncestorSearchSource._createFilterFn()).to.eql('mockKbnFilter:myParentValue');
+    const ancestorFilters = childControl.getAncestorFilters();
+    expect(ancestorFilters.length).to.be(2);
+    expect(ancestorFilters[0]).to.eql('mockKbnFilter:myParentValue');
+    expect(ancestorFilters[1]).to.eql('mockKbnFilter:myGrandParentValue');
   });
 });

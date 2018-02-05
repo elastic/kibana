@@ -41,7 +41,7 @@ class ListControl extends Control {
   }
 
   async fetch() {
-    let ancestorSearchSource;
+    let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
         this.disable(`Disabled until '${this.ancestors[0].label}' is set.`);
@@ -59,7 +59,7 @@ class ListControl extends Control {
       }
       this.lastAncestorSignature = ancestorSignature;
 
-      ancestorSearchSource = this.getAncestorSearchSource();
+      ancestorFilters = this.getAncestorFilters();
     }
 
     const indexPattern = this.filterManager.getIndexPattern();
@@ -77,10 +77,8 @@ class ListControl extends Control {
       initialSearchSourceState,
       indexPattern,
       aggs,
-      this.useTimeFilter);
-    if (ancestorSearchSource) {
-      searchSource.inherits(ancestorSearchSource);
-    }
+      this.useTimeFilter,
+      ancestorFilters);
 
     const resp = await searchSource.fetch();
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {

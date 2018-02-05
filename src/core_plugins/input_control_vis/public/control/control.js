@@ -50,30 +50,11 @@ export class Control {
     }).join(',');
   }
 
-  getAncestorSearchSource() {
-    let previousAncestorSearchSource;
-    this.ancestors.forEach(ancestor => {
-      if (!previousAncestorSearchSource) {
-        previousAncestorSearchSource = new this.kbnApi.SearchSource();
-        previousAncestorSearchSource.inherits(false);
-        previousAncestorSearchSource.index(ancestor.filterManager.getIndexPattern());
-        previousAncestorSearchSource.filter(() => {
-          return ancestor.filterManager.createFilter(ancestor.value);
-        });
-      } else {
-        const ancestorSearchSource = new this.kbnApi.SearchSource();
-        ancestorSearchSource.inherits(previousAncestorSearchSource);
-        ancestorSearchSource.index(ancestor.filterManager.getIndexPattern());
-        ancestorSearchSource.filter(() => {
-          return ancestor.filterManager.createFilter(ancestor.value);
-        });
-        previousAncestorSearchSource = ancestorSearchSource;
-      }
+  getAncestorFilters() {
+    return this.ancestors.map(ancestor => {
+      return ancestor.filterManager.createFilter(ancestor.value);
     });
-    return previousAncestorSearchSource;
   }
-
-
 
   isEnabled() {
     return this.enable;
