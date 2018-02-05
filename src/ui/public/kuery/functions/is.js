@@ -20,9 +20,6 @@ export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
 export function toElasticsearchQuery(node, indexPattern) {
   const { arguments: [fieldNameArg, valueArg] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
-  const fields = getFieldsByWildcard(fieldName, indexPattern);
-  const scriptedFields = fields.filter(field => field.scripted);
-  const nonScriptedFields = fields.filter(field => !field.scripted);
   const value = !_.isUndefined(valueArg) ? literal.toElasticsearchQuery(valueArg) : valueArg;
 
   if (fieldName === '*' && value === '*') {
@@ -38,23 +35,37 @@ export function toElasticsearchQuery(node, indexPattern) {
     };
   }
 
-  const queries = scriptedFields.map((scriptedField) => {
-    return {
-      script: {
-        ...getPhraseScript(scriptedField, value)
-      }
-    };
-  });
+  const fields = getFieldsByWildcard(fieldName, indexPattern);
+  const scriptedFields = fields.filter(field => field.scripted);
+  const nonScriptedFields = fields.filter(field => !field.scripted);
+  const queries = [];
 
-  if (!_.isEmpty(nonScriptedFields)) {
-    nonScriptedFields.forEach((field) => {
+  if (value !== '*') {
+    scriptedFields.forEach((scriptedField) => {
+      queries.push({
+        script: {
+          ...getPhraseScript(scriptedField, value)
+        }
+      });
+    });
+  }
+
+  nonScriptedFields.forEach((field) => {
+    if (value === '*') {
+      queries.push({
+        exists: {
+          field: field.name
+        }
+      });
+    }
+    else {
       queries.push({
         match_phrase: {
           [field.name]: value
         }
       });
-    });
-  }
+    }
+  });
 
   if (queries.length === 1) {
     return queries[0];
