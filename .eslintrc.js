@@ -1,0 +1,15 @@
+module.exports = {
+  extends: [
+    '@elastic/eslint-config-kibana',
+    '@elastic/eslint-config-kibana/jest',
+  ],
+
+  settings: {
+    'import/resolver': {
+      '@elastic/eslint-import-resolver-kibana': {
+        rootPackageName: 'kibana',
+        kibanaPath: '.'
+      },
+    },
+  },
+}
