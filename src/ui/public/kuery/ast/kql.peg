@@ -13,14 +13,14 @@ EmptyQuery
   }
 
 OrQuery
-  = head:AndQuery Or tail:OrQuery {
-    return buildNode('or', [head, tail]);
+  = left:AndQuery Or right:OrQuery {
+    return buildNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
-  = head:NotQuery And tail:AndQuery{
-    return buildNode('and', [head, tail]);
+  = left:NotQuery And right:AndQuery{
+    return buildNode('and', [left, right]);
   }
   / NotQuery
 
@@ -66,14 +66,14 @@ ValueExpression
   }
 
 OrList
-  = head:AndList Or tail:OrList {
-    return { or: [head, tail] };
+  = left:AndList Or right:OrList {
+    return { or: [left, right] };
   }
   / AndList
 
 AndList
-  = head:NotList And tail:AndList{
-    return { and: [head, tail] };
+  = left:NotList And right:AndList{
+    return { and: [left, right] };
   }
   / NotList
 
