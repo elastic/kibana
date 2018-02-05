@@ -34,6 +34,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
+    config: { auth: false },
     async handler(request, reply) {
       try {
         const { id } = request.params;
