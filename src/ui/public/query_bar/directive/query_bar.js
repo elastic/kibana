@@ -52,6 +52,12 @@ module.directive('queryBar', function () {
       const { indexPattern } = this;
       const getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
 
+      this.handleKeyUp = (event) => {
+        if (!['ArrowDown', 'ArrowUp', 'Tab', 'Enter', 'Escape'].includes(event.key)) {
+          this.updateSuggestions();
+        }
+      };
+
       this.updateSuggestions = () => {
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd, value } = inputEl;
