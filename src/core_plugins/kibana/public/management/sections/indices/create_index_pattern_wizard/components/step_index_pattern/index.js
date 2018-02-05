@@ -10,6 +10,11 @@ export function renderStepIndexPattern(
   esService,
   goToNextStep,
 ) {
+  const node = document.getElementById(domElementId);
+  if (!node) {
+    return;
+  }
+
   render(
     <StepIndexPattern
       allIndices={allIndices}
@@ -23,5 +28,10 @@ export function renderStepIndexPattern(
 }
 
 export function destroyStepIndexPattern(domElementId) {
-  unmountComponentAtNode(document.getElementById(domElementId));
+  const node = document.getElementById(domElementId);
+  if (!node) {
+    return;
+  }
+
+  unmountComponentAtNode(node);
 }
