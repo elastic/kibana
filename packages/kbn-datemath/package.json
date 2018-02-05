@@ -1,5 +1,5 @@
 {
-  "name": "@elastic/datemath",
+  "name": "@kbn/datemath",
   "version": "5.0.0",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",

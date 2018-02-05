@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import 'ui/state_management/global_state';
 import 'ui/config';
 import { EventsProvider } from 'ui/events';
