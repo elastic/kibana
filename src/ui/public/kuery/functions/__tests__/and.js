@@ -8,7 +8,7 @@ import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
-const childNode1 = nodeTypes.function.buildNode('is', 'response', 200);
+const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
@@ -69,13 +69,13 @@ describe('kuery functions', function () {
       it('should serialize "and" nodes with an implicit syntax when requested', function () {
         const node = nodeTypes.function.buildNode('and', [childNode1, childNode2], 'implicit');
         const result = and.toKueryExpression(node);
-        expect(result).to.be('"response":200 "extension":"jpg"');
+        expect(result).to.be('"machine.os":"osx" "extension":"jpg"');
       });
 
       it('should serialize "and" nodes with an operator syntax when requested', function () {
         const node = nodeTypes.function.buildNode('and', [childNode1, childNode2], 'operator');
         const result = and.toKueryExpression(node);
-        expect(result).to.be('"response":200 and "extension":"jpg"');
+        expect(result).to.be('"machine.os":"osx" and "extension":"jpg"');
       });
 
       it('should wrap "or" sub-queries in parenthesis', function () {
@@ -84,7 +84,7 @@ describe('kuery functions', function () {
         const andNode = nodeTypes.function.buildNode('and', [orNode, fooBarNode], 'implicit');
 
         const result = and.toKueryExpression(andNode);
-        expect(result).to.be('("response":200 or "extension":"jpg") "foo":"bar"');
+        expect(result).to.be('("machine.os":"osx" or "extension":"jpg") "foo":"bar"');
       });
 
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {

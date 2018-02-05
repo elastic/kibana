@@ -8,7 +8,7 @@ import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
-const childNode1 = nodeTypes.function.buildNode('is', 'response', 200);
+const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
@@ -75,7 +75,7 @@ describe('kuery functions', function () {
       it('should serialize "or" nodes with an operator syntax', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
         const result = or.toKueryExpression(node);
-        expect(result).to.be('"response":200 or "extension":"jpg"');
+        expect(result).to.be('"machine.os":"osx" or "extension":"jpg"');
       });
 
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
