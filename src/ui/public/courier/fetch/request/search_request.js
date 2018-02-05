@@ -10,6 +10,7 @@ export function SearchRequestProvider(Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
+      this.skipDefer = Promise.defer();
       this.type = 'search';
       requestQueue.push(this);
     }
@@ -112,6 +113,13 @@ export function SearchRequestProvider(Promise) {
       this.abortedDefer.promise.then(cb);
     }
 
+    skip() {
+      this.abort();
+
+      this.skipDefer.resolve();
+      this.skipDefer = null;
+    }
+
     complete() {
       this._markStopped();
       this.ms = this.moment.diff() * -1;
@@ -124,6 +132,10 @@ export function SearchRequestProvider(Promise) {
 
     getCompleteOrAbortedPromise() {
       return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
+    }
+
+    getCompleteOrSkippedPromise() {
+      return Promise.race([ this.defer.promise, this.skipDefer.promise ]);
     }
 
     clone() {
