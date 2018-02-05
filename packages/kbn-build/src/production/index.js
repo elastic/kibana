@@ -6,18 +6,18 @@ import { getProjectPaths } from '../config';
 import {
   getProjects,
   buildProjectGraph,
-  topologicallyBatchProjects
+  topologicallyBatchProjects,
 } from '../utils/projects';
 import {
   createProductionPackageJson,
-  writePackageJson
+  writePackageJson,
 } from '../utils/package_json';
 import { isDirectory } from '../utils/fs';
 
 export async function buildProductionProjects({ kibanaRoot, buildRoot }) {
   const projectPaths = getProjectPaths(kibanaRoot, {
     'skip-kibana': true,
-    'skip-kibana-extra': true
+    'skip-kibana-extra': true,
   });
 
   const projects = await getProductionProjects(kibanaRoot, projectPaths);
@@ -81,7 +81,7 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
     cwd: project.path,
     parents: true,
     nodir: true,
-    dot: true
+    dot: true,
   });
 
   const packageJson = project.json;
