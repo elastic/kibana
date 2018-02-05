@@ -88,7 +88,7 @@ export class VegaParser {
    */
   _compileVegaLite() {
     if (this.useMap) {
-      throw new Error('"_map" configuration is not compatible with vega-lite spec');
+      throw new Error('config.kibana.type="map" configuration is not compatible with vega-lite spec');
     }
     this.vlspec = this.spec;
 
@@ -219,15 +219,8 @@ export class VegaParser {
       res.mapStyle = `default`;
     }
 
-    const zoomControl = this._config.zoomControl;
-    if (zoomControl === undefined) {
-      res.zoomControl = true;
-    } else if (typeof zoomControl !== 'boolean') {
-      this._onWarning('config.kibana.zoomControl must be a boolean value');
-      res.zoomControl = true;
-    } else {
-      res.zoomControl = zoomControl;
-    }
+    this._parseBool('zoomControl', res, true);
+    this._parseBool('scrollWheelZoom', res, true);
 
     const maxBounds = this._config.maxBounds;
     if (maxBounds !== undefined) {
@@ -241,6 +234,18 @@ export class VegaParser {
     }
 
     return res;
+  }
+
+  _parseBool(paramName, dstObj, dflt) {
+    const val = this._config[paramName];
+    if (val === undefined) {
+      dstObj[paramName] = dflt;
+    } else if (typeof val !== 'boolean') {
+      this._onWarning(`config.kibana.${paramName} must be a boolean value`);
+      dstObj[paramName] = dflt;
+    } else {
+      dstObj[paramName] = val;
+    }
   }
 
   /**
