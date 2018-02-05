@@ -7,16 +7,17 @@ const { renderStepIndexPattern, destroyStepIndexPattern } = require('../index');
 
 describe('StepIndexPatternRender', () => {
   beforeEach(() => {
+    jest.spyOn(document, 'getElementById').mockImplementation(() => ({}));
     render.mockClear();
     unmountComponentAtNode.mockClear();
   });
 
   it('should call render', () => {
     renderStepIndexPattern(
-      'reactDiv',
       [],
       '',
       false,
+      {},
       {},
       () => {}
     );
@@ -25,7 +26,7 @@ describe('StepIndexPatternRender', () => {
   });
 
   it('should call unmountComponentAtNode', () => {
-    destroyStepIndexPattern('reactDiv');
+    destroyStepIndexPattern();
     expect(unmountComponentAtNode.mock.calls.length).toBe(1);
   });
 });

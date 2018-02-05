@@ -1,3 +1,30 @@
+.vislib-container {
+  flex: 1 1 0; /* 1 */
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+
+  &.vislib-container--legend-left {
+    flex-direction: row-reverse;
+  }
+  &.vislib-container--legend-right {
+    flex-direction: row;
+  }
+  &.vislib-container--legend-top {
+    flex-direction: column-reverse;
+  }
+  &.vislib-container--legend-bottom {
+    flex-direction: column;
+  }
+}
+
+.vislib-chart {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
 .visualize-chart {
   display: flex;
   flex: 1 1 auto;

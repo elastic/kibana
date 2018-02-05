@@ -16,7 +16,7 @@ function generateColors() {
 export function spawn(command, args, opts) {
   return execa(command, args, {
     ...opts,
-    stdio: 'inherit'
+    stdio: 'inherit',
   });
 }
 
@@ -25,14 +25,14 @@ const nextColor = generateColors();
 export function spawnStreaming(command, args, opts, { prefix }) {
   const spawned = execa(command, args, {
     ...opts,
-    stdio: ['ignore', 'pipe', 'pipe']
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
 
   const color = nextColor();
   const prefixedStdout = logTransformer({ tag: `${color.bold(prefix)}:` });
   const prefixedStderr = logTransformer({
     tag: `${logSymbols.error} ${color.bold(prefix)}:`,
-    mergeMultiline: true
+    mergeMultiline: true,
   });
 
   spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);

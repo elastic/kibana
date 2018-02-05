@@ -80,7 +80,7 @@ toastNotifications.add({
         Only you have access to this document. <a href="/documents">Edit permissions.</a>
       </p>
 
-      <button onClick={() => deleteDocument()}}>
+      <button onClick={() => deleteDocument()}>
         Delete document
       </button>
     </div>
@@ -90,7 +90,7 @@ toastNotifications.add({
 
 ## Use in functional tests
 
-Functional tests are commonly used to verify that a user action yielded a sucessful outcome. if you surface a toast to notify the user of this successful outcome, you can place a `data-test-subj` attribute on the toast and use it to check if the toast exists inside of your functional test. This acts as a proxy for verifying the sucessful outcome.
+Functional tests are commonly used to verify that a user action yielded a sucessful outcome. If you surface a toast to notify the user of this successful outcome, you can place a `data-test-subj` attribute on the toast and use it to check if the toast exists inside of your functional test. This acts as a proxy for verifying the sucessful outcome.
 
 ```js
 toastNotifications.addSuccess({
