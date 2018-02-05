@@ -47,6 +47,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   '**/webpackShims',
   'src/babel-*',
+  'packages/*',
   'ui_framework/generator-kui',
   'src/ui/public/angular-bootstrap',
   'src/ui/public/flot-charts',
