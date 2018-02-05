@@ -92,6 +92,15 @@ class VisController {
   }
 
   submitFilters() {
+    // Clean up filter pills for nested controls that are now disabled because ancestors are not set
+    this.controls.map(async (control) => {
+      if (control.hasAncestors() && control.hasUnsetAncestor()) {
+        control.filterManager.findFilters().forEach((existingFilter) => {
+          this.vis.API.queryFilter.removeFilter(existingFilter);
+        });
+      }
+    });
+
     const stagedControls = this.controls.filter((control) => {
       return control.hasChanged();
     });

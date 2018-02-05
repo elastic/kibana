@@ -45,10 +45,6 @@ class ListControl extends Control {
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
         this.disable(`Disabled until '${this.ancestors[0].label}' is set.`);
-        // Remove any existing filters for control.
-        this.filterManager.findFilters().forEach((existingFilter) => {
-          this.kbnApi.queryFilter.removeFilter(existingFilter);
-        });
         return;
       }
 
