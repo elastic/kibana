@@ -19,7 +19,7 @@ export async function getProjects(rootPath, projectsPaths) {
 
     // Do not match ** against multiple filenames
     // (This is only specified because we currently don't have a need for it.)
-    noglobstar: true
+    noglobstar: true,
   };
   const projects = new Map();
 
@@ -36,7 +36,7 @@ export async function getProjects(rootPath, projectsPaths) {
           `There are multiple projects with the same name [${project.name}]`,
           {
             name: project.name,
-            paths: [project.path, projects.get(project.name).path]
+            paths: [project.path, projects.get(project.name).path],
           }
         );
       }

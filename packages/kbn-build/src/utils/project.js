@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import {
   installInDir,
   runScriptInPackage,
-  runScriptInPackageStreaming
+  runScriptInPackageStreaming,
 } from './scripts';
 import { readPackageJson } from './package_json';
 import { CliError } from './errors';
@@ -27,7 +27,7 @@ export class Project {
 
     this.allDependencies = {
       ...(this.json.devDependencies || {}),
-      ...(this.json.dependencies || {})
+      ...(this.json.dependencies || {}),
     };
 
     this.scripts = this.json.scripts || {};
@@ -53,7 +53,7 @@ export class Project {
     const meta = {
       package: `${this.name} (${this.packageJsonLocation})`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      actual: `"${project.name}": "${versionInPackageJson}"`
+      actual: `"${project.name}": "${versionInPackageJson}"`,
     };
 
     if (versionInPackageJson.startsWith(PREFIX)) {

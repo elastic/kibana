@@ -9,7 +9,7 @@ const createProjectWith = (fields, path = '') =>
     {
       name: 'kibana',
       version: '1.0.0',
-      ...fields
+      ...fields,
     },
     join(rootPath, path)
   );
@@ -25,11 +25,11 @@ describe('fromPath', () => {
 test('fields', async () => {
   const kibana = createProjectWith({
     scripts: {
-      test: 'jest'
+      test: 'jest',
     },
     dependencies: {
-      foo: '1.2.3'
-    }
+      foo: '1.2.3',
+    },
   });
 
   expect(kibana.name).toBe('kibana');
@@ -45,13 +45,13 @@ describe('#ensureValidProjectDependency', () => {
   test('valid link: version', async () => {
     const root = createProjectWith({
       dependencies: {
-        foo: 'link:packages/foo'
-      }
+        foo: 'link:packages/foo',
+      },
     });
 
     const foo = createProjectWith(
       {
-        name: 'foo'
+        name: 'foo',
       },
       'packages/foo'
     );
@@ -63,15 +63,15 @@ describe('#ensureValidProjectDependency', () => {
     const root = createProjectWith(
       {
         dependencies: {
-          foo: 'link:wrong/path'
-        }
+          foo: 'link:wrong/path',
+        },
       },
       rootPath
     );
 
     const foo = createProjectWith(
       {
-        name: 'foo'
+        name: 'foo',
       },
       'packages/foo'
     );
@@ -85,15 +85,15 @@ describe('#ensureValidProjectDependency', () => {
     const root = createProjectWith(
       {
         dependencies: {
-          foo: '1.0.0'
-        }
+          foo: '1.0.0',
+        },
       },
       rootPath
     );
 
     const foo = createProjectWith(
       {
-        name: 'foo'
+        name: 'foo',
       },
       'packages/foo'
     );

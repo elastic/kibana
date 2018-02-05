@@ -12,7 +12,7 @@ export function writePackageJson(path, json) {
 
 export const createProductionPackageJson = pkgJson => ({
   ...pkgJson,
-  dependencies: transformDependencies(pkgJson.dependencies)
+  dependencies: transformDependencies(pkgJson.dependencies),
 });
 
 /**
