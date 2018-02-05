@@ -8,8 +8,24 @@ module.exports = {
     'import/resolver': {
       '@elastic/eslint-import-resolver-kibana': {
         rootPackageName: 'kibana',
-        kibanaPath: '.'
+        kibanaPath: '.',
       },
     },
   },
+
+  overrides: [
+    // Enable Prettier
+    {
+      files: [
+      ],
+      plugins: [
+        'prettier',
+      ],
+      rules: Object.assign(
+        { 'prettier/prettier': 'error' },
+        require('eslint-config-prettier').rules,
+        require('eslint-config-prettier/react').rules
+      ),
+    },
+  ]
 }
