@@ -19,13 +19,16 @@ module.exports = function (root) {
       const content = JSON.parse(readFileSync(resolve(root, configFile)));
       config = Object.assign(config, content);
     } catch (e) {
-      // noop
+      // rethrow error unless it's complaining about file not existing
+      if (e.code !== 'ENOENT') {
+        throw e;
+      }
     }
   });
 
   const deprecationMsg = 'has been removed from `@elastic/plugin-helpers`. ' +
     'During development your plugin must be located in `../kibana-extra/{pluginName}` ' +
-    'relative to the Kibana directory to work with this package.\n'
+    'relative to the Kibana directory to work with this package.\n';
 
   if (config.kibanaRoot) {
     throw new Error(
