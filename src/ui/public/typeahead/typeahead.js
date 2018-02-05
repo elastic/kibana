@@ -30,6 +30,11 @@ typeahead.directive('kbnTypeahead', function () {
         this.selectedIndex = null;
       };
 
+      /**
+       * Sets the selected index to the given value. If the value is less than
+       * zero, it will wrap around to the end, and if the value is greater than
+       * the number of items, it will wrap around to the beginning.
+       */
       this.setSelectedIndex = (index) => {
         this.selectedIndex = (index + this.items.length) % this.items.length;
       };
