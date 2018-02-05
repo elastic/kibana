@@ -109,7 +109,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeFieldOption(selection) {
-      return await find.displayedByCssSelector('option[label="' + selection + '"]');
+      return await find.displayedByCssSelector('option[value="' + selection + '"]');
     }
 
     async getCreateIndexPatternButton() {
