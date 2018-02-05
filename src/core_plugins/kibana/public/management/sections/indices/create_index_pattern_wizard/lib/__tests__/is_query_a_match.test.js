@@ -36,5 +36,9 @@ describe('isQueryAMatch', () => {
     it('for a pattern with wildcards but does not remotely match', () => {
       expect(isQueryAMatch('k*b*', 'es')).toBeFalsy();
     });
+
+    it('for a pattern that contains commas but is not a CCS query', () => {
+      expect(isQueryAMatch('kibana,es', 'kibana')).toBeFalsy();
+    });
   });
 });

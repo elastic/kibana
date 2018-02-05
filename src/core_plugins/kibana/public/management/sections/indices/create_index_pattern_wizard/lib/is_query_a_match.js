@@ -1,3 +1,7 @@
+function isCCSQuery(query) {
+  return query.includes(':');
+}
+
 export const isQueryAMatch = (query, name) => {
   if (name === query) {
     return true;
@@ -21,7 +25,9 @@ export const isQueryAMatch = (query, name) => {
   }
 
   if (query.includes(',')) {
-    return query.split(',').reduce((isMatch, subQuery) => isMatch || isQueryAMatch(subQuery, name), false);
+    return query.split(',').reduce((isMatch, subQuery) => {
+      return isMatch || isCCSQuery(subQuery) && isQueryAMatch(subQuery, name);
+    }, false);
   }
 
   return false;
