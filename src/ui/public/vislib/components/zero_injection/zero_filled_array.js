@@ -15,13 +15,7 @@ export function VislibComponentsZeroInjectionZeroFilledArrayProvider() {
       zeroFilledArray.push({
         x: val,
         xi: Infinity,
-        // make sure the y value is always zero, even when an offset function may change it
-        get y() {
-          return 0;
-        },
-        set y(value) {
-          // do nothing
-        },
+        y: 0,
         series: label
       });
     });
