@@ -6,7 +6,8 @@
   "private": true,
   "main": "target/index.js",
   "scripts": {
-    "build": "babel src --out-dir target"
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
