@@ -20,7 +20,10 @@ module.exports = function (root) {
       const content = JSON.parse(readFileSync(resolve(root, configFile)));
       config = Object.assign(config, content);
     } catch (e) {
-      // noop
+      // rethrow error unless it's complaining about file not existing
+      if (e.code !== 'ENOENT') {
+        throw e;
+      }
     }
   });
 
