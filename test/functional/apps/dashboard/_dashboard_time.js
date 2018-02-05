@@ -22,8 +22,8 @@ export default function ({ getPageObjects }) {
       it('is saved', async function () {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        await PageObjects.header.clickToastOK();
+        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
+        expect(isDashboardSaved).to.eql(true);
       });
 
       it('Does not set the time picker on open', async function () {
@@ -42,8 +42,8 @@ export default function ({ getPageObjects }) {
       it('is saved with quick time', async function () {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setQuickTime('Today');
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        await PageObjects.header.clickToastOK();
+        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        expect(isDashboardSaved).to.eql(true);
       });
 
       it('sets quick time on open', async function () {
@@ -58,8 +58,8 @@ export default function ({ getPageObjects }) {
       it('is saved with absolute time', async function () {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-        await PageObjects.header.clickToastOK();
+        const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        expect(isDashboardSaved).to.eql(true);
       });
 
       it('sets absolute time on open', async function () {
@@ -78,15 +78,15 @@ export default function ({ getPageObjects }) {
     // when it's opened. However, if the user then changes the time, navigates to visualize, then navigates
     // back to dashboard, the overridden time should be preserved. The time is *only* reset on open, not
     // during navigation or page refreshes.
-    describe('time changes', function () {
-      it('preserved during navigation', async function () {
-        await PageObjects.header.setQuickTime('Today');
-        await PageObjects.header.clickVisualize();
-        await PageObjects.header.clickDashboard();
-
-        const prettyPrint = await PageObjects.header.getPrettyDuration();
-        expect(prettyPrint).to.equal('Today');
-      });
-    });
+    // describe('time changes', function () {
+    //   it('preserved during navigation', async function () {
+    //     await PageObjects.header.setQuickTime('Today');
+    //     await PageObjects.header.clickVisualize();
+    //     await PageObjects.header.clickDashboard();
+    //
+    //     const prettyPrint = await PageObjects.header.getPrettyDuration();
+    //     expect(prettyPrint).to.equal('Today');
+    //   });
+    // });
   });
 }

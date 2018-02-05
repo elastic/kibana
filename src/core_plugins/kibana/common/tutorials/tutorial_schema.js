@@ -3,7 +3,7 @@ import { PARAM_TYPES } from './param_types';
 import { TUTORIAL_CATEGORY } from './tutorial_category';
 
 const dashboardSchema = Joi.object({
-  title: Joi.string().required(),
+  id: Joi.string().required(), // Dashboard saved object id
   linkLabel: Joi.string().when('isOverview', {
     is: true,
     then: Joi.required(),
@@ -15,7 +15,7 @@ const dashboardSchema = Joi.object({
 const artifactsSchema = Joi.object({
   // Fields present in Elasticsearch documents created by this product.
   exportedFields: Joi.object({
-    documentationUrl: Joi.string()
+    documentationUrl: Joi.string().required()
   }),
   // Kibana dashboards created by this product.
   dashboards: Joi.array().items(dashboardSchema).required()
@@ -65,10 +65,10 @@ export const tutorialSchema = {
   onPrem: instructionsSchema.required(),
 
   // kibana and elastic cluster running in elastic's cloud
-  elasticCloud: instructionsSchema.required(),
+  elasticCloud: instructionsSchema,
 
   // kibana running on prem and elastic cluster running in elastic's cloud
-  onPremElasticCloud: instructionsSchema.required(),
+  onPremElasticCloud: instructionsSchema,
 
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: artifactsSchema,

@@ -3,6 +3,7 @@ import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { applyTheme } from 'ui/theme';
+import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
 
@@ -45,7 +46,6 @@ app.directive('dashboardApp', function ($injector) {
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const timefilter = $injector.get('timefilter');
-  const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
@@ -83,7 +83,7 @@ app.directive('dashboardApp', function ($injector) {
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
       if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
       }
 
       const updateState = () => {
@@ -184,14 +184,18 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          notify.info(`Visualization successfully added to your dashboard`);
+          toastNotifications.addSuccess('Added visualization to your dashboard');
         }
       };
 
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashboard`);
+        toastNotifications.addSuccess({
+          title: 'Added saved search to your dashboard',
+          'data-test-subj': 'addSavedSearchToDashboardSuccess',
+        });
       };
+
       $scope.$watch('model.hidePanelTitles', () => {
         dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
       });
@@ -247,7 +251,7 @@ app.directive('dashboardApp', function ($injector) {
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
           if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
           }
         }
 
@@ -269,7 +273,11 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
-              notify.info(`Saved Dashboard as "${dash.title}"`);
+              toastNotifications.addSuccess({
+                title: `Saved '${dash.title}'`,
+                'data-test-subj': 'saveDashboardSuccess',
+              });
+
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change(createDashboardEditUrl(dash.id));
               } else {

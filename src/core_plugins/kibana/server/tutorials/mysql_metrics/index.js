@@ -8,15 +8,14 @@ export function mysqlMetricsSpecProvider() {
     id: 'mysqlMetrics',
     name: 'MySQL metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetches internal metrics from MySQL.',
+    shortDescription: 'Fetch internal metrics from MySQL.',
     longDescription: 'The `mysql` Metricbeat module fetches internal metrics from the MySQL server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mysql.html)' +
-                     ' about the mysql module.',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mysql.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
         {
-          title: '66881e90-0006-11e7-bf7f-c9acc3d3e306',
+          id: '66881e90-0006-11e7-bf7f-c9acc3d3e306',
           linkLabel: 'MySQL metrics dashboard',
           isOverview: true
         }

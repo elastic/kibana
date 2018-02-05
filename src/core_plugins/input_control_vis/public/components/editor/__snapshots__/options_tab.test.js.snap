@@ -1,29 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders OptionsTab 1`] = `
-<div>
-  <div
-    className="sidebar-item"
+<EuiForm>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="updateFiltersOnChange"
   >
-    <div
-      className="vis-editor-agg-header"
-    >
-      <KuiFieldGroup
-        isAlignedTop={false}
-      >
-        <KuiFieldGroupSection
-          isWide={false}
-        >
-          <KuiCheckBoxLabel
-            data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-            isChecked={false}
-            isDisabled={false}
-            onChange={[Function]}
-            text="Update Kibana filters on each change"
-          />
-        </KuiFieldGroupSection>
-      </KuiFieldGroup>
-    </div>
-  </div>
-</div>
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+      label="Update Kibana filters on each change"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="useTimeFilter"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+      label="Use time filter"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="pinFilters"
+  >
+    <EuiSwitch
+      data-test-subj="inputControlEditorPinFiltersCheckbox"
+      label="Pin filters to global state"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiForm>
 `;

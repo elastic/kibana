@@ -34,15 +34,6 @@ export const ELASTIC_CLOUD_INSTRUCTIONS = {
             ENABLE_INSTRUCTIONS.RPM,
             FILEBEAT_INSTRUCTIONS.START.RPM
           ]
-        },
-        {
-          id: INSTRUCTION_VARIANT.WINDOWS,
-          instructions: [
-            FILEBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
-            FILEBEAT_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
-            ENABLE_INSTRUCTIONS.WINDOWS,
-            FILEBEAT_INSTRUCTIONS.START.WINDOWS
-          ]
         }
       ]
     }

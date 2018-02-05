@@ -1,5 +1,6 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
+import Bluebird from 'bluebird';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -59,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+    }
+
+    async clickVega() {
+      await find.clickByPartialLinkText('Vega');
     }
 
     async clickVisualBuilder() {
@@ -161,6 +166,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return element.getVisibleText();
     }
 
+    async getVegaSpec() {
+      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      const editor = await testSubjects.find('vega-editor');
+      const lines = await editor.findAllByClassName('ace_line_group');
+      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      return linesText.join('\n');
+    }
+
+    async getVegaViewContainer() {
+      return await find.byCssSelector('div.vega-view-container');
+    }
+
+    async getVegaControlContainer() {
+      return await find.byCssSelector('div.vega-controls-container');
+    }
+
     async setFromTime(timeString) {
       const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
       await input.clearValue();
@@ -238,6 +259,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getSpyToggleExists() {
       return await testSubjects.exists('spyToggleButton');
+    }
+
+    async getSideEditorExists() {
+      return await find.existsByCssSelector('.collapsible-sidebar');
     }
 
     async openSpyPanel() {
@@ -440,8 +465,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      return await PageObjects.header.getToastMessage();
+      return await testSubjects.exists('saveVisualizationSuccess');
     }
 
     async clickLoadSavedVisButton() {

@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GlobalBannerList is rendered 1`] = `null`;
+
+exports[`GlobalBannerList props banners is rendered 1`] = `
+<div
+  class="euiPanel euiPanel--paddingMedium"
+  style="border:none"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--responsive"
+    style="flex-direction:column"
+  >
+    <div
+      class="euiFlexItem"
+      data-test-priority="1"
+    >
+      a component
+    </div>
+    <div
+      class="euiFlexItem"
+      data-test-subj="b"
+    >
+      b good
+    </div>
+  </div>
+</div>
+`;

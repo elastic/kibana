@@ -78,7 +78,7 @@ uiModules
       $rootScope.$apply();
     };
 
-    Timefilter.prototype.get = function (indexPattern, range) {
+    Timefilter.prototype.get = function (indexPattern, timeRange) {
 
       if (!indexPattern) {
       //in CI, we sometimes seem to fail here.
@@ -89,11 +89,11 @@ uiModules
       const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
       if (timefield) {
-        const bounds = this.getBounds();
+        const bounds = timeRange ? this.calculateBounds(timeRange) : this.getBounds();
         filter = { range: {} };
         filter.range[timefield.name] = {
-          gte: range ? range.min.valueOf() : bounds.min.valueOf(),
-          lte: range ? range.max.valueOf() : bounds.max.valueOf(),
+          gte: bounds.min.valueOf(),
+          lte: bounds.max.valueOf(),
           format: 'epoch_millis'
         };
       }
@@ -102,9 +102,13 @@ uiModules
     };
 
     Timefilter.prototype.getBounds = function () {
+      return this.calculateBounds(this.time);
+    };
+
+    Timefilter.prototype.calculateBounds = function (timeRange) {
       return {
-        min: dateMath.parse(this.time.from),
-        max: dateMath.parse(this.time.to, true)
+        min: dateMath.parse(timeRange.from),
+        max: dateMath.parse(timeRange.to, { roundUp: true })
       };
     };
 

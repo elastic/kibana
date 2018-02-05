@@ -126,7 +126,20 @@
     </div>
     <div id="metricOptionsColors" ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
-        <div class="kuiSideBarFormRow">
+        <div class="kuiSideBarFormRow" ng-show="vis.params.metric.colorsRange.length > 1">
+          <label class="kuiSideBarFormRow__label" for="metricColorMode">
+            Use Color For
+          </label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="metricColorMode"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="vis.params.metric.metricColorMode"
+              ng-options="mode for mode in collections.metricColorMode"
+            ></select>
+          </div>
+        </div>
+        <div class="kuiSideBarFormRow" ng-show="vis.params.metric.metricColorMode !== 'None'">
           <label class="kuiSideBarFormRow__label" for="colorSchema">
             Color Schema
           </label>
@@ -141,7 +154,7 @@
           <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()">reset colors</div>
         </div>
 
-        <div class="kuiSideBarFormRow">
+        <div class="kuiSideBarFormRow"  ng-show="vis.params.metric.metricColorMode !== 'None'">
           <label class="kuiSideBarFormRow__label" for="invertColors">
             Reverse Color Schema
           </label>
@@ -179,19 +192,7 @@
     <div id="metricOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
 
       <div class="kuiSideBarSection">
-        <div class="kuiSideBarFormRow" ng-show="vis.params.metric.colorsRange.length > 1">
-          <label class="kuiSideBarFormRow__label" for="metricColorMode">
-            Color
-          </label>
-          <div class="kuiSideBarFormRow__control">
-            <select
-              id="metricColorMode"
-              class="kuiSelect kuiSideBarSelect"
-              ng-model="vis.params.metric.metricColorMode"
-              ng-options="mode for mode in collections.metricColorMode"
-            ></select>
-          </div>
-        </div>
+
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="metricFontSize">
             Font Size (<span ng-bind="vis.params.metric.style.fontSize"></span>pt)

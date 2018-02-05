@@ -7,6 +7,6 @@
 export const takeMountedSnapshot = mountedComponent => {
   const html = mountedComponent.html();
   const template = document.createElement('template');
-  template.innerHTML = html;
+  template.innerHTML = html; // eslint-disable-line no-unsanitized/property
   return template.content.firstChild;
 };
