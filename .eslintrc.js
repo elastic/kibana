@@ -16,7 +16,11 @@ module.exports = {
   overrides: [
     // Enable Prettier
     {
-      files: ['.eslintrc.js', 'packages/kbn-build/**/*.js'],
+      files: [
+        '.eslintrc.js',
+        'packages/kbn-build/**/*.js',
+        'packages/kbn-datemath/**/*.js',
+      ],
       plugins: ['prettier'],
       rules: Object.assign(
         { 'prettier/prettier': 'error' },

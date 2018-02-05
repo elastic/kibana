@@ -35,9 +35,12 @@ describe('dateMath', function() {
       expect(dateMath.parse('now&1d')).to.be(undefined);
     });
 
-    it('should return undefined if I pass a unit besides' + spans.toString(), function() {
-      expect(dateMath.parse('now+5f')).to.be(undefined);
-    });
+    it(
+      'should return undefined if I pass a unit besides' + spans.toString(),
+      function() {
+        expect(dateMath.parse('now+5f')).to.be(undefined);
+      }
+    );
 
     it('should return undefined if rounding unit is not 1', function() {
       expect(dateMath.parse('now/2y')).to.be(undefined);
@@ -52,16 +55,21 @@ describe('dateMath', function() {
 
     describe('forceNow', function() {
       it('should throw an Error if passed a string', function() {
-        const fn = () => dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
+        const fn = () =>
+          dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
         expect(fn).to.throwError();
       });
 
       it('should throw an Error if passed a moment', function() {
-        expect(() => dateMath.parse('now', { forceNow: moment() })).to.throwError();
+        expect(() =>
+          dateMath.parse('now', { forceNow: moment() })
+        ).to.throwError();
       });
 
       it('should throw an Error if passed an invalid date', function() {
-        expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).to.throwError();
+        expect(() =>
+          dateMath.parse('now', { forceNow: new Date('foobar') })
+        ).to.throwError();
       });
     });
   });
@@ -101,7 +109,9 @@ describe('dateMath', function() {
     });
 
     it('should use the forceNow parameter when parsing now', function() {
-      expect(dateMath.parse('now', { forceNow: anchoredDate }).valueOf()).to.eql(unix);
+      expect(
+        dateMath.parse('now', { forceNow: anchoredDate }).valueOf()
+      ).to.eql(unix);
     });
   });
 
@@ -135,7 +145,9 @@ describe('dateMath', function() {
         });
 
         it('should return ' + len + span + ' before forceNow', function() {
-          const parsed = dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf();
+          const parsed = dateMath
+            .parse(nowEx, { forceNow: anchoredDate })
+            .valueOf();
           expect(parsed).to.eql(anchored.subtract(len, span).valueOf());
         });
       });
@@ -162,7 +174,9 @@ describe('dateMath', function() {
         const thenEx = `${anchor}||+${len}${span}`;
 
         it('should return ' + len + span + ' from now', function() {
-          expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
+          expect(dateMath.parse(nowEx).format(format)).to.eql(
+            now.add(len, span).format(format)
+          );
         });
 
         it('should return ' + len + span + ' after ' + anchor, function() {
@@ -172,9 +186,9 @@ describe('dateMath', function() {
         });
 
         it('should return ' + len + span + ' after forceNow', function() {
-          expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(
-            anchored.add(len, span).valueOf()
-          );
+          expect(
+            dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()
+          ).to.eql(anchored.add(len, span).valueOf());
         });
       });
     });
@@ -202,20 +216,22 @@ describe('dateMath', function() {
       });
 
       it(`should round now to the beginning of forceNow's ${span}`, function() {
-        expect(dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()).to.eql(
-          anchored.startOf(span).valueOf()
-        );
+        expect(
+          dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()
+        ).to.eql(anchored.startOf(span).valueOf());
       });
 
       it(`should round now to the end of the ${span}`, function() {
-        expect(dateMath.parse('now/' + span, { roundUp: true }).format(format)).to.eql(
-          now.endOf(span).format(format)
-        );
+        expect(
+          dateMath.parse('now/' + span, { roundUp: true }).format(format)
+        ).to.eql(now.endOf(span).format(format));
       });
 
       it(`should round now to the end of forceNow's ${span}`, function() {
         expect(
-          dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate }).valueOf()
+          dateMath
+            .parse('now/' + span, { roundUp: true, forceNow: anchoredDate })
+            .valueOf()
         ).to.eql(anchored.endOf(span).valueOf());
       });
     });
@@ -287,14 +303,19 @@ describe('dateMath', function() {
       m.defineLocale('x-test', {
         week: { dow: 3 },
       });
-      const val = dateMath.parse('now-1w/w', { roundUp: true, momentInstance: m });
+      const val = dateMath.parse('now-1w/w', {
+        roundUp: true,
+        momentInstance: m,
+      });
       // The end of the range (rounding up) should be the last day of the week (so one day before)
       // our start of the week, that's why 3 - 1
       expect(val.isoWeekday()).to.eql(3 - 1);
     });
 
     it('should round relative to forceNow', function() {
-      const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate }).valueOf();
+      const val = dateMath
+        .parse('now-0s/s', { forceNow: anchoredDate })
+        .valueOf();
       expect(val).to.eql(anchored.startOf('s').valueOf());
     });
   });
@@ -354,11 +375,29 @@ describe('dateMath', function() {
 
   describe('units', function() {
     it('should have units descending for unitsDesc', function() {
-      expect(dateMath.unitsDesc).to.eql(['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms']);
+      expect(dateMath.unitsDesc).to.eql([
+        'y',
+        'M',
+        'w',
+        'd',
+        'h',
+        'm',
+        's',
+        'ms',
+      ]);
     });
 
     it('should have units ascending for unitsAsc', function() {
-      expect(dateMath.unitsAsc).to.eql(['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']);
+      expect(dateMath.unitsAsc).to.eql([
+        'ms',
+        's',
+        'm',
+        'h',
+        'd',
+        'w',
+        'M',
+        'y',
+      ]);
     });
   });
 });
