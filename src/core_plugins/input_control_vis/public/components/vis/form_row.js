@@ -3,6 +3,10 @@ import React from 'react';
 import { Tooltip } from 'pivotal-ui/react/tooltip';
 import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
 
+import {
+  EuiFormRow,
+} from '@elastic/eui';
+
 export function FormRow(props) {
   let control = props.children;
   if (!props.control.isEnabled()) {
@@ -17,17 +21,13 @@ export function FormRow(props) {
   }
 
   return (
-    <div
-      className="kuiVerticalRhythm"
+    <EuiFormRow
+      label={props.label}
+      id={props.id}
       data-test-subj={'inputControl' + props.controlIndex}
     >
-      <label className="kuiLabel kuiVerticalRhythmSmall" htmlFor={props.id}>
-        {props.label}
-      </label>
-      <div className="kuiVerticalRhythmSmall">
-        {control}
-      </div>
-    </div>
+      {control}
+    </EuiFormRow>
   );
 }
 

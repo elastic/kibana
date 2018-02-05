@@ -5,9 +5,12 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+
+const location = 'SavedObject view';
 
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
@@ -15,11 +18,10 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
-        const notify = new Notifier({ location: 'SavedObject view' });
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -122,7 +124,7 @@ uiModules.get('apps/management')
               return (orderIndex > -1) ? orderIndex : Infinity;
             });
           })
-          .catch(notify.fatal);
+          .catch(error => fatalError(error, location));
 
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
@@ -173,7 +175,7 @@ uiModules.get('apps/management')
               .then(function () {
                 return redirectHandler('deleted');
               })
-              .catch(notify.fatal);
+              .catch(error => fatalError(error, location));
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
@@ -207,18 +209,17 @@ uiModules.get('apps/management')
             .then(function () {
               return redirectHandler('updated');
             })
-            .catch(notify.fatal);
+            .catch(error => fatalError(error, location));
         };
 
         function redirectHandler(action) {
-          const msg = 'You successfully ' + action + ' the "' + $scope.obj.attributes.title + '" ' + $scope.title.toLowerCase() + ' object';
-
           $location.path('/management/kibana/objects').search({
             _a: rison.encode({
               tab: serviceObj.title
             })
           });
-          notify.info(msg);
+
+          toastNotifications.addSuccess(`${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`);
         }
       }
     };

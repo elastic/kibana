@@ -2,7 +2,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import MockState from 'fixtures/mock_state';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
 import { VisProvider } from 'ui/vis';
@@ -40,22 +40,22 @@ describe('filterBarClickHandler', function () {
   }));
 
   afterEach(function () {
-    notify._notifs.splice(0);
+    toastNotifications.list.splice(0);
   });
 
   describe('on non-filterable fields', function () {
     it('warns about trying to filter on a non-filterable field', function () {
       const { clickHandler, aggConfigResult } = setup();
-      expect(notify._notifs).to.have.length(0);
+      expect(toastNotifications.list).to.have.length(0);
       clickHandler({ point: { aggConfigResult } });
-      expect(notify._notifs).to.have.length(1);
+      expect(toastNotifications.list).to.have.length(1);
     });
 
     it('does not warn if the event is click is being simulated', function () {
       const { clickHandler, aggConfigResult } = setup();
-      expect(notify._notifs).to.have.length(0);
+      expect(toastNotifications.list).to.have.length(0);
       clickHandler({ point: { aggConfigResult } }, true);
-      expect(notify._notifs).to.have.length(0);
+      expect(toastNotifications.list).to.have.length(0);
     });
   });
 });

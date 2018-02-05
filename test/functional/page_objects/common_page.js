@@ -246,6 +246,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('confirmModalCancelButton', 2000);
     }
 
+    async getBreadcrumbPageTitle() {
+      return await testSubjects.getVisibleText('breadcrumbPageTitle');
+    }
+
     async doesCssSelectorExist(selector) {
       log.debug(`doesCssSelectorExist ${selector}`);
 

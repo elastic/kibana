@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
 import {
-  KuiFieldGroup,
-  KuiFieldGroupSection,
-  KuiCheckBoxLabel } from 'ui_framework/components';
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+} from '@elastic/eui';
 
 export class OptionsTab extends Component {
 
@@ -22,39 +24,46 @@ export class OptionsTab extends Component {
     this.setVisParam('useTimeFilter', evt.target.checked);
   }
 
+  handlePinFilters = (evt) => {
+    this.setVisParam('pinFilters', evt.target.checked);
+  }
+
   render() {
     return (
-      <div>
+      <EuiForm>
+        <EuiFormRow
+          id="updateFiltersOnChange"
+        >
+          <EuiSwitch
+            label="Update Kibana filters on each change"
+            checked={this.props.scope.vis.params.updateFiltersOnChange}
+            onChange={this.handleUpdateFiltersChange}
+            data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+          />
+        </EuiFormRow>
 
-        <div className="sidebar-item">
-          <div className="vis-editor-agg-header">
-            <KuiFieldGroup>
-              <KuiFieldGroupSection>
-                <KuiCheckBoxLabel
-                  text="Update Kibana filters on each change"
-                  isChecked={this.props.scope.vis.params.updateFiltersOnChange}
-                  onChange={this.handleUpdateFiltersChange}
-                  data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-                />
-              </KuiFieldGroupSection>
-            </KuiFieldGroup>
-          </div>
+        <EuiFormRow
+          id="useTimeFilter"
+        >
+          <EuiSwitch
+            label="Use time filter"
+            checked={this.props.scope.vis.params.useTimeFilter}
+            onChange={this.handleUseTimeFilter}
+            data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+          />
+        </EuiFormRow>
 
-          <div className="vis-editor-agg-header">
-            <KuiFieldGroup>
-              <KuiFieldGroupSection>
-                <KuiCheckBoxLabel
-                  text="Use time filter"
-                  isChecked={this.props.scope.vis.params.useTimeFilter}
-                  onChange={this.handleUseTimeFilter}
-                  data-test-subj="inputControlEditorUseTimeFilterCheckbox"
-                />
-              </KuiFieldGroupSection>
-            </KuiFieldGroup>
-          </div>
-        </div>
-
-      </div>
+        <EuiFormRow
+          id="pinFilters"
+        >
+          <EuiSwitch
+            label="Pin filters to global state"
+            checked={this.props.scope.vis.params.pinFilters}
+            onChange={this.handlePinFilters}
+            data-test-subj="inputControlEditorPinFiltersCheckbox"
+          />
+        </EuiFormRow>
+      </EuiForm>
     );
   }
 }

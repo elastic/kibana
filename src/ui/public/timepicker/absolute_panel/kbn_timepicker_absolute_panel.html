@@ -27,7 +27,7 @@
       <div ng-show="!absolute.from"><em>Invalid Date</em></div>
 
       <div>
-        <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="absolute.to" show-weeks="false"></datepicker>
+        <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="pickToDate()" show-weeks="false"></datepicker>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
       >
 
       <div>
-        <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="absolute.from" show-weeks="false"></datepicker>
+        <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="pickFromDate()" show-weeks="false"></datepicker>
       </div>
     </div>
   </div>

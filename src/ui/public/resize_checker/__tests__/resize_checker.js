@@ -4,10 +4,10 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import ngMock from 'ng_mock';
-import { EventsProvider } from 'ui/events';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 
-import { ResizeCheckerProvider } from '../resize_checker';
+import { ResizeChecker } from '../resize_checker';
+import EventEmitter from 'events';
 
 describe('Resize Checker', () => {
   NoDigestPromises.activateForSuite();
@@ -16,11 +16,8 @@ describe('Resize Checker', () => {
   let setup;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
+  beforeEach(() => {
     setup = () => {
-      const Private = $injector.get('Private');
-      const ResizeChecker = Private(ResizeCheckerProvider);
-      const EventEmitter = Private(EventsProvider);
 
       const createEl = () => {
         const el = $('<div>').appendTo('body').get(0);
@@ -41,9 +38,9 @@ describe('Resize Checker', () => {
         return listener;
       };
 
-      return { EventEmitter, createEl, createChecker, createListener, ResizeChecker };
+      return { createEl, createChecker, createListener };
     };
-  }));
+  });
 
   afterEach(() => {
     teardown.splice(0).forEach(fn => {
@@ -61,7 +58,7 @@ describe('Resize Checker', () => {
 
   describe('events', () => {
     it('is an event emitter', () => {
-      const { createEl, createChecker, EventEmitter } = setup();
+      const { createEl, createChecker } = setup();
 
       const checker = createChecker(createEl());
       expect(checker).to.be.a(EventEmitter);
@@ -84,7 +81,7 @@ describe('Resize Checker', () => {
 
   describe('enable/disabled state', () => {
     it('should not trigger events while disabled', async () => {
-      const { createEl, createListener, ResizeChecker } = setup();
+      const { createEl, createListener } = setup();
 
       const el = createEl();
       const checker = new ResizeChecker(el, { disabled: true });
@@ -98,7 +95,7 @@ describe('Resize Checker', () => {
     });
 
     it('should trigger resize events after calling enable', async () => {
-      const { createEl, createListener, ResizeChecker } = setup();
+      const { createEl, createListener } = setup();
 
       const el = createEl();
       const checker = new ResizeChecker(el, { disabled: true });
@@ -113,7 +110,7 @@ describe('Resize Checker', () => {
     });
 
     it('should not trigger the first time after enable when the size does not change', async () => {
-      const { createEl, createListener, ResizeChecker } = setup();
+      const { createEl, createListener } = setup();
 
       const el = createEl();
       const checker = new ResizeChecker(el, { disabled: true });

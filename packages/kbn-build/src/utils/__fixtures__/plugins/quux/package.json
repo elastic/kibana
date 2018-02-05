@@ -1,0 +1,8 @@
+{
+  "name": "quux",
+  "version": "1.0.0",
+  "dependencies": {
+    "bar": "link:../../kibana/packages/bar",
+    "baz": "link:../baz"
+  }
+}

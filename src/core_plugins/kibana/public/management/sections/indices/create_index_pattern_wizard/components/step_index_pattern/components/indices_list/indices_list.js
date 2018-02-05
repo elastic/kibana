@@ -38,6 +38,15 @@ export class IndicesList extends Component {
     this.pager = new Pager(props.indices.length, this.state.perPage, this.state.page);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.indices.length !== this.props.indices.length) {
+      this.pager.setTotalItems(nextProps.indices.length);
+      this.resetPageTo0();
+    }
+  }
+
+  resetPageTo0 = () => this.onChangePage(0);
+
   onChangePage = page => {
     this.pager.goToPageIndex(page);
     this.setState({ page });
@@ -46,6 +55,7 @@ export class IndicesList extends Component {
   onChangePerPage = perPage => {
     this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
+    this.resetPageTo0();
     this.closePerPageControl();
   }
 

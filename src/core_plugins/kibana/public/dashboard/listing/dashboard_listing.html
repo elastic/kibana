@@ -125,7 +125,7 @@
     </div>
 
     <!-- Table -->
-    <table class="kuiTable" ng-if="listingController.items.length">
+    <table class="kuiTable dashboardListingTable" ng-if="listingController.items.length">
       <thead>
         <tr>
           <th
@@ -181,8 +181,7 @@
           <th
             ng-if="!listingController.hideWriteControls"
             scope="col"
-            class="kuiTableHeaderCell"
-            width="80px"
+            class="kuiTableHeaderCell actionBtnHeaderCell"
           >
             <div class="kuiTableHeaderCell__liner">Actions</div>
           </th>

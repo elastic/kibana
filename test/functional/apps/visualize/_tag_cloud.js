@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(true);
       });
 
-      it('should show correct tag cloud data', async function () {
+      it.skip('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
@@ -100,9 +100,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();

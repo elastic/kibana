@@ -11,13 +11,19 @@ export function ReactVisTypeProvider(Private, getAppState, config) {
       this.vis = vis;
     }
 
-    render(visData) {
+    render(visData, updateStatus) {
       this.visData = visData;
 
-      return new Promise((resolve, reject) => {
-        if (!this.visData) return reject();
+      return new Promise((resolve) => {
         const Component = this.vis.type.visConfig.component;
-        render(<Component config={config} vis={this.vis} appState={getAppState()} visData={visData} renderComplete={resolve} />, this.el);
+        render(<Component
+          config={config}
+          vis={this.vis}
+          appState={getAppState()}
+          visData={visData}
+          renderComplete={resolve}
+          updateStatus={updateStatus}
+        />, this.el);
       });
     }
 
