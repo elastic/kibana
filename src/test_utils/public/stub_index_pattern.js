@@ -16,6 +16,7 @@ export default function (Private) {
 
   function StubIndexPattern(pattern, timeField, fields) {
     this.id = pattern;
+    this.title = pattern;
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);

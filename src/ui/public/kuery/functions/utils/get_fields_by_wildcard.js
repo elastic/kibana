@@ -25,7 +25,7 @@ export function getFieldsByWildcard(pattern, indexPattern) {
     });
 
     if (_.isEmpty(fields)) {
-      throw new Error(`No fields match the pattern ${pattern}`);
+      throw new Error(`No fields match the pattern ${pattern} in index pattern ${indexPattern.title}`);
     }
 
     return fields;
