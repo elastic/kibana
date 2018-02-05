@@ -103,7 +103,7 @@ Object {
   "errors": Array [
     Array [
       "The following options were not recognized:
-  [1m[\\"foo\\"][22m",
+  [\\"foo\\"]",
     ],
     Array [
       "",
