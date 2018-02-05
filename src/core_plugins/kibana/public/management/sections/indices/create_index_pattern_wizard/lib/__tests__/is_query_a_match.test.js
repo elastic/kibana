@@ -21,6 +21,11 @@ describe('isQueryAMatch', () => {
     it('for a pattern that is only a wildcard', () => {
       expect(isQueryAMatch('*', 'es')).toBeTruthy();
     });
+
+    it('for a pattern that contains commas', () => {
+      expect(isQueryAMatch('cluster_one:kibana,cluster_two:kibana', 'cluster_one:kibana')).toBeTruthy();
+      expect(isQueryAMatch('cluster_one:k*,cluster_two:kibana', 'cluster_one:kibana')).toBeTruthy();
+    });
   });
 
   describe('returns false', () => {
