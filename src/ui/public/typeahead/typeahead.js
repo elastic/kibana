@@ -28,6 +28,7 @@ typeahead.directive('kbnTypeahead', function () {
         const item = this.items[this.selectedIndex];
         this.onSelect({ item });
         this.selectedIndex = null;
+        this.isHidden = true;
       };
 
       /**
@@ -50,37 +51,28 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       this.isVisible = () => {
-        // Blur fires before click so if we don't show even after blur then the click won't fire
-        return this.items.length > 0 && !this.isHidden && (this.isFocused || this.isMousedOver);
+        // Blur fires before click. If we only checked isFocused, then click events would never fire.
+        const isFocusedOrMousedOver = this.isFocused || this.isMousedOver;
+        return !this.isHidden && this.items.length > 0 && isFocusedOrMousedOver;
       };
 
       this.onKeyDown = (event) => {
-        // Prevent up/down from moving the cursor in the input
-        const isUpOrDownArrow = [UP, DOWN].includes(event.keyCode);
-
-        // Prevent enter from submitting the form if there is a selection
-        const isEnterWithSelection = event.keyCode === ENTER && this.selectedIndex !== null;
-
-        if (this.isVisible() && (isUpOrDownArrow || isEnterWithSelection)) {
-          event.preventDefault();
-        }
-      };
-
-      this.onKeyUp = (event) => {
         const { keyCode } = event;
 
         this.isHidden = (keyCode === ESCAPE);
 
-        if (!this.hidden && [TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
+        if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
           this.submit();
         } else if (keyCode === UP) {
           this.selectPrevious();
         } else if (keyCode === DOWN) {
           this.selectNext();
-        } else {
-          this.selectedIndex = null;
         }
+      };
+
+      this.onKeyPress = () => {
+        this.selectedIndex = null;
       };
 
       this.onFocus = () => {
