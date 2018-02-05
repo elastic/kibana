@@ -11,8 +11,8 @@ import { getProjects } from '../../utils/projects';
 // and more integration-y, as we're trying to not add very slow tests to our
 // Jest unit tests.
 
-describe('kbn-build production', function () {
-  it('builds and copies projects for production', async function () {
+describe('kbn-build production', function() {
+  it('builds and copies projects for production', async function() {
     this.timeout(60 * 1000);
 
     const tmpDir = tempy.directory();
@@ -26,7 +26,7 @@ describe('kbn-build production', function () {
       cwd: fixturesPath,
       parents: true,
       nodir: true,
-      dot: true
+      dot: true,
     });
 
     const projects = await getProjects(tmpDir, ['./packages/*']);
@@ -34,14 +34,14 @@ describe('kbn-build production', function () {
     for (const project of projects.values()) {
       // This will both install dependencies and generate `yarn.lock` files
       await project.installDependencies({
-        extraArgs: ['--silent', '--no-progress']
+        extraArgs: ['--silent', '--no-progress'],
       });
     }
 
     await buildProductionProjects({ kibanaRoot: tmpDir, buildRoot });
 
     const files = await globby(['**/*', '!**/node_modules/**'], {
-      cwd: buildRoot
+      cwd: buildRoot,
     });
 
     expect(files).to.eql([
@@ -52,7 +52,7 @@ describe('kbn-build production', function () {
       'packages/foo/package.json',
       'packages/foo/src/index.js',
       'packages/foo/target/index.js',
-      'packages/foo/yarn.lock'
+      'packages/foo/yarn.lock',
     ]);
   });
 });
