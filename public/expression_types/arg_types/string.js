@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
 const StringArgInput = ({ updateValue, value, confirm, commit }) => (
-  <Form inline>
+  <Form>
     <FormGroup>
       <FormControl
         spellCheck={false}
@@ -15,9 +15,11 @@ const StringArgInput = ({ updateValue, value, confirm, commit }) => (
       />
     </FormGroup>
     {confirm && (
-      <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>
-        {confirm}
-      </Button>
+      <FormGroup>
+        <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>
+          {confirm}
+        </Button>
+      </FormGroup>
     )}
   </Form>
 );

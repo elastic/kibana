@@ -1,4 +1,5 @@
 import { advancedFilter } from './advanced_filter';
+import { dropdownFilter } from './dropdown_filter';
 import { debug } from './debug';
 import { error } from './error';
 import { grid } from './grid';
@@ -13,6 +14,7 @@ import { timeFilter } from './time_filter';
 
 export const renderFunctions = [
   advancedFilter,
+  dropdownFilter,
   debug,
   error,
   grid,

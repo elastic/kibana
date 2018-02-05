@@ -5,6 +5,7 @@ import { containerStyle } from './containerStyle';
 import { context } from './context';
 import { columns } from './columns';
 import { date } from './date';
+import { dropdownControl } from './dropdownControl';
 import { exactly } from './exactly';
 import { filterrows } from './filterrows';
 import { font } from './font';
@@ -47,6 +48,7 @@ export const commonFunctions = [
   columns,
   context,
   date,
+  dropdownControl,
   exactly,
   filterrows,
   font,
