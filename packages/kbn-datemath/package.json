@@ -4,9 +4,9 @@
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
   "private": true,
-  "main": "lib/index.js",
+  "main": "target/index.js",
   "scripts": {
-    "build": "babel src --out-dir lib"
+    "build": "babel src --out-dir target"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
