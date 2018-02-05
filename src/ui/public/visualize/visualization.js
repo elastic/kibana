@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs/Rx';
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
-import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { ResizeChecker } from 'ui/resize_checker';
@@ -36,8 +35,6 @@ uiModules
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
 
-        $scope.addLegend = false;
-
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
         else $scope.vis._setUiState($scope.uiState);
@@ -50,17 +47,6 @@ uiModules
           const shouldShowMessage = !_.get($scope, 'vis.params.handleNoResults');
 
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
-        };
-
-        const legendPositionToVisContainerClassMap = {
-          top: 'vis-container--legend-top',
-          bottom: 'vis-container--legend-bottom',
-          left: 'vis-container--legend-left',
-          right: 'vis-container--legend-right',
-        };
-
-        $scope.getVisContainerClasses = function () {
-          return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
         };
 
         $scope.visElement = getVisContainer();
@@ -93,11 +79,6 @@ uiModules
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
-            $scope.addLegend = vis.params.addLegend;
-            vis.refreshLegend++;
-            // We need to wait one digest cycle for the legend to render, before
-            // we want to render the chart, so it know about the legend size.
-            await new Promise(resolve => $timeout(resolve));
             vis.size = [container.width(), container.height()];
             const status = getUpdateStatus($scope);
             const renderPromise = visualization.render(visData, status);
