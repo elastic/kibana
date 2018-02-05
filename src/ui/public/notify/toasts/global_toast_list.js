@@ -21,10 +21,15 @@ export class GlobalToastList extends Component {
 
     this.timeoutIds = [];
     this.toastIdToScheduledForDismissalMap = {};
+
+    if (this.props.subscribe) {
+      this.props.subscribe(() => this.forceUpdate());
+    }
   }
 
   static propTypes = {
     toasts: PropTypes.array,
+    subscribe: PropTypes.func,
     dismissToast: PropTypes.func.isRequired,
     toastLifeTimeMs: PropTypes.number.isRequired,
   };

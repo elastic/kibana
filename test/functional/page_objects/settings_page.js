@@ -109,7 +109,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeFieldOption(selection) {
-      return await find.displayedByCssSelector('option[label="' + selection + '"]');
+      return await find.displayedByCssSelector('option[value="' + selection + '"]');
     }
 
     async getCreateIndexPatternButton() {
@@ -174,9 +174,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldsTabCount() {
-      return await retry.try(async () => {
+      return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        // the value has () around it, remove them
         return text.replace(/\((.*)\)/, '$1');
       });
     }
@@ -345,6 +344,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternCreateButton() {
       return await testSubjects.find('createIndexPatternCreateButton');
+    }
+
+    async clickOnOnlyIndexPattern() {
+      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {

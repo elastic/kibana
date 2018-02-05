@@ -41,6 +41,12 @@ describe('ToastNotifications', () => {
         toastNotifications.remove(toast);
         expect(toastNotifications.list.length).toBe(0);
       });
+
+      test('ignores unknown toast', () => {
+        toastNotifications.add('Test');
+        toastNotifications.remove({});
+        expect(toastNotifications.list.length).toBe(1);
+      });
     });
 
     describe('onChange method', () => {
@@ -57,6 +63,13 @@ describe('ToastNotifications', () => {
         const toast = toastNotifications.add({});
         toastNotifications.remove(toast);
         expect(onChangeSpy.callCount).toBe(2);
+      });
+
+      test('callback is not called when remove is ignored', () => {
+        const onChangeSpy = sinon.spy();
+        toastNotifications.onChange(onChangeSpy);
+        toastNotifications.remove({});
+        expect(onChangeSpy.callCount).toBe(0);
       });
     });
 
