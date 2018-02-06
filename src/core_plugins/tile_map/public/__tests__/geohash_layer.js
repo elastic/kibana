@@ -5,7 +5,6 @@ import { GeoHashSampleData } from './geohash_sample_data';
 import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
-import shadedGeohashGridPng from './shadedGeohashGrid.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 describe('kibana_map tests', function () {
@@ -65,10 +64,6 @@ describe('kibana_map tests', function () {
       {
         options: { mapType: 'Shaded Circle Markers' },
         expected: shadedCircleMarkersPng
-      },
-      {
-        options: { mapType: 'Shaded Geohash Grid' },
-        expected: shadedGeohashGridPng
       },
       {
         options: {
