@@ -1,13 +1,20 @@
 import { difference } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
-import { formatListAsProse, getFlattenedObject } from '../../utils';
+import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 
 const getFlattenedKeys = object => (
   Object.keys(getFlattenedObject(object))
 );
 
-const getUnusedConfigKeys = (settings, configValues) => {
-  const inputKeys = getFlattenedKeys(transformDeprecations(settings));
+const getUnusedConfigKeys = (disabledPluginSpecs, rawSettings, configValues) => {
+  const settings = transformDeprecations(rawSettings);
+
+  // remove config values from disabled plugins
+  for (const spec of disabledPluginSpecs) {
+    unset(settings, spec.getConfigPrefix());
+  }
+
+  const inputKeys = getFlattenedKeys(settings);
   const appliedKeys = getFlattenedKeys(configValues);
 
   if (inputKeys.includes('env')) {
@@ -26,7 +33,7 @@ export default function (kbnServer, server, config) {
     return kbnServer.config;
   });
 
-  const unusedKeys = getUnusedConfigKeys(kbnServer.settings, config.get())
+  const unusedKeys = getUnusedConfigKeys(kbnServer.disabledPluginSpecs, kbnServer.settings, config.get())
     .map(key => `"${key}"`);
 
   if (!unusedKeys.length) {
@@ -40,7 +47,7 @@ export default function (kbnServer, server, config) {
   const error = new Error(
     `${formatListAsProse(unusedKeys)} ${desc} not applied. ` +
     'Check for spelling errors and ensure that expected ' +
-    'plugins are installed and enabled.'
+    'plugins are installed.'
   );
 
   error.code = 'InvalidConfig';
