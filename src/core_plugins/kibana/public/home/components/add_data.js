@@ -49,7 +49,6 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
           <KuiCardFooter>
             <EuiButton
-              buttonType="secondary"
               href="#/home/tutorial/apm"
             >
               Add APM
@@ -82,7 +81,6 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
             <KuiCardFooter>
               <EuiButton
-                buttonType="secondary"
                 href="#/home/tutorial_directory/logging"
               >
                 Add log data
@@ -108,7 +106,6 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
             <KuiCardFooter>
               <EuiButton
-                buttonType="secondary"
                 href="#/home/tutorial_directory/metrics"
               >
                 Add metric data
@@ -134,7 +131,6 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
             <KuiCardFooter>
               <EuiButton
-                buttonType="secondary"
                 href="#/home/tutorial_directory/security"
               >
                 Add security events
@@ -172,11 +168,11 @@ export function AddData({ addBasePath, isCloudEnabled }) {
             </EuiText>
           </EuiTextColor>
           <EuiSpacer size="s" />
-          <a href="#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
-            <span className="euiButton__content">
-              Set up index patterns
-            </span>
-          </a>
+          <EuiButton
+            href="#/management/kibana/index"
+          >
+            Set up index patterns
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 

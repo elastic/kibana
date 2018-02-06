@@ -19,6 +19,7 @@ function getRoute() {
     controller($scope, Private) {
       $scope.addBasePath = chrome.addBasePath;
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
+      $scope.recentlyAccessed = [];
     }
   };
 }

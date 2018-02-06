@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
+import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
 
 import {
   EuiButton,
@@ -17,7 +18,7 @@ import {
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories, isCloudEnabled }) {
+export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccessed }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -40,6 +41,12 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
 
   return (
     <EuiPage className="home">
+
+      <RecentlyAccessed
+        recentlyAccessed={recentlyAccessed}
+      />
+
+      <EuiSpacer size="l" />
 
       <AddData
         addBasePath={addBasePath}
@@ -88,7 +95,6 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
           </EuiText>
           <EuiSpacer size="s" />
           <EuiButton
-            buttonType="secondary"
             href="#/home/feature_directory"
           >
             View full directory of Kibana plugins
@@ -112,4 +118,5 @@ Home.propTypes = {
     category: PropTypes.string.isRequired
   })),
   isCloudEnabled: PropTypes.bool.isRequired,
+  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };
