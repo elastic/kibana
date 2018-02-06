@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTitle>
+    <h1>
+      Create index pattern
+    </h1>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText>
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={true}
+        label="Include system indices"
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;
+
+exports[`Header should render without including system indices 1`] = `
+<div>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTitle>
+    <h1>
+      Create index pattern
+    </h1>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText>
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiSwitch
+        checked={false}
+        label="Include system indices"
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;

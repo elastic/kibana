@@ -18,15 +18,15 @@ exports[`StepTimeField should render a loading state when creating the index pat
       component="div"
       grow={false}
     >
-      <EuiText>
-        Creating index pattern...
-      </EuiText>
+      <EuiLoadingSpinner />
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
       grow={false}
     >
-      <EuiLoadingSpinner />
+      <EuiText>
+        Creating index pattern...
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiPanel>
