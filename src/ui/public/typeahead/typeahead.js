@@ -28,7 +28,6 @@ typeahead.directive('kbnTypeahead', function () {
         const item = this.items[this.selectedIndex];
         this.onSelect({ item });
         this.selectedIndex = null;
-        this.isHidden = true;
       };
 
       /**
