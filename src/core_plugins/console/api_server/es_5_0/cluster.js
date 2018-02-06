@@ -9,7 +9,6 @@ export default function (api) {
       "metrics": ["version", "master_node", "nodes", "routing_table", "routing_node", "metadata", "blocks"]
     }
   });
-  api.addEndpointDescription('_cluster/pending_tasks');
 
   api.addEndpointDescription('put_cluster/settings', {
     methods: ['PUT'],
