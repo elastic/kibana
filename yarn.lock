@@ -7205,9 +7205,9 @@ leaflet-responsive-popup@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.2.0.tgz#119bfcfae147864730f6a01fbd73b5b2ce274728"
 
-leaflet-vega@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.6.0.tgz#2e23098752f9ad6361245c45cff94ddf7ab9199b"
+leaflet-vega@0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.6.1.tgz#41a30102badd00fed0c46a1cec8468d57dfa0516"
   dependencies:
     vega-spec-injector "^0.0.2"
 
