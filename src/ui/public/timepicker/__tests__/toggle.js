@@ -63,7 +63,7 @@ describe('kbnGlobalTimepicker', function () {
     expect($el.attr('data-shared-timefilter-to')).to.eql(maxString);
   });
 
-  it(`sets data-shared-timefilter-* to null when auto-refresh and time range selectors are both disabled`, function () {
+  it(`doesn't set data-shared-timefilter-* when auto-refresh and time range selectors are both disabled`, function () {
     const minString = '2000-01-01T00:00:00Z';
     const maxString = '2001-01-01T00:00:00Z';
     const bounds = {
