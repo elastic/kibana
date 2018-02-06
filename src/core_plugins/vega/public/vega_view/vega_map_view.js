@@ -8,8 +8,8 @@ export class VegaMapView extends VegaBaseView {
   async _initViewCustomizations() {
     const mapConfig = this._parser.mapConfig;
     let baseMapOpts;
-    let minZoom = 0;
-    let maxZoom = 25;
+    let limitMinZ = 0;
+    let limitMaxZ = 25;
 
     if (mapConfig.mapStyle !== false) {
       const tmsServices = await this._serviceSettings.getTMSServices();
@@ -20,8 +20,8 @@ export class VegaMapView extends VegaBaseView {
       if (!baseMapOpts) {
         this.onWarn(`mapStyle ${JSON.stringify(mapStyle)} was not found`);
       } else {
-        minZoom = baseMapOpts.minZoom;
-        maxZoom = baseMapOpts.maxZoom;
+        limitMinZ = baseMapOpts.minZoom;
+        limitMaxZ = baseMapOpts.maxZoom;
       }
     }
 
@@ -38,13 +38,13 @@ export class VegaMapView extends VegaBaseView {
       return value;
     };
 
-    let minZoom2 = validate('minZoom', mapConfig.minZoom, minZoom, minZoom, maxZoom);
-    let maxZoom2 = validate('maxZoom', mapConfig.maxZoom, maxZoom, minZoom, maxZoom);
-    if (minZoom2 > maxZoom2) {
+    let minZoom = validate('minZoom', mapConfig.minZoom, limitMinZ, limitMinZ, limitMaxZ);
+    let maxZoom = validate('maxZoom', mapConfig.maxZoom, limitMaxZ, limitMinZ, limitMaxZ);
+    if (minZoom > maxZoom) {
       this.onWarn('minZoom and maxZoom have been swapped');
-      [minZoom2, maxZoom2] = [maxZoom2, minZoom2];
+      [minZoom, maxZoom] = [maxZoom, minZoom];
     }
-    const zoom = validate('zoom', mapConfig.zoom, 2, minZoom2, maxZoom2);
+    const zoom = validate('zoom', mapConfig.zoom, 2, minZoom, maxZoom);
 
     // let maxBounds = null;
     // if (mapConfig.maxBounds) {
@@ -55,10 +55,8 @@ export class VegaMapView extends VegaBaseView {
     this._kibanaMap = new KibanaMap(
       this._$container.get(0),
       {
-        zoom,
+        zoom, minZoom, maxZoom,
         center: [mapConfig.latitude, mapConfig.longitude],
-        minZoom: minZoom2,
-        maxZoom: maxZoom2,
         zoomControl: mapConfig.zoomControl,
         scrollWheelZoom: mapConfig.scrollWheelZoom,
       });
