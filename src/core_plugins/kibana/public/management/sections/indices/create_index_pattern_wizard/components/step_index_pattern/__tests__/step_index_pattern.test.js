@@ -144,4 +144,27 @@ describe('StepIndexPattern', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  it('should ensure we properly append a wildcard', async () => {
+    const component = shallow(
+      <StepIndexPattern
+        allIndices={allIndices}
+        isIncludingSystemIndices={false}
+        esService={esService}
+        savedObjectsClient={{
+          find: () => ({ savedObjects: [
+            { attributes: { title: 'k*' } }
+          ] })
+        }}
+        goToNextStep={goToNextStep}
+      />
+    );
+
+    const instance = component.instance();
+
+    instance.onQueryChanged({ target: { value: 'k' } });
+    await component.update();
+
+    expect(component).toMatchSnapshot();
+  });
 });
