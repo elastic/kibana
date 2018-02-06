@@ -247,6 +247,10 @@ describe('dateMath', function() {
       anchored = moment(anchor);
     });
 
+    afterEach(function() {
+      clock.restore();
+    });
+
     it('should round to the nearest second with 0 value', function() {
       const val = dateMath.parse('now-0s/s').format(format);
       expect(val).to.eql(now.startOf('s').format(format));
