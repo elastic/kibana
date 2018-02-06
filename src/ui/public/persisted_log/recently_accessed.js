@@ -1,6 +1,6 @@
 import { PersistedLog } from 'ui/persisted_log';
 
-class KbnHistory {
+class RecentlyAccessed {
   constructor() {
     const historyOptions = {
       maxLength: 10,
@@ -10,11 +10,9 @@ class KbnHistory {
   }
 
   add(link, label) {
-    const now = new Date();
     const historyItem = {
       link: link,
-      label: label,
-      lastAccessed: now.toISOString()
+      label: label
     };
     this.history.add(historyItem);
   }
@@ -24,4 +22,4 @@ class KbnHistory {
   }
 }
 
-export const kbnHistory = new KbnHistory();
+export const recentlyAccessed = new RecentlyAccessed();

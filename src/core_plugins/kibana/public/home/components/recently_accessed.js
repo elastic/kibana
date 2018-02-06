@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,6 +11,8 @@ import {
 } from '@elastic/eui';
 
 export function RecentlyAccessed({ recentlyAccessed }) {
+
+  console.log(recentlyAccessed);
 
   return (
     <EuiPanel paddingSize="l">

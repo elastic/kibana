@@ -7,6 +7,7 @@ import { uiModules } from 'ui/modules';
 import {
   HomeApp
 } from './components/home_app';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -19,7 +20,7 @@ function getRoute() {
     controller($scope, Private) {
       $scope.addBasePath = chrome.addBasePath;
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
-      $scope.recentlyAccessed = [];
+      $scope.recentlyAccessed = recentlyAccessed.get();
     }
   };
 }
