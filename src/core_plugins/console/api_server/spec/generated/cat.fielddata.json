@@ -1,0 +1,34 @@
+{
+  "_cat/fielddata": {
+    "url_params": {
+      "format": "",
+      "bytes": [
+        "b",
+        "k",
+        "kb",
+        "m",
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
+      ],
+      "local": "__flag__",
+      "master_timeout": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__",
+      "fields": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/fielddata",
+      "_cat/fielddata/{fields}"
+    ]
+  }
+}
