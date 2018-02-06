@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingState should render normally 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="l"
+    justifyContent="center"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle>
+        <EuiTextColor
+          color="subdued"
+        >
+          <h2
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            Checking for Elasticsearch data
+          </h2>
+        </EuiTextColor>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText
+        size="s"
+      >
+        <p
+          style={
+            Object {
+              "textAlign": "center",
+            }
+          }
+        >
+          <EuiIcon
+            size="m"
+            type="faceSad"
+          />
+          <EuiTextColor
+            color="subdued"
+          >
+            Reticulating splines...
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;

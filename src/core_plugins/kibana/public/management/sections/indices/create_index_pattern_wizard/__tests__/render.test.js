@@ -3,9 +3,9 @@ const unmountComponentAtNode = jest.fn();
 
 jest.doMock('react-dom', () => ({ render, unmountComponentAtNode }));
 
-const { renderStepTimeField, destroyStepTimeField } = require('../index');
+const { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } = require('../render');
 
-describe('StepTimeFieldRender', () => {
+describe('CreateIndexPatternWizardRender', () => {
   beforeEach(() => {
     jest.spyOn(document, 'getElementById').mockImplementation(() => ({}));
     render.mockClear();
@@ -13,18 +13,23 @@ describe('StepTimeFieldRender', () => {
   });
 
   it('should call render', () => {
-    renderStepTimeField(
+    renderCreateIndexPatternWizard(
       '',
-      {},
-      () => {},
-      () => {},
+      '',
+      {
+        es: {},
+        indexPatterns: {},
+        savedObjectsClient: {},
+        config: {},
+        kbnUrl: {},
+      }
     );
 
     expect(render.mock.calls.length).toBe(1);
   });
 
   it('should call unmountComponentAtNode', () => {
-    destroyStepTimeField();
+    destroyCreateIndexPatternWizard();
     expect(unmountComponentAtNode.mock.calls.length).toBe(1);
   });
 });
