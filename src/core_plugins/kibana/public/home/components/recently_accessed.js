@@ -3,16 +3,26 @@ import PropTypes from 'prop-types';
 
 import {
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiButtonEmpty,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 
 export function RecentlyAccessed({ recentlyAccessed }) {
 
-  console.log(recentlyAccessed);
+  const renderRecentlyAccessed = () => {
+    return recentlyAccessed.map((item) => {
+      const shortLabel = item.label.length <= 32 ? item.label : `${item.label.substring(0, 31)}...`;
+      return (
+        <EuiButtonEmpty
+          key={item.link}
+          href={item.link}
+        >
+          {shortLabel}
+        </EuiButtonEmpty>
+      );
+    });
+  };
 
   return (
     <EuiPanel paddingSize="l">
@@ -23,6 +33,10 @@ export function RecentlyAccessed({ recentlyAccessed }) {
           </EuiTextColor>
         </p>
       </EuiText>
+
+      <div>
+        {renderRecentlyAccessed()}
+      </div>
 
     </EuiPanel>
   );
