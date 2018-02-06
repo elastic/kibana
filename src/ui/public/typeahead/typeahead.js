@@ -52,7 +52,7 @@ typeahead.directive('kbnTypeahead', function () {
       this.isVisible = () => {
         // Blur fires before click. If we only checked isFocused, then click events would never fire.
         const isFocusedOrMousedOver = this.isFocused || this.isMousedOver;
-        return !this.isHidden && this.items.length > 0 && isFocusedOrMousedOver;
+        return !this.isHidden && this.items && this.items.length > 0 && isFocusedOrMousedOver;
       };
 
       this.onKeyDown = (event) => {
