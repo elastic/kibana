@@ -30,6 +30,11 @@ typeahead.directive('kbnTypeahead', function () {
         this.selectedIndex = null;
       };
 
+      /**
+       * Sets the selected index to the given value. If the value is less than
+       * zero, it will wrap around to the end, and if the value is greater than
+       * the number of items, it will wrap around to the beginning.
+       */
       this.setSelectedIndex = (index) => {
         this.selectedIndex = (index + this.items.length) % this.items.length;
       };
@@ -45,37 +50,28 @@ typeahead.directive('kbnTypeahead', function () {
       };
 
       this.isVisible = () => {
-        // Blur fires before click so if we don't show even after blur then the click won't fire
-        return this.items && this.items.length > 0 && !this.isHidden && (this.isFocused || this.isMousedOver);
+        // Blur fires before click. If we only checked isFocused, then click events would never fire.
+        const isFocusedOrMousedOver = this.isFocused || this.isMousedOver;
+        return !this.isHidden && this.items && this.items.length > 0 && isFocusedOrMousedOver;
       };
 
       this.onKeyDown = (event) => {
-        // Prevent up/down from moving the cursor in the input
-        const isUpOrDownArrow = [UP, DOWN].includes(event.keyCode);
-
-        // Prevent enter from submitting the form if there is a selection
-        const isEnterWithSelection = event.keyCode === ENTER && this.selectedIndex !== null;
-
-        if (this.isVisible() && (isUpOrDownArrow || isEnterWithSelection)) {
-          event.preventDefault();
-        }
-      };
-
-      this.onKeyUp = (event) => {
         const { keyCode } = event;
 
         this.isHidden = (keyCode === ESCAPE);
 
-        if (!this.hidden && [TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
+        if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
           this.submit();
         } else if (keyCode === UP) {
           this.selectPrevious();
         } else if (keyCode === DOWN) {
           this.selectNext();
-        } else {
-          this.selectedIndex = null;
         }
+      };
+
+      this.onKeyPress = () => {
+        this.selectedIndex = null;
       };
 
       this.onFocus = () => {

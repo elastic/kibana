@@ -30,10 +30,8 @@ module.directive('queryBar', function () {
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
 
-      const persistedLog = new PersistedLog(`typeahead:${this.appName}-${this.query.language}`, {
-        maxLength: config.get('history:limit'),
-        filterDuplicates: true
-      });
+      let persistedLog;
+      let getSuggestions;
 
       this.submit = () => {
         if (this.localQuery.query) {
@@ -49,9 +47,6 @@ module.directive('queryBar', function () {
 
       this.suggestionTemplate = suggestionTemplate;
 
-      const { indexPattern } = this;
-      const getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
-
       this.handleKeyUp = (event) => {
         if (!['ArrowDown', 'ArrowUp', 'Tab', 'Enter', 'Escape'].includes(event.key)) {
           this.updateSuggestions();
@@ -63,9 +58,7 @@ module.directive('queryBar', function () {
         const { selectionStart, selectionEnd, value } = inputEl;
         const query = value;
         return getSuggestions({ query, selectionStart, selectionEnd })
-          .then(suggestions => {
-            $scope.$apply(() => this.suggestions = suggestions);
-          });
+          .then(suggestions => this.suggestions = suggestions);
       };
 
       // TODO: Figure out a better way to set selection
@@ -76,6 +69,15 @@ module.directive('queryBar', function () {
         inputEl.setSelectionRange(start + text.length, start + text.length);
         this.updateSuggestions();
       };
+
+      $scope.$watch('queryBar.localQuery.language', (language) => {
+        persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
+          maxLength: config.get('history:limit'),
+          filterDuplicates: true
+        });
+        const { indexPattern } = this;
+        getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
+      });
 
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = {
