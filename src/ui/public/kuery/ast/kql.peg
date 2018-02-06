@@ -25,18 +25,18 @@ EmptyQuery
   }
 
 OrQuery
-  = head:AndQuery Or tail:OrQuery {
-    const cursor = [head, tail].find(node => node.type === 'cursor');
+  = left:AndQuery Or right:OrQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildNode('or', [head, tail]);
+    return buildNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
-  = head:NotQuery And tail:AndQuery {
-    const cursor = [head, tail].find(node => node.type === 'cursor');
+  = left:NotQuery And right:AndQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildNode('and', [head, tail]);
+    return buildNode('and', [left, right]);
   }
   / NotQuery
 
@@ -58,24 +58,21 @@ Expression
 
 FieldListExpression
   = field:Literal Space* ':' Space* list:SubList {
-    function buildNodeWithField(field, list) {
-      if (list.type === 'cursor') {
+    function buildNodeWithField(node) {
+      if (node.type === 'cursor') {
         return {
           ...list,
           fieldName: field,
           suggestionTypes: ['value', 'conjunction']
         };
-      } else if (list.hasOwnProperty('and')) {
-        return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
-      } else if (list.hasOwnProperty('or')) {
-        return buildNode('or', list.or.map(node => buildNodeWithField(field, node)));
-      } else if (list.hasOwnProperty('not')) {
-        return buildNode('not', buildNodeWithField(field, list.not));
+      } else if (node.hasOwnProperty('arguments')) {
+        const args = node.arguments.map(buildNodeWithField);
+        return { ...list, arguments: args };
       } else {
-        return buildNode('is', field, list);
+        return buildNode('is', field, node);
       }
     }
-    return buildNodeWithField(field, list);
+    return buildNodeWithField(list);
   }
 
 FieldRangeExpression
@@ -97,28 +94,28 @@ ValueExpression
   }
 
 OrList
-  = head:AndList Or tail:OrList {
-    const cursor = [head, tail].find(node => node.type === 'cursor');
+  = left:AndList Or right:OrList {
+    const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return { or: [head, tail] };
+    return buildNode('or', [left, right]);
   }
   / AndList
 
 AndList
-  = head:NotList And tail:AndList {
-    const cursor = [head, tail].find(node => node.type === 'cursor');
+  = left:NotList And right:AndList{
+    const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return { and: [head, tail] };
+    return buildNode('and', [left, right]);
   }
   / NotList
 
@@ -130,7 +127,7 @@ NotList
         suggestionTypes: ['value']
       };
     }
-    return { not: list };
+    return buildNode('not', query);;
   }
   / SubList
 
@@ -190,7 +187,7 @@ UnquotedLiteral
   }
 
 EscapedQuote
-  = '\\' quote:('"' / '"') { return quote; }
+  = '\\' quote:('"' / "'") { return quote; }
 
 UnquotedCharacter
   = Cursor
