@@ -49,7 +49,7 @@ describe('kuery node types', function () {
     describe('toElasticsearchQuery', function () {
 
       it('should return the given function type\'s ES query representation', function () {
-        const node = functionType.buildNode('is', 'response', 200);
+        const node = functionType.buildNode('is', 'extension', 'jpg');
         const expected = isFunction.toElasticsearchQuery(node, indexPattern);
         const result = functionType.toElasticsearchQuery(node, indexPattern);
         expect(_.isEqual(expected, result)).to.be(true);
