@@ -109,7 +109,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeFieldOption(selection) {
-      return await find.displayedByCssSelector('option[label="' + selection + '"]');
+      return await find.displayedByCssSelector('option[value="' + selection + '"]');
     }
 
     async getCreateIndexPatternButton() {
@@ -344,6 +344,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternCreateButton() {
       return await testSubjects.find('createIndexPatternCreateButton');
+    }
+
+    async clickOnOnlyIndexPattern() {
+      return await testSubjects.click('indexPatternLink');
     }
 
     async removeIndexPattern() {

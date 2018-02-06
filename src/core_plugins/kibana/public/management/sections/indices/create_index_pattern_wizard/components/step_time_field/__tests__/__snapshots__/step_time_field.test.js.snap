@@ -1,0 +1,283 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiLoadingSpinner />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText>
+        Creating index pattern...
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render a selected timeField 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
+    onTimeFieldChanged={[Function]}
+    selectedTimeField="@timestamp"
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable="@timestamp"
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render advanced options 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId="foobar"
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render normally 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    submittable={true}
+  />
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render timeFields 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
+    onTimeFieldChanged={[Function]}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    isVisible={false}
+    onChangeIndexPatternId={[Function]}
+    toggleAdvancedOptions={[Function]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <ActionButtons
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+  />
+</EuiPanel>
+`;

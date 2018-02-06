@@ -1,7 +1,7 @@
 {
   "rootDir": "../../..",
   "roots": [
-    "<rootDir>/src/ui/public",
+    "<rootDir>/src/ui",
     "<rootDir>/src/core_plugins",
     "<rootDir>/ui_framework/",
     "<rootDir>/packages"
@@ -35,14 +35,16 @@
     "js",
     "json"
   ],
+  "modulePathIgnorePatterns": [
+    "__fixtures__/"
+  ],
   "testMatch": [
     "**/*.test.js"
   ],
   "testPathIgnorePatterns": [
     "<rootDir>/ui_framework/dist/",
     "<rootDir>/ui_framework/doc_site/",
-    "<rootDir>/ui_framework/generator-kui/",
-    ".*/__fixtures__/.*"
+    "<rootDir>/ui_framework/generator-kui/"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/dev/jest/babel_transform.js"

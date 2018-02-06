@@ -409,7 +409,7 @@ var SnippetManager = function() {
                 return;
 
             var value = tokens.slice(i + 1, i1);
-            var isNested = value.some(function(t) {return typeof t === "object"});          
+            var isNested = value.some(function(t) {return typeof t === "object"});
             if (isNested && !ts.value) {
                 ts.value = value;
             } else if (value.length && (!ts.value || typeof ts.value !== "string")) {
@@ -438,11 +438,11 @@ var SnippetManager = function() {
                 continue;
             var id = p.tabstopId;
             var i1 = tokens.indexOf(p, i + 1);
-            if (expanding[id] == p) { 
+            if (expanding[id] == p) {
                 expanding[id] = null;
                 continue;
             }
-            
+
             var ts = tabstops[id];
             var arg = typeof ts.value == "string" ? [ts.value] : copyValue(ts.value);
             arg.unshift(i + 1, Math.max(0, i1 - i));
@@ -482,7 +482,7 @@ var SnippetManager = function() {
         var scope = editor.session.$mode.$id || "";
         scope = scope.split("/").pop();
         if (scope === "html" || scope === "php") {
-            if (scope === "php") 
+            if (scope === "php")
                 scope = "html";
             var c = editor.getCursorPosition()
             var state = editor.session.getState(c.row);
@@ -498,7 +498,7 @@ var SnippetManager = function() {
                     scope = "php";
             }
         }
-        
+
         return scope;
     };
 
@@ -834,9 +834,9 @@ var TabstopManager = function(editor) {
         ts = this.tabstops[this.index];
         if (!ts || !ts.length)
             return;
-        
+
         this.selectedTabstop = ts;
-        if (!this.editor.inVirtualSelectionMode) {        
+        if (!this.editor.inVirtualSelectionMode) {
             var sel = this.editor.multiSelect;
             sel.toSingleRange(ts.firstNonLinked.clone());
             for (var i = ts.length; i--;) {
@@ -847,7 +847,7 @@ var TabstopManager = function(editor) {
         } else {
             this.editor.selection.setRange(ts.firstNonLinked);
         }
-        
+
         this.editor.keyBinding.addKeyboardHandler(this.keyboardHandler);
     };
     this.addTabstops = function(tabstops, start, end) {
@@ -978,7 +978,7 @@ var Autocomplete = function() {
     this.changeListener = this.changeListener.bind(this);
     this.mousedownListener = this.mousedownListener.bind(this);
     this.mousewheelListener = this.mousewheelListener.bind(this);
-    
+
     this.changeTimer = lang.delayedCall(function() {
         this.updateCompletions(true);
     }.bind(this))
@@ -1005,10 +1005,10 @@ var Autocomplete = function() {
             this.popup.setFontSize(editor.getFontSize());
 
             var lineHeight = renderer.layerConfig.lineHeight;
-            
-            var pos = renderer.$cursorLayer.getPixelPosition(this.base, true);            
+
+            var pos = renderer.$cursorLayer.getPixelPosition(this.base, true);
             pos.left -= this.popup.getTextLeftOffset();
-            
+
             var rect = editor.container.getBoundingClientRect();
             pos.top += rect.top - renderer.layerConfig.offset;
             pos.left += rect.left - editor.renderer.scrollLeft;
@@ -1025,7 +1025,7 @@ var Autocomplete = function() {
         this.editor.off("mousedown", this.mousedownListener);
         this.editor.off("mousewheel", this.mousewheelListener);
         this.changeTimer.cancel();
-        
+
         if (this.popup)
             this.popup.hide();
 
@@ -1113,10 +1113,10 @@ var Autocomplete = function() {
     this.gatherCompletions = function(editor, callback) {
         var session = editor.getSession();
         var pos = editor.getCursorPosition();
-        
+
         var line = session.getLine(pos.row);
         var prefix = util.retrievePrecedingIdentifier(line, pos.column);
-        
+
         this.base = editor.getCursorPosition();
         this.base.column -= prefix.length;
 
@@ -1139,7 +1139,7 @@ var Autocomplete = function() {
     this.showPopup = function(editor) {
         if (this.editor)
             this.detach();
-        
+
         this.activated = true;
 
         this.editor = editor;
@@ -1154,10 +1154,10 @@ var Autocomplete = function() {
         editor.on("blur", this.blurListener);
         editor.on("mousedown", this.mousedownListener);
         editor.on("mousewheel", this.mousewheelListener);
-        
+
         this.updateCompletions();
     };
-    
+
     this.updateCompletions = function(keepPopupPosition) {
         if (keepPopupPosition && this.base && this.completions) {
             var pos = this.editor.getCursorPosition();
@@ -1228,12 +1228,12 @@ var FilteredList = function(array, filterText, mutateData) {
         });
         var prev = null;
         matches = matches.filter(function(item){
-            var caption = item.value || item.caption || item.snippet; 
+            var caption = item.value || item.caption || item.snippet;
             if (caption === prev) return false;
             prev = caption;
             return true;
         });
-        
+
         this.filtered = matches;
     };
     this.filterCompletions = function(items, needle) {
@@ -1291,7 +1291,7 @@ var $singleLineEditor = function(el) {
     var renderer = new Renderer(el);
 
     renderer.$maxLines = 4;
-    
+
     var editor = new Editor(renderer);
 
     editor.setHighlightActiveLine(false);
@@ -1307,13 +1307,13 @@ var $singleLineEditor = function(el) {
 var AcePopup = function(parentNode) {
     var el = dom.createElement("div");
     var popup = new $singleLineEditor(el);
-    
+
     if (parentNode)
         parentNode.appendChild(el);
     el.style.display = "none";
     popup.renderer.content.style.cursor = "default";
     popup.renderer.setStyle("ace_autocomplete");
-    
+
     popup.setOption("displayIndentGuides", false);
 
     var noop = function(){};
@@ -1402,11 +1402,11 @@ var AcePopup = function(parentNode) {
     popup.getHoveredRow = function() {
         return hoverMarker.start.row;
     };
-    
+
     event.addListener(popup.container, "mouseout", hideHoverMarker);
     popup.on("hide", hideHoverMarker);
     popup.on("changeSelection", hideHoverMarker);
-    
+
     popup.session.doc.getLength = function() {
         return popup.data.length;
     };
@@ -1450,13 +1450,13 @@ var AcePopup = function(parentNode) {
     };
     bgTokenizer.$updateOnChange = noop;
     bgTokenizer.start = noop;
-    
+
     popup.session.$computeWidth = function() {
         return this.screenWidth = 0;
     }
     popup.isOpen = false;
     popup.isTopdown = false;
-    
+
     popup.data = [];
     popup.setData = function(list) {
         popup.data = list || [];
@@ -1481,7 +1481,7 @@ var AcePopup = function(parentNode) {
                 popup._signal("select");
         }
     };
-    
+
     popup.on("changeSelection", function() {
         if (popup.isOpen)
             popup.setRow(popup.selection.lead.row);
@@ -1512,22 +1512,22 @@ var AcePopup = function(parentNode) {
 
         el.style.display = "";
         this.renderer.$textLayer.checkForSizeChanges();
-        
+
         var left = pos.left;
         if (left + el.offsetWidth > screenWidth)
             left = screenWidth - el.offsetWidth;
-            
+
         el.style.left = left + "px";
-        
+
         this._signal("show");
         lastMouseEvent = null;
         popup.isOpen = true;
     };
-    
+
     popup.getTextLeftOffset = function() {
         return this.$borderSize + this.renderer.$padding + this.$imageSize;
     };
-    
+
     popup.$imageSize = 0;
     popup.$borderSize = 1;
 
@@ -1622,7 +1622,7 @@ exports.retrieveFollowingIdentifier = function(text, pos, regex) {
 
 consoleAce.define('ace/autocomplete/text_completer', ['require', 'exports', 'module' , 'ace/range'], function(require, exports, module) {
     var Range = require("ace/range").Range;
-    
+
     var splitRegex = /[^a-zA-Z_0-9\$\-]+/;
 
     function getWordIndex(doc, pos) {
@@ -1633,7 +1633,7 @@ consoleAce.define('ace/autocomplete/text_completer', ['require', 'exports', 'mod
         var prefixPos = getWordIndex(doc, pos);
         var words = doc.getValue().split(splitRegex);
         var wordScores = Object.create(null);
-        
+
         var currentWord = words[prefixPos];
 
         words.forEach(function(word, idx) {

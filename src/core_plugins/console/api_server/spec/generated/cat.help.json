@@ -1,0 +1,14 @@
+{
+  "_cat": {
+    "url_params": {
+      "help": "__flag__",
+      "s": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat"
+    ]
+  }
+}
