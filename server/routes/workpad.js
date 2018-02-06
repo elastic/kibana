@@ -1,13 +1,11 @@
 import boom from 'boom';
-import { pick } from 'lodash';
 import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
-import { getId } from '../../public/lib/get_id.js';
+import { getId } from '../../public/lib/get_id';
 
 export function workpad(server) {
-  const config = server.config();
-  const { callWithRequest, errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
+  //const config = server.config();
+  const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
-  const indexName = config.get('kibana.index');
 
   function formatResponse(reply, returnResponse = false) {
     return resp => {
@@ -20,92 +18,73 @@ export function workpad(server) {
     };
   }
 
-  function createWorkpad(request, id) {
-    const now = new Date().toISOString();
-    const doc = {
-      refresh: 'wait_for',
-      index: indexName,
-      type: 'doc',
-      id: id || request.payload.id || getId('workpad'),
-      body: {
-        type: CANVAS_TYPE,
-        [CANVAS_TYPE]: {
-          ...request.payload,
-          '@timestamp': now,
-          '@created': now,
-        },
-      },
-    };
+  function createWorkpad(req, id) {
+    const savedObjectsClient = req.getSavedObjectsClient();
 
-    return callWithRequest(request, 'create', doc);
+    const now = new Date().toISOString();
+    return savedObjectsClient.create(
+      CANVAS_TYPE,
+      {
+        ...req.payload,
+        '@timestamp': now,
+        '@created': now,
+      },
+      { id: id || req.payload.id || getId('workpad') }
+    );
   }
 
-  function updateWorkpad(request) {
-    const workpadId = request.params.id;
-    const findDoc = {
-      index: indexName,
-      type: 'doc',
-      id: workpadId,
-    };
+  function updateWorkpad(req) {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { id } = req.params;
 
-    return callWithRequest(request, 'get', findDoc)
-      .then(({ _source }) => {
-        const body = {
-          type: CANVAS_TYPE,
-          [CANVAS_TYPE]: {
-            ...request.payload,
-            '@created': _source['@created'] || new Date().toISOString(),
-            '@timestamp': new Date().toISOString(),
-          },
-        };
+    const now = new Date().toISOString();
 
-        // const srcElements = get(_source, '')
-        const doc = {
-          refresh: 'wait_for',
-          index: indexName,
-          type: 'doc',
-          id: workpadId,
-          body: body,
-        };
+    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
+      // TODO: Using create with force over-write because of version conflict issues with update
+      return savedObjectsClient.create(
+        CANVAS_TYPE,
+        {
+          ...req.payload,
+          '@timestamp': now,
+          '@created': workpad['@created'],
+        },
+        { overwrite: true, id }
+      );
+    });
+  }
 
-        return callWithRequest(request, 'index', doc);
-      })
-      .catch(err => {
-        if (err instanceof esErrors['404']) {
-          return createWorkpad(request, workpadId);
-        }
+  function deleteWorkpad(req) {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { id } = req.params;
 
-        throw err;
-      });
+    return savedObjectsClient.delete(CANVAS_TYPE, id);
+  }
+
+  function findWorkpad(req) {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { name, page } = req.query;
+
+    return savedObjectsClient.find({
+      type: CANVAS_TYPE,
+      search: name ? `${name}* | ${name}` : '*',
+      searchFields: ['name'],
+      fields: ['id', 'name', '@created', '@timestamp'],
+      page,
+    });
   }
 
   // get workpad
   server.route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: function(request, reply) {
-      const doc = {
-        index: indexName,
-        type: 'doc',
-        id: request.params.id,
-      };
+    handler: function(req, reply) {
+      const savedObjectsClient = req.getSavedObjectsClient();
+      const { id } = req.params;
 
-      callWithRequest(request, 'get', doc)
-        .then(formatResponse(reply, true))
-        .then(resp => {
-          const workpad = resp._source[CANVAS_TYPE];
-
-          // remove unwanted fields caused by caused by https://github.com/elastic/kibana-canvas/issues/260
-          // TODO: remove this after a while, maybe...
-          const elementFields = ['id', 'expression', 'filter', 'position'];
-          const fixedPages = workpad.pages.map(page => ({
-            ...page,
-            elements: page.elements.map(el => pick(el, elementFields)),
-          }));
-
-          reply({ ...workpad, pages: fixedPages });
-        })
-        .catch(formatResponse(reply));
+      return savedObjectsClient
+        .get(CANVAS_TYPE, id)
+        .then(obj => obj.attributes)
+        .then(formatResponse(reply));
     },
   });
 
@@ -138,13 +117,7 @@ export function workpad(server) {
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
     handler: function(request, reply) {
-      const doc = {
-        index: indexName,
-        type: 'doc',
-        id: request.params.id,
-      };
-
-      callWithRequest(request, 'delete', doc)
+      deleteWorkpad(request)
         .then(formatResponse(reply))
         .catch(formatResponse(reply));
     },
@@ -155,58 +128,20 @@ export function workpad(server) {
     method: 'GET',
     path: `${routePrefix}/find`,
     handler: function(request, reply) {
-      const { name, page } = request.query;
-      const limit = Number(request.query.limit) || 10000;
-      const offset = page && page >= 1 ? (page - 1) * limit : 0;
-
-      const getQuery = name => {
-        const nameField = `${CANVAS_TYPE}.name`;
-        const nameFieldKeyword = `${nameField}.keyword`;
-
-        if (name != null) {
-          return {
-            bool: {
-              minimum_should_match: 2,
-              should: [
-                { match: { type: CANVAS_TYPE } },
-                { match: { [nameField]: name } },
-                { wildcard: { [nameField]: `*${name}` } },
-                { wildcard: { [nameField]: `${name}*` } },
-                { wildcard: { [nameField]: `*${name}*` } },
-                { match: { [nameFieldKeyword]: name } },
-                { wildcard: { [nameFieldKeyword]: `*${name}` } },
-                { wildcard: { [nameFieldKeyword]: `${name}*` } },
-                { wildcard: { [nameFieldKeyword]: `*${name}*` } },
-              ],
-            },
-          };
-        }
-
-        return { match_all: {} };
-      };
-
-      const doc = {
-        index: indexName,
-        type: 'doc',
-        body: {
-          query: getQuery(name),
-          _source: ['name', 'id', '@timestamp', '@created'].map(name => `${CANVAS_TYPE}.${name}`),
-          sort: [{ [`${CANVAS_TYPE}.@timestamp`]: { order: 'desc' } }],
-          // TODO: Don't you hate this? Kibana did this, drives people nuts. Welcome to nut town. Nutball.
-          size: limit,
-          from: offset,
-        },
-      };
-
-      callWithRequest(request, 'search', doc)
+      findWorkpad(request)
         .then(formatResponse(reply, true))
         .then(resp => {
           reply({
-            total: resp.hits.total,
-            workpads: resp.hits.hits.map(hit => hit._source[CANVAS_TYPE]),
+            total: resp.total,
+            workpads: resp.saved_objects.map(hit => hit.attributes),
           });
         })
-        .catch(formatResponse(reply));
+        .catch(() => {
+          reply({
+            total: 0,
+            workpads: [],
+          });
+        });
     },
   });
 }

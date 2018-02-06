@@ -1,5 +1,6 @@
 import init from './init';
 import { functionsRegistry } from './common/lib/functions_registry';
+import { mappings } from './mappings';
 
 export default function(kibana) {
   return new kibana.Plugin({
@@ -47,6 +48,7 @@ export default function(kibana) {
         'plugins/canvas/lib/load_render_functions.js',
         'plugins/canvas/lib/load_elements.js',
       ],
+      mappings,
     },
 
     config: Joi => {
