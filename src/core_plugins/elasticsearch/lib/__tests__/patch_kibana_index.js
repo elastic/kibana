@@ -46,8 +46,12 @@ function createCallCluster(index) {
   return sinon.spy(async (method, params) => {
     switch (method) {
       case 'indices.get':
-        expect(params).to.have.property('index', Object.keys(index)[0]);
-        return cloneDeep(index);
+        if (!index) {
+          return { status: 404 };
+        } else {
+          expect(params).to.have.property('index', Object.keys(index)[0]);
+          return cloneDeep(index);
+        }
       case 'indices.putMapping':
         return { ok: true };
       default:
@@ -73,6 +77,24 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
         feature: '_mappings'
       }));
+    });
+  });
+
+  describe('missing index', () => {
+    it('returns without doing anything', async () => {
+      const indexName = chance.word();
+      const mappings = createRandomMappings();
+      const callCluster = createCallCluster(null);
+      const log = sinon.stub();
+      await patchKibanaIndex({
+        callCluster,
+        indexName,
+        kibanaIndexMappingsDsl: mappings,
+        log
+      });
+
+      sinon.assert.calledOnce(callCluster);
+      sinon.assert.notCalled(log);
     });
   });
 

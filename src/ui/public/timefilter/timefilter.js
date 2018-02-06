@@ -32,7 +32,8 @@ uiModules
       const diffTime = Private(TimefilterLibDiffTimeProvider)(self);
       const diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
 
-      self.enabled = false;
+      self.isTimeRangeSelectorEnabled = false;
+      self.isAutoRefreshSelectorEnabled = false;
 
       self.init = _.once(function () {
         const timeDefaults = config.get('timepicker:timeDefaults');
@@ -77,7 +78,7 @@ uiModules
       $rootScope.$apply();
     };
 
-    Timefilter.prototype.get = function (indexPattern, range) {
+    Timefilter.prototype.get = function (indexPattern, timeRange) {
 
       if (!indexPattern) {
       //in CI, we sometimes seem to fail here.
@@ -88,11 +89,11 @@ uiModules
       const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
 
       if (timefield) {
-        const bounds = this.getBounds();
+        const bounds = timeRange ? this.calculateBounds(timeRange) : this.getBounds();
         filter = { range: {} };
         filter.range[timefield.name] = {
-          gte: range ? range.min.valueOf() : bounds.min.valueOf(),
-          lte: range ? range.max.valueOf() : bounds.max.valueOf(),
+          gte: bounds.min.valueOf(),
+          lte: bounds.max.valueOf(),
           format: 'epoch_millis'
         };
       }
@@ -101,14 +102,48 @@ uiModules
     };
 
     Timefilter.prototype.getBounds = function () {
+      return this.calculateBounds(this.time);
+    };
+
+    Timefilter.prototype.calculateBounds = function (timeRange) {
       return {
-        min: dateMath.parse(this.time.from),
-        max: dateMath.parse(this.time.to, true)
+        min: dateMath.parse(timeRange.from),
+        max: dateMath.parse(timeRange.to, { roundUp: true })
       };
     };
 
     Timefilter.prototype.getActiveBounds = function () {
-      if (this.enabled) return this.getBounds();
+      if (this.isTimeRangeSelectorEnabled) {
+        return this.getBounds();
+      }
+    };
+
+    /**
+     * Show the time bounds selector part of the time filter
+     */
+    Timefilter.prototype.enableTimeRangeSelector = function () {
+      this.isTimeRangeSelectorEnabled = true;
+    };
+
+    /**
+     * Hide the time bounds selector part of the time filter
+     */
+    Timefilter.prototype.disableTimeRangeSelector = function () {
+      this.isTimeRangeSelectorEnabled = false;
+    };
+
+    /**
+     * Show the auto refresh part of the time filter
+     */
+    Timefilter.prototype.enableAutoRefreshSelector = function () {
+      this.isAutoRefreshSelectorEnabled = true;
+    };
+
+    /**
+     * Hide the auto refresh part of the time filter
+     */
+    Timefilter.prototype.disableAutoRefreshSelector = function () {
+      this.isAutoRefreshSelectorEnabled = false;
     };
 
     return new Timefilter();

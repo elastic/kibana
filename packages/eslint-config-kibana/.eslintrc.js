@@ -1,3 +1,5 @@
+const RESTRICTED_GLOBALS = require('./restricted_globals')
+
 module.exports = {
   parser: 'babel-eslint',
 
@@ -6,6 +8,7 @@ module.exports = {
     'babel',
     'react',
     'import',
+    'no-unsanitized',
     'prefer-object-spread',
   ],
 
@@ -59,7 +62,7 @@ module.exports = {
     'no-path-concat': 'off',
     'no-proto': 'error',
     'no-redeclare': 'error',
-    'no-restricted-globals': [ 'error', 'context' ],
+    'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
     'no-return-assign': 'off',
     'no-script-url': 'error',
     'no-sequences': 'error',
@@ -67,6 +70,8 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-undef': 'error',
     'no-underscore-dangle': 'off',
+    'no-unsanitized/method': 'error',
+    'no-unsanitized/property': 'error',
     'no-unused-expressions': 'off',
     'no-unused-vars': [ 'error' ],
     'no-use-before-define': [ 'error', 'nofunc' ],

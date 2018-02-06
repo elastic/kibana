@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { PercentFormat } from '../percent';
+import { createPercentFormat } from '../percent';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const PercentFormat = createPercentFormat(FieldFormat);
 
 describe('PercentFormat', function () {
 

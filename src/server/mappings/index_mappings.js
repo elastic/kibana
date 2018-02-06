@@ -11,7 +11,7 @@ const DEFAULT_INITIAL_DSL = {
 };
 
 export class IndexMappings {
-  constructor(initialDsl = DEFAULT_INITIAL_DSL) {
+  constructor(initialDsl = DEFAULT_INITIAL_DSL, mappingExtensions = []) {
     this._dsl = cloneDeep(initialDsl);
     if (!isPlainObject(this._dsl)) {
       throw new TypeError('initial mapping must be an object');
@@ -20,32 +20,32 @@ export class IndexMappings {
     // ensure that we have a properties object in the dsl
     // and that the dsl can be parsed with getRootProperties() and kin
     this._setProperties(getRootProperties(this._dsl) || {});
+
+    // extend this._dsl with each extension (which currently come from uiExports.savedObjectMappings)
+    mappingExtensions.forEach(({ properties, pluginId }) => {
+      const rootProperties = getRootProperties(this._dsl);
+
+
+      const conflicts = Object.keys(properties)
+        .filter(key => rootProperties.hasOwnProperty(key));
+
+      if (conflicts.length) {
+        const props = formatListAsProse(conflicts);
+        const owner = pluginId ? `registered by plugin ${pluginId} ` : '';
+        throw new Error(
+          `Mappings for ${props} ${owner}have already been defined`
+        );
+      }
+
+      this._setProperties({
+        ...rootProperties,
+        ...properties
+      });
+    });
   }
 
   getDsl() {
     return cloneDeep(this._dsl);
-  }
-
-  addRootProperties(newProperties, options = {}) {
-    const { plugin } = options;
-    const rootProperties = getRootProperties(this._dsl);
-
-
-    const conflicts = Object.keys(newProperties)
-      .filter(key => rootProperties.hasOwnProperty(key));
-
-    if (conflicts.length) {
-      const props = formatListAsProse(conflicts);
-      const owner = plugin ? `registered by plugin ${plugin} ` : '';
-      throw new Error(
-        `Mappings for ${props} ${owner}have already been defined`
-      );
-    }
-
-    this._setProperties({
-      ...rootProperties,
-      ...newProperties
-    });
   }
 
   _setProperties(newProperties) {

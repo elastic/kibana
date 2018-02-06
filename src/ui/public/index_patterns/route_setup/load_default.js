@@ -1,17 +1,47 @@
 import _ from 'lodash';
-import { Notifier } from 'ui/notify/notifier';
+import React from 'react';
+import { banners } from 'ui/notify';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';
-const notify = new Notifier({
-  location: 'Index Patterns'
-});
+import {
+  EuiCallOut,
+} from '@elastic/eui';
+import { clearTimeout } from 'timers';
+
+let bannerId;
+let timeoutId;
+
+function displayBanner() {
+  clearTimeout(timeoutId);
+
+  // Avoid being hostile to new users who don't have an index pattern setup yet
+  // give them a friendly info message instead of a terse error message
+  bannerId = banners.set({
+    id: bannerId, // initially undefined, but reused after first set
+    component: (
+      <EuiCallOut
+        color="warning"
+        iconType="iInCircle"
+        title={
+          `In order to visualize and explore data in Kibana,
+          you'll need to create an index pattern to retrieve data from Elasticsearch.`
+        }
+      />
+    )
+  });
+
+  // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
+  timeoutId = setTimeout(() => {
+    banners.remove(bannerId);
+    timeoutId = undefined;
+  }, 15000);
+}
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function (opts) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
-  let defaultRequiredToasts = null;
 
   uiRoutes
     .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
@@ -41,7 +71,7 @@ export default function (opts) {
         });
     })
     .afterWork(
-    // success
+      // success
       null,
 
       // failure
@@ -50,8 +80,8 @@ export default function (opts) {
         if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
 
         kbnUrl.change(whenMissingRedirectTo);
-        if (!defaultRequiredToasts) defaultRequiredToasts = [];
-        else defaultRequiredToasts.push(notify.error(err));
+
+        displayBanner();
       }
     );
 }

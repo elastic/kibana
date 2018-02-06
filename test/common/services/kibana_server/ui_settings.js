@@ -5,7 +5,7 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 
 export class KibanaServerUiSettings {
-  constructor(url, log, es, kibanaIndex, kibanaVersion) {
+  constructor(url, log, kibanaVersion) {
     this._log = log;
     this._kibanaVersion = kibanaVersion;
     this._wreck = Wreck.defaults({

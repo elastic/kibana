@@ -3,6 +3,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
+import { DefaultEditorSize } from 'ui/vis/editor_size';
 
 // we also need to load the controller and directive used by the template
 import 'plugins/timelion/vis/timelion_vis_controller';
@@ -38,6 +39,7 @@ export default function TimelionVisProvider(Private) {
     },
     editorConfig: {
       optionsTemplate: editorConfigTemplate,
+      defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler.handler,
     responseHandler: 'none',

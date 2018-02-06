@@ -1,12 +1,10 @@
 const SenseEditor = require('../sense_editor/editor');
 const exampleText = require('raw-loader!./helpExample.txt').trim();
-import { useResizeCheckerProvider } from '../sense_editor_resize';
+import { useResizeChecker } from '../sense_editor_resize';
 
 require('ui/modules')
 .get('app/sense')
-.directive('senseHelpExample', function (Private) {
-  const useResizeChecker = Private(useResizeCheckerProvider);
-
+.directive('senseHelpExample', function () {
   return {
     restrict: 'E',
     link: function ($scope, $el) {

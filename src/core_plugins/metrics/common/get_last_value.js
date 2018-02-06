@@ -1,5 +1,5 @@
 import _ from 'lodash';
-export default (data, lookback = 2) => {
+export default (data, lookback = 1) => {
   if (_.isNumber(data)) return data;
   if (!Array.isArray(data)) return 0;
   // First try the last value

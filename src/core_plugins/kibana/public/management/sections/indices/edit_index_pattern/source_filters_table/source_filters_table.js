@@ -1,7 +1,7 @@
 import { find, each, escape, invoke, size, without } from 'lodash';
 
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
 
 import controlsHtml from './controls.html';
@@ -102,10 +102,11 @@ uiModules.get('kibana')
           };
 
           const confirmModalOptions = {
-            confirmButtonText: 'Delete filter',
-            onConfirm: doDelete
+            confirmButtonText: 'Delete',
+            onConfirm: doDelete,
+            title: 'Delete source filter?'
           };
-          confirmModal(`Are you sure want to delete this filter?`, confirmModalOptions);
+          confirmModal('', confirmModalOptions);
         }
 
         create() {

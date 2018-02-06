@@ -8,7 +8,7 @@
 </div>
 <div
   ng-hide="showNoResultsMessage()"
-  class="vis-container {{getVisContainerClasses()}}"
+  class="vis-container"
   tabindex="0"
 >
   <span ng-if="!vis.type.isAccessible" class="kuiScreenReaderOnly">
@@ -19,6 +19,11 @@
     ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
     class="visualize-chart"></div>
-  <visualize-legend ng-if="addLegend"></visualize-legend>
 </div>
-<visualize-spy ng-if="showSpyPanel"></visualize-spy>
+<visualize-spy
+  ng-if="showSpyPanel"
+  vis="vis"
+  vis-element="visElement"
+  search-source="searchSource"
+  ui-state="uiState"
+></visualize-spy>

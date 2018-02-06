@@ -20,12 +20,13 @@ const metricAggs = [
 ];
 
 const pipelineAggs = [
-  { label: 'Bucket Script', value: 'calculation' },
+  { label: 'Calculation', value: 'calculation' },
   { label: 'Cumulative Sum', value: 'cumulative_sum' },
   { label: 'Derivative', value: 'derivative' },
   { label: 'Moving Average', value: 'moving_average' },
   { label: 'Positive Only', value: 'positive_only' },
   { label: 'Serial Difference', value: 'serial_diff' },
+  { label: 'Series Agg', value: 'series_agg' }
 ];
 
 const siblingAggs = [
@@ -36,11 +37,6 @@ const siblingAggs = [
   { label: 'Overall Sum', value: 'sum_bucket' },
   { label: 'Overall Sum of Squares', value: 'sum_of_squares_bucket' },
   { label: 'Overall Variance', value: 'variance_bucket' }
-];
-
-const specialAggs = [
-  { label: 'Series Agg', value: 'series_agg' },
-  { label: 'Math', value: 'math' }
 ];
 
 class AggSelectOption extends Component {
@@ -148,9 +144,7 @@ function AggSelect(props) {
       { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
       ...pipelineAggs.filter(filterByPanelType(panelType)).map(agg => ({ ...agg, disabled: !enablePipelines })),
       { label: 'Sibling Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
-      { label: 'Special Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
+      ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
     ];
   }
 

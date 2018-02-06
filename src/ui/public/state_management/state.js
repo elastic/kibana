@@ -11,7 +11,8 @@ import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
-import { Notifier } from 'ui/notify/notifier';
+import { fatalError, Notifier } from 'ui/notify';
+import 'ui/state_management/config_provider';
 
 import {
   createStateHash,
@@ -19,7 +20,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   _.class(State).inherits(Events);
@@ -108,6 +109,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.fetch = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     let stash = this._readFromURL();
 
     // nothing to read from the url? save if ordered to persist
@@ -133,6 +138,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.save = function (replace) {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     let stash = this._readFromURL();
     const state = this.toObject();
     replace = replace || false;
@@ -164,6 +173,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.replace = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     this.save(true);
   };
 
@@ -173,6 +186,10 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
    * @returns {void}
    */
   State.prototype.reset = function () {
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
+
     kbnUrl.removeParam(this.getQueryParamName());
     // apply diff to attributes from defaults, this is side effecting so
     // it will change the state in place.
@@ -253,7 +270,7 @@ export function StateProvider(Private, $rootScope, $location, config, kbnUrl) {
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    this._notifier.fatal(
+    fatalError(
       new Error(
         'Kibana is unable to store history items in your session ' +
         'because it is full and there don\'t seem to be items any items safe ' +

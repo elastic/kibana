@@ -388,7 +388,8 @@ export class KibanaMap extends EventEmitter {
     };
   }
 
-  getUntrimmedBounds() {
+  _getLeafletBounds(resizeOnFail) {
+
     const bounds = this._leafletMap.getBounds();
     if (!bounds) {
       return null;
@@ -396,47 +397,38 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
-    let southEastLng = southEast.lng;
-    let northWestLng = northWest.lng;
-    let southEastLat = southEast.lat;
-    let northWestLat = northWest.lat;
-
-    // When map has not width or height, calculate map dimensions based on parent dimensions
-    if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      let parent = this._containerNode.parentNode;
-      while (parent && (parent.clientWidth === 0 || parent.clientHeight === 0)) {
-        parent = parent.parentNode;
+    if (
+      southEast.lng === northWest.lng ||
+      southEast.lat === northWest.lat
+    ) {
+      if (resizeOnFail) {
+        this._leafletMap.invalidateSize();
+        return this._getLeafletBounds(false);
+      } else {
+        return null;
       }
-      let width = 512;
-      let height = 512;
-      if (parent && parent.clientWidth !== 0) {
-        width = parent.clientWidth;
-      }
-      if (parent && parent.clientHeight !== 0) {
-        height = parent.clientHeight;
-      }
-
-      let top = 0;
-      let left = 0;
-      let bottom = height;
-      let right = width;
-      // no height - top is center of map and needs to be adjusted
-      if (southEastLat === northWestLat) {
-        top = height / 2 * -1;
-        bottom = height / 2;
-      }
-      // no width - left is center of map and needs to be adjusted
-      if (southEastLng === northWestLng) {
-        left = width / 2 * -1;
-        right = width / 2;
-      }
-      const containerSouthEast = this._leafletMap.layerPointToLatLng(L.point(right, bottom));
-      const containerNorthWest = this._leafletMap.layerPointToLatLng(L.point(left, top));
-      southEastLng = containerSouthEast.lng;
-      northWestLng = containerNorthWest.lng;
-      southEastLat = containerSouthEast.lat;
-      northWestLat = containerNorthWest.lat;
+    } else {
+      return bounds;
     }
+  }
+
+  getUntrimmedBounds() {
+    const bounds = this._getLeafletBounds(true);
+    if (!bounds) {
+      return null;
+    }
+
+    const southEast = bounds.getSouthEast();
+    const northWest = bounds.getNorthWest();
+
+    const southEastLng = southEast.lng;
+    const northWestLng = northWest.lng;
+    const southEastLat = southEast.lat;
+    const northWestLat = northWest.lat;
+
+    // When map has not width or height, the map has no dimensions.
+    // These dimensions are enforced due to CSS style rules that enforce min-width/height of 0
+    // that enforcement also resolves errors with the heatmap layer plugin.
 
     return {
       bottom_right: {
@@ -528,6 +520,13 @@ export class KibanaMap extends EventEmitter {
     this._updateExtent();
   }
 
+  setMinZoom(zoom) {
+    this._leafletMap.setMinZoom(zoom);
+  }
+
+  setMaxZoom(zoom) {
+    this._leafletMap.setMaxZoom(zoom);
+  }
 
   getLeafletBaseLayer() {
     return this._leafletBaseLayer;

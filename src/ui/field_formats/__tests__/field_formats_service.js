@@ -1,6 +1,7 @@
 import expect from 'expect.js';
+import { FieldFormat } from '../field_format';
 import { FieldFormatsService } from '../field_formats_service';
-import { NumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
+import { createNumberFormat } from '../../../core_plugins/kibana/common/field_formats/types/number';
 
 describe('FieldFormatsService', function () {
 
@@ -11,7 +12,7 @@ describe('FieldFormatsService', function () {
   };
   config['format:number:defaultPattern'] = '0,0.[000]';
   const getConfig = (key) => config[key];
-  const fieldFormatClasses = [NumberFormat];
+  const fieldFormatClasses = [createNumberFormat(FieldFormat)];
 
   let fieldFormats;
   beforeEach(function () {

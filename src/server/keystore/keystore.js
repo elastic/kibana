@@ -9,9 +9,9 @@ const ITERATIONS = 10000;
 export class Keystore {
   constructor(path, password = '') {
     this.path = path;
-    this.data = {};
     this.password = password;
 
+    this.reset();
     this.load();
   }
 
@@ -79,6 +79,10 @@ export class Keystore {
 
       throw e;
     }
+  }
+
+  reset() {
+    this.data = {};
   }
 
   exists() {

@@ -42,12 +42,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .then(() => {
           log.debug('--find save button');
           return testSubjects.click('discoverSaveSearchButton');
+        })
+        .then(async () => {
+          return await testSubjects.exists('saveSearchSuccess', 2000);
         });
     }
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
       return await Promise.all(headerElements.map(el => el.getVisibleText()));
+    }
+
+    async hasSavedSearch(searchName) {
+      await this.clickLoadSavedSearchButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const searchLink = await find.byPartialLinkText(searchName);
+      return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
@@ -197,8 +207,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return testSubjects.click('sharedSnapshotShortUrlButton');
     }
 
-    clickCopyToClipboard() {
-      return testSubjects.click('sharedSnapshotCopyButton');
+    async clickCopyToClipboard() {
+      await testSubjects.click('sharedSnapshotCopyButton');
+
+      // Confirm that the content was copied to the clipboard.
+      return await testSubjects.exists('shareCopyToClipboardSuccess');
     }
 
     async getShareCaption() {
@@ -247,8 +260,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickFieldListItemAdd(field) {
-      const listEntry = await testSubjects.find(`field-${field}`);
-      await getRemote().moveMouseTo(listEntry);
+      await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
 

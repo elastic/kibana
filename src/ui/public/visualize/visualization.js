@@ -1,39 +1,44 @@
+import { Observable } from 'rxjs/Rx';
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
-import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
+import { ResizeChecker } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
 import 'angular-sanitize';
+import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
-    const ResizeChecker = Private(ResizeCheckerProvider);
+  .directive('visualization', function ($timeout, Notifier, SavedVis, indexPatterns, Private, config) {
 
     return {
       restrict: 'E',
-      require: '?renderCounter',
       scope: {
         showSpyPanel: '=?',
         vis: '=',
         visData: '=',
         uiState: '=?',
+        // If set to true (default) the visualization directive will listen for
+        // several changes in the data and uiState to trigger a render. If set to
+        // false (boolean value, not a falsy value), this directive won't listen
+        // for any changes and require to be notified by the 'render' event broadcasted
+        // to its scope, that it needs to rerender this. Usually when using this as
+        // a consumer you don't want to change the default behavior.
+        listenOnChange: '<',
         searchSource: '='
       },
       template: visualizationTemplate,
       link: function ($scope, $el) {
-        const minVisChartHeight = 180;
-        const resizeChecker = new ResizeChecker($el);
-
         //todo: lets make this a simple function call.
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
-        const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
-        $scope.addLegend = false;
+        // Set the passed in uiState to the vis object. uiState reference should never be changed
+        if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
+        else $scope.vis._setUiState($scope.uiState);
+
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
@@ -44,37 +49,7 @@ uiModules
           return Boolean(requiresSearch && isZeroHits && shouldShowMessage);
         };
 
-        const legendPositionToVisContainerClassMap = {
-          top: 'vis-container--legend-top',
-          bottom: 'vis-container--legend-bottom',
-          left: 'vis-container--legend-left',
-          right: 'vis-container--legend-right',
-        };
-
-        $scope.getVisContainerClasses = function () {
-          return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
-        };
-
-        $scope.spy = {};
-        $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
-
-        const applyClassNames = function () {
-          const $visEl = getVisContainer();
-          const $spyEl = getSpyContainer();
-          if (!$spyEl) return;
-
-          const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
-
-          $visEl.toggleClass('spy-only', Boolean(fullSpy));
-          $spyEl.toggleClass('only', Boolean(fullSpy));
-
-          $timeout(function () {
-            if (shouldHaveFullSpy()) {
-              $visEl.addClass('spy-only');
-              $spyEl.addClass('only');
-            }
-          }, 0);
-        };
+        $scope.visElement = getVisContainer();
 
         const loadingDelay = config.get('visualization:loadingDelay');
         $scope.loadingStyle = {
@@ -82,81 +57,72 @@ uiModules
           'transition-delay': loadingDelay
         };
 
-        function shouldHaveFullSpy() {
-          const $visEl = getVisEl();
-          if (!$visEl) return;
-
-          return ($visEl.height() < minVisChartHeight)
-          && _.get($scope.spy, 'mode.fill')
-          && _.get($scope.spy, 'mode.name');
-        }
-
-        // spy watchers
-        $scope.$watch('fullScreenSpy', applyClassNames);
-
-        $scope.$watchCollection('spy.mode', function () {
-          $scope.fullScreenSpy = shouldHaveFullSpy();
-          applyClassNames();
-        });
-
         const Visualization = $scope.vis.type.visualization;
         const visualization = new Visualization(getVisEl()[0], $scope.vis);
 
-        if (visualization.init) {
-          visualization.init().then(() => {
-            $scope.vis.initialized = true;
-            $scope.$emit('render');
-          });
-        } else {
-          $scope.vis.initialized = true;
-        }
+        $scope.vis.initialized = true;
 
-        const renderFunction = _.debounce(() => {
-          const container = getVisContainer();
-          $scope.vis.size = [container.width(), container.height()];
-          const status = getUpdateStatus($scope);
-          visualization.render($scope.visData, status)
-            .then(() => {
-            // renderComplete
-              $scope.$emit('renderComplete');
-              if (!$scope.vis.visualizeScope) {
-                $el.trigger('renderComplete');
-              }
+        const render$ = Observable.create(observer => {
+          $scope.$on('render', () => {
+            observer.next({
+              vis: $scope.vis,
+              visData: $scope.visData,
+              container: getVisContainer(),
             });
-          $scope.$apply();
-        }, 100);
+          });
+        }).share();
 
-        $scope.$on('render', () => {
-          if (!$scope.vis || !$scope.vis.initialized || ($scope.vis.type.requiresSearch && !$scope.visData)) {
-            return;
-          }
-          $scope.addLegend = $scope.vis.params.addLegend;
-          $scope.vis.refreshLegend++;
-          $timeout(renderFunction);
-        });
+        const success$ = render$
+          .do(() => {
+            dispatchRenderStart($el[0]);
+          })
+          .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
+          .debounceTime(100)
+          .switchMap(async ({ vis, visData, container }) => {
+            vis.size = [container.width(), container.height()];
+            const status = getUpdateStatus($scope);
+            const renderPromise = visualization.render(visData, status);
+            $scope.$apply();
+            return renderPromise;
+          });
+
+        const requestError$ = render$.filter(({ vis }) => vis.requestError);
+
+        const renderSubscription = Observable.merge(success$, requestError$)
+          .subscribe(() => {
+            dispatchRenderComplete($el[0]);
+          });
 
         $scope.$on('$destroy', () => {
-          resizeChecker.destroy();
           visualization.destroy();
+          renderSubscription.unsubscribe();
         });
 
-        if (!$scope.vis.visualizeScope) {
-          $scope.$watchGroup(['visData', 'vis.params'], () => {
+        // Listen on changes to trigger a render if listenOnChange is not false
+        // i.e. true or has not been used (undefined in that case)
+        if ($scope.listenOnChange !== false) {
+          const onChangeListener = () => {
+            $scope.$emit('render');
+          };
+
+          $scope.$watchGroup(['visData', 'vis.params'], onChangeListener);
+
+          const resizeChecker = new ResizeChecker($el);
+          resizeChecker.on('resize', () => {
             $scope.$emit('render');
           });
 
-          let resizeInit = false;
-          const resizeFunc = _.debounce(() => {
-            if (!resizeInit) return resizeInit = true;
-            $scope.$emit('render');
-          }, 200);
-          resizeChecker.on('resize',  resizeFunc);
+          $scope.uiState.on('change', onChangeListener);
+          $scope.$on('$destroy', () => {
+            resizeChecker.destroy();
+            $scope.uiState.off('change', onChangeListener);
+          });
         }
 
         function jQueryGetter(selector) {
           return function () {
             const $sel = $el.find(selector);
-            if ($sel.size()) return $sel;
+            if ($sel.length) return $sel;
           };
         }
       }

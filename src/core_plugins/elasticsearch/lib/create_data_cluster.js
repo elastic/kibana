@@ -10,10 +10,6 @@ export function createDataCluster(server) {
   }
 
   function getConfig() {
-    if (Boolean(config.get('elasticsearch.tribe.url'))) {
-      return config.get('elasticsearch.tribe');
-    }
-
     return config.get('elasticsearch');
   }
 

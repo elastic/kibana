@@ -15,6 +15,10 @@ import FlexGroup from './flex_group';
 const flexGroupSource = require('!!raw-loader!./flex_group');
 const flexGroupHtml = renderToHtml(FlexGroup);
 
+import FlexGroupWrap from './flex_group_wrap';
+const flexGroupWrapSource = require('!!raw-loader!./flex_group_wrap');
+const flexGroupWrapHtml = renderToHtml(FlexGroupWrap);
+
 import FlexItems from './flex_items';
 const flexItemsSource = require('!!raw-loader!./flex_items');
 const flexItemsHtml = renderToHtml(FlexItems);
@@ -23,9 +27,13 @@ import FlexGutter from './flex_gutter';
 const flexGutterSource = require('!!raw-loader!./flex_gutter');
 const flexGutterHtml = renderToHtml(FlexGutter);
 
-import FlexGrow from './flex_grow';
-const flexGrowSource = require('!!raw-loader!./flex_grow');
-const flexGrowHtml = renderToHtml(FlexGrow);
+import FlexGrowZero from './flex_grow_zero';
+const flexGrowZeroSource = require('!!raw-loader!./flex_grow_zero');
+const flexGrowZeroHtml = renderToHtml(FlexGrowZero);
+
+import FlexGrowNumeric from './flex_grow_numeric';
+const flexGrowNumericSource = require('!!raw-loader!./flex_grow_numeric');
+const flexGrowNumericHtml = renderToHtml(FlexGrowNumeric);
 
 import FlexJustify from './flex_justify';
 const flexJustifySource = require('!!raw-loader!./flex_justify');
@@ -65,6 +73,25 @@ export default props => (
     </GuideSection>
 
     <GuideSection
+      title="FlexGroup can wrap its items"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexGroupWrapSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexGroupWrapHtml,
+      }]}
+    >
+      <GuideText>
+        You can set <GuideCode>wrap</GuideCode> on <GuideCode>FlexGroup</GuideCode> if it
+        contains <GuideCode>FlexItem</GuideCode>s with minimum widths, which you want to wrap as
+        the container becomes narrower.
+      </GuideText>
+
+      <GuideDemo className="guideDemo__highlightGrid"><FlexGroupWrap /></GuideDemo>
+    </GuideSection>
+
+    <GuideSection
       title="FlexGroup accepts infinite items"
       source={[{
         type: GuideSectionTypes.JS,
@@ -86,10 +113,10 @@ export default props => (
       title="FlexItem can individually turn off stretching"
       source={[{
         type: GuideSectionTypes.JS,
-        code: flexGrowSource,
+        code: flexGrowZeroSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: flexGrowHtml,
+        code: flexGrowZeroHtml,
       }]}
     >
       <GuideText>
@@ -97,7 +124,25 @@ export default props => (
         can be turned off on each item individually.
       </GuideText>
 
-      <GuideDemo className="guideDemo__highlightGrid"><FlexGrow /></GuideDemo>
+      <GuideDemo className="guideDemo__highlightGrid"><FlexGrowZero /></GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="FlexItem can specify a proportional width"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexGrowNumericSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexGrowNumericHtml,
+      }]}
+    >
+      <GuideText>
+        You can specify a number between 1 and 10 for a <GuideCode>FlexItem</GuideCode> to
+        try to take up a proportional part of the flex box it is in.
+      </GuideText>
+
+      <GuideDemo className="guideDemo__highlightGrid"><FlexGrowNumeric /></GuideDemo>
     </GuideSection>
 
     <GuideSection

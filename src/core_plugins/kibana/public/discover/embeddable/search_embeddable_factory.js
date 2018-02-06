@@ -3,7 +3,7 @@ import angular from 'angular';
 import 'ui/doc_table';
 
 import * as columnActions from 'ui/doc_table/actions/columns';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { PersistedState } from 'ui/persisted_state';
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
@@ -31,6 +31,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     searchScope.editPath = this.getEditPath(panel.id);
     return this.searchLoader.get(panel.id)
       .then(savedObject => {
+        if (!container.getHidePanelTitles()) {
+          searchScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        }
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
         container.registerPanelIndexPattern(panel.panelIndex, savedObject.searchSource.get('index'));
@@ -40,8 +43,18 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         searchScope.columns = searchScope.panel.columns || searchScope.savedObj.columns;
         searchScope.sort = searchScope.panel.sort || searchScope.savedObj.sort;
 
-        const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        searchScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
+        const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+        searchScope.uiState = new PersistedState({
+          ...parsedUiState,
+          ...panel.embeddableConfig,
+        });
+        const uiStateChangeHandler = () => {
+          searchScope.panel = container.updatePanel(
+            searchScope.panel.panelIndex,
+            { embeddableConfig: searchScope.uiState.toJSON() }
+          );
+        };
+        searchScope.uiState.on('change', uiStateChangeHandler);
 
         searchScope.setSortOrder = function setSortOrder(columnName, direction) {
           searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { sort: [columnName, direction] });
@@ -74,10 +87,8 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
 
-        // TODO: There is probably a better way to do this.
-        searchScope.$on('ready:vis', () => this.courier.fetch());
-
         this.addDestroyEmeddable(panel.panelIndex, () => {
+          searchScope.uiState.off('change', uiStateChangeHandler);
           searchInstance.remove();
           searchScope.savedObj.destroy();
           searchScope.$destroy();

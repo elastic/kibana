@@ -52,9 +52,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();
@@ -68,6 +71,11 @@ export default function ({ getService, getPageObjects }) {
           .then(function waitForVisualization() {
             return PageObjects.visualize.waitForVisualization();
           });
+      });
+
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
       });
 
       it('should show correct chart, take screenshot', async function () {

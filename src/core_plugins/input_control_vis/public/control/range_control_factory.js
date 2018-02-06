@@ -1,6 +1,10 @@
 import _ from 'lodash';
-import { Control } from './control';
+import {
+  Control,
+  noValuesDisableMsg
+} from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
+import { createSearchSource } from './create_search_source';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -30,23 +34,31 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi) {
+export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-  const searchSource = new kbnApi.SearchSource();
-  searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
-  searchSource.size(0);
-  searchSource.index(indexPattern);
-  searchSource.aggs(minMaxAgg(indexPattern.fields.byName[controlParams.fieldName]));
+
+  const aggs = minMaxAgg(indexPattern.fields.byName[controlParams.fieldName]);
+  const searchSource = createSearchSource(kbnApi, null, indexPattern, aggs, useTimeFilter);
 
   const resp = await searchSource.fetch();
 
-  const min = _.get(resp, 'aggregations.minAgg.value');
-  const max = _.get(resp, 'aggregations.maxAgg.value');
+  let minMaxReturnedFromAggregation = true;
+  let min = _.get(resp, 'aggregations.minAgg.value');
+  let max = _.get(resp, 'aggregations.maxAgg.value');
+  if (min === null || max === null) {
+    min = 0;
+    max = 1;
+    minMaxReturnedFromAggregation = false;
+  }
   const emptyValue = { min: min, max: min };
-  return new RangeControl(
+  const rangeControl = new RangeControl(
     controlParams,
     new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
     min,
     max
   );
+  if (!minMaxReturnedFromAggregation) {
+    rangeControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
+  }
+  return rangeControl;
 }

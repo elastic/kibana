@@ -15,6 +15,8 @@ import {
   decorateEsUnavailableError,
   isEsUnavailableError,
   decorateGeneralError,
+  isEsAutoCreateIndexError,
+  createEsAutoCreateIndexError,
 } from '../errors';
 
 describe('savedObjectsClient/errorTypes', () => {
@@ -281,6 +283,41 @@ describe('savedObjectsClient/errorTypes', () => {
         it('sets statusCode to 500', () => {
           const error = decorateGeneralError(new Error('foo'));
           expect(error.output).to.have.property('statusCode', 500);
+        });
+      });
+    });
+  });
+
+  describe('EsAutoCreateIndex error', () => {
+    describe('createEsAutoCreateIndexError', () => {
+      it('does not take an error argument', () => {
+        const error = new Error();
+        expect(createEsAutoCreateIndexError(error)).to.not.be(error);
+      });
+
+      it('returns a new Error', () => {
+        expect(createEsAutoCreateIndexError()).to.be.a(Error);
+      });
+
+      it('makes errors identifiable as EsAutoCreateIndex errors', () => {
+        expect(isEsAutoCreateIndexError(createEsAutoCreateIndexError())).to.be(true);
+      });
+
+      it('returns a boom error', () => {
+        const error = createEsAutoCreateIndexError();
+        expect(error).to.have.property('isBoom', true);
+        expect(error.output).to.be.an('object');
+        expect(error.output.statusCode).to.be(503);
+      });
+
+      describe('error.output', () => {
+        it('uses "Automatic index creation failed" message', () => {
+          const error = createEsAutoCreateIndexError();
+          expect(error.output.payload).to.have.property('message', 'Automatic index creation failed');
+        });
+        it('sets statusCode to 503', () => {
+          const error = createEsAutoCreateIndexError();
+          expect(error.output).to.have.property('statusCode', 503);
         });
       });
     });

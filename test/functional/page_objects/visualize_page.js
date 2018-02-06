@@ -1,4 +1,6 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
+import Bluebird from 'bluebird';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -11,6 +13,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualizePage {
+
+    async waitForVisualizationSelectPage() {
+      await testSubjects.find('visualizeSelectTypePage');
+    }
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
@@ -54,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+    }
+
+    async clickVega() {
+      await find.clickByPartialLinkText('Vega');
     }
 
     async clickVisualBuilder() {
@@ -108,6 +118,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(getChartTypesPromises);
     }
 
+    async selectVisSourceIfRequired() {
+      log.debug('selectVisSourceIfRequired');
+      const selectPage = await testSubjects.findAll('visualizeSelectSearch');
+      if (selectPage.length) {
+        log.debug('a search is required for this visualization');
+        await this.clickNewSearch();
+      }
+    }
+
+    async getLabTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Lab)');
+    }
+
+    async getExperimentalTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Experimental)');
+    }
+
+    async isExperimentalInfoShown() {
+      return await testSubjects.exists('experimentalVisInfo');
+    }
+
+    async getExperimentalInfo() {
+      return await testSubjects.find('experimentalVisInfo');
+    }
+
     async clickAbsoluteButton() {
       await find.clickByCssSelector(
         'ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")',
@@ -129,6 +164,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
       return element.getVisibleText();
+    }
+
+    async getVegaSpec() {
+      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      const editor = await testSubjects.find('vega-editor');
+      const lines = await editor.findAllByClassName('ace_line_group');
+      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      return linesText.join('\n');
+    }
+
+    async getVegaViewContainer() {
+      return await find.byCssSelector('div.vega-view-container');
+    }
+
+    async getVegaControlContainer() {
+      return await find.byCssSelector('div.vega-controls-container');
     }
 
     async setFromTime(timeString) {
@@ -210,24 +261,28 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('spyToggleButton');
     }
 
+    async getSideEditorExists() {
+      return await find.existsByCssSelector('.collapsible-sidebar');
+    }
+
     async openSpyPanel() {
       log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyModeSelect');
+      const isOpen = await testSubjects.exists('spyContentContainer');
       if (!isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          await testSubjects.find('spyModeSelect');
+          await testSubjects.find('spyContentContainer');
         });
       }
     }
 
     async closeSpyPanel() {
       log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyModeSelect');
+      let isOpen = await testSubjects.exists('spyContentContainer');
       if (isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyModeSelect');
+          isOpen = await testSubjects.exists('spyContentContainer');
           if (isOpen) {
             throw new Error('Failed to close spy panel');
           }
@@ -253,8 +308,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
@@ -262,10 +318,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
       await input.clearValue();
       await input.type(newValue);
-    }
-
-    async clickSavedSearch() {
-      await find.clickByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]');
     }
 
     async selectSearch(searchName) {
@@ -352,9 +404,32 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue + '');
     }
 
+    async setSize(newValue) {
+      const input = await find.byCssSelector('input[name="size"]');
+      await input.clearValue();
+      await input.type(newValue);
+    }
+
+    async toggleOtherBucket() {
+      return await find.clickByCssSelector('input[name="showOther"]');
+    }
+
+    async toggleMissingBucket() {
+      return await find.clickByCssSelector('input[name="showMissing"]');
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -390,8 +465,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      return await PageObjects.header.getToastMessage();
+      return await testSubjects.exists('saveVisualizationSuccess');
     }
 
     async clickLoadSavedVisButton() {
@@ -560,6 +634,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(getChartTypesPromises);
     }
 
+    async getPieChartLabels() {
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+      return await Promise.all(getChartTypesPromises);
+    }
+
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
       return await rect.getAttribute('width');
@@ -571,7 +652,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
     }
 
@@ -618,7 +698,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
@@ -692,6 +771,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
+    }
+
+    async clickLegendOption(name) {
+      await testSubjects.click(`legend-${name}`);
+    }
+
+    async selectNewLegendColorChoice(color) {
+      await testSubjects.click(`legendSelectColor-${color}`);
+    }
+
+    async doesSelectedLegendColorExist(color) {
+      return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
   }
 

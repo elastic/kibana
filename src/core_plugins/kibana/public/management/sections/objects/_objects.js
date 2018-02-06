@@ -130,11 +130,12 @@ uiModules.get('apps/management')
           }
 
           const confirmModalOptions = {
-            confirmButtonText: `Delete ${$scope.currentTab.title}`,
-            onConfirm: doBulkDelete
+            confirmButtonText: 'Delete',
+            onConfirm: doBulkDelete,
+            title: `Delete selected ${$scope.currentTab.title}?`
           };
           confirmModal(
-            `Are you sure you want to delete the selected ${$scope.currentTab.title}? This action is irreversible!`,
+            `You can't recover deleted ${$scope.currentTab.title}.`,
             confirmModalOptions
           );
         };
@@ -195,11 +196,12 @@ uiModules.get('apps/management')
 
           return new Promise((resolve) => {
             confirmModal(
-              `If any of the objects already exist, do you want to automatically overwrite them?`, {
-                confirmButtonText: `Yes, overwrite all`,
-                cancelButtonText: `No, prompt me for each one`,
+              '', {
+                confirmButtonText: `Yes, overwrite all objects`,
+                cancelButtonText: `No, prompt for each object`,
                 onConfirm: () => resolve(true),
                 onCancel: () => resolve(false),
+                title: 'Automatically overwrite all saved objects?'
               }
             );
           })
@@ -211,6 +213,11 @@ uiModules.get('apps/management')
               // We want to do the same for saved searches, but we want to keep them separate because they need
               // to be applied _first_ because other saved objects can be depedent on those saved searches existing
               const conflictedSearchDocs = [];
+              // It's possbile to have saved objects that link to saved searches which then link to index patterns
+              // and those could error out, but the error comes as an index pattern not found error. We can't resolve
+              // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
+              // likely that these saved objects will work once resaved so keep them around to resave them.
+              const conflictedSavedObjectsLinkedToSavedSearches = [];
 
               function importDocument(swallowErrors, doc) {
                 const { service } = find($scope.services, { type: doc._type }) || {};
@@ -240,7 +247,11 @@ uiModules.get('apps/management')
                               conflictedSearchDocs.push(doc);
                               return;
                             case 'index-pattern':
-                              conflictedIndexPatterns.push({ obj, doc });
+                              if (obj.savedSearchId) {
+                                conflictedSavedObjectsLinkedToSavedSearches.push(obj);
+                              } else {
+                                conflictedIndexPatterns.push({ obj, doc });
+                              }
                               return;
                           }
                         }
@@ -278,7 +289,11 @@ uiModules.get('apps/management')
                   return;
                 }
                 return obj.hydrateIndexPattern(newIndexId)
-                  .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
+                  .then(() => saveObject(obj));
+              }
+
+              function saveObject(obj) {
+                return obj.save({ confirmOverwrite: !overwriteAll });
               }
 
               const docTypes = groupByType(docs);
@@ -291,6 +306,7 @@ uiModules.get('apps/management')
                       showChangeIndexModal(
                         (objs) => {
                           Promise.map(conflictedIndexPatterns, resolveConflicts.bind(null, objs))
+                            .then(Promise.map(conflictedSavedObjectsLinkedToSavedSearches, saveObject))
                             .then(resolve)
                             .catch(reject);
                         },

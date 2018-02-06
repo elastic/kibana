@@ -6,7 +6,6 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
-import 'ui/notify';
 import 'ui/fixed_scroll';
 import 'ui/directives/validate_json';
 import 'ui/filters/moment';
@@ -16,6 +15,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
+import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -324,7 +324,13 @@ function discoverController(
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
-          timefilter.enabled = !!timefield;
+          if (!!timefield) {
+            timefilter.enableAutoRefreshSelector();
+            timefilter.enableTimeRangeSelector();
+          } else {
+            timefilter.disableAutoRefreshSelector();
+            timefilter.disableTimeRangeSelector();
+          }
         });
 
         $scope.$watch('state.interval', function () {
@@ -388,16 +394,13 @@ function discoverController(
             };
           }()));
 
-        function initForTime() {
-          return setupVisualization().then($scope.updateTime);
+        if ($scope.opts.timefield) {
+          setupVisualization();
+          $scope.updateTime();
         }
 
-        return Promise.resolve($scope.opts.timefield && initForTime())
-          .then(function () {
-            init.complete = true;
-            $state.replace();
-            $scope.$emit('application.load');
-          });
+        init.complete = true;
+        $state.replace();
       });
   });
 
@@ -413,7 +416,11 @@ function discoverController(
             $scope.kbnTopNav.close('save');
 
             if (id) {
-              notify.info('Saved Data Source "' + savedSearch.title + '"');
+              toastNotifications.addSuccess({
+                title: `Saved '${savedSearch.title}'`,
+                'data-test-subj': 'saveSearchSuccess',
+              });
+
               if (savedSearch.id !== $route.current.params.id) {
                 kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
               } else {
@@ -578,7 +585,7 @@ function discoverController(
   $scope.updateTime = function () {
     $scope.timeRange = {
       from: dateMath.parse(timefilter.time.from),
-      to: dateMath.parse(timefilter.time.to, true)
+      to: dateMath.parse(timefilter.time.to, { roundUp: true })
     };
   };
 
@@ -637,11 +644,9 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  let loadingVis;
   function setupVisualization() {
-    // If we're not setting anything up we need to return an empty promise
-    if (!$scope.opts.timefield) return Promise.resolve();
-    if (loadingVis) return loadingVis;
+    // If no timefield has been specified we don't create a histogram of messages
+    if (!$scope.opts.timefield) return;
 
     const visStateAggs = [
       {
@@ -664,39 +669,25 @@ function discoverController(
       visState.aggs = visStateAggs;
 
       $scope.vis.setState(visState);
-      return Promise.resolve($scope.vis);
+    } else {
+      $scope.vis = new Vis($scope.indexPattern, {
+        title: savedSearch.title,
+        type: 'histogram',
+        params: {
+          addLegend: false,
+          addTimeMarker: true
+        },
+        aggs: visStateAggs
+      });
+
+      $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
+        return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
+      });
+
+      $scope.searchSource.aggs(function () {
+        return $scope.vis.getAggConfig().toDsl();
+      });
     }
-
-    $scope.vis = new Vis($scope.indexPattern, {
-      title: savedSearch.title,
-      type: 'histogram',
-      params: {
-        addLegend: false,
-        addTimeMarker: true
-      },
-      aggs: visStateAggs
-    });
-
-    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-      return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
-    });
-
-    $scope.searchSource.aggs(function () {
-      return $scope.vis.getAggConfig().toDsl();
-    });
-
-    // stash this promise so that other calls to setupVisualization will have to wait
-    loadingVis = new Promise(function (resolve) {
-      $scope.$on('ready:vis', function () {
-        resolve($scope.vis);
-      });
-    })
-      .finally(function () {
-      // clear the loading flag
-        loadingVis = null;
-      });
-
-    return loadingVis;
   }
 
   function resolveIndexPatternLoading() {

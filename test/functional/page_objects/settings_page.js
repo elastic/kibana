@@ -109,7 +109,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeFieldOption(selection) {
-      return await find.displayedByCssSelector('option[label="' + selection + '"]');
+      return await find.displayedByCssSelector('option[value="' + selection + '"]');
     }
 
     async getCreateIndexPatternButton() {
@@ -174,9 +174,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldsTabCount() {
-      return await retry.try(async () => {
+      return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        // the value has () around it, remove them
         return text.replace(/\((.*)\)/, '$1');
       });
     }
@@ -336,7 +335,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      field.type(indexPatternName);
+      await field.type(indexPatternName);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -347,6 +346,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await testSubjects.find('createIndexPatternCreateButton');
     }
 
+    async clickOnOnlyIndexPattern() {
+      return await testSubjects.click('indexPatternLink');
+    }
+
     async removeIndexPattern() {
       let alertText;
       await retry.try(async () => {
@@ -355,7 +358,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         log.debug('getAlertText');
-        alertText = await testSubjects.getVisibleText('confirmModalBodyText');
+        alertText = await testSubjects.getVisibleText('confirmModalTitleText');
       });
       await retry.try(async () => {
         log.debug('acceptConfirmation');

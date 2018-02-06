@@ -11,8 +11,13 @@ import {
   view,
 } from './view';
 
+import {
+  metadata,
+} from './metadata';
+
 export const dashboard = combineReducers({
   view,
   panels,
   embeddables,
+  metadata,
 });

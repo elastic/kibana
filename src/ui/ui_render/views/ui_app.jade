@@ -1,0 +1,113 @@
+extends ./chrome.jade
+
+block content
+  style.
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background-color: #F5F5F5;
+    }
+    .kibanaWelcomeView {
+      background-color: #F5F5F5;
+    }
+
+    .kibanaWelcomeText {
+      color: #222;
+      font-size: 14px;
+      font-family: Sans-serif;
+      margin-top: 20px;
+      color: #666;
+      animation: fadeIn 1s ease-in-out;
+      animation-fill-mode: forwards;
+      opacity: 0;
+      animation-delay: 1.0s;
+    }
+
+    .kibanaLoaderWrap {
+      height: 128px;
+      width: 128px;
+      position: relative;
+      margin-top: 40px;
+    }
+
+    .kibanaLoader {
+      height: 128px;
+      width: 128px;
+      margin: 0 auto;
+      position: relative;
+      border: 2px solid transparent;
+      border-top: 2px solid #00A69B;
+      border-radius: 100%;
+      display: block;
+      opacity: 0;
+      animation: rotation .75s .5s infinite linear, fadeIn 1s .5s ease-in-out forwards;
+    }
+
+    .kibanaWelcomeLogoCircle {
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 120px;
+      height: 120px;
+      padding: 20px;
+      background-color: #FFF;
+      border-radius: 50%;
+      animation: bounceIn .5s ease-in-out;
+    }
+
+    .kibanaWelcomeLogo {
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OSIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDQ5IDY0Ij4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgPHBhdGggZmlsbD0iIzNFQkVCMCIgZD0iTTEuNDE2MzE1NzMsNjQgTDQ4LjY0MDA4MTEsNjQgQzQ4LjY0MDA4MTEsNTEuMTI2NCA0MS4yMzYyNjI0LDM5LjY4NDggMjkuNzQ3NDk0NCwzMi4zNzA0IEwxLjQxNjMxNTczLDY0IFoiLz4KICAgIDxwYXRoIGZpbGw9IiMzN0E1OTUiIGQ9Ik0wLDQxLjYgTDAsNjQgTDMuMDM3NTY4LDY0IEwyOS43NTA2NTYsMzIuMzY1NiBDMjcuOTI1ODQ1MywzMS4yMDMyIDI1Ljk5MjQwNTMsMzAuMTUyIDIzLjk3NTQ2NjcsMjkuMjA4IEwwLDQxLjYgWiIvPgogICAgPHBhdGggZmlsbD0iIzM1MzUzNCIgZD0iTTAsMjAuOCBMMCw1Ny42IEwyMy45Nzk1MiwyOS4yMDMyIEMxNi45MDA3Nzg3LDI1Ljg5NzYgMjQuOTM1Mjk2LDIyLjQgMTYuMjEzMzMzMywyMi40IEwwLDIwLjggWiIvPgogICAgPHBhdGggZmlsbD0iI0U5NDc4QiIgZD0iTTQ4LjY0LDAgTDAsMCBMMCwyNCBDOC43MjE5NjI2NywyNCAxNi45MDA3Nzg3LDI1Ljg5NzYgMjMuOTc5NTIsMjkuMjAzMiBMNDguNjQsMCBaIi8+CiAgPC9nPgo8L3N2Zz4K");
+      background-repeat: no-repeat;
+      background-size: contain;
+      width: 60px;
+      height: 60px;
+      margin: 10px 0px 10px 20px;
+    }
+
+    @keyframes rotation {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(359deg);
+      }
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(.1);
+      }
+      80% {
+        opacity: .5;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+
+  .kibanaWelcomeView
+    .kibanaLoaderWrap
+      .kibanaLoader
+      .kibanaWelcomeLogoCircle
+        .kibanaWelcomeLogo
+    .kibanaWelcomeText
+      | #{i18n('UI-WELCOME_MESSAGE')}
+
+  script(src='#{bundlePath}/app/#{app.getId()}/bootstrap.js')

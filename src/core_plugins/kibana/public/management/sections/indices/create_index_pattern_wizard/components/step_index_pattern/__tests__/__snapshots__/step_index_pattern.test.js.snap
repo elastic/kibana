@@ -1,0 +1,347 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepIndexPattern should disable the next step if the index pattern exists 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={false}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "partialMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+      }
+    }
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should properly fetch indices for the initial query 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={false}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "partialMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+      }
+    }
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should render normally 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={
+      Array [
+        "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
+      ]
+    }
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query=""
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [],
+        "partialMatchedIndices": Array [],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+      }
+    }
+    query=""
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+        Object {
+          "name": "es",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should render some indices 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={false}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "partialMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+      }
+    }
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should render the loading state 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="k"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <LoadingIndices />
+  <EuiSpacer
+    size="s"
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should show errors 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={
+      Array [
+        "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
+      ]
+    }
+    goToNextStep={[Function]}
+    isInputInvalid={true}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="?"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "partialMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+      }
+    }
+    query="?"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;

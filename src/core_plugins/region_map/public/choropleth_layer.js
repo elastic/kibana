@@ -4,19 +4,62 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import * as topojson from 'topojson-client';
+
+
+const EMPTY_STYLE = {
+  weight: 1,
+  opacity: 0.6,
+  color: 'rgb(200,200,200)',
+  fillOpacity: 0
+};
+
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
-  constructor(geojsonUrl, attribution) {
+  static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
+    let j = 0;
+    for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
+      const property = sortedGeojsonFeatures[i].properties[joinField];
+      sortedGeojsonFeatures[i].__kbnJoinedMetric = null;
+      const position = sortedMetrics.length ? compareLexographically(property, sortedMetrics[j].term) : -1;
+      if (position === -1) {//just need to cycle on
+      } else if (position === 0) {
+        sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+      } else if (position === 1) {//needs to catch up
+        while (j < sortedMetrics.length) {
+          const newTerm = sortedMetrics[j].term;
+          const newPosition = compareLexographically(newTerm, property);
+          if (newPosition === -1) {//not far enough
+          } else if (newPosition === 0) {
+            sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+            break;
+          } else if (newPosition === 1) {//too far!
+            break;
+          }
+          if (j === sortedMetrics.length - 1) {//always keep a reference to the last metric
+            break;
+          } else {
+            j++;
+          }
+        }
+      }
+    }
+  }
+
+
+  constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
     super();
 
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
+    this._lineWeight = 1;
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
     this._boundsOfData = null;
 
+    this._showAllShapes = showAllShapes;
     this._geojsonUrl = geojsonUrl;
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
@@ -31,7 +74,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
               const leafletGeojon = L.geoJson(feature);
               location = leafletGeojon.getBounds().getCenter();
             }
-
             this.emit('showTooltip', {
               content: tooltipContents,
               position: location
@@ -42,24 +84,62 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           }
         });
       },
-      style: emptyStyle
+      style: this._makeEmptyStyleFunction()
     });
 
     this._loaded = false;
     this._error = false;
-    $.ajax({
-      dataType: 'json',
-      url: geojsonUrl,
-      success: (data) => {
-        this._leafletLayer.addData(data);
+    this._isJoinValid = false;
+    this._whenDataLoaded = new Promise(async (resolve) => {
+      try {
+        const data = await this._makeJsonAjaxCall(geojsonUrl);
+        let featureCollection;
+        const formatType = typeof format === 'string' ? format : format.type;
+        if (formatType === 'geojson') {
+          featureCollection = data;
+        } else if (formatType === 'topojson') {
+          const features = _.get(data, 'objects.' + meta.feature_collection_path);
+          featureCollection = topojson.feature(data, features);//conversion to geojson
+        } else {
+          //should never happen
+          throw new Error('Unrecognized format ' + formatType);
+        }
+        this._sortedFeatures = featureCollection.features.slice();
+        this._sortFeatures();
+
+        if (showAllShapes) {
+          this._leafletLayer.addData(featureCollection);
+        } else {
+          //we need to delay adding the data until we have performed the join and know which features
+          //should be displayed
+        }
         this._loaded = true;
         this._setStyle();
-      },
-      error: () => {
+        resolve();
+      } catch (e) {
         this._loaded = true;
         this._error = true;
+        resolve();
       }
     });
+
+  }
+
+  //This method is stubbed in the tests to avoid network request during unit tests.
+  async _makeJsonAjaxCall(url) {
+    return await $.ajax({
+      dataType: 'json',
+      url: url
+    });
+  }
+
+  _invalidateJoin() {
+    this._isJoinValid = false;
+  }
+
+  _doInnerJoin() {
+    ChoroplethLayer._doInnerJoin(this._metrics, this._sortedFeatures, this._joinField);
+    this._isJoinValid = true;
   }
 
   _setStyle() {
@@ -67,8 +147,19 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       return;
     }
 
-    const styler = makeChoroplethStyler(this._metrics, this._colorRamp, this._joinField);
-    this._leafletLayer.setStyle(styler.getLeafletStyleFunction);
+    if (!this._isJoinValid) {
+      this._doInnerJoin();
+      if (!this._showAllShapes) {
+        const featureCollection = {
+          type: 'FeatureCollection',
+          features: this._sortedFeatures.filter(feature => feature.__kbnJoinedMetric)
+        };
+        this._leafletLayer.addData(featureCollection);
+      }
+    }
+
+    const styler = this._makeChoroplethStyler();
+    this._leafletLayer.setStyle(styler.leafletStyleFunction);
 
     if (this._metrics && this._metrics.length > 0) {
       const { min, max } = getMinMax(this._metrics);
@@ -76,19 +167,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
-
     this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
     });
-  }
-
-  getMetrics() {
-    return this._metrics;
-  }
-
-  getMetricsAgg() {
-    return this._metricsAgg;
   }
 
   getUrl() {
@@ -112,16 +194,48 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       return;
     }
     this._joinField = joinfield;
+    this._sortFeatures();
     this._setStyle();
   }
 
+  cloneChoroplethLayerForNewData(url, attribution, format, showAllData, meta) {
+    const clonedLayer = new ChoroplethLayer(url, attribution, format, showAllData, meta);
+    clonedLayer.setJoinField(this._joinField);
+    clonedLayer.setColorRamp(this._colorRamp);
+    clonedLayer.setLineWeight(this._lineWeight);
+    clonedLayer.setTooltipFormatter(this._tooltipFormatter);
+    if (this._metrics && this._metricsAgg) {
+      clonedLayer.setMetrics(this._metrics, this._metricsAgg);
+    }
+    return clonedLayer;
+  }
+
+  _sortFeatures() {
+    if (this._sortedFeatures && this._joinField) {
+      this._sortedFeatures.sort((a, b) => {
+        const termA = a.properties[this._joinField];
+        const termB = b.properties[this._joinField];
+        return compareLexographically(termA, termB);
+      });
+      this._invalidateJoin();
+    }
+  }
+
+  whenDataLoaded() {
+    return this._whenDataLoaded;
+  }
 
   setMetrics(metrics, metricsAgg) {
-    this._metrics = metrics;
+    this._metrics = metrics.slice();
+
     this._metricsAgg = metricsAgg;
     this._valueFormatter = this._metricsAgg.fieldFormatter();
+
+    this._metrics.sort((a, b) => compareLexographically(a.term, b.term));
+    this._invalidateJoin();
     this._setStyle();
   }
+
 
   setColorRamp(colorRamp) {
     if (_.isEqual(colorRamp, this._colorRamp)) {
@@ -131,17 +245,42 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._setStyle();
   }
 
-  equalsGeoJsonUrl(geojsonUrl) {
-    return this._geojsonUrl === geojsonUrl;
+  setLineWeight(lineWeight) {
+    if (this._lineWeight === lineWeight) {
+      return;
+    }
+    this._lineWeight = lineWeight;
+    this._setStyle();
+  }
+
+  canReuseInstance(geojsonUrl, showAllShapes) {
+    return this._geojsonUrl === geojsonUrl && this._showAllShapes === showAllShapes;
+  }
+
+  canReuseInstanceForNewMetrics(geojsonUrl, showAllShapes, newMetrics) {
+    if (this._geojsonUrl !== geojsonUrl) {
+      return false;
+    }
+
+    if (showAllShapes) {
+      return this._showAllShapes === showAllShapes;
+    }
+
+    if (!this._metrics) {
+      return;
+    }
+
+    const currentKeys = Object.keys(this._metrics);
+    const newKeys = Object.keys(newMetrics);
+    return _.isEqual(currentKeys, newKeys);
   }
 
   getBounds() {
     const bounds = super.getBounds();
-    return (this._boundsOfData) ? this._boundsOfData  : bounds;
+    return (this._boundsOfData) ? this._boundsOfData : bounds;
   }
 
   appendLegendContents(jqueryDiv) {
-
 
     if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
       return;
@@ -171,8 +310,83 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       jqueryDiv.append(label);
     });
   }
+
+  _makeEmptyStyleFunction() {
+
+    const emptyStyle = _.assign({}, EMPTY_STYLE, {
+      weight: this._lineWeight
+    });
+
+    return () => {
+      return emptyStyle;
+    };
+  }
+
+  _makeChoroplethStyler() {
+    const emptyStyle = this._makeEmptyStyleFunction();
+    if (this._metrics.length === 0) {
+      return {
+        leafletStyleFunction: () => {
+          return emptyStyle();
+        },
+        getMismatches: () => {
+          return [];
+        },
+        getLeafletBounds: () => {
+          return null;
+        }
+      };
+    }
+
+    const { min, max } = getMinMax(this._metrics);
+
+    const boundsOfAllFeatures = new L.LatLngBounds();
+    return {
+      leafletStyleFunction: (geojsonFeature) => {
+        const match = geojsonFeature.__kbnJoinedMetric;
+        if (!match) {
+          return emptyStyle();
+        }
+        const boundsOfFeature = L.geoJson(geojsonFeature).getBounds();
+        boundsOfAllFeatures.extend(boundsOfFeature);
+
+        return {
+          fillColor: getChoroplethColor(match.value, min, max, this._colorRamp),
+          weight: this._lineWeight,
+          opacity: 1,
+          color: 'white',
+          fillOpacity: 0.7
+        };
+      },
+      /**
+       * should not be called until getLeafletStyleFunction has been called
+       * @return {Array}
+       */
+      getMismatches: () => {
+        const mismatches = this._metrics.slice();
+        this._sortedFeatures.forEach((feature) => {
+          const index = mismatches.indexOf(feature.__kbnJoinedMetric);
+          if (index >= 0) {
+            mismatches.splice(index, 1);
+          }
+        });
+        return mismatches.map(b => b.term);
+      },
+      getLeafletBounds: function () {
+        return boundsOfAllFeatures.isValid() ? boundsOfAllFeatures : null;
+      }
+    };
+
+  }
+
 }
 
+//lexographic compare
+function compareLexographically(termA, termB) {
+  termA = typeof termA === 'string' ? termA : termA.toString();
+  termB = typeof termB === 'string' ? termB : termB.toString();
+  return termA.localeCompare(termB);
+}
 
 function makeColorDarker(color) {
   const amount = 1.3;//magic number, carry over from earlier
@@ -188,68 +402,6 @@ function getMinMax(data) {
     max = Math.max(data[i].value, max);
   }
   return { min, max };
-}
-
-
-function makeChoroplethStyler(data, colorramp, joinField) {
-
-
-  if (data.length === 0) {
-    return {
-      getLeafletStyleFunction: function () {
-        return emptyStyle();
-      },
-      getMismatches: function () {
-        return [];
-      },
-      getLeafletBounds: function () {
-        return null;
-      }
-    };
-  }
-
-  const { min, max } = getMinMax(data);
-  const outstandingFeatures = data.slice();
-
-  const boundsOfAllFeatures = new L.LatLngBounds();
-  return {
-    getLeafletStyleFunction: function (geojsonFeature) {
-      let lastIndex = -1;
-      const match = outstandingFeatures.find((bucket, index) => {
-        lastIndex = index;
-        return bucket.term === geojsonFeature.properties[joinField];
-      });
-
-      if (!match) {
-        return emptyStyle();
-      }
-
-      outstandingFeatures.splice(lastIndex, 1);
-
-      const boundsOfFeature = L.geoJson(geojsonFeature).getBounds();
-      boundsOfAllFeatures.extend(boundsOfFeature);
-
-      return {
-        fillColor: getChoroplethColor(match.value, min, max, colorramp),
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        fillOpacity: 0.7
-      };
-    },
-    /**
-     * should not be called until getLeafletStyleFunction has been called
-     * @return {Array}
-     */
-    getMismatches: function () {
-      return outstandingFeatures.map((bucket) => bucket.term);
-    },
-    getLeafletBounds: function () {
-      return boundsOfAllFeatures.isValid() ?  boundsOfAllFeatures : null;
-    }
-  };
-
-
 }
 
 function getLegendColors(colorRamp) {
@@ -287,13 +439,5 @@ function getChoroplethColor(value, min, max, colorRamp) {
   return getColor(colorRamp, i);
 }
 
-const emptyStyleObject = {
-  weight: 1,
-  opacity: 0.6,
-  color: 'rgb(200,200,200)',
-  fillOpacity: 0
-};
-function emptyStyle() {
-  return emptyStyleObject;
-}
+
 

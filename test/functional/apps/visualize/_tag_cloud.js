@@ -3,7 +3,9 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
+  const remote = getService('remote');
   const retry = getService('retry');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function () {
@@ -54,10 +56,25 @@ export default function ({ getService, getPageObjects }) {
     describe('tag cloud chart', function () {
       const vizName1 = 'Visualization tagCloud';
 
-      it('should show correct tag cloud data', async function () {
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
+      it.skip('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      });
+
+      it('should collapse the sidebar', async function () {
+        const editorSidebar = await find.byCssSelector('.collapsible-sidebar');
+        await PageObjects.visualize.clickEditorSidebarCollapse();
+        // Give d3 tag cloud some time to rearrange tags
+        await PageObjects.common.sleep(1000);
+        const afterSize = await editorSidebar.getSize();
+        expect(afterSize.width).to.be(0);
+        await PageObjects.visualize.clickEditorSidebarCollapse();
       });
 
       it('should still show all tags after sidebar has been collapsed', async function () {
@@ -72,11 +89,23 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
+      it('should still show all tags after browser was resized very small', async function () {
+        await remote.setWindowSize(200, 200);
+        await PageObjects.common.sleep(1000);
+        await remote.setWindowSize(1200, 800);
+        await PageObjects.common.sleep(1000);
+        const data = await PageObjects.visualize.getTextTag();
+        expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      });
+
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();

@@ -72,13 +72,26 @@ export function isConflictError(error) {
 }
 
 
-// 500 - Es Unavailable
+// 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
 export function decorateEsUnavailableError(error, reason) {
   return decorate(error, CODE_ES_UNAVAILABLE, 503, reason);
 }
 export function isEsUnavailableError(error) {
   return error && error[code] === CODE_ES_UNAVAILABLE;
+}
+
+
+// 503 - Unable to automatically create index because of action.auto_create_index setting
+const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
+export function createEsAutoCreateIndexError() {
+  const error = Boom.serverUnavailable('Automatic index creation failed');
+  error.output.payload.code = 'ES_AUTO_CREATE_INDEX_ERROR';
+
+  return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
+}
+export function isEsAutoCreateIndexError(error) {
+  return error && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
 }
 
 

@@ -2,10 +2,12 @@ import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { applyTheme } from 'ui/theme';
+import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
 
-import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -18,7 +20,6 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -45,7 +46,6 @@ app.directive('dashboardApp', function ($injector) {
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const timefilter = $injector.get('timefilter');
-  const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
@@ -83,7 +83,7 @@ app.directive('dashboardApp', function ($injector) {
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
       if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
       }
 
       const updateState = () => {
@@ -92,19 +92,27 @@ app.directive('dashboardApp', function ($injector) {
         $scope.model = {
           query: dashboardStateManager.getQuery(),
           useMargins: dashboardStateManager.getUseMargins(),
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-        $scope.fullScreenMode = dashboardStateManager.getFullScreenMode();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
+      };
+
+      this.getSharingTitle = () => {
+        return dash.title;
+      };
+
+      this.getSharingType = () => {
+        return 'dashboard';
       };
 
       dashboardStateManager.registerChangeListener(status => {
@@ -117,7 +125,8 @@ app.directive('dashboardApp', function ($injector) {
         filterBar.getFilters()
       );
 
-      timefilter.enabled = true;
+      timefilter.enableAutoRefreshSelector();
+      timefilter.enableTimeRangeSelector();
       dash.searchSource.highlightAll(true);
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
@@ -175,14 +184,21 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          notify.info(`Visualization successfully added to your dashboard`);
+          toastNotifications.addSuccess('Added visualization to your dashboard');
         }
       };
 
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
-        notify.info(`Search successfully added to your dashboard`);
+        toastNotifications.addSuccess({
+          title: 'Added saved search to your dashboard',
+          'data-test-subj': 'addSavedSearchToDashboardSuccess',
+        });
       };
+
+      $scope.$watch('model.hidePanelTitles', () => {
+        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
+      });
       $scope.$watch('model.useMargins', () => {
         dashboardStateManager.setUseMargins($scope.model.useMargins);
       });
@@ -235,18 +251,19 @@ app.directive('dashboardApp', function ($injector) {
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
           if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
           }
         }
 
         confirmModal(
-          getUnsavedChangesWarningMessage(dashboardStateManager.getChangedFilterTypes(timefilter)),
+          `Once you discard your changes, there's no getting them back.`,
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Yes, lose changes',
-            cancelButtonText: 'No, keep working',
-            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+            confirmButtonText: 'Discard changes',
+            cancelButtonText: 'Continue editing',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+            title: 'Discard changes to dashboard?'
           }
         );
       };
@@ -256,7 +273,11 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
-              notify.info(`Saved Dashboard as "${dash.title}"`);
+              toastNotifications.addSuccess({
+                title: `Saved '${dash.title}'`,
+                'data-test-subj': 'saveDashboardSuccess',
+              });
+
               if (dash.id !== $routeParams.id) {
                 kbnUrl.change(createDashboardEditUrl(dash.id));
               } else {
@@ -268,50 +289,19 @@ app.directive('dashboardApp', function ($injector) {
           }).catch(notify.error);
       };
 
-      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
-      let onRouteChange;
-      const setFullScreenMode = (fullScreenMode) => {
-        $scope.fullScreenMode = fullScreenMode;
-        dashboardStateManager.setFullScreenMode(fullScreenMode);
-        chrome.setVisible(!fullScreenMode);
-        $scope.$broadcast('reLayout');
-
-        // Make sure that if we exit the dashboard app, the chrome becomes visible again
-        // (e.g. if the user clicks the back button).
-        if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => {
-            chrome.setVisible(true);
-            onRouteChange();
-          });
-        } else if (onRouteChange) {
-          onRouteChange();
-        }
-      };
-
-      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardStateManager.getFullScreenMode()));
-
-      $scope.exitFullScreenMode = () => setFullScreenMode(false);
-
-      document.addEventListener('keydown', (e) => {
-        if (e.keyCode === keyCodes.ESCAPE) {
-          setFullScreenMode(false);
-        }
-      }, false);
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.open('add');
       };
       $scope.enterEditMode = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
-      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
+      navActions[TopNavIds.FULL_SCREEN] = () =>
+        dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {
@@ -357,11 +347,13 @@ app.directive('dashboardApp', function ($injector) {
       function setDarkTheme() {
         chrome.removeApplicationClass(['theme-light']);
         chrome.addApplicationClass('theme-dark');
+        applyTheme('dark');
       }
 
       function setLightTheme() {
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
+        applyTheme('light');
       }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
@@ -388,8 +380,6 @@ app.directive('dashboardApp', function ($injector) {
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
-
-      $scope.$emit('application.load');
     }
   };
 });

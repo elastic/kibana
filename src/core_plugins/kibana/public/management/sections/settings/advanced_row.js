@@ -1,11 +1,12 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
 import { uiModules } from 'ui/modules';
-import { keyCodes } from 'ui_framework/services';
+import { fatalError } from 'ui/notify';
+import { keyCodes } from '@elastic/eui';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')
-  .directive('advancedRow', function (config, Notifier) {
+  .directive('advancedRow', function (config) {
     return {
       restrict: 'A',
       replace: true,
@@ -15,8 +16,6 @@ uiModules.get('apps/management')
         configs: '='
       },
       link: function ($scope) {
-        const notify = new Notifier();
-
         // To allow passing form validation state back
         $scope.forms = {};
 
@@ -27,7 +26,7 @@ uiModules.get('apps/management')
             .then(function () {
               conf.loading = conf.editing = false;
             })
-            .catch(notify.fatal);
+            .catch(fatalError);
         };
 
         $scope.maybeCancel = function ($event, conf) {
@@ -44,6 +43,12 @@ uiModules.get('apps/management')
         };
 
         $scope.save = function (conf) {
+          // an empty JSON is valid as per the validateJson directive.
+          // set the value to empty JSON in this case so that its parsing upon retrieving the setting does not fail.
+          if (conf.type === 'json' && conf.unsavedValue === '') {
+            conf.unsavedValue = '{}';
+          }
+
           loading(conf, function () {
             if (conf.unsavedValue === conf.defVal) {
               return config.remove(conf.name);

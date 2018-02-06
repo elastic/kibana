@@ -24,12 +24,6 @@ exports[`renders KuiListingTable 1`] = `
         />
       </div>
     </div>
-    <div
-      class="kuiToolBarSection"
-    />
-    <div
-      class="kuiToolBarSection"
-    />
   </div>
   <table
     class="kuiTable"
@@ -38,6 +32,7 @@ exports[`renders KuiListingTable 1`] = `
       <tr>
         <th
           class="kuiTableHeaderCell kuiTableHeaderCell--checkBox"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
@@ -46,11 +41,13 @@ exports[`renders KuiListingTable 1`] = `
               aria-label="Select all rows"
               class="kuiCheckBox"
               type="checkbox"
+              value="on"
             />
           </div>
         </th>
         <th
           class="kuiTableHeaderCell"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
@@ -60,6 +57,7 @@ exports[`renders KuiListingTable 1`] = `
         </th>
         <th
           class="kuiTableHeaderCell"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
@@ -83,6 +81,7 @@ exports[`renders KuiListingTable 1`] = `
               aria-label="Select row"
               class="kuiCheckBox"
               type="checkbox"
+              value="on"
             />
           </div>
         </td>
@@ -118,6 +117,7 @@ exports[`renders KuiListingTable 1`] = `
               aria-label="Select row"
               class="kuiCheckBox"
               type="checkbox"
+              value="on"
             />
           </div>
         </td>
@@ -153,6 +153,7 @@ exports[`renders KuiListingTable 1`] = `
               aria-label="Select row"
               class="kuiCheckBox"
               type="checkbox"
+              value="on"
             />
           </div>
         </td>
@@ -189,9 +190,6 @@ exports[`renders KuiListingTable 1`] = `
         0 items selected
       </div>
     </div>
-    <div
-      class="kuiToolBarFooterSection"
-    />
   </div>
 </div>
 `;

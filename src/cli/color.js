@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import ansicolors from 'ansicolors';
+import chalk from 'chalk';
 
-export const green = _.flow(ansicolors.black, ansicolors.bgGreen);
-export const red = _.flow(ansicolors.white, ansicolors.bgRed);
-export const yellow = _.flow(ansicolors.black, ansicolors.bgYellow);
+export const green = _.flow(chalk.black, chalk.bgGreen);
+export const red = _.flow(chalk.white, chalk.bgRed);
+export const yellow = _.flow(chalk.black, chalk.bgYellow);

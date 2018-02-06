@@ -8,6 +8,12 @@ export default kibana => new kibana.Plugin({
           from_test_app: true
         };
       }
+    },
+
+    injectDefaultVars() {
+      return {
+        from_defaults: true
+      };
     }
   }
 });

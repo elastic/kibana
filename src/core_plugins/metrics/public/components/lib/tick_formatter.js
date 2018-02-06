@@ -1,8 +1,12 @@
 import numeral from '@elastic/numeral';
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
-import { DurationFormat } from '../../../../kibana/common/field_formats/types/duration';
 import { capitalize, isNumber } from 'lodash';
+
+import { createDurationFormat } from '../../../../kibana/common/field_formats/types/duration';
+import { FieldFormat } from '../../../../../ui/field_formats/field_format';
+
+const DurationFormat = createDurationFormat(FieldFormat);
 
 const formatLookup = {
   'bytes': '0.0b',

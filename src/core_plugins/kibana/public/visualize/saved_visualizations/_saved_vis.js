@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
+import { updateOldState } from 'ui/vis/vis_update_state';
 
 uiModules
   .get('app/visualize')
@@ -111,9 +112,7 @@ uiModules
     SavedVis.prototype._createVis = function () {
       const self = this;
 
-      if (self.stateJSON) {
-        self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
-      }
+      self.visState = updateOldState(self.visState);
 
       // visState doesn't yet exist when importing a visualization, so we can't
       // assume that exists at this point. If it does exist, then we're not

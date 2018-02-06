@@ -8,7 +8,7 @@ const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
-export default class Config {
+export class Config {
   static withDefaultSchema(settings = {}) {
     return new Config(createDefaultSchema(), settings);
   }

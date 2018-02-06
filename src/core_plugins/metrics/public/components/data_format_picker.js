@@ -124,7 +124,7 @@ class DataFormatPicker extends Component {
       custom = (
         <div className="vis_editor__data_format_picker-custom_row">
           <div className="vis_editor__label">
-            Format String (See <a href="http://numeraljs.com/" target="_BLANK">Numeral.js</a>)
+            Format String (See <a href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</a>)
           </div>
           <input
             style={{ width: 100 }}

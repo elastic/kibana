@@ -98,6 +98,8 @@ class VisEditor extends Component {
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
             onChange={handleChange}
+            title={this.props.vis.title}
+            description={this.props.vis.description}
             dateFormat={this.props.config.get('dateFormat')}
           />
           <div className="vis-editor-hide-for-reporting">
@@ -117,6 +119,10 @@ class VisEditor extends Component {
   }
 
   componentDidMount() {
+    this.props.renderComplete();
+  }
+
+  componentDidUpdate() {
     this.props.renderComplete();
   }
 }

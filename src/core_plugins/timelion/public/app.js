@@ -3,9 +3,10 @@ import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify } from 'ui/notify';
+import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
+require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -46,6 +47,8 @@ require('ui/routes')
     }
   });
 
+const location = 'Timelion';
+
 app.controller('timelion', function (
   $http,
   $route,
@@ -70,9 +73,11 @@ app.controller('timelion', function (
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
-  timefilter.enabled = true;
+  timefilter.enableAutoRefreshSelector();
+  timefilter.enableTimeRangeSelector();
+
   const notify = new Notifier({
-    location: 'Timelion'
+    location
   });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
@@ -107,16 +112,17 @@ app.controller('timelion', function (
       const title = savedSheet.title;
       function doDelete() {
         savedSheet.delete().then(() => {
-          notify.info('Deleted ' + title);
+          toastNotifications.addSuccess(`Deleted '${title}'`);
           kbnUrl.change('/');
-        }).catch(notify.fatal);
+        }).catch(error => fatalError(error, location));
       }
 
       const confirmModalOptions = {
         onConfirm: doDelete,
-        confirmButtonText: 'Delete sheet'
+        confirmButtonText: 'Delete',
+        title: `Delete Timelion sheet '${title}'?`
       };
-      confirmModal(`Are you sure you want to delete the sheet ${title}?`, confirmModalOptions);
+      confirmModal(`You can't recover deleted sheets.`, confirmModalOptions);
     },
     testId: 'timelionDeleteButton',
   }, {
@@ -257,7 +263,7 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        notify.info('Saved sheet as "' + savedSheet.title + '"');
+        toastNotifications.addSuccess(`Saved sheet '${savedSheet.title}'`);
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
@@ -274,7 +280,9 @@ app.controller('timelion', function (
       savedExpression.title = title;
       savedExpression.visState.title = title;
       savedExpression.save().then(function (id) {
-        if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
+        if (id) {
+          toastNotifications.addSuccess(`Saved expression '${savedExpression.title}'`);
+        }
       });
     });
   }

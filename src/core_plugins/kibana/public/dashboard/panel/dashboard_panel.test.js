@@ -5,13 +5,16 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
-import { updateViewMode } from '../actions';
+import {
+  updateViewMode,
+  setPanels,
+} from '../actions';
 import { Provider } from 'react-redux';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import {
   takeMountedSnapshot,
-} from 'ui_framework/src/test';
+} from '@elastic/eui/lib/test';
 
 function getProps(props = {}) {
   const defaultTestProps = {
@@ -26,6 +29,7 @@ function getProps(props = {}) {
 
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
+  store.dispatch(setPanels([{ panelIndex: 'foo1' }]));
 });
 
 test('DashboardPanel matches snapshot', () => {

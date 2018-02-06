@@ -6,6 +6,8 @@ import {
   updatePanel,
   updatePanels,
   setPanels,
+  resetPanelTitle,
+  setPanelTitle,
 } from '../actions';
 
 /**
@@ -63,6 +65,33 @@ export const panels = handleActions({
      * @param panels {Object.<string, PanelState>}
      * @param payload {PanelState} The new panel state (is merged with existing).
      * @param payload.panelIndex {string} The id of the panel to update.
+     * @return {Object.<string, PanelState>}
+     */
+    (panels, { payload }) => ({
+      ...panels,
+      [payload.panelIndex]: mergePanelData(payload, panels),
+    }),
+
+  [resetPanelTitle]:
+    /**
+     * @param panels {Object.<string, PanelState>}
+     * @param payload {String} The id of the panel to reset it's title.
+     * @return {Object.<string, PanelState>}
+     */
+    (panels, { payload }) => ({
+      ...panels,
+      [payload]: {
+        ...panels[payload],
+        title: undefined,
+      }
+    }),
+
+  [setPanelTitle]:
+    /**
+     * @param panels {Object.<string, PanelState>}
+     * @param payload {PanelState} The new panel state (is merged with existing).
+     * @param payload.panelIndex {String} The id of the panel to reset it's title.
+     * @param payload.title {String} The new title to use.
      * @return {Object.<string, PanelState>}
      */
     (panels, { payload }) => ({

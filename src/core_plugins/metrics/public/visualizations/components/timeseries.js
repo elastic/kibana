@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
@@ -135,6 +135,7 @@ class Timeseries extends Component {
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes}
+              xAxisFormatter={this.props.xAxisFormatter}
             />
           </div>
           <Legend

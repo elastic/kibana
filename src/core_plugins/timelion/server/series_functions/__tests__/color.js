@@ -31,10 +31,14 @@ describe(filename, () => {
     });
   });
 
-  it('throws if you pass more colors than series', () => {
-    invoke(fn, [seriesList, '#000:#111:#222:#333']).catch((e) => {
-      expect(e).to.be.an(Error);
-    });
+  it('should handle more colors than number of series', async () => {
+    const colorsArg = '#000:#111:#222:#333:#444:#555';
+    const numColors = colorsArg.split(':').length;
+    expect(numColors).to.be.above(seriesList.list.length);
+
+    const r = await invoke(fn, [seriesList, colorsArg]);
+    const seriesColors = _.map(r.output.list, 'color');
+    expect(seriesColors).to.eql(['#000000', '#111111', '#222222', '#333333', '#444444']);
   });
 
   it('throws if you do not pass a color', () => {

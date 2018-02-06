@@ -1,0 +1,507 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
+<div
+  className="inputControlVis"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      data-test-subj="inputControlItem"
+      grow={true}
+      key="mock-list-control"
+      style={
+        Object {
+          "minWidth": "250px",
+        }
+      }
+    >
+      <ListControl
+        control={
+          Object {
+            "getMultiSelectDelimiter": [Function],
+            "id": "mock-list-control",
+            "isEnabled": [Function],
+            "label": "list control",
+            "options": Object {
+              "multiselect": true,
+              "type": "terms",
+            },
+            "selectOptions": Array [
+              Object {
+                "label": "choice1",
+                "value": "choice1",
+              },
+              Object {
+                "label": "choice2",
+                "value": "choice2",
+              },
+            ],
+            "type": "list",
+            "value": "",
+          }
+        }
+        controlIndex={0}
+        stageFilter={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={false}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={false}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Clear btns enabled when there are values 1`] = `
+<div
+  className="inputControlVis"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      data-test-subj="inputControlItem"
+      grow={true}
+      key="mock-list-control"
+      style={
+        Object {
+          "minWidth": "250px",
+        }
+      }
+    >
+      <ListControl
+        control={
+          Object {
+            "getMultiSelectDelimiter": [Function],
+            "id": "mock-list-control",
+            "isEnabled": [Function],
+            "label": "list control",
+            "options": Object {
+              "multiselect": true,
+              "type": "terms",
+            },
+            "selectOptions": Array [
+              Object {
+                "label": "choice1",
+                "value": "choice1",
+              },
+              Object {
+                "label": "choice2",
+                "value": "choice2",
+              },
+            ],
+            "type": "list",
+            "value": "",
+          }
+        }
+        controlIndex={0}
+        stageFilter={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={false}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Renders list control 1`] = `
+<div
+  className="inputControlVis"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      data-test-subj="inputControlItem"
+      grow={true}
+      key="mock-list-control"
+      style={
+        Object {
+          "minWidth": "250px",
+        }
+      }
+    >
+      <ListControl
+        control={
+          Object {
+            "getMultiSelectDelimiter": [Function],
+            "id": "mock-list-control",
+            "isEnabled": [Function],
+            "label": "list control",
+            "options": Object {
+              "multiselect": true,
+              "type": "terms",
+            },
+            "selectOptions": Array [
+              Object {
+                "label": "choice1",
+                "value": "choice1",
+              },
+              Object {
+                "label": "choice2",
+                "value": "choice2",
+              },
+            ],
+            "type": "list",
+            "value": "",
+          }
+        }
+        controlIndex={0}
+        stageFilter={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Renders range control 1`] = `
+<div
+  className="inputControlVis"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={true}
+  >
+    <EuiFlexItem
+      component="div"
+      data-test-subj="inputControlItem"
+      grow={true}
+      key="mock-range-control"
+      style={
+        Object {
+          "minWidth": "250px",
+        }
+      }
+    >
+      <RangeControl
+        control={
+          Object {
+            "id": "mock-range-control",
+            "isEnabled": [Function],
+            "label": "ragne control",
+            "max": 100,
+            "min": 0,
+            "options": Object {
+              "decimalPlaces": 0,
+              "step": 1,
+            },
+            "type": "range",
+            "value": Object {
+              "max": 0,
+              "min": 0,
+            },
+          }
+        }
+        controlIndex={0}
+        stageFilter={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

@@ -27,7 +27,7 @@
       <div ng-show="!absolute.from"><em>Invalid Date</em></div>
 
       <div>
-        <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="absolute.to" show-weeks="false"></datepicker>
+        <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="pickToDate()" show-weeks="false"></datepicker>
       </div>
     </div>
 
@@ -58,20 +58,25 @@
       >
 
       <div>
-        <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="absolute.from" show-weeks="false"></datepicker>
+        <datepicker ng-model="pickToDate" ng-model-options="{ getterSetter: true }" min-date="pickFromDate()" show-weeks="false"></datepicker>
       </div>
     </div>
   </div>
 
-  <div class="kbn-timepicker-actions">
+  <div class="kbn-timepicker-actions kuiVerticalRhythm">
+    <span
+      class="kbn-timepicker-action-item kbn-timepicker-error"
+      ng-show="absolute.from > absolute.to"
+    >
+      <strong>From</strong> must occur before <strong>To</strong>
+    </span>
     <button
-      data-test-subj="timepickerGoButton"
+      type="submit"
       class="kuiButton kuiButton--primary kbn-timepicker-submit-button"
       ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
-      type="submit"
+      data-test-subj="timepickerGoButton"
     >
       Go
     </button>
-    <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
   </div>
 </form>

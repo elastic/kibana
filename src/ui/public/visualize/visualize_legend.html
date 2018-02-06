@@ -31,8 +31,14 @@
           tooltip="{{legendData.label}}"
           tooltip-animation="false"
           aria-label="{{legendData.label}}, toggle options"
+          data-test-subj="legend-{{legendData.label}}"
         >
-          <i class="fa fa-circle" ng-style="{color: getColor(legendData.label)}"></i> {{legendData.label}}
+          <i
+            class="fa fa-circle"
+            ng-style="{color: getColor(legendData.label)}"
+            data-test-subj="legendSelectedColor-{{getColor(legendData.label)}}"
+          ></i>
+          {{legendData.label}}
         </div>
 
         <div ng-if="showDetails" class="legend-value-details">
@@ -64,7 +70,8 @@
             >
               Set color for value {{legendData.label}}
             </span>
-            <i ng-repeat="choice in colors"
+            <i
+              ng-repeat="choice in colors"
               kbn-accessible-click
               role="option"
               aria-label="{{choice}}"
@@ -73,6 +80,7 @@
               ng-click="setColor(legendData.label, choice)"
               ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
               ng-style="{color: choice}" class="fa dot"
+              data-test-subj="legendSelectColor-{{choice}}"
             >
             </i>
           </div>

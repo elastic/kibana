@@ -8,7 +8,7 @@ import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier, toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -118,6 +118,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     dirty: !savedVis.id
   };
 
+  this.getSharingTitle = () => {
+    return savedVis.title;
+  };
+
+  this.getSharingType = () => {
+    return 'visualization';
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
@@ -169,12 +177,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    // Associate PersistedState instance with the Vis instance, so that
-    // `uiStateVal` can be called on it. Currently this is only used to extract
-    // map-specific information (e.g. mapZoom, mapCenter).
-    vis.setUiState($scope.uiState);
-
-
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
@@ -195,7 +197,15 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       'searchSource.get("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
-      timefilter.enabled = Boolean((!index || index.timeFieldName) && requiresTimePicker);
+      const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
+
+      if (showTimeFilter) {
+        timefilter.enableAutoRefreshSelector();
+        timefilter.enableTimeRangeSelector();
+      } else {
+        timefilter.disableAutoRefreshSelector();
+        timefilter.disableTimeRangeSelector();
+      }
     });
 
     // update the searchSource when filters update
@@ -208,10 +218,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $state.save();
       $scope.vis.forceReload();
     };
-
-    $scope.$on('ready:vis', function () {
-      $scope.$emit('application.load');
-    });
 
     $scope.$on('$destroy', function () {
       savedVis.destroy();
@@ -245,7 +251,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
         $scope.kbnTopNav.close('save');
 
         if (id) {
-          notify.info('Saved Visualization "' + savedVis.title + '"');
+          toastNotifications.addSuccess({
+            title: `Saved '${savedVis.title}'`,
+            'data-test-subj': 'saveVisualizationSuccess',
+          });
+
           if ($scope.isAddToDashMode()) {
             const savedVisualizationParsedUrl = new KibanaParsedUrl({
               basePath: chrome.getBasePath(),
@@ -275,7 +285,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   $scope.unlink = function () {
     if (!$state.linked) return;
 
-    notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
+    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
 
     $state.linked = false;
     const parent = searchSource.getParent(true);
@@ -297,6 +307,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     searchSource.inherits(parentsParent);
 
     $scope.fetch();
+  };
+
+
+  $scope.getAdditionalMessage = () => {
+    return `<i class="kuiIcon fa-flask"></i> This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();

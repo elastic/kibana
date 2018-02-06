@@ -3,7 +3,7 @@ import html from 'ui/visualize/visualize_legend.html';
 import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { uiModules } from 'ui/modules';
-import { htmlIdGenerator, keyCodes } from 'ui_framework/services';
+import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
@@ -25,7 +25,7 @@ uiModules.get('kibana')
           $scope.data = data;
         });
 
-        $scope.$watch('vis.refreshLegend', () => {
+        $scope.$watch('refreshLegend', () => {
           refresh();
         });
 

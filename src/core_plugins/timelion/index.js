@@ -1,15 +1,4 @@
 export default function (kibana) {
-  let mainFile = 'plugins/timelion/app';
-
-  const ownDescriptor = Object.getOwnPropertyDescriptor(kibana, 'autoload');
-  const protoDescriptor = Object.getOwnPropertyDescriptor(kibana.constructor.prototype, 'autoload');
-  const descriptor = ownDescriptor || protoDescriptor || {};
-  if (descriptor.get) {
-    // the autoload list has been replaced with a getter that complains about
-    // improper access, bypass that getter by seeing if it is defined
-    mainFile = 'plugins/timelion/app_with_autoload';
-  }
-
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch'],
     uiExports: {
@@ -18,7 +7,7 @@ export default function (kibana) {
         order: -1000,
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
-        main: mainFile,
+        main: 'plugins/timelion/app',
         injectVars: function (server) {
           const config = server.config();
           return {

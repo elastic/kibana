@@ -1,7 +1,5 @@
 import './region_map.less';
-import './region_map_controller';
 import './region_map_vis_params';
-import regionTemplate from './region_map_controller.html';
 import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
@@ -9,20 +7,21 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
+import { RegionMapsVisualizationProvider } from './region_map_visualization';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
+  const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
-  return VisFactory.createAngularVisualization({
+  return VisFactory.createBaseVisualization({
     name: 'region_map',
     title: 'Region Map',
-    implementsRenderComplete: true,
-    description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
+    description: 'Show metrics on a thematic map. Use one of the provided base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: CATEGORY.MAP,
     image,
@@ -32,10 +31,16 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
-        selectedJoinField: selectedJoinField
-      },
-      template: regionTemplate,
+        selectedJoinField: selectedJoinField,
+        isDisplayWarning: true,
+        wms: config.get('visualization:tileMap:WMSdefaults'),
+        mapZoom: 2,
+        mapCenter: [0, 0],
+        outlineWeight: 1,
+        showAllShapes: true//still under consideration
+      }
     },
+    visualization: RegionMapsVisualization,
     editorConfig: {
       optionsTemplate: '<region_map-vis-params></region_map-vis-params>',
       collections: {
@@ -54,6 +59,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
         vectorLayers: vectorLayers,
+        baseLayers: []
       },
       schemas: new Schemas([
         {
@@ -83,5 +89,3 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
 
   });
 });
-
-

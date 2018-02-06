@@ -3,6 +3,12 @@ import React from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
+import {
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiSwitch,
+} from '@elastic/eui';
+
 function filterField(field) {
   return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
 }
@@ -34,36 +40,28 @@ export function ListControlEditor(props) {
         getIndexPattern={props.getIndexPattern}
       />
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={multiselectId}>
-          Enable Multiselect
-        </label>
-        <div className="kuiSideBarFormRow__control">
-          <input
-            id={multiselectId}
-            className="kuiCheckBox"
-            type="checkbox"
-            checked={props.controlParams.options.multiselect}
-            onChange={handleMultiselectChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={multiselectId}
+      >
+        <EuiSwitch
+          label="Multiselect"
+          checked={props.controlParams.options.multiselect}
+          onChange={handleMultiselectChange}
+          data-test-subj="listControlMultiselectInput"
+        />
+      </EuiFormRow>
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={sizeId}>
-          Size
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id={sizeId}
-            className="kuiTextInput"
-            type="number"
-            min="1"
-            value={props.controlParams.options.size}
-            onChange={handleSizeChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={sizeId}
+        label="Size"
+      >
+        <EuiFieldNumber
+          min={1}
+          value={props.controlParams.options.size}
+          onChange={handleSizeChange}
+          data-test-subj="listControlSizeInput"
+        />
+      </EuiFormRow>
 
     </div>
   );

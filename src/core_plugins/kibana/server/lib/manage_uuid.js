@@ -17,7 +17,7 @@ export default async function manageUuid(server) {
       return result.toString(FILE_ENCODING);
     } catch (err) {
       if (err.code === 'ENOENT') {
-        // non-existant uuid file is ok
+        // non-existent uuid file is ok
         return false;
       }
       server.log(['error', 'read-uuid'], err);

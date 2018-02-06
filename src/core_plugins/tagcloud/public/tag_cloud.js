@@ -304,6 +304,12 @@ class TagCloud extends EventEmitter {
 
   async _updateLayout(job) {
 
+    if (job.size[0] <= 0 || job.size[1] <= 0) {
+      // If either width or height isn't above 0 we don't relayout anything,
+      // since the d3-cloud will be stuck in an infinite loop otherwise.
+      return;
+    }
+
     const mapSizeToFontSize = this._makeTextSizeMapper();
     const tagCloudLayoutGenerator = d3TagCloud();
     tagCloudLayoutGenerator.size(job.size);

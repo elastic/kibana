@@ -3,6 +3,7 @@ module.exports = function () {
     devSource: {
       options: { mode: true },
       src: [
+        'yarn.lock',
         'src/**',
         '!src/**/__tests__/**',
         '!src/test_utils/**',
@@ -14,6 +15,7 @@ module.exports = function () {
         '!src/ui_framework/doc_site/**',
         '!src/es_archiver/**',
         '!src/functional_test_runner/**',
+        '!src/dev/**',
         'bin/**',
         'ui_framework/components/**',
         'ui_framework/services/**',

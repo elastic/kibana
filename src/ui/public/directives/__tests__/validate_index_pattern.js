@@ -42,7 +42,6 @@ describe('Validate index pattern directive', function () {
     'foo>bar',
     'foo|bar',
     'foo bar',
-    'foo,bar',
   ];
 
   const goodPatterns = [
@@ -51,6 +50,7 @@ describe('Validate index pattern directive', function () {
     'foo.bar',
     '[foo-]YYYY-MM-DD',
     'foo:bar',
+    'foo,bar',
   ];
 
   const wildcardPatterns = [

@@ -1,6 +1,9 @@
 import expect from 'expect.js';
 import moment from 'moment-timezone';
-import { DateFormat } from '../date';
+import { createDateFormat } from '../date';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const DateFormat = createDateFormat(FieldFormat);
 
 describe('Date Format', function () {
   let convert;
@@ -39,7 +42,8 @@ describe('Date Format', function () {
     expect(chicagoTime).not.to.equal(phoenixTime);
   });
 
-  it('should parse date math values', function () {
-    expect(convert('2015-01-01||+1M/d')).to.be('January 1st 2015, 00:00:00.000');
+  it('should return the value itself when it cannot successfully be formatted', function () {
+    const dateMath = 'now+1M/d';
+    expect(convert(dateMath)).to.be(dateMath);
   });
 });

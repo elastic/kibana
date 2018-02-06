@@ -1,0 +1,21 @@
+[[breaking-changes-7.0]]
+== Breaking changes in 7.0
+
+This section discusses the changes that you need to be aware of when migrating
+your application to Kibana 7.0.
+
+
+[float]
+=== Removed support for tribe nodes
+*Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
+
+*Impact:* You must remove any tribe node configurations in Kibana. Consider using <<management-cross-cluster-search>> instead, which does not require kibana.yml configurations in Kibana.
+
+
+[float]
+=== Removed support for running Kibana with a global Node.js installation
+*Details:* Previous versions of Kibana would fallback to using a global installation of Node.js if the distribution included with Kibana was not found.
+Kibana 7.0 will only use the Node.js distribution included in the package.
+
+*Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
+

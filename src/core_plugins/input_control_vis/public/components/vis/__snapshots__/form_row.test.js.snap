@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders disabled control with tooltip 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  id="controlId"
+  label="test control"
+>
+  <OverlayTrigger
+    display={false}
+    isSticky={false}
+    overlay={
+      <Tooltip
+        className="inputControlDisabledTooltip"
+        isSticky={false}
+        size="auto"
+        visible={true}
+      />
+    }
+    pin={true}
+    placement="top"
+    theme="dark"
+    trigger="hover"
+  >
+    <div>
+      My Control
+    </div>
+  </OverlayTrigger>
+</EuiFormRow>
+`;
+
+exports[`renders enabled control 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  id="controlId"
+  label="test control"
+>
+  <div>
+    My Control
+  </div>
+</EuiFormRow>
+`;

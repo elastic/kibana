@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import uuid from 'uuid';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
@@ -7,7 +8,7 @@ import FieldSelect from '../../aggs/field_select';
 import Select from 'react-select';
 import YesNo from '../../yes_no';
 import ColorRules from '../../color_rules';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 class TableSeriesConfig extends Component {
 

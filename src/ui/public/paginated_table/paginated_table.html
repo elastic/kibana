@@ -8,6 +8,7 @@
       <thead data-test-subj="paginated-table-header">
         <tr>
           <th
+            scope="col"
             ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
             kbn-accessible-click
@@ -35,7 +36,7 @@
       </tbody>
       <tfoot ng-if="showTotal">
         <tr>
-          <th ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>
+          <th scope="col" ng-repeat="col in columns" class="numeric-value">{{col.total}}</th>
         </tr>
       </tfoot>
     </table>

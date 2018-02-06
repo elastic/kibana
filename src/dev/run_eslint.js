@@ -1,5 +1,5 @@
 import { parse } from 'eslint/lib/options';
-import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
+import { DEFAULT_ESLINT_PATHS } from './eslint';
 
 const options = parse(process.argv);
 
@@ -11,5 +11,5 @@ if (!process.argv.includes('--no-cache')) {
   process.argv.push('--cache');
 }
 
-// common-js is requires to that logic before this executes before loading eslint
+// common-js is required so that logic before this executes before loading eslint
 require('eslint/bin/eslint');

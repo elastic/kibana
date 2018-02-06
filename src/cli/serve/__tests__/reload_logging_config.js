@@ -7,7 +7,6 @@ import { readYamlConfig } from '../read_yaml_config';
 import expect from 'expect.js';
 
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const cli = follow(`../../../../bin/kibana`);
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
@@ -34,7 +33,8 @@ describe(`Server logging configuration`, function () {
       let asserted = false;
       let json = Infinity;
       setLoggingJson(true);
-      const child = spawn(cli, [`--config`, testConfigFile]);
+      const kibanaPath = follow(`../../../../scripts/kibana.js`);
+      const child = spawn('node', [kibanaPath, '--config', testConfigFile]);
 
       child.on('error', err => {
         done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));
@@ -79,7 +79,7 @@ describe(`Server logging configuration`, function () {
 
       function expectPlainTextLogLine(line) {
         // assert
-        const tags = `[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]`;
+        const tags = `[info][config]`;
         const status = `Reloaded logging configuration due to SIGHUP.`;
         const expected = `${tags} ${status}`;
         const actual = line.slice(-expected.length);

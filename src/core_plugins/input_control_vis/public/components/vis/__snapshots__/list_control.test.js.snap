@@ -1,12 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders ListControl 1`] = `
-<Component
+<FormRow
+  control={
+    Object {
+      "getMultiSelectDelimiter": [Function],
+      "id": "mock-list-control",
+      "isEnabled": [Function],
+      "label": "list control",
+      "options": Object {
+        "multiselect": true,
+        "type": "terms",
+      },
+      "selectOptions": Array [
+        Object {
+          "label": "choice1",
+          "value": "choice1",
+        },
+        Object {
+          "label": "choice2",
+          "value": "choice2",
+        },
+      ],
+      "type": "list",
+      "value": "",
+    }
+  }
+  controlIndex={0}
   id="mock-list-control"
   label="list control"
 >
   <Select
-    addLabelText="Add \\"{label}\\"?"
     arrowRenderer={[Function]}
     autosize={true}
     backspaceRemoves={true}
@@ -16,6 +40,7 @@ exports[`renders ListControl 1`] = `
     clearRenderer={[Function]}
     clearValueText="Clear value"
     clearable={true}
+    closeOnSelect={true}
     deleteRemoves={true}
     delimiter=","
     disabled={false}
@@ -40,6 +65,8 @@ exports[`renders ListControl 1`] = `
     onBlurResetsInput={true}
     onChange={[Function]}
     onCloseResetsInput={true}
+    onSelectResetsInput={true}
+    openOnClick={true}
     optionComponent={[Function]}
     options={
       Array [
@@ -55,15 +82,18 @@ exports[`renders ListControl 1`] = `
     }
     pageSize={5}
     placeholder="Select..."
+    removeSelected={true}
     required={false}
+    rtl={false}
     scrollMenuIntoView={true}
     searchable={true}
     simpleValue={true}
     tabSelectsValue={true}
+    trimFilter={true}
     value=""
     valueComponent={[Function]}
     valueKey="value"
     valueRenderer={[Function]}
   />
-</Component>
+</FormRow>
 `;

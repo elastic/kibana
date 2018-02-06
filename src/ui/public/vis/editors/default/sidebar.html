@@ -4,12 +4,13 @@
     ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
     name="visualizeEditor"
     novalidate
+    ng-keydown="submitEditorWithKeyboard($event)"
   ><!-- see http://goo.gl/9kgz5w -->
 
     <div
       css-truncate
       aria-label="{{:: 'Index pattern: ' + vis.indexPattern.title}}"
-      ng-if="vis.type.requiresSearch"
+      ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
       class="index-pattern"
       tabindex="0"
       id="sidebarIndexPatternTitle"
@@ -44,6 +45,7 @@
             aria-selected="{{sidebar.section === tab.name}}"
             ng-repeat="tab in vis.type.editorConfig.optionTabs"
             ng-class="{active: sidebar.section == tab.name}"
+            ng-if="vis.type.editorConfig.optionTabs.length > 1 || sidebar.showData"
           >
             <a
               class="vis-editor-subnav-link"
@@ -76,15 +78,38 @@
           </li>
 
           <li
+            tooltip="Auto apply changes"
+            tooltip-placement="bottom"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
+            ng-if="vis.type.editorConfig.enableAutoApply"
+          >
+            <button
+              data-test-subj="visualizeEditorAutoButton"
+              class="kuiButton kuiButton--basic navbar-btn-link"
+              aria-label="Auto update the visualization on every change"
+              ng-click="toggleAutoApply()"
+              ng-class="{
+                'kuiButton--primary': autoApplyEnabled,
+                'kuiButton--basic': !autoApplyEnabled
+              }"
+            >
+              <span aria-hidden="true" class="kuiIcon fa-repeat"></span>
+              <span ng-show="autoApplyEnabled">Auto Apply</span>
+            </button>
+          </li>
+
+          <li
             tooltip="Apply changes"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
+            ng-hide="autoApplyEnabled"
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
               class="kuiButton kuiButton--primary navbar-btn-link"
               type="submit"
-              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0"
+              ng-disabled="!vis.dirty || visualizeEditor.errorCount() > 0 || autoApplyEnabled"
               aria-label="Update the visualization with your changes"
             >
               <span aria-hidden="true" class="kuiIcon fa-play"></span>
@@ -96,6 +121,7 @@
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
+            ng-hide="autoApplyEnabled"
           >
             <button
               class="kuiButton kuiButton--basic navbar-btn-link"

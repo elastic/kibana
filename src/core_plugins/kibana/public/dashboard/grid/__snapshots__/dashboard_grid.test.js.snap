@@ -26,6 +26,7 @@ exports[`renders DashboardGrid 1`] = `
 >
   <div
     className=""
+    key="1"
   >
     <Connect(DashboardPanel)
       embeddableFactory={
@@ -34,7 +35,7 @@ exports[`renders DashboardGrid 1`] = `
           "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
-          "render": [Function],
+          "render": [MockFunction],
         }
       }
       getContainerApi={[Function]}
@@ -45,6 +46,7 @@ exports[`renders DashboardGrid 1`] = `
   </div>
   <div
     className=""
+    key="2"
   >
     <Connect(DashboardPanel)
       embeddableFactory={
@@ -53,7 +55,7 @@ exports[`renders DashboardGrid 1`] = `
           "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
-          "render": [Function],
+          "render": [MockFunction],
         }
       }
       getContainerApi={[Function]}

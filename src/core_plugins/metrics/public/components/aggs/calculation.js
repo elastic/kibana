@@ -10,7 +10,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
 
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 class CalculationAgg extends Component {
 
@@ -63,7 +63,8 @@ class CalculationAgg extends Component {
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('painless')}>
                 Painless Script - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code>
+                object, i.e. <code>params.&lt;name&gt;</code>.
+                To access the bucket interval (in milliseconds) use <code>params._interval</code>.
               </label>
               <input
                 id={htmlId('painless')}
