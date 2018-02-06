@@ -22,11 +22,6 @@ export default function (api) {
     }
   });
   api.addEndpointDescription('_cluster/pending_tasks');
-  api.addEndpointDescription('get_cluster/settings', {
-    patterns: [
-      '_cluster/settings'
-    ]
-  });
 
   api.addEndpointDescription('put_cluster/settings', {
     methods: ['PUT'],
