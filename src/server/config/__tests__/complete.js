@@ -14,7 +14,8 @@ describe('server/config completeMixin()', function () {
   const setup = (options = {}) => {
     const {
       settings = {},
-      configValues = {}
+      configValues = {},
+      disabledPluginSpecs = [],
     } = options;
 
     const server = {
@@ -28,7 +29,8 @@ describe('server/config completeMixin()', function () {
     const kbnServer = {
       settings,
       server,
-      config
+      config,
+      disabledPluginSpecs
     };
 
     const callCompleteMixin = () => {
@@ -129,7 +131,9 @@ describe('server/config completeMixin()', function () {
         }
       });
 
-      expect(callCompleteMixin).to.throwError('"unused" not applied');
+      expect(callCompleteMixin).to.throwError(error => {
+        expect(error.message).to.contain('"unused" setting was not applied');
+      });
     });
 
     describe('error thrown', () => {
@@ -195,6 +199,29 @@ describe('server/config completeMixin()', function () {
 
       callCompleteMixin();
       sinon.assert.calledOnce(transformDeprecations);
+    });
+  });
+
+  describe('disabled plugins', () => {
+    it('ignores config for plugins that are disabled', () => {
+      const { callCompleteMixin } = setup({
+        settings: {
+          foo: {
+            bar: {
+              unused: true
+            }
+          }
+        },
+        disabledPluginSpecs: [
+          {
+            id: 'foo',
+            getConfigPrefix: () => 'foo.bar'
+          }
+        ],
+        configValues: {}
+      });
+
+      expect(callCompleteMixin).to.not.throwError();
     });
   });
 });
