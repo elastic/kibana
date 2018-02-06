@@ -1,4 +1,3 @@
-import querystring from 'querystring';
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -17,7 +16,7 @@ uiRoutes
 
 uiModules
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope, config) {
+  .service('timefilter', function (Private, globalState, $rootScope, config, $location) {
     const Events = Private(EventsProvider);
 
     function convertISO8601(stringTime) {
@@ -107,12 +106,16 @@ uiModules
     };
 
     Timefilter.prototype.getForceNow = function () {
-      const query = querystring.parse(window.location.search.replace(/^\?/, '')).forceNow;
+      const query = $location.search().forceNow;
       if (!query) {
         return;
       }
 
-      return new Date(Date.parse(query));
+      const ticks = Date.parse(query);
+      if (isNaN(ticks)) {
+        throw new Error(`forceNow query parameter can't be parsed`);
+      }
+      return new Date(ticks);
     };
 
     Timefilter.prototype.calculateBounds = function (timeRange) {
