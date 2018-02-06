@@ -16,3 +16,4 @@
 /packages/kbn-build/dist
 /packages/kbn-build/vendor
 /packages/kbn-build/**/fixtures
+!/.eslintrc.js

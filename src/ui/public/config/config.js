@@ -15,8 +15,8 @@ module.service(`config`, function (Private, $rootScope, chrome, uiSettings) {
 
   config.getAll = () => cloneDeep(settings);
   config.get = (key, defaultValue) => getCurrentValue(key, defaultValue);
-  config.set = (key, val) => change(key, isPlainObject(val) ? angular.toJson(val) : val);
-  config.remove = key => change(key, null);
+  config.set = (key, val) => config._change(key, isPlainObject(val) ? angular.toJson(val) : val);
+  config.remove = key => config._change(key, null);
   config.isDeclared = key => key in settings;
   config.isDefault = key => !config.isDeclared(key) || nullOrEmpty(settings[key].userValue);
   config.isCustom = key => config.isDeclared(key) && !('value' in settings[key]);
@@ -57,26 +57,28 @@ any custom setting configuration watchers for "${key}" may fix this issue.`);
     return scope.$on(`change:config`, update);
   }
 
-  function change(key, value) {
+  config._change = (key, value, { _delayedUpdate = delayedUpdate } = { }) => {
     const declared = config.isDeclared(key);
     const oldVal = declared ? settings[key].userValue : undefined;
     const newVal = key in defaults && defaults[key].defaultValue === value ? null : value;
     const unchanged = oldVal === newVal;
     if (unchanged) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
     const initialVal = declared ? config.get(key) : undefined;
     localUpdate(key, newVal, initialVal);
 
-    return delayedUpdate(key, newVal)
+    return _delayedUpdate(key, newVal)
       .then(updatedSettings => {
         settings = mergeSettings(defaults, updatedSettings);
+        return true;
       })
       .catch(reason => {
         localUpdate(key, initialVal, config.get(key));
         notify.error(reason);
+        return false;
       });
-  }
+  };
 
   function localUpdate(key, newVal, oldVal) {
     patch(key, newVal);
