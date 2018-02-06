@@ -39,14 +39,22 @@ export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccesse
       });
   };
 
+  let recentlyAccessedPanel;
+  if (recentlyAccessed.length > 0) {
+    recentlyAccessedPanel = (
+      <React.Fragment>
+        <RecentlyAccessed
+          recentlyAccessed={recentlyAccessed}
+        />
+        <EuiSpacer size="l" />
+      </React.Fragment>
+    );
+  }
+
   return (
     <EuiPage className="home">
 
-      <RecentlyAccessed
-        recentlyAccessed={recentlyAccessed}
-      />
-
-      <EuiSpacer size="l" />
+      {recentlyAccessedPanel}
 
       <AddData
         addBasePath={addBasePath}
