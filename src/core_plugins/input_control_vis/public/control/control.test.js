@@ -57,31 +57,31 @@ describe('ancestors', () => {
     });
   });
 
-  describe('getAncestorSignature', () => {
+  describe('getAncestorValues', () => {
 
-    let lastAncestorSignature;
+    let lastAncestorValues;
     beforeEach(() => {
       grandParentControl.set('myGrandParentValue');
       parentControl.set('myParentValue');
       childControl.setAncestors([parentControl, grandParentControl]);
-      lastAncestorSignature = childControl.getAncestorSignature();
+      lastAncestorValues = childControl.getAncestorValues();
     });
 
     test('should be the same when ancestor values have not changed', function () {
-      const newAncestorSignature = childControl.getAncestorSignature();
-      expect(newAncestorSignature).to.be(lastAncestorSignature);
+      const newAncestorValues = childControl.getAncestorValues();
+      expect(newAncestorValues).to.eql(lastAncestorValues);
     });
 
     test('should be different when grand parent value changes', function () {
       grandParentControl.set('new myGrandParentValue');
-      const newAncestorSignature = childControl.getAncestorSignature();
-      expect(newAncestorSignature).to.not.eql(lastAncestorSignature);
+      const newAncestorValues = childControl.getAncestorValues();
+      expect(newAncestorValues).to.not.eql(lastAncestorValues);
     });
 
     test('should be different when parent value changes', function () {
       parentControl.set('new myParentValue');
-      const newAncestorSignature = childControl.getAncestorSignature();
-      expect(newAncestorSignature).to.not.eql(lastAncestorSignature);
+      const newAncestorValues = childControl.getAncestorValues();
+      expect(newAncestorValues).to.not.eql(lastAncestorValues);
     });
   });
 

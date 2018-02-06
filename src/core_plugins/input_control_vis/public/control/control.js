@@ -44,10 +44,10 @@ export class Control {
     }, false);
   }
 
-  getAncestorSignature() {
+  getAncestorValues() {
     return this.ancestors.map(ancestor => {
       return ancestor.value;
-    }).join(',');
+    });
   }
 
   getAncestorFilters() {

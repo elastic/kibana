@@ -48,12 +48,12 @@ class ListControl extends Control {
         return;
       }
 
-      const ancestorSignature = this.getAncestorSignature();
-      if (ancestorSignature === this.lastAncestorSignature) {
+      const ancestorValues = this.getAncestorValues();
+      if (_.isEqual(ancestorValues, this.lastAncestorValues)) {
         // short circuit to avoid fetching options list for same ancestor values
         return;
       }
-      this.lastAncestorSignature = ancestorSignature;
+      this.lastAncestorValues = ancestorValues;
 
       ancestorFilters = this.getAncestorFilters();
     }
