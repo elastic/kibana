@@ -1,0 +1,12 @@
+{
+  "_search/scroll/{scroll_id}": {
+    "url_params": {},
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_search/scroll/{scroll_id}",
+      "_search/scroll"
+    ]
+  }
+}
