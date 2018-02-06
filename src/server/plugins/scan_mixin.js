@@ -11,6 +11,7 @@ export async function scanMixin(kbnServer, server, config) {
     deprecation$,
     invalidVersionSpec$,
     spec$,
+    disabledSpec$,
   } = findPluginSpecs(kbnServer.settings, config);
 
   const logging$ = Observable.merge(
@@ -53,10 +54,20 @@ export async function scanMixin(kbnServer, server, config) {
     })
   );
 
-  kbnServer.pluginSpecs = await spec$
-    .merge(logging$.ignoreElements())
+  const enabledSpecs$ = spec$
     .toArray()
-    .toPromise();
+    .do(specs => {
+      kbnServer.pluginSpecs = specs;
+    });
+
+  const disabledSpecs$ = disabledSpec$
+    .toArray()
+    .do(specs => {
+      kbnServer.disabledPluginSpecs = specs;
+    });
+
+  // await completion of enabledSpecs$, disabledSpecs$, and logging$
+  await Observable.merge(logging$, enabledSpecs$, disabledSpecs$).toPromise();
 
   kbnServer.plugins = kbnServer.pluginSpecs.map(spec => (
     new Plugin(kbnServer, spec)
