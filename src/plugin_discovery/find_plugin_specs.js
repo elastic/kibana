@@ -124,7 +124,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
       .mergeMap(result => result.enabledSpecs),
 
     // all disabled PluginSpec objects
-    disabledSpecs$: extendConfig$
+    disabledSpec$: extendConfig$
       .mergeMap(result => result.disabledSpecs),
 
     // all PluginSpec objects that were disabled because their version was incompatible
