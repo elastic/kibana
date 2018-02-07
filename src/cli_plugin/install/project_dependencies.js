@@ -7,15 +7,8 @@ const LINK_DEP = 'link:';
 const isKibanaDep = depVersion =>
   depVersion.startsWith(`${LINK_DEP}../../kibana/`);
 
-export async function prepareProjectDependencies(settings, logger) {
-  await handleLinkDependencies(
-    settings.workingPath,
-    logger
-  );
-}
-
-async function handleLinkDependencies(pluginPath) {
-  const packageJsonPath = path.resolve(pluginPath, 'package.json');
+export async function prepareProjectDependencies(settings) {
+  const packageJsonPath = path.resolve(settings.workingPath, 'package.json');
   const rawPkgJson = await fs.readFile(packageJsonPath, 'utf-8');
   const pkgJson = JSON.parse(rawPkgJson);
 

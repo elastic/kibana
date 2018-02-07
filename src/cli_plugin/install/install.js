@@ -29,7 +29,7 @@ export default async function install(settings, logger) {
 
     assertVersion(settings);
 
-    await prepareProjectDependencies(settings, logger);
+    await prepareProjectDependencies(settings);
 
     await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
 
