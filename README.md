@@ -1,10 +1,9 @@
 # backport
 
 [![Build Status](https://travis-ci.org/sqren/backport.svg?branch=master)](https://travis-ci.org/sqren/backport)
+[![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
 [![dependencies Status](https://david-dm.org/sqren/backport/status.svg)](https://david-dm.org/sqren/backport)
 [![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
-[![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](#badge)
 
 A simple CLI tool that automates the process of backporting commits
 
@@ -39,6 +38,8 @@ The CLI will ask you a few questions and then do those steps for you. You can ev
 npm install -g backport
 ```
 
+After installation you must update [the global config](#global-configuration) with your Github username and a Github access token. 
+
 ## Usage
 
 Run the CLI in your project folder:
@@ -47,7 +48,7 @@ Run the CLI in your project folder:
 $ backport
 ```
 
-Follow the steps. You can use the `arrow keys` to choose options and `Enter` to select.
+Follow the steps. You can use the `arrow keys` to choose options, <space> to select checkboxes and `Enter` to proceed.
 
 ### Options
 
@@ -66,68 +67,79 @@ Follow the steps. You can use the `arrow keys` to choose options and `Enter` to 
 
 ### Global configuration
 
-The first time you run `backport` a sample configuration file will be created
-in `~/.backport/config.json`. You need to update the config file with
-your Github username and a Github Access Token (can be created
-[here](https://github.com/settings/tokens/new)).
+During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with your Github username and a [Github Access Token](https://github.com/settings/tokens/new)
 
-<details>
-<summary>View "config.json" sample</summary>
-
-```js
+Example: 
+```json
 {
-  // Github personal access token. Create here: https://github.com/settings/tokens/new
-  // Please check "Repo (Full control of private repositories)"
-  "accessToken": "",
-
-  // Github username, eg. kimchy
-  "username": "",
-
-  // Override project-specific setting
-  "projects": [
-    {
-      "upstream": "elastic/kibana",
-      "branches": ["6.x", "6.1", "6.0"]
-    }
-  ]
+  "accessToken": "b4914600112ba18af7798b6c1a1363728ae1d96f",
+  "username": "sqren"
 }
 ```
 
-</details>
+##### `accessToken` (string) **required**
+A personal access token can be created here: https://github.com/settings/tokens/new
+
+Access scopes:
+ - Private repository: "Repo (Full control of private repositories)"
+ - Public repository:  "public_repo (Access public repositories)"
+
+<img width="578" alt="Github Personal Access Token scopes for private repositories" src="https://user-images.githubusercontent.com/209966/35889278-3527877c-0b9b-11e8-8815-0d23899e872c.png">
+
+##### `username` (string) **required**
+Your Github username
+
+##### `projects` (object[]) 
+A list of project-specific settings. This is useful if you want to override project-specific configurations.
+[Read more about the project-specific configuration](#project-specific-configuration)
 
 ### Project-specific configuration
+`.backportrc.json` can be added to every project where you use `backport`. 
 
-Add `.backportrc.json` to the root of your project with the following structure:
-
-<details>
-<summary>View ".backportrc.json" sample</summary>
-
-```js
+Example:
+```json
 {
   "upstream": "elastic/kibana",
-
-  // You can pre-select branches you use often
   "branches": [
     { "name": "6.x", "checked": true },
-    { "name": "6.1", "checked": true },
     "6.0"
   ],
-
-  // Only allow picking own commits to backport
   "own": true,
-
-  // Backport multiple commits
   "multipleCommits": false,
-
-  // Backport to multiple branches
   "multipleBranches": true,
-
-  // Labels will be added to the PR
   "labels": ["backport"]
 }
 ```
 
-</details>
+##### `upstream` (string) **required**
+Github organization/user and repository name separated with forward slash.
+
+##### `branches` (string[] | object[])
+List of branches that will be available to backport to. The list can contain string and objects. If a string is given, it must be the name of a branch, if an object is given it must use the format `{"name": "<string>", "checked": <boolean>}` where `name` is the branch name and `"checked"` indicates whether the branch should be auto-selected. It is useful to auto-select branches you often backport to.
+
+##### `own` (boolean)
+`true`: only commits by you will be available to backport. 
+
+`false`: all commits in the repository will be displayed. 
+
+Default: `true`
+
+##### `multipleCommits` (boolean)
+`true`: you will be able to select multiple commits to backport. You will use <space> to tick, and <enter> to confirm you selection. 
+ 
+`false`: you will only be able to select a single commit. You will use <enter> to confirm the selected item.
+ 
+Default: `false`
+
+##### `multipleBranches` (boolean)
+`true`: you will be able to select multiple branches to backport to. You will use <space> to tick, and <enter> to confirm you selection. 
+ 
+`false`: you will only be able to select a single branch. You will use <enter> to confirm the selected item.
+ 
+Default: `true`
+
+##### `labels` (string[])
+List of labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs
 
 ## Troubleshooting
 
