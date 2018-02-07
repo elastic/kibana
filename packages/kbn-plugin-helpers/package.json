@@ -7,10 +7,6 @@
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },
-  "keywords": [
-    "kibana",
-    "kibana-plugin"
-  ],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "scripts": {
