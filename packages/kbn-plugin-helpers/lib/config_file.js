@@ -26,7 +26,7 @@ module.exports = function (root) {
     }
   });
 
-  const deprecationMsg = 'has been removed from `@elastic/plugin-helpers`. ' +
+  const deprecationMsg = 'has been removed from `@kbn/plugin-helpers`. ' +
     'During development your plugin must be located in `../kibana-extra/{pluginName}` ' +
     'relative to the Kibana directory to work with this package.\n';
 
