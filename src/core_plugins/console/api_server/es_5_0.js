@@ -1,11 +1,10 @@
 let _ = require("lodash");
 let Api = require('./api');
+import { getSpec } from './spec'
 let parts = [
   require('./es_5_0/aliases'),
   require('./es_5_0/aggregations'),
-  require('./es_5_0/cat'),
   require('./es_5_0/cluster'),
-  require('./es_5_0/count'),
   require('./es_5_0/document'),
   require('./es_5_0/field_stats'),
   require('./es_5_0/filter'),
@@ -28,6 +27,11 @@ function ES_5_0() {
   _.each(parts, function (apiSection) {
     apiSection(this);
   }, this);
+
+  const spec = getSpec()
+  Object.keys(spec).forEach(endpoint => {
+    this.addEndpointDescription(endpoint, spec[endpoint])
+  })
 }
 
 ES_5_0.prototype = _.create(Api.prototype, { 'constructor': ES_5_0 });

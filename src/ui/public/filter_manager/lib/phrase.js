@@ -35,10 +35,15 @@ export function getPhraseScript(field, value) {
 // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
 export function getConvertedValueForField(field, value) {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
-    if (value !== 1 && value !== 0) {
-      throw new Error('Boolean scripted fields must return true or false');
+    if ([1, 'true'].includes(value)) {
+      return true;
     }
-    return value === 1 ? true : false;
+    else if ([0, 'false'].includes(value)) {
+      return false;
+    }
+    else {
+      throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
+    }
   }
   return value;
 }

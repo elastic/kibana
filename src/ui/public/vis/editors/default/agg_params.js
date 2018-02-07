@@ -1,10 +1,12 @@
 import $ from 'jquery';
+import _ from 'lodash';
 import aggSelectHtml from './agg_select.html';
 import advancedToggleHtml from './advanced_toggle.html';
 import 'ui/filters/match_any';
 import './agg_param';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { uiModules } from 'ui/modules';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
 
 uiModules
@@ -53,6 +55,11 @@ uiModules
         let $aggParamEditorsScope;
 
         function updateAggParamEditor() {
+          $scope.aggHelpLink = null;
+          if (_.has($scope, 'agg.type.name')) {
+            $scope.aggHelpLink = _.get(documentationLinks, ['aggs', $scope.agg.type.name]);
+          }
+
           if ($aggParamEditors) {
             $aggParamEditors.remove();
             $aggParamEditors = null;

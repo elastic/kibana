@@ -2,6 +2,7 @@ import { defaults, get } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import { AppBootstrap } from './bootstrap';
 
 export function uiRenderMixin(kbnServer, server, config) {
 
@@ -29,6 +30,39 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
+
+  server.route({
+    path: '/bundles/app/{id}/bootstrap.js',
+    method: 'GET',
+    config: { auth: false },
+    async handler(request, reply) {
+      try {
+        const { id } = request.params;
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
+        }
+
+        const bootstrap = new AppBootstrap({
+          templateData: {
+            appId: app.getId(),
+            bundlePath: `${config.get('server.basePath')}/bundles`
+          },
+          translations: await request.getUiTranslations()
+        });
+
+        const body = await bootstrap.getJsFile();
+        const etag = await bootstrap.getJsFileHash();
+
+        reply(body)
+          .header('cache-control', 'must-revalidate')
+          .header('content-type', 'application/javascript')
+          .etag(etag);
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
 
   server.route({
     path: '/app/{id}',

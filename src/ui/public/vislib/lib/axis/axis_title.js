@@ -43,7 +43,7 @@ export function VislibLibAxisTitleProvider() {
               return `translate(0,${height / 2}) rotate(270)`;
             })
             .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'hanging')
+            .attr('dominant-baseline', 'hanging')
             .text(config.get('title.text'))
             .node()
             .getBBox();

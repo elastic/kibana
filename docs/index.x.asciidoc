@@ -1,0 +1,10 @@
+[[kibana-guide]]
+= Kibana User Guide
+
+:include-xpack:  true
+:lang:           en
+:kib-repo-dir:   {docdir}
+:xes-repo-dir:   {docdir}/../../elasticsearch-extra/x-pack-elasticsearch/docs/{lang}
+:xkb-repo-dir:   {docdir}/../../kibana-extra/x-pack-kibana/docs/{lang}
+
+include::{xkb-repo-dir}/index.asciidoc[]

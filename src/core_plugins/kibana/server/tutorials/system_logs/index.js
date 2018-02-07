@@ -16,7 +16,7 @@ export function systemLogsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Filebeat-syslog-dashboard',
+          id: 'Filebeat-syslog-dashboard',
           linkLabel: 'System logs dashboard',
           isOverview: true
         }

@@ -4,7 +4,7 @@ import editorHtml from '../controls/field.html';
 import { BaseParamTypeProvider } from './base';
 import 'ui/filters/field_type';
 import { IndexedArray } from 'ui/indexed_array';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 
 export function FieldParamTypeProvider(Private, $filter) {
   const BaseParamType = Private(BaseParamTypeProvider);
