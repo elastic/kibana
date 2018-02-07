@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import './index_header';
 import './indexed_fields_table';
-import './scripted_fields_table';
+// import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
@@ -10,6 +10,8 @@ import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+
+import { renderScriptedFieldsTable, destroyScriptedFieldsTable } from './scripted_fields_table';
 
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
@@ -79,6 +81,7 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
+      $scope.tryToRenderScriptedFieldsTable();
       $state.save();
     };
 
@@ -140,4 +143,43 @@ uiModules.get('apps/management')
       $scope.indexPattern.timeFieldName = field.name;
       return $scope.indexPattern.save();
     };
+
+    $scope.tryToRenderScriptedFieldsTable = function () {
+      if ($state.tab === 'scriptedFields') {
+        $scope.$$postDigest($scope.renderScriptedFieldsTable);
+      }
+    };
+
+    $scope.renderScriptedFieldsTable = function () {
+      renderScriptedFieldsTable(
+        $scope.indexPattern,
+        $scope.fieldFilter,
+        $scope.scriptedFieldLanguageFilter,
+        {
+          redirectToRoute: (obj, route) => {
+            $scope.kbnUrl.redirectToRoute(obj, route);
+            $scope.$apply();
+          },
+          getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+        }
+      );
+    };
+
+    $scope.$watch('fieldFilter', () => {
+      if ($scope.fieldFilter !== undefined && $state.tab === 'scriptedFields') {
+        $scope.renderScriptedFieldsTable();
+      }
+    });
+
+    $scope.$watch('scriptedFieldLanguageFilter', () => {
+      if ($scope.scriptedFieldLanguageFilter !== undefined && $state.tab === 'scriptedFields') {
+        $scope.renderScriptedFieldsTable();
+      }
+    });
+
+    $scope.$on('$destory', () => {
+      destroyScriptedFieldsTable();
+    });
+
+    $scope.tryToRenderScriptedFieldsTable();
   });
