@@ -17,18 +17,16 @@ export async function prepareProjectDependencies(settings) {
   for (const depName of Object.keys(deps)) {
     const depVersion = deps[depName];
 
-    if (depVersion.startsWith(LINK_DEP)) {
-      if (isKibanaDep) {
-        // We found a `link:` dependency that relies on a Kibana package. These
-        // packages are already present in Kibana's `node_modules` folder so we
-        // don't need to take any action.
-      } else {
-        // We currently only allow `link:` dependencies for Kibana packages, as
-        // those don't require setting up symlinks.
-        throw new Error(
-          'This plugin is using `link:` dependencies for non-Kibana packages'
-        );
-      }
+    // Kibana currently only supports `link:` dependencies on Kibana's own
+    // packages, as these are packaged into the `node_modules` folder when
+    // Kibana is built, so we don't need to take any action to enable
+    // `require(...)` to resolve for these packages.
+    if (depVersion.startsWith(LINK_DEP) && !isKibanaDep(depVersion)) {
+      // For non-Kibana packages we need to set up symlinks during the
+      // installation process, but this is not something we support yet.
+      throw new Error(
+        'This plugin is using `link:` dependencies for non-Kibana packages'
+      );
     }
   }
 }
