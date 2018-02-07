@@ -21,6 +21,8 @@ export function workpad(server) {
   function createWorkpad(req, id) {
     const savedObjectsClient = req.getSavedObjectsClient();
 
+    if (!req.payload) return Promise.resolve(boom.badRequest('A workpad payload is required'));
+
     const now = new Date().toISOString();
     return savedObjectsClient.create(
       CANVAS_TYPE,
