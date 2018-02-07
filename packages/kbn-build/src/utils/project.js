@@ -1,4 +1,5 @@
 import path from 'path';
+import { inspect } from 'util';
 import chalk from 'chalk';
 
 import {
@@ -80,6 +81,37 @@ export class Project {
 
   hasScript(name) {
     return name in this.scripts;
+  }
+
+  getExecutables() {
+    const raw = this.json.bin;
+
+    if (!raw) {
+      return {};
+    }
+
+    if (typeof raw === 'string') {
+      return {
+        [this.name]: path.resolve(this.path, raw),
+      };
+    }
+
+    if (typeof raw === 'object') {
+      const binsConfig = {};
+      for (const binName of Object.keys(raw)) {
+        binsConfig[binName] = path.resolve(this.path, raw[binName]);
+      }
+      return binsConfig;
+    }
+
+    throw new CliError(
+      `[${this.name}] has an invalid "bin" field in its package.json, ` +
+        `expected an object or a string`,
+      {
+        package: `${this.name} (${this.packageJsonLocation})`,
+        binConfig: inspect(raw),
+      }
+    );
   }
 
   async runScript(scriptName, args = []) {

@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 
 import { topologicallyBatchProjects } from '../utils/projects';
+import { linkProjectExecutables } from '../utils/link_project_executables';
 
 export const name = 'bootstrap';
 export const description = 'Install dependencies and crosslink projects';
@@ -20,4 +21,9 @@ export async function run(projects, projectGraph, { options }) {
       }
     }
   }
+
+  console.log(
+    chalk.bold('\nInstalls completed, linking package executables:\n')
+  );
+  await linkProjectExecutables(projects, projectGraph);
 }

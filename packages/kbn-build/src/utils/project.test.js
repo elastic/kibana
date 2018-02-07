@@ -103,3 +103,42 @@ describe('#ensureValidProjectDependency', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 });
+
+describe('#getExecutables()', () => {
+  test('converts bin:string to an object with absolute paths', () => {
+    const project = createProjectWith({
+      bin: './bin/script.js',
+    });
+
+    expect(project.getExecutables()).toEqual({
+      kibana: resolve(rootPath, 'bin/script.js'),
+    });
+  });
+
+  test('resolves absolute paths when bin is an object', () => {
+    const project = createProjectWith({
+      bin: {
+        script1: 'bin/script1.js',
+        script2: './bin/script2.js',
+      },
+    });
+
+    expect(project.getExecutables()).toEqual({
+      script1: resolve(rootPath, 'bin/script1.js'),
+      script2: resolve(rootPath, 'bin/script2.js'),
+    });
+  });
+
+  test('returns empty object when bin is missing, or falsy', () => {
+    expect(createProjectWith({}).getExecutables()).toEqual({});
+    expect(createProjectWith({ bin: null }).getExecutables()).toEqual({});
+    expect(createProjectWith({ bin: false }).getExecutables()).toEqual({});
+    expect(createProjectWith({ bin: 0 }).getExecutables()).toEqual({});
+  });
+
+  test('throws CliError when bin is something strange', () => {
+    expect(() =>
+      createProjectWith({ bin: 1 }).getExecutables()
+    ).toThrowErrorMatchingSnapshot();
+  });
+});
