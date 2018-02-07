@@ -56,23 +56,6 @@ export default function (api) {
       "timeout": "1m"
     }
   });
-  api.addEndpointDescription('create_doc', {
-    methods: ['PUT', 'POST'],
-    patterns: [
-      "{index}/{type}/{id}/_create"
-    ],
-    url_params: {
-      "version": 1,
-      "version_type": ["external", "internal"],
-      "routing": "",
-      "parent": "",
-      "timestamp": "",
-      "ttl": "5m",
-      "consistency": ["qurom", "one", "all"],
-      "refresh": "__flag__",
-      "timeout": "1m"
-    }
-  });
   api.addEndpointDescription('index_doc_no_id', {
     methods: ['POST'],
     patterns: [
