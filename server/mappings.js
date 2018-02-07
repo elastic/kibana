@@ -1,4 +1,4 @@
-import { CANVAS_TYPE } from './common/lib/constants';
+import { CANVAS_TYPE } from '../common/lib/constants';
 
 export const mappings = {
   [CANVAS_TYPE]: {

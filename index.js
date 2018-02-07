@@ -1,6 +1,6 @@
 import init from './init';
 import { functionsRegistry } from './common/lib/functions_registry';
-import { mappings } from './mappings';
+import { mappings } from './server/mappings';
 
 export default function(kibana) {
   return new kibana.Plugin({
