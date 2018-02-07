@@ -27,7 +27,7 @@ const createProject = (fields, path = '.') =>
 expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-beforeEach(() => {
+afterEach(() => {
   jest.resetAllMocks();
 });
 
