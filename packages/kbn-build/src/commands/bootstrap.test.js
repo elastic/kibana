@@ -3,8 +3,9 @@ jest.mock('../utils/scripts', () => ({
   runScriptInPackageStreaming: jest.fn(),
 }));
 
-import path from 'path';
+import { resolve } from 'path';
 
+import { absolutePathSnaphotSerializer } from '../test_helpers';
 import { run } from './bootstrap';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
@@ -17,8 +18,10 @@ const createProject = (fields, path = '.') =>
       version: '1.0.0',
       ...fields,
     },
-    path
+    resolve(__dirname, path)
   );
+
+expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -127,9 +130,6 @@ test('handles "frozen-lockfile"', async () => {
 });
 
 test('calls "kbn:bootstrap" script after installing deps, if it exists', async () => {
-  // We mock `path.resolve` to avoid having absolute paths in the `project`
-  const resolveSpy = jest.spyOn(path, 'resolve').mockImplementation(path.join);
-
   const kibana = createProject({
     dependencies: {
       bar: 'link:packages/bar',
@@ -144,8 +144,6 @@ test('calls "kbn:bootstrap" script after installing deps, if it exists', async (
     },
     'packages/bar'
   );
-
-  resolveSpy.mockRestore();
 
   const projects = new Map([['kibana', kibana], ['bar', bar]]);
   const projectGraph = buildProjectGraph(projects);

@@ -14,13 +14,13 @@ Array [
         },
         "version": "1.0.0",
       },
-      "nodeModulesLocation": "packages/bar/node_modules",
-      "packageJsonLocation": "packages/bar/package.json",
-      "path": "packages/bar",
+      "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
+      "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
+      "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
       "scripts": Object {
         "kbn:bootstrap": "node ./bar.js",
       },
-      "targetLocation": "packages/bar/target",
+      "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
     },
   ],
 ]
@@ -29,7 +29,7 @@ Array [
 exports[`does not run installer if no deps in package: install in dir 1`] = `
 Array [
   Array [
-    ".",
+    "<repoRoot>/packages/kbn-build/src/commands",
     Array [],
   ],
 ]
@@ -49,7 +49,7 @@ Installing dependencies in [kibana]:
   ],
   Array [
     "
-Installs completed, bootstrapping packages:
+Installs completed, linking package executables:
 ",
   ],
   Array [
@@ -63,7 +63,7 @@ Bootstrapping completed!
 exports[`handles "frozen-lockfile": install in dir 1`] = `
 Array [
   Array [
-    ".",
+    "<repoRoot>/packages/kbn-build/src/commands",
     Array [
       "--frozen-lockfile",
     ],
@@ -74,15 +74,15 @@ Array [
 exports[`handles dependencies of dependencies: install in dir 1`] = `
 Array [
   Array [
-    "packages/bar",
+    "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
     Array [],
   ],
   Array [
-    ".",
+    "<repoRoot>/packages/kbn-build/src/commands",
     Array [],
   ],
   Array [
-    "packages/foo",
+    "<repoRoot>/packages/kbn-build/src/commands/packages/foo",
     Array [],
   ],
 ]
@@ -114,7 +114,7 @@ Installing dependencies in [foo]:
   ],
   Array [
     "
-Installs completed, bootstrapping packages:
+Installs completed, linking package executables:
 ",
   ],
   Array [
