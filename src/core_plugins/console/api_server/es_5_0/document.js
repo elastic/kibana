@@ -26,18 +26,6 @@ export default function (api) {
       "_source_includes": ""
     }
   });
-  api.addEndpointDescription('_delete_doc', {
-    methods: ['DELETE'],
-    patterns: [
-      "{index}/{type}/{id}"
-    ],
-    url_params: {
-      "version": 1,
-      "version_type": ["external", "internal"],
-      "routing": "",
-      "parent": ""
-    }
-  });
   api.addEndpointDescription('index_doc', {
     methods: ['PUT', 'POST'],
     patterns: [
