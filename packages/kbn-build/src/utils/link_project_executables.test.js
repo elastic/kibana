@@ -1,5 +1,6 @@
-import { resolve, sep as pathSep } from 'path';
+import { resolve } from 'path';
 
+import { absolutePathSnaphotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 
@@ -33,34 +34,18 @@ const projectGraph = new Map([
   ['bar', []],
 ]);
 
-function assertFsMocksMatchSnapshot() {
+function getFsMockCalls() {
   const fs = require('./fs');
-  const repoRoot = resolve(__dirname, '../../../../');
-
-  function rewriteAbsoluteArgs(calls) {
-    return calls.map(args =>
-      args.map(
-        arg =>
-          typeof arg === 'string' && arg.startsWith(repoRoot)
-            ? arg
-                .replace(repoRoot, '<repoRoot>')
-                .split(pathSep)
-                .join('/')
-            : arg
-      )
-    );
-  }
-
-  const fsModuleCalls = {};
-  Object.keys(fs).forEach(key => {
+  const fsMockCalls = {};
+  Object.keys(fs).map(key => {
     if (jest.isMockFunction(fs[key])) {
-      fsModuleCalls[key] = rewriteAbsoluteArgs(fs[key].mock.calls);
+      fsMockCalls[key] = fs[key].mock.calls;
     }
   });
-
-  expect(fsModuleCalls).toMatchSnapshot('fs module calls');
+  return fsMockCalls;
 }
 
+expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
 jest.mock('./fs');
 afterEach(() => {
   jest.resetAllMocks();
@@ -72,7 +57,7 @@ describe('bin script points nowhere', () => {
     fs.isFile.mockReturnValue(false);
 
     await linkProjectExecutables(projectsByName, projectGraph);
-    assertFsMocksMatchSnapshot();
+    expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
   });
 });
 
@@ -82,6 +67,6 @@ describe('bin script points to a file', () => {
     fs.isFile.mockReturnValue(true);
 
     await linkProjectExecutables(projectsByName, projectGraph);
-    assertFsMocksMatchSnapshot();
+    expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
   });
 });
