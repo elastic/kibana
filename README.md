@@ -48,7 +48,7 @@ Run the CLI in your project folder:
 $ backport
 ```
 
-Follow the steps. You can use the `arrow keys` to choose options, <space> to select checkboxes and `Enter` to proceed.
+Follow the steps. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
 
 ### Options
 
@@ -125,16 +125,16 @@ List of branches that will be available to backport to. The list can contain str
 Default: `true`
 
 ##### `multipleCommits` (boolean)
-`true`: you will be able to select multiple commits to backport. You will use <space> to tick, and <enter> to confirm you selection. 
+`true`: you will be able to select multiple commits to backport. You will use `<space>` to select, and `<enter>` to confirm you selection. 
  
-`false`: you will only be able to select a single commit. You will use <enter> to confirm the selected item.
+`false`: you will only be able to select a single commit. You will use `<enter>` to confirm the selected item.
  
 Default: `false`
 
 ##### `multipleBranches` (boolean)
-`true`: you will be able to select multiple branches to backport to. You will use <space> to tick, and <enter> to confirm you selection. 
+`true`: you will be able to select multiple branches to backport to. You will use `<space>` to select, and <enter> to confirm you selection. 
  
-`false`: you will only be able to select a single branch. You will use <enter> to confirm the selected item.
+`false`: you will only be able to select a single branch. You will use `<enter>` to confirm the selected item.
  
 Default: `true`
 
