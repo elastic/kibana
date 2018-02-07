@@ -54,6 +54,11 @@ Installs completed, linking package executables:
   ],
   Array [
     "
+Linking executables completed, running \`kbn:bootstrap\` scripts
+",
+  ],
+  Array [
+    "
 Bootstrapping completed!
 ",
   ],
@@ -115,6 +120,11 @@ Installing dependencies in [foo]:
   Array [
     "
 Installs completed, linking package executables:
+",
+  ],
+  Array [
+    "
+Linking executables completed, running \`kbn:bootstrap\` scripts
 ",
   ],
   Array [

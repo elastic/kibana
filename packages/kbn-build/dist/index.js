@@ -23350,7 +23350,6 @@ let run = exports.run = (() => {
     }
 
     console.log(_chalk2.default.bold('\nInstalls completed, linking package executables:\n'));
-
     yield (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
 
     /**
@@ -23359,6 +23358,7 @@ let run = exports.run = (() => {
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
+    console.log(_chalk2.default.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
     yield parallelizeBatches(batchedProjects, function (pkg) {
       if (pkg.hasScript('kbn:bootstrap')) {
         return pkg.runScriptStreaming('kbn:bootstrap');

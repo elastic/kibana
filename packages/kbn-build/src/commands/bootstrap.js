@@ -25,7 +25,6 @@ export async function run(projects, projectGraph, { options }) {
   console.log(
     chalk.bold('\nInstalls completed, linking package executables:\n')
   );
-
   await linkProjectExecutables(projects, projectGraph);
 
   /**
@@ -34,6 +33,11 @@ export async function run(projects, projectGraph, { options }) {
    * transpiled before they can be used. Ideally we shouldn't do this unless we
    * have to, as it will slow down the bootstrapping process.
    */
+  console.log(
+    chalk.bold(
+      '\nLinking executables completed, running `kbn:bootstrap` scripts\n'
+    )
+  );
   await parallelizeBatches(batchedProjects, pkg => {
     if (pkg.hasScript('kbn:bootstrap')) {
       return pkg.runScriptStreaming('kbn:bootstrap');
