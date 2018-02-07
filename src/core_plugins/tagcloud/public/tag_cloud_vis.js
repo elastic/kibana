@@ -1,18 +1,17 @@
 import 'plugins/tagcloud/tag_cloud.less';
-import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { TagCloudVisualization } from './tag_cloud_controller';
 import image from './images/icon-tagcloud.svg';
 
 VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  return VisFactory.createAngularVisualization({
+  return VisFactory.createReactVisualization({
     name: 'tagcloud',
     title: 'Tag Cloud',
     image,
@@ -25,7 +24,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
         minFontSize: 18,
         maxFontSize: 72
       },
-      template: tagCloudTemplate,
+      component: TagCloudVisualization,
     },
     responseHandler: 'tabify',
     editorConfig: {

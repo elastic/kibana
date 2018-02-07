@@ -27,6 +27,13 @@ class TagCloud extends EventEmitter {
 
     //DOM
     this._element = domNode;
+
+    this._errorDiv = document.createElement('div');
+    this._errorDiv.className = 'tagcloud-incomplete-message';
+    this._errorDiv.textContent = 'The container is too small to display the entire cloud. Tags might be cropped or omitted.';
+    this._errorDiv.style.display = false;
+    this._element.append(this._errorDiv);
+
     this._d3SvgContainer = d3.select(this._element).append('svg');
     this._svgGroup = this._d3SvgContainer.append('g');
     this._size = [1, 1];
@@ -103,10 +110,6 @@ class TagCloud extends EventEmitter {
     this._element.innerHTML = '';
   }
 
-  getStatus() {
-    return this._allInViewBox ? TagCloud.STATUS.COMPLETE : TagCloud.STATUS.INCOMPLETE;
-  }
-
   _updateContainerSize() {
     this._d3SvgContainer.attr('width', this._size[0]);
     this._d3SvgContainer.attr('height', this._size[1]);
@@ -150,6 +153,7 @@ class TagCloud extends EventEmitter {
     if (this._pendingJob) {
       this._processPendingJob();//pick up next job
     } else {
+      this._errorDiv.style.display = this._allInViewBox ? 'none' : 'block';
       this._completedJob = job;
       this.emit('renderComplete');
     }
