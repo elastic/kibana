@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calls "kbn:bootstrap" script after installing deps, if it exists: script 1`] = `
+Array [
+  Array [
+    "kbn:bootstrap",
+    Array [],
+    Project {
+      "allDependencies": Object {},
+      "json": Object {
+        "name": "bar",
+        "scripts": Object {
+          "kbn:bootstrap": "node ./bar.js",
+        },
+        "version": "1.0.0",
+      },
+      "nodeModulesLocation": "packages/bar/node_modules",
+      "packageJsonLocation": "packages/bar/package.json",
+      "path": "packages/bar",
+      "scripts": Object {
+        "kbn:bootstrap": "node ./bar.js",
+      },
+      "targetLocation": "packages/bar/target",
+    },
+  ],
+]
+`;
+
+exports[`does not run installer if no deps in package: install in dir 1`] = `
+Array [
+  Array [
+    ".",
+    Array [],
+  ],
+]
+`;
+
+exports[`does not run installer if no deps in package: logs 1`] = `
+Array [
+  Array [
+    "
+Running installs in topological order:",
+  ],
+  Array [
+    "
+
+Installing dependencies in [kibana]:
+",
+  ],
+  Array [
+    "
+Installs completed, bootstrapping packages:
+",
+  ],
+  Array [
+    "
+Bootstrapping completed!
+",
+  ],
+]
+`;
+
+exports[`handles "frozen-lockfile": install in dir 1`] = `
+Array [
+  Array [
+    ".",
+    Array [
+      "--frozen-lockfile",
+    ],
+  ],
+]
+`;
+
+exports[`handles dependencies of dependencies: install in dir 1`] = `
+Array [
+  Array [
+    "packages/bar",
+    Array [],
+  ],
+  Array [
+    ".",
+    Array [],
+  ],
+  Array [
+    "packages/foo",
+    Array [],
+  ],
+]
+`;
+
+exports[`handles dependencies of dependencies: logs 1`] = `
+Array [
+  Array [
+    "
+Running installs in topological order:",
+  ],
+  Array [
+    "
+
+Installing dependencies in [bar]:
+",
+  ],
+  Array [
+    "
+
+Installing dependencies in [kibana]:
+",
+  ],
+  Array [
+    "
+
+Installing dependencies in [foo]:
+",
+  ],
+  Array [
+    "
+Installs completed, bootstrapping packages:
+",
+  ],
+  Array [
+    "
+Bootstrapping completed!
+",
+  ],
+]
+`;
