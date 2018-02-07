@@ -1,6 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calls "kbn:bootstrap" script after installing deps, if it exists: script 1`] = `
+exports[`calls "kbn:bootstrap" scripts and links executables after installing deps: link bins 1`] = `
+Array [
+  Array [
+    Map {
+      "kibana" => Project {
+        "allDependencies": Object {
+          "bar": "link:packages/bar",
+        },
+        "json": Object {
+          "dependencies": Object {
+            "bar": "link:packages/bar",
+          },
+          "name": "kibana",
+          "version": "1.0.0",
+        },
+        "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/node_modules",
+        "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/package.json",
+        "path": "<repoRoot>/packages/kbn-build/src/commands",
+        "scripts": Object {},
+        "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/target",
+      },
+      "bar" => Project {
+        "allDependencies": Object {},
+        "json": Object {
+          "name": "bar",
+          "scripts": Object {
+            "kbn:bootstrap": "node ./bar.js",
+          },
+          "version": "1.0.0",
+        },
+        "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
+        "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
+        "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+        "scripts": Object {
+          "kbn:bootstrap": "node ./bar.js",
+        },
+        "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
+      },
+    },
+    Map {
+      "kibana" => Array [
+        Project {
+          "allDependencies": Object {},
+          "json": Object {
+            "name": "bar",
+            "scripts": Object {
+              "kbn:bootstrap": "node ./bar.js",
+            },
+            "version": "1.0.0",
+          },
+          "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
+          "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
+          "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+          "scripts": Object {
+            "kbn:bootstrap": "node ./bar.js",
+          },
+          "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
+        },
+      ],
+      "bar" => Array [],
+    },
+  ],
+]
+`;
+
+exports[`calls "kbn:bootstrap" scripts and links executables after installing deps: script 1`] = `
 Array [
   Array [
     "kbn:bootstrap",
