@@ -50,7 +50,7 @@ program
   .command('test')
   .description('Run the server and browser tests')
   .on('--help', docs('test/all'))
-  .action(taskRunner(function (command) {
+  .action(taskRunner(function () {
     run('testAll');
   }));
 
