@@ -62,8 +62,36 @@ class MarkdownVisComponent extends Component {
    * actually changed. So we prevent calling render if none of it changed.
    */
   shouldComponentUpdate(props, state) {
-    return props.fontSize !== this.props.fontSize ||
+    const shouldUpdate = props.fontSize !== this.props.fontSize ||
         state.renderedMarkdown !== this.state.renderedMarkdown;
+
+    // If we won't update, we need to trigger the renderComplete method here,
+    // since we will never render and thus never get to componentDidUpdate.
+    if (!shouldUpdate) {
+      this.props.renderComplete();
+    }
+
+    return shouldUpdate;
+  }
+
+  /**
+   * Will be called after the first render when the component is present in the DOM.
+   *
+   * We call renderComplete here, to signal, that we are done with rendering.
+   */
+  componentDidMount() {
+    this.props.renderComplete();
+  }
+
+  /**
+   * Will be called after the component has been updated and the changes has been
+   * flushed into the DOM.
+   *
+   * We will use this to signal that we are done rendering by calling the
+   * renderComplete property.
+   */
+  componentDidUpdate() {
+    this.props.renderComplete();
   }
 
   /**
