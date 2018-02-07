@@ -1,5 +1,6 @@
 {
-  "name": "@elastic/plugin-helpers",
+  "name": "@kbn/plugin-helpers",
+  "private": true,
   "version": "7.1.5",
   "description": "Just some helpers for kibana plugin devs.",
   "main": "lib/index.js",
@@ -28,7 +29,7 @@
     "vinyl-fs": "2.3.1"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "^0.15.0",
+    "@elastic/eslint-config-kibana": "link:../eslint-config-kibana",
     "babel-eslint": "^8.0.0",
     "eslint": "^4.1.0",
     "eslint-plugin-babel": "^4.1.1",
@@ -38,19 +39,5 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.1.0",
     "jest": "^17.0.3"
-  },
-  "engines": {
-    "node": "^6.11.5 || ^8.8.0"
-  },
-  "directories": {
-    "doc": "docs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/elastic/kibana-plugin-helpers.git"
-  },
-  "bugs": {
-    "url": "https://github.com/elastic/kibana-plugin-helpers/issues"
-  },
-  "homepage": "https://github.com/elastic/kibana-plugin-helpers#readme"
+  }
 }
