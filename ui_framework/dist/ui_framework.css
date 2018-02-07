@@ -1162,10 +1162,7 @@ main {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
         -ms-flex-positive: 1;
-            flex-grow: 1;
-    -webkit-flex-basis: 0;
-        -ms-flex-preferred-size: 0;
-            flex-basis: 0; }
+            flex-grow: 1; }
 
 .kuiFlexGroup--gutterSmall {
   margin: -4px; }
