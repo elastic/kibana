@@ -83,7 +83,9 @@ uiRoutes
       savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
           .then((savedSearch) => {
-            recentlyAccessed.add(`#/discover/${$route.current.params.id}`, savedSearch.title);
+            if ($route.current.params.id) {
+              recentlyAccessed.add(`#/discover/${$route.current.params.id}`, savedSearch.title);
+            }
             return savedSearch;
           })
           .catch(courier.redirectWhenMissing({
