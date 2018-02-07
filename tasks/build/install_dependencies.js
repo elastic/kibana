@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 module.exports = function (grunt) {
   grunt.registerTask('_build:installDependencies', function () {
     // We rely on a local version of Yarn that contains the bugfix from
@@ -11,7 +11,7 @@ module.exports = function (grunt) {
     // build. This means the lockfile won't be consistent, so instead of
     // verifying it, we just skip writing a new lockfile. However, this does
     // still use the existing lockfile for dependency resolution.
-    exec(`${yarn} --production --ignore-optional --pure-lockfile`, {
+    execFile(yarn, ['--production', '--ignore-optional', '--pure-lockfile'], {
       cwd: grunt.config.process('<%= root %>/build/kibana')
     }, this.async());
   });
