@@ -21,8 +21,7 @@ const createProject = (fields, path = '.') =>
   );
 
 beforeEach(() => {
-  installInDir.mockReset();
-  runScriptInPackageStreaming.mockReset();
+  jest.resetAllMocks();
 });
 
 test('handles dependencies of dependencies', async () => {
