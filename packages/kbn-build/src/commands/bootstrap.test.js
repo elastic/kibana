@@ -5,7 +5,10 @@ jest.mock('../utils/scripts', () => ({
 
 import { resolve } from 'path';
 
-import { absolutePathSnaphotSerializer } from '../test_helpers';
+import {
+  absolutePathSnaphotSerializer,
+  stripAnsiSnapshotSerializer,
+} from '../test_helpers';
 import { run } from './bootstrap';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
@@ -22,6 +25,7 @@ const createProject = (fields, path = '.') =>
   );
 
 expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
+expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 beforeEach(() => {
   jest.resetAllMocks();
