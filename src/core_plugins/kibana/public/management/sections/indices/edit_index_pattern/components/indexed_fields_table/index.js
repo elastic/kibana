@@ -4,11 +4,15 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 
 export function renderIndexedFieldsTable(
   domElementId,
-  indexPattern
+  indexPattern,
+  fieldFilter,
+  typeFilter,
 ) {
   render(
     <IndexedFieldsTable
       indexPattern={indexPattern}
+      fieldFilter={fieldFilter || ''}
+      typeFilter={typeFilter || ''}
     />,
     document.getElementById(domElementId),
   );

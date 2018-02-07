@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   booleanTemplate,
+  fieldWildcardProvider,
   getFieldFormat
 } from '../../lib';
 
@@ -12,6 +13,8 @@ import {
 export class IndexedFieldsTable extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
+    fieldFilter: PropTypes.string,
+    typeFilter: PropTypes.string,
   }
 
   static defaultProps = {
@@ -24,43 +27,65 @@ export class IndexedFieldsTable extends Component {
         index: 0,
         size: 25
       }
-    });
+    }, this.props);
   }
 
-  computeTableState(criteria) {
+  computeTableState(criteria, props) {
     return {
-      data: {
-        records: this.mapFields(this.props.indexPattern.getNonScriptedFields()),
-        totalRecordCount: this.props.indexPattern.getNonScriptedFields().length
-      },
-      criteria: {
+      fields: this.mapFields(props.indexPattern.getNonScriptedFields(), props),
+      criteria: criteria ? {
         page: {
           index: 0,
           size: 25
         },
         sort: criteria.sort
-      }
+      } : this.state.criteria
     };
   }
 
-  mapFields(fields) {
-    return fields.map((field) => {
-      return {
-        ...field,
-        displayName: field.displayName,
-        format: getFieldFormat(this.props.indexPattern, field.name),
-        excluded: false //todo: fix this
-      };
+  mapFields(fields, props) {
+    const { indexPattern, fieldFilter, typeFilter } = props;
+    const { fieldWildcardMatcher } = fieldWildcardProvider({
+      metaFields: indexPattern.metaFields
     });
+    const fieldWildcardMatch = fieldWildcardMatcher((indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value) || []));
+
+    return fields
+      .filter((field) => {
+        if(typeFilter && field.type !== typeFilter) {
+          return false;
+        }
+
+        if(fieldFilter && field.name.indexOf(fieldFilter) === -1) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((field) => {
+        return {
+          ...field,
+          displayName: field.displayName,
+          format: getFieldFormat(indexPattern, field.name),
+          excluded: fieldWildcardMatch(field.name),
+        };
+      });
   }
 
   onDataCriteriaChange(criteria) {
-    this.setState(this.computeTableState(criteria));
+    this.setState(this.computeTableState(criteria, this.props));
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(this.computeTableState(null, nextProps));
   }
 
   render() {
     const model = {
-      data: this.state.data
+      data: {
+        records: this.state.fields,
+        totalRecordCount: this.state.fields.length
+      }
     };
 
     const config = {
@@ -91,6 +116,7 @@ export class IndexedFieldsTable extends Component {
         {
           field: 'searchable',
           name: 'Searchable',
+          description: 'These fields can be used in the filter bar',
           dataType: 'boolean',
           sortable: true,
           render: booleanTemplate,
@@ -98,13 +124,15 @@ export class IndexedFieldsTable extends Component {
         {
           field: 'aggregatable',
           name: 'Aggregatable',
+          description: 'These fields can be used in visualization aggregations',
           dataType: 'boolean',
           sortable: true,
           render: booleanTemplate,
         },
         {
           field: 'excluded',
-          name: 'excluded',
+          name: 'Excluded',
+          description: 'Fields that are excluded from _source when it is fetched',
           dataType: 'boolean',
           sortable: true,
           render: booleanTemplate,
@@ -131,8 +159,6 @@ export class IndexedFieldsTable extends Component {
         },
       ]
     };
-
-    // console.log('jen', fields);
 
     return (
       <div>

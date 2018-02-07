@@ -134,6 +134,8 @@ uiModules.get('apps/management')
         renderIndexedFieldsTable(
           REACT_DOM_ELEMENT_ID,
           $scope.indexPattern,
+          $scope.fieldFilter,
+          $scope.indexedFieldTypeFilter,
           // allIndices,
           // this.formValues.name,
           // this.doesIncludeSystemIndices,
@@ -147,12 +149,16 @@ uiModules.get('apps/management')
         );
       });
     };
+    const bindIndexedFieldsTableReactWatchers = () => {
+      $scope.$watchGroup(['indexPattern', 'fieldFilter', 'indexedFieldTypeFilter'], renderIndexedFieldsTableReact);
+    };
 
     $scope.$watch('state.tab', function (tab) {
       if (!tab) $scope.changeTab($scope.editSections[0]);
       else {
-        if($state.tab === 'indexedFields') renderIndexedFieldsTableReact();
-        // else destroyIndexedFieldsTable();
+        if($state.tab === 'indexedFields') {
+          bindIndexedFieldsTableReactWatchers();
+        }
       }
     });
 
