@@ -1,0 +1,401 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should not render dropdown when recently accessed list size is NUM_LONG_LINKS 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiText>
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        Recently accessed
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link0"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link0"
+        iconSide="left"
+        type="button"
+      >
+        label0
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link1"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link1"
+        iconSide="left"
+        type="button"
+      >
+        label1
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link2"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link2"
+        iconSide="left"
+        type="button"
+      >
+        label2
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link3"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link3"
+        iconSide="left"
+        type="button"
+      >
+        label3
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link4"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link4"
+        iconSide="left"
+        type="button"
+      >
+        label4
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`should not render dropdown when recently accessed list size is less than NUM_LONG_LINKS 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiText>
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        Recently accessed
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link0"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link0"
+        iconSide="left"
+        type="button"
+      >
+        label0
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link1"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link1"
+        iconSide="left"
+        type="button"
+      >
+        label1
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link2"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link2"
+        iconSide="left"
+        type="button"
+      >
+        label2
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link3"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link3"
+        iconSide="left"
+        type="button"
+      >
+        label3
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`should render dropdown when recently accessed list size exceeds NUM_LONG_LINKS 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <EuiText>
+    <p>
+      <EuiTextColor
+        color="subdued"
+      >
+        Recently accessed
+      </EuiTextColor>
+    </p>
+  </EuiText>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link0"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link0"
+        iconSide="left"
+        type="button"
+      >
+        label0
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link1"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link1"
+        iconSide="left"
+        type="button"
+      >
+        label1
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link2"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link2"
+        iconSide="left"
+        type="button"
+      >
+        label2
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link3"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link3"
+        iconSide="left"
+        type="button"
+      >
+        label3
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+      key="link4"
+      style={
+        Object {
+          "overflow": "hidden",
+        }
+      }
+    >
+      <EuiButtonEmpty
+        color="primary"
+        href="link4"
+        iconSide="left"
+        type="button"
+      >
+        label4
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+      key="dropdown"
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="primary"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            type="button"
+          >
+            +1
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        id="popover"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="m"
+      >
+        <div
+          style={
+            Object {
+              "maxWidth": "200px",
+            }
+          }
+        >
+          <EuiFlexItem
+            component="div"
+            grow={true}
+            key="link5"
+            style={
+              Object {
+                "overflow": "hidden",
+              }
+            }
+          >
+            <EuiButtonEmpty
+              color="primary"
+              href="link5"
+              iconSide="left"
+              type="button"
+            >
+              label5
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </div>
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
