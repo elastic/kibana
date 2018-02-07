@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`StepIndexPattern should ensure we properly append a wildcard 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <LoadingIndices />
+  <EuiSpacer
+    size="s"
+  />
+</EuiPanel>
+`;
+
 exports[`StepIndexPattern should render normally 1`] = `
 <EuiPanel
   grow={true}
