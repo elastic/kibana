@@ -56,7 +56,7 @@ export class StepIndexPattern extends Component {
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(e.nativeEvent.data)) {
+    if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
