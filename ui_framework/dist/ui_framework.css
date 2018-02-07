@@ -2733,6 +2733,8 @@ main {
     .theme-dark .kuiLocalSearchInput:focus {
       outline: none;
       border-color: #0079a5; }
+  .kuiLocalSearchInput:focus {
+    box-shadow: none; }
   .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
     border-color: #e74C3c; }
 
