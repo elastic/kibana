@@ -94,7 +94,7 @@ A list of project-specific settings. This is useful if you want to override proj
 [Read more about the project-specific configuration](#project-specific-configuration)
 
 ### Project-specific configuration
-`.backportrc.json` can be added to every project where you use `backport`. 
+`.backportrc.json` can be added to every project where you use `backport`. This is useful for sharing configuration options with other project contributors.
 
 Example:
 ```json
