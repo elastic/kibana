@@ -1,9 +1,9 @@
-import './typeahead.less';
-import './typeahead_input';
-import './typeahead_item';
 import template from './typeahead.html';
 import { uiModules } from 'ui/modules';
 import { comboBoxKeyCodes } from '@elastic/eui';
+import './typeahead.less';
+import './typeahead_input';
+import './typeahead_item';
 
 const { UP, DOWN, ENTER, TAB, ESCAPE } = comboBoxKeyCodes;
 const typeahead = uiModules.get('kibana/typeahead');
@@ -27,15 +27,6 @@ typeahead.directive('kbnTypeahead', function () {
       this.submit = () => {
         const item = this.items[this.selectedIndex];
         this.onSelect({ item });
-        this.selectedIndex = null;
-      };
-
-      this.show = () => {
-        this.isHidden = false;
-      };
-
-      this.hide = () => {
-        this.isHidden = true;
         this.selectedIndex = null;
       };
 
@@ -64,11 +55,7 @@ typeahead.directive('kbnTypeahead', function () {
       this.onKeyDown = (event) => {
         const { keyCode } = event;
 
-        if (keyCode === ESCAPE) {
-          this.hide();
-        } else {
-          this.show();
-        }
+        this.isHidden = keyCode === ESCAPE;
 
         if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
