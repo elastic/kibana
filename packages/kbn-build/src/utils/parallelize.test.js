@@ -55,10 +55,38 @@ test('parallelizes batches', async () => {
   expect(completed).toEqual(['bar', 'foo', 'baz', 'parallelizeBatches']);
 });
 
+test('rejects if any promise rejects', async () => {
+  const foo = createPromiseWithResolve();
+  const bar = createPromiseWithResolve();
+  const baz = createPromiseWithResolve();
+
+  const batches = [[foo, bar], [baz]];
+  const parallelize = parallelizeBatches(batches, obj => obj.promise);
+
+  const completed = [];
+  const failed = [];
+  parallelize.then(
+    () => {
+      completed.push('parallelizeBatches');
+    },
+    () => {
+      failed.push('parallelizeBatches');
+    }
+  );
+
+  foo.reject();
+  await tick();
+
+  expect(completed).toEqual([]);
+  expect(failed).toEqual(['parallelizeBatches']);
+});
+
 function createPromiseWithResolve() {
   let resolve;
-  const promise = new Promise(_resolve => {
+  let reject;
+  const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve;
+    reject = _reject;
   });
-  return { promise, resolve, called: false };
+  return { promise, resolve, reject, called: false };
 }
