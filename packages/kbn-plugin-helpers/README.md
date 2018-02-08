@@ -56,6 +56,10 @@ All configuration setting listed below can simply can be included in the json co
 
 ## Global settings
 
+Setting | Description
+------- | -----------
+`kibanaRoot` | Path to your checkout of Kibana, relative paths are ok
+
 ### Settings for `start`
 
 Setting | Description

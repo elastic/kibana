@@ -1,7 +1,7 @@
 {
   "name": "@kbn/plugin-helpers",
   "private": true,
-  "version": "9.0.2",
+  "version": "7.1.5",
   "description": "Just some helpers for kibana plugin devs.",
   "main": "lib/index.js",
   "bin": {
@@ -14,7 +14,6 @@
     "test:dev": "jest --watch"
   },
   "dependencies": {
-    "argv-split": "^2.0.1",
     "commander": "^2.9.0",
     "del": "^2.2.2",
     "gulp-rename": "1.2.2",
