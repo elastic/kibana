@@ -9,7 +9,7 @@
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
   'docs/**/*',
-  '**/bin/**/*',
+  'bin/**/*',
   '**/+([A-Z_]).md',
   '**/*.txt',
   'Gruntfile.js',
