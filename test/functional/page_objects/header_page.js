@@ -180,7 +180,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('globalTimepickerAutoRefreshButton');
         result = true;
       }
-      return Promise.resolve(result);
+      return result;
     }
 
     // check if the auto refresh state is inactive and to resume it
@@ -190,7 +190,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('globalTimepickerAutoRefreshButton');
         result = true;
       }
-      return Promise.resolve(result);
+      return result;
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
