@@ -221,6 +221,7 @@
     "@elastic/eslint-import-resolver-kibana": "1.0.0",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "@kbn/build": "link:packages/kbn-build",
+    "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "backport": "2.2.0",
