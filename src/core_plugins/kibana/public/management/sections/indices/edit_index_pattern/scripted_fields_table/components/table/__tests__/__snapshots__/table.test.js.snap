@@ -16,7 +16,8 @@ exports[`Table should render normally 1`] = `
           "dataType": "string",
           "description": "Language used for the field",
           "field": "lang",
-          "name": "Name",
+          "name": "Lang",
+          "render": [Function],
           "sortable": true,
         },
         Object {

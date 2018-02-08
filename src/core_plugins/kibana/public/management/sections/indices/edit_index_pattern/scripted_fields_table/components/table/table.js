@@ -56,10 +56,17 @@ export class Table extends PureComponent {
         },
         {
           field: 'lang',
-          name: 'Name',
+          name: 'Lang',
           description: `Language used for the field`,
           dataType: 'string',
           sortable: true,
+          render: value => {
+            return (
+              <span data-test-subj="scriptedFieldLang">
+                {value}
+              </span>
+            );
+          }
         },
         {
           field: 'script',
