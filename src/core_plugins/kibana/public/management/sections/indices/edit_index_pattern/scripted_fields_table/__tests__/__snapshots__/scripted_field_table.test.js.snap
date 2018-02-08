@@ -26,6 +26,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
       painlessDocLink="painlessDocs"
     />
     <eui-button
+      data-test-subj="addScriptedFieldLink"
       href={undefined}
     >
       Add Scripted Field
@@ -100,6 +101,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
       painlessDocLink="painlessDocs"
     />
     <eui-button
+      data-test-subj="addScriptedFieldLink"
       href={undefined}
     >
       Add Scripted Field
@@ -168,6 +170,7 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
       painlessDocLink="painlessDocs"
     />
     <eui-button
+      data-test-subj="addScriptedFieldLink"
       href={undefined}
     >
       Add Scripted Field
@@ -241,6 +244,7 @@ exports[`ScriptedFieldsTable should show a message if there are no scripted fiel
       painlessDocLink="painlessDocs"
     />
     <eui-button
+      data-test-subj="addScriptedFieldLink"
       href={undefined}
     >
       Add Scripted Field

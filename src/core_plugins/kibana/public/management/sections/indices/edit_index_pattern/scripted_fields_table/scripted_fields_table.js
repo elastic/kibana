@@ -180,7 +180,10 @@ export class ScriptedFieldsTable extends Component {
       <div>
         <Header/>
         {this.renderCallOuts()}
-        <EuiButton href={helpers.getRouteHref(indexPattern, 'addField')}>
+        <EuiButton
+          data-test-subj="addScriptedFieldLink"
+          href={helpers.getRouteHref(indexPattern, 'addField')}
+        >
           Add Scripted Field
         </EuiButton>
         <EuiSpacer size="l" />
