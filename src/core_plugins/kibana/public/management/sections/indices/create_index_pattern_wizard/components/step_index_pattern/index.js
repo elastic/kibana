@@ -2,6 +2,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { StepIndexPattern } from './step_index_pattern';
 
+function getNode(domElementId) {
+  return document.getElementById(domElementId);
+}
+
 export function renderStepIndexPattern(
   domElementId,
   allIndices,
@@ -10,6 +14,11 @@ export function renderStepIndexPattern(
   esService,
   goToNextStep,
 ) {
+  const node = getNode(domElementId);
+  if (!node) {
+    return;
+  }
+
   render(
     <StepIndexPattern
       allIndices={allIndices}
@@ -23,5 +32,10 @@ export function renderStepIndexPattern(
 }
 
 export function destroyStepIndexPattern(domElementId) {
-  unmountComponentAtNode(document.getElementById(domElementId));
+  const node = getNode(domElementId);
+  if (!node) {
+    return;
+  }
+
+  unmountComponentAtNode(node);
 }

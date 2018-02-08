@@ -7,6 +7,7 @@ const { renderStepIndexPattern, destroyStepIndexPattern } = require('../index');
 
 describe('StepIndexPatternRender', () => {
   beforeEach(() => {
+    jest.spyOn(document, 'getElementById').mockImplementation(() => ({}));
     render.mockClear();
     unmountComponentAtNode.mockClear();
   });
