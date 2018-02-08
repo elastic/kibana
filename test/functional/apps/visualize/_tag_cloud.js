@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql(['32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008']);
       });
 
-      it('should still show all tags after browser was resized very small', async function () {
+      it.skip('should still show all tags after browser was resized very small', async function () {
         await remote.setWindowSize(200, 200);
         await PageObjects.common.sleep(1000);
         await remote.setWindowSize(1200, 800);
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
 
-      it('should show the tags and relative size', function () {
+      it.skip('should show the tags and relative size', function () {
         return PageObjects.visualize.getTextSizes()
           .then(function (results) {
             log.debug('results here ' + results);
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
 
-      it('should show correct data', function () {
+      it.skip('should show correct data', function () {
         const expectedTableData =  [ '32,212,254,720', '737',
           '21,474,836,480', '728',
           '20,401,094,656', '687',
