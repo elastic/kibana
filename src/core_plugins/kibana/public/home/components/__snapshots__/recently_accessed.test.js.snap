@@ -28,9 +28,10 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
     >
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -60,9 +61,10 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -92,9 +94,10 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -124,9 +127,10 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -156,9 +160,10 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -205,9 +210,10 @@ exports[`should not render dropdown when recently accessed list size is less tha
     >
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -237,9 +243,10 @@ exports[`should not render dropdown when recently accessed list size is less tha
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -269,9 +276,10 @@ exports[`should not render dropdown when recently accessed list size is less tha
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -301,9 +309,10 @@ exports[`should not render dropdown when recently accessed list size is less tha
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -350,9 +359,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
     >
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -382,9 +392,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -414,9 +425,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -446,9 +458,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
@@ -478,9 +491,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
         style={
           Object {
+            "minWidth": "3.5999999999999996em",
             "overflow": "hidden",
           }
         }
