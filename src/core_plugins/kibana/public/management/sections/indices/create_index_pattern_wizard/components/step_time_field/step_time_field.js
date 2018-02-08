@@ -87,10 +87,10 @@ export class StepTimeField extends Component {
         <EuiPanel>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText>Creating index pattern...</EuiText>
+              <EuiLoadingSpinner/>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner/>
+              <EuiText>Creating index pattern...</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

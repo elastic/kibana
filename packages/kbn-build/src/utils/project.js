@@ -1,10 +1,11 @@
 import path from 'path';
+import { inspect } from 'util';
 import chalk from 'chalk';
 
 import {
   installInDir,
   runScriptInPackage,
-  runScriptInPackageStreaming
+  runScriptInPackageStreaming,
 } from './scripts';
 import { readPackageJson } from './package_json';
 import { CliError } from './errors';
@@ -27,7 +28,7 @@ export class Project {
 
     this.allDependencies = {
       ...(this.json.devDependencies || {}),
-      ...(this.json.dependencies || {})
+      ...(this.json.dependencies || {}),
     };
 
     this.scripts = this.json.scripts || {};
@@ -53,7 +54,7 @@ export class Project {
     const meta = {
       package: `${this.name} (${this.packageJsonLocation})`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      actual: `"${project.name}": "${versionInPackageJson}"`
+      actual: `"${project.name}": "${versionInPackageJson}"`,
     };
 
     if (versionInPackageJson.startsWith(PREFIX)) {
@@ -80,6 +81,37 @@ export class Project {
 
   hasScript(name) {
     return name in this.scripts;
+  }
+
+  getExecutables() {
+    const raw = this.json.bin;
+
+    if (!raw) {
+      return {};
+    }
+
+    if (typeof raw === 'string') {
+      return {
+        [this.name]: path.resolve(this.path, raw),
+      };
+    }
+
+    if (typeof raw === 'object') {
+      const binsConfig = {};
+      for (const binName of Object.keys(raw)) {
+        binsConfig[binName] = path.resolve(this.path, raw[binName]);
+      }
+      return binsConfig;
+    }
+
+    throw new CliError(
+      `[${this.name}] has an invalid "bin" field in its package.json, ` +
+        `expected an object or a string`,
+      {
+        package: `${this.name} (${this.packageJsonLocation})`,
+        binConfig: inspect(raw),
+      }
+    );
   }
 
   async runScript(scriptName, args = []) {

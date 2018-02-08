@@ -1,4 +1,4 @@
-extends: '../.eslintrc'
+extends: '../.eslintrc.js'
 
 rules:
   no-var: 0

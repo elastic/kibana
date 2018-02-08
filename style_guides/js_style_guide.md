@@ -6,6 +6,15 @@ This JavaScript guide forked from the [node style guide](https://github.com/feli
 licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
 license.
 
+## Prettier
+
+We are gradually moving the Kibana code base over to Prettier.
+
+Prettier is set up to run with ESLint, and to add new code paths to Prettier,
+see `.eslintrc.js` in the root of the Kibana repo. This also means that if you
+get ESLint errors related to Prettier, run `node scripts/eslint --fix` from the
+root of the Kibana repo to fix these.
+
 ## 2 Spaces for indention
 
 Use 2 spaces for indenting your code and swear an oath to never mix tabs and
