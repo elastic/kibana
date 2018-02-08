@@ -1,7 +1,6 @@
 <div
   class="typeahead"
   ng-keydown="typeahead.onKeyDown($event)"
-  ng-keypress="typeahead.onKeyPress($event)"
 >
   <ng-transclude></ng-transclude>
   <div
@@ -15,7 +14,7 @@
       ng-repeat="item in typeahead.items"
       ng-class="{active: $index === typeahead.selectedIndex}"
       ng-click="typeahead.submit()"
-      ng-mouseenter="typeahead.setSelectedIndex($index)"
+      ng-mouseenter="typeahead.selectedIndex = $index"
     >
       <kbn-typeahead-item
         item="item"
