@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import './index_header';
 import './indexed_fields_table';
-// import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';

@@ -74,9 +74,6 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
     >
       table
     </Table>
-    <eui-horizontal-rule
-      margin="xxl"
-    />
   </div>
 </ScriptedFieldsTable>
 `;
@@ -146,9 +143,6 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
     >
       table
     </Table>
-    <eui-horizontal-rule
-      margin="xxl"
-    />
   </div>
 </ScriptedFieldsTable>
 `;
@@ -222,9 +216,6 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
     >
       table
     </Table>
-    <eui-horizontal-rule
-      margin="xxl"
-    />
   </div>
 </ScriptedFieldsTable>
 `;
@@ -290,9 +281,6 @@ exports[`ScriptedFieldsTable should show a message if there are no scripted fiel
     <eui-text>
       No scripted fields found.
     </eui-text>
-    <eui-horizontal-rule
-      margin="xxl"
-    />
   </div>
 </ScriptedFieldsTable>
 `;

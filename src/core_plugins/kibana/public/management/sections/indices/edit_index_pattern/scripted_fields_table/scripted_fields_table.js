@@ -6,7 +6,6 @@ import { documentationLinks } from 'ui/documentation_links';
 import {
   EuiText,
   EuiButton,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
@@ -194,7 +193,6 @@ export class ScriptedFieldsTable extends Component {
         />
         {this.renderDeleteConfirmationModal()}
         {this.renderNoFieldsFound()}
-        <EuiHorizontalRule margin="xxl"/>
       </div>
     );
   }
