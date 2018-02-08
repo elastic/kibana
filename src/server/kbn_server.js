@@ -17,7 +17,7 @@ import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { injectIntoKbnServer as newPlatformMixin } from '../../target/platform/legacy';
+import { injectIntoKbnServer as newPlatformMixin } from '@kbn/platform';
 
 const rootDir = fromRoot('.');
 
