@@ -6,6 +6,7 @@ import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { sync as rimrafSync } from 'rimraf';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
+import { symlinkProjects } from './symlinkProjects';
 import mkdirp from 'mkdirp';
 
 const mkdir = Promise.promisify(mkdirp);
@@ -27,6 +28,8 @@ export default async function install(settings, logger) {
     existingInstall(settings, logger);
 
     assertVersion(settings);
+
+    await symlinkProjects(settings, logger);
 
     await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
 
