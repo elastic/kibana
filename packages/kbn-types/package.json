@@ -10,8 +10,7 @@
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
-    "@kbn/observable": "link:../kbn-observable",
-    "@kbn/utils": "link:../kbn-utils",
+    "@kbn/platform": "link:../../platform",
     "typescript": "^2.7.1"
   }
 }
