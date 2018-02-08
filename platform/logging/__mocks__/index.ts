@@ -7,7 +7,7 @@ const _log = {
   error: jest.fn(),
   trace: jest.fn(),
   fatal: jest.fn(),
-  log: jest.fn()
+  log: jest.fn(),
 };
 
 const _clear = () => {
@@ -28,12 +28,12 @@ const _collect = () => ({
   error: _log.error.mock.calls,
   trace: _log.trace.mock.calls,
   fatal: _log.fatal.mock.calls,
-  log: _log.log.mock.calls
+  log: _log.log.mock.calls,
 });
 
 export const logger = {
   get: jest.fn(() => _log),
   _log,
   _collect,
-  _clear
+  _clear,
 };

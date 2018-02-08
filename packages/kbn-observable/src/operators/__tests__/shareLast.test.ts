@@ -68,7 +68,7 @@ test('should multicast the same values to multiple observers', () => {
     '1/c',
     '2/c',
     '3/c',
-    '4/c'
+    '4/c',
   ]);
 });
 
@@ -83,19 +83,19 @@ test('should multicast an error from the source to multiple observers', () => {
   source.subscribe({
     error(err) {
       results.push([1, err]);
-    }
+    },
   });
 
   source.subscribe({
     error(err) {
       results.push([2, err]);
-    }
+    },
   });
 
   source.subscribe({
     error(err) {
       results.push([3, err]);
-    }
+    },
   });
 
   const error = new Error('fail');

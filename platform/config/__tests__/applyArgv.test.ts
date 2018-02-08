@@ -3,11 +3,11 @@ import { overrideConfigWithArgv } from '../../cli/overrideConfigWithArgv';
 
 test('port', () => {
   const argv = {
-    port: 123
+    port: 123,
   };
 
   const config = new ObjectToRawConfigAdapter({
-    server: { port: 456 }
+    server: { port: 456 },
   });
 
   overrideConfigWithArgv(config, argv);
@@ -17,11 +17,11 @@ test('port', () => {
 
 test('host', () => {
   const argv = {
-    host: 'example.org'
+    host: 'example.org',
   };
 
   const config = new ObjectToRawConfigAdapter({
-    server: { host: 'org.example' }
+    server: { host: 'org.example' },
   });
 
   overrideConfigWithArgv(config, argv);
@@ -31,7 +31,7 @@ test('host', () => {
 
 test('ignores unknown', () => {
   const argv = {
-    unknown: 'some value'
+    unknown: 'some value',
   };
 
   const config = new ObjectToRawConfigAdapter({});

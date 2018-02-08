@@ -4,7 +4,7 @@ import {
   $combineLatest,
   map,
   first,
-  toPromise
+  toPromise,
 } from '@elastic/kbn-observable';
 
 import { ScopedDataClient, KibanaConfig } from '@elastic/kbn-types';
@@ -26,21 +26,21 @@ export class BazService {
       index: kibanaIndex,
       type,
       size: perPage,
-      from: perPage * (page - 1)
+      from: perPage * (page - 1),
     });
 
     const data = response.hits.hits.map((hit: any) => ({
       id: hit._id,
       type: hit._type,
       version: hit._version,
-      attributes: hit._source
+      attributes: hit._source,
     }));
 
     return {
       data,
       total: response.hits.total,
       per_page: perPage,
-      page: page
+      page: page,
     };
   }
 }

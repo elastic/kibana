@@ -5,7 +5,7 @@ test('returns a topologically ordered sequence', () => {
     ['a', []],
     ['b', ['a']],
     ['c', ['a', 'b']],
-    ['d', ['a']]
+    ['d', ['a']],
   ]);
 
   let sorted = topologicalSort(nodes);
@@ -20,7 +20,7 @@ test('handles multiple "roots" with no deps', () => {
     ['a', []],
     ['b', []],
     ['c', ['a', 'b']],
-    ['d', ['a']]
+    ['d', ['a']],
   ]);
 
   let sorted = topologicalSort(nodes);
@@ -37,7 +37,7 @@ test('throws if ordering does not succeed', () => {
     ['c', ['a', 'd']], // cycles back to 'a'
     ['d', []],
     ['e', ['d']],
-    ['f', ['g']] // 'g' does not 'exist'
+    ['f', ['g']], // 'g' does not 'exist'
   ]);
 
   expect(() => {

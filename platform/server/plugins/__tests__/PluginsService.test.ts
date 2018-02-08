@@ -16,7 +16,7 @@ beforeEach(() => {
   mockPluginSystem = {
     addPlugin: jest.fn(),
     startPlugins: jest.fn(),
-    stopPlugins: jest.fn()
+    stopPlugins: jest.fn(),
   };
 
   env.corePluginsDir = resolve(__dirname, 'examplePlugins');

@@ -1,7 +1,7 @@
 import {
   NEW_PLATFORM_CONFIG_ROOT,
   ObjectToRawConfigAdapter,
-  RawConfig
+  RawConfig,
 } from '../config';
 import { ConfigPath } from '../config/ConfigService';
 
@@ -36,7 +36,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   constructor(private readonly legacyConfig: LegacyConfig) {
     this.newPlatformConfig = new ObjectToRawConfigAdapter({
       [NEW_PLATFORM_CONFIG_ROOT]:
-        legacyConfig.get(NEW_PLATFORM_CONFIG_ROOT) || {}
+        legacyConfig.get(NEW_PLATFORM_CONFIG_ROOT) || {},
     });
   }
 
@@ -98,7 +98,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   private static transformLogging(configValue: LegacyLoggingConfig) {
     const loggingConfig = {
       root: { level: 'info' },
-      appenders: { default: { kind: 'legacy-appender' } }
+      appenders: { default: { kind: 'legacy-appender' } },
     };
 
     if (configValue.silent) {
@@ -120,7 +120,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
       port: configValue.port,
       maxPayload: configValue.maxPayloadBytes,
       basePath: configValue.basePath,
-      ssl: configValue.ssl
+      ssl: configValue.ssl,
     };
   }
 

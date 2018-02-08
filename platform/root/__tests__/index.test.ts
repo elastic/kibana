@@ -1,27 +1,27 @@
 const loggerConfig = {};
 
 const configService = {
-  atPath: jest.fn(() => loggerConfig)
+  atPath: jest.fn(() => loggerConfig),
 };
 
 const mockConfigService = jest.fn(() => configService);
 
 const server = {
   start: jest.fn(),
-  stop: jest.fn()
+  stop: jest.fn(),
 };
 const mockServer = jest.fn(() => server);
 
 const loggingService = {
   upgrade: jest.fn(),
-  stop: jest.fn()
+  stop: jest.fn(),
 };
 
 const logger = {
   get: jest.fn(() => ({
     info: jest.fn(),
-    error: jest.fn()
-  }))
+    error: jest.fn(),
+  })),
 };
 
 const mockMutableLoggerFactory = jest.fn(() => logger);
@@ -33,10 +33,10 @@ import { BehaviorSubject } from '@elastic/kbn-observable';
 jest.mock('../../config', () => ({ ConfigService: mockConfigService }));
 jest.mock('../../server', () => ({ Server: mockServer }));
 jest.mock('../../logging/LoggingService', () => ({
-  LoggingService: mockLoggingService
+  LoggingService: mockLoggingService,
 }));
 jest.mock('../../logging/LoggerFactory', () => ({
-  MutableLoggerFactory: mockMutableLoggerFactory
+  MutableLoggerFactory: mockMutableLoggerFactory,
 }));
 
 import { Root } from '../';

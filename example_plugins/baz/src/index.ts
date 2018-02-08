@@ -14,5 +14,5 @@ export const plugin: KibanaPluginConfig<{}> = {
 
     log.info('register Baz endpoints');
     registerEndpoints(router, logger, elasticsearch.service, config$);
-  }
+  },
 };

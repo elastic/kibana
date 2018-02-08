@@ -1,7 +1,7 @@
 const mockCreateClient = jest.fn();
 
 jest.mock('elasticsearch', () => ({
-  Client: mockCreateClient
+  Client: mockCreateClient,
 }));
 
 import { ElasticsearchService } from '../ElasticsearchService';
@@ -14,10 +14,10 @@ test('should not create multiple clients while service is running', async () => 
   const createElasticsearchConfig = (type: string) => ({
     filterHeaders: () => {},
     toElasticsearchClientConfig: (options: any) => ({ type, options }),
-    requestHeadersWhitelist: []
+    requestHeadersWhitelist: [],
   });
   const elasticsearchConfigs = {
-    forType: (type: string) => createElasticsearchConfig(type)
+    forType: (type: string) => createElasticsearchConfig(type),
   };
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
   const service = new ElasticsearchService(configs$, logger);
@@ -48,7 +48,7 @@ test('should not create multiple clients while service is running', async () => 
 
 test('should get an AdminClient', async () => {
   const elasticsearchConfigs = {
-    forType: () => ({ toElasticsearchClientConfig: () => {} })
+    forType: () => ({ toElasticsearchClientConfig: () => {} }),
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -63,11 +63,11 @@ test('should get a ScopedDataClient', async () => {
   const elasticsearchConfig = {
     filterHeaders: () => {},
     toElasticsearchClientConfig: () => {},
-    requestHeadersWhitelist: []
+    requestHeadersWhitelist: [],
   };
 
   const elasticsearchConfigs = {
-    forType: () => elasticsearchConfig
+    forType: () => elasticsearchConfig,
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -82,11 +82,11 @@ test('should get a ScopedDataClient observable', async () => {
   const elasticsearchConfig = {
     filterHeaders: jest.fn(),
     toElasticsearchClientConfig: () => {},
-    requestHeadersWhitelist: []
+    requestHeadersWhitelist: [],
   };
 
   const elasticsearchConfigs = {
-    forType: () => elasticsearchConfig
+    forType: () => elasticsearchConfig,
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -98,6 +98,6 @@ test('should get a ScopedDataClient observable', async () => {
 
   expect(dataClient).toBeInstanceOf(ScopedDataClient);
   expect(elasticsearchConfig.filterHeaders).toHaveBeenCalledWith({
-    foo: 'bar'
+    foo: 'bar',
   });
 });

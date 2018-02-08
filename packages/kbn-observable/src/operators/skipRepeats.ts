@@ -42,7 +42,7 @@ export function skipRepeats<T>(
         },
         complete() {
           observer.complete();
-        }
+        },
       });
     });
   };

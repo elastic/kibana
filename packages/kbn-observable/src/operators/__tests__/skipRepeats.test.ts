@@ -30,7 +30,7 @@ test('should distinguish between values and does not complete', () => {
   k$(values$)(skipRepeats()).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   values$.next('a');
@@ -48,7 +48,7 @@ test('should complete if source is empty', done => {
   const values$ = $of();
 
   k$(values$)(skipRepeats()).subscribe({
-    complete: done
+    complete: done,
   });
 });
 
@@ -59,7 +59,7 @@ test('should emit if source emits single element only', () => {
   k$(values$)(skipRepeats()).subscribe({
     next(x) {
       actual.push(x);
-    }
+    },
   });
 
   values$.next('a');
@@ -74,7 +74,7 @@ test('should emit if source is scalar', () => {
   k$(values$)(skipRepeats()).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   expect(actual).toEqual(['a']);
@@ -104,7 +104,7 @@ test('should raise error if source throws', () => {
 
   const error = jest.fn();
   k$(obs)(skipRepeats()).subscribe({
-    error
+    error,
   });
 
   expect(error).toHaveBeenCalledWith(thrownError);
@@ -117,7 +117,7 @@ test('should allow unsubscribing early and explicitly', () => {
   const sub = k$(values$)(skipRepeats()).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   values$.next('a');
@@ -139,7 +139,7 @@ test('should emit once if comparator returns true always regardless of source em
   k$(values$)(skipRepeats(() => true)).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   values$.next('a');
@@ -157,7 +157,7 @@ test('should emit all if comparator returns false always regardless of source em
   k$(values$)(skipRepeats(() => false)).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   values$.next('a');
@@ -177,7 +177,7 @@ test('should distinguish values by comparator', () => {
   k$(values$)(skipRepeats(comparator)).subscribe({
     next(v) {
       actual.push(v);
-    }
+    },
   });
 
   values$.next(1);

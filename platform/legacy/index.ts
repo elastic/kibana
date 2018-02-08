@@ -3,7 +3,7 @@ export { LegacyPlatformProxifier } from './LegacyPlatformProxifier';
 /**@internal**/
 export {
   LegacyConfigToRawConfigAdapter,
-  LegacyConfig
+  LegacyConfig,
 } from './LegacyPlatformConfig';
 /**@internal**/
 export { LegacyKbnServer } from './LegacyKbnServer';
@@ -15,7 +15,7 @@ import {
   LegacyConfig,
   LegacyKbnServer,
   LegacyPlatformProxifier,
-  LegacyConfigToRawConfigAdapter
+  LegacyConfigToRawConfigAdapter,
 } from '.';
 
 /**
@@ -39,6 +39,6 @@ export const injectIntoKbnServer = (rawKbnServer: any) => {
     // Propagates legacy config updates to the new platform.
     updateConfig(legacyConfig: LegacyConfig) {
       legacyConfig$.next(legacyConfig);
-    }
+    },
   };
 };

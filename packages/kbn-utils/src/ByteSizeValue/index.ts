@@ -4,7 +4,7 @@ const unitMultiplier: { [unit: string]: number } = {
   b: Math.pow(1024, 0),
   kb: Math.pow(1024, 1),
   mb: Math.pow(1024, 2),
-  gb: Math.pow(1024, 3)
+  gb: Math.pow(1024, 3),
 };
 
 function renderUnit(value: number, unit: string) {

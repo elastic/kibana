@@ -18,7 +18,7 @@ describe('creates elasticsearch client config', () => {
       requestTimeout: { asMilliseconds: () => {} },
       url: '',
       username: 'foo',
-      password: 'bar'
+      password: 'bar',
     } as ClusterSchema;
     const config = new ElasticsearchConfig('data', clusterSchema);
 
@@ -29,7 +29,7 @@ describe('creates elasticsearch client config', () => {
     const clusterSchema = {
       pingTimeout: { asMilliseconds: () => {} },
       requestTimeout: { asMilliseconds: () => {} },
-      url: ''
+      url: '',
     } as ClusterSchema;
     const config = new ElasticsearchConfig('data', clusterSchema);
 

@@ -118,7 +118,7 @@ test('should unsubscribe inner observables if inner observer errors', async () =
         })
     )
   ).subscribe({
-    error
+    error,
   });
 
   subject.next('a');
@@ -132,7 +132,7 @@ test('should switch inner observables', () => {
   const outer$ = new Subject<'x' | 'y'>();
   const inner$ = {
     x: new Subject(),
-    y: new Subject()
+    y: new Subject(),
   };
 
   const actual: any[] = [];
@@ -140,7 +140,7 @@ test('should switch inner observables', () => {
   k$(outer$)(switchMap(x => inner$[x])).subscribe({
     next(val) {
       actual.push(val);
-    }
+    },
   });
 
   outer$.next('x');
@@ -160,7 +160,7 @@ test('should switch inner empty and empty', () => {
   const outer$ = new Subject<'x' | 'y'>();
   const inner$ = {
     x: new Subject(),
-    y: new Subject()
+    y: new Subject(),
   };
 
   const next = jest.fn();
@@ -184,7 +184,7 @@ test('should switch inner never and throw', async () => {
   const outer$ = new Subject<'x' | 'y'>();
   const inner$ = {
     x: new Subject(),
-    y: new Subject()
+    y: new Subject(),
   };
 
   inner$.y.error(error);
@@ -214,7 +214,7 @@ test('should handle outer throw', async () => {
 test('should handle outer error', async () => {
   const outer$ = new Subject<'x'>();
   const inner$ = {
-    x: new Subject()
+    x: new Subject(),
   };
 
   const observable = k$(outer$)(switchMap(x => inner$[x]));
@@ -255,14 +255,14 @@ test('should switch inner cold observables, outer is unsubscribed early', () => 
   const outer$ = new Subject<'x' | 'y'>();
   const inner$ = {
     x: new Subject(),
-    y: new Subject()
+    y: new Subject(),
   };
 
   const actual: any[] = [];
   const sub = k$(outer$)(switchMap(x => inner$[x])).subscribe({
     next(val) {
       actual.push(val);
-    }
+    },
   });
 
   outer$.next('x');

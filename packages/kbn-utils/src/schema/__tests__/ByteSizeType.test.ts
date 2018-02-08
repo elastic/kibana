@@ -19,7 +19,7 @@ describe('#defaultValue', () => {
   test('can be a ByteSizeValue', () => {
     expect(
       byteSize({
-        defaultValue: ByteSizeValue.parse('1kb')
+        defaultValue: ByteSizeValue.parse('1kb'),
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -27,7 +27,7 @@ describe('#defaultValue', () => {
   test('can be a string', () => {
     expect(
       byteSize({
-        defaultValue: '1kb'
+        defaultValue: '1kb',
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -35,7 +35,7 @@ describe('#defaultValue', () => {
   test('can be a number', () => {
     expect(
       byteSize({
-        defaultValue: 1024
+        defaultValue: 1024,
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -45,7 +45,7 @@ describe('#min', () => {
   test('returns value when larger', () => {
     expect(
       byteSize({
-        min: '1b'
+        min: '1b',
       }).validate('1kb')
     ).toMatchSnapshot();
   });
@@ -53,7 +53,7 @@ describe('#min', () => {
   test('returns error when smaller', () => {
     expect(() =>
       byteSize({
-        min: '1kb'
+        min: '1kb',
       }).validate('1b')
     ).toThrowErrorMatchingSnapshot();
   });

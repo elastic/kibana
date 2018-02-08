@@ -3,8 +3,8 @@ import { Env } from '../../config';
 
 const pluginsSchema = schema.object({
   scanDirs: schema.arrayOf(schema.string(), {
-    defaultValue: []
-  })
+    defaultValue: [],
+  }),
 });
 
 type PluginsConfigType = schema.TypeOf<typeof pluginsSchema>;

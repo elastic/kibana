@@ -4,7 +4,7 @@ import {
   KibanaClassPluginStatic,
   KibanaPluginConfig,
   PluginName,
-  PluginConfigPath
+  PluginConfigPath,
 } from './types';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import { Logger, LoggerFactory } from '../../logging';

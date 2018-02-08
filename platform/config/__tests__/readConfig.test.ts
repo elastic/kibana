@@ -8,8 +8,8 @@ test('reads yaml from file system and parses to json', () => {
   expect(config).toEqual({
     pid: {
       enabled: true,
-      file: '/var/run/kibana.pid'
-    }
+      file: '/var/run/kibana.pid',
+    },
   });
 });
 
@@ -19,7 +19,7 @@ test('returns a deep object', () => {
   expect(config).toEqual({
     pid: {
       enabled: true,
-      file: '/var/run/kibana.pid'
-    }
+      file: '/var/run/kibana.pid',
+    },
   });
 });

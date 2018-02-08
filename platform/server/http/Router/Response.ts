@@ -11,7 +11,7 @@ export const responseFactory = {
   accepted: <T extends { [key: string]: any }>(payload: T) =>
     new KibanaResponse(202, payload),
   noContent: () => new KibanaResponse<void>(204),
-  badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err)
+  badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err),
 };
 
 export type ResponseFactory = typeof responseFactory;

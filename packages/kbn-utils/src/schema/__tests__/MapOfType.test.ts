@@ -3,7 +3,7 @@ import { mapOf, object, string, number } from '../';
 test('handles object as input', () => {
   const type = mapOf(string(), string());
   const value = {
-    name: 'foo'
+    name: 'foo',
   };
   const expected = new Map([['name', 'foo']]);
 
@@ -13,7 +13,7 @@ test('handles object as input', () => {
 test('fails when not receiving expected value type', () => {
   const type = mapOf(string(), string());
   const value = {
-    name: 123
+    name: 123,
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
@@ -22,7 +22,7 @@ test('fails when not receiving expected value type', () => {
 test('fails when not receiving expected key type', () => {
   const type = mapOf(number(), string());
   const value = {
-    name: 'foo'
+    name: 'foo',
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
@@ -30,15 +30,13 @@ test('fails when not receiving expected key type', () => {
 
 test('includes context in failure when wrong top-level type', () => {
   const type = mapOf(string(), string());
-  expect(() =>
-    type.validate([], 'foo-context')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
   const type = mapOf(string(), string());
   const value = {
-    name: 123
+    name: 123,
   };
 
   expect(() =>
@@ -49,7 +47,7 @@ test('includes context in failure when wrong value type', () => {
 test('includes context in failure when wrong key type', () => {
   const type = mapOf(number(), string());
   const value = {
-    name: 'foo'
+    name: 'foo',
   };
 
   expect(() =>
@@ -61,7 +59,7 @@ test('returns default value if undefined', () => {
   const obj = new Map([['foo', 'bar']]);
 
   const type = mapOf(string(), string(), {
-    defaultValue: obj
+    defaultValue: obj,
   });
 
   expect(type.validate(undefined)).toEqual(obj);
@@ -71,8 +69,8 @@ test('mapOf within mapOf', () => {
   const type = mapOf(string(), mapOf(string(), number()));
   const value = {
     foo: {
-      bar: 123
-    }
+      bar: 123,
+    },
   };
   const expected = new Map([['foo', new Map([['bar', 123]])]]);
 
@@ -83,13 +81,13 @@ test('object within mapOf', () => {
   const type = mapOf(
     string(),
     object({
-      bar: number()
+      bar: number(),
     })
   );
   const value = {
     foo: {
-      bar: 123
-    }
+      bar: 123,
+    },
   };
   const expected = new Map([['foo', { bar: 123 }]]);
 

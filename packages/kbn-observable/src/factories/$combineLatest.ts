@@ -84,7 +84,7 @@ export function $combineLatest<T>(
             observer.complete();
             values.length = 0;
           }
-        }
+        },
       })
     );
 

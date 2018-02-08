@@ -1,7 +1,7 @@
 import { schema } from '@elastic/kbn-utils';
 
 const fooSchema = schema.object({
-  encryptionKey: schema.string({ defaultValue: 'default' })
+  encryptionKey: schema.string({ defaultValue: 'default' }),
 });
 
 type FooConfigType = schema.TypeOf<typeof fooSchema>;

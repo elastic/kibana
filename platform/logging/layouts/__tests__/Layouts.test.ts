@@ -8,18 +8,18 @@ test('`configSchema` creates correct schema for `pattern` layout.', () => {
   expect(layoutsSchema.validate(validConfigWithOptional)).toEqual({
     kind: 'pattern',
     pattern: undefined,
-    highlight: undefined
+    highlight: undefined,
   });
 
   const validConfig = {
     kind: 'pattern',
     pattern: '{message}',
-    highlight: true
+    highlight: true,
   };
   expect(layoutsSchema.validate(validConfig)).toEqual({
     kind: 'pattern',
     pattern: '{message}',
-    highlight: true
+    highlight: true,
   });
 
   const wrongConfig2 = { kind: 'pattern', pattern: 1 };
@@ -37,7 +37,7 @@ test('`create()` creates correct layout.', () => {
   const patternLayout = Layouts.create({
     kind: 'pattern',
     pattern: '[{timestamp}][{level}][{context}] {message}',
-    highlight: false
+    highlight: false,
   });
   expect(patternLayout).toBeInstanceOf(PatternLayout);
 

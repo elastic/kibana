@@ -12,7 +12,7 @@ test('receives values when subscribed', async () => {
   source.subscribe({
     next(x) {
       res.push(x);
-    }
+    },
   });
 
   observer!.next('foo');
@@ -32,7 +32,7 @@ test('triggers complete when observer is completed', async () => {
   const complete = jest.fn();
 
   source.subscribe({
-    complete
+    complete,
   });
 
   observer!.complete();
@@ -50,7 +50,7 @@ test('should send errors thrown in the constructor down the error path', async (
   const error = jest.fn();
 
   source.subscribe({
-    error
+    error,
   });
 
   expect(error).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe('Observable.from', () => {
       next(x) {
         res.push(x);
       },
-      complete
+      complete,
     });
 
     expect(complete).toHaveBeenCalledTimes(1);
@@ -105,7 +105,7 @@ describe('Observable.from', () => {
         yield 1;
         yield 2;
         yield 3;
-      }
+      },
     };
 
     const res: number[] = [];
@@ -115,7 +115,7 @@ describe('Observable.from', () => {
       next(x) {
         res.push(x);
       },
-      complete
+      complete,
     });
 
     expect(complete).toHaveBeenCalledTimes(1);
@@ -132,7 +132,7 @@ describe('Observable.of', () => {
       next(x) {
         res.push(x);
       },
-      complete
+      complete,
     });
 
     expect(complete).toHaveBeenCalledTimes(1);

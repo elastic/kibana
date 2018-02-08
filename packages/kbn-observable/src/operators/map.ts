@@ -34,7 +34,7 @@ export function map<T, R>(
         },
         complete() {
           observer.complete();
-        }
+        },
       });
     });
   };

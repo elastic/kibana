@@ -9,7 +9,7 @@ import {
   shareLast,
   first,
   toPromise,
-  $combineLatest
+  $combineLatest,
 } from '@elastic/kbn-observable';
 
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
@@ -51,9 +51,9 @@ export class ElasticsearchService implements CoreService {
               ),
               admin: new Client(
                 configs.forType('admin').toElasticsearchClientConfig({
-                  shouldAuth: false
+                  shouldAuth: false,
                 })
-              )
+              ),
             };
 
             observer.next(clients);

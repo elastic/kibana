@@ -1,6 +1,6 @@
 import {
   ElasticsearchConfig,
-  ElasticsearchClusterType
+  ElasticsearchClusterType,
 } from './ElasticsearchConfig';
 import { elasticsearchSchema, ElasticsearchConfigsSchema } from './schema';
 import { Env } from '../../config';
@@ -24,7 +24,7 @@ export class ElasticsearchConfigs {
         config.tribe !== undefined
           ? new ElasticsearchConfig('data', config.tribe)
           : new ElasticsearchConfig('data', config),
-      admin: new ElasticsearchConfig('admin', config)
+      admin: new ElasticsearchConfig('admin', config),
     };
   }
 

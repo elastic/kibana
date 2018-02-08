@@ -10,7 +10,7 @@ import {
   toArray,
   toPromise,
   $bindNodeCallback,
-  $fromPromise
+  $fromPromise,
 } from '@elastic/kbn-observable';
 
 import { Plugin } from './Plugin';
@@ -78,7 +78,7 @@ export class PluginsService implements CoreService {
           mergeMap(pluginNames =>
             pluginNames.map(pluginName => ({
               name: pluginName,
-              path: resolve(dir, pluginName)
+              path: resolve(dir, pluginName),
             }))
           )
         )

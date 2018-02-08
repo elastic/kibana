@@ -87,7 +87,7 @@ export class HttpServer {
         passphrase: config.ssl.keyPassphrase,
         ciphers: config.ssl.cipherSuites.join(':'),
         // We use the server's cipher order rather than the client's to prevent the BEAST attack.
-        honorCipherOrder: true
+        honorCipherOrder: true,
       },
       app
     );

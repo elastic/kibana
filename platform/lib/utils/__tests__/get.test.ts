@@ -3,9 +3,9 @@ import { get } from '../get';
 const obj = {
   foo: 'value',
   bar: {
-    quux: 123
+    quux: 123,
   },
-  'dotted.value': 'dots'
+  'dotted.value': 'dots',
 };
 
 test('get with string', () => {

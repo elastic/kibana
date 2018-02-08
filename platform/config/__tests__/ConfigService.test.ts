@@ -128,20 +128,20 @@ test('tracks unhandled paths', async () => {
     foo: 'value',
     bar: {
       deep1: {
-        key: '123'
+        key: '123',
       },
       deep2: {
-        key: '321'
-      }
+        key: '321',
+      },
     },
     quux: {
       deep1: {
-        key: 'hello'
+        key: 'hello',
       },
       deep2: {
-        key: 'world'
-      }
-    }
+        key: 'world',
+      },
+    },
   };
 
   const config$ = new BehaviorSubject(
@@ -154,7 +154,7 @@ test('tracks unhandled paths', async () => {
     ['bar', 'deep2'],
     createClassWithSchema(
       schema.object({
-        key: schema.string()
+        key: schema.string(),
       })
     )
   );
@@ -168,8 +168,8 @@ test('handles enabled path, but only marks the enabled path as used', async () =
   const initialConfig = {
     pid: {
       enabled: true,
-      file: '/some/file.pid'
-    }
+      file: '/some/file.pid',
+    },
   };
 
   const config$ = new BehaviorSubject(
@@ -188,8 +188,8 @@ test('handles enabled path when path is array', async () => {
   const initialConfig = {
     pid: {
       enabled: true,
-      file: '/some/file.pid'
-    }
+      file: '/some/file.pid',
+    },
   };
 
   const config$ = new BehaviorSubject(
@@ -208,8 +208,8 @@ test('handles disabled path and marks config as used', async () => {
   const initialConfig = {
     pid: {
       enabled: false,
-      file: '/some/file.pid'
-    }
+      file: '/some/file.pid',
+    },
   };
 
   const config$ = new BehaviorSubject(

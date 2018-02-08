@@ -23,21 +23,21 @@ export function createKibanaValuesForPlugin(
     logger: {
       get(...contextParts) {
         return core.logger.get('plugins', pluginName, ...contextParts);
-      }
+      },
     },
     elasticsearch: {
       service: core.elasticsearch.service,
-      config$: core.elasticsearch.config$
+      config$: core.elasticsearch.config$,
     },
     kibana: {
-      config$: core.kibana.config$
+      config$: core.kibana.config$,
     },
     http: {
       createAndRegisterRouter(path) {
         const router = new Router(path);
         core.http.service.registerRouter(router);
         return router;
-      }
+      },
     },
     config: {
       create(ConfigClass) {
@@ -51,7 +51,7 @@ export function createKibanaValuesForPlugin(
           throw new Error('config path not defined');
         }
         return core.configService.optionalAtPath(configPath, ConfigClass);
-      }
-    }
+      },
+    },
   };
 }

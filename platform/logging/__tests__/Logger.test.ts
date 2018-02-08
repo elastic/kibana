@@ -25,7 +25,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Trace,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -38,7 +38,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Trace,
       message: 'message-2',
       error: undefined,
-      meta: { trace: true }
+      meta: { trace: true },
     });
   }
 });
@@ -53,7 +53,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Debug,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -66,7 +66,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Debug,
       message: 'message-2',
       error: undefined,
-      meta: { debug: true }
+      meta: { debug: true },
     });
   }
 });
@@ -81,7 +81,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       level: LogLevel.Info,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -94,7 +94,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       level: LogLevel.Info,
       message: 'message-2',
       error: undefined,
-      meta: { info: true }
+      meta: { info: true },
     });
   }
 });
@@ -109,7 +109,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       level: LogLevel.Warn,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -123,7 +123,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       level: LogLevel.Warn,
       message: 'message-2',
       error: error,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -136,7 +136,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       level: LogLevel.Warn,
       message: 'message-3',
       error: undefined,
-      meta: { warn: true }
+      meta: { warn: true },
     });
   }
 });
@@ -151,7 +151,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Error,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -165,7 +165,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Error,
       message: 'message-2',
       error: error,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -178,7 +178,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Error,
       message: 'message-3',
       error: undefined,
-      meta: { error: true }
+      meta: { error: true },
     });
   }
 });
@@ -193,7 +193,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Fatal,
       message: 'message-1',
       error: undefined,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -207,7 +207,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Fatal,
       message: 'message-2',
       error: error,
-      meta: undefined
+      meta: undefined,
     });
   }
 
@@ -220,7 +220,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       level: LogLevel.Fatal,
       message: 'message-3',
       error: undefined,
-      meta: { fatal: true }
+      meta: { fatal: true },
     });
   }
 });
@@ -230,7 +230,7 @@ test('`log()` just passes the record to all appenders.', () => {
     context,
     timestamp,
     level: LogLevel.Info,
-    message: 'message-1'
+    message: 'message-1',
   };
 
   logger.log(record);
@@ -265,7 +265,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Trace,
-      message: 'trace-message'
+      message: 'trace-message',
     });
   }
 
@@ -276,7 +276,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Debug,
-      message: 'debug-message'
+      message: 'debug-message',
     });
   }
 
@@ -287,7 +287,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Info,
-      message: 'info-message'
+      message: 'info-message',
     });
   }
 
@@ -298,7 +298,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Warn,
-      message: 'warn-message'
+      message: 'warn-message',
     });
   }
 
@@ -309,7 +309,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Error,
-      message: 'error-message'
+      message: 'error-message',
     });
   }
 
@@ -320,7 +320,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       context,
       timestamp,
       level: LogLevel.Fatal,
-      message: 'fatal-message'
+      message: 'fatal-message',
     });
   }
 });
@@ -343,7 +343,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       context,
       timestamp,
       level: LogLevel.Warn,
-      message: 'warn-message'
+      message: 'warn-message',
     });
   }
 
@@ -354,7 +354,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       context,
       timestamp,
       level: LogLevel.Error,
-      message: 'error-message'
+      message: 'error-message',
     });
   }
 
@@ -365,7 +365,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       context,
       timestamp,
       level: LogLevel.Fatal,
-      message: 'fatal-message'
+      message: 'fatal-message',
     });
   }
 });

@@ -13,23 +13,23 @@ const match = (regex: RegExp, errorMsg: string) => (str: string) =>
 const createHttpSchema = object({
   host: string({
     defaultValue: 'localhost',
-    validate: match(validHostnameRegex, 'must be a valid hostname')
+    validate: match(validHostnameRegex, 'must be a valid hostname'),
   }),
   port: number({
-    defaultValue: 5601
+    defaultValue: 5601,
   }),
   maxPayload: byteSize({
-    defaultValue: '1mb'
+    defaultValue: '1mb',
   }),
   basePath: maybe(
     string({
       validate: match(
         validBasePathRegex,
         "must start with a slash, don't end with one"
-      )
+      ),
     })
   ),
-  ssl: SslConfig.schema
+  ssl: SslConfig.schema,
 });
 
 type HttpConfigType = schema.TypeOf<typeof createHttpSchema>;

@@ -30,8 +30,8 @@ export function ifEmpty<T>(factory: () => T): MonoTypeOperatorFunction<T> {
             } else {
               subs.push($fromCallback(factory).subscribe(observer));
             }
-          }
-        })
+          },
+        }),
       ];
 
       return function() {

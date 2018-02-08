@@ -3,8 +3,8 @@ import { LegacyKbnServer } from '..';
 test('correctly returns `newPlatformProxyListener`.', () => {
   const rawKbnServer = {
     newPlatform: {
-      proxyListener: {}
-    }
+      proxyListener: {},
+    },
   };
 
   const legacyKbnServer = new LegacyKbnServer(rawKbnServer);
@@ -15,7 +15,7 @@ test('correctly returns `newPlatformProxyListener`.', () => {
 
 test('correctly forwards log record.', () => {
   const rawKbnServer = {
-    server: { log: jest.fn() }
+    server: { log: jest.fn() },
   };
 
   const legacyKbnServer = new LegacyKbnServer(rawKbnServer);

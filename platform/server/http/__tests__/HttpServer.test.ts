@@ -17,7 +17,7 @@ beforeEach(() => {
   config = {
     port: chance.integer({ min: 10000, max: 15000 }),
     host: '127.0.0.1',
-    ssl: {}
+    ssl: {},
   } as HttpConfig;
 
   server = new HttpServer(logger.get(), new Env('/kibana', {}));
@@ -122,9 +122,9 @@ test('valid params', async () => {
       path: '/:test',
       validate: schema => ({
         params: schema.object({
-          test: schema.string()
-        })
-      })
+          test: schema.string(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok({ key: req.params.test });
@@ -151,9 +151,9 @@ test('invalid params', async () => {
       path: '/:test',
       validate: schema => ({
         params: schema.object({
-          test: schema.number()
-        })
-      })
+          test: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok({ key: req.params.test });
@@ -169,7 +169,7 @@ test('invalid params', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[test]: expected value of type [number] but got [string]'
+        error: '[test]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -183,9 +183,9 @@ test('valid query', async () => {
       validate: schema => ({
         query: schema.object({
           bar: schema.string(),
-          quux: schema.number()
-        })
-      })
+          quux: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok(req.query);
@@ -212,9 +212,9 @@ test('invalid query', async () => {
       path: '/',
       validate: schema => ({
         query: schema.object({
-          bar: schema.number()
-        })
-      })
+          bar: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok(req.query);
@@ -230,7 +230,7 @@ test('invalid query', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[bar]: expected value of type [number] but got [string]'
+        error: '[bar]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -244,9 +244,9 @@ test('valid body', async () => {
       validate: schema => ({
         body: schema.object({
           bar: schema.string(),
-          baz: schema.number()
-        })
-      })
+          baz: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok(req.body);
@@ -261,7 +261,7 @@ test('valid body', async () => {
     .post('/foo')
     .send({
       bar: 'test',
-      baz: 123
+      baz: 123,
     })
     .expect(200)
     .then(res => {
@@ -277,9 +277,9 @@ test('invalid body', async () => {
       path: '/',
       validate: schema => ({
         body: schema.object({
-          bar: schema.number()
-        })
-      })
+          bar: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok(req.body);
@@ -296,7 +296,7 @@ test('invalid body', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[bar]: expected value of type [number] but got [string]'
+        error: '[bar]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -309,9 +309,9 @@ test('handles putting', async () => {
       path: '/',
       validate: schema => ({
         body: schema.object({
-          key: schema.string()
-        })
-      })
+          key: schema.string(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok(req.body);
@@ -339,9 +339,9 @@ test('handles deleting', async () => {
       path: '/:id',
       validate: schema => ({
         params: schema.object({
-          id: schema.number()
-        })
-      })
+          id: schema.number(),
+        }),
+      }),
     },
     async (req, res) => {
       return res.ok({ key: req.params.id });
@@ -403,7 +403,7 @@ test('filtered headers', async () => {
 
   expect(filteredHeaders).toEqual({
     'x-kibana-foo': 'bar',
-    host: `127.0.0.1:${config.port}`
+    host: `127.0.0.1:${config.port}`,
   });
 });
 
@@ -412,11 +412,11 @@ describe('when run within legacy platform', () => {
   beforeEach(() => {
     newPlatformProxyListenerMock = {
       bind: jest.fn(),
-      proxy: jest.fn()
+      proxy: jest.fn(),
     };
 
     const kbnServerMock = {
-      newPlatformProxyListener: newPlatformProxyListenerMock
+      newPlatformProxyListener: newPlatformProxyListenerMock,
     };
 
     server = new HttpServer(

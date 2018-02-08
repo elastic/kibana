@@ -1,7 +1,7 @@
 let mockCreateWriteStream: any = {};
 
 jest.mock('fs', () => ({
-  createWriteStream: () => mockCreateWriteStream
+  createWriteStream: () => mockCreateWriteStream,
 }));
 
 import { LoggingConfig } from '../LoggingConfig';
@@ -51,25 +51,25 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
       appenders: {
         default: {
           kind: 'console',
-          layout: { kind: 'pattern' }
+          layout: { kind: 'pattern' },
         },
         file: {
           kind: 'file',
           path: 'path',
-          layout: { kind: 'pattern' }
-        }
+          layout: { kind: 'pattern' },
+        },
       },
       loggers: [
         {
           context: 'tests',
           appenders: ['file'],
-          level: 'warn'
+          level: 'warn',
         },
         {
           context: 'tests.child',
-          level: 'error'
-        }
-      ]
+          level: 'error',
+        },
+      ],
     })
   );
 
@@ -97,9 +97,9 @@ test('`get()` returns `root` logger if context is not specified.', () => {
     appenders: {
       default: {
         kind: 'console',
-        layout: { kind: 'pattern' }
-      }
-    }
+        layout: { kind: 'pattern' },
+      },
+    },
   });
   factory.updateConfig(new LoggingConfig(config));
 
@@ -123,9 +123,9 @@ test('`close()` disposes all resources used by appenders.', async () => {
         default: {
           kind: 'file',
           path: 'path',
-          layout: { kind: 'pattern' }
-        }
-      }
+          layout: { kind: 'pattern' },
+        },
+      },
     })
   );
 

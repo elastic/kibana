@@ -19,7 +19,7 @@ export class LoggingService {
    */
   upgrade(config$: Observable<LoggingConfig>) {
     this.subscription = config$.subscribe({
-      next: config => this.loggingFactory.updateConfig(config)
+      next: config => this.loggingFactory.updateConfig(config),
     });
   }
 

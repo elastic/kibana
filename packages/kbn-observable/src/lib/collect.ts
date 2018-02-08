@@ -20,7 +20,7 @@ export function collect<T>(source: Observable<T>) {
       complete() {
         values.push('C');
         resolve(values);
-      }
+      },
     });
   });
 }

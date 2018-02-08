@@ -11,7 +11,7 @@ import { Layouts } from '../layouts/Layouts';
 const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
-  LegacyAppender.configSchema
+  LegacyAppender.configSchema,
 ]);
 
 /** @internal */

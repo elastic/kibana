@@ -54,7 +54,7 @@ export class ElasticsearchConfig {
     const config: ConfigOptions = pick(this.config, [
       'apiVersion',
       'username',
-      'logQueries'
+      'logQueries',
     ]);
 
     config.pingTimeout = this.config.pingTimeout.asMilliseconds();
@@ -70,7 +70,7 @@ export class ElasticsearchConfig {
       protocol: uri.protocol,
       path: uri.pathname,
       query: uri.query,
-      headers: this.config.customHeaders
+      headers: this.config.customHeaders,
     };
 
     if (
@@ -90,7 +90,7 @@ export class ElasticsearchConfig {
       ssl = {
         cert: readFileSync(this.config.ssl.certificate),
         key: readFileSync(this.config.ssl.key),
-        passphrase: this.config.ssl.keyPassphrase
+        passphrase: this.config.ssl.keyPassphrase,
       };
     }
 

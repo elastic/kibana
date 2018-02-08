@@ -32,7 +32,7 @@ export function last<T>(): MonoTypeOperatorFunction<T> {
           } else {
             observer.error(new EmptyError('last()'));
           }
-        }
+        },
       });
     });
   };

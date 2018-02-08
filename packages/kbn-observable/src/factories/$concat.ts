@@ -30,7 +30,7 @@ export function $concat<T>(...observables: Observable<T>[]) {
         },
         complete() {
           subscribe(i + 1);
-        }
+        },
       });
     }
 

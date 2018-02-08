@@ -2,11 +2,7 @@ import { arrayOf, string, object, maybe } from '../';
 
 test('returns value if it matches the type', () => {
   const type = arrayOf(string());
-  expect(type.validate(['foo', 'bar', 'baz'])).toEqual([
-    'foo',
-    'bar',
-    'baz'
-  ]);
+  expect(type.validate(['foo', 'bar', 'baz'])).toEqual(['foo', 'bar', 'baz']);
 });
 
 test('fails if wrong input type', () => {
@@ -64,7 +60,7 @@ test('array within array', () => {
   const type = arrayOf(
     arrayOf(string(), {
       minSize: 2,
-      maxSize: 2
+      maxSize: 2,
     }),
     { minSize: 1, maxSize: 1 }
   );
@@ -77,14 +73,14 @@ test('array within array', () => {
 test('object within array', () => {
   const type = arrayOf(
     object({
-      foo: string({ defaultValue: 'foo' })
+      foo: string({ defaultValue: 'foo' }),
     })
   );
 
   const value = [
     {
-      foo: 'test'
-    }
+      foo: 'test',
+    },
   ];
 
   expect(type.validate(value)).toEqual([{ foo: 'test' }]);
@@ -93,7 +89,7 @@ test('object within array', () => {
 test('object within array with required', () => {
   const type = arrayOf(
     object({
-      foo: string()
+      foo: string(),
     })
   );
 
@@ -105,7 +101,7 @@ test('object within array with required', () => {
 describe('#minSize', () => {
   test('returns value when more items', () => {
     expect(arrayOf(string(), { minSize: 1 }).validate(['foo'])).toEqual([
-      'foo'
+      'foo',
     ]);
   });
 
@@ -119,7 +115,7 @@ describe('#minSize', () => {
 describe('#maxSize', () => {
   test('returns value when fewer items', () => {
     expect(arrayOf(string(), { maxSize: 2 }).validate(['foo'])).toEqual([
-      'foo'
+      'foo',
     ]);
   });
 

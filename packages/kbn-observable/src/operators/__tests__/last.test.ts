@@ -31,7 +31,7 @@ test('returns error if completing without receiving any value', async () => {
   const error = jest.fn();
 
   k$(values$)(last()).subscribe({
-    error
+    error,
   });
 
   values$.complete();

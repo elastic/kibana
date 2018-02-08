@@ -1,6 +1,6 @@
 jest.mock('../KibanaPluginValues', () => {
   return {
-    createKibanaValuesForPlugin: () => ({})
+    createKibanaValuesForPlugin: () => ({}),
   };
 });
 
@@ -27,9 +27,9 @@ test('can register value', () => {
       dependencies: [],
       plugin: config => {
         return {
-          value: 'my-value'
+          value: 'my-value',
         };
-      }
+      },
     },
     logger
   );
@@ -40,7 +40,7 @@ test('can register value', () => {
       dependencies: ['foo'],
       plugin: (kibana, deps) => {
         expect(deps.foo).toEqual({ value: 'my-value' });
-      }
+      },
     },
     logger
   );
@@ -65,8 +65,8 @@ test('can register function', () => {
     {
       dependencies: [],
       plugin: config => ({
-        fn: val => `test-${val}`
-      })
+        fn: val => `test-${val}`,
+      }),
     },
     logger
   );
@@ -78,7 +78,7 @@ test('can register function', () => {
       plugin: (kibana, deps) => {
         expect(deps.foo).toBeDefined();
         expect(deps.foo.fn('some-value')).toBe('test-some-value');
-      }
+      },
     },
     logger
   );
@@ -109,8 +109,8 @@ test('can register value with same name across plugins', () => {
     {
       dependencies: [],
       plugin: kibana => ({
-        value: 'value-foo'
-      })
+        value: 'value-foo',
+      }),
     },
     logger
   );
@@ -120,8 +120,8 @@ test('can register value with same name across plugins', () => {
     {
       dependencies: [],
       plugin: kibana => ({
-        value: 'value-bar'
-      })
+        value: 'value-bar',
+      }),
     },
     logger
   );
@@ -133,7 +133,7 @@ test('can register value with same name across plugins', () => {
       plugin: (kibana, deps) => {
         expect(deps.foo).toEqual({ value: 'value-foo' });
         expect(deps.bar).toEqual({ value: 'value-bar' });
-      }
+      },
     },
     logger
   );
@@ -159,8 +159,8 @@ test('receives values from dependencies but not transitive dependencies', () => 
     {
       dependencies: [],
       plugin: kibana => ({
-        value: 'grandchild'
-      })
+        value: 'grandchild',
+      }),
     },
     logger
   );
@@ -179,9 +179,9 @@ test('receives values from dependencies but not transitive dependencies', () => 
         expect(deps.grandchild).toEqual({ value: 'grandchild' });
 
         return {
-          value: 'child'
+          value: 'child',
         };
-      }
+      },
     },
     logger
   );
@@ -193,7 +193,7 @@ test('receives values from dependencies but not transitive dependencies', () => 
       plugin: (kibana, deps) => {
         expect(deps.child).toEqual({ value: 'child' });
         expect(deps.grandchild).toBeUndefined();
-      }
+      },
     },
     logger
   );
@@ -221,8 +221,8 @@ test('keeps ref on registered value', () => {
     {
       dependencies: [],
       plugin: kibana => ({
-        value: myRef
-      })
+        value: myRef,
+      }),
     },
     logger
   );
@@ -233,7 +233,7 @@ test('keeps ref on registered value', () => {
       dependencies: ['child'],
       plugin: (kibana, deps) => {
         expect(deps.child.value).toBe(myRef);
-      }
+      },
     },
     logger
   );
@@ -260,8 +260,8 @@ test('can register multiple values in single plugin', () => {
       dependencies: [],
       plugin: kibana => ({
         value1: 1,
-        value2: 2
-      })
+        value2: 2,
+      }),
     },
     logger
   );
@@ -273,9 +273,9 @@ test('can register multiple values in single plugin', () => {
       plugin: (kibana, deps) => {
         expect(deps.child).toEqual({
           value1: 1,
-          value2: 2
+          value2: 2,
         });
-      }
+      },
     },
     logger
   );
@@ -302,8 +302,8 @@ test('plugins can be typed', () => {
       dependencies: [],
       plugin: kibana => ({
         value1: 1,
-        value2: 2
-      })
+        value2: 2,
+      }),
     },
     logger
   );
@@ -324,9 +324,9 @@ test('plugins can be typed', () => {
 
         return {
           value1: 'test',
-          value2: false
+          value2: false,
         };
-      }
+      },
     },
     logger
   );
@@ -341,7 +341,7 @@ test('plugins can be typed', () => {
 
         expect(deps.bar.value1).toBe('test');
         expect(deps.bar.value2).toBe(false);
-      }
+      },
     },
     logger
   );
@@ -362,7 +362,7 @@ test('ensure `this` is not specified when starting a plugin', () => {
       dependencies: [],
       plugin: function(this: any, config) {
         expect(this).toBeNull();
-      }
+      },
     },
     logger
   );
@@ -377,7 +377,7 @@ test("throws if starting a plugin that depends on a plugin that's not yet starte
     'foo',
     {
       dependencies: ['does-not-exist'],
-      plugin: () => {}
+      plugin: () => {},
     },
     logger
   );
@@ -396,7 +396,7 @@ test("throws if adding a plugin that's already added", () => {
     'foo',
     {
       dependencies: [],
-      plugin: () => {}
+      plugin: () => {},
     },
     logger
   );
@@ -434,7 +434,7 @@ test('stops plugins in reverse order of started order', () => {
     'foo',
     {
       dependencies: [],
-      plugin: FooPlugin
+      plugin: FooPlugin,
     },
     logger
   );
@@ -442,7 +442,7 @@ test('stops plugins in reverse order of started order', () => {
     'bar',
     {
       dependencies: [],
-      plugin: BarPlugin
+      plugin: BarPlugin,
     },
     logger
   );
@@ -469,7 +469,7 @@ test('can add plugins before adding its dependencies', () => {
     'foo',
     {
       dependencies: [],
-      plugin: kibana => 'value'
+      plugin: kibana => 'value',
     },
     logger
   );
@@ -480,7 +480,7 @@ test('can add plugins before adding its dependencies', () => {
       dependencies: ['foo'],
       plugin: (kibana, deps) => {
         expect(deps.foo).toBe('value');
-      }
+      },
     },
     logger
   );

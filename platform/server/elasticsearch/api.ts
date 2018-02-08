@@ -16,12 +16,12 @@ export function registerElasticsearchRoutes(
       path: '/:field',
       validate: schema => ({
         params: schema.object({
-          field: schema.string()
+          field: schema.string(),
         }),
         query: schema.object({
-          key: schema.maybe(schema.string())
-        })
-      })
+          key: schema.maybe(schema.string()),
+        }),
+      }),
     },
     async (req, res) => {
       // WOHO! Both of these are typed!
@@ -42,7 +42,7 @@ export function registerElasticsearchRoutes(
       return {
         params: req.params,
         query: req.query,
-        total_count: response.hits.total
+        total_count: response.hits.total,
       };
     }
   );

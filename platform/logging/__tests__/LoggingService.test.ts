@@ -9,8 +9,8 @@ const createConfig = () => {
     loggers: [],
     root: {
       appenders: ['default'],
-      level: 'info'
-    }
+      level: 'info',
+    },
   });
 };
 

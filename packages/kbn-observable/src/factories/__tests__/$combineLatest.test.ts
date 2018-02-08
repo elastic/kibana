@@ -36,7 +36,7 @@ test('emits once for each combination of items', async () => {
     [2, 'b'],
     [2, 'c'],
     [3, 'c'],
-    'C'
+    'C',
   ]);
 });
 

@@ -11,7 +11,7 @@ const cryptoConstants = (crypto as any).constants;
 const sslSchema = object(
   {
     enabled: boolean({
-      defaultValue: false
+      defaultValue: false,
     }),
     certificate: maybe(string()),
     key: maybe(string()),
@@ -21,15 +21,15 @@ const sslSchema = object(
       arrayOf(oneOf([literal('TLSv1'), literal('TLSv1.1'), literal('TLSv1.2')]))
     ),
     cipherSuites: arrayOf(string(), {
-      defaultValue: cryptoConstants.defaultCoreCipherList.split(':')
-    })
+      defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
+    }),
   },
   {
     validate: ssl => {
       if (ssl.enabled && (!has(ssl, 'certificate') || !has(ssl, 'key'))) {
         return 'must specify [certificate] and [key] when ssl is enabled';
       }
-    }
+    },
   }
 );
 

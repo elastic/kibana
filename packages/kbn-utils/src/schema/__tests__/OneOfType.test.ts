@@ -6,7 +6,7 @@ test('handles string', () => {
 
 test('handles string with default', () => {
   const type = oneOf([string()], {
-    defaultValue: 'test'
+    defaultValue: 'test',
   });
 
   expect(type.validate(undefined)).toBe('test');
@@ -18,7 +18,7 @@ test('handles number', () => {
 
 test('handles number with default', () => {
   const type = oneOf([number()], {
-    defaultValue: 123
+    defaultValue: 123,
   });
 
   expect(type.validate(undefined)).toBe(123);
@@ -32,7 +32,7 @@ test('handles literal', () => {
 
 test('handles literal with default', () => {
   const type = oneOf([literal('foo')], {
-    defaultValue: 'foo'
+    defaultValue: 'foo',
   });
 
   expect(type.validate(undefined)).toBe('foo');
@@ -40,7 +40,7 @@ test('handles literal with default', () => {
 
 test('handles multiple literals with default', () => {
   const type = oneOf([literal('foo'), literal('bar')], {
-    defaultValue: 'bar'
+    defaultValue: 'bar',
   });
 
   expect(type.validate('foo')).toBe('foo');

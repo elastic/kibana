@@ -38,7 +38,7 @@ export function scan<T, R>(
         },
         complete() {
           observer.complete();
-        }
+        },
       });
     });
   };

@@ -10,40 +10,40 @@ const records: LogRecord[] = [
     error: {
       message: 'Some error message',
       name: 'Some error name',
-      stack: 'Some error stack'
+      stack: 'Some error stack',
     },
-    level: LogLevel.Fatal
+    level: LogLevel.Fatal,
   },
   {
     timestamp: new Date(Date.UTC(2012, 1, 1)),
     message: 'message-2',
     context: 'context-2',
-    level: LogLevel.Error
+    level: LogLevel.Error,
   },
   {
     timestamp: new Date(Date.UTC(2012, 1, 1)),
     message: 'message-3',
     context: 'context-3',
-    level: LogLevel.Warn
+    level: LogLevel.Warn,
   },
   {
     timestamp: new Date(Date.UTC(2012, 1, 1)),
     message: 'message-4',
     context: 'context-4',
-    level: LogLevel.Debug
+    level: LogLevel.Debug,
   },
   {
     timestamp: new Date(Date.UTC(2012, 1, 1)),
     message: 'message-5',
     context: 'context-5',
-    level: LogLevel.Info
+    level: LogLevel.Info,
   },
   {
     timestamp: new Date(Date.UTC(2012, 1, 1)),
     message: 'message-6',
     context: 'context-6',
-    level: LogLevel.Trace
-  }
+    level: LogLevel.Trace,
+  },
 ];
 
 test('`createConfigSchema()` creates correct schema.', () => {

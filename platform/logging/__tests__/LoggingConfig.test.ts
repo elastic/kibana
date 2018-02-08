@@ -11,8 +11,8 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
   expect(() =>
     loggingConfigSchema.validate({
       root: {
-        appenders: []
-      }
+        appenders: [],
+      },
     })
   ).toThrowErrorMatchingSnapshot();
 });
@@ -38,7 +38,7 @@ test('correctly fills in default `appenders` config.', () => {
 
   expect(config.appenders.get('default')).toEqual({
     kind: 'console',
-    layout: { kind: 'pattern', highlight: true }
+    layout: { kind: 'pattern', highlight: true },
   });
 });
 
@@ -49,14 +49,14 @@ test('correctly fills in custom `appenders` config.', () => {
       appenders: {
         console: {
           kind: 'console',
-          layout: { kind: 'pattern' }
+          layout: { kind: 'pattern' },
         },
         file: {
           kind: 'file',
           path: 'path',
-          layout: { kind: 'pattern' }
-        }
-      }
+          layout: { kind: 'pattern' },
+        },
+      },
     })
   );
 
@@ -64,18 +64,18 @@ test('correctly fills in custom `appenders` config.', () => {
 
   expect(config.appenders.get('default')).toEqual({
     kind: 'console',
-    layout: { kind: 'pattern', highlight: true }
+    layout: { kind: 'pattern', highlight: true },
   });
 
   expect(config.appenders.get('console')).toEqual({
     kind: 'console',
-    layout: { kind: 'pattern' }
+    layout: { kind: 'pattern' },
   });
 
   expect(config.appenders.get('file')).toEqual({
     kind: 'file',
     path: 'path',
-    layout: { kind: 'pattern' }
+    layout: { kind: 'pattern' },
   });
 });
 
@@ -87,7 +87,7 @@ test('correctly fills in default `loggers` config.', () => {
   expect(config.loggers.get('root')).toEqual({
     context: 'root',
     appenders: ['default'],
-    level: 'info'
+    level: 'info',
   });
 });
 
@@ -99,25 +99,25 @@ test('correctly fills in custom `loggers` config.', () => {
         file: {
           kind: 'file',
           path: 'path',
-          layout: { kind: 'pattern' }
-        }
+          layout: { kind: 'pattern' },
+        },
       },
       loggers: [
         {
           context: 'plugins',
           appenders: ['file'],
-          level: 'warn'
+          level: 'warn',
         },
         {
           context: 'plugins.pid',
-          level: 'trace'
+          level: 'trace',
         },
         {
           context: 'http',
           level: 'error',
-          appenders: ['default']
-        }
-      ]
+          appenders: ['default'],
+        },
+      ],
     })
   );
 
@@ -125,22 +125,22 @@ test('correctly fills in custom `loggers` config.', () => {
   expect(config.loggers.get('root')).toEqual({
     context: 'root',
     appenders: ['default'],
-    level: 'info'
+    level: 'info',
   });
   expect(config.loggers.get('plugins')).toEqual({
     context: 'plugins',
     appenders: ['file'],
-    level: 'warn'
+    level: 'warn',
   });
   expect(config.loggers.get('plugins.pid')).toEqual({
     context: 'plugins.pid',
     appenders: ['file'],
-    level: 'trace'
+    level: 'trace',
   });
   expect(config.loggers.get('http')).toEqual({
     context: 'http',
     appenders: ['default'],
-    level: 'error'
+    level: 'error',
   });
 });
 
@@ -150,9 +150,9 @@ test('fails if loggers use unknown appenders.', () => {
     loggers: [
       {
         context: 'some.nested.context',
-        appenders: ['unknown']
-      }
-    ]
+        appenders: ['unknown'],
+      },
+    ],
   });
 
   expect(

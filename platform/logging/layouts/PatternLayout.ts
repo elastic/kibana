@@ -13,7 +13,7 @@ const Parameters = Object.freeze({
   Timestamp: '{timestamp}',
   Level: '{level}',
   Context: '{context}',
-  Message: '{message}'
+  Message: '{message}',
 });
 
 /**
@@ -36,7 +36,7 @@ const LEVEL_COLORS = new Map([
   [LogLevel.Error, chalk.red],
   [LogLevel.Warn, chalk.yellow],
   [LogLevel.Debug, chalk.green],
-  [LogLevel.Trace, chalk.blue]
+  [LogLevel.Trace, chalk.blue],
 ]);
 
 /**
@@ -49,7 +49,7 @@ const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
 const patternLayoutSchema = object({
   kind: literal('pattern'),
   pattern: maybe(string()),
-  highlight: maybe(boolean())
+  highlight: maybe(boolean()),
 });
 
 /** @internal */
@@ -79,7 +79,7 @@ export class PatternLayout implements Layout {
       [Parameters.Timestamp, record.timestamp.toISOString()],
       [Parameters.Level, record.level.id.toUpperCase().padEnd(5)],
       [Parameters.Context, record.context],
-      [Parameters.Message, message]
+      [Parameters.Message, message],
     ]);
 
     if (this.highlight) {

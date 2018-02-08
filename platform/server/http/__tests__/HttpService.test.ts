@@ -1,7 +1,7 @@
 const mockHttpServer = jest.fn();
 
 jest.mock('../HttpServer', () => ({
-  HttpServer: mockHttpServer
+  HttpServer: mockHttpServer,
 }));
 
 import { noop } from 'lodash';
@@ -31,7 +31,7 @@ test('creates an http server', () => {
 test('starts http server', async () => {
   const config = {
     port: 1234,
-    host: 'example.org'
+    host: 'example.org',
   } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -39,7 +39,7 @@ test('starts http server', async () => {
   const httpServer = {
     isListening: () => false,
     start: jest.fn(),
-    stop: noop
+    stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
@@ -62,7 +62,7 @@ test('logs error is already started', async () => {
   const httpServer = {
     isListening: () => true,
     start: noop,
-    stop: noop
+    stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
@@ -85,7 +85,7 @@ test('stops http server', async () => {
   const httpServer = {
     isListening: () => false,
     start: noop,
-    stop: jest.fn()
+    stop: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
@@ -113,7 +113,7 @@ test('register route handler', () => {
     isListening: () => false,
     start: noop,
     stop: noop,
-    registerRouter: jest.fn()
+    registerRouter: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
@@ -140,7 +140,7 @@ test('throws if registering route handler after http server is started', () => {
     isListening: () => true,
     start: noop,
     stop: noop,
-    registerRouter: jest.fn()
+    registerRouter: jest.fn(),
   };
   mockHttpServer.mockImplementation(() => httpServer);
 

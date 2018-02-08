@@ -13,7 +13,7 @@ test('returns undefined if undefined', () => {
 test('returns undefined even if contained type has a default value', () => {
   const type = maybe(
     string({
-      defaultValue: 'abc'
+      defaultValue: 'abc',
     })
   );
 
@@ -25,7 +25,7 @@ test('calls validate on contained type', () => {
 
   const type = maybe(
     string({
-      validate: spy
+      validate: spy,
     })
   );
 

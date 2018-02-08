@@ -40,7 +40,7 @@ test('should mergeMap many outer values to many inner values', async () => {
     '2-c',
     '3-c',
     '4-c',
-    'C'
+    'C',
   ]);
 });
 

@@ -3,9 +3,9 @@ jest.mock('../../layouts/Layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock')
-      })
-    }
+        kind: schema.literal('mock'),
+      }),
+    },
   };
 });
 
@@ -18,7 +18,7 @@ test('`configSchema` creates correct schema.', () => {
   const validConfig = { kind: 'console', layout: { kind: 'mock' } };
   expect(appenderSchema.validate(validConfig)).toEqual({
     kind: 'console',
-    layout: { kind: 'mock' }
+    layout: { kind: 'mock' },
   });
 
   const wrongConfig1 = { kind: 'not-console', layout: { kind: 'mock' } };
@@ -36,27 +36,27 @@ test('`append()` correctly formats records and pushes them to console.', () => {
       timestamp: new Date(),
       message: 'message-1',
       context: 'context-1',
-      level: LogLevel.All
+      level: LogLevel.All,
     },
     {
       timestamp: new Date(),
       message: 'message-2',
       context: 'context-2',
-      level: LogLevel.Trace
+      level: LogLevel.Trace,
     },
     {
       timestamp: new Date(),
       message: 'message-3',
       context: 'context-3',
       error: new Error('Error'),
-      level: LogLevel.Fatal
-    }
+      level: LogLevel.Fatal,
+    },
   ];
 
   const appender = new ConsoleAppender({
     format(record) {
       return `mock-${JSON.stringify(record)}`;
-    }
+    },
   });
 
   for (const record of records) {

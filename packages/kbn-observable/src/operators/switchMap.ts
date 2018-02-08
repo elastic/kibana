@@ -77,7 +77,7 @@ export function switchMap<T, R>(
             },
             error(err) {
               observer.error(err);
-            }
+            },
           });
         },
         error(err) {
@@ -95,7 +95,7 @@ export function switchMap<T, R>(
           }
 
           observer.complete();
-        }
+        },
       });
     });
   };

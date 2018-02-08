@@ -1,7 +1,7 @@
 import { schema } from '@elastic/kbn-utils';
 
 const barConfig = schema.object({
-  myValue: schema.string()
+  myValue: schema.string(),
 });
 
 type BarConfigType = schema.TypeOf<typeof barConfig>;

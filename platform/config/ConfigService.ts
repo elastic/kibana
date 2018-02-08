@@ -4,7 +4,7 @@ import {
   map,
   first,
   skipRepeats,
-  toPromise
+  toPromise,
 } from '@elastic/kbn-observable';
 import { isEqual } from 'lodash';
 

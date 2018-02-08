@@ -14,14 +14,14 @@ test('`flush()` returns all appended records and cleans internal buffer.', () =>
       timestamp: new Date(),
       message: 'message-1',
       context: 'context-1',
-      level: LogLevel.All
+      level: LogLevel.All,
     },
     {
       timestamp: new Date(),
       message: 'message-2',
       context: 'context-2',
-      level: LogLevel.Trace
-    }
+      level: LogLevel.Trace,
+    },
   ];
 
   const appender = new BufferAppender();
@@ -44,7 +44,7 @@ test('`dispose()` flushes internal buffer.', async () => {
     timestamp: new Date(),
     message: 'message-1',
     context: 'context-1',
-    level: LogLevel.All
+    level: LogLevel.All,
   });
 
   await appender.dispose();

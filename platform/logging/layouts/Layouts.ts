@@ -21,7 +21,7 @@ export interface Layout {
 export class Layouts {
   static configSchema = oneOf([
     JsonLayout.configSchema,
-    PatternLayout.configSchema
+    PatternLayout.configSchema,
   ]);
 
   /**

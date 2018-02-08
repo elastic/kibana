@@ -1,5 +1,5 @@
 jest.mock('../version', () => ({
-  version: '5.2.2'
+  version: '5.2.2',
 }));
 
 import { parseArgv } from '../cli';

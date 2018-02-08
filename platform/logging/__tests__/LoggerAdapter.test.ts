@@ -9,7 +9,7 @@ test('proxies all method calls to the internal logger.', () => {
     warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
-    log: jest.fn()
+    log: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(internalLogger);
@@ -47,7 +47,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
-    log: jest.fn()
+    log: jest.fn(),
   };
 
   const newInternalLogger: Logger = {
@@ -57,7 +57,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     warn: jest.fn(),
     error: jest.fn(),
     fatal: jest.fn(),
-    log: jest.fn()
+    log: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(oldInternalLogger);

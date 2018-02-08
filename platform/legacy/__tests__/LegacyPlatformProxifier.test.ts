@@ -11,7 +11,7 @@ class mockNetServer extends EventEmitter {
   }
 }
 jest.mock('net', () => ({
-  createServer: jest.fn(() => new mockNetServer())
+  createServer: jest.fn(() => new mockNetServer()),
 }));
 
 import { LegacyPlatformProxifier } from '..';
@@ -26,9 +26,9 @@ beforeEach(() => {
     logger: {
       get: jest.fn(() => ({
         info: jest.fn(),
-        debug: jest.fn()
-      }))
-    }
+        debug: jest.fn(),
+      })),
+    },
   } as any;
 
   proxifier = new LegacyPlatformProxifier(root);
@@ -124,7 +124,7 @@ test('returns `address` from the underlying server.', () => {
   expect(proxifier.address()).toEqual({
     port: 1234,
     family: 'test-family',
-    address: 'test-address'
+    address: 'test-address',
   });
 });
 

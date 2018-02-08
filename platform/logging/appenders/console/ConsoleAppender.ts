@@ -13,7 +13,7 @@ const { literal, object } = schema;
 export class ConsoleAppender implements DisposableAppender {
   static configSchema = object({
     kind: literal('console'),
-    layout: Layouts.configSchema
+    layout: Layouts.configSchema,
   });
 
   /**

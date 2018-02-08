@@ -3,7 +3,7 @@ import {
   Subscription,
   k$,
   first,
-  toPromise
+  toPromise,
 } from '@elastic/kbn-observable';
 
 import { Env } from '../../config';

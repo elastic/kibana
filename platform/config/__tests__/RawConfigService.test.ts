@@ -1,7 +1,7 @@
 const mockGetConfigFromFile = jest.fn();
 
 jest.mock('../readConfig', () => ({
-  getConfigFromFile: mockGetConfigFromFile
+  getConfigFromFile: mockGetConfigFromFile,
 }));
 
 import { k$, first, toPromise } from '@elastic/kbn-observable';
@@ -109,7 +109,7 @@ test('completes config observables when stopped', done => {
   configService.loadConfig();
 
   configService.getConfig$().subscribe({
-    complete: () => done()
+    complete: () => done(),
   });
 
   configService.stop();

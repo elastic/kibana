@@ -1,7 +1,7 @@
 const mockCallAPI = jest.fn();
 
 jest.mock('../call_api', () => ({
-  callAPI: mockCallAPI
+  callAPI: mockCallAPI,
 }));
 
 import { Client } from 'elasticsearch';

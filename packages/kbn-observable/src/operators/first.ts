@@ -25,7 +25,7 @@ export function first<T>(): MonoTypeOperatorFunction<T> {
         complete() {
           // The only time we end up here, is if we never received any values.
           observer.error(new EmptyError('first()'));
-        }
+        },
       });
     });
   };

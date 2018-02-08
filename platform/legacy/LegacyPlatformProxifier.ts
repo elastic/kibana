@@ -12,7 +12,7 @@ const ServerEventsToForward = [
   'listening',
   'error',
   'clientError',
-  'connection'
+  'connection',
 ];
 
 /**
@@ -38,7 +38,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
           (...args: any[]) => {
             this.log.debug(`Event is being forwarded: ${eventName}`);
             this.emit(eventName, ...args);
-          }
+          },
         ] as [string, (...args: any[]) => void];
       })
     );

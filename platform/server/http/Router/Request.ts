@@ -46,7 +46,7 @@ export class KibanaRequest<Params, Query, Body> {
       return {
         params: {},
         query: {},
-        body: {}
+        body: {},
       };
     }
 

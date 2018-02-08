@@ -2,10 +2,10 @@ import { object, string, oneOf } from '../';
 
 test('returns value by default', () => {
   const type = object({
-    name: string()
+    name: string(),
   });
   const value = {
-    name: 'test'
+    name: 'test',
   };
 
   expect(type.validate(value)).toEqual({ name: 'test' });
@@ -13,7 +13,7 @@ test('returns value by default', () => {
 
 test('fails if missing required value', () => {
   const type = object({
-    name: string()
+    name: string(),
   });
   const value = {};
 
@@ -22,7 +22,7 @@ test('fails if missing required value', () => {
 
 test('returns value if undefined string with default', () => {
   const type = object({
-    name: string({ defaultValue: 'test' })
+    name: string({ defaultValue: 'test' }),
   });
   const value = {};
 
@@ -31,10 +31,10 @@ test('returns value if undefined string with default', () => {
 
 test('fails if key does not exist in schema', () => {
   const type = object({
-    foo: string()
+    foo: string(),
   });
   const value = {
-    bar: 'baz'
+    bar: 'baz',
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
@@ -43,23 +43,23 @@ test('fails if key does not exist in schema', () => {
 test('object within object', () => {
   const type = object({
     foo: object({
-      bar: string({ defaultValue: 'hello world' })
-    })
+      bar: string({ defaultValue: 'hello world' }),
+    }),
   });
   const value = { foo: {} };
 
   expect(type.validate(value)).toEqual({
     foo: {
-      bar: 'hello world'
-    }
+      bar: 'hello world',
+    },
   });
 });
 
 test('object within object with required', () => {
   const type = object({
     foo: object({
-      bar: string()
-    })
+      bar: string(),
+    }),
   });
   const value = {};
 
@@ -73,13 +73,13 @@ describe('#validate', () => {
     const type = object(
       {
         foo: object({
-          bar: string({ defaultValue: 'baz' })
-        })
+          bar: string({ defaultValue: 'baz' }),
+        }),
       },
       {
         validate: value => {
           calledWith = value;
-        }
+        },
       }
     );
 
@@ -87,8 +87,8 @@ describe('#validate', () => {
 
     expect(calledWith).toEqual({
       foo: {
-        bar: 'baz'
-      }
+        bar: 'baz',
+      },
     });
   });
 });
@@ -102,7 +102,7 @@ test('called with wrong type', () => {
 
 test('handles oneOf', () => {
   const type = object({
-    key: oneOf([string()])
+    key: oneOf([string()]),
   });
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
@@ -111,20 +111,18 @@ test('handles oneOf', () => {
 
 test('includes context in failure when wrong top-level type', () => {
   const type = object({
-    foo: string()
+    foo: string(),
   });
 
-  expect(() =>
-    type.validate([], 'foo-context')
-  ).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([], 'foo-context')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong value type', () => {
   const type = object({
-    foo: string()
+    foo: string(),
   });
   const value = {
-    foo: 123
+    foo: 123,
   };
 
   expect(() =>

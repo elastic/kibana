@@ -78,7 +78,7 @@ export class BaseLogger implements Logger {
         context: this.context,
         meta,
         message: errorOrMessage.message,
-        error: errorOrMessage
+        error: errorOrMessage,
       };
     }
 
@@ -87,7 +87,7 @@ export class BaseLogger implements Logger {
       level,
       context: this.context,
       meta,
-      message: errorOrMessage
+      message: errorOrMessage,
     };
   }
 }

@@ -15,7 +15,7 @@ export class FileAppender implements DisposableAppender {
   static configSchema = object({
     kind: literal('file'),
     path: string(),
-    layout: Layouts.configSchema
+    layout: Layouts.configSchema,
   });
 
   /**
@@ -38,7 +38,7 @@ export class FileAppender implements DisposableAppender {
     if (this.outputStream === undefined) {
       this.outputStream = createWriteStream(this.path, {
         flags: 'a',
-        encoding: 'utf8'
+        encoding: 'utf8',
       });
     }
 

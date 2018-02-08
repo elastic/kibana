@@ -343,7 +343,7 @@ test('can use subject in $k', async () => {
   k$(values$)(first()).subscribe({
     next,
     error,
-    complete
+    complete,
   });
 
   values$.next('test');
@@ -398,7 +398,7 @@ describe('asObservable', () => {
     let complete = jest.fn();
 
     subject.asObservable().subscribe({
-      complete
+      complete,
     });
 
     subject.complete();
@@ -412,7 +412,7 @@ describe('asObservable', () => {
     let error = jest.fn();
 
     subject.asObservable().subscribe({
-      error
+      error,
     });
 
     const e = new Error('yep');
@@ -430,7 +430,7 @@ describe('asObservable', () => {
     subject.asObservable().subscribe({
       next(x) {
         actual.push(x);
-      }
+      },
     });
 
     subject.next(1);
@@ -448,7 +448,7 @@ describe('asObservable', () => {
     const sub = subject.asObservable().subscribe({
       next(x) {
         actual.push(x);
-      }
+      },
     });
 
     subject.next(1);
@@ -469,13 +469,13 @@ describe('asObservable', () => {
     subject.asObservable().subscribe({
       next(x) {
         actual.push(`1-${x}`);
-      }
+      },
     });
 
     subject.asObservable().subscribe({
       next(x) {
         actual.push(`2-${x}`);
-      }
+      },
     });
 
     subject.next('foo');

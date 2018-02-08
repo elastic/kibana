@@ -2,10 +2,7 @@ import { KibanaError } from '../Errors';
 
 export class TypeError extends KibanaError {
   constructor(error: Error | string, key?: string) {
-    super(
-      TypeError.extractMessage(error, key),
-      TypeError.extractCause(error)
-    );
+    super(TypeError.extractMessage(error, key), TypeError.extractCause(error));
   }
 
   static extractMessage(error: Error | string, context?: string) {

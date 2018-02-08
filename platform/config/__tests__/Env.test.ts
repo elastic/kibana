@@ -1,13 +1,13 @@
 jest.mock('process', () => ({
   cwd() {
     return '/test/cwd';
-  }
+  },
 }));
 
 jest.mock('path', () => ({
   resolve(...pathSegments: string[]) {
     return pathSegments.join('/');
-  }
+  },
 }));
 
 import { Env } from '../Env';
@@ -30,7 +30,7 @@ test('correctly creates default environment with options overrides.', () => {
   const kbnServerMock = {};
   const defaultEnv = Env.createDefault({
     config: '/some/other/path/some-kibana.yml',
-    kbnServer: kbnServerMock
+    kbnServer: kbnServerMock,
   });
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
@@ -48,7 +48,7 @@ test('correctly creates default environment with options overrides.', () => {
 
 test('correctly creates environment with constructor.', () => {
   const defaultEnv = new Env('/some/home/dir', {
-    config: '/some/other/path/some-kibana.yml'
+    config: '/some/other/path/some-kibana.yml',
   });
 
   expect(defaultEnv.homeDir).toEqual('/some/home/dir');

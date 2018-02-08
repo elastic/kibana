@@ -104,7 +104,7 @@ export class Router {
     return [
       bodyParser.json(),
       bodyParser.raw({ type: 'application/x-ndjson' }),
-      bodyParser.urlencoded({ extended: false })
+      bodyParser.urlencoded({ extended: false }),
     ];
   }
 

@@ -9,7 +9,7 @@ test('has defaults for config', () => {
 test('throws if invalid hostname', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
-    host: 'asdf$%^'
+    host: 'asdf$%^',
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
@@ -17,7 +17,7 @@ test('throws if invalid hostname', () => {
 test('can specify max payload as string', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
-    maxPayload: '2mb'
+    maxPayload: '2mb',
   };
   const config = httpSchema.validate(obj);
   expect(config.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
@@ -26,7 +26,7 @@ test('can specify max payload as string', () => {
 test('throws is basepath is missing prepended slash', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
-    basePath: 'foo'
+    basePath: 'foo',
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
@@ -34,7 +34,7 @@ test('throws is basepath is missing prepended slash', () => {
 test('throws is basepath appends a slash', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
-    basePath: '/foo/'
+    basePath: '/foo/',
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });

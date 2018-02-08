@@ -3,9 +3,9 @@ jest.mock('../../layouts/Layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock')
-      })
-    }
+        kind: schema.literal('mock'),
+      }),
+    },
   };
 });
 
@@ -29,13 +29,13 @@ test('`createConfigSchema()` creates correct schema.', () => {
   expect(appenderSchema.validate(validConfig)).toEqual({
     kind: 'file',
     layout: { kind: 'mock' },
-    path: 'path'
+    path: 'path',
   });
 
   const wrongConfig1 = {
     kind: 'not-file',
     layout: { kind: 'mock' },
-    path: 'path'
+    path: 'path',
   };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
@@ -58,13 +58,13 @@ test('file stream is created only once and only after first `append()` is called
     timestamp: new Date(),
     message: 'message-1',
     context: 'context-1',
-    level: LogLevel.All
+    level: LogLevel.All,
   });
 
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
   expect(mockCreateWriteStream).toHaveBeenCalledWith(mockPath, {
     flags: 'a',
-    encoding: 'utf8'
+    encoding: 'utf8',
   });
 
   mockCreateWriteStream.mockClear();
@@ -72,7 +72,7 @@ test('file stream is created only once and only after first `append()` is called
     timestamp: new Date(),
     message: 'message-2',
     context: 'context-2',
-    level: LogLevel.All
+    level: LogLevel.All,
   });
 
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
@@ -87,28 +87,28 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
       timestamp: new Date(),
       message: 'message-1',
       context: 'context-1',
-      level: LogLevel.All
+      level: LogLevel.All,
     },
     {
       timestamp: new Date(),
       message: 'message-2',
       context: 'context-2',
-      level: LogLevel.Trace
+      level: LogLevel.Trace,
     },
     {
       timestamp: new Date(),
       message: 'message-3',
       context: 'context-3',
       error: new Error('Error'),
-      level: LogLevel.Fatal
-    }
+      level: LogLevel.Fatal,
+    },
   ];
 
   const appender = new FileAppender(
     {
       format(record) {
         return `mock-${JSON.stringify(record)}`;
-      }
+      },
     },
     'mock://path/file.log'
   );
@@ -143,7 +143,7 @@ test('`dispose()` closes stream.', async () => {
 
   mockCreateWriteStream.mockReturnValue({
     write: () => {},
-    end: mockStreamEnd
+    end: mockStreamEnd,
   });
 
   const appender = new FileAppender(
@@ -154,7 +154,7 @@ test('`dispose()` closes stream.', async () => {
     timestamp: new Date(),
     message: 'message-1',
     context: 'context-1',
-    level: LogLevel.All
+    level: LogLevel.All,
   });
 
   await appender.dispose();

@@ -6,7 +6,7 @@ import { Layout } from './Layouts';
 const { literal, object } = schema;
 
 const jsonLayoutSchema = object({
-  kind: literal('json')
+  kind: literal('json'),
 });
 
 /** @internal */
@@ -26,7 +26,7 @@ export class JsonLayout implements Layout {
       context: record.context,
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),
-      meta: record.meta
+      meta: record.meta,
     });
   }
 
@@ -38,7 +38,7 @@ export class JsonLayout implements Layout {
     return {
       name: error.name,
       stack: error.stack,
-      message: error.message
+      message: error.message,
     };
   }
 }

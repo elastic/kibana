@@ -41,7 +41,7 @@ export class Server {
       kibana: this.kibana,
       http: this.http,
       configService,
-      logger
+      logger,
     };
 
     this.plugins = new PluginsService(

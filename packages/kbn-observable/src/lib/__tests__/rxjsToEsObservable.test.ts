@@ -21,7 +21,7 @@ test('handles completed', () => {
   esObservable.subscribe({
     complete: () => {
       completed = true;
-    }
+    },
   });
 
   expect(completed).toBe(true);
@@ -37,7 +37,7 @@ test('handles error', () => {
   esObservable.subscribe({
     error: err => {
       receivedError = err;
-    }
+    },
   });
 
   expect(receivedError).toBe(err);

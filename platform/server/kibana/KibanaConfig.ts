@@ -1,7 +1,7 @@
 import { schema } from '@elastic/kbn-utils';
 
 const kibanaSchema = schema.object({
-  index: schema.string({ defaultValue: '.kibana' })
+  index: schema.string({ defaultValue: '.kibana' }),
 });
 
 type KibanaConfigType = schema.TypeOf<typeof kibanaSchema>;

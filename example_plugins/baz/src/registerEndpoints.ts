@@ -3,7 +3,7 @@ import {
   Router,
   LoggerFactory,
   ElasticsearchService,
-  KibanaConfig
+  KibanaConfig,
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
@@ -18,7 +18,7 @@ export function registerEndpoints(
   router.get(
     {
       path: '/fail',
-      validate: false
+      validate: false,
     },
     async (req, res) => {
       log.info(`GET should fail`);
@@ -32,21 +32,21 @@ export function registerEndpoints(
       path: '/:type',
       validate: schema => ({
         params: schema.object({
-          type: schema.string()
+          type: schema.string(),
         }),
         query: schema.object({
           page: schema.maybe(
             schema.number({
-              min: 1
+              min: 1,
             })
           ),
           per_page: schema.maybe(
             schema.number({
-              min: 1
+              min: 1,
             })
-          )
-        })
-      })
+          ),
+        }),
+      }),
     },
     async (req, res) => {
       log.info('handle Baz route');
@@ -66,7 +66,7 @@ export function registerEndpoints(
       const items = await bazService.find({
         type: params.type,
         page: query.page,
-        perPage: query.per_page
+        perPage: query.per_page,
       });
 
       return res.ok(items);

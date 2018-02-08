@@ -24,7 +24,7 @@ export function captureTerminal<T extends string[]>(
 
   process.env = {
     ...process.env,
-    _: 'node'
+    _: 'node',
   };
 
   process.argv = argv;
@@ -37,7 +37,7 @@ export function captureTerminal<T extends string[]>(
       logs: mockConsoleLog.mock.calls,
       warnings: mockConsoleWarn.mock.calls,
       exit: mockProcessExit.mock.calls.length > 0,
-      result
+      result,
     };
   } finally {
     mockProcessExit.mockReset();

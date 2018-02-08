@@ -15,7 +15,7 @@ export function toPromise<T>(): UnaryFunction<Observable<T>, Promise<T>> {
         },
         complete() {
           resolve(lastValue);
-        }
+        },
       });
     });
   };

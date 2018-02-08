@@ -31,33 +31,33 @@ const createLevelSchema = oneOf(
     literal('info'),
     literal('debug'),
     literal('trace'),
-    literal('off')
+    literal('off'),
   ],
   {
-    defaultValue: 'info'
+    defaultValue: 'info',
   }
 );
 
 const createLoggerSchema = object({
   context: string(),
   level: createLevelSchema,
-  appenders: arrayOf(string(), { defaultValue: [] })
+  appenders: arrayOf(string(), { defaultValue: [] }),
 });
 
 const loggingSchema = object({
   appenders: mapOf(string(), Appenders.configSchema, {
-    defaultValue: new Map<string, AppenderConfigType>()
+    defaultValue: new Map<string, AppenderConfigType>(),
   }),
   root: object({
     level: createLevelSchema,
     appenders: arrayOf(string(), {
       defaultValue: [DEFAULT_APPENDER_NAME],
-      minSize: 1
-    })
+      minSize: 1,
+    }),
   }),
   loggers: arrayOf(createLoggerSchema, {
-    defaultValue: []
-  })
+    defaultValue: [],
+  }),
 });
 
 /** @internal */
@@ -80,9 +80,9 @@ export class LoggingConfig {
       DEFAULT_APPENDER_NAME,
       {
         kind: 'console',
-        layout: { kind: 'pattern', highlight: true }
-      } as AppenderConfigType
-    ]
+        layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
   ]);
 
   /**
@@ -130,7 +130,7 @@ export class LoggingConfig {
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
     const loggers = [
       { context: ROOT_CONTEXT_NAME, ...loggingConfig.root },
-      ...loggingConfig.loggers
+      ...loggingConfig.loggers,
     ];
 
     const loggerConfigByContext = new Map(
@@ -145,9 +145,7 @@ export class LoggingConfig {
 
       if (unsupportedAppenderKey) {
         throw new Error(
-          `Logger "${loggerContext}" contains unsupported appender key "${
-            unsupportedAppenderKey
-          }".`
+          `Logger "${loggerContext}" contains unsupported appender key "${unsupportedAppenderKey}".`
         );
       }
 
@@ -157,7 +155,7 @@ export class LoggingConfig {
       // have at least one appender that is enforced by the config schema validation.
       this.loggers.set(loggerContext, {
         ...loggerConfig,
-        appenders
+        appenders,
       });
     }
   }

@@ -8,7 +8,7 @@ const allLogLevels = [
   LogLevel.Info,
   LogLevel.Debug,
   LogLevel.Trace,
-  LogLevel.All
+  LogLevel.All,
 ];
 
 test('`LogLevel.All` supports all log levels.', () => {
@@ -25,7 +25,7 @@ test('`LogLevel.Trace` supports `Trace, Debug, Info, Warn, Error, Fatal, Off`.',
     LogLevel.Warn,
     LogLevel.Info,
     LogLevel.Debug,
-    LogLevel.Trace
+    LogLevel.Trace,
   ];
 
   for (const level of allLogLevels) {
@@ -42,7 +42,7 @@ test('`LogLevel.Debug` supports `Debug, Info, Warn, Error, Fatal, Off`.', () => 
     LogLevel.Error,
     LogLevel.Warn,
     LogLevel.Info,
-    LogLevel.Debug
+    LogLevel.Debug,
   ];
 
   for (const level of allLogLevels) {
@@ -58,7 +58,7 @@ test('`LogLevel.Info` supports `Info, Warn, Error, Fatal, Off`.', () => {
     LogLevel.Fatal,
     LogLevel.Error,
     LogLevel.Warn,
-    LogLevel.Info
+    LogLevel.Info,
   ];
 
   for (const level of allLogLevels) {
@@ -71,7 +71,7 @@ test('`LogLevel.Warn` supports `Warn, Error, Fatal, Off`.', () => {
     LogLevel.Off,
     LogLevel.Fatal,
     LogLevel.Error,
-    LogLevel.Warn
+    LogLevel.Warn,
   ];
 
   for (const level of allLogLevels) {

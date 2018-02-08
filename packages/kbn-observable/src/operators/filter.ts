@@ -38,7 +38,7 @@ export function filter<T>(
         },
         complete() {
           observer.complete();
-        }
+        },
       });
     });
   };

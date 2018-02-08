@@ -29,7 +29,7 @@ export function rxjsToEsObservable<T>(observable: RxjsObservable<T>) {
       },
       complete: () => {
         observer.complete();
-      }
+      },
     })
   );
 }

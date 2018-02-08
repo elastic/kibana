@@ -3,7 +3,7 @@ import { k$ } from '../k$';
 import {
   OperatorFunction,
   UnaryFunction,
-  MonoTypeOperatorFunction
+  MonoTypeOperatorFunction,
 } from '../interfaces';
 
 const plus1: MonoTypeOperatorFunction<number> = source =>
@@ -17,7 +17,7 @@ const plus1: MonoTypeOperatorFunction<number> = source =>
       },
       complete() {
         observer.complete();
-      }
+      },
     });
   });
 
@@ -32,7 +32,7 @@ const toString: OperatorFunction<number, string> = source =>
       },
       complete() {
         observer.complete();
-      }
+      },
     });
   });
 
@@ -49,7 +49,7 @@ const toPromise: UnaryFunction<Observable<number>, Promise<number>> = source =>
       },
       complete() {
         resolve(lastValue);
-      }
+      },
     });
   });
 
@@ -60,7 +60,7 @@ test('observable to observable', () => {
   k$(numbers$)(plus1, toString).subscribe({
     next(x) {
       actual.push(x);
-    }
+    },
   });
 
   expect(actual).toEqual(['2', '3', '4']);

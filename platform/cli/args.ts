@@ -23,70 +23,70 @@ export const options: { [key: string]: ArgvOptions } = {
       }
       return arg;
     },
-    requiresArg: true
+    requiresArg: true,
   },
   elasticsearch: {
     alias: 'e',
     description: 'URI for Elasticsearch instance',
     type: 'string',
-    requiresArg: true
+    requiresArg: true,
   },
   host: {
     alias: 'H',
     description: 'The host to bind to',
     type: 'string',
-    requiresArg: true
+    requiresArg: true,
   },
   port: {
     alias: 'p',
     description: 'The port to bind Kibana to',
     type: 'number',
-    requiresArg: true
+    requiresArg: true,
   },
   quiet: {
     alias: 'q',
-    description: 'Prevent all logging except errors'
+    description: 'Prevent all logging except errors',
     //conflicts: 'silent'
     // conflicts: ['quiet', 'verbose']
   },
   silent: {
     alias: 'Q',
-    description: 'Prevent all logging'
+    description: 'Prevent all logging',
     //conflicts: 'quiet'
     // conflicts: ['silent', 'verbose']
   },
   verbose: {
-    description: 'Turns on verbose logging'
+    description: 'Turns on verbose logging',
     // conflicts: ['silent', 'quiet']
   },
   'log-file': {
     alias: 'l',
     description: 'The file to log to',
     type: 'string',
-    requiresArg: true
+    requiresArg: true,
   },
   'plugin-dir': {},
   dev: {
-    description: 'Run the server with development mode defaults'
+    description: 'Run the server with development mode defaults',
   },
   ssl: {
     description:
       'Dev only. Specify --no-ssl to not run the dev server using HTTPS',
     type: 'boolean',
-    default: true
+    default: true,
   },
   'base-path': {
     description:
       'Dev only. Specify --no-base-path to not put a proxy with a random base path in front of the dev server',
     type: 'boolean',
-    default: true
+    default: true,
   },
   watch: {
     description:
       'Dev only. Specify --no-watch to prevent automatic restarts of the server in dev mode',
     type: 'boolean',
-    default: true
-  }
+    default: true,
+  },
 };
 
 const fileExists = (configPath: string): boolean => {

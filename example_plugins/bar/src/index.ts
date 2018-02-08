@@ -14,7 +14,7 @@ export const plugin: KibanaPluginConfig<{}, BarExports> = {
     log.info('bar is running');
 
     return {
-      myValue: "I'm bar!"
+      myValue: "I'm bar!",
     };
-  }
+  },
 };

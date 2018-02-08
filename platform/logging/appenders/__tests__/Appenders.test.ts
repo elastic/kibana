@@ -5,9 +5,9 @@ jest.mock('../../layouts/Layouts', () => {
     Layouts: {
       create: mockCreateLayout,
       configSchema: schema.object({
-        kind: schema.literal('mock')
-      })
-    }
+        kind: schema.literal('mock'),
+      }),
+    },
   };
 });
 
@@ -26,19 +26,19 @@ test('`configSchema` creates correct schema.', () => {
   expect(appendersSchema.validate(validConfig1)).toEqual({
     kind: 'file',
     layout: { kind: 'mock' },
-    path: 'path'
+    path: 'path',
   });
 
   const validConfig2 = { kind: 'console', layout: { kind: 'mock' } };
   expect(appendersSchema.validate(validConfig2)).toEqual({
     kind: 'console',
-    layout: { kind: 'mock' }
+    layout: { kind: 'mock' },
   });
 
   const wrongConfig1 = {
     kind: 'console',
     layout: { kind: 'mock' },
-    path: 'path'
+    path: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig1)).toThrow();
 
@@ -48,7 +48,7 @@ test('`configSchema` creates correct schema.', () => {
   const wrongConfig3 = {
     kind: 'console',
     layout: { kind: 'mock' },
-    path: 'path'
+    path: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig3)).toThrow();
 });
@@ -62,8 +62,8 @@ test('`create()` creates correct appender.', () => {
       layout: {
         kind: 'pattern',
         pattern: '',
-        highlight: true
-      }
+        highlight: true,
+      },
     },
     {} as any
   );
@@ -76,8 +76,8 @@ test('`create()` creates correct appender.', () => {
       layout: {
         kind: 'pattern',
         pattern: '',
-        highlight: true
-      }
+        highlight: true,
+      },
     },
     {} as any
   );
@@ -87,14 +87,14 @@ test('`create()` creates correct appender.', () => {
 test('`create()` fails to create legacy appender if kbnServer is not provided.', () => {
   expect(() => {
     Appenders.create({ kind: 'legacy-appender' }, {
-      getLegacyKbnServer() {}
+      getLegacyKbnServer() {},
     } as any);
   }).toThrowErrorMatchingSnapshot();
 });
 
 test('`create()` creates legacy appender if kbnServer is provided.', () => {
   const legacyAppender = Appenders.create({ kind: 'legacy-appender' }, {
-    getLegacyKbnServer: () => ({})
+    getLegacyKbnServer: () => ({}),
   } as any);
 
   expect(legacyAppender).toBeInstanceOf(LegacyAppender);

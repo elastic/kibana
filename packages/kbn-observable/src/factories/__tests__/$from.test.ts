@@ -8,7 +8,7 @@ test('handles array', () => {
     next(x) {
       res.push(x);
     },
-    complete
+    complete,
   });
 
   expect(complete).toHaveBeenCalledTimes(1);
@@ -21,7 +21,7 @@ test('handles iterable', () => {
       yield 1;
       yield 2;
       yield 3;
-    }
+    },
   };
 
   const res: number[] = [];
@@ -31,7 +31,7 @@ test('handles iterable', () => {
     next(x) {
       res.push(x);
     },
-    complete
+    complete,
   });
 
   expect(complete).toHaveBeenCalledTimes(1);

@@ -23,5 +23,5 @@ export const plugin: KibanaPluginConfig<BarPluginType> = {
     log.info(
       `got value from 'foo.encryptionKey' config: ${config.encryptionKey}`
     );
-  }
+  },
 };

@@ -12,7 +12,7 @@ const { literal, object } = schema;
  */
 export class LegacyAppender implements DisposableAppender {
   static configSchema = object({
-    kind: literal('legacy-appender')
+    kind: literal('legacy-appender'),
   });
 
   constructor(private readonly kbnServer: LegacyKbnServer) {}

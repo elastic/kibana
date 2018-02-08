@@ -20,7 +20,7 @@ describe('#defaultValue', () => {
   test('can be a moment.Duration', () => {
     expect(
       duration({
-        defaultValue: momentDuration(1, 'hour')
+        defaultValue: momentDuration(1, 'hour'),
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -28,7 +28,7 @@ describe('#defaultValue', () => {
   test('can be a string', () => {
     expect(
       duration({
-        defaultValue: '1h'
+        defaultValue: '1h',
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -36,7 +36,7 @@ describe('#defaultValue', () => {
   test('can be a number', () => {
     expect(
       duration({
-        defaultValue: 600
+        defaultValue: 600,
       }).validate(undefined)
     ).toMatchSnapshot();
   });

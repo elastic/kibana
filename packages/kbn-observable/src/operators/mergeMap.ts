@@ -79,7 +79,7 @@ export function mergeMap<T, R>(
               if (active === 0 && completed) {
                 destination.complete();
               }
-            }
+            },
           });
         },
 
@@ -92,7 +92,7 @@ export function mergeMap<T, R>(
           if (active === 0) {
             destination.complete();
           }
-        }
+        },
       });
     });
   };
