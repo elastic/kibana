@@ -4,12 +4,13 @@ import PropTypes from 'prop-types';
 
 import {
   EuiPanel,
-  EuiButtonEmpty,
+  EuiLink,
   EuiText,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiIcon,
 } from '@elastic/eui';
 
 export const NUM_LONG_LINKS = 5;
@@ -39,19 +40,33 @@ export class RecentlyAccessed extends React.Component {
   renderDropdown = () => {
     const dropdownLinks = [];
     for (let i = NUM_LONG_LINKS; i < this.props.recentlyAccessed.length; i++) {
-      dropdownLinks.push(this.renderLink(
-        this.props.recentlyAccessed[i].link,
-        this.props.recentlyAccessed[i].label));
+      dropdownLinks.push(
+        (
+          <li
+            style={{ marginBottom: 8 }}
+            key={this.props.recentlyAccessed[i].link}
+          >
+            <EuiLink
+              className="dropwdownLink"
+              href={this.props.recentlyAccessed[i].link}
+            >
+              {this.props.recentlyAccessed[i].label}
+            </EuiLink>
+          </li>
+        )
+      );
     }
 
-    const button = (
-      <EuiButtonEmpty
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.onButtonClick.bind(this)}
-      >
-        {`+${dropdownLinks.length}`}
-      </EuiButtonEmpty>
+    const openPopoverComponent = (
+      <EuiLink onClick={this.onButtonClick.bind(this)}>
+        <EuiTextColor color="subdued">
+          {`+${dropdownLinks.length}`}
+        </EuiTextColor>
+        <EuiIcon
+          type="arrowDown"
+          color="subdued"
+        />
+      </EuiLink>
     );
 
     return (
@@ -62,45 +77,69 @@ export class RecentlyAccessed extends React.Component {
         <EuiPopover
           id="popover"
           ownFocus
-          button={button}
+          button={openPopoverComponent}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
+          anchorPosition="downRight"
         >
-          <div style={{ maxWidth: '200px' }}>
+          <ul>
             {dropdownLinks}
-          </div>
+          </ul>
         </EuiPopover>
       </EuiFlexItem>
     );
   }
 
-  renderLink = (link, label) => {
+  renderLongLink = (link, label, includeSeperator = false) => {
+    let seperator;
+    if (includeSeperator) {
+      seperator = (
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            type="dot"
+            color="subdued"
+          />
+        </EuiFlexItem>
+      );
+    }
     return (
-      <EuiFlexItem
-        style={{ overflow: 'hidden' }}
-        key={link}
-      >
-        <EuiButtonEmpty
-          href={link}
+      <React.Fragment key={link}>
+        {seperator}
+        <EuiFlexItem
+          style={{ overflow: 'hidden' }}
         >
-          {label}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+          <EuiLink
+            className="longLink"
+            href={link}
+          >
+            {label}
+          </EuiLink>
+        </EuiFlexItem>
+      </React.Fragment>
     );
   }
 
   renderRecentlyAccessed = () => {
     if (this.props.recentlyAccessed.length <= NUM_LONG_LINKS) {
-      return this.props.recentlyAccessed.map((item) => {
-        return this.renderLink(item.link, item.label);
+      return this.props.recentlyAccessed.map((item, index) => {
+        let includeSeperator = true;
+        if (index === 0) {
+          includeSeperator = false;
+        }
+        return this.renderLongLink(item.link, item.label, includeSeperator);
       });
     }
 
     const links = [];
     for (let i = 0; i < NUM_LONG_LINKS; i++) {
-      links.push(this.renderLink(
+      let includeSeperator = true;
+      if (i === 0) {
+        includeSeperator = false;
+      }
+      links.push(this.renderLongLink(
         this.props.recentlyAccessed[i].link,
-        this.props.recentlyAccessed[i].label));
+        this.props.recentlyAccessed[i].label,
+        includeSeperator));
     }
 
     return [

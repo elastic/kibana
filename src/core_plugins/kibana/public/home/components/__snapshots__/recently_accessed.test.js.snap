@@ -23,101 +23,156 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
     responsive={true}
     wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
+    <React.Fragment
       key="link0"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link0"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
       >
-        label0
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link0"
+          type="button"
+        >
+          label0
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link1"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link1"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label1
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link1"
+          type="button"
+        >
+          label1
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link2"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link2"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label2
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link2"
+          type="button"
+        >
+          label2
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link3"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link3"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label3
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link3"
+          type="button"
+        >
+          label3
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link4"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link4"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label4
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link4"
+          type="button"
+        >
+          label4
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
   </EuiFlexGroup>
 </EuiPanel>
 `;
@@ -145,82 +200,124 @@ exports[`should not render dropdown when recently accessed list size is less tha
     responsive={true}
     wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
+    <React.Fragment
       key="link0"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link0"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
       >
-        label0
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link0"
+          type="button"
+        >
+          label0
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link1"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link1"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label1
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link1"
+          type="button"
+        >
+          label1
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link2"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link2"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label2
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link2"
+          type="button"
+        >
+          label2
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link3"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link3"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label3
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link3"
+          type="button"
+        >
+          label3
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
   </EuiFlexGroup>
 </EuiPanel>
 `;
@@ -248,118 +345,180 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
     responsive={true}
     wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
+    <React.Fragment
       key="link0"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link0"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
       >
-        label0
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link0"
+          type="button"
+        >
+          label0
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link1"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link1"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label1
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link1"
+          type="button"
+        >
+          label1
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link2"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link2"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label2
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link2"
+          type="button"
+        >
+          label2
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link3"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link3"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label3
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link3"
+          type="button"
+        >
+          label3
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
+    <React.Fragment
       key="link4"
-      style={
-        Object {
-          "overflow": "hidden",
-        }
-      }
     >
-      <EuiButtonEmpty
-        color="primary"
-        href="link4"
-        iconSide="left"
-        type="button"
+      <EuiFlexItem
+        component="div"
+        grow={false}
       >
-        label4
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+        <EuiIcon
+          color="subdued"
+          size="m"
+          type="dot"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+        style={
+          Object {
+            "overflow": "hidden",
+          }
+        }
+      >
+        <EuiLink
+          className="longLink"
+          color="primary"
+          href="link4"
+          type="button"
+        >
+          label4
+        </EuiLink>
+      </EuiFlexItem>
+    </React.Fragment>
     <EuiFlexItem
       component="div"
       grow={false}
       key="dropdown"
     >
       <EuiPopover
-        anchorPosition="downCenter"
+        anchorPosition="downRight"
         button={
-          <EuiButtonEmpty
+          <EuiLink
             color="primary"
-            iconSide="right"
-            iconType="arrowDown"
             onClick={[Function]}
             type="button"
           >
-            +1
-          </EuiButtonEmpty>
+            <EuiTextColor
+              color="subdued"
+            >
+              +1
+            </EuiTextColor>
+            <EuiIcon
+              color="subdued"
+              size="m"
+              type="arrowDown"
+            />
+          </EuiLink>
         }
         closePopover={[Function]}
         id="popover"
@@ -367,33 +526,25 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         ownFocus={true}
         panelPaddingSize="m"
       >
-        <div
-          style={
-            Object {
-              "maxWidth": "200px",
-            }
-          }
-        >
-          <EuiFlexItem
-            component="div"
-            grow={true}
+        <ul>
+          <li
             key="link5"
             style={
               Object {
-                "overflow": "hidden",
+                "marginBottom": 8,
               }
             }
           >
-            <EuiButtonEmpty
+            <EuiLink
+              className="dropwdownLink"
               color="primary"
               href="link5"
-              iconSide="left"
               type="button"
             >
               label5
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </div>
+            </EuiLink>
+          </li>
+        </ul>
       </EuiPopover>
     </EuiFlexItem>
   </EuiFlexGroup>
