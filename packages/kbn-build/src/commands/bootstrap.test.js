@@ -31,6 +31,8 @@ const createProject = (fields, path = '.') =>
 expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
+const noop = () => {};
+
 afterEach(() => {
   jest.resetAllMocks();
 });
@@ -73,16 +75,16 @@ test('handles dependencies of dependencies', async () => {
   ]);
   const projectGraph = buildProjectGraph(projects);
 
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
   await run(projects, projectGraph, {
     options: {},
   });
 
-  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
-  expect(spy.mock.calls).toMatchSnapshot('logs');
+  logMock.mockRestore();
 
-  spy.mockRestore();
+  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
+  expect(logMock.mock.calls).toMatchSnapshot('logs');
 });
 
 test('does not run installer if no deps in package', async () => {
@@ -102,16 +104,16 @@ test('does not run installer if no deps in package', async () => {
   const projects = new Map([['kibana', kibana], ['bar', bar]]);
   const projectGraph = buildProjectGraph(projects);
 
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
   await run(projects, projectGraph, {
     options: {},
   });
 
-  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
-  expect(spy.mock.calls).toMatchSnapshot('logs');
+  logMock.mockRestore();
 
-  spy.mockRestore();
+  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
+  expect(logMock.mock.calls).toMatchSnapshot('logs');
 });
 
 test('handles "frozen-lockfile"', async () => {
@@ -124,7 +126,7 @@ test('handles "frozen-lockfile"', async () => {
   const projects = new Map([['kibana', kibana]]);
   const projectGraph = buildProjectGraph(projects);
 
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
   await run(projects, projectGraph, {
     options: {
@@ -132,9 +134,9 @@ test('handles "frozen-lockfile"', async () => {
     },
   });
 
-  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
+  logMock.mockRestore();
 
-  spy.mockRestore();
+  expect(installInDir.mock.calls).toMatchSnapshot('install in dir');
 });
 
 test('calls "kbn:bootstrap" scripts and links executables after installing deps', async () => {
@@ -156,14 +158,14 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
   const projects = new Map([['kibana', kibana], ['bar', bar]]);
   const projectGraph = buildProjectGraph(projects);
 
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
   await run(projects, projectGraph, {
     options: {},
   });
 
+  logMock.mockRestore();
+
   expect(linkProjectExecutables.mock.calls).toMatchSnapshot('link bins');
   expect(runScriptInPackageStreaming.mock.calls).toMatchSnapshot('script');
-
-  spy.mockRestore();
 });
