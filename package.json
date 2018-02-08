@@ -80,7 +80,7 @@
     "@elastic/eui": "0.0.19",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.1",
-    "@elastic/test-subj-selector": "0.2.1",
+    "@elastic/test-subj-selector": "link:packages/test-subj-selector",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/build": "link:packages/kbn-build",
