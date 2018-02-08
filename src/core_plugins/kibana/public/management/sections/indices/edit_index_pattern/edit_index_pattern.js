@@ -147,6 +147,8 @@ uiModules.get('apps/management')
     $scope.tryToRenderScriptedFieldsTable = function () {
       if ($state.tab === 'scriptedFields') {
         $scope.$$postDigest($scope.renderScriptedFieldsTable);
+      } else {
+        destroyScriptedFieldsTable();
       }
     };
 
