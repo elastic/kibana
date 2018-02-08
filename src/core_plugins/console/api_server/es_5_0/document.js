@@ -13,19 +13,6 @@ export default function (api) {
       "_source_includes": ""
     }
   });
-  api.addEndpointDescription('_get_doc_source', {
-    methods: ['GET'],
-    patterns: [
-      "{index}/{type}/{id}/_source"
-    ],
-    url_params: {
-      "version": 1,
-      "routing": "",
-      "parent": "",
-      "_source_excludes": "",
-      "_source_includes": ""
-    }
-  });
   api.addEndpointDescription('index_doc', {
     methods: ['PUT', 'POST'],
     patterns: [
