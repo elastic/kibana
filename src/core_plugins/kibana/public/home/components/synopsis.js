@@ -63,8 +63,6 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
     );
   }
 
-
-
   return (
     <a
       href={url}
