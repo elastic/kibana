@@ -6,7 +6,8 @@
   "types": "./types/packages/kbn-types/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "start": "tsc --watch"
+    "start": "tsc --watch",
+    "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
     "@kbn/observable": "link:../kbn-observable",

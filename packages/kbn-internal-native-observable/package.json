@@ -6,7 +6,8 @@
   "main": "./target/index.js",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
     "symbol-observable": "1.0.4"

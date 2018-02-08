@@ -6,7 +6,8 @@
   "main": "target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
     "@kbn/internal-native-observable": "link:../kbn-internal-native-observable",
