@@ -11,13 +11,13 @@ import {
 
 import {
   EuiButton,
+  EuiLink,
   EuiPanel,
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 
 export function AddData({ addBasePath, isCloudEnabled }) {
@@ -25,13 +25,14 @@ export function AddData({ addBasePath, isCloudEnabled }) {
   const renderCards = () => {
     const cardStyle = {
       width: '250px',
-      'minWidth': '200px'
+      'minWidth': '200px',
+      'border': 'none'
     };
 
     let apmCard;
     if (!isCloudEnabled) {
       apmCard = (
-        <KuiCard style={cardStyle} className="euiPanel">
+        <KuiCard style={cardStyle}>
           <KuiCardDescription>
             <KuiCardDescriptionTitle>
               <img
@@ -63,7 +64,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
           {apmCard}
 
-          <KuiCard style={cardStyle} className="euiPanel">
+          <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
@@ -88,7 +89,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
             </KuiCardFooter>
           </KuiCard>
 
-          <KuiCard style={cardStyle} className="euiPanel">
+          <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
@@ -113,7 +114,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
             </KuiCardFooter>
           </KuiCard>
 
-          <KuiCard style={cardStyle} className="euiPanel">
+          <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
@@ -144,10 +145,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
   return (
     <EuiPanel paddingSize="l">
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="flexEnd"
-      >
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle>
             <h3>Add Data to Kibana</h3>
@@ -158,27 +156,27 @@ export function AddData({ addBasePath, isCloudEnabled }) {
             </p>
           </EuiText>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued">
-            <EuiText>
-              <p>
-                Data already in Elasticsearch?
-              </p>
-            </EuiText>
-          </EuiTextColor>
-          <EuiSpacer size="s" />
-          <EuiButton
-            href="#/management/kibana/index"
-          >
-            Set up index patterns
-          </EuiButton>
-        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer />
 
       {renderCards()}
+
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <span style={{ height: 38 }}>
+              Data already in Elasticsearch?
+            </span>
+            <EuiLink
+              style={{ marginLeft: 8 }}
+              href="#/management/kibana/index"
+            >
+              Set up index patterns
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
     </EuiPanel>
   );
