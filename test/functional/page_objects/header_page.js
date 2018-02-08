@@ -169,6 +169,30 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         .findByLinkText(quickTime).click();
     }
 
+    async getAutoRefreshState() {
+      return testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
+    }
+
+    // check if the auto refresh state is active and to pause it
+    async pauseAutoRefresh() {
+      let result = false;
+      if (await this.getAutoRefreshState() === 'active') {
+        await testSubjects.click('globalTimepickerAutoRefreshButton');
+        result = true;
+      }
+      return Promise.resolve(result);
+    }
+
+    // check if the auto refresh state is inactive and to resume it
+    async resumeAutoRefresh() {
+      let result = false;
+      if (await this.getAutoRefreshState() === 'inactive') {
+        await testSubjects.click('globalTimepickerAutoRefreshButton');
+        result = true;
+      }
+      return Promise.resolve(result);
+    }
+
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage =
         await find.displayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope', findTimeout);
