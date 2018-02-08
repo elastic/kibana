@@ -4,7 +4,7 @@ export function createSearchSource(kbnApi, initialState, indexPattern, aggs, use
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.inherits(false);
   searchSource.filter(() => {
-    const activeFilters = [].concat(filters);
+    const activeFilters = [...filters];
     if (useTimeFilter) {
       activeFilters.push(kbnApi.timeFilter.get(indexPattern));
     }
