@@ -1,18 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('_get_doc', {
-    methods: ['GET'],
-    patterns: [
-      "{index}/{type}/{id}"
-    ],
-    url_params: {
-      "version": 1,
-      "routing": "",
-      "parent": "",
-      "_source": "",
-      "_source_excludes": "",
-      "_source_includes": ""
-    }
-  });
   api.addEndpointDescription('index_doc', {
     methods: ['PUT', 'POST'],
     patterns: [
