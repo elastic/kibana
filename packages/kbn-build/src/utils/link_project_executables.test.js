@@ -1,6 +1,9 @@
 import { resolve } from 'path';
 
-import { absolutePathSnaphotSerializer } from '../test_helpers';
+import {
+  absolutePathSnaphotSerializer,
+  stripAnsiSnapshotSerializer,
+} from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 
@@ -46,6 +49,8 @@ function getFsMockCalls() {
 }
 
 expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
+expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
+
 jest.mock('./fs');
 afterEach(() => {
   jest.resetAllMocks();
@@ -66,7 +71,11 @@ describe('bin script points to a file', () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
 
+    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {});
     await linkProjectExecutables(projectsByName, projectGraph);
+    logMock.mockRestore();
+
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
+    expect(logMock.mock.calls).toMatchSnapshot('logs');
   });
 });
