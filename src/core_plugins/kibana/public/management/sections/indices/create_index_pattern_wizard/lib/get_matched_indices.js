@@ -1,6 +1,18 @@
 import { MAX_NUMBER_OF_MATCHING_INDICES } from '../constants';
 import { isQueryAMatch } from './is_query_a_match';
 
+function isSystemIndex(index) {
+  if (index.startsWith('.')) {
+    return true;
+  }
+
+  if (index.includes(':')) {
+    return index.split(':').reduce((isSystem, index) => isSystem || isSystemIndex(index), false);
+  }
+
+  return false;
+}
+
 function filterSystemIndices(indices, isIncludingSystemIndices) {
   if (!indices) {
     return indices;
@@ -9,7 +21,7 @@ function filterSystemIndices(indices, isIncludingSystemIndices) {
   const acceptableIndices = isIncludingSystemIndices
     ? indices
     // All system indices begin with a period.
-    : indices.filter(index => !index.name.startsWith('.'));
+    : indices.filter(index => !isSystemIndex(index.name));
 
   return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
 }
