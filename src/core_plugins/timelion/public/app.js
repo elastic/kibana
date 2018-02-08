@@ -5,6 +5,8 @@ import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { recentlyAccessed } from 'ui/persisted_log';
+import chrome from 'ui/chrome';
 
 require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
@@ -17,8 +19,6 @@ require('plugins/timelion/directives/timelion_interval/timelion_interval');
 require('plugins/timelion/app.less');
 
 document.title = 'Timelion - Kibana';
-
-require('ui/chrome');
 
 const app = require('ui/modules').get('apps/timelion', []);
 
@@ -40,6 +40,14 @@ require('ui/routes')
     resolve: {
       savedSheet: function (courier, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
+          .then((savedSheet) => {
+            if ($route.current.params.id) {
+              recentlyAccessed.add(
+                `${chrome.addBasePath('/app/timelion')}#/${$route.current.params.id}`,
+                savedSheet.title);
+            }
+            return savedSheet;
+          })
           .catch(courier.redirectWhenMissing({
             'search': '/'
           }));

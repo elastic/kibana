@@ -105,8 +105,8 @@ export class RecentlyAccessed extends React.Component {
     // Want to avoid a bunch of white space around items with short labels (happens when min width is too large).
     // Also want to avoid truncating really short names (happens when there is no min width)
     // Dynamically setting the min width based on label lengh meets both of these goals.
-    // 0.6 was a good ratio of 'em' that avoided too much horizontal white space and too much truncation
-    const minWidth = (label.length < 8 ? label.length : 8) * 0.6;
+    const EM_RATIO = 0.6; // 'em' ratio that avoids too much horizontal white space and too much truncation
+    const minWidth = (label.length < 8 ? label.length : 8) * EM_RATIO;
     const style = {
       overflow: 'hidden',
       minWidth: `${minWidth}em`
