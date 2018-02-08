@@ -7,6 +7,7 @@ import {
   EuiFormRow,
   EuiFieldNumber,
   EuiSwitch,
+  EuiSelect,
 } from '@elastic/eui';
 
 function filterField(field) {
@@ -22,6 +23,30 @@ export function ListControlEditor(props) {
   const handleSizeChange = (evt) => {
     props.handleNumberOptionChange(props.controlIndex, 'size', evt);
   };
+  const handleParentChange = (evt) => {
+    props.handleParentChange(props.controlIndex, evt);
+  };
+
+  let parentSelect;
+  if (props.parentCandidates && props.parentCandidates.length > 0) {
+    const options = [
+      { value: '', text: '' },
+      ...props.parentCandidates,
+    ];
+    parentSelect = (
+      <EuiFormRow
+        id={`parentSelect-${props.controlIndex}`}
+        label="Parent control"
+        helpText="Options are based on the value of parent control. Disabled if parent is not set."
+      >
+        <EuiSelect
+          options={options}
+          value={props.controlParams.parent}
+          onChange={handleParentChange}
+        />
+      </EuiFormRow>
+    );
+  }
 
   return (
     <div>
@@ -30,6 +55,7 @@ export function ListControlEditor(props) {
         value={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        controlIndex={props.controlIndex}
       />
 
       <FieldSelect
@@ -38,7 +64,10 @@ export function ListControlEditor(props) {
         filterField={filterField}
         onChange={props.handleFieldNameChange}
         getIndexPattern={props.getIndexPattern}
+        controlIndex={props.controlIndex}
       />
+
+      { parentSelect }
 
       <EuiFormRow
         id={multiselectId}
@@ -75,5 +104,10 @@ ListControlEditor.propTypes = {
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
-  handleNumberOptionChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired,
+  parentCandidates: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    text: PropTypes.string.isRequired,
+  })).isRequired,
+  handleParentChange: PropTypes.func.isRequired,
 };
