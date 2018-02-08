@@ -1,9 +1,22 @@
-# kibana-plugin-helpers
-
-[![Apache License](https://img.shields.io/badge/license-apache_2.0-a9215a.svg)](https://raw.githubusercontent.com/elastic/kibana-plugin-helpers/master/LICENSE)
-[![CircleCI](https://img.shields.io/circleci/project/github/elastic/kibana-plugin-helpers.svg)](https://circleci.com/gh/elastic/kibana-plugin-helpers/tree/master)
+# @kbn/plugin-helpers
 
 Just some helpers for kibana plugin devs.
+
+## Installation
+
+To install the plugin helpers use `yarn` to link to the package from the Kibana project:
+
+```sh
+yarn add --dev link:../../kibana/packages/kbn-plugin-helpers
+```
+
+This will link the package from the repository into your plugin, but the `plugin-helpers` executable won't be available in your project until you run bootstrap again.
+
+```sh
+yarn kbn bootstrap
+```
+
+## Usage
 
 This simple CLI has several tasks that plugin devs can run from to easily debug, test, or package kibana plugins.
 
@@ -29,17 +42,11 @@ $ plugin-helpers help
 
 ## Versions
 
-Plugin Helpers | Kibana
--------------- | ------
-9.x | 7.0+ (`kibanaRoot` setting removed from `plugin-helpers`)
-8.x | 7.0+
-7.x | 4.6.x to 6.x (node 6+ only)
-6.x | 4.6.x to 6.x
-5.x | 4.x
+The plugins helpers in the Kibana repo are available for Kibana 6.3 and greater. Just checkout the branch of Kibana you want to build against and the plugin helpers should be up to date for that version of Kibana.
 
 ## Configuration
 
-`plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.kibana-plugin-helpers.json` file if you'd like to bundle those settings with your project. 
+`plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.kibana-plugin-helpers.json` file if you'd like to bundle those settings with your project.
 
 It will also observe a `.kibana-plugin-helpers.dev.json`, much like Kibana does, which we encourage you to add to your `.gitignore` file and use for local settings that you don't intend to share. These "dev" settings will override any settings in the normal json config.
 
