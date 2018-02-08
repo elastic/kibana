@@ -1,0 +1,57 @@
+{
+  "name": "@elastic/plugin-helpers",
+  "version": "9.0.2",
+  "description": "Just some helpers for kibana plugin devs.",
+  "main": "lib/index.js",
+  "bin": {
+    "plugin-helpers": "bin/plugin-helpers.js"
+  },
+  "keywords": [
+    "kibana",
+    "kibana-plugin"
+  ],
+  "author": "Spencer Alger <email@spalger.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "npm run lint && jest",
+    "test:only": "jest",
+    "test:dev": "jest --watch",
+    "lint": "eslint bin/ help/ tasks/"
+  },
+  "dependencies": {
+    "argv-split": "^2.0.1",
+    "commander": "^2.9.0",
+    "del": "^2.2.2",
+    "gulp-rename": "1.2.2",
+    "gulp-zip": "^4.1.0",
+    "inquirer": "^1.2.2",
+    "through2-map": "^3.0.0",
+    "vinyl-fs": "2.3.1"
+  },
+  "devDependencies": {
+    "@elastic/eslint-config-kibana": "^0.15.0",
+    "babel-eslint": "^8.0.0",
+    "eslint": "^4.1.0",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-import": "^2.6.0",
+    "eslint-plugin-jest": "^21.0.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-prefer-object-spread": "^1.2.1",
+    "eslint-plugin-react": "^7.1.0",
+    "jest": "^17.0.3"
+  },
+  "engines": {
+    "node": "^6.11.5 || ^8.8.0"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elastic/kibana-plugin-helpers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elastic/kibana-plugin-helpers/issues"
+  },
+  "homepage": "https://github.com/elastic/kibana-plugin-helpers#readme"
+}
