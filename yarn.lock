@@ -63,12 +63,6 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@elastic/datemath@4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-4.0.2.tgz#91417763fa4ec93ad1426cb69aaf2de2e9914a68"
-  dependencies:
-    moment "^2.13.0"
-
 "@elastic/eslint-config-kibana@link:packages/eslint-config-kibana":
   version "0.0.0"
   uid ""
@@ -129,6 +123,10 @@
   uid ""
 
 "@kbn/build@link:packages/kbn-build":
+  version "0.0.0"
+  uid ""
+
+"@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
 
