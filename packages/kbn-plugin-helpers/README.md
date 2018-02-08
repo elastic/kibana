@@ -44,6 +44,8 @@ $ plugin-helpers help
 
 The plugins helpers in the Kibana repo are available for Kibana 6.3 and greater. Just checkout the branch of Kibana you want to build against and the plugin helpers should be up to date for that version of Kibana.
 
+When you're targeting versions before Kibana 6.3, use the `@elastic/plugin-helpers` from npm. See the [versions](https://github.com/elastic/kibana-plugin-helpers#versions) section of the [`@elastic/plugin-helpers` readme](https://github.com/elastic/kibana-plugin-helpers) for information about version compatibility.
+
 ## Configuration
 
 `plugin-helpers` accepts a number of settings, which can be specified at runtime, or included in a `.kibana-plugin-helpers.json` file if you'd like to bundle those settings with your project.
