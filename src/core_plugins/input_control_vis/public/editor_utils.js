@@ -1,3 +1,8 @@
+export const CONTROL_TYPES = {
+  LIST: 'list',
+  RANGE: 'range'
+};
+
 export const setControl = (controls, controlIndex, control) => [
   ...controls.slice(0, controlIndex),
   control,
@@ -44,11 +49,11 @@ export const removeControl = (controls, controlIndex) => [
 export const getDefaultOptions = (type) => {
   const defaultOptions = {};
   switch (type) {
-    case 'range':
+    case CONTROL_TYPES.RANGE:
       defaultOptions.decimalPlaces = 0;
       defaultOptions.step = 1;
       break;
-    case 'list':
+    case CONTROL_TYPES.LIST:
       defaultOptions.type = 'terms';
       defaultOptions.multiselect = true;
       defaultOptions.size = 5;
@@ -62,6 +67,7 @@ export const newControl = (type) => ({
   id: (new Date()).getTime().toString(),
   indexPattern: '',
   fieldName: '',
+  parent: '',
   label: '',
   type: type,
   options: getDefaultOptions(type),
@@ -70,9 +76,9 @@ export const newControl = (type) => ({
 export const getTitle = (controlParams, controlIndex) => {
   let title = `${controlParams.type}: ${controlIndex}`;
   if (controlParams.label) {
-    title = `${controlParams.type}: ${controlParams.label}`;
+    title = `${controlParams.label}`;
   } else if (controlParams.fieldName) {
-    title = `${controlParams.type}: ${controlParams.fieldName}`;
+    title = `${controlParams.fieldName}`;
   }
   return title;
 };

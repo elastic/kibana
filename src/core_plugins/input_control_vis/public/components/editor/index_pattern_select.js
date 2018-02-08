@@ -4,7 +4,6 @@ import Select from 'react-select';
 
 import {
   EuiFormRow,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 export class IndexPatternSelect extends Component {
@@ -27,8 +26,7 @@ export class IndexPatternSelect extends Component {
   }
 
   render() {
-    const idGenerator = htmlIdGenerator();
-    const selectId = idGenerator('indexPatternSelect');
+    const selectId = `indexPatternSelect-${this.props.controlIndex}`;
     return (
       <EuiFormRow
         id={selectId}
@@ -51,5 +49,6 @@ export class IndexPatternSelect extends Component {
 IndexPatternSelect.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string
+  value: PropTypes.string,
+  controlIndex: PropTypes.number.isRequired,
 };
