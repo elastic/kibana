@@ -11,7 +11,7 @@ export function redisMetricsSpecProvider() {
     shortDescription: 'Fetch internal metrics from Redis.',
     longDescription: 'The `redis` Metricbeat module fetches internal metrics from the Redis server.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-redis.html).',
-    //iconPath: '', TODO
+    euiIconType: 'logoRedis',
     artifacts: {
       dashboards: [
         {

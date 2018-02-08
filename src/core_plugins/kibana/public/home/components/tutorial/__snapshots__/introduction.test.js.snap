@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`props exportedFieldsUrl 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiTitle
+      size="l"
+    >
+      <h2>
+        Great tutorial
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <Content
+      text="this is a great tutorial about..."
+    />
+    <div>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiButton
+        color="primary"
+        fill={false}
+        href="exported_fields_url"
+        iconSide="left"
+        rel="noopener noreferrer"
+        target="_blank"
+        type="button"
+      >
+        View exported fields
+      </EuiButton>
+    </div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`props iconType 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiTitle
+      size="l"
+    >
+      <h2>
+        <EuiIcon
+          size="xl"
+          style={
+            Object {
+              "marginRight": 16,
+            }
+          }
+          type="logoElastic"
+        />
+        Great tutorial
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <Content
+      text="this is a great tutorial about..."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
+
+exports[`props previewUrl 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiTitle
+      size="l"
+    >
+      <h2>
+        Great tutorial
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <Content
+      text="this is a great tutorial about..."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiImage
+      allowFullScreen={true}
+      alt="screenshot of primary dashboard."
+      fullScreenIconColor="dark"
+      hasShadow={true}
+      size="l"
+      url="preview_image_url"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`render 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiTitle
+      size="l"
+    >
+      <h2>
+        Great tutorial
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="l"
+    />
+    <Content
+      text="this is a great tutorial about..."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  />
+</EuiFlexGroup>
+`;
