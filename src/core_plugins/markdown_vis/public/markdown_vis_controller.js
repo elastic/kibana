@@ -131,6 +131,7 @@ export function MarkdownVisWrapper(props) {
     <MarkdownVisComponent
       fontSize={props.vis.params.fontSize}
       markdown={props.vis.params.markdown}
+      renderComplete={props.renderComplete}
     />
   );
 }
