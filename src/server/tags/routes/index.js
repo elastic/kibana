@@ -1,3 +1,3 @@
 export { createGetRoute } from './get';
-//export { createCreateRoute } from './create';
+export { createUpdateRoute } from './update';
 //export { createDeleteRoute } from './delete';
