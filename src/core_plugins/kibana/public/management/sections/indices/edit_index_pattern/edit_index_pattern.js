@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import './index_header';
-import './indexed_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
@@ -9,10 +8,10 @@ import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import { destroyIndexedFieldsTable, renderIndexedFieldsTable } from './components/indexed_fields_table';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { renderIndexedFieldsTable, destroyIndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
@@ -124,42 +123,13 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
+      $scope.tryToRenderIndexedFieldsTable();
       updateScriptedFieldsTable($scope, $state);
       $state.save();
     };
 
-    const REACT_DOM_ELEMENT_ID = 'indexFieldsTableReact';
-    const renderIndexedFieldsTableReact = () => {
-      $scope.$$postDigest(() => {
-        renderIndexedFieldsTable(
-          REACT_DOM_ELEMENT_ID,
-          $scope.indexPattern,
-          $scope.fieldFilter,
-          $scope.indexedFieldTypeFilter,
-          // allIndices,
-          // this.formValues.name,
-          // this.doesIncludeSystemIndices,
-          // es,
-          // query => {
-          //   destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
-          //   this.formValues.name = query;
-          //   this.goToTimeFieldStep();
-          //   $scope.$apply();
-          // }
-        );
-      });
-    };
-    const bindIndexedFieldsTableReactWatchers = () => {
-      $scope.$watchGroup(['indexPattern', 'fieldFilter', 'indexedFieldTypeFilter'], renderIndexedFieldsTableReact);
-    };
-
     $scope.$watch('state.tab', function (tab) {
       if (!tab) $scope.changeTab($scope.editSections[0]);
-      else {
-        if($state.tab === 'indexedFields') {
-          bindIndexedFieldsTableReactWatchers();
-        }
-      }
     });
 
     $scope.$watchCollection('indexPattern.fields', function () {
@@ -217,9 +187,35 @@ uiModules.get('apps/management')
       return $scope.indexPattern.save();
     };
 
+    $scope.tryToRenderIndexedFieldsTable = function () {
+      if ($state.tab === 'indexedFields') {
+        $scope.$$postDigest($scope.renderIndexedFieldsTable);
+      } else {
+        destroyIndexedFieldsTable();
+      }
+    };
+
+    $scope.renderIndexedFieldsTable = function () {
+      renderIndexedFieldsTable(
+        $scope.indexPattern,
+        $scope.fieldFilter,
+        $scope.indexedFieldTypeFilter
+      );
+    };
+
     $scope.$watch('fieldFilter', () => {
-      if ($scope.fieldFilter !== undefined && $state.tab === 'scriptedFields') {
-        updateScriptedFieldsTable($scope, $state);
+      if ($scope.fieldFilter !== undefined) {
+        if($state.tab === 'indexedFields') {
+          $scope.renderIndexedFieldsTable();
+        } else if($state.tab === 'scriptedFields') {
+          updateScriptedFieldsTable($scope, $state);
+        }
+      }
+    });
+
+    $scope.$watch('indexedFieldTypeFilter', () => {
+      if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
+        $scope.renderIndexedFieldsTable();
       }
     });
 
@@ -230,9 +226,10 @@ uiModules.get('apps/management')
     });
 
     $scope.$on('$destory', () => {
+      destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
-      destroyIndexedFieldsTable(REACT_DOM_ELEMENT_ID);
     });
 
+    $scope.tryToRenderIndexedFieldsTable();
     updateScriptedFieldsTable($scope, $state);
   });
