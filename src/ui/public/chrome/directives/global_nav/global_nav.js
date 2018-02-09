@@ -51,7 +51,7 @@ module.directive('globalNav', (globalNavState, chrome) => {
       };
 
       scope.isHomeActive = () => {
-        return true;
+        return window.location.hash.indexOf('#/home') === 0;
       };
     }
   };
