@@ -355,6 +355,17 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+
+    async selectYAxisAggregation(agg, field, label) {
+      await find.byCssSelector('#visAggEditorParams1').click();
+      await testSubjects.click(agg);
+      await find
+        .byCssSelector('#visAggEditorParams1 > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span')
+        .click();
+      await testSubjects.click(field);
+      await find.byCssSelector('#visEditorStringInput1customLabel').type(label);
+    }
+
     async getField() {
       const field = await retry.try(
         async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));

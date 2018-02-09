@@ -1,114 +1,78 @@
-// import expect from 'expect.js';
-import { spawn } from 'child_process';
+import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   // const kibanaServer = getService('kibanaServer');
   // const remote = getService('remote');
   const log = getService('log');
-  // const retry = getService('retry');
-  const PageObjects = getPageObjects(['console', 'common']);
+  const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['console', 'common', 'settings']);
 
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
   describe('Shakespeare', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
-      log.debug('navigateTo console');
-      await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.collapseHelp();
-
-      // this is just to set focus without messing up the default request
-      await PageObjects.console.clickPlay();
-
-      await PageObjects.common.sleep(1000);
-      await PageObjects.console.setRequest('DELETE shakespeare');
-      await PageObjects.common.sleep(1000);
-      await PageObjects.console.clickPlay();
-      await PageObjects.common.sleep(1000);
-      // maybe we just ignore the response since it may or may not exist?
+      log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
+      + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
+      await esArchiver.load('empty_kibana');
+      log.debug('Load shakespeare data');
+      await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
-    it('should set Shakespeare mapping', async function () {
-      const mapping = 'PUT /shakespeare \n{\n "mappings": {\n "doc": {\n "properties": '
-      + '{\n "speaker": {"type": "keyword"},\n  "play_name": {"type": "keyword"},\n '
-      + '"line_id": {"type": "integer"},\n "speech_number": {"type": "integer"}';
-      // log.debug('clearAceEditor');
-      // await PageObjects.console.clearAceEditor();
-      // await PageObjects.common.sleep(50000);
-      await PageObjects.console.setRequest(mapping);
-      // await PageObjects.common.sleep(10000);
-      await PageObjects.console.clickPlay();
-      await PageObjects.common.sleep(1000);
-      const response = await PageObjects.console.getResponse();
-      log.debug('response = ' + response);
-      // expect(JSON.parse(response).acknowledged).to.be(true);
+    it('should create shakespeare index pattern', async function () {
+      log.debug('Create shakespeare index pattern');
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.createIndexPattern('shakespeare', null);
+      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
+      const patternName = await indexPageHeading.getVisibleText();
+      expect(patternName).to.be('shakespeare');
+    });
 
-      // "acknowledged": true,
-      // "shards_acknowledged": true,
-      // "index": "shakespeare"
-      // }');
-      log.debug('run curl');
-      //spawn('/bin/sh', [ '-c', 'curl -sSL https://get.rvm.io | bash -s stable --ruby' ])
 
-      // const proc = spawn('curl', ['-H "Content-Type: application/x-ndjson" -XPOST "https://elastic:changeit@localhost:9200/shakespeare/doc/_bulk?pretty" --data-binary @shakespeare_6.0.json'], {
-      const proc = spawn('/c/Program\ Files/Git/mingw64/bin/curl.exe', ['-H "Content-Type: application/x-ndjson" -XPOST "https://elastic:changeit@localhost:9200/shakespeare/doc/_bulk?pretty" --data-binary @shakespeare_6.0.json'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      await PageObjects.common.sleep(5000);
-      proc.stdout.on('data', chunk => {
-        log.debug('[chromedriver:stdout]', chunk.toString('utf8').trim());
-      });
-      proc.stderr.on('data', chunk => {
-        log.debug('[chromedriver:stderr]', chunk.toString('utf8').trim());
-      });
-      log.debug('ran curl');
-      await PageObjects.common.sleep(5000);
+    it('should create shakespeare index pattern', async function () {
+      log.debug('Create shakespeare index pattern');
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.createIndexPattern('shakespeare', null);
+      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
+      const patternName = await indexPageHeading.getVisibleText();
+      expect(patternName).to.be('shakespeare');
+    });
 
+
+    it('should create initial vertical bar chart', async function () {
+      log.debug('create shakespeare vertical bar chart');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.clickVerticalBarChart();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.visualize.waitForVisualization();
+
+      const expectedChartValues = [111396];
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
+    });
+
+
+    it('should configure metric Speaking Parts', async function () {
+      log.debug('Bucket = X-Axis');
+      await PageObjects.visualize.selectYAxisAggregation('Unique Count', 'speaker', 'Speaking Parts');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.common.sleep(10000);
+      //
+      // await PageObjects.visualize.clickBucket('X-Axis');
+      // log.debug('Aggregation = Date Histogram');
+      // await PageObjects.visualize.selectAggregation('Date Histogram');
+      // log.debug('Field = @timestamp');
+      // await PageObjects.visualize.selectField('@timestamp');
+      // await PageObjects.visualize.clickGo();
 
     });
 
-    //curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
-
-
-    //
-    // spawn = require('child_process').spawn,
-    // var ls  = spawn('ls', ['-l']);
-    // ls.stdout.on('data', function (data) {
-    //    console.log(data);
-    // });
-    // let proc = null;
-    // proc.stdout.on('data', chunk => {
-    //   log.debug('[chromedriver:stdout]', chunk.toString('utf8').trim());
-    // });
-    // proc.stderr.on('data', chunk => {
-    //   log.debug('[chromedriver:stderr]', chunk.toString('utf8').trim());
-    // });
-
-
-    //
-    //   it('should have index pattern in url', function url() {
-    //     return retry.try(function tryingForTime() {
-    //       return remote.getCurrentUrl()
-    //         .then(function (currentUrl) {
-    //           expect(currentUrl).to.contain(indexPatternId);
-    //         });
-    //     });
-    //   });
-    //
-    //   it('should have expected table headers', function checkingHeader() {
-    //     return PageObjects.settings.getTableHeader()
-    //       .then(function (headers) {
-    //         log.debug('header.length = ' + headers.length);
-    //         const expectedHeaders = [
-    //           'name',
-    //           'type',
-    //           'format',
-    //           'searchable',
-    //           'aggregatable',
-    //           'excluded',
-    //           'controls'
-    //         ];
-    //
     //         expect(headers.length).to.be(expectedHeaders.length);
     //
     //         const comparedHeaders = headers.map(function compareHead(header, i) {

@@ -62,17 +62,6 @@ export function ConsolePageProvider({ getService }) {
       return await this.getFontSize(await this.getRequestEditor());
     }
 
-    // async clearAceEditor() {
-    //   const input = await find.byCssSelector('#editor > div.ace_scroller > div');
-    //   // Since we use ACE editor and that isn't really storing its value inside
-    //   // a textarea we must really select all text and remove it, and cannot use
-    //   // clearValue().
-    //   await input.click();
-    //   await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
-    //   await input.session.pressKeys(Keys.NULL); // Release modifier keys
-    //   await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
-    // }
-
     async setRequest(request) {
       const input = await find.byCssSelector('#editor > div.ace_scroller > div');
       await input.session.pressKeys([Keys.ARROW_RIGHT]);
@@ -88,7 +77,6 @@ export function ConsolePageProvider({ getService }) {
       await input.session.pressKeys([Keys.ENTER]);
       await input.session.pressKeys(request.split(''));
     }
-
 
   };
 }
