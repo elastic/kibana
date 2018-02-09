@@ -245,6 +245,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         };
       }
 
+      // Tags are hosted out of saved object type in storage.
+      // As a result, they are not in the type mapping but need to serialized
+      if (this.tags) {
+        body.tags = this.tags;
+      }
+
       return body;
     };
 
