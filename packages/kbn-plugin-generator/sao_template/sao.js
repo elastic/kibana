@@ -34,7 +34,7 @@ module.exports = function({ name }) {
       },
       generateHack: {
         type: 'confirm',
-        message: 'Should an hack component be generated?',
+        message: 'Should a hack component be generated?',
         default: true,
       },
       generateApi: {
