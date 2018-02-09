@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "main": "target/tsc/index.js",
+  "main": "./target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {
     "build": "tsc",
