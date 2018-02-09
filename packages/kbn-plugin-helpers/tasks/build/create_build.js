@@ -38,6 +38,6 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         stdio: ['ignore', 'ignore', 'pipe'],
       };
 
-      execFileSync(winCmd('yarn'), ['install', '--production'], options);
+      execFileSync(winCmd('yarn'), ['install', '--production', '--frozen-lockfile'], options);
     });
 };
