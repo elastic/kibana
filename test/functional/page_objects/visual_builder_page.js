@@ -9,11 +9,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async clickMetric() {
       const button = await testSubjects.find('metricTsvbTypeBtn');
       await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdown() {
       const button = await testSubjects.find('markdownTsvbTypeBtn');
       await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getMetricValue() {
@@ -66,6 +68,38 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await metricValue.session.moveMouseTo(metricValue);
       return await metricValue.getVisibleText();
     }
+
+    async clickGauge() {
+      await testSubjects.click('gaugeTsvbTypeBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getGaugeLabel() {
+      const gaugeLabel = await find.byCssSelector('.thorHalfGauge__label');
+      return await gaugeLabel.getVisibleText();
+    }
+
+    async getGaugeCount() {
+      const gaugeCount = await find.byCssSelector('.thorHalfGauge__value');
+      return await gaugeCount.getVisibleText();
+    }
+
+    async clickTopN()
+    {
+      await testSubjects.click('top_nTsvbTypeBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getTopNLabel() {
+      const topNLabel = await find.byCssSelector('.rhythm_top_n__label');
+      return await topNLabel.getVisibleText();
+    }
+
+    async getTopNCount() {
+      const gaugeCount = await find.byCssSelector('.rhythm_top_n__value');
+      return await gaugeCount.getVisibleText();
+    }
+
   }
 
   return new VisualBuilderPage();
