@@ -20,6 +20,7 @@ export class SourceFiltersTable extends Component {
     indexPattern: PropTypes.object.isRequired,
     filterFilter: PropTypes.string,
     fieldWildcardMatcher: PropTypes.func.isRequired,
+    onAddOrRemoveFilter: PropTypes.func,
   }
 
   constructor(props) {
@@ -76,7 +77,7 @@ export class SourceFiltersTable extends Component {
   }
 
   deleteFilter = async () =>  {
-    const { indexPattern } = this.props;
+    const { indexPattern, onAddOrRemoveFilter } = this.props;
     const { filterToDelete } = this.state;
 
     indexPattern.sourceFilters = indexPattern.sourceFilters.filter(filter => {
@@ -85,21 +86,23 @@ export class SourceFiltersTable extends Component {
 
     this.setState({ isSaving: true });
     await indexPattern.save();
+    onAddOrRemoveFilter && onAddOrRemoveFilter();
     this.fetchFilters();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
   }
 
   addFilter = async (value) => {
-    const { indexPattern } = this.props;
+    const { indexPattern, onAddOrRemoveFilter } = this.props;
 
     indexPattern.sourceFilters = [
-      ...indexPattern.sourceFilters,
+      ...indexPattern.sourceFilters || [],
       { value }
     ];
 
     this.setState({ isSaving: true });
     await indexPattern.save();
+    onAddOrRemoveFilter && onAddOrRemoveFilter();
     this.fetchFilters();
     this.setState({ isSaving: false });
   }

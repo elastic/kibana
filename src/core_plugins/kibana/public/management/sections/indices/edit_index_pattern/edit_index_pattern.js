@@ -8,10 +8,45 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
-import { renderSourceFiltersTable, destroySourceFiltersTable } from './source_filters_table';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { SourceFiltersTable } from './source_filters_table';
+
+const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
+
+function updateSourceFiltersTable($scope, $state) {
+  if ($state.tab === 'sourceFilters') {
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <SourceFiltersTable
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+          onAddOrRemoveFilter={() => {
+            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+            $scope.refreshFilters();
+            $scope.$apply();
+          }}
+        />,
+        node,
+      );
+    });
+  } else {
+    destroySourceFiltersTable();
+  }
+}
+
+function destroySourceFiltersTable() {
+  const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 
@@ -167,6 +202,7 @@ uiModules.get('apps/management')
       $state.tab = obj.index;
       updateIndexedFieldsTable($scope, $state);
       updateScriptedFieldsTable($scope, $state);
+      updateSourceFiltersTable($scope, $state);
       $state.save();
     };
 
@@ -249,6 +285,9 @@ uiModules.get('apps/management')
       if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
         updateIndexedFieldsTable($scope, $state);
       }
+      if ($scope.fieldFilter !== undefined && $state.tab === 'sourceFilters') {
+        updateSourceFiltersTable($scope, $state);
+      }
     });
 
     $scope.$watch('scriptedFieldLanguageFilter', () => {
@@ -261,4 +300,7 @@ uiModules.get('apps/management')
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
     });
+
+    updateScriptedFieldsTable($scope, $state);
+    updateSourceFiltersTable($scope, $state);
   });
