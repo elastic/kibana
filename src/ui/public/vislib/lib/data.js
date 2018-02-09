@@ -1,7 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import { markZeros } from '../components/zero_values/mark_zeros';
-import { revertZeros } from '../components/zero_values/revert_zeros';
 import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/zero_injection/inject_zeros';
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
 import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
@@ -136,10 +134,8 @@ export function VislibLibDataProvider(Private) {
         const id = axis.axisConfig.get('id');
         stackedData[id] = this.getStackedSeries(chartConfig, axis, data, i === 0);
         stackedData[id] = this.injectZeros(stackedData[id], handler.visConfig.get('orderBucketsBySum', false));
-        stackedData[id] = markZeros(stackedData[id]);
         axis.axisConfig.set('stackedSeries', stackedData[id].length);
         axis.stack(_.map(stackedData[id], 'values'));
-        stackedData[id] = revertZeros(stackedData[id]);
       });
       return stackedData;
     }
