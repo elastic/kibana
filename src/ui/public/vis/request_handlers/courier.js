@@ -51,7 +51,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
             return _.cloneDeep(resp);
           }).then(async resp => {
-            for (const agg of vis.aggs) {
+            for (const agg of vis.getAggConfig()) {
               const nestedSearchSource = new SearchSource().inherits(searchSource);
               resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
             }
