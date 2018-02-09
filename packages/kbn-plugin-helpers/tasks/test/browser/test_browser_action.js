@@ -15,8 +15,8 @@ module.exports = function testBrowserAction(plugin, run, options) {
   }
 
   const task = (options.dev) ? 'test:dev' : 'test:browser';
-  const args = ['run', task, '--'].concat(kbnServerArgs);
-  execFileSync(winCmd('npm'), args, {
+  const args = [task].concat(kbnServerArgs);
+  execFileSync(winCmd('yarn'), args, {
     cwd: plugin.kibanaRoot,
     stdio: ['ignore', 1, 2]
   });
