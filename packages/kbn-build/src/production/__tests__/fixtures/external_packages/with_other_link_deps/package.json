@@ -1,5 +1,5 @@
 {
-  "name": "foo",
+  "name": "quux",
   "version": "1.0.0",
   "dependencies": {
     "bar": "link:../foo/packages/bar"
