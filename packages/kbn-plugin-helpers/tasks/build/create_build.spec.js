@@ -3,7 +3,7 @@ const { resolve } = require('path');
 const del = require('del');
 const createBuild = require('./create_build');
 
-const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/test_plugin');
+const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/create_build_test_plugin');
 const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
 const PLUGIN_BUILD_TARGET = resolve(PLUGIN_BUILD_DIR, 'kibana', PLUGIN.id);

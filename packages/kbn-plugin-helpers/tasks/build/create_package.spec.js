@@ -5,7 +5,7 @@ const del = require('del');
 const createBuild = require('./create_build');
 const createPackage = require('./create_package');
 
-const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/test_plugin');
+const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/create_package_test_plugin');
 const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build-custom');
 
