@@ -4,6 +4,7 @@ const dedent = require('dedent');
 const sao = require('sao');
 const chalk = require('chalk');
 const getopts = require('getopts');
+const snakeCase = require('lodash.snakecase');
 
 exports.run = function run(argv) {
   const options = getopts(argv, {
@@ -30,7 +31,8 @@ exports.run = function run(argv) {
 
   const name = options._[0];
   const template = resolve(__dirname, './sao_template');
-  const targetPath = resolve(__dirname, '../../../kibana-extra', name);
+  const kibanaExtra = resolve(__dirname, '../../../kibana-extra');
+  const targetPath = resolve(kibanaExtra, snakeCase(name));
 
   sao({
     template: template,
