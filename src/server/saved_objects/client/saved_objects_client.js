@@ -156,7 +156,7 @@ export class SavedObjectsClient {
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
-    const validateResult = validateBulkObjects(attributes);
+    const validateResult = validateBulkObjects(options);
     if (validateResult.error) {
       throw errors.decorateBadRequestError(validateResult.error);
     }
@@ -483,7 +483,7 @@ export class SavedObjectsClient {
       type,
       updated_at: time,
       [type]: _.cloneDeep(attributes)
-    }
+    };
     // Tags are stored as a top level property but appear in attributes to the application.
     // Host the tags property for storage
     if (attributes.tags) {
