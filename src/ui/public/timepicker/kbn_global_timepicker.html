@@ -4,6 +4,8 @@
     aria-label="{{ timefilter.refreshInterval.pause ? 'Resume refreshing data' : 'Pause refreshing data' }}"
     ng-click="toggleRefresh()"
     ng-show="timefilter.isAutoRefreshSelectorEnabled && (timefilter.refreshInterval.value > 0)"
+    data-test-subj="globalTimepickerAutoRefreshButton"
+    data-test-subj-state="{{ timefilter.refreshInterval.pause ? 'inactive' : 'active' }}"
   >
     <span
       class="kuiIcon"
