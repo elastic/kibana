@@ -91,3 +91,9 @@ exports[`Table should render normally 1`] = `
   }
 />
 `;
+
+exports[`Table should render the format 1`] = `
+<span>
+  string
+</span>
+`;

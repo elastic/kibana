@@ -13,9 +13,8 @@ export const Header = () => (
     </EuiTitle>
     <EuiText>
       <p>
-        These scripted fields are computed on the fly from your data.
-        They can be used in visualizations and displayed in your documents, however they can not be searched.
-        You can manage them here and add new ones as you see fit, but be careful, scripts can be tricky!
+        You can use scripted fields in visualizations and display them in your documents.
+        However, you cannot search scripted fields.
       </p>
     </EuiText>
     <EuiSpacer size="s" />

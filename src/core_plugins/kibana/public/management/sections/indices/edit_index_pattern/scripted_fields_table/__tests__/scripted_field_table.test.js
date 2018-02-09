@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 
@@ -54,7 +54,7 @@ const indexPattern = {
 
 describe('ScriptedFieldsTable', () => {
   it('should render normally', async () => {
-    const component = mount(
+    const component = shallow(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -70,7 +70,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the query bar', async () => {
-    const component = mount(
+    const component = shallow(
       <ScriptedFieldsTable
         indexPattern={indexPattern}
         helpers={helpers}
@@ -89,7 +89,7 @@ describe('ScriptedFieldsTable', () => {
   });
 
   it('should filter based on the lang filter', async () => {
-    const component = mount(
+    const component = shallow(
       <ScriptedFieldsTable
         indexPattern={{
           getScriptedFields: () => ([
@@ -113,8 +113,8 @@ describe('ScriptedFieldsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should show a message if there are no scripted fields', async () => {
-    const component = mount(
+  it('should hide the table if there are no scripted fields', async () => {
+    const component = shallow(
       <ScriptedFieldsTable
         indexPattern={{
           getScriptedFields: () => ([])
@@ -129,5 +129,41 @@ describe('ScriptedFieldsTable', () => {
     await component.update(); // Force update the component post async actions
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should show a delete modal', async () => {
+    const component = shallow(
+      <ScriptedFieldsTable
+        indexPattern={indexPattern}
+        helpers={helpers}
+      />
+    );
+
+    await component.update(); // Fire `componentWillMount()`
+    component.instance().startDeleteField({ name: 'ScriptedField' });
+    await component.update();
+
+    // Ensure the modal is visible
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should delete a field', async () => {
+    const removeScriptedField = jest.fn();
+    const component = shallow(
+      <ScriptedFieldsTable
+        indexPattern={{
+          ...indexPattern,
+          removeScriptedField,
+        }}
+        helpers={helpers}
+      />
+    );
+
+    await component.update(); // Fire `componentWillMount()`
+    component.instance().startDeleteField({ name: 'ScriptedField' });
+    await component.update();
+    await component.instance().deleteField();
+    await component.update();
+    expect(removeScriptedField).toBeCalled();
   });
 });

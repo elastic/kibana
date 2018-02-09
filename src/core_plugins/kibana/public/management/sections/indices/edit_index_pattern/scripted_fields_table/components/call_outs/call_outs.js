@@ -17,14 +17,14 @@ export const CallOuts = ({
   return (
     <div>
       <EuiCallOut
-        title="Deprecation Warning"
+        title="Deprecation languages in use"
         color="danger"
         iconType="cross"
       >
         <p>
-          We&apos;ve detected that the following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}.
-          Support for these languages will be removed in the next major version of Kibana and Elasticsearch.
-          We recommend converting your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink>.
+          The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}.
+          Support for these languages will be removed in the next major version of Kibana
+          and Elasticsearch. Convert you scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
         </p>
       </EuiCallOut>
       <EuiSpacer size="m"/>

@@ -6,12 +6,12 @@ exports[`CallOuts should render normally 1`] = `
     color="danger"
     iconType="cross"
     size="m"
-    title="Deprecation Warning"
+    title="Deprecation languages in use"
   >
     <p>
-      We've detected that the following deprecated languages are in use: 
+      The following deprecated languages are in use: 
       php
-      . Support for these languages will be removed in the next major version of Kibana and Elasticsearch. We recommend converting your scripted fields to 
+      . Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to 
       <EuiLink
         color="primary"
         href="http://www.elastic.co/painlessDocs"
@@ -19,7 +19,7 @@ exports[`CallOuts should render normally 1`] = `
       >
         Painless
       </EuiLink>
-      .
+       to avoid any problems.
     </p>
   </EuiCallOut>
   <EuiSpacer

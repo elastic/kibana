@@ -1,290 +1,255 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
-<ScriptedFieldsTable
-  helpers={
-    Object {
-      "getRouteHref": [Function],
-      "redirectToRoute": [Function],
+<div>
+  <header />
+  <call-outs
+    deprecatedLangsInUse={
+      Array [
+        "somethingElse",
+      ]
     }
-  }
-  indexPattern={
-    Object {
-      "getScriptedFields": [Function],
+    painlessDocLink="painlessDocs"
+  />
+  <eui-button
+    data-test-subj="addScriptedFieldLink"
+  >
+    Add scripted field
+  </eui-button>
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
     }
-  }
-  scriptedFieldLanguageFilter="painless"
->
-  <div>
-    <header />
-    <call-outs
-      deprecatedLangsInUse={
-        Array [
-          "somethingElse",
-        ]
-      }
-      painlessDocLink="painlessDocs"
-    />
-    <eui-button
-      data-test-subj="addScriptedFieldLink"
-      href={undefined}
-    >
-      Add Scripted Field
-    </eui-button>
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
-        Object {
-          "getScriptedFields": [Function],
-        }
-      }
-      model={
-        Object {
-          "criteria": Object {
-            "page": Object {
-              "index": 0,
-              "size": 10,
-            },
-            "sort": Object {
-              "direction": "asc",
-              "field": "name",
-            },
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
           },
-          "data": Object {
-            "records": Array [
-              Object {
-                "lang": "painless",
-                "name": "ScriptedField",
-                "script": "x++",
-              },
-              Object {
-                "lang": "painless",
-                "name": "JustATest",
-                "script": "z++",
-              },
-            ],
-            "totalRecordCount": 2,
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
           },
-        }
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "lang": "painless",
+              "name": "ScriptedField",
+              "script": "x++",
+            },
+            Object {
+              "lang": "painless",
+              "name": "JustATest",
+              "script": "z++",
+            },
+          ],
+          "totalRecordCount": 2,
+        },
       }
-      onDataCriteriaChange={[Function]}
-    >
-      table
-    </Table>
-  </div>
-</ScriptedFieldsTable>
+    }
+    onDataCriteriaChange={[Function]}
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
-<ScriptedFieldsTable
-  fieldFilter="Just"
-  helpers={
-    Object {
-      "getRouteHref": [Function],
-      "redirectToRoute": [Function],
-    }
-  }
-  indexPattern={
-    Object {
-      "getScriptedFields": [Function],
-    }
-  }
->
-  <div>
-    <header />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-button
-      data-test-subj="addScriptedFieldLink"
-      href={undefined}
-    >
-      Add Scripted Field
-    </eui-button>
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
-        Object {
-          "getScriptedFields": [Function],
-        }
+<div>
+  <header />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-button
+    data-test-subj="addScriptedFieldLink"
+  >
+    Add scripted field
+  </eui-button>
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
       }
-      model={
-        Object {
-          "criteria": Object {
-            "page": Object {
-              "index": 0,
-              "size": 10,
-            },
-            "sort": Object {
-              "direction": "asc",
-              "field": "name",
-            },
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
           },
-          "data": Object {
-            "records": Array [
-              Object {
-                "lang": "painless",
-                "name": "JustATest",
-                "script": "z++",
-              },
-            ],
-            "totalRecordCount": 1,
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
           },
-        }
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "lang": "painless",
+              "name": "JustATest",
+              "script": "z++",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
       }
-      onDataCriteriaChange={[Function]}
-    >
-      table
-    </Table>
-  </div>
-</ScriptedFieldsTable>
+    }
+    onDataCriteriaChange={[Function]}
+  />
+</div>
+`;
+
+exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
+<div>
+  <header />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-button
+    data-test-subj="addScriptedFieldLink"
+  >
+    Add scripted field
+  </eui-button>
+  <eui-spacer
+    size="l"
+  />
+</div>
 `;
 
 exports[`ScriptedFieldsTable should render normally 1`] = `
-<ScriptedFieldsTable
-  helpers={
-    Object {
-      "getRouteHref": [Function],
-      "redirectToRoute": [Function],
-    }
-  }
-  indexPattern={
-    Object {
-      "getScriptedFields": [Function],
-    }
-  }
->
-  <div>
-    <header />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-button
-      data-test-subj="addScriptedFieldLink"
-      href={undefined}
-    >
-      Add Scripted Field
-    </eui-button>
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
-        Object {
-          "getScriptedFields": [Function],
-        }
+<div>
+  <header />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-button
+    data-test-subj="addScriptedFieldLink"
+  >
+    Add scripted field
+  </eui-button>
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
       }
-      model={
-        Object {
-          "criteria": Object {
-            "page": Object {
-              "index": 0,
-              "size": 10,
-            },
-            "sort": Object {
-              "direction": "asc",
-              "field": "name",
-            },
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
           },
-          "data": Object {
-            "records": Array [
-              Object {
-                "lang": "painless",
-                "name": "ScriptedField",
-                "script": "x++",
-              },
-              Object {
-                "lang": "painless",
-                "name": "JustATest",
-                "script": "z++",
-              },
-            ],
-            "totalRecordCount": 2,
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
           },
-        }
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "lang": "painless",
+              "name": "ScriptedField",
+              "script": "x++",
+            },
+            Object {
+              "lang": "painless",
+              "name": "JustATest",
+              "script": "z++",
+            },
+          ],
+          "totalRecordCount": 2,
+        },
       }
-      onDataCriteriaChange={[Function]}
-    >
-      table
-    </Table>
-  </div>
-</ScriptedFieldsTable>
+    }
+    onDataCriteriaChange={[Function]}
+  />
+</div>
 `;
 
-exports[`ScriptedFieldsTable should show a message if there are no scripted fields 1`] = `
-<ScriptedFieldsTable
-  helpers={
-    Object {
-      "getRouteHref": [Function],
-      "redirectToRoute": [Function],
-    }
-  }
-  indexPattern={
-    Object {
-      "getScriptedFields": [Function],
-    }
-  }
->
-  <div>
-    <header />
-    <call-outs
-      deprecatedLangsInUse={Array []}
-      painlessDocLink="painlessDocs"
-    />
-    <eui-button
-      data-test-subj="addScriptedFieldLink"
-      href={undefined}
-    >
-      Add Scripted Field
-    </eui-button>
-    <eui-spacer
-      size="l"
-    />
-    <Table
-      deleteField={[Function]}
-      editField={[Function]}
-      indexPattern={
-        Object {
-          "getScriptedFields": [Function],
-        }
+exports[`ScriptedFieldsTable should show a delete modal 1`] = `
+<div>
+  <header />
+  <call-outs
+    deprecatedLangsInUse={Array []}
+    painlessDocLink="painlessDocs"
+  />
+  <eui-button
+    data-test-subj="addScriptedFieldLink"
+  >
+    Add scripted field
+  </eui-button>
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
       }
-      model={
-        Object {
-          "criteria": Object {
-            "page": Object {
-              "index": 0,
-              "size": 10,
-            },
-            "sort": Object {
-              "direction": "asc",
-              "field": "name",
-            },
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
           },
-          "data": Object {
-            "records": Array [],
-            "totalRecordCount": 0,
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
           },
-        }
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "lang": "painless",
+              "name": "ScriptedField",
+              "script": "x++",
+            },
+            Object {
+              "lang": "painless",
+              "name": "JustATest",
+              "script": "z++",
+            },
+          ],
+          "totalRecordCount": 2,
+        },
       }
-      onDataCriteriaChange={[Function]}
-    >
-      table
-    </Table>
-    <eui-text>
-      No scripted fields found.
-    </eui-text>
-  </div>
-</ScriptedFieldsTable>
+    }
+    onDataCriteriaChange={[Function]}
+  />
+  <eui-overlay-mask>
+    <eui-confirm-modal
+      cancelButtonText="Cancel"
+      confirmButtonText="Delete"
+      onCancel={[Function]}
+      onConfirm={[Function]}
+      title="Delete scripted field 'ScriptedField'?"
+    />
+  </eui-overlay-mask>
+</div>
 `;

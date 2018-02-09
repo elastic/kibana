@@ -4,7 +4,6 @@ import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 
 import { documentationLinks } from 'ui/documentation_links';
 
 import {
-  EuiText,
   EuiButton,
   EuiSpacer,
   EuiOverlayMask,
@@ -27,6 +26,7 @@ export class ScriptedFieldsTable extends Component {
       redirectToRoute: PropTypes.func.isRequired,
       getRouteHref: PropTypes.func.isRequired,
     }),
+    onRemoveField: PropTypes.func,
   }
 
   constructor(props) {
@@ -111,10 +111,11 @@ export class ScriptedFieldsTable extends Component {
   }
 
   deleteField = () =>  {
-    const { indexPattern } = this.props;
+    const { indexPattern, onRemoveField } = this.props;
     const { fieldToDelete } = this.state;
 
     indexPattern.removeScriptedField(fieldToDelete.name);
+    onRemoveField && onRemoveField();
     this.fetchFields();
     this.hideDeleteConfirmationModal();
   }
@@ -140,20 +141,6 @@ export class ScriptedFieldsTable extends Component {
     );
   }
 
-  renderNoFieldsFound() {
-    const { fields } = this.state;
-
-    if (fields.length > 0) {
-      return null;
-    }
-
-    return (
-      <EuiText>
-        No scripted fields found.
-      </EuiText>
-    );
-  }
-
   render() {
     const {
       helpers,
@@ -166,6 +153,7 @@ export class ScriptedFieldsTable extends Component {
         page,
         sort,
       },
+      fields,
     } = this.state;
 
     const model = {
@@ -184,18 +172,20 @@ export class ScriptedFieldsTable extends Component {
           data-test-subj="addScriptedFieldLink"
           href={helpers.getRouteHref(indexPattern, 'addField')}
         >
-          Add Scripted Field
+          Add scripted field
         </EuiButton>
         <EuiSpacer size="l" />
-        <Table
-          indexPattern={indexPattern}
-          model={model}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-          deleteField={this.startDeleteField}
-          onDataCriteriaChange={this.onDataCriteriaChange}
-        />
+        { fields.length > 0 ?
+          <Table
+            indexPattern={indexPattern}
+            model={model}
+            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+            deleteField={this.startDeleteField}
+            onDataCriteriaChange={this.onDataCriteriaChange}
+          />
+          : null
+        }
         {this.renderDeleteConfirmationModal()}
-        {this.renderNoFieldsFound()}
       </div>
     );
   }
