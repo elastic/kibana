@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import './index_header';
 import './scripted_field_editor';
-import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError } from 'ui/notify';
@@ -9,6 +8,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
+import { renderSourceFiltersTable, destroySourceFiltersTable } from './source_filters_table';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';

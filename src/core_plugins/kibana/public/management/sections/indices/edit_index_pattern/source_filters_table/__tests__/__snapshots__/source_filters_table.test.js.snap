@@ -1,0 +1,405 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourceFiltersTable should add a filter 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        },
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+          Object {
+            "value": "na*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "tim*",
+            },
+            Object {
+              "value": "na*",
+            },
+          ],
+          "totalRecordCount": 2,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should filter based on the query bar 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "time*",
+          },
+          Object {
+            "value": "nam*",
+          },
+          Object {
+            "value": "age*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "time*",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should hide the table if there are no scripted fields 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should remove a filter 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        },
+        "sourceFilters": Array [
+          Object {
+            "value": "na*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "na*",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should render normally 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "time*",
+          },
+          Object {
+            "value": "nam*",
+          },
+          Object {
+            "value": "age*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "time*",
+            },
+            Object {
+              "value": "nam*",
+            },
+            Object {
+              "value": "age*",
+            },
+          ],
+          "totalRecordCount": 3,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <eui-loading-spinner />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "tim*",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;
+
+exports[`SourceFiltersTable should show a delete modal 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "tim*",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+  <eui-overlay-mask>
+    <eui-confirm-modal
+      cancelButtonText="Cancel"
+      confirmButtonText="Delete"
+      onCancel={[Function]}
+      onConfirm={[Function]}
+      title="Delete source filter?"
+    />
+  </eui-overlay-mask>
+</div>
+`;
+
+exports[`SourceFiltersTable should update a filter 1`] = `
+<div>
+  <header />
+  <AddFilter
+    addFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "save": [MockFunction] {
+          "calls": Array [
+            Array [],
+          ],
+        },
+        "sourceFilters": Array [
+          Object {
+            "value": "ti*",
+          },
+        ],
+      }
+    }
+    model={
+      Object {
+        "criteria": Object {
+          "page": Object {
+            "index": 0,
+            "size": 10,
+          },
+          "sort": Object {
+            "direction": "asc",
+            "field": "name",
+          },
+        },
+        "data": Object {
+          "records": Array [
+            Object {
+              "value": "ti*",
+            },
+          ],
+          "totalRecordCount": 1,
+        },
+      }
+    }
+    onDataCriteriaChange={[Function]}
+    saveFilter={[Function]}
+  />
+</div>
+`;

@@ -1,128 +1,189 @@
-import { find, each, escape, invoke, size, without } from 'lodash';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
-import { FieldWildcardProvider } from 'ui/field_wildcard';
+import {
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EuiLoadingSpinner,
+  EUI_MODAL_CONFIRM_BUTTON,
+} from '@elastic/eui';
 
-import controlsHtml from './controls.html';
-import filterHtml from './filter.html';
-import template from './source_filters_table.html';
-import './source_filters_table.less';
+import { Table } from './components/table';
+import { Header } from './components/header';
+import { AddFilter } from './components/add_filter';
+import { getTableOfRecordsState, DEFAULT_TABLE_OF_RECORDS_STATE } from './lib';
 
-const notify = new Notifier();
 
-uiModules.get('kibana')
-  .directive('sourceFiltersTable', function (Private, $filter, confirmModal) {
-    const angularFilter = $filter('filter');
-    const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
-    const rowScopes = []; // track row scopes, so they can be destroyed as needed
+export class SourceFiltersTable extends Component {
+  static propTypes = {
+    indexPattern: PropTypes.object.isRequired,
+    filterFilter: PropTypes.string,
+    fieldWildcardMatcher: PropTypes.func.isRequired,
+  }
 
-    return {
-      restrict: 'E',
-      scope: {
-        indexPattern: '='
-      },
-      template,
-      controllerAs: 'sourceFilters',
-      controller: class FieldFiltersController {
-        constructor($scope) {
-          if (!$scope.indexPattern) {
-            throw new Error('index pattern is required');
-          }
+  constructor(props) {
+    super(props);
 
-          $scope.perPage = 25;
-          $scope.columns = [
-            {
-              title: 'filter'
-            },
-            {
-              title: 'matches',
-              sortable: false,
-              info: 'The source fields that match the filter.'
-            },
-            {
-              title: 'controls',
-              sortable: false
-            }
-          ];
-
-          this.$scope = $scope;
-          this.saving = false;
-          this.editing = null;
-          this.newValue = null;
-          this.placeHolder = 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
-
-          $scope.$watchMulti([ '[]indexPattern.sourceFilters', '$parent.fieldFilter' ], () => {
-            invoke(rowScopes, '$destroy');
-            rowScopes.length = 0;
-
-            if ($scope.indexPattern.sourceFilters) {
-              $scope.rows = [];
-              each($scope.indexPattern.sourceFilters, (filter) => {
-                const matcher = fieldWildcardMatcher([ filter.value ]);
-                // compute which fields match a filter
-                const matches = $scope.indexPattern.getNonScriptedFields().map(f => f.name).filter(matcher).sort();
-                if ($scope.$parent.fieldFilter && !angularFilter(matches, $scope.$parent.fieldFilter).length) {
-                  return;
-                }
-                // compute the rows
-                const rowScope = $scope.$new();
-                rowScope.filter = filter;
-                rowScopes.push(rowScope);
-                $scope.rows.push([
-                  {
-                    markup: filterHtml,
-                    scope: rowScope
-                  },
-                  size(matches) ? escape(matches.join(', ')) : '<em>The source filter doesn\'t match any known fields.</em>',
-                  {
-                    markup: controlsHtml,
-                    scope: rowScope
-                  }
-                ]);
-              });
-              // Update the tab count
-              find($scope.$parent.editSections, { index: 'sourceFilters' }).count = $scope.rows.length;
-            }
-          });
-        }
-
-        all() {
-          return this.$scope.indexPattern.sourceFilters || [];
-        }
-
-        delete(filter) {
-          const doDelete = () => {
-            if (this.editing === filter) {
-              this.editing = null;
-            }
-
-            this.$scope.indexPattern.sourceFilters = without(this.all(), filter);
-            return this.save();
-          };
-
-          const confirmModalOptions = {
-            confirmButtonText: 'Delete',
-            onConfirm: doDelete,
-            title: 'Delete source filter?'
-          };
-          confirmModal('', confirmModalOptions);
-        }
-
-        create() {
-          const value = this.newValue;
-          this.newValue = null;
-          this.$scope.indexPattern.sourceFilters = [...this.all(), { value }];
-          return this.save();
-        }
-
-        save() {
-          this.saving = true;
-          this.$scope.indexPattern.save()
-            .then(() => this.editing = null)
-            .catch(notify.error)
-            .finally(() => this.saving = false);
-        }
-      }
+    this.state = {
+      filterToDelete: undefined,
+      isDeleteConfirmationModalVisible: false,
+      isSaving: false,
+      filters: [],
+      ...DEFAULT_TABLE_OF_RECORDS_STATE,
     };
-  });
+  }
+
+  componentWillMount() {
+    this.fetchFilters();
+  }
+
+  fetchFilters = () => {
+    const filters = this.props.indexPattern.sourceFilters;
+
+    this.setState({
+      filters,
+      ...this.computeTableState(this.state.criteria, this.props, filters)
+    });
+  }
+
+  onDataCriteriaChange = criteria => {
+    this.setState(this.computeTableState(criteria));
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.filterFilter !== nextProps.filterFilter) {
+      this.setState(this.computeTableState(this.state.criteria, nextProps));
+    }
+  }
+
+  computeTableState(criteria, props = this.props, filters = this.state.filters) {
+    let items = filters;
+    if (props.filterFilter) {
+      const filterFilter = props.filterFilter.toLowerCase();
+      items = items.filter(filter => filter.value.toLowerCase().includes(filterFilter));
+    }
+
+    return getTableOfRecordsState(items, criteria);
+  }
+
+  startDeleteFilter = filter => {
+    this.setState({ filterToDelete: filter, isDeleteConfirmationModalVisible: true });
+  }
+
+  hideDeleteConfirmationModal = () => {
+    this.setState({ filterToDelete: undefined, isDeleteConfirmationModalVisible: false });
+  }
+
+  deleteFilter = async () =>  {
+    const { indexPattern } = this.props;
+    const { filterToDelete } = this.state;
+
+    indexPattern.sourceFilters = indexPattern.sourceFilters.filter(filter => {
+      return filter.value !== filterToDelete.value;
+    });
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    this.fetchFilters();
+    this.setState({ isSaving: false });
+    this.hideDeleteConfirmationModal();
+  }
+
+  addFilter = async (value) => {
+    const { indexPattern } = this.props;
+
+    indexPattern.sourceFilters = [
+      ...indexPattern.sourceFilters,
+      { value }
+    ];
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    this.fetchFilters();
+    this.setState({ isSaving: false });
+  }
+
+  saveFilter = async ({ oldFilterValue, newFilterValue }) => {
+    const { indexPattern } = this.props;
+
+    indexPattern.sourceFilters = indexPattern.sourceFilters.map(filter => {
+      if (filter.value === oldFilterValue) {
+        return { value: newFilterValue };
+      }
+      return filter;
+    });
+
+    this.setState({ isSaving: true });
+    await indexPattern.save();
+    this.fetchFilters();
+    this.setState({ isSaving: false });
+  }
+
+  renderDeleteConfirmationModal() {
+    const { filterToDelete } = this.state;
+
+    if (!filterToDelete) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={`Delete source filter?`}
+          onCancel={this.hideDeleteConfirmationModal}
+          onConfirm={this.deleteFilter}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
+      </EuiOverlayMask>
+    );
+  }
+
+  render() {
+    const {
+      indexPattern,
+      fieldWildcardMatcher,
+    } = this.props;
+
+    const {
+      data,
+      criteria: {
+        page,
+        sort,
+      },
+      isSaving,
+    } = this.state;
+
+    const model = {
+      data,
+      criteria: {
+        page,
+        sort,
+      },
+    };
+
+    return (
+      <div>
+        <Header/>
+        <AddFilter addFilter={this.addFilter}/>
+        <EuiSpacer size="l" />
+        { isSaving ? <EuiLoadingSpinner/> : null }
+        { data.records.length > 0 ?
+          <Table
+            indexPattern={indexPattern}
+            model={model}
+            fieldWildcardMatcher={fieldWildcardMatcher}
+            deleteFilter={this.startDeleteFilter}
+            saveFilter={this.saveFilter}
+            onDataCriteriaChange={this.onDataCriteriaChange}
+          />
+          : null
+        }
+
+        {this.renderDeleteConfirmationModal()}
+      </div>
+    );
+  }
+}
