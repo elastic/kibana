@@ -2,13 +2,13 @@ export {
   KibanaFunctionalPlugin,
   KibanaClassPlugin,
   KibanaPluginConfig,
-} from '../../platform/server/plugins/types';
-export { KibanaPluginApi } from '../../platform/server/plugins/KibanaPluginApi';
-export { Logger, LoggerFactory } from '../../platform/logging';
+} from '../../platform/src/server/plugins/types';
+export { KibanaPluginApi } from '../../platform/src/server/plugins/KibanaPluginApi';
+export { Logger, LoggerFactory } from '../../platform/src/logging';
 export {
   ElasticsearchService,
   ScopedDataClient,
   AdminClient,
-} from '../../platform/server/elasticsearch';
-export { KibanaConfig } from '../../platform/server/kibana';
-export { KibanaRequest, Router, HttpService } from '../../platform/server/http';
+} from '../../platform/src/server/elasticsearch';
+export { KibanaConfig } from '../../platform/src/server/kibana';
+export { KibanaRequest, Router, HttpService } from '../../platform/src/server/http';

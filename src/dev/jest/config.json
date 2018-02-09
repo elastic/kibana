@@ -9,7 +9,6 @@
   ],
   "collectCoverageFrom": [
     "platform/**/*.ts",
-    "!platform/plugins/**/*.ts",
     "ui_framework/src/components/**/*.js",
     "!ui_framework/src/components/index.js",
     "!ui_framework/src/components/**/*/index.js",
@@ -47,7 +46,8 @@
     "json"
   ],
   "modulePathIgnorePatterns": [
-    "__fixtures__/"
+    "__fixtures__/",
+    "__mocks__"
   ],
   "testMatch": [
     "**/*.test.js",
@@ -57,7 +57,7 @@
     "<rootDir>/ui_framework/dist/",
     "<rootDir>/ui_framework/doc_site/",
     "<rootDir>/ui_framework/generator-kui/",
-    "<rootDir>/packages/.*/target/"
+    "/target/"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/dev/jest/babel_transform.js",
