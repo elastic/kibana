@@ -35,7 +35,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -53,6 +53,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       key="link1"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -68,7 +69,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -86,6 +87,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       key="link2"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -101,7 +103,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -119,6 +121,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       key="link3"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -134,7 +137,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -152,6 +155,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       key="link4"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -167,7 +171,7 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -220,7 +224,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -238,6 +242,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
       key="link1"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -253,7 +258,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -271,6 +276,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
       key="link2"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -286,7 +292,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -304,6 +310,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
       key="link3"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -319,7 +326,7 @@ exports[`should not render dropdown when recently accessed list size is less tha
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -372,7 +379,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -390,6 +397,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       key="link1"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -405,7 +413,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -423,6 +431,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       key="link2"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -438,7 +447,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -456,6 +465,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       key="link3"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -471,7 +481,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >
@@ -489,6 +499,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       key="link4"
     >
       <EuiFlexItem
+        className="recentlyAccessedSeparator"
         component="div"
         grow={false}
       >
@@ -504,7 +515,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         grow={false}
         style={
           Object {
-            "minWidth": "3.5999999999999996em",
+            "minWidth": "3.9000000000000004em",
           }
         }
       >

@@ -102,7 +102,7 @@ export class RecentlyAccessed extends React.Component {
     let separator;
     if (includeSeparator) {
       separator = (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="recentlyAccessedSeparator">
           <EuiIcon
             type="dot"
             color="subdued"
@@ -113,7 +113,7 @@ export class RecentlyAccessed extends React.Component {
     // Want to avoid a bunch of white space around items with short labels (happens when min width is too large).
     // Also want to avoid truncating really short names (happens when there is no min width)
     // Dynamically setting the min width based on label lengh meets both of these goals.
-    const EM_RATIO = 0.6; // 'em' ratio that avoids too much horizontal white space and too much truncation
+    const EM_RATIO = 0.65; // 'em' ratio that avoids too much horizontal white space and too much truncation
     const minWidth = (label.length < 8 ? label.length : 8) * EM_RATIO;
     const style = { minWidth: `${minWidth}em` };
     return (
