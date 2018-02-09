@@ -103,10 +103,12 @@ export class RecentlyAccessed extends React.Component {
     if (includeSeparator) {
       separator = (
         <EuiFlexItem grow={false} className="recentlyAccessedSeparator">
-          <EuiIcon
-            type="dot"
-            color="subdued"
-          />
+          <EuiText>
+            <EuiIcon
+              type="dot"
+              color="subdued"
+            />
+          </EuiText>
         </EuiFlexItem>
       );
     }

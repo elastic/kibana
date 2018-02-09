@@ -57,11 +57,13 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -91,11 +93,13 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -125,11 +129,13 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -159,11 +165,13 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -246,11 +254,13 @@ exports[`should not render dropdown when recently accessed list size is less tha
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -280,11 +290,13 @@ exports[`should not render dropdown when recently accessed list size is less tha
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -314,11 +326,13 @@ exports[`should not render dropdown when recently accessed list size is less tha
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -401,11 +415,13 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -435,11 +451,13 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -469,11 +487,13 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
@@ -503,11 +523,13 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         component="div"
         grow={false}
       >
-        <EuiIcon
-          color="subdued"
-          size="m"
-          type="dot"
-        />
+        <EuiText>
+          <EuiIcon
+            color="subdued"
+            size="m"
+            type="dot"
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
         className="recentlyAccessedItem"
