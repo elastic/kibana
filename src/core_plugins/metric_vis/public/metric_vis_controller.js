@@ -65,6 +65,11 @@ export class MetricVisComponent extends Component {
     return isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]));
   }
 
+  _getFormattedValue(fieldFormatter, value) {
+    if (!value && isNaN(value)) return '-';
+    return fieldFormatter(value);
+  }
+
   _processTableGroups(tableGroups) {
     const config = this.props.vis.params.metric;
     const isPercentageMode = config.percentageMode;
@@ -101,7 +106,7 @@ export class MetricVisComponent extends Component {
           }
 
           if (aggConfig) {
-            if (!isPercentageMode) value = aggConfig.fieldFormatter('html')(value);
+            if (!isPercentageMode) value = this._getFormattedValue(aggConfig.fieldFormatter('html'), value);
             if (bucketAgg) {
               const bucketValue = bucketAgg.fieldFormatter('text')(row[0]);
               title = `${bucketValue} - ${aggConfig.makeLabel()}`;
