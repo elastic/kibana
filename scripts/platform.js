@@ -1,4 +1,4 @@
 /* eslint-disable */
 
 require('../src/babel-register');
-require('../platform/target/tsc/cli');
+require('@kbn/platform/target/tsc/cli');
