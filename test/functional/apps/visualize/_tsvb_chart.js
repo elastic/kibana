@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
@@ -21,13 +21,10 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.header.waitUntilLoadingHasFinished();
-        })
-        .then(function sleep() {
-          return PageObjects.common.sleep(1003);
         });
     });
 
-    describe('Visual Builder Time Series', function () {
+    describe('Time Series', function () {
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -54,10 +51,9 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('Visual Builder metric', () => {
+    describe('metric', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.common.sleep(1003);
       });
 
       it('should not display spy panel toggle button', async function () {
@@ -76,11 +72,41 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('Visual Builder markdown', () => {
+    // add a gauge test
+    describe('gauge', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickGauge();
+        log.debug('clicked on Gauge');
+      });
+
+      it('should verfiy gauge label and count display', async function () {
+        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+        expect(gaugeCount).to.be('156');
+      });
+    });
+
+    // add a top N test
+    describe('topN', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickTopN();
+        log.debug('clicked on TopN');
+      });
+
+      it('should verfiy topN label and count display', async function () {
+        const labelString = await PageObjects.visualBuilder.getTopNLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
+        expect(gaugeCount).to.be('156');
+      });
+    });
+
+
+    describe('markdown', () => {
 
       before(async () => {
         await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.common.sleep(1003);
         await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
