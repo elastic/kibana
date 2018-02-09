@@ -35,7 +35,7 @@ const projectsByName = new Map([
     'baz',
     new Project(
       {
-        name: 'bar',
+        name: 'baz',
         devDependencies: {
           bar: 'link:../bar',
         },
