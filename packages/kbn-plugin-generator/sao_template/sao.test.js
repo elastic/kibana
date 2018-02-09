@@ -22,21 +22,18 @@ describe('plugin generator sao integration', () => {
   test('skips files when answering no', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: false,
-      generateTranslations: false,
       generateHack: false,
       generateApi: false,
     });
 
     expect(res.fileList).not.toContain('public/app.js');
     expect(res.fileList).not.toContain('public/__tests__/index.js');
-    expect(res.fileList).not.toContain('translations/es.json');
     expect(res.fileList).not.toContain('public/hack.js');
     expect(res.fileList).not.toContain('server/routes/example.js');
     expect(res.fileList).not.toContain('server/__tests__/index.js');
 
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).not.toContain('app:');
-    expect(uiExports).not.toContain('translations:');
     expect(uiExports).not.toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
   });
@@ -44,7 +41,6 @@ describe('plugin generator sao integration', () => {
   it('includes app when answering yes', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: false,
       generateHack: false,
       generateApi: false,
     });
@@ -52,37 +48,12 @@ describe('plugin generator sao integration', () => {
     // check output files
     expect(res.fileList).toContain('public/app.js');
     expect(res.fileList).toContain('public/__tests__/index.js');
-    expect(res.fileList).not.toContain('translations/es.json');
     expect(res.fileList).not.toContain('public/hack.js');
     expect(res.fileList).not.toContain('server/routes/example.js');
     expect(res.fileList).not.toContain('server/__tests__/index.js');
 
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).toContain('app:');
-    expect(uiExports).not.toContain('translations:');
-    expect(uiExports).not.toContain('hacks:');
-    expect(uiExports).not.toContain('init(server, options)');
-  });
-
-  it('includes translations when answering yes', async () => {
-    const res = await sao.mockPrompt(template, {
-      generateApp: true,
-      generateTranslations: true,
-      generateHack: false,
-      generateApi: false,
-    });
-
-    // check output files
-    expect(res.fileList).toContain('public/app.js');
-    expect(res.fileList).toContain('public/__tests__/index.js');
-    expect(res.fileList).toContain('translations/es.json');
-    expect(res.fileList).not.toContain('public/hack.js');
-    expect(res.fileList).not.toContain('server/routes/example.js');
-    expect(res.fileList).not.toContain('server/__tests__/index.js');
-
-    const uiExports = getConfig(res.files['index.js']);
-    expect(uiExports).toContain('app:');
-    expect(uiExports).toContain('translations:');
     expect(uiExports).not.toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
   });
@@ -90,7 +61,6 @@ describe('plugin generator sao integration', () => {
   it('includes hack when answering yes', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: true,
       generateHack: true,
       generateApi: false,
     });
@@ -98,14 +68,12 @@ describe('plugin generator sao integration', () => {
     // check output files
     expect(res.fileList).toContain('public/app.js');
     expect(res.fileList).toContain('public/__tests__/index.js');
-    expect(res.fileList).toContain('translations/es.json');
     expect(res.fileList).toContain('public/hack.js');
     expect(res.fileList).not.toContain('server/routes/example.js');
     expect(res.fileList).not.toContain('server/__tests__/index.js');
 
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).toContain('app:');
-    expect(uiExports).toContain('translations:');
     expect(uiExports).toContain('hacks:');
     expect(uiExports).not.toContain('init(server, options)');
   });
@@ -113,14 +81,12 @@ describe('plugin generator sao integration', () => {
   it('includes server api when answering yes', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: true,
       generateHack: true,
       generateApi: true,
     });
 
     // check output files
     expect(res.fileList).toContain('public/app.js');
-    expect(res.fileList).toContain('translations/es.json');
     expect(res.fileList).toContain('public/__tests__/index.js');
     expect(res.fileList).toContain('public/hack.js');
     expect(res.fileList).toContain('server/routes/example.js');
@@ -128,7 +94,6 @@ describe('plugin generator sao integration', () => {
 
     const uiExports = getConfig(res.files['index.js']);
     expect(uiExports).toContain('app:');
-    expect(uiExports).toContain('translations:');
     expect(uiExports).toContain('hacks:');
     expect(uiExports).toContain('init(server, options)');
   });
@@ -136,7 +101,6 @@ describe('plugin generator sao integration', () => {
   it('plugin config has correct name and main path', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: true,
       generateHack: true,
       generateApi: true,
     });
@@ -152,7 +116,6 @@ describe('plugin generator sao integration', () => {
   it('plugin package has correct name', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: true,
       generateHack: true,
       generateApi: true,
     });
@@ -199,7 +162,6 @@ describe('plugin generator sao integration', () => {
   it('sample app has correct values', async () => {
     const res = await sao.mockPrompt(template, {
       generateApp: true,
-      generateTranslations: true,
       generateHack: true,
       generateApi: true,
     });
