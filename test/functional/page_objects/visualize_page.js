@@ -357,13 +357,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
 
     async selectYAxisAggregation(agg, field, label) {
-      await find.byCssSelector('#visAggEditorParams1').click();
-      await testSubjects.click(agg);
-      await find
-        .byCssSelector('#visAggEditorParams1 > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span')
-        .click();
+      await testSubjects.click('toggleEditor');
+      const aggSelect = await find.byCssSelector('[data-test-subj="visEditorAggSelect"] > div > span[aria-label="Select box activate"]');
+      // open agg selection list
+      await aggSelect.click();
+      // select our agg
+      // await testSubjects.click(agg); // can't get this to work if there's a space in "Unique Count"
+      const aggItem = await find.byCssSelector('[data-test-subj="' + agg + '"]');
+      await aggItem.click();
+      const fieldSelect = await find
+        .byCssSelector('#visAggEditorParams1 > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span');
+      // open field selection list
+      await fieldSelect.click();
+      // select our field
       await testSubjects.click(field);
-      await find.byCssSelector('#visEditorStringInput1customLabel').type(label);
+      // enter custom label
+      const customLabel = await find.byCssSelector('#visEditorStringInput1customLabel');
+      customLabel.type(label);
     }
 
     async getField() {
@@ -599,7 +609,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
-    async getBarChartData() {
+    async getBarChartData(dataLabel = 'Count') {
       // 1). get the maximim chart Y-Axis marker value
       const maxYAxisChartMarker = await retry.try(
         async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
@@ -615,10 +625,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 3). get the chart-wrapper elements
       const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
       async function getChartType(chart) {
-        const fillColor = await chart.getAttribute('fill');
+        const label = await chart.getAttribute('data-label');
 
         // we're getting the default count color from defaults.js
-        if (fillColor === '#00a69b') {
+        if (label === dataLabel) {
           const barHeight = await chart.getAttribute('height');
           return Math.round(barHeight / yAxisHeight * yAxisLabel);
         }
@@ -795,6 +805,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async doesSelectedLegendColorExist(color) {
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
+
+    async getYAxisTitle() {
+      const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
+      return await title.getVisibleText();
+    }
+
   }
 
   return new VisualizePage();

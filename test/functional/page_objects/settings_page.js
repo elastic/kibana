@@ -1,4 +1,5 @@
 import { map as mapAsync } from 'bluebird';
+import Keys from 'leadfoot/keys';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -331,11 +332,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField(indexPatternName = 'logstash-*') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      await field.session.pressKeys(indexPatternName.split(''));
+      await field.session.pressKeys([Keys.ARROW_RIGHT]);
+      await field.session.pressKeys([Keys.BACKSPACE]);
+
+      // await field.clearValue();
+      // await field.type(indexPatternName);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
