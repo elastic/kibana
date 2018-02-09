@@ -16,7 +16,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
     .then(function () {
       return new Promise(function (resolve, reject) {
         vfs
-          .src(files, { cwd: buildSource, base: buildSource })
+          .src(files, { cwd: buildSource, base: buildSource, allowEmpty: true })
           // modify the package.json file
           .pipe(rewritePackageJson(buildSource, buildVersion, kibanaVersion))
 
