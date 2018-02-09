@@ -59,7 +59,7 @@ FieldRangeExpression
 
 ValueExpression
   = value:Literal {
-    return buildNode('is', '*', value);
+    return buildNode('is', null, value);
   }
 
 OrList
@@ -76,7 +76,7 @@ AndList
 
 NotList
   = Not list:SubList {
-    return buildNode('not', query);;
+    return buildNode('not', list);
   }
   / SubList
 
