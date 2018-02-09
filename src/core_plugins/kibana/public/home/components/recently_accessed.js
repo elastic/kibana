@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export const NUM_LONG_LINKS = 5;
@@ -47,7 +48,7 @@ export class RecentlyAccessed extends React.Component {
             key={this.props.recentlyAccessed[i].link}
           >
             <EuiLink
-              className="dropwdownLink"
+              className="recentlyAccessedDropwdownLink"
               href={this.props.recentlyAccessed[i].link}
             >
               {this.props.recentlyAccessed[i].label}
@@ -57,10 +58,17 @@ export class RecentlyAccessed extends React.Component {
       );
     }
 
+    let dropdownLabel = `${dropdownLinks.length} more links`;
+    if (dropdownLinks.length === 1) {
+      dropdownLabel = `${dropdownLinks.length} more link`;
+    }
     const openPopoverComponent = (
       <EuiLink onClick={this.onButtonClick.bind(this)}>
-        <EuiTextColor color="subdued">
-          {`+${dropdownLinks.length}`}
+        <EuiTextColor
+          className="recentlyAccessedDropdownLabel"
+          color="subdued"
+        >
+          {dropdownLabel}
         </EuiTextColor>
         <EuiIcon
           type="arrowDown"
@@ -90,10 +98,10 @@ export class RecentlyAccessed extends React.Component {
     );
   }
 
-  renderLongLink = (link, label, includeSeperator = false) => {
-    let seperator;
-    if (includeSeperator) {
-      seperator = (
+  renderLongLink = (link, label, includeSeparator = false) => {
+    let separator;
+    if (includeSeparator) {
+      separator = (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type="dot"
@@ -107,19 +115,17 @@ export class RecentlyAccessed extends React.Component {
     // Dynamically setting the min width based on label lengh meets both of these goals.
     const EM_RATIO = 0.6; // 'em' ratio that avoids too much horizontal white space and too much truncation
     const minWidth = (label.length < 8 ? label.length : 8) * EM_RATIO;
-    const style = {
-      overflow: 'hidden',
-      minWidth: `${minWidth}em`
-    };
+    const style = { minWidth: `${minWidth}em` };
     return (
       <React.Fragment key={link}>
-        {seperator}
+        {separator}
         <EuiFlexItem
+          className="recentlyAccessedItem"
           style={style}
           grow={false}
         >
           <EuiLink
-            className="longLink"
+            className="recentlyAccessedLongLink"
             href={link}
           >
             {label}
@@ -132,24 +138,24 @@ export class RecentlyAccessed extends React.Component {
   renderRecentlyAccessed = () => {
     if (this.props.recentlyAccessed.length <= NUM_LONG_LINKS) {
       return this.props.recentlyAccessed.map((item, index) => {
-        let includeSeperator = true;
+        let includeSeparator = true;
         if (index === 0) {
-          includeSeperator = false;
+          includeSeparator = false;
         }
-        return this.renderLongLink(item.link, item.label, includeSeperator);
+        return this.renderLongLink(item.link, item.label, includeSeparator);
       });
     }
 
     const links = [];
     for (let i = 0; i < NUM_LONG_LINKS; i++) {
-      let includeSeperator = true;
+      let includeSeparator = true;
       if (i === 0) {
-        includeSeperator = false;
+        includeSeparator = false;
       }
       links.push(this.renderLongLink(
         this.props.recentlyAccessed[i].link,
         this.props.recentlyAccessed[i].label,
-        includeSeperator));
+        includeSeparator));
     }
 
     return [
@@ -168,6 +174,8 @@ export class RecentlyAccessed extends React.Component {
             </EuiTextColor>
           </p>
         </EuiText>
+
+        <EuiSpacer size="s"/>
 
         <EuiFlexGroup>
           {this.renderRecentlyAccessed()}

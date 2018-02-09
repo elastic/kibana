@@ -15,6 +15,9 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       </EuiTextColor>
     </p>
   </EuiText>
+  <EuiSpacer
+    size="s"
+  />
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
@@ -27,17 +30,17 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
       key="link0"
     >
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link0"
           type="button"
@@ -60,17 +63,17 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link1"
           type="button"
@@ -93,17 +96,17 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link2"
           type="button"
@@ -126,17 +129,17 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link3"
           type="button"
@@ -159,17 +162,17 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link4"
           type="button"
@@ -197,6 +200,9 @@ exports[`should not render dropdown when recently accessed list size is less tha
       </EuiTextColor>
     </p>
   </EuiText>
+  <EuiSpacer
+    size="s"
+  />
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
@@ -209,17 +215,17 @@ exports[`should not render dropdown when recently accessed list size is less tha
       key="link0"
     >
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link0"
           type="button"
@@ -242,17 +248,17 @@ exports[`should not render dropdown when recently accessed list size is less tha
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link1"
           type="button"
@@ -275,17 +281,17 @@ exports[`should not render dropdown when recently accessed list size is less tha
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link2"
           type="button"
@@ -308,17 +314,17 @@ exports[`should not render dropdown when recently accessed list size is less tha
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link3"
           type="button"
@@ -346,6 +352,9 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       </EuiTextColor>
     </p>
   </EuiText>
+  <EuiSpacer
+    size="s"
+  />
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
@@ -358,17 +367,17 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
       key="link0"
     >
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link0"
           type="button"
@@ -391,17 +400,17 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link1"
           type="button"
@@ -424,17 +433,17 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link2"
           type="button"
@@ -457,17 +466,17 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link3"
           type="button"
@@ -490,17 +499,17 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
         />
       </EuiFlexItem>
       <EuiFlexItem
+        className="recentlyAccessedItem"
         component="div"
         grow={false}
         style={
           Object {
             "minWidth": "3.5999999999999996em",
-            "overflow": "hidden",
           }
         }
       >
         <EuiLink
-          className="longLink"
+          className="recentlyAccessedLongLink"
           color="primary"
           href="link4"
           type="button"
@@ -523,9 +532,10 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
             type="button"
           >
             <EuiTextColor
+              className="recentlyAccessedDropdownLabel"
               color="subdued"
             >
-              +1
+              1 more link
             </EuiTextColor>
             <EuiIcon
               color="subdued"
@@ -550,7 +560,7 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
             }
           >
             <EuiLink
-              className="dropwdownLink"
+              className="recentlyAccessedDropwdownLink"
               color="primary"
               href="link5"
               type="button"
