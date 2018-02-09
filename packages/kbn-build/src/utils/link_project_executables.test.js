@@ -6,6 +6,7 @@ import {
 } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
+import { buildProjectGraph } from './projects';
 
 const projectsByName = new Map([
   [
@@ -30,12 +31,21 @@ const projectsByName = new Map([
       resolve(__dirname, 'bar')
     ),
   ],
+  [
+    'baz',
+    new Project(
+      {
+        name: 'baz',
+        devDependencies: {
+          bar: 'link:../bar',
+        },
+      },
+      resolve(__dirname, 'baz')
+    ),
+  ],
 ]);
 
-const projectGraph = new Map([
-  ['foo', [projectsByName.get('bar')]],
-  ['bar', []],
-]);
+const projectGraph = buildProjectGraph(projectsByName);
 
 function getFsMockCalls() {
   const fs = require('./fs');
