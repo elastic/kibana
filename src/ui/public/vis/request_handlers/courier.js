@@ -46,8 +46,10 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       removeSearchSourceParentTimefilter(searchSource, timeRange);
 
-      if (queryFilter && vis.editorMode) {
+      if (queryFilter) {
         searchSource.set('filter', queryFilter.getFilters());
+      }
+      if (appState && appState.query) {
         searchSource.set('query', appState.query);
       }
 
