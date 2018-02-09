@@ -20,9 +20,9 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
  *    don't pass a uiState, the visualization will creates it's own uiState to
  *    store information like whether the legend is open or closed, but you don't
  *    have access to it from the outside. Pass one in if you need that access.
- * @property {object} timeRange An object with a min/max key, that must be
+ * @property {object} timeRange An object with a from/to key, that must be
  *    either a date in ISO format, or a valid datetime Elasticsearch expression,
- *    e.g.: { min: 'now-7d/d', max: 'now' }
+ *    e.g.: { from: 'now-7d/d', to: 'now' }
  * @property {boolean} showSpyPanel Whether or not the spy panel should be available
  *    on this chart. If set to true, spy panels will only be shown if there are
  *    spy panels available for this specific visualization, since not every visualization
