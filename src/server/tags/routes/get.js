@@ -13,7 +13,7 @@ export const createGetRoute = (server) => {
             tags: {
               terms: {
                 field: 'tags.tagJSON',
-                size: 100,
+                size: 1000,
                 order: {
                   _count: 'desc'
                 }
@@ -24,12 +24,29 @@ export const createGetRoute = (server) => {
         }
       };
 
+      const query = request.query.q;
+      if (query) {
+        params.body.query = {
+          bool: {
+            must: [
+              { match_phrase_prefix: { 'tags.label': query } }
+            ]
+          }
+        };
+      }
+
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       try {
         const esResp = await callWithRequest(request, 'search', params);
-        const tags = _.get(esResp, 'aggregations.tags.buckets', []).map(bucket => {
+        let tags = _.get(esResp, 'aggregations.tags.buckets', []).map(bucket => {
           return JSON.parse(bucket.key);
         });
+        if (query) {
+          tags = tags.filter(tag => {
+            // entire tags array gets added to buckets for a matching document, filter out non-matching tags
+            return tag.label.includes(query);
+          });
+        }
         reply(tags);
       } catch (error) {
         reply('there was an error');
