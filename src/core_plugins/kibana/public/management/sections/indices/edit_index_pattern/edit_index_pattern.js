@@ -11,9 +11,10 @@ import template from './edit_index_pattern.html';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { renderIndexedFieldsTable, destroyIndexedFieldsTable } from './indexed_fields_table';
+import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 
+const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 
 function updateScriptedFieldsTable($scope, $state) {
@@ -51,6 +52,39 @@ function updateScriptedFieldsTable($scope, $state) {
 
 function destroyScriptedFieldsTable() {
   const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
+function updateIndexedFieldsTable($scope, $state) {
+  if ($state.tab === 'indexedFields') {
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <IndexedFieldsTable
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
+          helpers={{
+            redirectToRoute: (obj, route) => {
+              $scope.kbnUrl.redirectToRoute(obj, route);
+              $scope.$apply();
+            },
+          }}
+        />,
+        node,
+      );
+    });
+  } else {
+    destroyIndexedFieldsTable();
+  }
+}
+
+function destroyIndexedFieldsTable() {
+  const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
 }
 
@@ -123,7 +157,7 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
-      $scope.tryToRenderIndexedFieldsTable();
+      updateIndexedFieldsTable($scope, $state);
       updateScriptedFieldsTable($scope, $state);
       $state.save();
     };
@@ -187,26 +221,10 @@ uiModules.get('apps/management')
       return $scope.indexPattern.save();
     };
 
-    $scope.tryToRenderIndexedFieldsTable = function () {
-      if ($state.tab === 'indexedFields') {
-        $scope.$$postDigest($scope.renderIndexedFieldsTable);
-      } else {
-        destroyIndexedFieldsTable();
-      }
-    };
-
-    $scope.renderIndexedFieldsTable = function () {
-      renderIndexedFieldsTable(
-        $scope.indexPattern,
-        $scope.fieldFilter,
-        $scope.indexedFieldTypeFilter
-      );
-    };
-
     $scope.$watch('fieldFilter', () => {
       if ($scope.fieldFilter !== undefined) {
         if($state.tab === 'indexedFields') {
-          $scope.renderIndexedFieldsTable();
+          updateIndexedFieldsTable($scope, $state);
         } else if($state.tab === 'scriptedFields') {
           updateScriptedFieldsTable($scope, $state);
         }
@@ -215,7 +233,7 @@ uiModules.get('apps/management')
 
     $scope.$watch('indexedFieldTypeFilter', () => {
       if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
-        $scope.renderIndexedFieldsTable();
+        updateIndexedFieldsTable($scope, $state);
       }
     });
 
@@ -230,6 +248,6 @@ uiModules.get('apps/management')
       destroyScriptedFieldsTable();
     });
 
-    $scope.tryToRenderIndexedFieldsTable();
+    updateIndexedFieldsTable($scope, $state);
     updateScriptedFieldsTable($scope, $state);
   });

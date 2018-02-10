@@ -2,8 +2,11 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiHealth,
-  EuiTableOfRecords
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTableOfRecords,
+  TooltipTrigger
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
@@ -26,16 +29,49 @@ export class Table extends PureComponent {
       }).isRequired,
     }),
     editField: PropTypes.func.isRequired,
-    deleteField: PropTypes.func.isRequired,
     onDataCriteriaChange: PropTypes.func.isRequired,
-  };
+  }
 
   renderBooleanTemplate(value) {
-    return value ? <EuiHealth color="success"/> : '';
+    return value ? <EuiIcon type="dot" color="secondary" /> : '';
+  }
+
+  renderFieldName(name, isTimeField) {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          {name}
+        </EuiFlexItem>
+        {isTimeField ? (
+          <EuiFlexItem>
+            <TooltipTrigger tooltip="This field represents the time that events occurred.">
+              <EuiIcon type="clock" color="primary" />
+            </TooltipTrigger>
+          </EuiFlexItem>
+        ) : ''}
+      </EuiFlexGroup>
+    );
+  }
+
+  renderFieldType(type, isConflict) {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          {type}
+        </EuiFlexItem>
+        {isConflict ? (
+          <EuiFlexItem>
+            <TooltipTrigger tooltip="The type of this field changes across indices. It is unavailable for many analysis functions.">
+              <EuiIcon type="alert" color="warning" />
+            </TooltipTrigger>
+          </EuiFlexItem>
+        ) : ''}
+      </EuiFlexGroup>
+    );
   }
 
   getTableConfig() {
-    const { editField, deleteField, onDataCriteriaChange } = this.props;
+    const { indexPattern, editField, onDataCriteriaChange } = this.props;
 
     return {
       recordId: 'name',
@@ -45,12 +81,19 @@ export class Table extends PureComponent {
           name: 'Name',
           dataType: 'string',
           sortable: true,
+          width: '50%',
+          render: (value) => {
+            return this.renderFieldName(value, indexPattern.timeFieldName === value);
+          },
         },
         {
           field: 'type',
           name: 'Type',
           dataType: 'string',
           sortable: true,
+          render: (value) => {
+            return this.renderFieldType(value, value === 'conflict');
+          },
         },
         {
           field: 'format',
@@ -65,6 +108,7 @@ export class Table extends PureComponent {
           dataType: 'boolean',
           sortable: true,
           render: this.renderBooleanTemplate,
+          width: '120px',
         },
         {
           field: 'aggregatable',
@@ -72,7 +116,8 @@ export class Table extends PureComponent {
           description: `These fields can be used in visualization aggregations`,
           dataType: 'boolean',
           sortable: true,
-          render: this.booleanTemplate,
+          render: this.renderBooleanTemplate,
+          width: '120px',
         },
         {
           field: 'excluded',
@@ -80,7 +125,8 @@ export class Table extends PureComponent {
           description: `Fields that are excluded from _source when it is fetched`,
           dataType: 'boolean',
           sortable: true,
-          render: this.booleanTemplate,
+          render: this.renderBooleanTemplate,
+          width: '120px',
         },
         {
           name: '',
@@ -90,20 +136,14 @@ export class Table extends PureComponent {
               description: 'Edit',
               icon: 'pencil',
               onClick: editField,
+              type: 'icon',
             },
-            {
-              name: 'Delete',
-              description: 'Delete',
-              icon: 'trash',
-              color: 'danger',
-              onClick: deleteField,
-              available: (record) => record.scripted,
-            },
-          ]
+          ],
+          width: '50px',
         }
       ],
       pagination: {
-        pageSizeOptions: [25, 50, 100]
+        pageSizeOptions: [5, 10, 25, 50]
       },
       selection: undefined,
       onDataCriteriaChange,

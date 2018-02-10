@@ -51,7 +51,7 @@ export const DEFAULT_TABLE_OF_RECORDS_STATE = {
   criteria: {
     page: {
       index: 0,
-      size: 25,
+      size: 10,
     },
     sort: {
       field: 'displayName',

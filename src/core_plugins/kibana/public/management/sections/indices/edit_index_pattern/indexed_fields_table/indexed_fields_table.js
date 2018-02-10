@@ -2,7 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { Table } from './components/table';
-import { getTableOfRecordsState, DEFAULT_TABLE_OF_RECORDS_STATE } from './lib';
+import {
+  fieldWildcardProvider,
+  getFieldFormat,
+  getTableOfRecordsState,
+  DEFAULT_TABLE_OF_RECORDS_STATE
+} from './lib';
 
 
 export class IndexedFieldsTable extends Component {
@@ -10,6 +15,9 @@ export class IndexedFieldsTable extends Component {
     indexPattern: PropTypes.object.isRequired,
     fieldFilter: PropTypes.string,
     indexedFieldTypeFilter: PropTypes.string,
+    helpers: PropTypes.shape({
+      redirectToRoute: PropTypes.func.isRequired,
+    }),
   }
 
   constructor(props) {
@@ -25,11 +33,31 @@ export class IndexedFieldsTable extends Component {
     this.fetchFields();
   }
 
+  mapFields(fields) {
+    const { indexPattern } = this.props;
+    const { fieldWildcardMatcher } = fieldWildcardProvider({
+      metaFields: indexPattern.metaFields
+    });
+    const fieldWildcardMatch = fieldWildcardMatcher((indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value) || []));
+
+    return fields
+      .map((field) => {
+        return {
+          ...field,
+          displayName: field.displayName,
+          routes: field.routes,
+          indexPattern: field.indexPattern,
+          format: getFieldFormat(indexPattern, field.name),
+          excluded: fieldWildcardMatch(field.name),
+        };
+      });
+  }
+
   fetchFields = async () => {
-    const fields = await this.props.indexPattern.getNonScriptedFields();
+    const fields = this.mapFields(await this.props.indexPattern.getNonScriptedFields());
     this.setState({
       fields,
-      ...this.computeTableState(this.state.criteria, this.props, fields)
+      ...this.computeTableState(this.state.criteria, this.props, fields),
     });
   }
 
@@ -59,58 +87,6 @@ export class IndexedFieldsTable extends Component {
     return getTableOfRecordsState(items, criteria);
   }
 
-  // startDeleteField = field => {
-  //   this.setState({ fieldToDelete: field, isDeleteConfirmationModalVisible: true });
-  // }
-  //
-  // hideDeleteConfirmationModal = () => {
-  //   this.setState({ fieldToDelete: undefined, isDeleteConfirmationModalVisible: false });
-  // }
-  //
-  // deleteField = () =>  {
-  //   const { indexPattern } = this.props;
-  //   const { fieldToDelete } = this.state;
-  //
-  //   indexPattern.removeScriptedField(fieldToDelete.name);
-  //   this.fetchFields();
-  //   this.hideDeleteConfirmationModal();
-  // }
-  //
-  // renderDeleteConfirmationModal() {
-  //   const { fieldToDelete } = this.state;
-  //
-  //   if (!fieldToDelete) {
-  //     return null;
-  //   }
-  //
-  //   return (
-  //     <EuiOverlayMask>
-  //       <EuiConfirmModal
-  //         title={`Delete scripted field '${fieldToDelete.name}'?`}
-  //         onCancel={this.hideDeleteConfirmationModal}
-  //         onConfirm={this.deleteField}
-  //         cancelButtonText="Cancel"
-  //         confirmButtonText="Delete"
-  //         defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-  //       />
-  //     </EuiOverlayMask>
-  //   );
-  // }
-  //
-  // renderNoFieldsFound() {
-  //   const { fields } = this.state;
-  //
-  //   if (fields.length > 0) {
-  //     return null;
-  //   }
-  //
-  //   return (
-  //     <EuiText>
-  //       No scripted fields found.
-  //     </EuiText>
-  //   );
-  // }
-
   render() {
     const {
       indexPattern,
@@ -137,8 +113,7 @@ export class IndexedFieldsTable extends Component {
         <Table
           indexPattern={indexPattern}
           model={model}
-          editField={() => {}}
-          deleteField={() => {}}
+          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
           onDataCriteriaChange={this.onDataCriteriaChange}
         />
       </div>
