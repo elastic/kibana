@@ -1,17 +1,18 @@
 import _ from 'lodash';
 
-export const createGetRoute = (kibanaIndex, callWithRequest) => {
+export const createGetRoute = (server) => {
   return {
     method: 'GET',
     path: '/api/tags',
     handler: async function (request, reply) {
+
       const params = {
-        index: kibanaIndex,
+        index: server.config().get('kibana.index'),
         body: {
           aggs: {
-            labels: {
+            tags: {
               terms: {
-                field: 'tags.label.keyword',
+                field: 'tags.tagJSON',
                 size: 100,
                 order: {
                   _count: 'desc'
@@ -23,12 +24,13 @@ export const createGetRoute = (kibanaIndex, callWithRequest) => {
         }
       };
 
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       try {
         const esResp = await callWithRequest(request, 'search', params);
-        const labels = _.get(esResp, 'aggregations.labels.buckets', []).map(bucket => {
-          return bucket.key;
+        const tags = _.get(esResp, 'aggregations.tags.buckets', []).map(bucket => {
+          return JSON.parse(bucket.key);
         });
-        reply(labels);
+        reply(tags);
       } catch (error) {
         reply('there was an error');
       }

@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const createUpdateRoute = (kibanaIndex, callWithRequest) => {
+export const createUpdateRoute = (server) => {
   return {
     method: 'PUT',
     path: '/api/tags/{tagLabel}',
@@ -17,16 +17,17 @@ export const createUpdateRoute = (kibanaIndex, callWithRequest) => {
       handler: async function (request, reply) {
 
         const { tagLabel } = request.params;
-        const { label, color } = request.payload;
+        const newLabel = request.payload.label;
+        const tagJSON = JSON.stringify(request.payload);
 
         const params = {
-          index: kibanaIndex,
+          index: server.config().get('kibana.index'),
           body: {
             script: {
-              source: 'for (tag in ctx._source.tags) { if (tag.label == params.oldLabel){ tag.label = params.newLabel; tag.color = params.newColor; } }',
+              source: 'for (tag in ctx._source.tags) { if (tag.label == params.oldLabel){ tag.label = params.newLabel; tag.tagJSON = params.tagJSON; } }',
               params: {
-                newLabel: label,
-                newColor: color,
+                newLabel: newLabel,
+                tagJSON: tagJSON,
                 oldLabel: tagLabel
               },
               lang: 'painless'
@@ -41,6 +42,7 @@ export const createUpdateRoute = (kibanaIndex, callWithRequest) => {
           }
         };
 
+        const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
         try {
           const esResp = await callWithRequest(request, 'updateByQuery', params);
           reply(esResp);

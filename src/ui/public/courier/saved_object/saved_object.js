@@ -112,6 +112,14 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
     };
 
+    const parseTags = () => {
+      if (this.tags) {
+        this.tags = this.tags.map(tag => {
+          return JSON.parse(tag.tagJSON);
+        });
+      }
+    };
+
     /**
      * After creation or fetching from ES, ensure that the searchSources index indexPattern
      * is an bonafide IndexPattern object.
@@ -217,6 +225,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
+        parseTags();
         return this.hydrateIndexPattern();
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
@@ -245,10 +254,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         };
       }
 
-      // Tags are hosted out of saved object type in storage.
-      // As a result, they are not in the type mapping but need to serialized
       if (this.tags) {
-        body.tags = this.tags;
+        body.tags = this.tags.map(tag => {
+          return {
+            label: tag.label,
+            tagJSON: JSON.stringify(tag)
+          };
+        });
       }
 
       return body;

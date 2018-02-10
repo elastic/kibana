@@ -27,15 +27,9 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
       tags: {
         properties: {
           label: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 50
-              }
-            }
+            type: 'text'
           },
-          color: {
+          tagJSON: {
             type: 'keyword'
           }
         }

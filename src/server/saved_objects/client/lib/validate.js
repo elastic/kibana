@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 const tagSchema = Joi.object().keys({
   label: Joi.string().min(1).max(50).required(),
-  color: Joi.string().required()
+  tagJSON: Joi.string().required()
 });
 
 const attributesSchema = Joi.object().unknown().keys({
