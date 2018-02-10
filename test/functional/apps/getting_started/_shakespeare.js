@@ -11,22 +11,24 @@ export default function ({ getService, getPageObjects }) {
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
   describe('Shakespeare', function describeIndexTests() {
+    let aggIndex = 1;
+
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
       + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
       await esArchiver.load('empty_kibana');
       log.debug('Load shakespeare data');
-      // await esArchiver.loadIfNeeded('getting_started/shakespeare');
+      await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
     it('should create shakespeare index pattern', async function () {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.navigateTo();
       // await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.createIndexPattern('shakespeare', null);
+      await PageObjects.settings.createIndexPattern('shakes*', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
-      expect(patternName).to.be('shakespeare');
+      expect(patternName).to.be('shakes*');
     });
 
     // https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html
@@ -39,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('create shakespeare vertical bar chart');
       await PageObjects.common.navigateToUrl('visualize', 'new');
       await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch('shakespeare');
+      await PageObjects.visualize.clickNewSearch('shakes*');
       await PageObjects.visualize.waitForVisualization();
 
       const expectedChartValues = [111396];
@@ -59,8 +61,9 @@ export default function ({ getService, getPageObjects }) {
     custom label, Speaking Parts.
     */
     it('should configure metric Unique Count Speaking Parts', async function () {
-      log.debug('Bucket = X-Axis');
+      log.debug('Metric = Unique Count, speaker, Speaking Parts');
       await PageObjects.visualize.selectYAxisAggregation('Unique Count', 'speaker', 'Speaking Parts');
+      aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
       await PageObjects.visualize.waitForVisualization();
       const expectedChartValues = [935];
@@ -84,6 +87,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
+      aggIndex = aggIndex + 1;
       log.debug('Field = play_name');
       await PageObjects.visualize.selectField('play_name');
       await PageObjects.visualize.clickGo();
@@ -99,6 +103,90 @@ export default function ({ getService, getPageObjects }) {
       const labels = await PageObjects.visualize.getXAxisLabels();
       expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
         'Antony and Cleopatra', 'Timon of Athens' ]);
+    });
+
+
+    /* Now that you have a list of the smallest casts for Shakespeare plays, you
+    might also be curious to see which of these plays makes the greatest demands
+    on an individual actor by showing the maximum number of speeches for a
+    given part.
+
+    1. Click Add metrics to add a Y-axis aggregation.
+    2. Choose the Max aggregation and select the speech_number field.
+    */
+    it('should configure Max aggregation metric on speech_number', async function () {
+      await PageObjects.visualize.clickAddMetric();
+      await PageObjects.visualize.clickBucket('Y-Axis');
+      // await PageObjects.common.sleep(5001);
+      log.debug('Aggregation = Max');
+      await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
+      await PageObjects.visualize.clickGo();
+
+      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
+      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
+        const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        log.debug('data2=' + data2);
+        log.debug('data2.length=' + data2.length);
+        expect(data).to.eql(expectedChartValues);
+        expect(data2).to.eql(expectedChartValues2);
+      });
+
+      const labels = await PageObjects.visualize.getXAxisLabels();
+      expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
+        'Antony and Cleopatra', 'Timon of Athens' ]);
+    });
+
+    /* Continued from above.
+
+    3. Click Options and change the Bar Mode to grouped.
+    4. Click Apply changes images/apply-changes-button.png. Your chart should now look like this:
+    */
+    it('should configure change options to normal bars', async function () {
+      await PageObjects.visualize.clickMetricsAndAxes();
+      await PageObjects.visualize.selectChartMode('normal');
+      await PageObjects.visualize.clickGo();
+
+      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
+      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
+        const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        log.debug('data2=' + data2);
+        log.debug('data2.length=' + data2.length);
+        expect(data).to.eql(expectedChartValues);
+        expect(data2).to.eql(expectedChartValues2);
+      });
+    });
+
+    /* Note how the Number of speaking parts Y-axis starts at zero, but the bars
+     don’t begin to differentiate until 18. To make the differences stand out,
+     starting the Y-axis at a value closer to the minimum, go to Options and
+     select Scale Y-Axis to data bounds.
+
+    Save this chart with the name Bar Example.
+    */
+    it('should change the Y-Axis extents', async function () {
+      await PageObjects.visualize.setAxisExtents(50, 250);
+      await PageObjects.visualize.clickGo();
+
+      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
+      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
+        const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        log.debug('data2=' + data2);
+        log.debug('data2.length=' + data2.length);
+        expect(data).to.eql(expectedChartValues);
+        expect(data2).to.eql(expectedChartValues2);
+      });
     });
 
   });

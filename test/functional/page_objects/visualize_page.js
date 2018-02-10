@@ -355,25 +355,63 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async toggleOpenEditor(index) {
+      // const toggle = await find.byCssSelector(`[data-test-subj="toggleEditor"][aria-controls="visAggEditorParams${index}"]`);
+      const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
+      const toggleOpen = await toggle.getAttribute('aria-expanded');
+      // await PageObjects.common.sleep(4008);
+      log.debug(`toggle ${index} expand = ${toggleOpen}`);
+      if (toggleOpen === 'false') {
+        log.debug(`toggle ${index} click()`);
+        await toggle.click();
+      }
+    }
 
-    async selectYAxisAggregation(agg, field, label) {
-      await testSubjects.click('toggleEditor');
-      const aggSelect = await find.byCssSelector('[data-test-subj="visEditorAggSelect"] > div > span[aria-label="Select box activate"]');
+    async selectYAxisAggregation(agg, field, label, index = 1) {
+
+      // await PageObjects.common.sleep(4007);
+      await this.toggleOpenEditor(index);
+
+      // await PageObjects.common.sleep(4009);
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
       // open agg selection list
       await aggSelect.click();
+      // await PageObjects.common.sleep(4002);
       // select our agg
-      // await testSubjects.click(agg); // can't get this to work if there's a space in "Unique Count"
-      const aggItem = await find.byCssSelector('[data-test-subj="' + agg + '"]');
+      // await testSubjects.click(agg); // <--can't get this to work if there's a space in "Unique Count"
+      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
       const fieldSelect = await find
-        .byCssSelector('#visAggEditorParams1 > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span');
+        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span`);
       // open field selection list
       await fieldSelect.click();
       // select our field
       await testSubjects.click(field);
       // enter custom label
-      const customLabel = await find.byCssSelector('#visEditorStringInput1customLabel');
+      await this.setCustomLabel(label, index);
+    }
+
+    async setCustomLabel(label, index = 1) {
+      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
       customLabel.type(label);
+    }
+
+    async setAxisExtents(min, max) {
+      const advancedLink = await find.byCssSelector('#axisOptionsValueAxis-1 > div:nth-child(2) > a > span.kuiSideBarOptionsLink__text');
+      log.debug('moveMouseTo advancedLink');
+      await advancedLink.session.moveMouseTo(advancedLink);
+      log.debug('now click advancedLink');
+      await advancedLink.click();
+
+      const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
+      await checkbox.session.moveMouseTo(checkbox);
+      await checkbox.click();
+      const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
+      await maxField.type(max);
+      const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
+      await minField.type(min);
+
     }
 
     async getField() {
@@ -398,12 +436,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
-        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
-          'option.ng-binding.ng-scope:contains("' + fieldValue + '")');
+        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
+        + `option.ng-binding.ng-scope:contains("${fieldValue}")`);
     }
 
     async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]');
+      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
     }
 
     async getInterval() {
@@ -455,6 +493,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
+    }
+
+    async clickMetricsAndAxes() {
+      await testSubjects.click('visEditorTabadvanced');
+    }
+
+    async selectChartMode(mode) {
+      const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      await selector.click();
     }
 
     async clickData() {
@@ -617,21 +664,30 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yLabel = await maxYAxisChartMarker.getVisibleText();
       const yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
+      // get the y-position of the max label
+      const maxLabelY = await maxYAxisChartMarker.getPosition();
+      log.debug('maxLabelY = ' + maxLabelY.y);
 
-      // 2). find and save the y-axis pixel size (the chart height)
-      const chartAreaObj = await find.byCssSelector('rect.background');
-      const yAxisHeight = await chartAreaObj.getAttribute('height');
+      // 2). find the value and y-position of the minimum label
+      const chartAreaObjNew = await
+        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1)');
+      const yLabelMin = (await chartAreaObjNew.getVisibleText()).replace(',', '');
+      const yAxisHeightNew = await chartAreaObjNew.getPosition();
+      log.debug('MaxTickYpos = ' + yAxisHeightNew.y);
+
+      // TODO: All get*ChartData methods should use this or be refactored to share this code.
+      // We have to use the differnce in the y-position of the min and max labels
+      // to determine the scale because the max marker is not always at the very
+      // top of the chart.
+      const yAxisHeight = yAxisHeightNew.y - maxLabelY.y;
+      log.debug('yAxisHeight = ' + yAxisHeight);
 
       // 3). get the chart-wrapper elements
-      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
-      async function getChartType(chart) {
-        const label = await chart.getAttribute('data-label');
+      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
 
-        // we're getting the default count color from defaults.js
-        if (label === dataLabel) {
-          const barHeight = await chart.getAttribute('height');
-          return Math.round(barHeight / yAxisHeight * yAxisLabel);
-        }
+      async function getChartType(chart) {
+        const barHeight = await chart.getAttribute('height');
+        return Math.round(barHeight / yAxisHeight * (yAxisLabel - yLabelMin));
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -809,6 +865,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getYAxisTitle() {
       const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
       return await title.getVisibleText();
+    }
+
+    async selectBucketType(type) {
+      const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
+      return await bucketType.click();
     }
 
   }
