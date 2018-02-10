@@ -35,54 +35,52 @@ SubQuery
   / Expression
 
 Expression
-  = FieldListExpression
-  / FieldRangeExpression
+  = FieldRangeExpression
+  / FieldValueExpression
   / ValueExpression
-
-FieldListExpression
-  = field:Literal Space* ':' Space* list:SubList {
-    function buildNodeWithField(node) {
-      if (node.hasOwnProperty('arguments')) {
-        const args = node.arguments.map(buildNodeWithField);
-        return { ...list, arguments: args };
-      } else {
-        return buildNode('is', field, node);
-      }
-    }
-    return buildNodeWithField(list);
-  }
 
 FieldRangeExpression
   = field:Literal Space* operator:RangeOperator Space* value:Literal {
     return buildNode('range', field, { [operator]: value });
   }
 
+FieldValueExpression
+  = field:Literal Space* ':' Space* partial:ListOfValues {
+    return partial(field);
+  }
+
 ValueExpression
+  = partial:Value {
+    const field = null;
+    return partial(field);
+  }
+
+ListOfValues
+  = '(' Space* partial:OrListOfValues Space* ')' { return partial; }
+  / Value
+
+OrListOfValues
+  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+    return (field) => buildNode('or', [partialLeft(field), partialRight(field)]);
+  }
+  / AndListOfValues
+
+AndListOfValues
+  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
+    return (field) => buildNode('and', [partialLeft(field), partialRight(field)]);
+  }
+  / NotListOfValues
+
+NotListOfValues
+  = Not partial:ListOfValues {
+    return (field) => buildNode('not', partial(field));
+  }
+  / ListOfValues
+
+Value
   = value:Literal {
-    return buildNode('is', null, value);
+    return (field) => buildNode('is', field, value);
   }
-
-OrList
-  = left:AndList Or right:OrList {
-    return buildNode('or', [left, right]);
-  }
-  / AndList
-
-AndList
-  = left:NotList And right:AndList{
-    return buildNode('and', [left, right]);
-  }
-  / NotList
-
-NotList
-  = Not list:SubList {
-    return buildNode('not', list);
-  }
-  / SubList
-
-SubList
-  = '(' Space* list:OrList Space* ')' { return list; }
-  / Literal
 
 Or
   = Space+ 'or'i Space+
