@@ -1,42 +1,34 @@
 import Joi from 'joi';
 
-const UPDATE_SOURCE = `
-  for (tag in ctx._source.tags) {
-    if (tag.label == params.oldLabel) {
-      tag.label = params.newLabel; tag.tagJSON = params.tagJSON;
-    }
+const DELETE_SOURCE = `
+  Iterator itr = ctx._source.tags.iterator();
+  while(itr.hasNext()) {
+    Map nextTag = itr.next();
+    if (nextTag.get('label') == params.removeLabel) { itr.remove(); }
   }
 `;
 
-export const createUpdateRoute = (server) => {
+export const createDeleteRoute = (server) => {
   return {
-    method: 'PUT',
+    method: 'DELETE',
     path: '/api/tags/{tagLabel}',
     config: {
       validate: {
         params: Joi.object().keys({
           tagLabel: Joi.string().required(),
         }).required(),
-        payload: Joi.object({
-          label: Joi.string().required(),
-          color: Joi.string().required()
-        }).required()
       },
       handler: async function (request, reply) {
 
         const { tagLabel } = request.params;
-        const newLabel = request.payload.label;
-        const tagJSON = JSON.stringify(request.payload);
 
         const params = {
           index: server.config().get('kibana.index'),
           body: {
             script: {
-              source: UPDATE_SOURCE,
+              source: DELETE_SOURCE,
               params: {
-                newLabel: newLabel,
-                tagJSON: tagJSON,
-                oldLabel: tagLabel
+                removeLabel: tagLabel,
               },
               lang: 'painless'
             },
