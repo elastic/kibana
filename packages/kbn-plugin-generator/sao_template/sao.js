@@ -1,9 +1,11 @@
-const { dirname } = require('path');
+const { resolve, relative, dirname } = require('path');
 
 const kebabCase = require('lodash.kebabcase');
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
+const snakeCase = require('lodash.snakecase');
 const execa = require('execa');
+const chalk = require('chalk');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
@@ -72,9 +74,18 @@ module.exports = function({ name }) {
         cwd: KBN_DIR,
         stdio: 'inherit',
       }).then(() => {
-        log.success(
-          `🎉\n\nYour plugin has been created in \`../kibana-extra/${name}\`. Move into that directory and run it with \`yarn start\`\n`
+        const dir = relative(
+          process.cwd(),
+          resolve(KBN_DIR, `../kibana-extra`, snakeCase(name))
         );
+
+        log.success(chalk`🎉
+
+  Your plugin has been created in {bold ${dir}}. Move into that directory to run it:
+
+    {bold cd "${dir}"}
+    {bold yarn start}
+`);
       });
     },
   };
