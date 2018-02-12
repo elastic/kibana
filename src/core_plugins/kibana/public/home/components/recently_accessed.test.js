@@ -4,10 +4,12 @@ import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 
 const createRecentlyAccessed = (length) => {
   const recentlyAccessed = [];
+  let i = 0;
   while(recentlyAccessed.length < length) {
     recentlyAccessed.push({
       label: `label${recentlyAccessed.length}`,
-      link: `link${recentlyAccessed.length}`
+      link: `link${recentlyAccessed.length}`,
+      id: `${i++}`
     });
   }
   return recentlyAccessed;

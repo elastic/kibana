@@ -4,15 +4,19 @@ class RecentlyAccessed {
   constructor() {
     const historyOptions = {
       maxLength: 10,
-      filterDuplicates: true
+      filterDuplicates: true,
+      isDuplicate: (oldItem, newItem) => {
+        return oldItem.id === newItem.id;
+      }
     };
     this.history = new PersistedLog('kibana.history.recentlyAccessed', historyOptions);
   }
 
-  add(link, label) {
+  add(link, label, id) {
     const historyItem = {
       link: link,
-      label: label
+      label: label,
+      id: id
     };
     this.history.add(historyItem);
   }

@@ -45,7 +45,7 @@ export class RecentlyAccessed extends React.Component {
         (
           <li
             style={{ marginBottom: 8 }}
-            key={this.props.recentlyAccessed[i].link}
+            key={this.props.recentlyAccessed[i].id}
           >
             <EuiLink
               className="recentlyAccessedDropwdownLink"
@@ -98,7 +98,7 @@ export class RecentlyAccessed extends React.Component {
     );
   }
 
-  renderLongLink = (link, label, includeSeparator = false) => {
+  renderLongLink = (recentlyAccessedItem, includeSeparator = false) => {
     let separator;
     if (includeSeparator) {
       separator = (
@@ -116,10 +116,10 @@ export class RecentlyAccessed extends React.Component {
     // Also want to avoid truncating really short names (happens when there is no min width)
     // Dynamically setting the min width based on label lengh meets both of these goals.
     const EM_RATIO = 0.65; // 'em' ratio that avoids too much horizontal white space and too much truncation
-    const minWidth = (label.length < 8 ? label.length : 8) * EM_RATIO;
+    const minWidth = (recentlyAccessedItem.label.length < 8 ? recentlyAccessedItem.label.length : 8) * EM_RATIO;
     const style = { minWidth: `${minWidth}em` };
     return (
-      <React.Fragment key={link}>
+      <React.Fragment key={recentlyAccessedItem.id}>
         {separator}
         <EuiFlexItem
           className="recentlyAccessedItem"
@@ -128,9 +128,9 @@ export class RecentlyAccessed extends React.Component {
         >
           <EuiLink
             className="recentlyAccessedLongLink"
-            href={link}
+            href={recentlyAccessedItem.link}
           >
-            {label}
+            {recentlyAccessedItem.label}
           </EuiLink>
         </EuiFlexItem>
       </React.Fragment>
@@ -144,7 +144,7 @@ export class RecentlyAccessed extends React.Component {
         if (index === 0) {
           includeSeparator = false;
         }
-        return this.renderLongLink(item.link, item.label, includeSeparator);
+        return this.renderLongLink(item, includeSeparator);
       });
     }
 
@@ -155,8 +155,7 @@ export class RecentlyAccessed extends React.Component {
         includeSeparator = false;
       }
       links.push(this.renderLongLink(
-        this.props.recentlyAccessed[i].link,
-        this.props.recentlyAccessed[i].label,
+        this.props.recentlyAccessed[i],
         includeSeparator));
     }
 
@@ -191,6 +190,7 @@ export class RecentlyAccessed extends React.Component {
 export const recentlyAccessedShape = PropTypes.shape({
   label: PropTypes.string.isRequired,
   link: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
 });
 
 RecentlyAccessed.propTypes = {

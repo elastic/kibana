@@ -84,7 +84,10 @@ uiRoutes
         return savedSearches.get($route.current.params.id)
           .then((savedSearch) => {
             if ($route.current.params.id) {
-              recentlyAccessed.add(`#/discover/${$route.current.params.id}`, savedSearch.title);
+              recentlyAccessed.add(
+                `#/discover/${$route.current.params.id}`,
+                savedSearch.title,
+                $route.current.params.id);
             }
             return savedSearch;
           })

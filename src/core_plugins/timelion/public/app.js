@@ -44,7 +44,8 @@ require('ui/routes')
             if ($route.current.params.id) {
               recentlyAccessed.add(
                 `${chrome.addBasePath('/app/timelion')}#/${$route.current.params.id}`,
-                savedSheet.title);
+                savedSheet.title,
+                $route.current.params.id);
             }
             return savedSheet;
           })

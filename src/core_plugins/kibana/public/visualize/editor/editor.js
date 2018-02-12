@@ -51,7 +51,8 @@ uiRoutes
           .then((savedVis) => {
             recentlyAccessed.add(
               `#${VisualizeConstants.EDIT_PATH}/${$route.current.params.id}`,
-              savedVis.title);
+              savedVis.title,
+              $route.current.params.id);
             return savedVis;
           })
           .catch(courier.redirectWhenMissing({
