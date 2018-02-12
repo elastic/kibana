@@ -14,6 +14,7 @@ Object {
     ],
   ],
   "mkdirp": Array [],
+  "readFile": Array [],
 }
 `;
 
@@ -58,6 +59,7 @@ Object {
       "<repoRoot>/packages/kbn-build/src/utils/baz/node_modules/.bin",
     ],
   ],
+  "readFile": Array [],
 }
 `;
 

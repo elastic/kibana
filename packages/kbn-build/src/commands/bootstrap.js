@@ -2,6 +2,7 @@ import chalk from 'chalk';
 
 import { topologicallyBatchProjects } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
+import { parallelizeBatches } from '../utils/parallelize';
 
 export const name = 'bootstrap';
 export const description = 'Install dependencies and crosslink projects';
@@ -45,14 +46,4 @@ export async function run(projects, projectGraph, { options }) {
   });
 
   console.log(chalk.green.bold('\nBootstrapping completed!\n'));
-}
-
-async function parallelizeBatches(batchedProjects, fn) {
-  for (const batch of batchedProjects) {
-    const running = batch.map(pkg => fn(pkg));
-
-    // We need to make sure the entire batch has completed before we can move on
-    // to the next batch
-    await Promise.all(running);
-  }
 }
