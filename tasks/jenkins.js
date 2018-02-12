@@ -35,7 +35,7 @@ module.exports = function (grunt) {
     'test:jest',
     'test:browser-ci',
     'test:api',
-    '_build:verifyTranslations',
+    'verifyTranslations',
   ]);
 
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);

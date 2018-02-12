@@ -1,12 +1,12 @@
-import { fromRoot, formatListAsProse } from '../../src/utils';
-import * as i18nVerify from '../utils/i18n_verify_keys';
+import { fromRoot, formatListAsProse } from '../src/utils';
+import { findPluginSpecs } from '../src/plugin_discovery';
+import { collectUiExports } from '../src/ui';
+import { I18n } from '../src/ui/ui_i18n/i18n';
 
-import { findPluginSpecs } from '../../src/plugin_discovery';
-import { collectUiExports } from '../../src/ui';
-import { I18n } from '../../src/ui/ui_i18n/i18n';
+import * as i18nVerify from './utils/i18n_verify_keys';
 
 export default function (grunt) {
-  grunt.registerTask('_build:verifyTranslations', async function () {
+  grunt.registerTask('verifyTranslations', async function () {
     const done = this.async();
 
     try {
