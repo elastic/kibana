@@ -16,4 +16,5 @@
 /packages/kbn-build/dist
 /packages/kbn-build/vendor
 /packages/kbn-build/**/fixtures
+/packages/kbn-plugin-generator/sao_template/template
 !/.eslintrc.js
