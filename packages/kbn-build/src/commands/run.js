@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 
 import { topologicallyBatchProjects } from '../utils/projects';
+import { parallelizeBatches } from '../utils/parallelize';
 
 export const name = 'run';
 export const description =
@@ -30,14 +31,4 @@ export async function run(projects, projectGraph, { extraArgs }) {
       return pkg.runScriptStreaming(scriptName, scriptArgs);
     }
   });
-}
-
-async function parallelizeBatches(batchedProjects, fn) {
-  for (const batch of batchedProjects) {
-    const running = batch.map(pkg => fn(pkg));
-
-    // We need to make sure the entire batch has completed before we can move on
-    // to the next batch
-    await Promise.all(running);
-  }
 }
