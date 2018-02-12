@@ -39,6 +39,10 @@ export class RecentlyAccessed extends React.Component {
   }
 
   renderDropdown = () => {
+    if (this.props.recentlyAccessed.length <= NUM_LONG_LINKS) {
+      return;
+    }
+
     const dropdownLinks = [];
     for (let i = NUM_LONG_LINKS; i < this.props.recentlyAccessed.length; i++) {
       dropdownLinks.push(
@@ -78,23 +82,18 @@ export class RecentlyAccessed extends React.Component {
     );
 
     return (
-      <EuiFlexItem
-        key="dropdown"
-        grow={false}
+      <EuiPopover
+        id="popover"
+        ownFocus
+        button={openPopoverComponent}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
+        anchorPosition="downRight"
       >
-        <EuiPopover
-          id="popover"
-          ownFocus
-          button={openPopoverComponent}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover.bind(this)}
-          anchorPosition="downRight"
-        >
-          <ul>
-            {dropdownLinks}
-          </ul>
-        </EuiPopover>
-      </EuiFlexItem>
+        <ul>
+          {dropdownLinks}
+        </ul>
+      </EuiPopover>
     );
   }
 
@@ -158,11 +157,7 @@ export class RecentlyAccessed extends React.Component {
         this.props.recentlyAccessed[i],
         includeSeparator));
     }
-
-    return [
-      ...links,
-      this.renderDropdown()
-    ];
+    return links;
   };
 
   render() {
@@ -178,8 +173,16 @@ export class RecentlyAccessed extends React.Component {
 
         <EuiSpacer size="s"/>
 
-        <EuiFlexGroup>
-          {this.renderRecentlyAccessed()}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              {this.renderRecentlyAccessed()}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            {this.renderDropdown()}
+          </EuiFlexItem>
         </EuiFlexGroup>
 
       </EuiPanel>

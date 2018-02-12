@@ -6,7 +6,7 @@ const localStorage = new Storage(window.localStorage);
 
 const defaultIsDuplicate = (oldItem, newItem) => {
   return _.isEqual(oldItem, newItem);
-}
+};
 
 export class PersistedLog {
   constructor(name, options = {}, storage = localStorage) {

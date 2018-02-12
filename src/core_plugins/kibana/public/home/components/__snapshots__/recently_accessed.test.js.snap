@@ -19,180 +19,198 @@ exports[`should not render dropdown when recently accessed list size is NUM_LONG
     size="s"
   />
   <EuiFlexGroup
-    alignItems="stretch"
+    alignItems="flexEnd"
     component="div"
     gutterSize="l"
-    justifyContent="flexStart"
+    justifyContent="spaceBetween"
     responsive={true}
     wrap={false}
   >
-    <React.Fragment
-      key="0"
+    <EuiFlexItem
+      component="div"
+      grow={false}
     >
-      <EuiFlexItem
-        className="recentlyAccessedItem"
+      <EuiFlexGroup
+        alignItems="stretch"
         component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
       >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link0"
-          type="button"
+        <React.Fragment
+          key="0"
         >
-          label0
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="1"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link1"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link0"
+              type="button"
+            >
+              label0
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="1"
         >
-          label1
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="2"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link2"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link1"
+              type="button"
+            >
+              label1
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="2"
         >
-          label2
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="3"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link3"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link2"
+              type="button"
+            >
+              label2
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="3"
         >
-          label3
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="4"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link4"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link3"
+              type="button"
+            >
+              label3
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="4"
         >
-          label4
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link4"
+              type="button"
+            >
+              label4
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    />
   </EuiFlexGroup>
 </EuiPanel>
 `;
@@ -216,144 +234,162 @@ exports[`should not render dropdown when recently accessed list size is less tha
     size="s"
   />
   <EuiFlexGroup
-    alignItems="stretch"
+    alignItems="flexEnd"
     component="div"
     gutterSize="l"
-    justifyContent="flexStart"
+    justifyContent="spaceBetween"
     responsive={true}
     wrap={false}
   >
-    <React.Fragment
-      key="0"
+    <EuiFlexItem
+      component="div"
+      grow={false}
     >
-      <EuiFlexItem
-        className="recentlyAccessedItem"
+      <EuiFlexGroup
+        alignItems="stretch"
         component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
       >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link0"
-          type="button"
+        <React.Fragment
+          key="0"
         >
-          label0
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="1"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link1"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link0"
+              type="button"
+            >
+              label0
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="1"
         >
-          label1
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="2"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link2"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link1"
+              type="button"
+            >
+              label1
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="2"
         >
-          label2
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="3"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link3"
-          type="button"
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link2"
+              type="button"
+            >
+              label2
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="3"
         >
-          label3
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link3"
+              type="button"
+            >
+              label3
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    />
   </EuiFlexGroup>
 </EuiPanel>
 `;
@@ -377,184 +413,197 @@ exports[`should render dropdown when recently accessed list size exceeds NUM_LON
     size="s"
   />
   <EuiFlexGroup
-    alignItems="stretch"
+    alignItems="flexEnd"
     component="div"
     gutterSize="l"
-    justifyContent="flexStart"
+    justifyContent="spaceBetween"
     responsive={true}
     wrap={false}
   >
-    <React.Fragment
-      key="0"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link0"
-          type="button"
-        >
-          label0
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="1"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link1"
-          type="button"
-        >
-          label1
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="2"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link2"
-          type="button"
-        >
-          label2
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="3"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link3"
-          type="button"
-        >
-          label3
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
-    <React.Fragment
-      key="4"
-    >
-      <EuiFlexItem
-        className="recentlyAccessedSeparator"
-        component="div"
-        grow={false}
-      >
-        <EuiText>
-          <EuiIcon
-            color="subdued"
-            size="m"
-            type="dot"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        className="recentlyAccessedItem"
-        component="div"
-        grow={false}
-        style={
-          Object {
-            "minWidth": "3.9000000000000004em",
-          }
-        }
-      >
-        <EuiLink
-          className="recentlyAccessedLongLink"
-          color="primary"
-          href="link4"
-          type="button"
-        >
-          label4
-        </EuiLink>
-      </EuiFlexItem>
-    </React.Fragment>
     <EuiFlexItem
       component="div"
       grow={false}
-      key="dropdown"
+    >
+      <EuiFlexGroup
+        alignItems="stretch"
+        component="div"
+        gutterSize="l"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
+      >
+        <React.Fragment
+          key="0"
+        >
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link0"
+              type="button"
+            >
+              label0
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="1"
+        >
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link1"
+              type="button"
+            >
+              label1
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="2"
+        >
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link2"
+              type="button"
+            >
+              label2
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="3"
+        >
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link3"
+              type="button"
+            >
+              label3
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+        <React.Fragment
+          key="4"
+        >
+          <EuiFlexItem
+            className="recentlyAccessedSeparator"
+            component="div"
+            grow={false}
+          >
+            <EuiText>
+              <EuiIcon
+                color="subdued"
+                size="m"
+                type="dot"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="recentlyAccessedItem"
+            component="div"
+            grow={false}
+            style={
+              Object {
+                "minWidth": "3.9000000000000004em",
+              }
+            }
+          >
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              color="primary"
+              href="link4"
+              type="button"
+            >
+              label4
+            </EuiLink>
+          </EuiFlexItem>
+        </React.Fragment>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
     >
       <EuiPopover
         anchorPosition="downRight"
