@@ -141,7 +141,7 @@ describe('kuery AST API', function () {
     });
 
     it('should support a shorthand operator syntax for "is" functions', function () {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', 'operator');
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', true, 'operator');
       const actual = fromKueryExpressionNoMeta('foo:bar');
       expectDeepEqual(actual, expected);
     });

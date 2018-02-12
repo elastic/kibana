@@ -82,8 +82,13 @@ NotListOfValues
   / ListOfValues
 
 Value
-  = value:Literal {
-    return (field) => buildFunctionNode('is', [field, value]);
+  = value:QuotedString {
+    const isPhrase = buildLiteralNode(true);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+  / value:UnquotedLiteral {
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
 
 Or
@@ -96,23 +101,22 @@ Not
   = 'not'i Space+
 
 Literal
-  = value:(QuotedString / UnquotedLiteral) {
-    return buildLiteralNode(value);
-  }
+  = QuotedString / UnquotedLiteral
 
 QuotedString
   = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
-    return chars.join('');
+    return buildLiteralNode(chars.join(''));
   }
 
 UnquotedLiteral
   = chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
-    if (sequence === 'null') return null;
-    if (sequence === 'true') return true;
-    if (sequence === 'false') return false;
+    if (sequence === 'null') return buildLiteralNode(null);
+    if (sequence === 'true') return buildLiteralNode(true);
+    if (sequence === 'false') return buildLiteralNode(false);
     const number = Number(sequence);
-    return isNaN(number) ? sequence : number;
+    const value = isNaN(number) ? sequence : number;
+    return buildLiteralNode(value);
   }
 
 UnquotedCharacter

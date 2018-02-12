@@ -2,7 +2,7 @@ import _ from 'lodash';
 import * as literal from '../node_types/literal';
 import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
 
-export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
+export function buildNodeParams(fieldName, value, isPhrase = false, serializeStyle = 'operator') {
   if (_.isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
@@ -11,16 +11,17 @@ export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
   }
 
   return {
-    arguments: [literal.buildNode(fieldName), literal.buildNode(value)],
+    arguments: [literal.buildNode(fieldName), literal.buildNode(value), literal.buildNode(isPhrase)],
     serializeStyle
   };
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
-  const { arguments: [ fieldNameArg, valueArg ] } = node;
+  const { arguments: [ fieldNameArg, valueArg, isPhraseArg ] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
   const field = indexPattern.fields.byName[fieldName];
   const value = !_.isUndefined(valueArg) ? literal.toElasticsearchQuery(valueArg) : valueArg;
+  const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
   if (field && field.scripted) {
     return {
@@ -32,8 +33,8 @@ export function toElasticsearchQuery(node, indexPattern) {
   else if (fieldName === null) {
     return {
       multi_match: {
+        type,
         query: value,
-        type: 'phrase',
         lenient: true,
       }
     };
@@ -44,9 +45,9 @@ export function toElasticsearchQuery(node, indexPattern) {
   else if (fieldName === '*' && value !== '*') {
     return {
       multi_match: {
+        type,
         query: value,
         fields: ['*'],
-        type: 'phrase',
         lenient: true,
       }
     };
@@ -57,8 +58,9 @@ export function toElasticsearchQuery(node, indexPattern) {
     };
   }
   else {
+    const queryType = type === 'phrase' ? 'match_phrase' : 'match';
     return {
-      match_phrase: {
+      [queryType]: {
         [fieldName]: value
       }
     };

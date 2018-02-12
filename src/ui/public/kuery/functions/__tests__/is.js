@@ -103,7 +103,7 @@ describe('kuery functions', function () {
           }
         };
 
-        const node = nodeTypes.function.buildNode('is', 'response', 200);
+        const node = nodeTypes.function.buildNode('is', 'response', 200, true);
         const result = is.toElasticsearchQuery(node, indexPattern);
         expectDeepEqual(result, expected);
       });
@@ -119,13 +119,13 @@ describe('kuery functions', function () {
     describe('toKueryExpression', function () {
 
       it('should serialize "is" nodes with an operator syntax', function () {
-        const node = nodeTypes.function.buildNode('is', 'response', 200, 'operator');
+        const node = nodeTypes.function.buildNode('is', 'response', 200, false, 'operator');
         const result = is.toKueryExpression(node);
         expect(result).to.be('"response":200');
       });
 
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
-        const node = nodeTypes.function.buildNode('is', 'response', 200, 'notValid');
+        const node = nodeTypes.function.buildNode('is', 'response', 200, false, 'notValid');
         expect(is.toKueryExpression)
           .withArgs(node).to.throwException(/Cannot serialize "is" function as "notValid"/);
       });
