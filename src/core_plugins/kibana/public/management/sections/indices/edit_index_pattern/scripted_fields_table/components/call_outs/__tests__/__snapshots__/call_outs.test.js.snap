@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallOuts should render normally 1`] = `
+<div>
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    size="m"
+    title="Deprecation languages in use"
+  >
+    <p>
+      The following deprecated languages are in use: 
+      php
+      . Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to 
+      <EuiLink
+        color="primary"
+        href="http://www.elastic.co/painlessDocs"
+        type="button"
+      >
+        Painless
+      </EuiLink>
+       to avoid any problems.
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;
+
+exports[`CallOuts should render without any call outs 1`] = `""`;
