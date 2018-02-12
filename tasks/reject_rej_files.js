@@ -10,9 +10,8 @@ export default grunt => {
       '**/*.rej',
       '!esvm/**/*.rej',
       '!plugins/**/*.rej',
-      '!node_modules/**/*.rej',
-      '!**/node_modules/**/*.rej',
       '!optimize/**/*.rej',
+      '!**/node_modules/**/*.rej',
     ]);
 
     if (files.length > 0) {

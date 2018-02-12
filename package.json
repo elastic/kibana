@@ -44,7 +44,6 @@
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "test": "grunt test",
-    "rej": "grunt rejectRejFiles",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
