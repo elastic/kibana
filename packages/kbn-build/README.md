@@ -117,6 +117,9 @@ For more details, run:
 yarn kbn
 ```
 
+Bootstrapping also calls the `kbn:boostrap` script for every included project.
+This is intended for packages that need to be built/transpiled to be usable.
+
 ### Running scripts
 
 Some times you want to run the same script across multiple packages and plugins,

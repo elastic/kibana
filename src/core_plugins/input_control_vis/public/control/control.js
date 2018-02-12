@@ -7,15 +7,53 @@ Choose a different field or index documents that contain values for this field.`
 }
 
 export class Control {
-  constructor(controlParams, filterManager) {
+  constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
     this.id = controlParams.id;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
+    this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
-    this.enable = true;
+    this.kbnApi = kbnApi;
+
     // restore state from kibana filter context
     this.reset();
+    // disable until initialized
+    this.disable('Control has not been initialized');
+  }
+
+  async fetch() {
+    throw new Error('fetch method not defined, subclass are required to implement');
+  }
+
+  /**
+   *
+   * @param ancestors {array of Controls}
+   */
+  setAncestors(ancestors) {
+    this.ancestors = ancestors;
+  }
+
+  hasAncestors() {
+    return this.ancestors && this.ancestors.length > 0;
+  }
+
+  hasUnsetAncestor() {
+    return this.ancestors.reduce((accumulator, ancestor) => {
+      return accumulator || !ancestor.hasValue();
+    }, false);
+  }
+
+  getAncestorValues() {
+    return this.ancestors.map(ancestor => {
+      return ancestor.value;
+    });
+  }
+
+  getAncestorFilters() {
+    return this.ancestors.map(ancestor => {
+      return ancestor.filterManager.createFilter(ancestor.value);
+    });
   }
 
   isEnabled() {

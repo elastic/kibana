@@ -68,6 +68,28 @@ test('renders ListControlEditor', () => {
     handleIndexPatternChange={handleIndexPatternChange}
     handleCheckboxOptionChange={handleCheckboxOptionChange}
     handleNumberOptionChange={handleNumberOptionChange}
+    handleParentChange={() => {}}
+    parentCandidates={[]}
+  />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+test('parentCandidates', () => {
+  const parentCandidates = [
+    { value: '1', text: 'fieldA' },
+    { value: '2', text: 'fieldB' }
+  ];
+  const component = shallow(<ListControlEditor
+    getIndexPatterns={getIndexPatterns}
+    getIndexPattern={getIndexPattern}
+    controlIndex={0}
+    controlParams={controlParams}
+    handleFieldNameChange={handleFieldNameChange}
+    handleIndexPatternChange={handleIndexPatternChange}
+    handleCheckboxOptionChange={handleCheckboxOptionChange}
+    handleNumberOptionChange={handleNumberOptionChange}
+    handleParentChange={() => {}}
+    parentCandidates={parentCandidates}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -82,6 +104,8 @@ test('handleCheckboxOptionChange - multiselect', () => {
     handleIndexPatternChange={handleIndexPatternChange}
     handleCheckboxOptionChange={handleCheckboxOptionChange}
     handleNumberOptionChange={handleNumberOptionChange}
+    handleParentChange={() => {}}
+    parentCandidates={[]}
   />);
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
   checkbox.simulate('change', { target: { checked: true } });
@@ -112,6 +136,8 @@ test('handleNumberOptionChange - size', () => {
     handleIndexPatternChange={handleIndexPatternChange}
     handleCheckboxOptionChange={handleCheckboxOptionChange}
     handleNumberOptionChange={handleNumberOptionChange}
+    handleParentChange={() => {}}
+    parentCandidates={[]}
   />);
   const input = findTestSubject(component, 'listControlSizeInput');
   input.simulate('change', { target: { value: 7 } });

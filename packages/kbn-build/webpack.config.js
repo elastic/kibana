@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    index: './src/index.js'
+    index: './src/index.js',
   },
   target: 'node',
 
@@ -18,8 +18,8 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules)/,
         use: {
-          loader: 'babel-loader'
-        }
+          loader: 'babel-loader',
+        },
       },
       // Removing an unnecessary require from
       // https://github.com/ForbesLindesay/spawn-sync/blob/8ba6d1bd032917ff5f0cf68508b91bb628d16336/index.js#L3
@@ -33,16 +33,16 @@ module.exports = {
           options: {
             search: ` || require('./lib/spawn-sync')`,
             replace: '',
-            strict: true
-          }
-        }
-      }
-    ]
+            strict: true,
+          },
+        },
+      },
+    ],
   },
 
   node: {
     // Don't replace built-in globals
     __filename: false,
-    __dirname: false
-  }
+    __dirname: false,
+  },
 };

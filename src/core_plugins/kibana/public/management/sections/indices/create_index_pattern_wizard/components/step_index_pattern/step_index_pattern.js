@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
-  isIndexPatternQueryValid,
+  containsInvalidCharacters,
   getMatchedIndices,
   canAppendWildcard,
   createReasonableWait
@@ -83,7 +83,7 @@ export class StepIndexPattern extends Component {
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(e.nativeEvent.data)) {
+    if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
@@ -139,6 +139,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <IndicesList
+        query={query}
         indices={indicesToList}
       />
     );
@@ -170,12 +171,16 @@ export class StepIndexPattern extends Component {
     const errors = [];
     const characterList = ILLEGAL_CHARACTERS.slice(0, ILLEGAL_CHARACTERS.length - 1).join(', ');
 
-    if (!isIndexPatternQueryValid(query, ILLEGAL_CHARACTERS)) {
+    if (!query || !query.length || query === '.' || query === '..') {
+      // This is an error scenario but do not report an error
+      containsErrors = true;
+    }
+    else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
       errors.push(`Your input contains invalid characters or spaces. Please omit: ${characterList}`);
       containsErrors = true;
     }
 
-    const isInputInvalid = showingIndexPatternQueryErrors && containsErrors;
+    const isInputInvalid = showingIndexPatternQueryErrors && containsErrors && errors.length > 0;
     const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
     return (

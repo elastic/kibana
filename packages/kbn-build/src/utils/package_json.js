@@ -12,8 +12,10 @@ export function writePackageJson(path, json) {
 
 export const createProductionPackageJson = pkgJson => ({
   ...pkgJson,
-  dependencies: transformDependencies(pkgJson.dependencies)
+  dependencies: transformDependencies(pkgJson.dependencies),
 });
+
+export const isLinkDependency = depVersion => depVersion.startsWith('link:');
 
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
@@ -28,7 +30,7 @@ export function transformDependencies(dependencies = {}) {
   const newDeps = {};
   for (const name of Object.keys(dependencies)) {
     const depVersion = dependencies[name];
-    if (depVersion.startsWith('link:')) {
+    if (isLinkDependency(depVersion)) {
       newDeps[name] = depVersion.replace('link:', 'file:');
     } else {
       newDeps[name] = depVersion;

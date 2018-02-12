@@ -1,10 +1,5 @@
 {
   "name": "@kbn/build",
-  "kibana": {
-    "build": {
-      "skip": true
-    }
-  },
   "main": "./dist/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
@@ -19,6 +14,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
     "chalk": "^2.3.0",
+    "cmd-shim": "^2.0.2",
     "cpy": "^6.0.0",
     "dedent": "^0.7.0",
     "del": "^3.0.0",
@@ -26,14 +22,18 @@
     "getopts": "^2.0.0",
     "glob": "^7.1.2",
     "globby": "^7.1.1",
+    "has-ansi": "^3.0.0",
     "indent-string": "^3.2.0",
+    "lodash.clonedeepwith": "^4.5.0",
     "log-symbols": "^2.1.0",
+    "mkdirp": "^0.5.1",
     "ora": "^1.3.0",
     "pify": "^3.0.0",
     "prettier": "^1.9.1",
     "read-pkg": "^3.0.0",
     "spawn-sync": "^1.0.15",
     "string-replace-loader": "^1.3.0",
+    "strip-ansi": "^4.0.0",
     "strong-log-transformer": "^1.0.6",
     "tempy": "^0.2.1",
     "webpack": "^3.10.0",
