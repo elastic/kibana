@@ -1,6 +1,9 @@
 // Initialization block
 {
-  var { nodeTypes: { function: { buildNode }}} = options.helpers;
+  const { nodeTypes } = options.helpers;
+  const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
+  const buildLiteralNode = nodeTypes.literal.buildNode;
+  const buildNamedArgNode = nodeTypes.namedArg.buildNode;
 }
 
 start
@@ -9,24 +12,24 @@ start
 
 EmptyQuery
   = Space* {
-    return buildNode('and', []);
+    return buildFunctionNode('and', []);
   }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
-    return buildNode('or', [left, right]);
+    return buildFunctionNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
   = left:NotQuery And right:AndQuery{
-    return buildNode('and', [left, right]);
+    return buildFunctionNode('and', [left, right]);
   }
   / NotQuery
 
 NotQuery
   = Not query:SubQuery {
-    return buildNode('not', query);
+    return buildFunctionNode('not', [query]);
   }
   / SubQuery
 
@@ -41,7 +44,8 @@ Expression
 
 FieldRangeExpression
   = field:Literal Space* operator:RangeOperator Space* value:Literal {
-    return buildNode('range', field, { [operator]: value });
+    const range = buildNamedArgNode(operator, value);
+    return buildFunctionNode('range', [field, range]);
   }
 
 FieldValueExpression
@@ -51,7 +55,7 @@ FieldValueExpression
 
 ValueExpression
   = partial:Value {
-    const field = null;
+    const field = buildLiteralNode(null);
     return partial(field);
   }
 
@@ -61,25 +65,25 @@ ListOfValues
 
 OrListOfValues
   = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    return (field) => buildNode('or', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
   }
   / AndListOfValues
 
 AndListOfValues
   = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    return (field) => buildNode('and', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
   }
   / NotListOfValues
 
 NotListOfValues
   = Not partial:ListOfValues {
-    return (field) => buildNode('not', partial(field));
+    return (field) => buildFunctionNode('not', [partial(field)]);
   }
   / ListOfValues
 
 Value
   = value:Literal {
-    return (field) => buildNode('is', field, value);
+    return (field) => buildFunctionNode('is', [field, value]);
   }
 
 Or
@@ -92,8 +96,9 @@ Not
   = 'not'i Space+
 
 Literal
-  = QuotedString
-  / UnquotedLiteral
+  = value:(QuotedString / UnquotedLiteral) {
+    return buildLiteralNode(value);
+  }
 
 QuotedString
   = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
