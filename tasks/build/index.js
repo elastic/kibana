@@ -10,7 +10,6 @@ module.exports = function (grunt) {
       '_build:downloadNodeBuilds',
       '_build:extractNodeBuilds',
       'copy:devSource',
-      'clean:devSourceForTestbed',
       'babel:build',
       '_build:plugins',
       '_build:data',
