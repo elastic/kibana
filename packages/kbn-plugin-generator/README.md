@@ -2,85 +2,81 @@
 
 This package can be used to generate a Kibana plugin from the Kibana repo.
 
+## Setup
+
+Before you can use this plugin generator you must setup your [Kibana development environment](../../CONTRIBUTING.md#development-environment-setup). If you can successfully run `yarn kbn bootstrap` then you are ready to generate plugins!
+
 ## Compatibility
 
-The plugin generator is a part of the Kibana project as of Kibana 6.3, so if you are targeting versions before 6.3 then continue to use the [Kibana plugin sao template](https://github.com/elastic/template-kibana-plugin). If you are targeting Kibana 6.3 or greater then checkout the corresponding Kibana and run the plugin generator from that branch.
+The plugin generator became a part of the Kibana project as of Kibana 6.3. If you are targeting versions **before Kibana 6.3** then use the [Kibana plugin sao template](https://github.com/elastic/template-kibana-plugin).
+
+If you are targeting **Kibana 6.3 or greater** then checkout the corresponding Kibana branch and run the plugin generator.
 
 ## Quick Start
 
-The plugin generator is exposed with a node script in the Kibana repo, run it from there with the `--help` flag for info about options you can pass.
+To target the current development version of Kibana just use the default  `master` branch.
 
 ```sh
-node scripts/generate_plugins
+node scripts/generate_plugin my_plugin_name
+# generates a plugin in `../kibana-extra/my_plugin_name`
 ```
 
-## Usage
-
-### Setup your Kibana development environment
-
-You can find instructions on the [Kibana development documentation](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md#development-environment-setup)
-
-### Double check that your Node.js version matches Kibana's [.node-version](https://github.com/elastic/kibana/blob/master/.node-version) file
+To target 6.3, use the `6.x` branch (until the `6.3` branch is created).
 
 ```sh
-node --version
+git checkout 6.x
+yarn kbn bootstrap # always bootstrap when switching branches
+node scripts/generate_plugin
+# generates a plugin for Kibana 6.3 in `../kibana-extra/my_plugin_name`
 ```
 
-**HINT:** If you install [`nvm`](https://github.com/creationix/nvm#install-script) and [`avn`](https://github.com/wbyoung/avn) then you can create your own `.node-version` file and `avn` will switch to it _automatically_!
-
-### Run the generator
+The generate script supports a few flags; run it with the `--help` flag to learn more.
 
 ```sh
-node script/generate_plugin [your-plugin-name]
+node scripts/generate_plugin --help
 ```
 
-This will generate your plugin in `../kibana-extra/<your-plugin-name>` relative to your Kibana repo.
+## Updating
 
-### [Optional] Get the URL for your Elasticsearch installation
+Since the Plugin Generator is now a part of the Kibana repo, when you update your local checkout of the Kibana repository and `bootstrap` everything should be up to date!
 
-Elasticsearch is available at `http://localhost:9200`, unless you explicitly changed it in the Elasticsearch config.
-
-### Start Kibana in development mode with your new plugin included
+> ***NOTE:*** These commands should be run from the Kibana repo, and `upstream` is our convention for the git remote that references https://github.com/elastic/kibana.git, unless you added this remote you might need to use `origin`.
 
 ```sh
-cd ../kibana-extra/<your-plugin-name>
-yarn start
+git pull upstream master
+yarn kbn bootstrap
 ```
 
-**HINT:** If your Elasticsearch instance is running on another port, you can pass it in here.
+## Plugin Development Scripts
 
-```sh
-yarn start --elasticsearch.url 'http://localhost:9200'
+Generated plugins receive a handful of scripts that can be used during development. Those scripts are detailed in the [README.md](sao_template/template/README.md) file in each newly generated plugin, and expose the scripts provided by the [Kibana plugin helpers](../kbn-plugin-helpers), but here is a quick reference in case you need it:
 
-# passing the elasticsearch.url here is to demonstrate how arguments can
-# be passed to kibana with `yarn start` but is not actually necessary if
-# you are running elasticsearch locally
-```
+> ***NOTE:*** All of these scripts should be run from the generated plugin.
 
-### Open your Kibana instance
+  - `yarn kbn bootstrap`
 
-Visit [http://localhost:5601](http://localhost:5601) with your web browser of choice.
+    Install dependencies and crosslink Kibana and all projects/plugins.
 
-## Development Tasks
+    > ***IMPORTANT:*** Use this script instead of `yarn` to install dependencies when switching branches, and re-run it whenever your dependencies change.
 
   - `yarn start`
 
-    Start kibana and have it include this plugin
+    Start kibana and have it include this plugin. You can pass any arguments that you would normally send to `bin/kibana`
 
-  - `yarn start --config kibana.yml`
-
-    You can pass any argument that you would normally send to `bin/kibana`
+      ```
+      yarn start --elasticsearch.url http://localhost:9220
+      ```
 
   - `yarn build`
 
-    Build a distributable archive
+    Build a distributable archive of your plugin.
 
   - `yarn test:browser`
 
-    Run the browser tests in a real web browser
+    Run the browser tests in a real web browser.
 
   - `yarn test:server`
 
-    Run the server tests using mocha
+    Run the server tests using mocha.
 
-For more information about any of these commands run `yarn ${task} --help`.
+For more information about any of these commands run `yarn ${task} --help`. For a full list of tasks run `yarn run` or take a look in the `package.json` file.
