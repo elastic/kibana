@@ -8,6 +8,7 @@
     "templateVersion": "<%= templateVersion %>"
   },
   "scripts": {
+    "preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
     "lint": "eslint **/*.js",
     "start": "plugin-helpers start",
