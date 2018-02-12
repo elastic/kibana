@@ -81,6 +81,11 @@ export class RecentlyAccessed extends React.Component {
       </EuiLink>
     );
 
+    let anchorPosition = 'downRight';
+    if (window.innerWidth <= 768) {
+      anchorPosition = 'downLeft';
+    }
+
     return (
       <EuiPopover
         id="popover"
@@ -88,7 +93,7 @@ export class RecentlyAccessed extends React.Component {
         button={openPopoverComponent}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
-        anchorPosition="downRight"
+        anchorPosition={anchorPosition}
       >
         <ul>
           {dropdownLinks}
