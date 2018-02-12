@@ -92,17 +92,11 @@ Not
   = 'not'i Space+
 
 Literal
-  = SingleQuotedString
-  / DoubleQuotedString
+  = QuotedString
   / UnquotedLiteral
 
-SingleQuotedString
-  = "'" chars:(EscapedQuote / [^'])* "'" {
-    return chars.join('');
-  }
-
-DoubleQuotedString
-  = '"' chars:(EscapedQuote / [^"])* '"' {
+QuotedString
+  = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
     return chars.join('');
   }
 
@@ -115,9 +109,6 @@ UnquotedLiteral
     const number = Number(sequence);
     return isNaN(number) ? sequence : number;
   }
-
-EscapedQuote
-  = '\\' quote:('"' / "'") { return quote; }
 
 UnquotedCharacter
   = EscapedSpecialCharacter
@@ -133,7 +124,7 @@ Keyword
   = Or / And / Not
 
 SpecialCharacter
-  = [():<>]
+  = [():<>"]
 
 RangeOperator
   = '<=' { return 'lte'; }
