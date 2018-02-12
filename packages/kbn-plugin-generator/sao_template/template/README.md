@@ -8,26 +8,26 @@
 
 ## development
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment. Once you have completed that, use the following npm tasks.
+See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions setting up your development environment. Once you have completed that, use the following yarn scripts.
 
-  - `npm start`
+  - `yarn start`
 
     Start kibana and have it include this plugin
 
-  - `npm start -- --config kibana.yml`
+  - `yarn start --config kibana.yml`
 
-    You can pass any argument that you would normally send to `bin/kibana` by putting them after `--` when running `npm start`
+    You can pass any argument that you would normally send to `bin/kibana`
 
-  - `npm run build`
+  - `yarn build`
 
     Build a distributable archive
 
-  - `npm run test:browser`
+  - `yarn test:browser`
 
     Run the browser tests in a real web browser
 
-  - `npm run test:server`
+  - `yarn test:server`
 
     Run the server tests using mocha
 
-For more information about any of these commands run `npm run ${task} -- --help`.
+For more information about any of these commands run `yarn run ${task} --help`.
