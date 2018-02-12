@@ -7,10 +7,8 @@ import {
   runScriptInPackage,
   runScriptInPackageStreaming,
 } from './scripts';
-import { readPackageJson } from './package_json';
+import { readPackageJson, isLinkDependency } from './package_json';
 import { CliError } from './errors';
-
-const PREFIX = 'link:';
 
 export class Project {
   static async fromPath(path) {
@@ -44,7 +42,7 @@ export class Project {
     );
 
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `${PREFIX}${relativePathToProject}`;
+    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
 
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
@@ -57,11 +55,11 @@ export class Project {
       actual: `"${project.name}": "${versionInPackageJson}"`,
     };
 
-    if (versionInPackageJson.startsWith(PREFIX)) {
+    if (isLinkDependency(versionInPackageJson)) {
       throw new CliError(
         `[${this.name}] depends on [${
           project.name
-        }] using '${PREFIX}', but the path is wrong. ${updateMsg}`,
+        }] using 'link:', but the path is wrong. ${updateMsg}`,
         meta
       );
     }
