@@ -1,5 +1,5 @@
 {
-  "name": "@spalger/test-subj-selector",
+  "name": "@kbn/test-subj-selector",
   "version": "0.2.1",
   "description": "",
   "main": "index.js",
