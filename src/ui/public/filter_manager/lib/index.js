@@ -3,3 +3,4 @@ export { buildPhraseFilter } from './phrase';
 export { buildPhrasesFilter } from './phrases';
 export { buildQueryFilter } from './query';
 export { buildRangeFilter } from './range';
+export { buildValuesFilter } from './values';

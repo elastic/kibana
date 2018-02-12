@@ -27,6 +27,8 @@ export function getParamsFromFilter(filter) {
     params = filter.query ? filter.query.match[key].query : filter.script.script.params.value;
   } else if (type === 'phrases') {
     params = filter.meta.params;
+  } else if (type === 'values') {
+    params = filter.meta.params.values;
   } else if (type === 'range') {
     const range = filter.range ? filter.range[key] : filter.script.script.params;
     const from = _.has(range, 'gte') ? range.gte : range.gt;
@@ -77,6 +79,8 @@ export function buildFilter({ indexPattern, field, operator, params, filterBuild
     filter = filterBuilder.buildRangeFilter(field, { gte: params.range.from, lt: params.range.to }, indexPattern);
   } else if (operator.type === 'exists') {
     filter = filterBuilder.buildExistsFilter(field, indexPattern);
+  } else if (operator.type === 'values') {
+    filter = filterBuilder.buildValuesFilter(field, params, indexPattern);
   }
   filter.meta.negate = operator.negate;
   return filter;

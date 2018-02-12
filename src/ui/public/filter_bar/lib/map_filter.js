@@ -9,6 +9,7 @@ import { FilterBarLibMapMissingProvider } from './map_missing';
 import { FilterBarLibMapQueryStringProvider } from './map_query_string';
 import { FilterBarLibMapGeoBoundingBoxProvider } from './map_geo_bounding_box';
 import { FilterBarLibMapGeoPolygonProvider } from './map_geo_polygon';
+import { FilterBarLibMapValuesProvider } from './map_values';
 import { FilterBarLibMapDefaultProvider } from './map_default';
 
 export function FilterBarLibMapFilterProvider(Promise, Private) {
@@ -41,6 +42,7 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
     Private(FilterBarLibMapQueryStringProvider),
     Private(FilterBarLibMapGeoBoundingBoxProvider),
     Private(FilterBarLibMapGeoPolygonProvider),
+    Private(FilterBarLibMapValuesProvider),
     Private(FilterBarLibMapDefaultProvider),
   ];
 

@@ -11,6 +11,7 @@ import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
 import scripts from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
+import { registerValuesApi } from './server/routes/api/values';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
@@ -151,6 +152,7 @@ export default function (kibana) {
       exportApi(server);
       homeApi(server);
       registerSuggestionsApi(server);
+      registerValuesApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
       server.expose('systemApi', systemApi);

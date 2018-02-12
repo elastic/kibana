@@ -45,6 +45,12 @@ export const FILTER_OPERATORS = [
     type: 'exists',
     negate: true,
   },
+  {
+    name: 'values',
+    type: 'values',
+    negate: false,
+    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
+  },
 ];
 
 export const FILTER_OPERATOR_TYPES = _(FILTER_OPERATORS)
