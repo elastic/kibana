@@ -12,7 +12,6 @@ module.exports = function (grunt) {
       'copy:devSource',
       'babel:build',
       '_build:createEmptyDirsAndFiles',
-      '_build:verifyTranslations',
       '_build:packageJson',
       '_build:readme',
       '_build:packages',
