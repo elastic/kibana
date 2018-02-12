@@ -63,22 +63,9 @@ test('rejects if any promise rejects', async () => {
   const batches = [[foo, bar], [baz]];
   const parallelize = parallelizeBatches(batches, obj => obj.promise);
 
-  const completed = [];
-  const failed = [];
-  parallelize.then(
-    () => {
-      completed.push('parallelizeBatches');
-    },
-    () => {
-      failed.push('parallelizeBatches');
-    }
-  );
+  foo.reject(new Error('foo failed'));
 
-  foo.reject();
-  await tick();
-
-  expect(completed).toEqual([]);
-  expect(failed).toEqual(['parallelizeBatches']);
+  await expect(parallelize).rejects.toThrow('foo failed');
 });
 
 function createPromiseWithResolve() {
