@@ -26,9 +26,18 @@ exports[`renders ControlsTab 1`] = `
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="1"
     moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "numberField",
+          "value": "2",
+        },
+      ]
+    }
   />
   <ControlEditor
     controlIndex={1}
@@ -51,9 +60,18 @@ exports[`renders ControlsTab 1`] = `
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="2"
     moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "custom label",
+          "value": "1",
+        },
+      ]
+    }
   />
   <EuiPanel
     grow={false}

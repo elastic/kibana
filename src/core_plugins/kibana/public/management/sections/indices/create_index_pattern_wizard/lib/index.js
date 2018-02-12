@@ -6,6 +6,6 @@ export { getIndices } from './get_indices';
 
 export { getMatchedIndices } from './get_matched_indices';
 
-export { isIndexPatternQueryValid } from './is_index_pattern_query_valid';
+export { containsInvalidCharacters } from './contains_invalid_characters';
 
 export { extractTimeFields } from './extract_time_fields';

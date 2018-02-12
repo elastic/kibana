@@ -93,4 +93,41 @@ describe('getMatchedIndices', () => {
       ]);
     });
   });
+
+  describe('systemIndices', () => {
+    it('should return all visible ccs indices', () => {
+      const query = 'cluster_one:*';
+      const indices = [
+        { name: 'cluster_one:kibana' },
+        { name: 'cluster_one:es' },
+        { name: 'cluster_two:kibana' },
+        { name: 'kibana' },
+        { name: 'cluster_one:.kibana' },
+      ];
+
+      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(visibleIndices).toEqual([
+        { name: 'cluster_one:kibana' },
+        { name: 'cluster_one:es' },
+        { name: 'cluster_one:.kibana' },
+      ]);
+    });
+
+    it('should return all visible ccs indices except for system indices', () => {
+      const query = 'cluster_one:*';
+      const indices = [
+        { name: 'cluster_one:kibana' },
+        { name: 'cluster_one:es' },
+        { name: 'cluster_two:kibana' },
+        { name: 'kibana' },
+        { name: 'cluster_one:.kibana' },
+      ];
+
+      const { visibleIndices } = getMatchedIndices(indices, indices, query, false);
+      expect(visibleIndices).toEqual([
+        { name: 'cluster_one:kibana' },
+        { name: 'cluster_one:es' },
+      ]);
+    });
+  });
 });

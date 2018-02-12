@@ -28,6 +28,7 @@ export function RangeControlEditor(props) {
         value={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        controlIndex={props.controlIndex}
       />
 
       <FieldSelect
@@ -36,6 +37,7 @@ export function RangeControlEditor(props) {
         filterField={filterField}
         onChange={props.handleFieldNameChange}
         getIndexPattern={props.getIndexPattern}
+        controlIndex={props.controlIndex}
       />
 
       <EuiFormRow
