@@ -5,13 +5,14 @@ import cmdShimCb from 'cmd-shim';
 import mkdirpCb from 'mkdirp';
 
 const stat = promisify(fs.stat);
+const readFile = promisify(fs.readFile);
 const unlink = promisify(fs.unlink);
 const symlink = promisify(fs.symlink);
 const chmod = promisify(fs.chmod);
 const cmdShim = promisify(cmdShimCb);
 const mkdirp = promisify(mkdirpCb);
 
-export { chmod, mkdirp };
+export { chmod, mkdirp, readFile };
 
 async function statTest(path, block) {
   try {
