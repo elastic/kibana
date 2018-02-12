@@ -163,6 +163,76 @@ export default function ({ getService, getPageObjects }) {
           expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
         });
       });
+
+      describe('nested controls', () => {
+
+        before(async () => {
+          await PageObjects.common.navigateToUrl('visualize', 'new');
+          await PageObjects.visualize.clickInputControlVis();
+          await PageObjects.visualize.clickVisEditorTab('controls');
+
+          await PageObjects.visualize.addInputControl();
+          await PageObjects.visualize.setReactSelect('#indexPatternSelect-0-row', 'logstash');
+          await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
+          await PageObjects.visualize.setReactSelect('#fieldSelect-0-row', 'geo.src');
+
+          await PageObjects.visualize.addInputControl();
+          await PageObjects.visualize.setReactSelect('#indexPatternSelect-1-row', 'logstash');
+          await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
+          await PageObjects.visualize.setReactSelect('#fieldSelect-1-row', 'clientip');
+          await PageObjects.visualize.setSelectByOptionText('parentSelect-1', 'geo.src');
+
+          await PageObjects.visualize.clickGo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+
+        it('should disable child control when parent control is not set', async () => {
+          const parentControlMenu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
+          expect(parentControlMenu.trim().split('\n').join()).to.equal('BR,CN,ID,IN,US');
+
+          const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
+          const isDisabled = await childControlInput.getProperty('disabled');
+          expect(isDisabled).to.equal(true);
+        });
+
+        it('should filter child control options by parent control value', async () => {
+          await PageObjects.visualize.setReactSelect('[data-test-subj="inputControl0"]', 'BR');
+
+          const childControlMenu = await PageObjects.visualize.getReactSelectOptions('inputControl1');
+          expect(childControlMenu.trim().split('\n').join()).to.equal('14.61.182.136,3.174.21.181,6.183.121.70,71.241.97.89,9.69.255.135');
+        });
+
+        it('should create a seperate filter pill for parent control and child control', async () => {
+          await PageObjects.visualize.setReactSelect('[data-test-subj="inputControl1"]', '14.61.182.136');
+
+          await testSubjects.click('inputControlSubmitBtn');
+
+          const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
+          expect(hasParentControlFilter).to.equal(true);
+
+          const hasChildControlFilter = await filterBar.hasFilter('clientip', '14.61.182.136');
+          expect(hasChildControlFilter).to.equal(true);
+        });
+
+        it('should clear child control dropdown when parent control value is removed', async () => {
+          await PageObjects.visualize.clearReactSelect('[data-test-subj="inputControl0"]');
+          await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
+
+          const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
+          const isDisabled = await childControlInput.getProperty('disabled');
+          expect(isDisabled).to.equal(true);
+
+          await testSubjects.click('inputControlCancelBtn');
+        });
+
+        it('should clear child control dropdown when parent control filter pill removed', async () => {
+          await filterBar.removeFilter('geo.src');
+          await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
+
+          const hasValue = await PageObjects.visualize.doesReactSelectHaveValue('[data-test-subj="inputControl1"]');
+          expect(hasValue).to.equal(false);
+        });
+      });
     });
   });
 }

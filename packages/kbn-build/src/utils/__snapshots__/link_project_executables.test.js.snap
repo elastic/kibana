@@ -9,6 +9,9 @@ Object {
     Array [
       "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
     ],
+    Array [
+      "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
+    ],
   ],
   "mkdirp": Array [],
   "readFile": Array [],
@@ -22,11 +25,20 @@ Object {
       "<repoRoot>/packages/kbn-build/src/utils/foo/node_modules/.bin/bar",
       "755",
     ],
+    Array [
+      "<repoRoot>/packages/kbn-build/src/utils/baz/node_modules/.bin/bar",
+      "755",
+    ],
   ],
   "createSymlink": Array [
     Array [
       "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
       "<repoRoot>/packages/kbn-build/src/utils/foo/node_modules/.bin/bar",
+      "exec",
+    ],
+    Array [
+      "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
+      "<repoRoot>/packages/kbn-build/src/utils/baz/node_modules/.bin/bar",
       "exec",
     ],
   ],
@@ -35,10 +47,16 @@ Object {
     Array [
       "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
     ],
+    Array [
+      "<repoRoot>/packages/kbn-build/src/utils/bar/bin/bar.js",
+    ],
   ],
   "mkdirp": Array [
     Array [
       "<repoRoot>/packages/kbn-build/src/utils/foo/node_modules/.bin",
+    ],
+    Array [
+      "<repoRoot>/packages/kbn-build/src/utils/baz/node_modules/.bin",
     ],
   ],
   "readFile": Array [],
@@ -49,6 +67,9 @@ exports[`bin script points to a file creates a symlink in the project node_modul
 Array [
   Array [
     "[foo] bar -> ../bar/bin/bar.js",
+  ],
+  Array [
+    "[baz] bar -> ../bar/bin/bar.js",
   ],
 ]
 `;
