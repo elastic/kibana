@@ -1,1 +1,1 @@
-import './scripted_fields_table';
+export { ScriptedFieldsTable } from './scripted_fields_table';
