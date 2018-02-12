@@ -50,6 +50,9 @@ module.directive('globalNav', (globalNavState, chrome) => {
         globalNavState.setOpen(!globalNavState.isOpen());
       };
 
+      scope.isHomeActive = () => {
+        return window.location.hash.indexOf('#/home') === 0;
+      };
     }
   };
 });
