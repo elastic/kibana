@@ -4,7 +4,7 @@ import copy from 'cpy';
 import { resolve } from 'path';
 import globby from 'globby';
 
-import { buildProductionProjects } from '../';
+import { buildProductionProjects } from '../build_production_projects';
 import { getProjects } from '../../utils/projects';
 
 // This is specifically a Mocha test instead of a Jest test because it's slow
