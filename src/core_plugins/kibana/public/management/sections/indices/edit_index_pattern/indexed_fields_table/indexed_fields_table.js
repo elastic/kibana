@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import { Table } from './components/table';
 import {
-  fieldWildcardProvider,
   getFieldFormat,
   getTableOfRecordsState,
   DEFAULT_TABLE_OF_RECORDS_STATE
@@ -18,6 +17,7 @@ export class IndexedFieldsTable extends Component {
     helpers: PropTypes.shape({
       redirectToRoute: PropTypes.func.isRequired,
     }),
+    fieldWildcardMatcher: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -34,10 +34,7 @@ export class IndexedFieldsTable extends Component {
   }
 
   mapFields(fields) {
-    const { indexPattern } = this.props;
-    const { fieldWildcardMatcher } = fieldWildcardProvider({
-      metaFields: indexPattern.metaFields
-    });
+    const { indexPattern, fieldWildcardMatcher } = this.props;
     const fieldWildcardMatch = fieldWildcardMatcher((indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value) || []));
 
     return fields
@@ -48,7 +45,7 @@ export class IndexedFieldsTable extends Component {
           routes: field.routes,
           indexPattern: field.indexPattern,
           format: getFieldFormat(indexPattern, field.name),
-          excluded: fieldWildcardMatch(field.name),
+          excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
         };
       });
   }

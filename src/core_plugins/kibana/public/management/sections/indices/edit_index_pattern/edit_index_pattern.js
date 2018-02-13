@@ -8,6 +8,7 @@ import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -67,6 +68,7 @@ function updateIndexedFieldsTable($scope, $state) {
         <IndexedFieldsTable
           indexPattern={$scope.indexPattern}
           fieldFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
           helpers={{
             redirectToRoute: (obj, route) => {
@@ -121,7 +123,9 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
+    const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
 
+    $scope.fieldWildcardMatcher = fieldWildcardMatcher;
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;

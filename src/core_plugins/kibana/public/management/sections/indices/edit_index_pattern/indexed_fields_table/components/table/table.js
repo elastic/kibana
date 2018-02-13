@@ -27,13 +27,13 @@ export class Table extends PureComponent {
           direction: PropTypes.string.isRequired,
         }).isRequired,
       }).isRequired,
-    }),
+    }).isRequired,
     editField: PropTypes.func.isRequired,
     onDataCriteriaChange: PropTypes.func.isRequired,
   }
 
   renderBooleanTemplate(value) {
-    return value ? <EuiIcon type="dot" color="secondary" /> : '';
+    return value ? <EuiIcon type="dot" color="secondary" /> : <span/>;
   }
 
   renderFieldName(name, isTimeField) {
@@ -81,7 +81,6 @@ export class Table extends PureComponent {
           name: 'Name',
           dataType: 'string',
           sortable: true,
-          width: '50%',
           render: (value) => {
             return this.renderFieldName(value, indexPattern.timeFieldName === value);
           },
@@ -108,7 +107,6 @@ export class Table extends PureComponent {
           dataType: 'boolean',
           sortable: true,
           render: this.renderBooleanTemplate,
-          width: '120px',
         },
         {
           field: 'aggregatable',
@@ -117,7 +115,6 @@ export class Table extends PureComponent {
           dataType: 'boolean',
           sortable: true,
           render: this.renderBooleanTemplate,
-          width: '120px',
         },
         {
           field: 'excluded',
@@ -126,7 +123,6 @@ export class Table extends PureComponent {
           dataType: 'boolean',
           sortable: true,
           render: this.renderBooleanTemplate,
-          width: '120px',
         },
         {
           name: '',
@@ -139,7 +135,6 @@ export class Table extends PureComponent {
               type: 'icon',
             },
           ],
-          width: '50px',
         }
       ],
       pagination: {
