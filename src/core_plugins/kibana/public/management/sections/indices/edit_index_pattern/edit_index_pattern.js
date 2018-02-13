@@ -12,7 +12,9 @@ import { FieldWildcardProvider } from 'ui/field_wildcard';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
+import { ScriptedFieldsTable } from './scripted_fields_table';
 
+const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 
 function updateSourceFiltersTable($scope, $state) {
