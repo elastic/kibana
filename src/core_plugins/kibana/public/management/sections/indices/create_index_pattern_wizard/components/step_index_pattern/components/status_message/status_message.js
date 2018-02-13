@@ -8,10 +8,11 @@ import {
 
 export const StatusMessage = ({
   matchedIndices: {
-    allIndices,
-    exactMatchedIndices,
-    partialMatchedIndices
+    allIndices = [],
+    exactMatchedIndices = [],
+    partialMatchedIndices = []
   },
+  isIncludingSystemIndices,
   query,
 }) => {
   let statusIcon;
@@ -21,13 +22,29 @@ export const StatusMessage = ({
   if (query.length === 0) {
     statusIcon = null;
     statusColor = 'default';
-    statusMessage = allIndices.length > 1
-      ? (
+
+    if (allIndices.length > 1) {
+      statusMessage = (
         <span>
           Your index pattern can match any of your <strong>{allIndices.length} indices</strong>, below.
         </span>
-      )
-      : (<span>You only have a single index. You can create an index pattern to match it.</span>);
+      );
+    }
+    else if (!isIncludingSystemIndices) {
+      statusMessage = (
+        <span>
+          No indices found, but there are some system indices.
+        </span>
+      );
+    }
+    else {
+      // This should never really happen but let's handle it just in case
+      statusMessage = (
+        <span>
+          No indices found.
+        </span>
+      );
+    }
   }
   else if (exactMatchedIndices.length) {
     statusIcon = 'check';
