@@ -11,7 +11,7 @@ exports[`render 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        Recently accessed
+        Recently viewed
       </EuiTextColor>
     </p>
   </EuiText>

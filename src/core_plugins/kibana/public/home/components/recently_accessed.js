@@ -175,7 +175,7 @@ export class RecentlyAccessed extends React.Component {
         <EuiText>
           <p>
             <EuiTextColor color="subdued">
-              Recently accessed
+              Recently viewed
             </EuiTextColor>
           </p>
         </EuiText>
