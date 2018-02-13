@@ -18,6 +18,7 @@ uiRoutes.when('/management/kibana/index', {
         indexPatterns: $injector.get('indexPatterns'),
         savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
         kbnUrl: $injector.get('kbnUrl'),
+        scopeApply: () => $scope.$apply(),
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;

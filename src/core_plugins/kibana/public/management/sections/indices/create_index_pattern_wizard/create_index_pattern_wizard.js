@@ -20,6 +20,7 @@ export class CreateIndexPatternWizard extends Component {
       savedObjectsClient: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       kbnUrl: PropTypes.object.isRequired,
+      scopeApply: PropTypes.func.isRequired,
     }).isRequired,
   }
 
@@ -60,6 +61,7 @@ export class CreateIndexPatternWizard extends Component {
 
     services.indexPatterns.cache.clear(createdId);
     services.kbnUrl.change(`/management/kibana/indices/${createdId}`);
+    services.scopeApply();
   }
 
   goToTimeFieldStep = (indexPattern) => {
