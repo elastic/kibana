@@ -37,30 +37,6 @@ describe('pointseries', () => {
         rows: [{ x: 1, y: 2 }],
       });
     });
-    it('invalid args', () => {
-      expect(fn(testTable, { x: 'name', y: 'quantity * 3' })).to.be.eql({
-        type: 'pointseries',
-        columns: {
-          x: {
-            type: 'string',
-            role: 'dimension',
-            expression: 'name',
-          },
-          y: {
-            type: 'number',
-            role: 'measure',
-            expression: 'quantity * 3',
-          },
-        },
-        rows: [
-          { x: 'product1', y: null },
-          { x: 'product2', y: null },
-          { x: 'product3', y: null },
-          { x: 'product4', y: null },
-          { x: 'product5', y: null },
-        ],
-      });
-    });
     it('args with dimensions only', () => {
       expect(fn(testTable, { x: 'name', y: 'price', size: 'quantity' })).to.be.eql({
         type: 'pointseries',
@@ -159,6 +135,54 @@ describe('pointseries', () => {
       randomPointseries.rows.map((row, i) => {
         expect(row.x).to.be(testTable.rows[i].time);
         expect(row.y).to.be.within(0, 1);
+      });
+    });
+    it('empty string arg', () => {
+      expect(fn(testTable, { x: 'name', y: 'max(time)', size: '    ', text: '' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'string',
+            role: 'dimension',
+            expression: 'name',
+          },
+          y: {
+            type: 'number',
+            role: 'measure',
+            expression: 'max(time)',
+          },
+        },
+        rows: [
+          { x: 'product1', y: 1518015600950 },
+          { x: 'product2', y: 1518015600950 },
+          { x: 'product3', y: 1517842800950 },
+          { x: 'product4', y: 1517842800950 },
+          { x: 'product5', y: 1517842800950 },
+        ],
+      });
+    });
+    it('invalid args', () => {
+      expect(fn(testTable, { x: 'name', y: 'quantity * 3' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'string',
+            role: 'dimension',
+            expression: 'name',
+          },
+          y: {
+            type: 'number',
+            role: 'measure',
+            expression: 'quantity * 3',
+          },
+        },
+        rows: [
+          { x: 'product1', y: null },
+          { x: 'product2', y: null },
+          { x: 'product3', y: null },
+          { x: 'product4', y: null },
+          { x: 'product5', y: null },
+        ],
       });
     });
   });

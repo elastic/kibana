@@ -7,6 +7,17 @@ describe('datatableToMathContext', () => {
   });
   it('filters out non-numeric columns and pivots datatable', () => {
     expect(datatableToMathContext(testTable)).to.be.eql({
+      time: [
+        1517842800950,
+        1517929200950,
+        1518015600950,
+        1517842800950,
+        1517929200950,
+        1518015600950,
+        1517842800950,
+        1517842800950,
+        1517842800950,
+      ],
       price: [605, 583, 420, 216, 200, 190, 67, 311, 288],
       quantity: [100, 200, 300, 350, 256, 231, 240, 447, 384],
     });

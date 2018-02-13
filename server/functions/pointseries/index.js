@@ -54,8 +54,7 @@ export const pointseries = () => ({
     // Separates args into dimensions and measures arrays by checking if arg is a column reference (dimension)
     Object.keys(args).forEach(arg => {
       const mathExp = args[arg];
-
-      if (mathExp != null) {
+      if (mathExp != null && mathExp.trim() !== '') {
         const col = {
           type: '',
           role: '',
