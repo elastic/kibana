@@ -11,7 +11,7 @@ export function kubernetesMetricsSpecProvider() {
     shortDescription: 'Fetch metrics from your Kubernetes installation.',
     longDescription: 'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html).',
-    //iconPath: '', TODO
+    euiIconType: 'logoKubernetes',
     artifacts: {
       dashboards: [
         {
