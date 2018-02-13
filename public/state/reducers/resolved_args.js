@@ -66,6 +66,14 @@ export const resolvedArgsReducer = handleActions(
       return set(transientState, fullPath, getContext(value, false, oldVal));
     },
 
+    [actions.setValues]: (transientState, { payload }) => {
+      return payload.reduce((acc, setValueObj) => {
+        const fullPath = getFullPath(setValueObj.path);
+        const oldVal = get(acc, fullPath, null);
+        return set(acc, fullPath, getContext(setValueObj.value, false, oldVal));
+      }, transientState);
+    },
+
     [actions.clear]: (transientState, { payload }) => {
       const { path } = payload;
       return del(transientState, getFullPath(path));

@@ -5,31 +5,12 @@ import { createThunk } from 'redux-thunks';
 import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { getType } from '../../../common/lib/get_type';
-import { fromExpression, toExpression, safeElementFromExpression } from '../../../common/lib/ast';
-import { interpretAst } from '../../lib/interpreter';
+import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { notify } from '../../lib/notify';
+import { runInterpreter } from '../../lib/run_interpreter';
+import { interpretAst } from '../../lib/interpreter';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
-
-function runInterpreter(ast, context = null, retry = false) {
-  return interpretAst(ast, context)
-    .then(renderable => {
-      if (getType(renderable) === 'render') {
-        return renderable;
-      }
-
-      if (!retry) {
-        return runInterpreter(fromExpression('render'), renderable || context, true);
-      }
-
-      return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
-    })
-    .catch(err => {
-      notify.error(err);
-      throw err;
-    });
-}
 
 function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
@@ -117,36 +98,34 @@ export const fetchContext = createThunk(
   }
 );
 
+const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
+  const argumentPath = [element.id, 'expressionRenderable'];
+
+  dispatch(
+    args.setLoading({
+      path: argumentPath,
+    })
+  );
+
+  const getAction = renderable =>
+    args.setValue({
+      path: argumentPath,
+      value: renderable,
+    });
+
+  return runInterpreter(ast, context, { castToRender: true })
+    .then(renderable => {
+      dispatch(getAction(renderable));
+    })
+    .catch(err => {
+      notify.error(err);
+      dispatch(getAction(err));
+    });
+};
+
 export const fetchRenderableWithContext = createThunk(
   'fetchRenderableWithContext',
-  ({ dispatch }, element, ast, context) => {
-    const argumentPath = [element.id, 'expressionRenderable'];
-
-    dispatch(
-      args.setLoading({
-        path: argumentPath,
-      })
-    );
-
-    return runInterpreter(ast, context)
-      .then(renderable => {
-        dispatch(
-          args.setValue({
-            path: argumentPath,
-            value: renderable,
-          })
-        );
-      })
-      .catch(err => {
-        notify.error(err);
-        dispatch(
-          args.setValue({
-            path: argumentPath,
-            value: err,
-          })
-        );
-      });
-  }
+  fetchRenderableWithContextFn
 );
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
@@ -157,10 +136,31 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
 
 export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatch, getState }) => {
   const pages = getPages(getState());
+
+  const elements = [];
   pages.forEach(page => {
     page.elements.forEach(element => {
-      dispatch(fetchRenderable(element));
+      elements.push(element);
     });
+  });
+
+  dispatch(args.inFlightActive());
+
+  const renderablePromises = elements.map(element => {
+    const ast = element.ast || safeElementFromExpression(element.expression);
+    const argumentPath = [element.id, 'expressionRenderable'];
+
+    return runInterpreter(ast, null, { castToRender: true })
+      .then(renderable => ({ path: argumentPath, value: renderable }))
+      .catch(err => {
+        notify.error(err);
+        return { path: argumentPath, value: err };
+      });
+  });
+
+  Promise.all(renderablePromises).then(renderables => {
+    dispatch(args.inFlightComplete());
+    dispatch(args.setValues(renderables));
   });
 });
 
