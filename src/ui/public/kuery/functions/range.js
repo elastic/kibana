@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from 'ui/filter_manager/lib/range';
+import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, params, serializeStyle = 'operator') {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -23,22 +24,30 @@ export function buildNodeParams(fieldName, params, serializeStyle = 'operator') 
 
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...args ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
+  const fields = getFields(fieldNameArg, indexPattern);
   const namedArgs = extractArguments(args);
   const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
 
-  if (field && field.scripted) {
+  const queries = fields.map((field) => {
+    if (field.scripted) {
+      return {
+        script: {
+          ...getRangeScript(field, queryParams)
+        }
+      };
+    }
+
     return {
-      script: {
-        ...getRangeScript(field, queryParams)
+      range: {
+        [field.name]: queryParams
       }
     };
-  }
+  });
 
   return {
-    range: {
-      [fieldName]: queryParams
+    bool: {
+      should: queries,
+      minimum_should_match: 1
     }
   };
 }

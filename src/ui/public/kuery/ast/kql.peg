@@ -5,6 +5,14 @@
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
   const buildNamedArgNode = nodeTypes.namedArg.buildNode;
+
+  function trimLeft(string) {
+    return string.replace(/^[\s\uFEFF\xA0]+/g, '');
+  }
+
+  function trimRight(string) {
+    return string.replace(/[\s\uFEFF\xA0]+$/g, '');
+  }
 }
 
 start
@@ -115,10 +123,18 @@ QuotedString
 
 WildcardString
   = sequences:WildcardSequence+ {
-    return buildWildcardNode(sequences.reduce((acc, arr) => {
+    const compactedSequences = sequences.reduce((acc, arr, i) => {
       const compacted = arr.filter(value => value !== '');
       return [...acc, ...compacted];
-    }, []));
+    }, []);
+    if (typeof compactedSequences[0] === 'string') {
+      compactedSequences[0] = trimLeft(compactedSequences[0]);
+    }
+    const lastIndex = compactedSequences.length - 1;
+    if (typeof compactedSequences[lastIndex] === 'string') {
+      compactedSequences[lastIndex] = trimRight(compactedSequences[lastIndex]);
+    }
+    return buildWildcardNode(compactedSequences);
   }
 
 WildcardSequence
