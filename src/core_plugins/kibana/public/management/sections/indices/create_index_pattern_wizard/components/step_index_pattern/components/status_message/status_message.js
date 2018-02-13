@@ -33,7 +33,7 @@ export const StatusMessage = ({
     else if (!isIncludingSystemIndices) {
       statusMessage = (
         <span>
-          No indices found, but there are some system indices.
+          No Elasticsearch indices match your pattern.  To view the matching system indices, toggle the switch in the upper right.
         </span>
       );
     }
@@ -41,7 +41,7 @@ export const StatusMessage = ({
       // This should never really happen but let's handle it just in case
       statusMessage = (
         <span>
-          No indices found.
+          No Elasticsearch indices match your pattern.
         </span>
       );
     }
