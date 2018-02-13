@@ -41,6 +41,13 @@ module.directive('queryBar', function () {
         this.submit();
       };
 
+      this.updateTypeaheadItems = () => {
+        const { persistedLog, localQuery: { query } } = this;
+        this.typeaheadItems = persistedLog.get().filter(recentSearch => {
+          return recentSearch.includes(query) && recentSearch !== query;
+        });
+      };
+
       $scope.$watch('queryBar.localQuery.language', (language) => {
         this.persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
           maxLength: config.get('history:limit'),
@@ -48,11 +55,7 @@ module.directive('queryBar', function () {
         });
       });
 
-      $scope.$watch('queryBar.localQuery.query', (query) => {
-        this.typeaheadItems = this.persistedLog.get().filter(recentSearch => {
-          return recentSearch.includes(query) && recentSearch !== query;
-        });
-      });
+      $scope.$watch('queryBar.localQuery.query', this.updateTypeaheadItems);
 
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = {
