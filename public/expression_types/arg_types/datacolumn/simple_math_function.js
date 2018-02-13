@@ -11,7 +11,6 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
     { label: 'Max', value: 'max' },
     { label: 'Min', value: 'min' },
     { label: 'Median', value: 'median' },
-    { label: 'Mode', value: 'mode' },
   ];
 
   const onSelect = ev => onChange(ev.target.value);

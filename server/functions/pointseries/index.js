@@ -1,62 +1,21 @@
-import { groupBy, zipObject, omit, uniq, map, mapValues } from 'lodash';
+import { groupBy, zipObject, omit, values } from 'lodash';
 import uniqBy from 'lodash.uniqby';
-import pickBy from 'lodash.pickby';
 import moment from 'moment';
-import mathjs from 'mathjs';
-import { findInObject } from '../../common/lib/find_in_object';
-import { pivotObjectArray } from '../../common/lib/pivot_object_array.js';
+import { evaluate } from 'tinymath';
+import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
+import { datatableToMathContext } from '../../../common/lib/datatable_to_math_context.js';
+import { isColumnReference } from './lib/is_column_reference.js';
+import { getExpressionType } from './lib/get_expression_type';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
-
-function isColumnReference(mathExpression) {
-  const parsedMath = mathjs.parse(mathExpression);
-  if (parsedMath.type === 'SymbolNode') return true;
-}
-
-function isMeasure(mathScope, mathExpression) {
-  if (isColumnReference(mathExpression)) return false;
-
-  const parsedMath = mathjs.parse(mathExpression);
-
-  if (parsedMath.type !== 'FunctionNode' && parsedMath.type !== 'ConstantNode') {
-    throw new Error('Expressions must be wrapped in a function such as sum()');
-  }
-
-  if (parsedMath.type !== 'ConstantNode') return true;
-
-  // This will throw if the field isn't found on scope.
-  // Must be a function node!
-  const evaluated = mathjs.eval(mathExpression, mathScope);
-  if (typeof evaluated !== 'number') return false;
-
-  return true;
-}
-
-function getFieldType(columns, field) {
-  if (!field) return 'null';
-  const column = columns.find(column => column.name === field);
-  return column ? column.type : 'null';
-}
-
-function getType(columns, mathExpression) {
-  if (isColumnReference(mathExpression)) return getFieldType(columns, mathExpression);
-
-  const parsedMath = mathjs.parse(mathExpression);
-  const symbolNames = map(
-    findInObject(parsedMath, (val, name) => val.type === 'SymbolNode' && name !== 'fn'),
-    'name'
-  );
-  const symbolTypes = uniq(symbolNames.map(field => getFieldType(columns, field)));
-  return symbolTypes.length === 1 ? symbolTypes[0] : 'string';
-}
 
 export const pointseries = () => ({
   name: 'pointseries',
   type: 'pointseries',
   help:
-    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a MathJS function.' +
-    'If you are using MathJS, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
-    'keys. Measures are then deduplicated by those keys using the specified MathJS function',
+    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a tinymath function.' +
+    'If you are using tinymath, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
+    'keys. Measures are then deduplicated by those keys using the specified tinymath function',
   context: {
     types: ['datatable'],
   },
@@ -85,26 +44,43 @@ export const pointseries = () => ({
     // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
+    // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
     const mathScope = pivotObjectArray(context.rows, context.columns.map(col => col.name));
-    const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(mathScope, val))).filter(
-      arg => args[arg] != null
-    );
-    const measureNames = Object.keys(pickBy(args, val => isMeasure(mathScope, val)));
-    const columns = mapValues(args, arg => {
-      if (!arg) return;
-      // TODO: We're setting the measure/dimension break down here, but it should probably come from the datatable right?
-      return {
-        type: getType(context.columns, arg),
-        role: isMeasure(mathScope, arg) ? 'measure' : 'dimension',
-        expression: arg,
-      };
+
+    const measureNames = [];
+    const dimensionNames = [];
+    const columns = {};
+
+    // Separates args into dimensions and measures arrays by checking if arg is a column reference (dimension)
+    Object.keys(args).forEach(arg => {
+      const mathExp = args[arg];
+
+      if (mathExp != null) {
+        const col = {
+          type: '',
+          role: '',
+          expression: mathExp,
+        };
+
+        if (isColumnReference(mathExp)) {
+          dimensionNames.push(arg);
+          col.type = getExpressionType(context.columns, mathExp);
+          col.role = 'dimension';
+        } else {
+          measureNames.push(arg);
+          col.type = 'number';
+          col.role = 'measure';
+        }
+
+        columns[arg] = col;
+      }
     });
 
     const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
     const rows = context.rows.map((row, i) => ({ ...row, [PRIMARY_KEY]: i }));
 
     function normalizeValue(expression, value) {
-      switch (getType(context.columns, expression)) {
+      switch (getExpressionType(context.columns, expression)) {
         case 'string':
           return String(value);
         case 'number':
@@ -125,7 +101,7 @@ export const pointseries = () => ({
           const colName = args[dimension];
           try {
             acc[dimension] = colName
-              ? normalizeValue(colName, mathjs.eval(colName, mathScope)[i])
+              ? normalizeValue(colName, evaluate(colName, mathScope)[i])
               : '_all';
           } catch (e) {
             // TODO: handle invalid column names...
@@ -150,13 +126,18 @@ export const pointseries = () => ({
     });
 
     // Then compute that 1 value for each measure
-    Object.values(measureKeys).forEach(rows => {
+    values(measureKeys).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
-      const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
+      const subScope = datatableToMathContext(subtable);
       const measureValues = measureNames.map(measure => {
         try {
-          return mathjs.eval(args[measure], subScope);
+          const ev = evaluate(args[measure], subScope);
+          if (Array.isArray(ev)) {
+            throw new Error('Expressions must be wrapped in a function such as sum()');
+          }
+          return evaluate(args[measure], subScope);
         } catch (e) {
+          // TODO: don't catch if eval to Array
           return null;
         }
       });
@@ -168,7 +149,7 @@ export const pointseries = () => ({
 
     // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
     const resultingRows = uniqBy(
-      Object.values(results).map(row => omit(row, PRIMARY_KEY)),
+      values(results).map(row => omit(row, PRIMARY_KEY)),
       JSON.stringify
     );
 

@@ -3,43 +3,13 @@ import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 import { sortBy } from 'lodash';
-import { parse } from 'mathjs';
 import { createStatefulPropHoc } from '../../../components/enhance/stateful_prop';
 import { getType } from '../../../../common/lib/get_type';
 import { SimpleMathFunction } from './simple_math_function';
+import { getFormObject } from './get_form_object';
 import './datacolumn.less';
 
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
-function getFormObject(argValue) {
-  if (argValue === '') {
-    return {
-      fn: '',
-      column: '',
-    };
-  }
-
-  // check if the value is a math expression, and set its type if it is
-  const mathObj = parse(argValue);
-
-  // A symbol node is a plain string, so we guess that they're looking for a column.
-  if (mathObj.type === 'SymbolNode') {
-    return {
-      fn: '',
-      column: argValue,
-    };
-
-    // Check if its a simple function, eg a function wrapping a symbol node
-  } else if (mathObj.type === 'FunctionNode' && mathObj.args[0].type === 'SymbolNode') {
-    return {
-      fn: mathObj.name,
-      column: mathObj.args[0].name,
-    };
-
-    // Screw it, textarea for you my fancy.
-  } else {
-    throw new Error(`Invalid math object type: ${mathObj.type}`);
-  }
-}
 
 const DatacolumnArgInput = ({
   onValueChange,
