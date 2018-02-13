@@ -10,7 +10,6 @@ export const UI_EXPORT_DEFAULTS = {
   webpackAliases: {
     ui: resolve(ROOT, 'src/ui/public'),
     ui_framework: resolve(ROOT, 'ui_framework'),
-    packages: resolve(ROOT, 'packages'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
     querystring: 'querystring-browser',
     moment$: resolve(ROOT, 'webpackShims/moment'),
