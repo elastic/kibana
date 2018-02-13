@@ -52,7 +52,7 @@ Expression
   / ValueExpression
 
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:Literal {
+  = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
     const range = buildNamedArgNode(operator, value);
     return buildFunctionNode('range', [field, range]);
   }
