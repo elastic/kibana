@@ -16,7 +16,7 @@ uiRoutes
 
 uiModules
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope, config) {
+  .service('timefilter', function (Private, globalState, $rootScope, config, $location) {
     const Events = Private(EventsProvider);
 
     function convertISO8601(stringTime) {
@@ -105,10 +105,25 @@ uiModules
       return this.calculateBounds(this.time);
     };
 
+    Timefilter.prototype.getForceNow = function () {
+      const query = $location.search().forceNow;
+      if (!query) {
+        return;
+      }
+
+      const ticks = Date.parse(query);
+      if (isNaN(ticks)) {
+        throw new Error(`forceNow query parameter can't be parsed`);
+      }
+      return new Date(ticks);
+    };
+
     Timefilter.prototype.calculateBounds = function (timeRange) {
+      const forceNow = this.getForceNow();
+
       return {
-        min: dateMath.parse(timeRange.from),
-        max: dateMath.parse(timeRange.to, { roundUp: true })
+        min: dateMath.parse(timeRange.from, { forceNow }),
+        max: dateMath.parse(timeRange.to, { roundUp: true, forceNow })
       };
     };
 

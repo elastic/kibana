@@ -91,6 +91,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
   <div>
     <Introduction
       description="tutorial used to drive jest tests"
+      iconType="logoApache"
       title="jest test tutorial"
     />
     <EuiSpacer
@@ -175,6 +176,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   <div>
     <Introduction
       description="tutorial used to drive jest tests"
+      iconType="logoApache"
       title="jest test tutorial"
     />
     <EuiSpacer

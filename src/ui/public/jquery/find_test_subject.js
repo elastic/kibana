@@ -1,4 +1,4 @@
-import testSubjSelector from '@elastic/test-subj-selector';
+import testSubjSelector from '@kbn/test-subj-selector';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function bindToJquery($) {

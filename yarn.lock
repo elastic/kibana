@@ -110,10 +110,6 @@
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.1.tgz#743801971d8f0c975f9a122867d0e8939d31b3eb"
 
-"@elastic/test-subj-selector@0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/test-subj-selector/-/test-subj-selector-0.2.1.tgz#f49fedd438bb1f2273d3c6b1b1b8bf335de2c192"
-
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
@@ -131,6 +127,10 @@
   uid ""
 
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
