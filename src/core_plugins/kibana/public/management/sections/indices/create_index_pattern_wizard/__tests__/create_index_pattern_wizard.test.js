@@ -23,7 +23,7 @@ const services = {
   indexPatterns: {},
   savedObjectsClient: {},
   config: {},
-  kbnUrl: {},
+  changeUrl: () => {},
   scopeApply: () => {},
 };
 
@@ -97,12 +97,11 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   it('should create an index pattern', async () => {
-    const scopeApply = jest.fn();
     const get = jest.fn();
     const set = jest.fn();
     const create = jest.fn().mockImplementation(() => 'id');
     const clear = jest.fn();
-    const change = jest.fn();
+    const changeUrl = jest.fn();
 
     const component = shallow(
       <CreateIndexPatternWizard
@@ -117,18 +116,16 @@ describe('CreateIndexPatternWizard', () => {
             }),
             cache: { clear }
           },
-          kbnUrl: { change },
-          scopeApply,
+          changeUrl,
         }}
       />
     );
 
     component.setState({ indexPattern: 'foo' });
     await component.instance().createIndexPattern(null, 'id');
-    expect(scopeApply).toBeCalled();
     expect(get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
-    expect(change).toBeCalledWith(`/management/kibana/indices/id`);
+    expect(changeUrl).toBeCalledWith(`/management/kibana/indices/id`);
   });
 });
