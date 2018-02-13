@@ -53,6 +53,7 @@ module.directive('queryBar', function () {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
+        this.updateTypeaheadItems();
       });
 
       $scope.$watch('queryBar.localQuery.query', this.updateTypeaheadItems);
