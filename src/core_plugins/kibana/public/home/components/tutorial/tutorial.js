@@ -194,6 +194,7 @@ export class Tutorial extends React.Component {
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
             exportedFieldsUrl={exportedFieldsUrl}
+            iconType={this.state.tutorial.euiIconType}
           />
 
           <EuiSpacer />

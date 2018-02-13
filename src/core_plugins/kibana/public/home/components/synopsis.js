@@ -8,9 +8,10 @@ import {
   EuiTitle,
   EuiText,
   EuiTextColor,
+  EuiIcon,
 } from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
+export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel }) {
   let optionalImg;
   if (iconUrl) {
     optionalImg = (
@@ -19,6 +20,15 @@ export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
           className="synopsisIcon"
           src={iconUrl}
           alt=""
+        />
+      </EuiFlexItem>
+    );
+  } else if (iconType) {
+    optionalImg = (
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type={iconType}
+          size="xl"
         />
       </EuiFlexItem>
     );
@@ -53,8 +63,6 @@ export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
     );
   }
 
-
-
   return (
     <a
       href={url}
@@ -69,6 +77,7 @@ export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
 Synopsis.propTypes = {
   description: PropTypes.string.isRequired,
   iconUrl: PropTypes.string,
+  iconType: PropTypes.string,
   title: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired
 };
