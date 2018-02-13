@@ -102,7 +102,17 @@ export class VegaParser {
    * @private
    */
   _calcSizing() {
-    this.useResize = !this.useMap && (this.spec.autosize === 'fit' || this.spec.autosize.type === 'fit');
+    this.useResize = false;
+    if (!this.useMap) {
+      // when useResize is true, vega's canvas size will be set based on the size of the container,
+      // and will be automatically updated on resize events.
+      // We delete width & height if the autosize is set to "fit"
+      // We also set useResize=true in case autosize=none, and width & height are not set
+      const autosize = this.spec.autosize.type || this.spec.autosize;
+      if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
+        this.useResize = true;
+      }
+    }
 
     // Padding is not included in the width/height by default
     this.paddingWidth = 0;
