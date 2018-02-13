@@ -46,6 +46,28 @@ describe('#getProjects', () => {
       'There are multiple projects with the same name [baz]'
     );
   });
+
+  test('can specify additional project paths in package.json', async () => {
+    const projects = await getProjects(rootPath, [
+      '.',
+      'packages/*',
+      '../additional_projects',
+    ]);
+
+    const expectedProjects = [
+      'kibana',
+      'bar',
+      'foo',
+      'with-additional-projects',
+      'baz',
+      'quux',
+    ];
+
+    expect([...projects.keys()]).toEqual(
+      expect.arrayContaining(expectedProjects)
+    );
+    expect(projects.size).toBe(6);
+  });
 });
 
 describe('#buildProjectGraph', () => {

@@ -72,9 +72,19 @@ export class Project {
     );
   }
 
-  skipFromBuild() {
+  getBuildOptions() {
     const json = this.json;
-    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+    return (json.kibana && json.kibana.build) || {};
+  }
+
+  skipFromBuild() {
+    const build = this.getBuildOptions();
+    return build.skip === true;
+  }
+
+  getAdditionalProjects() {
+    const build = this.getBuildOptions();
+    return build.projects;
   }
 
   hasScript(name) {

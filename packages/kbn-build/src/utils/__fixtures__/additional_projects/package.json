@@ -1,0 +1,12 @@
+{
+  "name": "with-additional-projects",
+  "version": "1.0.0",
+  "kibana": {
+    "build": {
+      "projects": [
+        "./packages/*",
+        "./baz"
+      ]
+    }
+  }
+}
