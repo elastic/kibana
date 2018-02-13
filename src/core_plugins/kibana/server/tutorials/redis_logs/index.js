@@ -17,7 +17,7 @@ export function redisLogsSpecProvider() {
                      ' option is set.' +
                      ' Note that the `slowlog` fileset is experimental.' +
                      ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-redis.html).',
-    //iconPath: '', TODO
+    euiIconType: 'logoRedis',
     artifacts: {
       dashboards: [
         {
