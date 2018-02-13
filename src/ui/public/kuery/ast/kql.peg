@@ -3,6 +3,7 @@
   const { nodeTypes } = options.helpers;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
+  const buildWildcardNode = nodeTypes.wildcard.buildNode;
   const buildNamedArgNode = nodeTypes.namedArg.buildNode;
 }
 
@@ -86,6 +87,10 @@ Value
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
+  / value:WildcardString {
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
   / value:UnquotedLiteral {
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
@@ -101,11 +106,24 @@ Not
   = 'not'i Space+
 
 Literal
-  = QuotedString / UnquotedLiteral
+  = QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
   = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
     return buildLiteralNode(chars.join(''));
+  }
+
+WildcardString
+  = sequences:WildcardSequence+ {
+    return buildWildcardNode(sequences.reduce((acc, arr) => {
+      const compacted = arr.filter(value => value !== '');
+      return [...acc, ...compacted];
+    }, []));
+  }
+
+WildcardSequence
+  = left:UnquotedCharacter* '*' right:UnquotedCharacter* {
+    return [left.join(''), Symbol('*'), right.join('')];
   }
 
 UnquotedLiteral
@@ -133,7 +151,7 @@ Keyword
   = Or / And / Not
 
 SpecialCharacter
-  = [():<>"]
+  = [\\():<>"*]
 
 RangeOperator
   = '<=' { return 'lte'; }
