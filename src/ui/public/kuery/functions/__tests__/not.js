@@ -8,7 +8,7 @@ import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
-const childNode = nodeTypes.function.buildNode('is', 'response', 200);
+const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
 
@@ -64,27 +64,27 @@ describe('kuery functions', function () {
       it('should serialize "not" nodes with an operator syntax', function () {
         const node = nodeTypes.function.buildNode('not', childNode, 'operator');
         const result = not.toKueryExpression(node);
-        expect(result).to.be('!"response":200');
+        expect(result).to.be('!"extension":"jpg"');
       });
 
       it('should wrap "and" and "or" sub-queries in parenthesis', function () {
         const andNode = nodeTypes.function.buildNode('and', [childNode, childNode], 'operator');
         const notAndNode = nodeTypes.function.buildNode('not', andNode, 'operator');
-        expect(not.toKueryExpression(notAndNode)).to.be('!("response":200 and "response":200)');
+        expect(not.toKueryExpression(notAndNode)).to.be('!("extension":"jpg" and "extension":"jpg")');
 
         const orNode = nodeTypes.function.buildNode('or', [childNode, childNode], 'operator');
         const notOrNode = nodeTypes.function.buildNode('not', orNode, 'operator');
-        expect(not.toKueryExpression(notOrNode)).to.be('!("response":200 or "response":200)');
+        expect(not.toKueryExpression(notOrNode)).to.be('!("extension":"jpg" or "extension":"jpg")');
       });
 
       it('should not wrap "and" and "or" sub-queries that use the function syntax', function () {
         const andNode = nodeTypes.function.buildNode('and', [childNode, childNode], 'function');
         const notAndNode = nodeTypes.function.buildNode('not', andNode, 'operator');
-        expect(not.toKueryExpression(notAndNode)).to.be('!and("response":200, "response":200)');
+        expect(not.toKueryExpression(notAndNode)).to.be('!and("extension":"jpg", "extension":"jpg")');
 
         const orNode = nodeTypes.function.buildNode('or', [childNode, childNode], 'function');
         const notOrNode = nodeTypes.function.buildNode('not', orNode, 'operator');
-        expect(not.toKueryExpression(notOrNode)).to.be('!or("response":200, "response":200)');
+        expect(not.toKueryExpression(notOrNode)).to.be('!or("extension":"jpg", "extension":"jpg")');
       });
 
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {

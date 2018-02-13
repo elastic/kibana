@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import * as literal from '../node_types/literal';
 import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
+import { getFieldsByWildcard } from './utils/get_fields_by_wildcard';
 
 export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
   if (_.isUndefined(fieldName)) {
@@ -17,17 +18,12 @@ export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
-  const { arguments: [ fieldNameArg, valueArg ] } = node;
+  const { arguments: [fieldNameArg, valueArg] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
   const value = !_.isUndefined(valueArg) ? literal.toElasticsearchQuery(valueArg) : valueArg;
 
-  if (field && field.scripted) {
-    return {
-      script: {
-        ...getPhraseScript(field, value)
-      }
-    };
+  if (fieldName === '*' && value === '*') {
+    return { match_all: {} };
   }
   else if (fieldName === null) {
     return {
@@ -38,28 +34,47 @@ export function toElasticsearchQuery(node, indexPattern) {
       }
     };
   }
-  else if (fieldName === '*' && value === '*') {
-    return { match_all: {} };
+
+  const fields = getFieldsByWildcard(fieldName, indexPattern);
+  const scriptedFields = fields.filter(field => field.scripted);
+  const nonScriptedFields = fields.filter(field => !field.scripted);
+  const queries = [];
+
+  if (value !== '*') {
+    scriptedFields.forEach((scriptedField) => {
+      queries.push({
+        script: {
+          ...getPhraseScript(scriptedField, value)
+        }
+      });
+    });
   }
-  else if (fieldName === '*' && value !== '*') {
-    return {
-      multi_match: {
-        query: value,
-        fields: ['*'],
-        type: 'phrase',
-        lenient: true,
-      }
-    };
-  }
-  else if (fieldName !== '*' && value === '*') {
-    return {
-      exists: { field: fieldName }
-    };
+
+  nonScriptedFields.forEach((field) => {
+    if (value === '*') {
+      queries.push({
+        exists: {
+          field: field.name
+        }
+      });
+    }
+    else {
+      queries.push({
+        match_phrase: {
+          [field.name]: value
+        }
+      });
+    }
+  });
+
+  if (queries.length === 1) {
+    return queries[0];
   }
   else {
     return {
-      match_phrase: {
-        [fieldName]: value
+      bool: {
+        should: queries,
+        minimum_should_match: 1,
       }
     };
   }

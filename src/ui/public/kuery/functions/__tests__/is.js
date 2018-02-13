@@ -71,27 +71,23 @@ describe('kuery functions', function () {
         expectDeepEqual(result, expected);
       });
 
-      it('should return an ES multi_match query when fieldName is "*"', function () {
-        const expected = {
-          multi_match: {
-            query: 200,
-            fields: ['*'],
-            type: 'phrase',
-            lenient: true,
-          }
-        };
-
+      it('should return a bool query with one sub-query per field when fieldName is "*"', function () {
         const node = nodeTypes.function.buildNode('is', '*', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expectDeepEqual(result, expected);
+
+        expect(result).to.have.property('bool');
+        expect(result.bool).to.have.property('minimum_should_match', 1);
+        expect(result.bool).to.have.property('should');
+        expect(result.bool.should).to.be.an('array');
+        expect(result.bool.should).to.have.length(indexPattern.fields.length);
       });
 
       it('should return an ES exists query when value is "*"', function () {
         const expected = {
-          exists: { field: 'response' }
+          exists: { field: 'extension' }
         };
 
-        const node = nodeTypes.function.buildNode('is', 'response', '*');
+        const node = nodeTypes.function.buildNode('is', 'extension', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
         expectDeepEqual(result, expected);
       });
@@ -99,11 +95,11 @@ describe('kuery functions', function () {
       it('should return an ES match_phrase query when a concrete fieldName and value are provided', function () {
         const expected = {
           match_phrase: {
-            response: 200
+            extension: 'jpg'
           }
         };
 
-        const node = nodeTypes.function.buildNode('is', 'response', 200);
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
         const result = is.toElasticsearchQuery(node, indexPattern);
         expectDeepEqual(result, expected);
       });

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from 'ui/filter_manager/lib/range';
+import { getFieldsByWildcard } from './utils/get_fields_by_wildcard';
 
 export function buildNodeParams(fieldName, params, serializeStyle = 'operator') {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -21,13 +22,7 @@ export function buildNodeParams(fieldName, params, serializeStyle = 'operator') 
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
-  const [ fieldNameArg, ...args ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
-  const namedArgs = extractArguments(args);
-  const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
-
+function createRangeDSL(field, queryParams) {
   if (field && field.scripted) {
     return {
       script: {
@@ -38,9 +33,29 @@ export function toElasticsearchQuery(node, indexPattern) {
 
   return {
     range: {
-      [fieldName]: queryParams
+      [field.name]: queryParams
     }
   };
+}
+
+export function toElasticsearchQuery(node, indexPattern) {
+  const [ fieldNameArg, ...args ] = node.arguments;
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  const fields = getFieldsByWildcard(fieldName, indexPattern);
+  const namedArgs = extractArguments(args);
+  const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
+
+  if (fields.length === 1) {
+    return createRangeDSL(fields[0], queryParams);
+  }
+  else {
+    return {
+      bool: {
+        should: fields.map(field => createRangeDSL(field, queryParams)),
+        minimum_should_match: 1,
+      }
+    };
+  }
 }
 
 export function toKueryExpression(node) {

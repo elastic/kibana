@@ -28,8 +28,8 @@ describe('build query', function () {
 
     it('should transform an array of kuery queries into ES queries combined in the bool\'s filter clause', function () {
       const queries = [
-        { query: 'foo:bar', language: 'kuery' },
-        { query: 'bar:baz', language: 'kuery' },
+        { query: 'machine.os:bar', language: 'kuery' },
+        { query: 'extension:baz', language: 'kuery' },
       ];
 
       const expectedESQueries = queries.map(
