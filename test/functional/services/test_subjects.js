@@ -1,4 +1,4 @@
-import testSubjSelector from '@elastic/test-subj-selector';
+import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
   map as mapAsync,
