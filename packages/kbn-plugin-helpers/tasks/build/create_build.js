@@ -53,6 +53,10 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
       });
     })
     .then(function () {
+      if (plugin.buildIgnoreDependencies) {
+        return;
+      }
+
       // install packages in build
       const options = {
         cwd: buildRoot,
