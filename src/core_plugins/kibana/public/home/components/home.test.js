@@ -9,7 +9,8 @@ test('should render home component', () => {
   const recentlyAccessed = [
     {
       label: 'my vis',
-      link: 'link_to_my_vis'
+      link: 'link_to_my_vis',
+      id: '1'
     }
   ];
   const component = shallow(<Home

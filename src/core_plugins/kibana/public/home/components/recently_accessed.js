@@ -50,6 +50,7 @@ export class RecentlyAccessed extends React.Component {
           <li
             style={{ marginBottom: 8 }}
             key={this.props.recentlyAccessed[i].id}
+            data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
           >
             <EuiLink
               className="recentlyAccessedDropwdownLink"
@@ -67,7 +68,10 @@ export class RecentlyAccessed extends React.Component {
       dropdownLabel = `${dropdownLinks.length} more link`;
     }
     const openPopoverComponent = (
-      <EuiLink onClick={this.onButtonClick.bind(this)}>
+      <EuiLink
+        onClick={this.onButtonClick.bind(this)}
+        data-test-subj="openMoreRecentlyAccessedPopover"
+      >
         <EuiTextColor
           className="recentlyAccessedDropdownLabel"
           color="subdued"

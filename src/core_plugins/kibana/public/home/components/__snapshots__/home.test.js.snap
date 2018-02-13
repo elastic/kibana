@@ -457,6 +457,7 @@ exports[`should render home component 1`] = `
       recentlyAccessed={
         Array [
           Object {
+            "id": "1",
             "label": "my vis",
             "link": "link_to_my_vis",
           },
