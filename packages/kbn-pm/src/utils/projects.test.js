@@ -68,6 +68,12 @@ describe('#getProjects', () => {
     );
     expect(projects.size).toBe(6);
   });
+
+  test("throws if specifying additional projects that does't exist", async () => {
+    await expect(
+      getProjects(rootPath, ['../additional_no_matching'])
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
 });
 
 describe('#buildProjectGraph', () => {

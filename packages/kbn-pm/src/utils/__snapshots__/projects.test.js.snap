@@ -17,6 +17,8 @@ Object {
 }
 `;
 
+exports[`#getProjects throws if specifying additional projects that does't exist 1`] = `"No projects matched the additional projects pattern [./packages/*] specified in [additional-but-no-matching-projects]"`;
+
 exports[`#topologicallyBatchProjects batches projects topologically based on their project dependencies 1`] = `
 Array [
   Array [

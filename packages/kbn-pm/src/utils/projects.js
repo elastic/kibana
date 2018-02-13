@@ -33,12 +33,25 @@ export async function getProjects(rootPath, projectsPathsPatterns) {
       // A project can specify additional projects, which will be resolved
       // relative to the package itself.
       const additionalProjects = project.getAdditionalProjects() || [];
-      for (const additional of additionalProjects) {
-        const morePaths = await packagesFromGlobPattern({
-          pattern: additional,
+      for (const additionalProject of additionalProjects) {
+        const additionalProjectPaths = await packagesFromGlobPattern({
+          pattern: additionalProject,
           rootPath: project.path,
         });
-        pathsToProcess = pathsToProcess.concat(morePaths);
+
+        if (additionalProjectPaths.length === 0) {
+          throw new CliError(
+            `No projects matched the additional projects pattern [${additionalProject}] specified in [${
+              project.name
+            }]`,
+            {
+              name: project.name,
+              pattern: additionalProject,
+            }
+          );
+        }
+
+        pathsToProcess = pathsToProcess.concat(additionalProjectPaths);
       }
 
       projects.set(project.name, project);
