@@ -81,13 +81,14 @@ uiRoutes
           });
       },
       savedSearch: function (courier, savedSearches, $route) {
-        return savedSearches.get($route.current.params.id)
+        const savedSearchId = $route.current.params.id;
+        return savedSearches.get(savedSearchId)
           .then((savedSearch) => {
-            if ($route.current.params.id) {
+            if (savedSearchId) {
               recentlyAccessed.add(
-                `#/discover/${$route.current.params.id}`,
+                `#/discover/${savedSearchId}`,
                 savedSearch.title,
-                $route.current.params.id);
+                savedSearchId);
             }
             return savedSearch;
           })
