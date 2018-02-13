@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 export function VislibVisualizationsTimeMarkerProvider() {
 

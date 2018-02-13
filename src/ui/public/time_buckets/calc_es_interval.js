@@ -1,4 +1,4 @@
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 export function TimeBucketsCalcEsIntervalProvider() {
 
