@@ -24,9 +24,7 @@ export const DropdownFilter = ({ value, onChange, commit, choices }) => {
           commit(e.target.value);
         }}
       >
-        <option value="" disabled>
-          select column
-        </option>
+        <option value="%%CANVAS_MATCH_ALL%%">-- ANY --</option>
         {choices.map(value => (
           <option key={value} value={value}>
             {value}
