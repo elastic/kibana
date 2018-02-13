@@ -164,7 +164,7 @@ const MyNewVisType = (Private) => {
     icon: 'my_icon',
     description: 'Cool new chart',
     visConfig: {
-       template: '<div ng-controller="MyAngularController"></div>`
+       template: '<div ng-controller="MyAngularController"></div>'
     }
   });
 }
