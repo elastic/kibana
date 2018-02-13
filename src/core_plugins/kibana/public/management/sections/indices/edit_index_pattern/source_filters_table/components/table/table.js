@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {
   EuiTableOfRecords,
   EuiFieldText,
+  keyCodes,
 } from '@elastic/eui';
 
 export class Table extends Component {
@@ -43,6 +44,16 @@ export class Table extends Component {
   stopEditingFilter = () => this.setState({ editingFilter: null })
   onEditingFilterChange = e => this.setState({ editingFilterValue: e.target.value })
 
+  onEditFieldKeyPressed = ({ charCode }) => {
+    if (keyCodes.ENTER === charCode) {
+      this.props.saveFilter({
+        oldFilterValue: this.state.editingFilter,
+        newFilterValue: this.state.editingFilterValue,
+      });
+      this.stopEditingFilter();
+    }
+  }
+
   getTableConfig() {
     const {
       deleteFilter,
@@ -52,8 +63,10 @@ export class Table extends Component {
       saveFilter,
     } = this.props;
 
-    const saveOrEditAction = this.state.editingFilter
-      ? {
+    const actions = [];
+
+    if (this.state.editingFilter) {
+      actions.push({
         name: 'Save',
         description: 'Save this field',
         icon: 'checkInCircleFilled',
@@ -64,12 +77,31 @@ export class Table extends Component {
           });
           this.stopEditingFilter();
         }
-      } : {
+      });
+      actions.push({
+        name: 'Cancel',
+        description: 'Cancel editing this field',
+        icon: 'cross',
+        onClick: () => {
+          this.stopEditingFilter();
+        }
+      });
+    }
+    else {
+      actions.push({
         name: 'Edit',
         description: 'Edit this field',
         icon: 'pencil',
-        onClick: filter => this.startEditingFilter(filter.value),
-      };
+        onClick: filter => this.startEditingFilter(filter.value)
+      });
+      actions.push({
+        name: 'Delete',
+        description: 'Delete this field',
+        icon: 'trash',
+        color: 'danger',
+        onClick: deleteFilter,
+      });
+    }
 
     return {
       recordId: 'id',
@@ -86,6 +118,7 @@ export class Table extends Component {
                 <EuiFieldText
                   value={this.state.editingFilterValue}
                   onChange={this.onEditingFilterChange}
+                  onKeyPress={this.onEditFieldKeyPressed}
                 />
               );
             }
@@ -117,16 +150,7 @@ export class Table extends Component {
         },
         {
           name: '',
-          actions: [
-            saveOrEditAction,
-            {
-              name: 'Delete',
-              description: 'Delete this field',
-              icon: 'trash',
-              color: 'danger',
-              onClick: deleteFilter,
-            },
-          ]
+          actions,
         }
       ],
       pagination: {

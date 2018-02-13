@@ -10,6 +10,7 @@ exports[`Table should allow edits 1`] = `
     <input
       className="euiFieldText"
       onChange={[Function]}
+      onKeyPress={[Function]}
       type="text"
       value="tim*"
     />

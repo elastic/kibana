@@ -36,10 +36,10 @@ export class SourceFiltersTable extends Component {
   }
 
   componentWillMount() {
-    this.fetchFilters();
+    this.putFiltersInState();
   }
 
-  fetchFilters = () => {
+  putFiltersInState = () => {
     const filters = this.props.indexPattern.sourceFilters;
 
     this.setState({
@@ -87,12 +87,12 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: true });
     await indexPattern.save();
     onAddOrRemoveFilter && onAddOrRemoveFilter();
-    this.fetchFilters();
+    this.putFiltersInState();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
   }
 
-  addFilter = async (value) => {
+  onAddFilter = async (value) => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
 
     indexPattern.sourceFilters = [
@@ -103,7 +103,7 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: true });
     await indexPattern.save();
     onAddOrRemoveFilter && onAddOrRemoveFilter();
-    this.fetchFilters();
+    this.putFiltersInState();
     this.setState({ isSaving: false });
   }
 
@@ -119,7 +119,7 @@ export class SourceFiltersTable extends Component {
 
     this.setState({ isSaving: true });
     await indexPattern.save();
-    this.fetchFilters();
+    this.putFiltersInState();
     this.setState({ isSaving: false });
   }
 
@@ -133,7 +133,7 @@ export class SourceFiltersTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Delete source filter?`}
+          title={`Delete source filter '${filterToDelete.value}'?`}
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
           cancelButtonText="Cancel"
@@ -170,7 +170,7 @@ export class SourceFiltersTable extends Component {
     return (
       <div>
         <Header/>
-        <AddFilter addFilter={this.addFilter}/>
+        <AddFilter onAddFilter={this.onAddFilter}/>
         <EuiSpacer size="l" />
         { isSaving ? <EuiLoadingSpinner/> : null }
         { data.records.length > 0 ?

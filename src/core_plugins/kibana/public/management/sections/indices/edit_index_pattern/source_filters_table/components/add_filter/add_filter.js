@@ -10,7 +10,7 @@ import {
 
 export class AddFilter extends Component {
   static propTypes = {
-    addFilter: PropTypes.func.isRequired,
+    onAddFilter: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -20,8 +20,8 @@ export class AddFilter extends Component {
     };
   }
 
-  addFilter = () => {
-    this.props.addFilter(this.state.filter);
+  onAddFilter = () => {
+    this.props.onAddFilter(this.state.filter);
     this.setState({ filter: '' });
   }
 
@@ -40,7 +40,8 @@ export class AddFilter extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            onClick={this.addFilter}
+            isDisabled={filter.length === 0}
+            onClick={this.onAddFilter}
           >
             Add
           </EuiButton>

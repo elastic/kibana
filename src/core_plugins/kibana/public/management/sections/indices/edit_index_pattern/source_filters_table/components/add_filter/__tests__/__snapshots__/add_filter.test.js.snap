@@ -29,6 +29,7 @@ exports[`AddFilter should render normally 1`] = `
       color="primary"
       fill={false}
       iconSide="left"
+      isDisabled={true}
       onClick={[Function]}
       type="button"
     >

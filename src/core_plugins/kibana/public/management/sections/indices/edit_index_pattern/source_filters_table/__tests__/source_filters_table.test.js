@@ -151,7 +151,7 @@ describe('SourceFiltersTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
-    await component.instance().addFilter('na*');
+    await component.instance().onAddFilter('na*');
     await component.update();
 
     expect(save).toBeCalled();

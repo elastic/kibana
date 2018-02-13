@@ -4,7 +4,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -64,7 +64,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -119,7 +119,7 @@ exports[`SourceFiltersTable should hide the table if there are no scripted field
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -131,7 +131,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -185,7 +185,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -246,7 +246,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -296,7 +296,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
@@ -344,7 +344,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
       confirmButtonText="Delete"
       onCancel={[Function]}
       onConfirm={[Function]}
-      title="Delete source filter?"
+      title="Delete source filter 'tim*'?"
     />
   </eui-overlay-mask>
 </div>
@@ -354,7 +354,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
 <div>
   <header />
   <AddFilter
-    addFilter={[Function]}
+    onAddFilter={[Function]}
   />
   <eui-spacer
     size="l"
