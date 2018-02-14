@@ -50,13 +50,6 @@ export default function (api) {
 
   });
 
-  api.addEndpointDescription('_segments', {
-    patterns: [
-      "{indices}/_segments",
-      "_segments"
-    ]
-  });
-
   api.addEndpointDescription('_validate_query', {
     methods: ['GET', 'POST'],
     patterns: [
