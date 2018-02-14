@@ -137,14 +137,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_upgrade_status', {
-    methods: ["GET"],
-    patterns: [
-      "_upgrade",
-      "{indices}/_upgrade"
-    ]
-  });
-
   api.addEndpointDescription('_open', {
     methods: ["POST"],
     patterns: [
