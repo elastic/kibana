@@ -67,17 +67,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_shard_stores', {
-    methods: ['GET'],
-    patterns: [
-      "{indices}/_shard_stores",
-      "_shard_stores"
-    ],
-    url_params: {
-      status: ["green", "yellow", "red", "all"]
-    }
-  });
-
   api.addEndpointDescription('__create_index__', {
     methods: ['PUT'],
     patterns: [
