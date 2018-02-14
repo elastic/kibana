@@ -15,6 +15,7 @@ export const IGNORE_FILE_GLOBS = [
   'Gruntfile.js',
   'tasks/config/**/*',
   'tasks/build/docker/docs/{Dockerfile,docker-compose.yml}',
+  'packages/kbn-pm/vendor/yarn-1.3.2.js'
 ];
 
 
@@ -53,6 +54,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/ui/public/flot-charts',
   'src/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
+  'packages/kbn-pm/src/utils/__fixtures__/*'
 ];
 
 
