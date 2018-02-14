@@ -12,18 +12,17 @@ const buildVersion = PLUGIN.version;
 const kibanaVersion = PLUGIN.version;
 const buildFiles = PLUGIN.buildSourcePatterns;
 const packageFile = `${PLUGIN.id}-${buildVersion}.zip`;
-const doBuild = () => createBuild(PLUGIN, PLUGIN_BUILD_DIR, buildVersion, kibanaVersion, buildFiles);
 
-beforeAll(() => del(PLUGIN_BUILD_DIR).then(doBuild));
+beforeAll(() => del(PLUGIN_BUILD_DIR));
 afterAll(() => del(PLUGIN_BUILD_DIR));
 
-describe('creating the package', function () {
-  it('creates zip file in build target path', function () {
-    return createPackage(PLUGIN, PLUGIN_BUILD_DIR, buildVersion)
-      .then(() => {
-        const zipFile = resolve(PLUGIN_BUILD_DIR, packageFile);
-        const stats = statSync(zipFile);
-        expect(stats.isFile()).toBeTruthy();
-      });
+describe('creating the package', () => {
+  it('creates zip file in build target path', async () => {
+    await createBuild(PLUGIN, PLUGIN_BUILD_DIR, buildVersion, kibanaVersion, buildFiles);
+    await createPackage(PLUGIN, PLUGIN_BUILD_DIR, buildVersion);
+
+    const zipFile = resolve(PLUGIN_BUILD_DIR, packageFile);
+    const stats = statSync(zipFile);
+    expect(stats.isFile()).toBeTruthy();
   });
 });
