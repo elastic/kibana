@@ -24,6 +24,7 @@ export const revealImage = () => ({
     img.src = config.image;
 
     function finish() {
+      // eslint-disable-next-line no-unsanitized/property
       domNode.innerHTML = container.outerHTML;
       handlers.done();
     }
