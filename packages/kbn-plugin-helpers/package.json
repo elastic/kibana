@@ -9,10 +9,6 @@
   },
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
-  "scripts": {
-    "test": "jest",
-    "test:dev": "jest --watch"
-  },
   "dependencies": {
     "commander": "^2.9.0",
     "del": "^2.2.2",
@@ -23,8 +19,5 @@
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
     "vinyl-fs": "^3.0.0"
-  },
-  "devDependencies": {
-    "jest": "^17.0.3"
   }
 }
