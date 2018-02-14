@@ -25,6 +25,18 @@ const savedObjectsIndexCheckTimeout = (settings, log) => {
   }
 };
 
+const rewriteBasePath = (settings, log) => {
+  if (_.has(settings, 'server.basePath') && !_.has(settings, 'server.rewriteBasePath')) {
+    log(
+      'Setting server.basePath without server.rewriteBasePath is deprecated until Kibana 7.0, ' +
+      'when the default behavior of server.basePath will change and Kibana will start expecting ' +
+      'that all requests start with the server.basePath rather expecting you to rewrite the ' +
+      'requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
+      'current behavior and silence this warning.'
+    );
+  }
+};
+
 const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
@@ -37,6 +49,7 @@ const deprecations = [
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
+  rewriteBasePath,
 ];
 
 export const transformDeprecations = createTransform(deprecations);
