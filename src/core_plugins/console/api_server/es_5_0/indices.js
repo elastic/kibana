@@ -126,26 +126,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('__create_index__', {
-    methods: ['PUT'],
-    patterns: [
-      "{index}"
-    ],
-    data_autocomplete_rules: {
-      mappings: {
-        __scope_link: '_put_mapping'
-      },
-      settings: {
-        __scope_link: '_put_settings'
-      },
-      aliases: {
-        __template: {
-          "NAME": {}
-        }
-      }
-    }
-  });
-
   api.addEndpointDescription('__delete_indices__', {
     methods: ['DELETE'],
     patterns: [
