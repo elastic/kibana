@@ -30,7 +30,7 @@ the relative location of the Kibana repo, so it would instead be:
 ```
 
 How all of this works is described in more detail in the
-[`@kbn/build` docs](./kbn-build#how-it-works).
+[`@kbn/pm` docs](./kbn-pm#how-it-works).
 
 ## Creating a new package
 
