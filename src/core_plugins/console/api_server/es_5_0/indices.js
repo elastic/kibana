@@ -196,13 +196,6 @@ export default function (api) {
     ]
   });
 
-  api.addEndpointDescription('_close', {
-    methods: ["POST"],
-    patterns: [
-      "{indices}/_close"
-    ]
-  });
-
   api.addEndpointDescription('_open', {
     methods: ["POST"],
     patterns: [
