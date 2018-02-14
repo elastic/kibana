@@ -7,19 +7,6 @@ export default function (api) {
     ],
   });
 
-  api.addEndpointDescription('_flush', {
-    methods: ['POST'],
-    patterns: [
-      "_flush",
-      "{indices}/_flush"
-    ],
-    url_params: {
-      wait_if_ongoing: [true, false],
-      force: [true, false]
-    }
-  });
-
-
   api.addEndpointDescription('_rollover', {
     methods: ['POST'],
     patterns: [
