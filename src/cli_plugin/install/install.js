@@ -6,7 +6,7 @@ import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { sync as rimrafSync } from 'rimraf';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
-import { prepareExternalProjectDependencies } from '@kbn/build';
+import { prepareExternalProjectDependencies } from '@kbn/pm';
 import mkdirp from 'mkdirp';
 
 const mkdir = Promise.promisify(mkdirp);

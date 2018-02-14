@@ -118,7 +118,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/build@link:packages/kbn-build":
+"@kbn/pm@link:packages/kbn-pm":
   version "0.0.0"
   uid ""
 
