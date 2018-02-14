@@ -1,25 +1,18 @@
-import expect from 'expect.js';
 import tempy from 'tempy';
 import copy from 'cpy';
 import { resolve } from 'path';
 import globby from 'globby';
 
-import { buildProductionProjects } from '../build_production_projects';
-import { getProjects } from '../../utils/projects';
-
-// This is specifically a Mocha test instead of a Jest test because it's slow
-// and more integration-y, as we're trying to not add very slow tests to our
-// Jest unit tests.
+import { buildProductionProjects } from './build_production_projects';
+import { getProjects } from '../utils/projects';
 
 describe('kbn-pm production', function() {
   it('builds and copies projects for production', async function() {
-    this.timeout(60 * 1000);
+    jest.setTimeout(60 * 1000);
 
     const tmpDir = tempy.directory();
     const buildRoot = tempy.directory();
-    const fixturesPath = resolve(__dirname, 'fixtures');
-
-    // console.log({ tmpDir, buildRoot, __dirname });
+    const fixturesPath = resolve(__dirname, '__fixtures__');
 
     // Copy all the test fixtures into a tmp dir, as we will be mutating them
     await copy(['**/*'], tmpDir, {
@@ -44,15 +37,6 @@ describe('kbn-pm production', function() {
       cwd: buildRoot,
     });
 
-    expect(files).to.eql([
-      'packages/bar/package.json',
-      'packages/bar/src/index.js',
-      'packages/bar/target/index.js',
-      'packages/bar/yarn.lock',
-      'packages/foo/package.json',
-      'packages/foo/src/index.js',
-      'packages/foo/target/index.js',
-      'packages/foo/yarn.lock',
-    ]);
+    expect(files.sort()).toMatchSnapshot();
   });
 });

@@ -15,6 +15,5 @@
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
 /packages/kbn-pm/vendor
-/packages/kbn-pm/**/fixtures
 /packages/kbn-plugin-generator/sao_template/template
 !/.eslintrc.js

@@ -1,7 +1,7 @@
 module.exports = {
   overrides: [
     {
-      files: ['**/*.test.js'],
+      files: ['**/*.test.js', '**/*.integration_test.js'],
       plugins: [
         'jest',
       ],
