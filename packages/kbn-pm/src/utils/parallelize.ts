@@ -1,4 +1,7 @@
-export async function parallelizeBatches(batches, fn) {
+export async function parallelizeBatches<T>(
+  batches: Array<T[]>,
+  fn: (item: T) => Promise<void>
+) {
   for (const batch of batches) {
     const running = batch.map(obj => fn(obj));
 

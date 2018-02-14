@@ -4,12 +4,18 @@ import { relative } from 'path';
 import ora from 'ora';
 
 import { isDirectory } from '../utils/fs';
+import { Project } from '../utils/project';
+import { ProjectGraph } from '../utils/projects';
 
 export const name = 'clean';
 export const description =
   'Remove the node_modules and target directories from all projects.';
 
-export async function run(projects, projectGraph, { rootPath }) {
+export async function run(
+  projects: Map<string, Project>,
+  projectGraph: ProjectGraph,
+  { rootPath }: { rootPath: string }
+) {
   const directoriesToDelete = [];
   for (const project of projects.values()) {
     if (await isDirectory(project.nodeModulesLocation)) {
@@ -28,7 +34,8 @@ export async function run(projects, projectGraph, { rootPath }) {
 
     for (const dir of directoriesToDelete) {
       const deleting = del(dir, { force: true });
-      ora.promise(deleting, relative(rootPath, dir));
+      // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
+      (ora as any).promise(deleting, relative(rootPath, dir));
       await deleting;
     }
   }

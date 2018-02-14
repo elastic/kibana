@@ -2,20 +2,25 @@ import readPkg from 'read-pkg';
 import writePkg from 'write-pkg';
 import path from 'path';
 
-export function readPackageJson(dir) {
+export type Package = { [k: string]: any };
+export type PackageDependencies = { [key: string]: string };
+export type PackageScripts = { [key: string]: string };
+
+export function readPackageJson(dir: string) {
   return readPkg(path.join(dir, 'package.json'), { normalize: false });
 }
 
-export function writePackageJson(path, json) {
+export function writePackageJson(path: string, json: Package) {
   return writePkg(path, json);
 }
 
-export const createProductionPackageJson = pkgJson => ({
+export const createProductionPackageJson = (pkgJson: Package) => ({
   ...pkgJson,
   dependencies: transformDependencies(pkgJson.dependencies),
 });
 
-export const isLinkDependency = depVersion => depVersion.startsWith('link:');
+export const isLinkDependency = (depVersion: string) =>
+  depVersion.startsWith('link:');
 
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
@@ -26,8 +31,8 @@ export const isLinkDependency = depVersion => depVersion.startsWith('link:');
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  */
-export function transformDependencies(dependencies = {}) {
-  const newDeps = {};
+export function transformDependencies(dependencies: PackageDependencies = {}) {
+  const newDeps: PackageDependencies = {};
   for (const name of Object.keys(dependencies)) {
     const depVersion = dependencies[name];
     if (isLinkDependency(depVersion)) {

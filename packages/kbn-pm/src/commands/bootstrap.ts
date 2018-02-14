@@ -1,13 +1,18 @@
 import chalk from 'chalk';
 
-import { topologicallyBatchProjects } from '../utils/projects';
+import { Project } from '../utils/project';
+import { ProjectGraph, topologicallyBatchProjects } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
 
 export const name = 'bootstrap';
 export const description = 'Install dependencies and crosslink projects';
 
-export async function run(projects, projectGraph, { options }) {
+export async function run(
+  projects: Map<string, Project>,
+  projectGraph: ProjectGraph,
+  { options }: { options: { [key: string]: boolean } }
+) {
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const frozenLockfile = options['frozen-lockfile'] === true;
@@ -39,9 +44,9 @@ export async function run(projects, projectGraph, { options }) {
       '\nLinking executables completed, running `kbn:bootstrap` scripts\n'
     )
   );
-  await parallelizeBatches(batchedProjects, pkg => {
+  await parallelizeBatches(batchedProjects, async pkg => {
     if (pkg.hasScript('kbn:bootstrap')) {
-      return pkg.runScriptStreaming('kbn:bootstrap');
+      await pkg.runScriptStreaming('kbn:bootstrap');
     }
   });
 

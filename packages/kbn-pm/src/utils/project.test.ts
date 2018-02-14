@@ -4,7 +4,7 @@ import { Project } from './project';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
-const createProjectWith = (fields, path = '') =>
+const createProjectWith = (fields: { [key: string]: any }, path = '') =>
   new Project(
     {
       name: 'kibana',

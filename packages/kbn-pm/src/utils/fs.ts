@@ -14,7 +14,7 @@ const mkdirp = promisify(mkdirpCb);
 
 export { chmod, mkdirp, readFile };
 
-async function statTest(path, block) {
+async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
     return block(await stat(path));
   } catch (e) {
@@ -30,7 +30,7 @@ async function statTest(path, block) {
  * @param  {String} path
  * @return {Promise<Boolean>}
  */
-export async function isDirectory(path) {
+export async function isDirectory(path: string) {
   return await statTest(path, stats => stats.isDirectory());
 }
 
@@ -39,7 +39,7 @@ export async function isDirectory(path) {
  * @param  {String} path
  * @return {Promise<Boolean>}
  */
-export async function isFile(path) {
+export async function isFile(path: string) {
   return await statTest(path, stats => stats.isFile());
 }
 
@@ -54,20 +54,7 @@ export async function isFile(path) {
  *  for executable files on windows.
  * @return {Promise<undefined>}
  */
-export async function createSymlink(src, dest, type) {
-  async function forceCreate(src, dest, type) {
-    try {
-      // If something exists at `dest` we need to remove it first.
-      await unlink(dest);
-    } catch (error) {
-      if (error.code !== 'ENOENT') {
-        throw error;
-      }
-    }
-
-    await symlink(src, dest, type);
-  }
-
+export async function createSymlink(src: string, dest: string, type: string) {
   if (process.platform === 'win32') {
     if (type === 'exec') {
       await cmdShim(src, dest);
@@ -79,4 +66,17 @@ export async function createSymlink(src, dest, type) {
     const relativeSource = relative(dirname(dest), src);
     await forceCreate(relativeSource, dest, posixType);
   }
+}
+
+async function forceCreate(src: string, dest: string, type: string) {
+  try {
+    // If something exists at `dest` we need to remove it first.
+    await unlink(dest);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await symlink(src, dest, type);
 }

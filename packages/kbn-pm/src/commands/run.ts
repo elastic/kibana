@@ -1,13 +1,18 @@
 import chalk from 'chalk';
 
-import { topologicallyBatchProjects } from '../utils/projects';
+import { Project } from '../utils/project';
+import { ProjectGraph, topologicallyBatchProjects } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
 
 export const name = 'run';
 export const description =
   'Run script defined in package.json in each package that contains that script.';
 
-export async function run(projects, projectGraph, { extraArgs }) {
+export async function run(
+  projects: Map<string, Project>,
+  projectGraph: ProjectGraph,
+  { extraArgs }: { extraArgs: string[] }
+) {
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   if (extraArgs.length === 0) {
@@ -26,9 +31,9 @@ export async function run(projects, projectGraph, { extraArgs }) {
     )
   );
 
-  await parallelizeBatches(batchedProjects, pkg => {
+  await parallelizeBatches(batchedProjects, async pkg => {
     if (pkg.hasScript(scriptName)) {
-      return pkg.runScriptStreaming(scriptName, scriptArgs);
+      await pkg.runScriptStreaming(scriptName, scriptArgs);
     }
   });
 }

@@ -1,9 +1,13 @@
+const installInDir = jest.fn();
+const runScriptInPackageStreaming = jest.fn();
+const linkProjectExecutables = jest.fn();
+
 jest.mock('../utils/scripts', () => ({
-  installInDir: jest.fn(),
-  runScriptInPackageStreaming: jest.fn(),
+  installInDir,
+  runScriptInPackageStreaming,
 }));
 jest.mock('../utils/link_project_executables', () => ({
-  linkProjectExecutables: jest.fn(),
+  linkProjectExecutables,
 }));
 
 import { resolve } from 'path';
@@ -15,10 +19,8 @@ import {
 import { run } from './bootstrap';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
-import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
-import { linkProjectExecutables } from '../utils/link_project_executables';
 
-const createProject = (fields, path = '.') =>
+const createProject = (fields: { [key: string]: any }, path = '.') =>
   new Project(
     {
       name: 'kibana',
