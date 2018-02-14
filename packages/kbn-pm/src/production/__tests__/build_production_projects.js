@@ -11,7 +11,7 @@ import { getProjects } from '../../utils/projects';
 // and more integration-y, as we're trying to not add very slow tests to our
 // Jest unit tests.
 
-describe('kbn-build production', function() {
+describe('kbn-pm production', function() {
   it('builds and copies projects for production', async function() {
     this.timeout(60 * 1000);
 

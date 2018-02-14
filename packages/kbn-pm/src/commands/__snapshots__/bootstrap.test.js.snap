@@ -15,11 +15,11 @@ Array [
           "name": "kibana",
           "version": "1.0.0",
         },
-        "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/node_modules",
-        "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/package.json",
-        "path": "<repoRoot>/packages/kbn-build/src/commands",
+        "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/node_modules",
+        "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/package.json",
+        "path": "<repoRoot>/packages/kbn-pm/src/commands",
         "scripts": Object {},
-        "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/target",
+        "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/target",
       },
       "bar" => Project {
         "allDependencies": Object {},
@@ -30,13 +30,13 @@ Array [
           },
           "version": "1.0.0",
         },
-        "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
-        "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
-        "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+        "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
+        "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
+        "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
         "scripts": Object {
           "kbn:bootstrap": "node ./bar.js",
         },
-        "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
+        "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
       },
     },
     Map {
@@ -50,13 +50,13 @@ Array [
             },
             "version": "1.0.0",
           },
-          "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
-          "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
-          "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+          "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
+          "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
+          "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
           "scripts": Object {
             "kbn:bootstrap": "node ./bar.js",
           },
-          "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
+          "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
         },
       ],
       "bar" => Array [],
@@ -79,13 +79,13 @@ Array [
         },
         "version": "1.0.0",
       },
-      "nodeModulesLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/node_modules",
-      "packageJsonLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/package.json",
-      "path": "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+      "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
+      "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
+      "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
       "scripts": Object {
         "kbn:bootstrap": "node ./bar.js",
       },
-      "targetLocation": "<repoRoot>/packages/kbn-build/src/commands/packages/bar/target",
+      "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
     },
   ],
 ]
@@ -94,7 +94,7 @@ Array [
 exports[`does not run installer if no deps in package: install in dir 1`] = `
 Array [
   Array [
-    "<repoRoot>/packages/kbn-build/src/commands",
+    "<repoRoot>/packages/kbn-pm/src/commands",
     Array [],
   ],
 ]
@@ -133,7 +133,7 @@ Bootstrapping completed!
 exports[`handles "frozen-lockfile": install in dir 1`] = `
 Array [
   Array [
-    "<repoRoot>/packages/kbn-build/src/commands",
+    "<repoRoot>/packages/kbn-pm/src/commands",
     Array [
       "--frozen-lockfile",
     ],
@@ -144,15 +144,15 @@ Array [
 exports[`handles dependencies of dependencies: install in dir 1`] = `
 Array [
   Array [
-    "<repoRoot>/packages/kbn-build/src/commands/packages/bar",
+    "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
     Array [],
   ],
   Array [
-    "<repoRoot>/packages/kbn-build/src/commands",
+    "<repoRoot>/packages/kbn-pm/src/commands",
     Array [],
   ],
   Array [
-    "<repoRoot>/packages/kbn-build/src/commands/packages/foo",
+    "<repoRoot>/packages/kbn-pm/src/commands/packages/foo",
     Array [],
   ],
 ]

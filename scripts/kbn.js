@@ -1,2 +1,2 @@
-require('../packages/kbn-build/cli');
+require('../packages/kbn-pm/cli');
 

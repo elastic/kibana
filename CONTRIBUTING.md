@@ -166,7 +166,7 @@ Bootstrap Kibana and install all the dependencies
 yarn kbn bootstrap
 ```
 
-(You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-build.)
+(You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
 Start elasticsearch.
 
