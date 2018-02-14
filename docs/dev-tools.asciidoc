@@ -9,5 +9,3 @@ with your data in Kibana.
 --
 
 include::console.asciidoc[]
-
-include::api.asciidoc[]

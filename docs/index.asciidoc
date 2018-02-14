@@ -71,6 +71,8 @@ include::{xkb-repo-dir}/dashboard_only_mode/index.asciidoc[]
 
 include::{xkb-repo-dir}/reporting/index.asciidoc[]
 
+include::api.asciidoc[]
+
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
