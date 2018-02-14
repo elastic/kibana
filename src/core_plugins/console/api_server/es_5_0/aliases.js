@@ -55,15 +55,6 @@ export default function (api) {
       "{indices}/_alias/{name}"
     ]
   });
-  api.addEndpointDescription('_get_alias', {
-    methods: ["GET"],
-    patterns: [
-      "_alias",
-      "{indices}/_alias",
-      "{indices}/_alias/{name}",
-      "_alias/{name}"
-    ]
-  });
 
   api.addGlobalAutocompleteRules('aliases', {
     '*': aliasRules
