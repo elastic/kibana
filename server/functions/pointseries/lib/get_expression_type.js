@@ -15,7 +15,6 @@ export function getExpressionType(columns, mathExpression) {
     if (fieldNames.length > 0) {
       const fieldTypes = fieldNames.reduce((types, name) => {
         const type = getFieldType(columns, name);
-        console.log(type);
         if (type !== 'null' && types.indexOf(type) === -1) {
           return types.concat(type);
         }
