@@ -3,6 +3,12 @@
 This folder contains packages that are intended for use in Kibana and Kibana
 plugins.
 
+tl;dr:
+
+- Don't publish to npm registry
+- Always use the `@kbn` namespace
+- Always set `"private": true` in `package.json`
+
 ## Using these packages
 
 We no longer publish these packages to the npm registry. Now, instead of
@@ -32,7 +38,6 @@ Create a new sub-folder. The name of the folder should mirror the `name` in the
 package's `package.json`. E.g. if the name is `@kbn/datemath` the folder name
 should be `kbn-datemath`.
 
-Preferably use the `@kbn` namespace for these packages.
-
-Unless we intend to publish these packages, they should be marked with
+All new packages should use the `@kbn` namespace, and should be marked with
 `"private": true`.
+
