@@ -1,0 +1,11 @@
+{
+  "_remote/info": {
+    "url_params": {},
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_remote/info"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "_cluster/pending_tasks": {
+    "url_params": {
+      "local": "__flag__",
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cluster/pending_tasks"
+    ]
+  }
+}
