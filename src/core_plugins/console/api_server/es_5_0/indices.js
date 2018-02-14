@@ -32,14 +32,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_flush_synced', {
-    methods: ['POST'],
-    patterns: [
-      "_flush/synced",
-      "{indices}/_flush/synced"
-    ]
-  });
-
   api.addEndpointDescription('_stats', {
     patterns: [
       "_stats",
