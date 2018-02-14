@@ -11,45 +11,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_stats', {
-    patterns: [
-      "_stats",
-      "_stats/{metrics}",
-      "{indices}/_stats",
-      "{indices}/_stats/{metrics}",
-    ],
-    url_components: {
-      "metrics": [
-        "docs",
-        "store",
-        "indexing",
-        "search",
-        "get",
-        "merge",
-        "refresh",
-        "flush",
-        "warmer",
-        "filter_cache",
-        "percolate",
-        "segments",
-        "fielddata",
-        "completion",
-        "translog",
-        "query_cache",
-        "commit",
-        "_all"
-      ]
-    },
-    url_params: {
-      "fields": [],
-      "types": [],
-      "completion_fields": [],
-      "docvalue_fields": [],
-      "level": ["cluster", "indices", "shards"]
-    }
-
-  });
-
   api.addEndpointDescription('_validate_query', {
     methods: ['GET', 'POST'],
     patterns: [
