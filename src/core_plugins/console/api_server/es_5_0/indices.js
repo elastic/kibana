@@ -177,13 +177,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_cache/clear', {
-    patterns: [
-      "_cache/clear",
-      "{indices}/_cache/clear"
-    ]
-  });
-
   api.addEndpointDescription('_upgrade', {
     methods: ["POST"],
     patterns: [
