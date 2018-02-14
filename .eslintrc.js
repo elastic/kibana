@@ -1,8 +1,12 @@
+const prettierConfig = require('@elastic/eslint-config-kibana/prettier');
+const node6Config = require('@elastic/eslint-config-kibana/node6');
+const serverConfig = require('@elastic/eslint-config-kibana/server');
+const uiConfig = require('@elastic/eslint-config-kibana/ui');
+const mochaConfig = require('@elastic/eslint-config-kibana/mocha');
+const jestConfig = require('@elastic/eslint-config-kibana/jest');
+
 module.exports = {
-  extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest',
-  ],
+  extends: ['@elastic/eslint-config-kibana'],
 
   settings: {
     'import/resolver': {
@@ -14,32 +18,71 @@ module.exports = {
   },
 
   overrides: [
-    // Enable Prettier
-    {
+    // Anything transpiled with `@kbn/babel-preset/node`
+    serverConfig({
       files: [
-        '.eslintrc.js',
-        'packages/kbn-pm/**/*',
-        'packages/kbn-datemath/**/*.js',
-        'packages/kbn-plugin-generator/**/*',
+        'src/**/*.js',
+        'test/**/*.js',
+        'tasks/**/*.js',
+        'utilities/**/*.js',
+        'packages/kbn-pm/**/*.js',
       ],
-      plugins: ['prettier'],
-      rules: Object.assign(
-        { 'prettier/prettier': 'error' },
-        require('eslint-config-prettier').rules,
-        require('eslint-config-prettier/react').rules
-      ),
-    },
+      excludedFiles: ['src/ui/public/**/*.js'],
+    }),
 
-    // files not transpiled by babel can't using things like object-spread
-    {
+    // Anything transpiled with `@kbn/babel-preset/webpack`
+    uiConfig({
+      files: [
+        'src/ui/public/**/*.js',
+        'ui_framework/**/*.js',
+        'webpackShims/**/*.js',
+        'src/test_utils/public/**/*.js',
+        'src/core_plugins/*/public/**/*.js',
+        'test/functional/page_objects/**/*.js',
+        'packages/kbn-datemath/**/*.js',
+        'packages/kbn-test-subj-selector/**/*.js',
+      ],
+    }),
+
+    // Files that are not transpiled, so they must work on current Node version
+    node6Config({
       files: [
         '.eslintrc.js',
-        'packages/kbn-plugin-helpers/**/*',
-        'packages/kbn-plugin-generator/**/*',
+        'Gruntfile.js',
+        'scripts/**/*.js',
+        'packages/eslint-config-kibana/**/*.js',
+        'packages/kbn-babel-preset/**/*.js',
+        'packages/kbn-plugin-helpers/**/*.js',
+        'packages/kbn-plugin-generator/**/*.js',
       ],
-      rules: {
-        'prefer-object-spread/prefer-object-spread': 'off',
-      },
-    },
+    }),
+
+    mochaConfig({
+      files: [
+        '**/__tests__/**/*.js',
+        'test/**/*.js',
+        'src/test_utils/**/*.js',
+        'src/ui/public/test_harness/**/*.js',
+        'src/functional_test_runner/lib/mocha/**/*.js',
+        'src/core_plugins/timelion/public/lib/_tests_/**/*.js',
+        'packages/kbn-datemath/test/**/*.js',
+        'packages/kbn-test-subj-selector/test/**/*.js',
+      ],
+    }),
+
+    jestConfig({
+      files: ['**/*.test.js'],
+    }),
+
+    // Enable Prettier
+    prettierConfig({
+      files: [
+        '.eslintrc.js',
+        'packages/kbn-pm/**/*.js',
+        'packages/kbn-datemath/**/*.js',
+        'packages/kbn-plugin-generator/**/*.js',
+        'packages/eslint-config-kibana/**/*.js',
+      ],
+    }),
   ],
 };

@@ -11,7 +11,6 @@
 /tasks/vendor
 /packages/*/node_modules
 /packages/*/target
-/packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
 /packages/kbn-pm/vendor

@@ -1,24 +1,17 @@
 {
   "name": "@elastic/eslint-config-kibana",
+  "private": true,
   "kibana": {
     "build": {
       "skip": true
     }
   },
-  "version": "0.15.0",
+  "version": "1.0.0",
   "description": "The eslint config used by the kibana team",
-  "main": ".eslintrc.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/elastic/eslint-config-kibana.git"
-  },
+  "main": "index.js",
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/elastic/eslint-config-kibana/issues"
-  },
-  "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
     "babel-eslint": "^8.0.0",
     "eslint": "^4.1.0",
