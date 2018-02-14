@@ -1,12 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('_refresh', {
-    methods: ['POST'],
-    patterns: [
-      "_refresh",
-      "{indices}/_refresh"
-    ],
-  });
-
   api.addEndpointDescription('_rollover', {
     methods: ['POST'],
     patterns: [
