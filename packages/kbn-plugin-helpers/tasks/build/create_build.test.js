@@ -23,8 +23,8 @@ describe('creating the build', () => {
     await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
     const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
-    expect(pkg.scripts).toBeUndefined();
-    expect(pkg.devDependencies).toBeUndefined();
+    expect(pkg).not.toHaveProperty('scripts');
+    expect(pkg).not.toHaveProperty('devDependencies');
   });
 
   it('adds build metadata to package.json', async () => {
@@ -33,7 +33,7 @@ describe('creating the build', () => {
     await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
     const pkg = require(resolve(PLUGIN_BUILD_TARGET, 'package.json'));
-    expect(pkg.build).not.toBeUndefined();
+    expect(pkg).toHaveProperty('build');
     expect(pkg.build.git).not.toBeUndefined();
     expect(pkg.build.date).not.toBeUndefined();
   });

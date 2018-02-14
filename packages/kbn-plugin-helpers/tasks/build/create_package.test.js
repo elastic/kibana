@@ -23,6 +23,6 @@ describe('creating the package', () => {
 
     const zipFile = resolve(PLUGIN_BUILD_DIR, packageFile);
     const stats = statSync(zipFile);
-    expect(stats.isFile()).toBeTruthy();
+    expect(stats.isFile()).toBe(true);
   });
 });
