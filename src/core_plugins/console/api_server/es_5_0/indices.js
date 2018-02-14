@@ -35,15 +35,4 @@ export default function (api) {
     ],
 
   });
-
-  api.addEndpointDescription('_upgrade', {
-    methods: ["POST"],
-    patterns: [
-      "_upgrade",
-      "{indices}/_upgrade"
-    ],
-    url_params: {
-      wait_for_completion: "__flag__"
-    }
-  });
 }
