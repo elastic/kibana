@@ -126,11 +126,12 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('__delete_indices__', {
-    methods: ['DELETE'],
+  api.addEndpointDescription('__create_index__', {
+    methods: ['PUT'],
     patterns: [
-      "{indices}"
-    ]
+      "{index}"
+    ],
+
   });
 
   api.addEndpointDescription('_get_index_settings', {
