@@ -1,4 +1,6 @@
 
+include::api.asciidoc[]
+
 include::plugins.asciidoc[]
 
 include::development.asciidoc[]
