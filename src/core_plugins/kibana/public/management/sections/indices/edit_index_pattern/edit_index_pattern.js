@@ -138,6 +138,8 @@ uiModules.get('apps/management')
     $scope.$watch('indexPattern.fields', function () {
       $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
       $scope.refreshFilters();
+      updateIndexedFieldsTable($scope, $state);
+      updateScriptedFieldsTable($scope, $state);
     });
 
     $scope.refreshFilters = function () {
@@ -251,7 +253,4 @@ uiModules.get('apps/management')
       destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
     });
-
-    updateIndexedFieldsTable($scope, $state);
-    updateScriptedFieldsTable($scope, $state);
   });
