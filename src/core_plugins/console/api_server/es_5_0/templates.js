@@ -1,10 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('_delete_template', {
-    methods: ['DELETE'],
-    patterns: [
-      "_template/{id}",
-    ]
-  });
   api.addEndpointDescription('_get_template', {
     methods: ['GET'],
     patterns: [
