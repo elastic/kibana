@@ -72,19 +72,9 @@ export class Project {
     );
   }
 
-  getBuildOptions() {
-    const json = this.json;
-    return (json.kibana && json.kibana.build) || {};
-  }
-
   skipFromBuild() {
-    const build = this.getBuildOptions();
-    return build.skip === true;
-  }
-
-  getAdditionalProjects() {
-    const build = this.getBuildOptions();
-    return build.projects;
+    const json = this.json;
+    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
   }
 
   hasScript(name) {

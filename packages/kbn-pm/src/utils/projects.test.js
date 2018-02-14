@@ -5,6 +5,7 @@ import {
   buildProjectGraph,
   topologicallyBatchProjects,
 } from './projects';
+import { getProjectPaths } from '../config';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
@@ -47,32 +48,23 @@ describe('#getProjects', () => {
     );
   });
 
-  test('can specify additional project paths in package.json', async () => {
-    const projects = await getProjects(rootPath, [
-      '.',
-      'packages/*',
-      '../additional_projects',
-    ]);
+  test('includes additional projects in package.json', async () => {
+    const projectPaths = getProjectPaths(rootPath, {});
+    const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [
       'kibana',
       'bar',
       'foo',
       'with-additional-projects',
-      'baz',
       'quux',
+      'baz',
     ];
 
     expect([...projects.keys()]).toEqual(
       expect.arrayContaining(expectedProjects)
     );
-    expect(projects.size).toBe(6);
-  });
-
-  test("throws if specifying additional projects that does't exist", async () => {
-    await expect(
-      getProjects(rootPath, ['../additional_no_matching'])
-    ).rejects.toThrowErrorMatchingSnapshot();
+    expect(projects.size).toBe(expectedProjects.length);
   });
 });
 

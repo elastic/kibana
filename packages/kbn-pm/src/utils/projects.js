@@ -11,11 +11,9 @@ export async function getProjects(rootPath, projectsPathsPatterns) {
   const projects = new Map();
 
   for (const pattern of projectsPathsPatterns) {
-    let pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
+    const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
 
-    while (pathsToProcess.length > 0) {
-      const filePath = pathsToProcess.shift();
-
+    for (const filePath of pathsToProcess) {
       const projectConfigPath = normalize(filePath);
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
@@ -28,30 +26,6 @@ export async function getProjects(rootPath, projectsPathsPatterns) {
             paths: [project.path, projects.get(project.name).path],
           }
         );
-      }
-
-      // A project can specify additional projects, which will be resolved
-      // relative to the package itself.
-      const additionalProjects = project.getAdditionalProjects() || [];
-      for (const additionalProject of additionalProjects) {
-        const additionalProjectPaths = await packagesFromGlobPattern({
-          pattern: additionalProject,
-          rootPath: project.path,
-        });
-
-        if (additionalProjectPaths.length === 0) {
-          throw new CliError(
-            `No projects matched the additional projects pattern [${additionalProject}] specified in [${
-              project.name
-            }]`,
-            {
-              name: project.name,
-              pattern: additionalProject,
-            }
-          );
-        }
-
-        pathsToProcess = pathsToProcess.concat(additionalProjectPaths);
       }
 
       projects.set(project.name, project);
