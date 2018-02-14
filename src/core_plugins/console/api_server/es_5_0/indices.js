@@ -123,11 +123,4 @@ export default function (api) {
       wait_for_completion: "__flag__"
     }
   });
-
-  api.addEndpointDescription('_open', {
-    methods: ["POST"],
-    patterns: [
-      "{indices}/_open"
-    ]
-  });
 }
