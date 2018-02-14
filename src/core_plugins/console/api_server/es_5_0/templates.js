@@ -1,11 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('_get_template', {
-    methods: ['GET'],
-    patterns: [
-      "_template/{id}",
-      "_template",
-    ]
-  });
   api.addEndpointDescription('_put_template', {
     methods: ['PUT'],
     patterns: [
