@@ -113,16 +113,6 @@ export default function (api) {
 
   });
 
-  api.addEndpointDescription('_get_index_settings', {
-    methods: ['GET', ],
-    patterns: [
-      "{indices}/_settings",
-    ],
-    url_params: {
-      flat_settings: "__flag__"
-    }
-  });
-
   api.addEndpointDescription('_get_index', {
     methods: ['GET', ],
     patterns: [
