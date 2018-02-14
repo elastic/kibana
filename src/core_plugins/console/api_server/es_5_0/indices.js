@@ -98,34 +98,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_analyze', {
-    methods: ['GET', 'POST'],
-    patterns: [
-      "{indices}/_analyze",
-      "_analyze"
-    ],
-    url_params: {
-      "analyzer": "",
-      "char_filter": [],
-      "field": "",
-      "filter": [],
-      "text": "",
-      "tokenizer": "",
-      "explain": "__flag__",
-      "attributes": []
-    },
-    data_autocomplete_rules: {
-      text: [],
-      field: "{field}",
-      analyzer: "",
-      tokenizer: "",
-      char_filter: [],
-      filter: [],
-      explain: { __one_of: [false, true] },
-      attributes: []
-    }
-  });
-
   api.addEndpointDescription('_validate_query', {
     methods: ['GET', 'POST'],
     patterns: [
