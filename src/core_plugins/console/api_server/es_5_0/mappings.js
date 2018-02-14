@@ -5,16 +5,6 @@ var BOOLEAN = {
 };
 
 export default function (api) {
-  api.addEndpointDescription('_delete_mapping', {
-    methods: ['DELETE'],
-    priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping",
-      "{indices}/_mapping/{types}",
-      "{indices}/{types}/_mapping",
-      "_mapping"
-    ]
-  });
   api.addEndpointDescription('_put_type_mapping', {
     methods: ['PUT', 'POST'],
     patterns: [
