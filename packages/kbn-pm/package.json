@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/build",
+  "name": "@kbn/pm",
   "main": "./dist/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",

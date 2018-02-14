@@ -9,7 +9,7 @@ if (!process.env.BABEL_CACHE_PATH) {
 // paths that babel-register should ignore
 const ignore = [
   /[\\\/](node_modules|bower_components)[\\\/]/,
-  /[\\\/](kbn-build\/dist)[\\\/]/
+  /[\\\/](kbn-pm\/dist)[\\\/]/
 ];
 
 if (global.__BUILT_WITH_BABEL__) {

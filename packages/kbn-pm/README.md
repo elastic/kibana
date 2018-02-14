@@ -1,11 +1,11 @@
-# `kbn-build` — The Kibana build tool
+# `@kbn/pm` — The Kibana project management tool
 
-`kbn-build` is a build/monorepo tool inspired by Lerna, which enables sharing
+`@kbn/pm` is a project management tool inspired by Lerna, which enables sharing
 code between Kibana and Kibana plugins.
 
-To run `kbn-build`, go to Kibana root and run `yarn kbn`.
+To run `@kbn/pm`, go to Kibana root and run `yarn kbn`.
 
-## Why `kbn-build`?
+## Why `@kbn/pm`?
 
 Long-term we want to get rid of Webpack from production (basically, it's causing
 a lot of problems, using a lot of memory and adding a lot of complexity).
@@ -45,7 +45,7 @@ the Kibana folder.
 Basically, we just want to be able to share "static code" (aka being able to
 `import`) between Kibana and Kibana plugins. To get there we need tooling.
 
-`kbn-build` is a tool that helps us manage these static dependencies, and it
+`@kbn/pm` is a tool that helps us manage these static dependencies, and it
 enables us to share these packages between Kibana and Kibana plugins. It also
 enables these packages to have their own dependencies and their own build
 scripts, while still having a nice developer experience.
@@ -58,18 +58,18 @@ relative location to a package instead of a version when adding it to
 `package.json`. For example:
 
 ```
-"eslint-config-kibana": "link:packages/eslint-config-kibana"
+"@kbn/datemath": "link:packages/kbn-datemath"
 ```
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
 downloading code from the npm registry. That means you can make changes to
-eslint-config-kibana and immediately have them available in Kibana itself. No
+`@kbn/datematch` and immediately have them available in Kibana itself. No
 `npm publish` needed anymore — Kibana will always rely directly on the code
 that's in the local packages. And we can also do the same in x-pack-kibana or
 any other Kibana plugin, e.g.
 
 ```
-"eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana"
+"@kbn/datemath": "link:../../kibana/packages/kbn-date-math"
 ```
 
 This works because we moved to a strict location of Kibana plugins,
@@ -94,7 +94,7 @@ packages from their local Kibana.
 ### Bootstrapping
 
 Now, instead of installing all the dependencies with just running `yarn` you use
-the `kbn-build` tool, which can install dependencies (and set up symlinks) in
+the `@kbn/pm` tool, which can install dependencies (and set up symlinks) in
 all the packages using one command (aka "bootstrap" the setup).
 
 To bootstrap Kibana:
@@ -103,7 +103,7 @@ To bootstrap Kibana:
 yarn kbn bootstrap
 ```
 
-By default, `kbn-build` will bootstrap all packages within Kibana, plus all
+By default, `@kbn/pm` will bootstrap all packages within Kibana, plus all
 Kibana plugins located in `../kibana-extra`. There are several options for
 skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
 
@@ -140,7 +140,7 @@ yarn kbn run build --skip-kibana
 ## Building packages for production
 
 The production build process relies on both the Grunt setup at the root of the
-Kibana project and code in `kbn-build`. The full process is described in
+Kibana project and code in `@kbn/pm`. The full process is described in
 `tasks/build/packages.js`.
 
 ## Development
