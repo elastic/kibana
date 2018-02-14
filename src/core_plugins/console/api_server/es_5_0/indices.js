@@ -113,19 +113,6 @@ export default function (api) {
 
   });
 
-  api.addEndpointDescription('_get_index', {
-    methods: ['GET', ],
-    patterns: [
-      "{indices}",
-      "{indices}/{feature}"
-    ],
-    url_components: {
-      "feature": [
-        "_mappings",
-      ]
-    }
-  });
-
   api.addEndpointDescription('_upgrade', {
     methods: ["POST"],
     patterns: [
