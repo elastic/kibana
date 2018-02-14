@@ -65,18 +65,6 @@ export default function (api) {
     ]
   });
 
-  api.addEndpointDescription('_recovery', {
-    patterns: [
-      "{indices}/_recovery",
-      "_recovery"
-    ],
-    url_params: {
-      detailed: "__flag__",
-      active_only: "__flag__",
-      human: "__flag__"
-    }
-  });
-
   api.addEndpointDescription('_validate_query', {
     methods: ['GET', 'POST'],
     patterns: [
