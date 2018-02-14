@@ -153,7 +153,6 @@ export default function (api) {
     url_components: {
       "feature": [
         "_mappings",
-        "_aliases"
       ]
     }
   });
