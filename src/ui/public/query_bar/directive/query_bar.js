@@ -58,7 +58,9 @@ module.directive('queryBar', function () {
         const { selectionStart, selectionEnd, value } = inputEl;
         const query = value;
         return getSuggestions({ query, selectionStart, selectionEnd })
-          .then(suggestions => this.suggestions = suggestions);
+          .then(suggestions => {
+            $scope.$apply(() => this.suggestions = suggestions);
+          });
       };
 
       // TODO: Figure out a better way to set selection
