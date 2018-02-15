@@ -16,13 +16,6 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('all_snapshots', {
-    methods: ['GET'],
-    patterns: [
-      '_snapshot/{id}/_all'
-    ]
-  });
-
   api.addEndpointDescription('_snapshot_status', {
     methods: ['GET'],
     patterns: [
