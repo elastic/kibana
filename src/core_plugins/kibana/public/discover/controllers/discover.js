@@ -417,7 +417,7 @@ function discoverController(
 
             if (id) {
               toastNotifications.addSuccess({
-                title: `Saved '${savedSearch.title}'`,
+                title: `Search '${savedSearch.title}' was saved`,
                 'data-test-subj': 'saveSearchSuccess',
               });
 
