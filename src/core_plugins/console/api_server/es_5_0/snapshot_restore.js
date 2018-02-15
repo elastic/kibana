@@ -16,14 +16,6 @@ export default function (api) {
     }
   });
 
-
-  api.addEndpointDescription('single_snapshot', {
-    methods: ['GET'],
-    patterns: [
-      '_snapshot/{id}/{id}'
-    ]
-  });
-
   api.addEndpointDescription('all_snapshots', {
     methods: ['GET'],
     patterns: [
