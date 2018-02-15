@@ -6067,26 +6067,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.getProjects = undefined;
 
 let getProjects = exports.getProjects = (() => {
-  var _ref = _asyncToGenerator(function* (rootPath, projectsPaths) {
-    const globOpts = {
-      cwd: rootPath,
-
-      // Should throw in case of unusual errors when reading the file system
-      strict: true,
-
-      // Always returns absolute paths for matched files
-      absolute: true,
-
-      // Do not match ** against multiple filenames
-      // (This is only specified because we currently don't have a need for it.)
-      noglobstar: true
-    };
+  var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns) {
     const projects = new Map();
 
-    for (const globPath of projectsPaths) {
-      const files = yield glob(_path2.default.join(globPath, 'package.json'), globOpts);
+    for (const pattern of projectsPathsPatterns) {
+      const pathsToProcess = yield packagesFromGlobPattern({ pattern, rootPath });
 
-      for (const filePath of files) {
+      for (const filePath of pathsToProcess) {
         const projectConfigPath = normalize(filePath);
         const projectDir = _path2.default.dirname(projectConfigPath);
         const project = yield _project.Project.fromPath(projectDir);
@@ -6109,11 +6096,6 @@ let getProjects = exports.getProjects = (() => {
     return _ref.apply(this, arguments);
   };
 })();
-
-// https://github.com/isaacs/node-glob/blob/master/common.js#L104
-// glob always returns "\\" as "/" in windows, so everyone
-// gets normalized because we can't have nice things.
-
 
 exports.buildProjectGraph = buildProjectGraph;
 exports.topologicallyBatchProjects = topologicallyBatchProjects;
@@ -6140,6 +6122,27 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 const glob = (0, _pify2.default)(_glob3.default);
 
+function packagesFromGlobPattern({ pattern, rootPath }) {
+  const globOptions = {
+    cwd: rootPath,
+
+    // Should throw in case of unusual errors when reading the file system
+    strict: true,
+
+    // Always returns absolute paths for matched files
+    absolute: true,
+
+    // Do not match ** against multiple filenames
+    // (This is only specified because we currently don't have a need for it.)
+    noglobstar: true
+  };
+
+  return glob(_path2.default.join(pattern, 'package.json'), globOptions);
+}
+
+// https://github.com/isaacs/node-glob/blob/master/common.js#L104
+// glob always returns "\\" as "/" in windows, so everyone
+// gets normalized because we can't have nice things.
 function normalize(dir) {
   return _path2.default.normalize(dir);
 }
@@ -22239,6 +22242,8 @@ function getProjectPaths(rootPath, options) {
 
   if (!skipKibanaExtra) {
     projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*'));
+    projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/packages/*'));
+    projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/plugins/*'));
   }
 
   return projectPaths;
