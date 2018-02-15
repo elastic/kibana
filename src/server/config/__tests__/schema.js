@@ -2,13 +2,27 @@ import schemaProvider from '../schema';
 import expect from 'expect.js';
 import Joi from 'joi';
 import { set } from 'lodash';
+import pkg from '../../../../package.json';
 
 describe('Config schema', function () {
   let schema;
   beforeEach(() => schema = schemaProvider());
 
-  function validate(data, options) {
-    return Joi.validate(data, schema, options);
+  function validate(data, { dev = false } = {}) {
+    return Joi.validate(data, schema, {
+      // simulate the context exposed by the Config class
+      context: {
+        env: dev ? 'development' : 'production',
+        prod: !dev,
+        dev: dev,
+        notProd: dev,
+        notDev: !dev,
+        version: pkg.version,
+        branch: pkg.branch,
+        buildNum: dev ? Math.pow(2, 53) - 1 : (pkg.build.number || NaN),
+        buildSha: dev ? 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' : (pkg.build.sha || '')
+      }
+    });
   }
 
   describe('server', function () {
@@ -196,6 +210,84 @@ describe('Config schema', function () {
         expect(whitelist).to.be.an(Array);
         expect(whitelist).to.have.length(1);
         expect(whitelist).to.contain('/path/to');
+      });
+    });
+
+    describe('cors', () => {
+      describe('production', () => {
+        const validateServerCors = value => validate(
+          value === undefined ? {} : { server: { cors: value } },
+          { dev: false }
+        );
+
+        it('defaults to false', () => {
+          const { error, value } = validateServerCors();
+          expect(error).to.be(null);
+          expect(value.server.cors).to.be(false);
+        });
+        it('accepts true', () => {
+          const { error, value } = validateServerCors(true);
+          expect(error).to.be(null);
+          expect(value.server.cors).to.be(true);
+        });
+        it('accepts false', () => {
+          const { error, value } = validateServerCors(false);
+          expect(error).to.be(null);
+          expect(value.server.cors).to.be(false);
+        });
+        it('accepts object', () => {
+          const { error, value } = validateServerCors({ foo: 'bar' });
+          expect(error).to.be(null);
+          expect(value.server.cors).to.eql({ foo: 'bar' });
+        });
+        it('rejects number', () => {
+          const { error } = validateServerCors(1);
+          expect(error).to.be.an(Error);
+        });
+        it('rejects array', () => {
+          const { error } = validateServerCors([]);
+          expect(error).to.be.an(Error);
+        });
+      });
+
+      describe('dev', () => {
+        const validateServerCors = value => validate(
+          value === undefined ? {} : { server: { cors: value } },
+          { dev: true }
+        );
+
+        it('defaults to allow karma test runner in dev', () => {
+          const { error, value } = validateServerCors();
+          expect(error).to.be(null);
+          expect(value.server.cors).to.eql({
+            origin: [
+              '*://localhost:9876'
+            ]
+          });
+        });
+        it('accepts true', () => {
+          const { error, value } = validateServerCors(true);
+          expect(error).to.be(null);
+          expect(value.server.cors).to.be(true);
+        });
+        it('accepts false', () => {
+          const { error, value } = validateServerCors(false);
+          expect(error).to.be(null);
+          expect(value.server.cors).to.be(false);
+        });
+        it('accepts object', () => {
+          const { error, value } = validateServerCors({ foo: 'bar' });
+          expect(error).to.be(null);
+          expect(value.server.cors).to.eql({ foo: 'bar' });
+        });
+        it('rejects number', () => {
+          const { error } = validateServerCors(1);
+          expect(error).to.be.an(Error);
+        });
+        it('rejects array', () => {
+          const { error } = validateServerCors([]);
+          expect(error).to.be.an(Error);
+        });
       });
     });
   });

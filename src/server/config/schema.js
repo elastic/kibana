@@ -5,6 +5,16 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
+function createServerCorsSchema(defaultValue) {
+  return Joi
+    .alternatives()
+    .try([
+      Joi.boolean(),
+      Joi.object(),
+    ])
+    .default(defaultValue);
+}
+
 export default () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
@@ -72,10 +82,8 @@ export default () => Joi.object({
     }).default(),
     cors: Joi.when('$dev', {
       is: true,
-      then: Joi.object().default({
-        origin: ['*://localhost:9876'] // karma test server
-      }),
-      otherwise: Joi.boolean().default(false)
+      then: createServerCorsSchema({ origin: ['*://localhost:9876'] }), // allow karma tests to access server
+      otherwise: createServerCorsSchema(false)
     }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
