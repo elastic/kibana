@@ -28,6 +28,7 @@ function buildInstructionSet(type) {
 const tutorial = {
   name: 'jest test tutorial',
   longDescription: 'tutorial used to drive jest tests',
+  euiIconType: 'logoApache',
   elasticCloud: buildInstructionSet('elasticCloud'),
   onPrem: buildInstructionSet('onPrem'),
   onPremElasticCloud: buildInstructionSet('onPremElasticCloud')

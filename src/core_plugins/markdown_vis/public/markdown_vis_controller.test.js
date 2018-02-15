@@ -10,7 +10,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
     expect(wrapper.find('a').text()).toBe('markdown');
   });
 
@@ -21,7 +21,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisWrapper vis={vis} />);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
   });
 
@@ -32,10 +32,52 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = mount(<MarkdownVisWrapper vis={vis} />);
+    const wrapper = mount(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
     expect(wrapper.text().trim()).toBe('Initial');
     vis.params.markdown = 'Updated';
     wrapper.setProps({ vis });
     expect(wrapper.text().trim()).toBe('Updated');
+  });
+
+  describe('renderComplete', () => {
+    it('should be called on initial rendering', () => {
+      const vis = {
+        params: {
+          markdown: 'test'
+        }
+      };
+      const renderComplete = jest.fn();
+      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      expect(renderComplete.mock.calls.length).toBe(1);
+    });
+
+    it('should be called on successive render when params change', () => {
+      const vis = {
+        params: {
+          markdown: 'test'
+        }
+      };
+      const renderComplete = jest.fn();
+      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      expect(renderComplete.mock.calls.length).toBe(1);
+      renderComplete.mockClear();
+      vis.params.markdown = 'changed';
+      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      expect(renderComplete.mock.calls.length).toBe(1);
+    });
+
+    it('should be called on successive render even without data change', () => {
+      const vis = {
+        params: {
+          markdown: 'test'
+        }
+      };
+      const renderComplete = jest.fn();
+      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      expect(renderComplete.mock.calls.length).toBe(1);
+      renderComplete.mockClear();
+      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      expect(renderComplete.mock.calls.length).toBe(1);
+    });
   });
 });

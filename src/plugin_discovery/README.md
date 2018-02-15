@@ -1,6 +1,6 @@
 # Plugin Discovery
 
-The plugin discovery module defines the core plugin loading logic used by the Kibana server. It exports functions for 
+The plugin discovery module defines the core plugin loading logic used by the Kibana server. It exports functions for
 
 
 ## `findPluginSpecs(settings, [config])`
@@ -23,7 +23,7 @@ If you *never* subscribe to any of the Observables then plugin discovery won't a
  - `deprecation$: Observable<string>`: emits deprecation warnings that are produces when reading each [`PluginPack`][PluginPack]'s configuration
  - `extendedConfig$: Observable<Config>`: emits the [`Config`][Config] service that was passed to `findPluginSpecs()` (or created internally if none was passed) after it has been extended with the configuration from each plugin
  - `spec$: Observable<PluginSpec>`: emits every *enabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
- - `disabledSpecs$: Observable<PluginSpec>`: emits every *disabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
+ - `disabledSpec$: Observable<PluginSpec>`: emits every *disabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
  - `invalidVersionSpec$: Observable<PluginSpec>`: emits every [`PluginSpec`][PluginSpec] who's required kibana version does not match the version exposed by `config.get('pkg.version')`
 
 ### example
@@ -48,7 +48,7 @@ const { pack$, invalidDirectoryError$ } = findPluginSpecs(settings);
 const packs = await Observable.merge(
   pack$.toArray(),
 
-  // if we ever get an InvalidDirectoryError, throw it 
+  // if we ever get an InvalidDirectoryError, throw it
   // into the stream so that all streams are unsubscribed,
   // the discovery process is aborted, and the promise rejects
   invalidDirectoryError$.map(error => {
@@ -73,25 +73,25 @@ const {
 Observable.merge(
   pack$
     .do(pluginPack => console.log('Found plugin pack', pluginPack)),
-    
+
   invalidDirectoryError$
     .do(error => console.log('Invalid directory error', error)),
-    
+
   invalidPackError$
     .do(error => console.log('Invalid plugin pack error', error)),
-    
+
   deprecation$
     .do(msg => console.log('DEPRECATION:', msg)),
-    
+
   extendedConfig$
     .do(config => console.log('config service extended by plugins', config)),
-    
+
   spec$
     .do(pluginSpec => console.log('enabled plugin spec found', spec)),
-    
+
   disabledSpec$
     .do(pluginSpec => console.log('disabled plugin spec found', spec)),
-    
+
   invalidVersionSpec$
     .do(pluginSpec => console.log('plugin spec with invalid version found', spec)),
 )
@@ -115,14 +115,14 @@ reducer(
   acc: any,
   // the exported value, found at `uiExports[type]` or `uiExports[type][i]`
   // in the PluginSpec config.
-  spec: any, 
+  spec: any,
   // the key in `uiExports` where this export was found
   type: string,
   // the PluginSpec which exported this spec
   pluginSpec: PluginSpec
 )
 ```
-  
+
 ## `new PluginPack(options)` class
 
 Only exported so that `PluginPack` instances can be created in tests and used in place of on-disk plugin fixtures. Use `findPluginSpecs()`, or the cached result of a call to `findPluginSpecs()` (like `kbnServer.pluginSpecs`) any time you might need access to `PluginPack` objects in distributed code.

@@ -6,10 +6,8 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import {
   Router,
-  useRouterHistory,
+  hashHistory,
 } from 'react-router';
-import { syncHistoryWithStore } from 'react-router-redux';
-import createHashHistory from 'history/lib/createHashHistory';
 
 // Store.
 import configureStore from './store/configure_store';
@@ -24,10 +22,6 @@ import {
 } from './services';
 
 const store = configureStore();
-const browserHistory = useRouterHistory(createHashHistory)({
-  queryKey: false,
-});
-const history = syncHistoryWithStore(browserHistory, store);
 
 const childRoutes = [].concat(Routes.getAppRoutes());
 childRoutes.push({
@@ -72,7 +66,7 @@ syncTitleWithRoutes(routes);
 ReactDOM.render(
   <Provider store={store}>
     <Router
-      history={history}
+      history={hashHistory}
       routes={routes}
     />
   </Provider>,

@@ -25,7 +25,7 @@ uiModules.get('kibana')
           $scope.data = data;
         });
 
-        $scope.$watch('vis.refreshLegend', () => {
+        $scope.$watch('refreshLegend', () => {
           refresh();
         });
 

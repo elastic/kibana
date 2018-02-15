@@ -59,6 +59,32 @@ exports[`StepIndexPattern should disable the next step if the index pattern exis
         },
       ]
     }
+    query="k*"
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should ensure we properly append a wildcard 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <LoadingIndices />
+  <EuiSpacer
+    size="s"
   />
 </EuiPanel>
 `;
@@ -122,6 +148,7 @@ exports[`StepIndexPattern should properly fetch indices for the initial query 1`
         },
       ]
     }
+    query="k*"
   />
 </EuiPanel>
 `;
@@ -134,11 +161,7 @@ exports[`StepIndexPattern should render normally 1`] = `
 >
   <Header
     characterList="\\\\, /, ?, \\", <, >, |"
-    errors={
-      Array [
-        "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
-      ]
-    }
+    errors={Array []}
     goToNextStep={[Function]}
     isInputInvalid={false}
     isNextStepDisabled={true}
@@ -187,6 +210,7 @@ exports[`StepIndexPattern should render normally 1`] = `
         },
       ]
     }
+    query=""
   />
 </EuiPanel>
 `;
@@ -250,6 +274,7 @@ exports[`StepIndexPattern should render some indices 1`] = `
         },
       ]
     }
+    query="k*"
   />
 </EuiPanel>
 `;
@@ -342,6 +367,7 @@ exports[`StepIndexPattern should show errors 1`] = `
         },
       ]
     }
+    query="?"
   />
 </EuiPanel>
 `;

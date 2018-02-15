@@ -99,7 +99,8 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'run:eslint',
       'licenses',
-      'test:quick'
+      'test:quick',
+      'verifyTranslations',
     ]));
   });
 

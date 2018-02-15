@@ -24,6 +24,7 @@ import {
 export class IndicesList extends Component {
   static propTypes = {
     indices: PropTypes.array.isRequired,
+    query: PropTypes.string.isRequired,
   }
 
   constructor(props) {
@@ -129,15 +130,35 @@ export class IndicesList extends Component {
     );
   }
 
+  highlightIndexName(indexName, query) {
+    const queryIdx = indexName.indexOf(query);
+    if (!query || queryIdx === -1) {
+      return indexName;
+    }
+
+    const preStr = indexName.substr(0, queryIdx);
+    const postStr = indexName.substr(queryIdx + query.length);
+
+    return (
+      <span>
+        {preStr}
+        <strong>{query}</strong>
+        {postStr}
+      </span>
+    );
+  }
+
   render() {
-    const { indices } = this.props;
+    const { indices, query } = this.props;
+
+    const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
           <EuiTableRowCell>
-            {index.name}
+            {this.highlightIndexName(index.name, queryWithoutWildcard)}
           </EuiTableRowCell>
         </EuiTableRow>
       );
