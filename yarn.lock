@@ -130,6 +130,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/platform@link:platform":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
@@ -12496,6 +12500,10 @@ type-detect@4.0.3:
 type-detect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
+
+type-detect@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
 
 type-is@~1.6.15:
   version "1.6.15"

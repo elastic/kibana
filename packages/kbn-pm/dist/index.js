@@ -22234,7 +22234,7 @@ function getProjectPaths(rootPath, options) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
   const skipKibana = Boolean(options['skip-kibana']);
 
-  const projectPaths = [(0, _path.resolve)(rootPath, 'packages/*')];
+  const projectPaths = [(0, _path.resolve)(rootPath, 'packages/*'), (0, _path.resolve)(rootPath, 'platform')];
 
   if (!skipKibana) {
     projectPaths.push(rootPath);

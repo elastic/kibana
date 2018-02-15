@@ -1,0 +1,21 @@
+{
+  "name": "@kbn/platform",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/tsc/index.js",
+  "types": "./target/tsc-types/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
+  },
+  "dependencies": {
+    "@kbn/observable": "link:../packages/kbn-observable",
+    "@kbn/utils": "link:../packages/kbn-utils",
+    "rxjs": "5.4.3",
+    "type-detect": "^4.0.8"
+  },
+  "devDependencies": {
+    "typescript": "^2.7.1"
+  }
+}
