@@ -77,6 +77,13 @@ FieldListExpression
 
 FieldRangeExpression
   = field:Literal Space* operator:RangeOperator Space* value:Literal {
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        fieldName: field,
+        suggestionTypes: ['conjunction']
+      };
+    }
     return buildNode('range', field, { [operator]: value });
   }
 
