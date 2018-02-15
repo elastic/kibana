@@ -31,22 +31,6 @@ export default function (api) {
     ]
   });
 
-  api.addEndpointDescription('put_snapshot', {
-    methods: ['PUT'],
-    patterns: [
-      '_snapshot/{id}/{id}'
-    ],
-    url_params: {
-      wait_for_completion: "__flag__"
-    },
-    data_autocomplete_rules: {
-      indices: "*",
-      ignore_unavailable: { __one_of: [true, false] },
-      include_global_state: { __one_of: [true, false] },
-      partial: { __one_of: [true, false] }
-    }
-  });
-
   api.addEndpointDescription('_snapshot_status', {
     methods: ['GET'],
     patterns: [
