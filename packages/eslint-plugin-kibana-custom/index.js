@@ -2,13 +2,13 @@ module.exports = {
   rules: {
     'no-default-export': {
       meta: {
-        schema: []
+        schema: [],
       },
       create: context => ({
-        ExportDefaultDeclaration: (node) => {
+        ExportDefaultDeclaration: node => {
           context.report(node, 'Default exports not allowed.');
-        }
-      })
-    }
-  }
+        },
+      }),
+    },
+  },
 };
