@@ -1,9 +1,9 @@
-import './typeahead.less';
-import './typeahead_input';
-import './typeahead_item';
 import template from './typeahead.html';
 import { uiModules } from 'ui/modules';
 import { comboBoxKeyCodes } from '@elastic/eui';
+import './typeahead.less';
+import './typeahead_input';
+import './typeahead_item';
 
 const { UP, DOWN, ENTER, TAB, ESCAPE } = comboBoxKeyCodes;
 const typeahead = uiModules.get('kibana/typeahead');
@@ -30,23 +30,20 @@ typeahead.directive('kbnTypeahead', function () {
         this.selectedIndex = null;
       };
 
-      /**
-       * Sets the selected index to the given value. If the value is less than
-       * zero, it will wrap around to the end, and if the value is greater than
-       * the number of items, it will wrap around to the beginning.
-       */
-      this.setSelectedIndex = (index) => {
-        this.selectedIndex = (index + this.items.length) % this.items.length;
-      };
-
       this.selectPrevious = () => {
-        const previousIndex = (this.selectedIndex === null ? 0 : this.selectedIndex) - 1;
-        this.setSelectedIndex(previousIndex);
+        if (this.selectedIndex !== null && this.selectedIndex > 0) {
+          this.selectedIndex--;
+        } else {
+          this.selectedIndex = this.items.length - 1;
+        }
       };
 
       this.selectNext = () => {
-        const nextIndex = (this.selectedIndex === null ? -1 : this.selectedIndex) + 1;
-        this.setSelectedIndex(nextIndex);
+        if (this.selectedIndex !== null && this.selectedIndex < this.items.length - 1) {
+          this.selectedIndex++;
+        } else {
+          this.selectedIndex = 0;
+        }
       };
 
       this.isVisible = () => {
@@ -58,20 +55,20 @@ typeahead.directive('kbnTypeahead', function () {
       this.onKeyDown = (event) => {
         const { keyCode } = event;
 
-        this.isHidden = (keyCode === ESCAPE);
+        this.isHidden = keyCode === ESCAPE;
 
         if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
           this.submit();
         } else if (keyCode === UP) {
+          event.preventDefault();
           this.selectPrevious();
         } else if (keyCode === DOWN) {
+          event.preventDefault();
           this.selectNext();
+        } else {
+          this.selectedIndex = null;
         }
-      };
-
-      this.onKeyPress = () => {
-        this.selectedIndex = null;
       };
 
       this.onFocus = () => {

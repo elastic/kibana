@@ -75,6 +75,7 @@ module.directive('queryBar', function () {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
+
         const { indexPattern } = this;
         getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
       });
