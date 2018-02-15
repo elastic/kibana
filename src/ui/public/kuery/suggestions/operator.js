@@ -2,33 +2,33 @@ const type = 'operator';
 
 const operators = {
   '<=': {
-    description: 'is LESS THAN OR EQUAL TO some value',
+    description: 'is <span class="suggestionItem__callout">less than or equal to</span> some value',
     fieldTypes: ['number', 'date', 'ip']
   },
   '>=': {
-    description: 'is GREATER THAN OR EQUAL TO to some value',
+    description: 'is <span class="suggestionItem__callout">greater than or equal to</span> to some value',
     fieldTypes: ['number', 'date', 'ip']
   },
   '<': {
-    description: 'is LESS THAN some value',
+    description: 'is <span class="suggestionItem__callout">less than</span> some value',
     fieldTypes: ['number', 'date', 'ip']
   },
   '>': {
-    description: 'is GREATER THAN some value',
+    description: 'is <span class="suggestionItem__callout">greater than</span> some value',
     fieldTypes: ['number', 'date', 'ip']
   },
   ':': {
-    description: 'IS some value',
+    description: '<span class="suggestionItem__callout">equals</span> some value',
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
   },
   ':*': {
-    description: 'EXISTS'
+    description: '<span class="suggestionItem__callout">exists</span>'
   }
 };
 
 function getDescription({ fieldName, operator }) {
   const { description } = operators[operator];
-  return `Filter results where ${fieldName} ${description}.`;
+  return `<p>Filter results where ${fieldName} ${description}</p>`;
 }
 
 export function getSuggestionsProvider({ indexPattern }) {

@@ -1,11 +1,23 @@
-<div>
-  <div class="suggestion-type">
-    {{item.type}}
+<div class="suggestionItem suggestionItem--{{item.type}}">
+  <div class="suggestionItem__type">
+    <div ng-switch="item.type">
+      <div ng-switch-when="field">
+        <icon type="'list'"></icon>
+      </div>
+      <div ng-switch-when="value">
+        <icon type="'bullseye'"></icon>
+      </div>
+      <div ng-switch-when="recentSearch">
+        <icon type="'calendar'"></icon>
+      </div>
+      <div ng-switch-when="conjunction">
+        <icon type="'merge'"></icon>
+      </div>
+      <div ng-switch-when="operator">
+        <icon type="'dot'"></icon>
+      </div>
+    </div>
   </div>
-  <div class="suggestion-text">
-    {{item.text}}
-  </div>
-  <div class="suggestion-description">
-    {{item.description}}
-  </div>
+  <div class="suggestionItem__text" ng-bind-html="item.text"></div>
+  <div class="suggestionItem__description" ng-if="item.type !== 'recentSearch'" ng-bind-html="item.description"></div>
 </div>

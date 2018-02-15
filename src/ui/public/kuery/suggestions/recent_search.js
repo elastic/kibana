@@ -1,5 +1,5 @@
 const type = 'recentSearch';
-const description = 'A recent entry in your search history.';
+const description = 'Run this query you performed earlier';
 
 export function getSuggestionsProvider({ persistedLog, query }) {
   return function getRecentSearchSuggestions() {

@@ -1,7 +1,7 @@
 const type = 'field';
 
 function getDescription(fieldName) {
-  return `Filter results using ${fieldName}.`;
+  return `<p>Filter results that contain <span class="suggestionItem__callout">${fieldName}</span></p>`;
 }
 
 export function getSuggestionsProvider({ indexPattern }) {

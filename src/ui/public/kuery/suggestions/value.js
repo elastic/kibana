@@ -4,7 +4,10 @@ const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
 
 function getDescription({ fieldName, value }) {
-  return `Filter results where ${fieldName} is "${value}".`;
+  return `
+    <p>Find results where <span class="suggestionItem__callout">${fieldName}</span>
+    is <span class="suggestionItem__callout">${value}</span></p>
+  `;
 }
 
 export function getSuggestionsProvider({ $http, indexPattern }) {
