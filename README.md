@@ -93,6 +93,18 @@ Your Github username
 A list of project-specific settings. This is useful if you want to override project-specific configurations.
 [Read more about the project-specific configuration](#project-specific-configuration)
 
+The `upstream` property will determine which project-specific config to override. The following will override `own` and `multipleCommits` for `elastic/kibana`:
+
+```json
+{
+  "projects": [{
+    "upstream": "elastic/kibana",
+    "own": false,
+    "multipleCommits": true
+  }]
+}
+```
+
 ### Project-specific configuration
 `.backportrc.json` can be added to every project where you use `backport`. This is useful for sharing configuration options with other project contributors.
 
