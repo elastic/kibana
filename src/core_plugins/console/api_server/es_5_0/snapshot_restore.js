@@ -18,7 +18,7 @@ export default function (api) {
 
 
   api.addEndpointDescription('single_snapshot', {
-    methods: ['GET', 'DELETE'],
+    methods: ['GET'],
     patterns: [
       '_snapshot/{id}/{id}'
     ]
