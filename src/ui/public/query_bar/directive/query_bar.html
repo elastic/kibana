@@ -67,22 +67,6 @@
         </div>
       </div>
 
-      <!-- kql input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kql'">
-        <input
-          ng-model="queryBar.localQuery.query"
-          input-focus
-          disable-input-focus="queryBar.disableAutoFocus"
-          kbn-typeahead-input
-          placeholder="Search... (e.g. status:200 AND extension:PHP)"
-          aria-label="Search input"
-          aria-describedby="discoverKuerySyntaxHint"
-          type="text"
-          class="kuiLocalSearchInput"
-          ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
-          data-test-subj="queryInput"
-        />
-      </div>
 
       <select
         class="kuiLocalSearchSelect"
