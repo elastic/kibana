@@ -27,7 +27,7 @@ toastNotifications.add('Copied to clipboard');
 Let the user know that an action was successful, such as saving or deleting an object.
 
 ```js
-toastNotifications.addSuccess('Saved document');
+toastNotifications.addSuccess('Your document was saved');
 ```
 
 #### Warning
@@ -35,7 +35,7 @@ toastNotifications.addSuccess('Saved document');
 If something OK or good happened, but perhaps wasn't perfect, show a warning toast.
 
 ```js
-toastNotifications.addWarning('Saved document, but not edit history');
+toastNotifications.addWarning('Your document was saved, but not its edit history');
 ```
 
 #### Danger
@@ -51,7 +51,7 @@ toastNotifications.addDanger('An error caused your document to be lost');
 Toasts will automatically be dismissed after a brief delay, but if for some reason you want to dismiss a toast, you can use the returned toast from one of the `add` methods and then pass it to `remove`.
 
 ```js
-const toast = toastNotifications.add('Saved document');
+const toast = toastNotifications.add('Your document was saved');
 toastNotifications.remove(toast);
 ```
 
@@ -61,7 +61,7 @@ If you want to configure the toast further you can provide an object instead of 
 
 ```js
 toastNotifications.add({
-  title: 'Saved document',
+  title: 'Your document was saved',
   text: 'Only you have access to this document',
   color: 'success',
   iconType: 'check',
@@ -73,7 +73,7 @@ Because the underlying components are React, you can use JSX to pass in React el
 
 ```js
 toastNotifications.add({
-  title: 'Saved document',
+  title: 'Your document was saved',
   text: (
     <div>
       <p>
@@ -94,7 +94,7 @@ Functional tests are commonly used to verify that a user action yielded a sucess
 
 ```js
 toastNotifications.addSuccess({
-  title: 'Saved document',
+  title: 'Your document was saved',
   'data-test-subj': 'saveDocumentSuccess',
 });
 ```
