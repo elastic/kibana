@@ -87,6 +87,8 @@
           ng-model="queryBar.localQuery.query"
           ng-trim="false"
           ng-keyup="queryBar.handleKeyUp($event)"
+          ng-change="queryBar.updateSuggestions()"
+          ng-click="queryBar.updateSuggestions()"
           input-focus
           match-pairs
           disable-input-focus="queryBar.disableAutoFocus"

@@ -48,7 +48,7 @@ module.directive('queryBar', function () {
       this.suggestionTemplate = suggestionTemplate;
 
       this.handleKeyUp = (event) => {
-        if (!['ArrowDown', 'ArrowUp', 'Tab', 'Enter', 'Escape'].includes(event.key)) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
           this.updateSuggestions();
         }
       };
@@ -75,9 +75,9 @@ module.directive('queryBar', function () {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
-
         const { indexPattern } = this;
         getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
+        this.updateSuggestions();
       });
 
       $scope.$watch('queryBar.query', (newQuery) => {
