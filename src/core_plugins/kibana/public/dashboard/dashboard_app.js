@@ -184,14 +184,14 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addVis = function (hit, showToast = true) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
-          toastNotifications.addSuccess('Added visualization to your dashboard');
+          toastNotifications.addSuccess('Visualization was added to your dashboard');
         }
       };
 
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         toastNotifications.addSuccess({
-          title: 'Added saved search to your dashboard',
+          title: 'Saved search was added to your dashboard',
           'data-test-subj': 'addSavedSearchToDashboardSuccess',
         });
       };
@@ -274,7 +274,7 @@ app.directive('dashboardApp', function ($injector) {
             $scope.kbnTopNav.close('save');
             if (id) {
               toastNotifications.addSuccess({
-                title: `Saved '${dash.title}'`,
+                title: `Dashboard '${dash.title}' was saved`,
                 'data-test-subj': 'saveDashboardSuccess',
               });
 
