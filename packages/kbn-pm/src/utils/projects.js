@@ -7,26 +7,13 @@ import { Project } from './project';
 
 const glob = promisify(_glob);
 
-export async function getProjects(rootPath, projectsPaths) {
-  const globOpts = {
-    cwd: rootPath,
-
-    // Should throw in case of unusual errors when reading the file system
-    strict: true,
-
-    // Always returns absolute paths for matched files
-    absolute: true,
-
-    // Do not match ** against multiple filenames
-    // (This is only specified because we currently don't have a need for it.)
-    noglobstar: true,
-  };
+export async function getProjects(rootPath, projectsPathsPatterns) {
   const projects = new Map();
 
-  for (const globPath of projectsPaths) {
-    const files = await glob(path.join(globPath, 'package.json'), globOpts);
+  for (const pattern of projectsPathsPatterns) {
+    const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
 
-    for (const filePath of files) {
+    for (const filePath of pathsToProcess) {
       const projectConfigPath = normalize(filePath);
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
@@ -46,6 +33,24 @@ export async function getProjects(rootPath, projectsPaths) {
   }
 
   return projects;
+}
+
+function packagesFromGlobPattern({ pattern, rootPath }) {
+  const globOptions = {
+    cwd: rootPath,
+
+    // Should throw in case of unusual errors when reading the file system
+    strict: true,
+
+    // Always returns absolute paths for matched files
+    absolute: true,
+
+    // Do not match ** against multiple filenames
+    // (This is only specified because we currently don't have a need for it.)
+    noglobstar: true,
+  };
+
+  return glob(path.join(pattern, 'package.json'), globOptions);
 }
 
 // https://github.com/isaacs/node-glob/blob/master/common.js#L104
