@@ -40,7 +40,7 @@ export default function (kbnServer, server, config) {
     return;
   }
 
-  server.connection({
+  const connection = server.connection({
     ...connectionOptions,
     tls: {
       key: readFileSync(config.get('server.ssl.key')),
@@ -52,6 +52,16 @@ export default function (kbnServer, server, config) {
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
       honorCipherOrder: true,
       secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
+    }
+  });
+
+  const badRequestResponse = new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii');
+  connection.listener.on('clientError', (err, socket) => {
+    if (socket.writable) {
+      socket.end(badRequestResponse);
+    }
+    else {
+      socket.destroy(err);
     }
   });
 }

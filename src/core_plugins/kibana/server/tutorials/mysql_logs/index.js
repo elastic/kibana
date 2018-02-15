@@ -11,7 +11,7 @@ export function mysqlLogsSpecProvider() {
     shortDescription: 'Collect and parse error and slow logs created by MySQL.',
     longDescription: 'The `mysql` Filebeat module parses error and slow logs created by MySQL.' +
                      ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-mysql.html).',
-    //iconPath: '', TODO
+    euiIconType: 'logoMySQL',
     artifacts: {
       dashboards: [
         {

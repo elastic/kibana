@@ -13,7 +13,6 @@ export function netflowSpecProvider() {
       ' indexes the events into Elasticsearch, and installs a suite of Kibana dashboards.' +
       ' This module support Netflow Version 5 and 9.' +
       ' [Learn more]({config.docs.logstash}/netflow-module.html).',
-    //iconPath: '', TODO
     completionTimeMinutes: 10,
     //previewImagePath: 'kibana-apache.png', TODO
     onPrem: ON_PREM_INSTRUCTIONS,

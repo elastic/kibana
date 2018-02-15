@@ -29,19 +29,13 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
 
-    // We need to build all the Kibana packages so ESLint is able to verify that
-    // e.g. imports resolve properly. If we don't build the packages here, the
-    // `main` field in their `package.json` would link to a location that
-    // doesn't exist yet.
-    'buildPackages',
-
     'run:eslint',
     'licenses',
     'test:server',
     'test:jest',
     'test:browser-ci',
     'test:api',
-    '_build:verifyTranslations',
+    'verifyTranslations',
   ]);
 
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
