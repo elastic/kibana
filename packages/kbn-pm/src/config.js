@@ -15,6 +15,8 @@ export function getProjectPaths(rootPath, options) {
 
   if (!skipKibanaExtra) {
     projectPaths.push(resolve(rootPath, '../kibana-extra/*'));
+    projectPaths.push(resolve(rootPath, '../kibana-extra/*/packages/*'));
+    projectPaths.push(resolve(rootPath, '../kibana-extra/*/plugins/*'));
   }
 
   return projectPaths;

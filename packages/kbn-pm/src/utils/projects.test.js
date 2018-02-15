@@ -5,6 +5,7 @@ import {
   buildProjectGraph,
   topologicallyBatchProjects,
 } from './projects';
+import { getProjectPaths } from '../config';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
@@ -45,6 +46,25 @@ describe('#getProjects', () => {
       'message',
       'There are multiple projects with the same name [baz]'
     );
+  });
+
+  test('includes additional projects in package.json', async () => {
+    const projectPaths = getProjectPaths(rootPath, {});
+    const projects = await getProjects(rootPath, projectPaths);
+
+    const expectedProjects = [
+      'kibana',
+      'bar',
+      'foo',
+      'with-additional-projects',
+      'quux',
+      'baz',
+    ];
+
+    expect([...projects.keys()]).toEqual(
+      expect.arrayContaining(expectedProjects)
+    );
+    expect(projects.size).toBe(expectedProjects.length);
   });
 });
 
