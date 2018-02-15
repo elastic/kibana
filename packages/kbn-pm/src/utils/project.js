@@ -72,9 +72,19 @@ export class Project {
     );
   }
 
+  getBuildConfig() {
+    return (this.json.kibana && this.json.kibana.build) || {};
+  }
+
   skipFromBuild() {
-    const json = this.json;
-    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+    return this.getBuildConfig().skip === true;
+  }
+
+  getCopyBuildDirectory() {
+    return path.resolve(
+      this.path,
+      this.getBuildConfig().copyBuildDirectory || '.'
+    );
   }
 
   hasScript(name) {

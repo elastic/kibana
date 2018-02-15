@@ -1,5 +1,6 @@
-import del from 'del';
 import { relative, resolve } from 'path';
+import { readFileSync } from 'fs';
+import del from 'del';
 import copy from 'cpy';
 
 import { getProjectPaths } from '../config';
@@ -77,14 +78,26 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   // dependencies. The primary reason for allowing the Kibana build process to
   // install the dependencies is that it will "dedupe" them, so we don't include
   // unnecessary copies of dependencies.
-  await copy(['**/*', '!package.json', '!node_modules/**'], buildProjectPath, {
-    cwd: project.path,
+  await copy(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getCopyBuildDirectory(),
     parents: true,
     nodir: true,
     dot: true,
   });
 
-  const packageJson = project.json;
+  // attempt to read package.json from build output, use copy from project if it doesn't exist
+  let packageJson;
+  try {
+    packageJson = JSON.parse(
+      readFileSync(resolve(buildProjectPath, 'package.json'), 'utf8')
+    );
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+    packageJson = project.json;
+  }
+
   const preparedPackageJson = createProductionPackageJson(packageJson);
   await writePackageJson(buildProjectPath, preparedPackageJson);
 }
