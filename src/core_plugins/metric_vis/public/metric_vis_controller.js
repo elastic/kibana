@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
-import { isColorDark } from '@elastic/eui';
+import { EuiKeyboardAccessible, isColorDark } from '@elastic/eui';
 import classNames from 'classnames';
 
 export class MetricVisComponent extends Component {
@@ -75,12 +75,16 @@ export class MetricVisComponent extends Component {
 
     tableGroups.tables.forEach((table) => {
       let bucketAgg;
+      let rowHeaderIndex;
 
       table.columns.forEach((column, i) => {
         const aggConfig = column.aggConfig;
 
         if (aggConfig && aggConfig.schema.group === 'buckets') {
           bucketAgg = aggConfig;
+          // Store the current index, so we later know in which position in the
+          // row array, the bucket agg key will be, so we can create filters on it.
+          rowHeaderIndex = i;
           return;
         }
 
@@ -105,6 +109,14 @@ export class MetricVisComponent extends Component {
             }
           }
 
+          let createFilter;
+          if (bucketAgg && rowHeaderIndex !== undefined) {
+            createFilter = () => {
+              const filter = bucketAgg.createFilter(row[rowHeaderIndex]);
+              this.props.vis.API.queryFilter.addFilters(filter);
+            };
+          }
+
           const shouldColor = config.colorsRange.length > 1;
 
           metrics.push({
@@ -113,6 +125,7 @@ export class MetricVisComponent extends Component {
             color: shouldColor && config.style.labelColor ? color : null,
             bgColor: shouldColor && config.style.bgColor ? color : null,
             lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
+            createFilter,
           });
         });
       });
@@ -128,24 +141,30 @@ export class MetricVisComponent extends Component {
     };
 
     const containerClassName = classNames('metric-container', {
-      'metric-container--light': metric.lightText
+      'metric-container--light': metric.lightText,
+      'metric-container--filterable': !!metric.createFilter
     });
 
     return (
-      <div
-        key={index}
-        className={containerClassName}
-        style={{ backgroundColor: metric.bgColor }}
-      >
+      <EuiKeyboardAccessible>
         <div
-          className="metric-value"
-          style={metricValueStyle}
-          dangerouslySetInnerHTML={{ __html: metric.value }}
-        />
-        { this.props.vis.params.metric.labels.show &&
-          <div>{metric.label}</div>
-        }
-      </div>
+          key={index}
+          className={containerClassName}
+          style={{ backgroundColor: metric.bgColor }}
+          onClick={metric.createFilter}
+          tabIndex={metric.createFilter ? 0 : null}
+          role={metric.createFilter ? 'button' : null}
+        >
+          <div
+            className="metric-value"
+            style={metricValueStyle}
+            dangerouslySetInnerHTML={{ __html: metric.value }}
+          />
+          { this.props.vis.params.metric.labels.show &&
+            <div>{metric.label}</div>
+          }
+        </div>
+      </EuiKeyboardAccessible>
     );
   };
 
