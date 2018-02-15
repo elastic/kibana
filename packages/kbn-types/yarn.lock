@@ -14,6 +14,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/utils@link:../kbn-utils":
+  version "0.0.0"
+  uid ""
+
 rxjs@5.4.3:
   version "5.4.3"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.4.3.tgz#0758cddee6033d68e0fd53676f0f3596ce3d483f"
