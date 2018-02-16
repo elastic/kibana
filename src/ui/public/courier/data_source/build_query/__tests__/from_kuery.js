@@ -2,7 +2,8 @@ import { buildQueryFromKuery } from '../from_kuery';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
+import expect from 'expect.js';
+import { fromKqlExpression, toElasticsearchQuery } from '../../../../kuery';
 
 let indexPattern;
 
@@ -28,19 +29,27 @@ describe('build query', function () {
 
     it('should transform an array of kuery queries into ES queries combined in the bool\'s filter clause', function () {
       const queries = [
-        { query: 'foo:bar', language: 'kuery' },
-        { query: 'bar:baz', language: 'kuery' },
+        { query: 'extension:jpg', language: 'kuery' },
+        { query: 'machine.os:osx', language: 'kuery' },
       ];
 
       const expectedESQueries = queries.map(
         (query) => {
-          return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
+          return toElasticsearchQuery(fromKqlExpression(query.query), indexPattern);
         }
       );
 
       const result = buildQueryFromKuery(indexPattern, queries);
 
       expectDeepEqual(result.filter, expectedESQueries);
+    });
+
+    it('should throw a useful error if it looks like query is using an old, unsupported syntax', function () {
+      const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
+
+      expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery]).to.throwError(
+        /It looks like you're using an outdated Kuery syntax./
+      );
     });
 
   });

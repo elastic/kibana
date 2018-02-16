@@ -2,7 +2,7 @@ import { BuildESQueryProvider } from '../build_es_query';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
+import { fromKqlExpression, toElasticsearchQuery } from '../../../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import { DecorateQueryProvider } from '../../_decorate_query';
 
@@ -36,7 +36,7 @@ describe('build query', function () {
 
     it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
       const queries = [
-        { query: 'foo:bar', language: 'kuery' },
+        { query: 'extension:jpg', language: 'kuery' },
         { query: 'bar:baz', language: 'lucene' },
       ];
       const filters = [
@@ -53,7 +53,7 @@ describe('build query', function () {
             { match_all: {} },
           ],
           filter: [
-            toElasticsearchQuery(fromKueryExpression('foo:bar'), indexPattern),
+            toElasticsearchQuery(fromKqlExpression('extension:jpg'), indexPattern),
           ],
           should: [],
           must_not: [],
