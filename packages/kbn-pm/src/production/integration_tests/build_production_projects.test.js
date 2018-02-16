@@ -3,8 +3,8 @@ import copy from 'cpy';
 import { resolve } from 'path';
 import globby from 'globby';
 
-import { buildProductionProjects } from './build_production_projects';
-import { getProjects } from '../utils/projects';
+import { buildProductionProjects } from '../build_production_projects';
+import { getProjects } from '../../utils/projects';
 
 describe('kbn-pm production', function() {
   it(

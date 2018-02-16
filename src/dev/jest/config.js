@@ -46,6 +46,7 @@ export default {
     '<rootDir>/ui_framework/doc_site/',
     '<rootDir>/ui_framework/generator-kui/',
     '<rootDir>/packages/kbn-pm/(dist|vendor)/',
+    '/integration_tests/'
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
