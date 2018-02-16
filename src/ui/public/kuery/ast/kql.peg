@@ -139,7 +139,7 @@ WildcardString
 
 WildcardSequence
   = left:UnquotedCharacter* '*' right:UnquotedCharacter* {
-    return [left.join(''), Symbol('*'), right.join('')];
+    return [left.join(''), nodeTypes.wildcard.wildcardSymbol, right.join('')];
   }
 
 UnquotedLiteral

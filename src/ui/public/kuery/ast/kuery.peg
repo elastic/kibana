@@ -42,32 +42,32 @@
 start
   = space? query:OrQuery space? {
     if (query.type === 'literal') {
-      return addMeta(nodeTypes.function.buildNode('and', [query], 'implicit'), text(), location());
+      return addMeta(nodeTypes.function.buildNode('and', [query]), text(), location());
     }
     return query;
   }
   / whitespace:[\ \t\r\n]* {
-    return addMeta(nodeTypes.function.buildNode('is', '*', '*'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('is', '*', '*', false), text(), location());
   }
 
 OrQuery
   = left:AndQuery space 'or'i space right:OrQuery {
-    return addMeta(nodeTypes.function.buildNode('or', [left, right], 'operator'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('or', [left, right]), text(), location());
   }
   / AndQuery
 
 AndQuery
   = left:NegatedClause space 'and'i space right:AndQuery {
-    return addMeta(nodeTypes.function.buildNode('and', [left, right], 'operator'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
   }
   / left:NegatedClause space !'or'i right:AndQuery {
-    return addMeta(nodeTypes.function.buildNode('and', [left, right], 'implicit'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
   }
   / NegatedClause
 
 NegatedClause
   = [!] clause:Clause {
-    return addMeta(nodeTypes.function.buildNode('not', clause, 'operator'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('not', clause), text(), location());
   }
   / Clause
 
@@ -79,10 +79,10 @@ Clause
 
 Term
   = field:literal_arg_type ':' value:literal_arg_type {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value], 'operator'), text(), location());
+    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value, nodeTypes.literal.buildNode(true)]), text(), location());
   }
   / field:literal_arg_type ':[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt], 'operator'), text(), location());
+    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt]), text(), location());
   }
   / function
   / !Keywords literal:literal_arg_type { return literal; }
@@ -92,7 +92,7 @@ function_name
 
 function "function"
  = name:function_name space? '(' space? arg_list:arg_list? space? ')' {
-  return addMeta(nodeTypes.function.buildNodeWithArgumentNodes(name, arg_list || [], 'function'), text(), location());
+  return addMeta(nodeTypes.function.buildNodeWithArgumentNodes(name, arg_list || []), text(), location());
  }
 
 arg_list

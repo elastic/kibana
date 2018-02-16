@@ -5,7 +5,7 @@ import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
 import { getFields } from './utils/get_fields';
 
-export function buildNodeParams(fieldName, value, isPhrase = false, serializeStyle = 'operator') {
+export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
@@ -13,9 +13,12 @@ export function buildNodeParams(fieldName, value, isPhrase = false, serializeSty
     throw new Error('value is a required argument');
   }
 
+  const fieldNode = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : literal.buildNode(fieldName);
+  const valueNode = typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
+  const isPhraseNode = literal.buildNode(isPhrase);
+
   return {
-    arguments: [literal.buildNode(fieldName), literal.buildNode(value), literal.buildNode(isPhrase)],
-    serializeStyle
+    arguments: [fieldNode, valueNode, isPhraseNode],
   };
 }
 
@@ -87,14 +90,3 @@ export function toElasticsearchQuery(node, indexPattern) {
   };
 }
 
-export function toKueryExpression(node) {
-  if (node.serializeStyle !== 'operator') {
-    throw new Error(`Cannot serialize "is" function as "${node.serializeStyle}"`);
-  }
-
-  const { arguments: [ fieldNameArg, valueArg ] } = node;
-  const fieldName = literal.toKueryExpression(fieldNameArg);
-  const value = !_.isUndefined(valueArg) ? literal.toKueryExpression(valueArg) : valueArg;
-
-  return `${fieldName}:${value}`;
-}

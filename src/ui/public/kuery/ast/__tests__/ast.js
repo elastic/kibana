@@ -141,7 +141,7 @@ describe('kuery AST API', function () {
     });
 
     it('should support a shorthand operator syntax for "is" functions', function () {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', true, 'operator');
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', true);
       const actual = fromKueryExpressionNoMeta('foo:bar');
       expectDeepEqual(actual, expected);
     });
@@ -168,29 +168,6 @@ describe('kuery AST API', function () {
     });
   });
 
-  describe('toKueryExpression', function () {
-
-    it('should return the given node type\'s kuery string representation', function () {
-      const node = nodeTypes.function.buildNode('exists', 'foo');
-      const expected = nodeTypes.function.toKueryExpression(node);
-      const result = ast.toKueryExpression(node);
-      expectDeepEqual(result, expected);
-    });
-
-    it('should return an empty string for undefined nodes and unknown node types', function () {
-      expect(ast.toKueryExpression()).to.be('');
-
-      const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
-      delete noTypeNode.type;
-      expect(ast.toKueryExpression(noTypeNode)).to.be('');
-
-      const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
-      unknownTypeNode.type = 'notValid';
-      expect(ast.toKueryExpression(unknownTypeNode)).to.be('');
-    });
-
-  });
-
   describe('toElasticsearchQuery', function () {
 
     it('should return the given node type\'s ES query representation', function () {
@@ -212,40 +189,6 @@ describe('kuery AST API', function () {
       const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
       unknownTypeNode.type = 'notValid';
       expectDeepEqual(ast.toElasticsearchQuery(unknownTypeNode), expected);
-    });
-
-  });
-
-  describe('symmetry of to/fromKueryExpression', function () {
-
-    it('toKueryExpression and fromKueryExpression should be inverse operations', function () {
-      function testExpression(expression) {
-        expect(ast.toKueryExpression(ast.fromKueryExpression(expression))).to.be(expression);
-      }
-
-      testExpression('');
-      testExpression('    ');
-      testExpression('foo');
-      testExpression('foo bar');
-      testExpression('foo 200');
-      testExpression('bytes:[1000 to 8000]');
-      testExpression('bytes:[1000 TO    8000]');
-      testExpression('range(bytes, gt=1000, lt=8000)');
-      testExpression('range(bytes, gt=1000, lte=8000)');
-      testExpression('range(bytes, gte=1000, lt=8000)');
-      testExpression('range(bytes, gte=1000, lte=8000)');
-      testExpression('response:200');
-      testExpression('"response":200');
-      testExpression('response:"200"');
-      testExpression('"response":"200"');
-      testExpression('is(response, 200)');
-      testExpression('!is(response, 200)');
-      testExpression('foo or is(tic, tock) or foo:bar');
-      testExpression('or(foo, is(tic, tock), foo:bar)');
-      testExpression('foo is(tic, tock) foo:bar');
-      testExpression('foo and is(tic, tock) and foo:bar');
-      testExpression('(foo or is(tic, tock)) and foo:bar');
-      testExpression('!(foo or is(tic, tock)) and foo:bar');
     });
 
   });

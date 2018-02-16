@@ -39,14 +39,6 @@ function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
   return parser.parse(expression, parseOptions);
 }
 
-export function toKueryExpression(node) {
-  if (!node || !node.type || !nodeTypes[node.type]) {
-    return '';
-  }
-
-  return nodeTypes[node.type].toKueryExpression(node);
-}
-
 export function toElasticsearchQuery(node, indexPattern) {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
