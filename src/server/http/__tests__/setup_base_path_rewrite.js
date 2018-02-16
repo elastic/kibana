@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { setupBasePathRewrite } from '../setup_base_path_rewrite';
 
-describe('server / base path rewriting', () => {
+describe('server / setup_base_path_rewrite', () => {
   function createServer({ basePath, rewriteBasePath }) {
     const config = {
       get: sinon.stub()
@@ -39,8 +39,11 @@ describe('server / base path rewriting', () => {
   }
 
   describe('no base path', () => {
+    let server;
+    before(() => server = createServer({ basePath: '', rewriteBasePath: false }));
+    after(() => server = undefined);
+
     it('/bar => 404', async () => {
-      const server = createServer({ basePath: '', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar'
       });
@@ -49,7 +52,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/ => 404', async () => {
-      const server = createServer({ basePath: '', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar/'
       });
@@ -58,7 +60,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/foo => 404', async () => {
-      const server = createServer({ basePath: '', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar/foo'
       });
@@ -67,7 +68,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/ => /', async () => {
-      const server = createServer({ basePath: '', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/'
       });
@@ -77,7 +77,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/foo => /foo', async () => {
-      const server = createServer({ basePath: '', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/foo'
       });
@@ -88,8 +87,11 @@ describe('server / base path rewriting', () => {
   });
 
   describe('base path /bar, rewrite = false', () => {
+    let server;
+    before(() => server = createServer({ basePath: '/bar', rewriteBasePath: false }));
+    after(() => server = undefined);
+
     it('/bar => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar'
       });
@@ -98,7 +100,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/ => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar/'
       });
@@ -107,7 +108,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/foo => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/bar/foo'
       });
@@ -116,7 +116,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/ => /', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/'
       });
@@ -126,7 +125,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/foo => /foo', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: false });
       const resp = await server.inject({
         url: '/foo'
       });
@@ -137,8 +135,11 @@ describe('server / base path rewriting', () => {
   });
 
   describe('base path /bar, rewrite = true', () => {
+    let server;
+    before(() => server = createServer({ basePath: '/bar', rewriteBasePath: true }));
+    after(() => server = undefined);
+
     it('/bar => /', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: true });
       const resp = await server.inject({
         url: '/bar'
       });
@@ -148,7 +149,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/ => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: true });
       const resp = await server.inject({
         url: '/bar/'
       });
@@ -158,7 +158,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/bar/foo => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: true });
       const resp = await server.inject({
         url: '/bar/foo'
       });
@@ -168,7 +167,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/ => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: true });
       const resp = await server.inject({
         url: '/'
       });
@@ -177,7 +175,6 @@ describe('server / base path rewriting', () => {
     });
 
     it('/foo => 404', async () => {
-      const server = createServer({ basePath: '/bar', rewriteBasePath: true });
       const resp = await server.inject({
         url: '/foo'
       });
