@@ -228,12 +228,15 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('fieldFilter', () => {
-      if ($scope.fieldFilter !== undefined) {
-        if($state.tab === 'indexedFields') {
+      if ($scope.fieldFilter === undefined) {
+        return;
+      }
+
+      switch($state.tab) {
+        case 'indexedFields':
           updateIndexedFieldsTable($scope, $state);
-        } else if($state.tab === 'scriptedFields') {
+        case 'scriptedFields':
           updateScriptedFieldsTable($scope, $state);
-        }
       }
     });
 
