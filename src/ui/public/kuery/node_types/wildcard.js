@@ -1,3 +1,5 @@
+import { fromLiteralExpression } from '../ast/ast';
+
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -9,6 +11,10 @@ function escapeQueryString(string) {
 }
 
 export function buildNode(value) {
+  if (typeof value === 'string') {
+    return fromLiteralExpression(value);
+  }
+
   return {
     type: 'wildcard',
     value,
