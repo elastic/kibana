@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }) {
 
     Save this chart with the name Bar Example.
     */
-    it('should change the Y-Axis extents', async function () {
+    it.skip('should change the Y-Axis extents', async function () {
       await PageObjects.visualize.setAxisExtents(50, 250);
       await PageObjects.visualize.clickGo();
 

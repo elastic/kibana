@@ -592,23 +592,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      ** This method gets the chart data and scales it based on chart height and label.
      ** Returns an array of height values
      */
-    async getAreaChartData(aggregateName) {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxChartYAxisElement = await retry.try(
-        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
-
-      const yLabel = await maxChartYAxisElement.getVisibleText();
-      // since we're going to use the y-axis 'last' (top) label as a number to
-      // scale the chart pixel data, we need to clean out commas and % marks.
-      const yAxisLabel = yLabel.replace(/(%|,)/g, '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
+    async getAreaChartData(dataLabel, axis = 'ValueAxis-1') {
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
 
       const rectangle = await find.byCssSelector('rect.background');
       const yAxisHeight = await rectangle.getAttribute('height');
       log.debug(`height --------- ${yAxisHeight}`);
 
       const path = await retry.try(
-        async () => await find.byCssSelector(`path[data-label="${aggregateName}"]`, defaultFindTimeout * 2));
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2));
       const data = await path.getAttribute('d');
       log.debug(data);
       // This area chart data starts with a 'M'ove to a x,y location, followed
@@ -617,37 +609,33 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // So git rid of the one 'M' and split the rest on the 'L's.
       const tempArray = data.replace('M', '').split('L');
       const chartSections = tempArray.length / 2;
-      log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
+      // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
       for (let i = 0; i < chartSections; i++) {
-        chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
+        chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) * yAxisRatio);
         log.debug('chartData[i] =' + chartData[i]);
       }
       return chartData;
     }
 
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-    async getLineChartData(cssPart, axis = 'ValueAxis-1') {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxYAxisMarker = await retry.try(
-        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`));
-      const yLabel = await maxYAxisMarker.getVisibleText();
-      const yAxisLabel = yLabel.replace(/,/g, '');
-
+    async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      // 1). get the range/pixel ratio
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 2). find and save the y-axis pixel size (the chart height)
       const rectangle = await find.byCssSelector('clipPath rect');
-      const theHeight = await rectangle.getAttribute('height');
-      const yAxisHeight = theHeight;
-      log.debug('theHeight = ' + theHeight);
-
+      const yAxisHeight = await rectangle.getAttribute('height');
       // 3). get the chart-wrapper elements
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector(`.chart-wrapper circle[${cssPart}]`, defaultFindTimeout * 2));
+        async () => await find
+          .allByCssSelector(`.chart-wrapper circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
 
       // 5). for each chart element, find the green circle, then the cy position
       async function getChartType(chart) {
         const cy = await chart.getAttribute('cy');
-        return Math.round((yAxisHeight - cy) / yAxisHeight * yAxisLabel);
+        // the point_series_options test has data in the billions range and
+        // getting 11 digits of precision with these calculations is very hard
+        return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(8));
       }
 
       // 4). pass the chartTypes to the getChartType function
@@ -656,42 +644,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
-    async getBarChartData(dataLabel = 'Count') {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxYAxisChartMarker = await retry.try(
-        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
-
-      const yLabel = await maxYAxisChartMarker.getVisibleText();
-      const yAxisLabel = yLabel.replace(',', '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
-      // get the y-position of the max label
-      const maxLabelY = await maxYAxisChartMarker.getPosition();
-      log.debug('maxLabelY = ' + maxLabelY.y);
-
-      // 2). find the value and y-position of the minimum label
-      const chartAreaObjNew = await
-        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1)');
-      const yLabelMin = (await chartAreaObjNew.getVisibleText()).replace(',', '');
-      const yAxisHeightNew = await chartAreaObjNew.getPosition();
-      log.debug('MaxTickYpos = ' + yAxisHeightNew.y);
-
-      // TODO: All get*ChartData methods should use this or be refactored to share this code.
-      // We have to use the differnce in the y-position of the min and max labels
-      // to determine the scale because the max marker is not always at the very
-      // top of the chart.
-      const yAxisHeight = yAxisHeightNew.y - maxLabelY.y;
-      log.debug('yAxisHeight = ' + yAxisHeight);
-
+    async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      // 1). get the range/pixel ratio
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the chart-wrapper elements
       const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
 
       async function getChartType(chart) {
         const barHeight = await chart.getAttribute('height');
-        return Math.round(barHeight / yAxisHeight * (yAxisLabel - yLabelMin));
+        return Math.round(barHeight * yAxisRatio);
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
     }
+
+
+    // Returns value per pixel
+    async getChartYAxisRatio(axis = 'ValueAxis-1') {
+      // 1). get the maximim chart Y-Axis marker value and Y position
+      const maxYAxisChartMarker = await retry.try(
+        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
+      );
+      const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
+      const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
+      log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
+
+      // 2). get the minimum chart Y-Axis marker value and Y position
+      const minYAxisChartMarker = await
+        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick');
+      const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
+      const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
+      return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
+    }
+
 
     async getHeatmapData() {
       const chartTypes = await retry.try(
