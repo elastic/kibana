@@ -10,6 +10,7 @@ uiRoutes.when('/management/kibana/index', {
   template: angularTemplate,
   controller: function ($scope, $injector) {
     // Wait for the directives to execute
+    const kbnUrl = $injector.get('kbnUrl');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
       const services = {
@@ -17,7 +18,9 @@ uiRoutes.when('/management/kibana/index', {
         es: $injector.get('es'),
         indexPatterns: $injector.get('indexPatterns'),
         savedObjectsClient: $injector.get('Private')(SavedObjectsClientProvider),
-        kbnUrl: $injector.get('kbnUrl'),
+        changeUrl: url => {
+          $scope.$evalAsync(() => kbnUrl.changePath(url));
+        },
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;
