@@ -1,6 +1,6 @@
 import { last } from './last';
 import { scan } from './scan';
-import { ifEmpty } from './ifEmpty';
+import { ifEmpty } from './if_empty';
 import { pipe } from '../lib';
 import { OperatorFunction } from '../interfaces';
 

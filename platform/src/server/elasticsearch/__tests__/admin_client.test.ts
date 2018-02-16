@@ -5,7 +5,7 @@ jest.mock('../call_api', () => ({
 }));
 
 import { Client } from 'elasticsearch';
-import { AdminClient } from '../AdminClient';
+import { AdminClient } from '../admin_client';
 
 let client: AdminClient;
 let esClient: Client;

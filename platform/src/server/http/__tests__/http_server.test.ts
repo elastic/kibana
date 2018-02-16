@@ -2,10 +2,10 @@ import * as http from 'http';
 import * as supertest from 'supertest';
 import * as Chance from 'chance';
 
-import { Env } from '../../../config/Env';
+import { Env } from '../../../config/env';
 import { Router } from '../Router';
-import { HttpServer } from '../HttpServer';
-import { HttpConfig } from '../HttpConfig';
+import { HttpServer } from '../http_server';
+import { HttpConfig } from '../http_config';
 import { logger } from '../../../logging/__mocks__';
 
 const chance = new Chance();

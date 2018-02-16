@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 
 export function $bindNodeCallback<R>(
   callbackFunc: (callback: (err: any, result: R) => any) => any

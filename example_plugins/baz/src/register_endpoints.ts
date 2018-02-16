@@ -5,7 +5,7 @@ import {
   ElasticsearchService,
   KibanaConfig,
 } from '@kbn/types';
-import { BazService } from './BazService';
+import { BazService } from './baz_service';
 
 export function registerEndpoints(
   router: Router,

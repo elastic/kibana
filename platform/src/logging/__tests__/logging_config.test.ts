@@ -1,4 +1,4 @@
-import { LoggingConfig } from '../LoggingConfig';
+import { LoggingConfig } from '../logging_config';
 
 test('`schema` creates correct schema with defaults.', () => {
   const loggingConfigSchema = LoggingConfig.schema;

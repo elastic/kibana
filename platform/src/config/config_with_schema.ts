@@ -1,6 +1,6 @@
 // TODO inline all of these
 import { schema } from '@kbn/utils';
-import { Env } from './Env';
+import { Env } from './env';
 
 /**
  * Interface that defines the static side of a config class.

@@ -1,7 +1,7 @@
 import { BehaviorSubject } from '@kbn/observable';
-import { MutableLoggerFactory } from '../LoggerFactory';
-import { LoggingConfig } from '../LoggingConfig';
-import { LoggingService } from '../LoggingService';
+import { MutableLoggerFactory } from '../logger_factory';
+import { LoggingConfig } from '../logging_config';
+import { LoggingService } from '../logging_service';
 
 const createConfig = () => {
   return new LoggingConfig({

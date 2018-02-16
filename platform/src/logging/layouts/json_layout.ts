@@ -1,7 +1,7 @@
 import { schema } from '@kbn/utils';
 
-import { LogRecord } from '../LogRecord';
-import { Layout } from './Layouts';
+import { LogRecord } from '../log_record';
+import { Layout } from './layouts';
 
 const { literal, object } = schema;
 

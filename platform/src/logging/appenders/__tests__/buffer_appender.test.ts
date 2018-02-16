@@ -1,6 +1,6 @@
-import { LogLevel } from '../../LogLevel';
-import { LogRecord } from '../../LogRecord';
-import { BufferAppender } from '../buffer/BufferAppender';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
+import { BufferAppender } from '../buffer/buffer_appender';
 
 test('`flush()` does not return any record buffered at the beginning.', () => {
   const appender = new BufferAppender();

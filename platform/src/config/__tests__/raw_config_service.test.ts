@@ -1,11 +1,11 @@
 const mockGetConfigFromFile = jest.fn();
 
-jest.mock('../readConfig', () => ({
+jest.mock('../read_config', () => ({
   getConfigFromFile: mockGetConfigFromFile,
 }));
 
 import { k$, first, toPromise } from '@kbn/observable';
-import { RawConfigService } from '../RawConfigService';
+import { RawConfigService } from '../raw_config_service';
 
 const configFile = '/config/kibana.yml';
 

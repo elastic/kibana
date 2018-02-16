@@ -1,5 +1,5 @@
 import { KibanaPluginConfig } from '@kbn/types';
-import { registerEndpoints } from './registerEndpoints';
+import { registerEndpoints } from './register_endpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {

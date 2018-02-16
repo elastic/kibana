@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 import { reduce } from './reduce';
 import { OperatorFunction } from '../interfaces';
 

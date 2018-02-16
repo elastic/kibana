@@ -1,4 +1,4 @@
-import { Observable, SubscriptionObserver } from './Observable';
+import { Observable, SubscriptionObserver } from './observable';
 
 /**
  * A Subject is a special type of Observable that allows values to be

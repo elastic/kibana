@@ -1,4 +1,4 @@
-import { Observable, ObservableInput } from '../Observable';
+import { Observable, ObservableInput } from '../observable';
 
 /**
  * Alias for `Observable.from`

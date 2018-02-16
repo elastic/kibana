@@ -2,7 +2,7 @@ import { BehaviorSubject, k$, first, toPromise } from '@kbn/observable';
 import { schema } from '@kbn/utils';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
-import { Env } from '../Env';
+import { Env } from '../env';
 import { logger } from '../../logging/__mocks__';
 
 const emptyArgv = {};

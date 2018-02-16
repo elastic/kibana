@@ -1,7 +1,7 @@
 import {
   ElasticsearchConfig,
   ElasticsearchClusterType,
-} from './ElasticsearchConfig';
+} from './elasticsearch_config';
 import { elasticsearchSchema, ElasticsearchConfigsSchema } from './schema';
 import { Env } from '../../config';
 

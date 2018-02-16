@@ -1,4 +1,4 @@
-import { Observable } from './Observable';
+import { Observable } from './observable';
 
 export type UnaryFunction<T, R> = (source: T) => R;
 

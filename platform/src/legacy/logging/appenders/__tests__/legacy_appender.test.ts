@@ -1,7 +1,7 @@
-import { LogLevel } from '../../../../logging/LogLevel';
-import { LogRecord } from '../../../../logging/LogRecord';
-import { LegacyKbnServer } from '../../../LegacyKbnServer';
-import { LegacyAppender } from '../LegacyAppender';
+import { LogLevel } from '../../../../logging/log_level';
+import { LogRecord } from '../../../../logging/log_record';
+import { LegacyKbnServer } from '../../../legacy_kbn_server';
+import { LegacyAppender } from '../legacy_appender';
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = LegacyAppender.configSchema;

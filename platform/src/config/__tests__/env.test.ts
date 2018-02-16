@@ -10,7 +10,7 @@ jest.mock('path', () => ({
   },
 }));
 
-import { Env } from '../Env';
+import { Env } from '../env';
 
 test('correctly creates default environment with empty options.', () => {
   const defaultEnv = Env.createDefault({});

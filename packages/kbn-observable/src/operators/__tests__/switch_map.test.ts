@@ -1,9 +1,9 @@
-import { Observable } from '../../Observable';
-import { k$ } from '../../k$';
+import { Observable } from '../../observable';
+import { k$ } from '../../k';
 import { switchMap } from '../';
 import { collect } from '../../lib/collect';
 import { $of } from '../../factories';
-import { Subject } from '../../Subject';
+import { Subject } from '../../subject';
 
 const number$ = $of(1, 2, 3);
 

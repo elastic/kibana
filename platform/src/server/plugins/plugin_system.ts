@@ -1,6 +1,6 @@
-import { Plugin } from './Plugin';
+import { Plugin } from './plugin';
 import { PluginName, BasePluginsType } from './types';
-import { KibanaCoreModules } from './KibanaCoreModules';
+import { KibanaCoreModules } from './kibana_core_modules';
 import { Logger, LoggerFactory } from '../../logging';
 import { topologicalSort } from '../../lib/topologicalSort';
 

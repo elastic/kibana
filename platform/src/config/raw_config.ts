@@ -1,4 +1,4 @@
-import { ConfigPath } from './ConfigService';
+import { ConfigPath } from './config_service';
 
 /**
  * Represents raw config store.

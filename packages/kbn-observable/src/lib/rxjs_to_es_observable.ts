@@ -1,5 +1,5 @@
 import { Observable as RxjsObservable } from 'rxjs';
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 
 /**
  * Transforms an RxJS observable into a "spec-compliant" observable.

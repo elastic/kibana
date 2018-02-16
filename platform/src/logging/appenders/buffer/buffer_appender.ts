@@ -1,5 +1,5 @@
-import { LogRecord } from '../../LogRecord';
-import { DisposableAppender } from '../Appenders';
+import { LogRecord } from '../../log_record';
+import { DisposableAppender } from '../appenders';
 
 /**
  * Simple appender that just buffers `LogRecord` instances it receives. It is a *reserved* appender

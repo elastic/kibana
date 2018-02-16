@@ -8,11 +8,11 @@ import {
 } from '@kbn/observable';
 import { isEqual } from 'lodash';
 
-import { Env } from './Env';
+import { Env } from './env';
 import { Logger, LoggerFactory } from '../logging';
 import { schema } from '@kbn/utils';
-import { ConfigWithSchema } from './ConfigWithSchema';
-import { RawConfig } from './RawConfig';
+import { ConfigWithSchema } from './config_with_schema';
+import { RawConfig } from './raw_config';
 
 export type ConfigPath = string | string[];
 

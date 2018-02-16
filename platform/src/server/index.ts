@@ -3,9 +3,9 @@ import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
 import { Logger, LoggerFactory } from '../logging';
-import { PluginsConfig } from './plugins/PluginsConfig';
-import { PluginsService } from './plugins/PluginsService';
-import { PluginSystem } from './plugins/PluginSystem';
+import { PluginsConfig } from './plugins/plugins_config';
+import { PluginsService } from './plugins/plugins_service';
+import { PluginSystem } from './plugins/plugin_system';
 
 export class Server {
   private readonly elasticsearch: ElasticsearchModule;

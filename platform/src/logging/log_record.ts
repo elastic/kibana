@@ -1,4 +1,4 @@
-import { LogLevel } from './LogLevel';
+import { LogLevel } from './log_level';
 
 /**
  * Essential parts of every log message.

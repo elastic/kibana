@@ -1,4 +1,4 @@
-import { ensureDeepObject } from '../ensureDeepObject';
+import { ensureDeepObject } from '../ensure_deep_object';
 
 test('flat object', () => {
   const obj = {

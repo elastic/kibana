@@ -1,5 +1,5 @@
 const mockCreateLayout = jest.fn();
-jest.mock('../../layouts/Layouts', () => {
+jest.mock('../../layouts/layouts', () => {
   const { schema } = require('@kbn/utils');
   return {
     Layouts: {
@@ -11,10 +11,10 @@ jest.mock('../../layouts/Layouts', () => {
   };
 });
 
-import { ConsoleAppender } from '../console/ConsoleAppender';
-import { FileAppender } from '../file/FileAppender';
-import { LegacyAppender } from '../../../legacy/logging/appenders/LegacyAppender';
-import { Appenders } from '../Appenders';
+import { ConsoleAppender } from '../console/console_appender';
+import { FileAppender } from '../file/file_appender';
+import { LegacyAppender } from '../../../legacy/logging/appenders/legacy_appender';
+import { Appenders } from '../appenders';
 
 beforeEach(() => {
   mockCreateLayout.mockReset();

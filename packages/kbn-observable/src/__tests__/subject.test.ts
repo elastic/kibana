@@ -1,6 +1,6 @@
-import { Observable } from '../Observable';
-import { Subject } from '../Subject';
-import { k$ } from '../k$';
+import { Observable } from '../observable';
+import { Subject } from '../subject';
+import { k$ } from '../k';
 import { first } from '../operators';
 
 const noop = () => {};

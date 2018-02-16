@@ -1,4 +1,4 @@
-import { Observable, ObservableInput } from '../Observable';
+import { Observable, ObservableInput } from '../observable';
 import { $from } from '../factories';
 
 const pending = Symbol('awaiting first value');

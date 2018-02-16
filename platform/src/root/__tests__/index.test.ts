@@ -32,16 +32,16 @@ import { BehaviorSubject } from '@kbn/observable';
 
 jest.mock('../../config', () => ({ ConfigService: mockConfigService }));
 jest.mock('../../server', () => ({ Server: mockServer }));
-jest.mock('../../logging/LoggingService', () => ({
+jest.mock('../../logging/logging_service', () => ({
   LoggingService: mockLoggingService,
 }));
-jest.mock('../../logging/LoggerFactory', () => ({
+jest.mock('../../logging/logger_factory', () => ({
   MutableLoggerFactory: mockMutableLoggerFactory,
 }));
 
 import { Root } from '../';
-import { Env } from '../../config/Env';
-import { RawConfig } from '../../config/RawConfig';
+import { Env } from '../../config/env';
+import { RawConfig } from '../../config/raw_config';
 
 const env = new Env('.', {});
 const config$ = new BehaviorSubject({} as RawConfig);

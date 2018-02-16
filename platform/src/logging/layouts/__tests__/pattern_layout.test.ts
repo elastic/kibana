@@ -1,6 +1,6 @@
-import { LogLevel } from '../../LogLevel';
-import { LogRecord } from '../../LogRecord';
-import { PatternLayout } from '../PatternLayout';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
+import { PatternLayout } from '../pattern_layout';
 
 const records: LogRecord[] = [
   {

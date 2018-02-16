@@ -1,5 +1,5 @@
 import { Router } from '../http';
-import { ElasticsearchService } from './ElasticsearchService';
+import { ElasticsearchService } from './elasticsearch_service';
 import { LoggerFactory } from '../../logging';
 
 export function registerElasticsearchRoutes(

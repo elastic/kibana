@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 
 /**
  * Test helper that collects all actions, and returns an array with all

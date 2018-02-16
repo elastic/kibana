@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 
 /**
  * Create an observable that mirrors a promise. If the promise resolves the

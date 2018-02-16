@@ -1,4 +1,4 @@
-jest.mock('../../layouts/Layouts', () => {
+jest.mock('../../layouts/layouts', () => {
   const { schema } = require('@kbn/utils');
   return {
     Layouts: {
@@ -9,9 +9,9 @@ jest.mock('../../layouts/Layouts', () => {
   };
 });
 
-import { LogLevel } from '../../LogLevel';
-import { LogRecord } from '../../LogRecord';
-import { ConsoleAppender } from '../console/ConsoleAppender';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
+import { ConsoleAppender } from '../console/console_appender';
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = ConsoleAppender.configSchema;

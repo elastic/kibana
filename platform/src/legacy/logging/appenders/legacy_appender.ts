@@ -1,8 +1,8 @@
 import { schema } from '@kbn/utils';
 
-import { LogRecord } from '../../../logging/LogRecord';
-import { DisposableAppender } from '../../../logging/appenders/Appenders';
-import { LegacyKbnServer } from '../../LegacyKbnServer';
+import { LogRecord } from '../../../logging/log_record';
+import { DisposableAppender } from '../../../logging/appenders/appenders';
+import { LegacyKbnServer } from '../../legacy_kbn_server';
 
 const { literal, object } = schema;
 

@@ -1,5 +1,5 @@
-import { KibanaPluginApi } from './KibanaPluginApi';
-import { KibanaCoreModules } from './KibanaCoreModules';
+import { KibanaPluginApi } from './kibana_plugin_api';
+import { KibanaCoreModules } from './kibana_core_modules';
 import { Router } from '../http';
 
 /**

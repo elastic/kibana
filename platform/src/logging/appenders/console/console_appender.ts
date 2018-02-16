@@ -1,8 +1,8 @@
 import { schema } from '@kbn/utils';
 
-import { LogRecord } from '../../LogRecord';
-import { Layout, Layouts } from '../../layouts/Layouts';
-import { DisposableAppender } from '../Appenders';
+import { LogRecord } from '../../log_record';
+import { Layout, Layouts } from '../../layouts/layouts';
+import { DisposableAppender } from '../appenders';
 
 const { literal, object } = schema;
 

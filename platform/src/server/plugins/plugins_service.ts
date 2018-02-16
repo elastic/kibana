@@ -13,12 +13,12 @@ import {
   $fromPromise,
 } from '@kbn/observable';
 
-import { Plugin } from './Plugin';
+import { Plugin } from './plugin';
 import { PluginName } from './types';
-import { PluginSystem } from './PluginSystem';
-import { PluginsConfig } from './PluginsConfig';
+import { PluginSystem } from './plugin_system';
+import { PluginsConfig } from './plugins_config';
 import { Logger, LoggerFactory } from '../../logging';
-import { CoreService } from '../../types/CoreService';
+import { CoreService } from '../../types/core_service';
 import { ConfigService } from '../../config';
 
 const $fsReadDir = $bindNodeCallback(readdir);

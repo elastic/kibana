@@ -1,4 +1,4 @@
-import { Observable, ObservableInput } from '../Observable';
+import { Observable, ObservableInput } from '../observable';
 import { OperatorFunction } from '../interfaces';
 import { $from } from '../factories';
 

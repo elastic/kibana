@@ -1,12 +1,12 @@
-jest.mock('../KibanaPluginValues', () => {
+jest.mock('../kibana_plugin_values', () => {
   return {
     createKibanaValuesForPlugin: () => ({}),
   };
 });
 
-import { Plugin } from '../Plugin';
-import { PluginSystem } from '../PluginSystem';
-import { KibanaCoreModules } from '../KibanaCoreModules';
+import { Plugin } from '../plugin';
+import { PluginSystem } from '../plugin_system';
+import { KibanaCoreModules } from '../kibana_core_modules';
 import { logger } from '../../../logging/__mocks__';
 
 // To make typings work in the tests

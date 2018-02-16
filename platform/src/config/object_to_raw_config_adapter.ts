@@ -1,7 +1,7 @@
 import { has, get, set } from 'lodash';
 
-import { RawConfig } from './RawConfig';
-import { ConfigPath } from './ConfigService';
+import { RawConfig } from './raw_config';
+import { ConfigPath } from './config_service';
 
 /**
  * Allows plain javascript object to behave like `RawConfig` instance.

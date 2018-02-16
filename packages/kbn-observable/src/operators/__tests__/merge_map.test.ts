@@ -1,6 +1,6 @@
-import { Observable } from '../../Observable';
-import { k$ } from '../../k$';
-import { Subject } from '../../Subject';
+import { Observable } from '../../observable';
+import { k$ } from '../../k';
+import { Subject } from '../../subject';
 import { mergeMap, map } from '../';
 import { $of, $error } from '../../factories';
 import { collect } from '../../lib/collect';

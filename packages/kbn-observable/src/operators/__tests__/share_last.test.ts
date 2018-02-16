@@ -1,6 +1,6 @@
-import { Observable, SubscriptionObserver } from '../../Observable';
-import { BehaviorSubject } from '../../BehaviorSubject';
-import { k$ } from '../../k$';
+import { Observable, SubscriptionObserver } from '../../observable';
+import { BehaviorSubject } from '../../behavior_subject';
+import { k$ } from '../../k';
 import { shareLast } from '../';
 import { collect } from '../../lib/collect';
 

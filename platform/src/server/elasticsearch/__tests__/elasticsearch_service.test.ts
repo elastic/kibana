@@ -4,9 +4,9 @@ jest.mock('elasticsearch', () => ({
   Client: mockCreateClient,
 }));
 
-import { ElasticsearchService } from '../ElasticsearchService';
-import { AdminClient } from '../AdminClient';
-import { ScopedDataClient } from '../ScopedDataClient';
+import { ElasticsearchService } from '../elasticsearch_service';
+import { AdminClient } from '../admin_client';
+import { ScopedDataClient } from '../scoped_data_client';
 import { logger } from '../../../logging/__mocks__';
 import { k$, BehaviorSubject, first, toPromise } from '@kbn/observable';
 

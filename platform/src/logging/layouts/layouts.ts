@@ -1,9 +1,9 @@
 import { schema } from '@kbn/utils';
 
 import { assertNever } from '../../lib/utils';
-import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';
-import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
-import { LogRecord } from '../LogRecord';
+import { JsonLayout, JsonLayoutConfigType } from './json_layout';
+import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
+import { LogRecord } from '../log_record';
 
 const { oneOf } = schema;
 

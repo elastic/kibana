@@ -4,8 +4,8 @@ jest.mock('fs', () => ({
   createWriteStream: () => mockCreateWriteStream,
 }));
 
-import { LoggingConfig } from '../LoggingConfig';
-import { MutableLoggerFactory } from '../LoggerFactory';
+import { LoggingConfig } from '../logging_config';
+import { MutableLoggerFactory } from '../logger_factory';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

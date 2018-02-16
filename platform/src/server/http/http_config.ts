@@ -1,4 +1,4 @@
-import { SslConfig } from './SslConfig';
+import { SslConfig } from './ssl_config';
 import { Env } from '../../config';
 import { schema, ByteSizeValue } from '@kbn/utils';
 

@@ -1,12 +1,12 @@
 import { schema } from '@kbn/utils';
 
 import { assertNever } from '../../lib/utils';
-import { Env } from '../../config/Env';
-import { ConsoleAppender } from './console/ConsoleAppender';
-import { FileAppender } from './file/FileAppender';
-import { LegacyAppender } from '../../legacy/logging/appenders/LegacyAppender';
-import { LogRecord } from '../LogRecord';
-import { Layouts } from '../layouts/Layouts';
+import { Env } from '../../config/env';
+import { ConsoleAppender } from './console/console_appender';
+import { FileAppender } from './file/file_appender';
+import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
+import { LogRecord } from '../log_record';
+import { Layouts } from '../layouts/layouts';
 
 const appendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,

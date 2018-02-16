@@ -1,15 +1,15 @@
 const mockHttpServer = jest.fn();
 
-jest.mock('../HttpServer', () => ({
+jest.mock('../http_server', () => ({
   HttpServer: mockHttpServer,
 }));
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from '@kbn/observable';
 
-import { Env } from '../../../config/Env';
-import { HttpService } from '../HttpService';
-import { HttpConfig } from '../HttpConfig';
+import { Env } from '../../../config/env';
+import { HttpService } from '../http_service';
+import { HttpConfig } from '../http_config';
 import { Router } from '../Router';
 import { logger } from '../../../logging/__mocks__';
 

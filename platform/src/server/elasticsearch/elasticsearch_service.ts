@@ -12,11 +12,11 @@ import {
   $combineLatest,
 } from '@kbn/observable';
 
-import { ElasticsearchConfigs } from './ElasticsearchConfigs';
-import { AdminClient } from './AdminClient';
-import { ScopedDataClient } from './ScopedDataClient';
+import { ElasticsearchConfigs } from './elasticsearch_configs';
+import { AdminClient } from './admin_client';
+import { ScopedDataClient } from './scoped_data_client';
 import { LoggerFactory } from '../../logging';
-import { CoreService } from '../../types/CoreService';
+import { CoreService } from '../../types/core_service';
 import { Headers } from '../http/Router/headers';
 
 type Clients = { data: Client; admin: Client };

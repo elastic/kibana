@@ -6,7 +6,7 @@ import * as args from './args';
 import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
-import { overrideConfigWithArgv } from './overrideConfigWithArgv';
+import { overrideConfigWithArgv } from './override_config_with_argv';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)

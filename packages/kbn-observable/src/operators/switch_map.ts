@@ -1,4 +1,4 @@
-import { Observable, Subscription } from '../Observable';
+import { Observable, Subscription } from '../observable';
 import { OperatorFunction } from '../interfaces';
 
 /**

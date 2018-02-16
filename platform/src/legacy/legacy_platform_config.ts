@@ -3,7 +3,7 @@ import {
   ObjectToRawConfigAdapter,
   RawConfig,
 } from '../config';
-import { ConfigPath } from '../config/ConfigService';
+import { ConfigPath } from '../config/config_service';
 
 /**
  * Represents legacy Kibana config class.

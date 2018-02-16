@@ -5,7 +5,7 @@ jest.mock('../call_api', () => ({
 }));
 
 import { Client } from 'elasticsearch';
-import { ScopedDataClient } from '../ScopedDataClient';
+import { ScopedDataClient } from '../scoped_data_client';
 
 let client: ScopedDataClient;
 let esClient: Client;

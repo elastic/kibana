@@ -5,7 +5,7 @@ import { Server } from 'net';
 import { promisify } from 'bluebird';
 import { readFileSync } from 'fs';
 
-import { HttpConfig } from './HttpConfig';
+import { HttpConfig } from './http_config';
 import { Env } from '../../config';
 import { Logger } from '../../logging';
 import { Router } from './Router';

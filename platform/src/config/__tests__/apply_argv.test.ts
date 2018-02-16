@@ -1,5 +1,5 @@
 import { ObjectToRawConfigAdapter } from '..';
-import { overrideConfigWithArgv } from '../../cli/overrideConfigWithArgv';
+import { overrideConfigWithArgv } from '../../cli/override_config_with_argv';
 
 test('port', () => {
   const argv = {

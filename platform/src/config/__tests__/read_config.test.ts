@@ -1,4 +1,4 @@
-import { getConfigFromFile } from '../readConfig';
+import { getConfigFromFile } from '../read_config';
 
 const fixtureFile = (name: string) => `${__dirname}/__fixtures__/${name}`;
 

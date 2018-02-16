@@ -1,4 +1,4 @@
-import { Observable, Subscription } from '../Observable';
+import { Observable, Subscription } from '../observable';
 
 /**
  * Creates an observable that combines all observables passed as arguments into

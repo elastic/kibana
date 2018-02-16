@@ -1,5 +1,5 @@
-import { k$ } from '../../k$';
-import { Subject } from '../../Subject';
+import { k$ } from '../../k';
+import { Subject } from '../../subject';
 import { last } from '../';
 
 test('returns the last value', async () => {

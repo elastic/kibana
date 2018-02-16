@@ -1,4 +1,4 @@
-jest.mock('../../layouts/Layouts', () => {
+jest.mock('../../layouts/layouts', () => {
   const { schema } = require('@kbn/utils');
   return {
     Layouts: {
@@ -12,9 +12,9 @@ jest.mock('../../layouts/Layouts', () => {
 const mockCreateWriteStream = jest.fn();
 jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
 
-import { LogLevel } from '../../LogLevel';
-import { LogRecord } from '../../LogRecord';
-import { FileAppender } from '../file/FileAppender';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
+import { FileAppender } from '../file/file_appender';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

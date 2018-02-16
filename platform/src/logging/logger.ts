@@ -1,6 +1,6 @@
-import { Appender } from './appenders/Appenders';
-import { LogLevel } from './LogLevel';
-import { LogRecord } from './LogRecord';
+import { Appender } from './appenders/appenders';
+import { LogLevel } from './log_level';
+import { LogRecord } from './log_record';
 
 export type LogMeta = { [key: string]: any };
 

@@ -7,11 +7,11 @@ import {
 } from '@kbn/observable';
 
 import { Env } from '../../config';
-import { HttpServer } from './HttpServer';
-import { HttpConfig } from './HttpConfig';
+import { HttpServer } from './http_server';
+import { HttpConfig } from './http_config';
 import { Logger, LoggerFactory } from '../../logging';
 import { Router } from './Router';
-import { CoreService } from '../../types/CoreService';
+import { CoreService } from '../../types/core_service';
 
 export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;

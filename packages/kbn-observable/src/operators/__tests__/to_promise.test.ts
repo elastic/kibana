@@ -1,5 +1,5 @@
-import { k$ } from '../../k$';
-import { Subject } from '../../Subject';
+import { k$ } from '../../k';
+import { Subject } from '../../subject';
 import { toPromise } from '../';
 
 // Promises are always async, so we add a simple helper that we can `await` to

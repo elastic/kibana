@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 import { MonoTypeOperatorFunction } from '../interfaces';
 import { $fromCallback } from '../factories';
 

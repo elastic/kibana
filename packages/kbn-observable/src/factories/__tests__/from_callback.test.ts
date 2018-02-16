@@ -1,6 +1,6 @@
 import { $from } from '../';
-import { $fromCallback } from '../$fromCallback';
-import { Subject } from '../../Subject';
+import { $fromCallback } from '../from_callback';
+import { Subject } from '../../subject';
 import { collect } from '../../lib/collect';
 
 test('returns raw value', async () => {

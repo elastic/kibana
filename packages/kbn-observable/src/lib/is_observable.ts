@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 
 export function isObservable<T>(x: any): x is Observable<T> {
   return (

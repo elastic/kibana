@@ -6,9 +6,9 @@ import {
   PluginName,
   PluginConfigPath,
 } from './types';
-import { KibanaCoreModules } from './KibanaCoreModules';
+import { KibanaCoreModules } from './kibana_core_modules';
 import { Logger, LoggerFactory } from '../../logging';
-import { createKibanaValuesForPlugin } from './KibanaPluginValues';
+import { createKibanaValuesForPlugin } from './kibana_plugin_values';
 
 // `isClass` is forked from https://github.com/miguelmota/is-class/blob/master/is-class.js
 // MIT licensed, copyright 2014 Miguel Mota

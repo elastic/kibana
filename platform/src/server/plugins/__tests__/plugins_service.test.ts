@@ -2,15 +2,15 @@ import { pick } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from '@kbn/observable';
 
-import { PluginsService } from '../PluginsService';
-import { PluginsConfig } from '../PluginsConfig';
+import { PluginsService } from '../plugins_service';
+import { PluginsConfig } from '../plugins_config';
 import { logger } from '../../../logging/__mocks__';
 
 let mockConfigService: any = jest.genMockFromModule(
-  '../../../config/ConfigService'
+  '../../../config/config_service'
 );
-let mockPluginSystem: any = jest.genMockFromModule('../PluginSystem');
-let env: any = jest.genMockFromModule('../../../config/Env');
+let mockPluginSystem: any = jest.genMockFromModule('../plugin_system');
+let env: any = jest.genMockFromModule('../../../config/env');
 
 beforeEach(() => {
   mockPluginSystem = {

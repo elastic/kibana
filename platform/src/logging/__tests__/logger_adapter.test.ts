@@ -1,5 +1,5 @@
-import { Logger } from '../Logger';
-import { LoggerAdapter } from '../LoggerAdapter';
+import { Logger } from '../logger';
+import { LoggerAdapter } from '../logger_adapter';
 
 test('proxies all method calls to the internal logger.', () => {
   const internalLogger: Logger = {

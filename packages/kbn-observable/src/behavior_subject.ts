@@ -1,5 +1,5 @@
-import { SubscriptionObserver } from './Observable';
-import { Subject } from './Subject';
+import { SubscriptionObserver } from './observable';
+import { Subject } from './subject';
 
 /**
  * A BehaviorSubject is a Subject that has a _current_ value.

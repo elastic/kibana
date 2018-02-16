@@ -1,5 +1,5 @@
-import { Observable } from '../Observable';
-import { k$ } from '../k$';
+import { Observable } from '../observable';
+import { k$ } from '../k';
 import {
   OperatorFunction,
   UnaryFunction,

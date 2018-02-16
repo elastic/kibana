@@ -1,4 +1,4 @@
-import { HttpConfig } from '../HttpConfig';
+import { HttpConfig } from '../http_config';
 
 test('has defaults for config', () => {
   const httpSchema = HttpConfig.schema;

@@ -1,6 +1,6 @@
 import { $of, $combineLatest } from '../../factories';
 import { collect } from '../../lib/collect';
-import { Subject } from '../../Subject';
+import { Subject } from '../../subject';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

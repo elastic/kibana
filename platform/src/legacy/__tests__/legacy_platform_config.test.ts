@@ -1,5 +1,5 @@
 import { LegacyConfigToRawConfigAdapter } from '..';
-import { LegacyConfigMock } from '../__mocks__/LegacyConfigMock';
+import { LegacyConfigMock } from '../__mocks__/legacy_config_mock';
 
 let legacyConfigMock: LegacyConfigMock;
 let configAdapter: LegacyConfigToRawConfigAdapter;

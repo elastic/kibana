@@ -1,5 +1,5 @@
-import { Observable } from '../Observable';
-import { isObservable } from '../lib/isObservable';
+import { Observable } from '../observable';
+import { isObservable } from '../lib/is_observable';
 
 /**
  * Creates an observable that calls the specified function with no arguments

@@ -1,4 +1,4 @@
-import { $bindNodeCallback } from '../$bindNodeCallback';
+import { $bindNodeCallback } from '../bind_node_callback';
 import { collect } from '../../lib/collect';
 
 type NodeCallback = (err: any, val?: string) => void;

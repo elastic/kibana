@@ -1,9 +1,9 @@
 import { createWriteStream, WriteStream } from 'fs';
 import { schema } from '@kbn/utils';
 
-import { Layout, Layouts } from '../../layouts/Layouts';
-import { LogRecord } from '../../LogRecord';
-import { DisposableAppender } from '../Appenders';
+import { Layout, Layouts } from '../../layouts/layouts';
+import { LogRecord } from '../../log_record';
+import { DisposableAppender } from '../appenders';
 
 const { literal, object, string } = schema;
 

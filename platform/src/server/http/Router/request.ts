@@ -2,7 +2,7 @@ import * as express from 'express';
 import { schema } from '@kbn/utils';
 
 import { Headers, filterHeaders } from './headers';
-import { RouteSchemas } from './Route';
+import { RouteSchemas } from './route';
 
 export class KibanaRequest<Params, Query, Body> {
   readonly headers: Headers;

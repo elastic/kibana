@@ -1,5 +1,5 @@
-import { Logger, LogMeta } from './Logger';
-import { LogRecord } from './LogRecord';
+import { Logger, LogMeta } from './logger';
+import { LogRecord } from './log_record';
 
 /** @internal */
 export class LoggerAdapter implements Logger {

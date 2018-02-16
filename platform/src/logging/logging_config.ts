@@ -1,5 +1,5 @@
 import { schema } from '@kbn/utils';
-import { Appenders, AppenderConfigType } from './appenders/Appenders';
+import { Appenders, AppenderConfigType } from './appenders/appenders';
 
 const { literal, oneOf, object, string, arrayOf, mapOf } = schema;
 

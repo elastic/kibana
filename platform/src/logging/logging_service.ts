@@ -1,7 +1,7 @@
 import { Observable, Subscription } from '@kbn/observable';
 
-import { MutableLoggerFactory } from './LoggerFactory';
-import { LoggingConfig } from './LoggingConfig';
+import { MutableLoggerFactory } from './logger_factory';
+import { LoggingConfig } from './logging_config';
 
 /**
  * Service that is responsible for maintaining the log config subscription and

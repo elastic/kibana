@@ -9,9 +9,9 @@ import {
 import { isEqual, isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
 
-import { getConfigFromFile } from './readConfig';
-import { RawConfig } from './RawConfig';
-import { ObjectToRawConfigAdapter } from './ObjectToRawConfigAdapter';
+import { getConfigFromFile } from './read_config';
+import { RawConfig } from './raw_config';
+import { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');

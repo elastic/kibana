@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import { schema } from '@kbn/utils';
 
-import { LogLevel } from '../LogLevel';
-import { LogRecord } from '../LogRecord';
-import { Layout } from './Layouts';
+import { LogLevel } from '../log_level';
+import { LogRecord } from '../log_record';
+import { Layout } from './layouts';
 
 const { boolean, literal, maybe, object, string } = schema;
 /**

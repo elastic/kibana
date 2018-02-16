@@ -1,10 +1,10 @@
-import { Env } from '../config/Env';
-import { LoggingConfig, LoggerConfigType } from './LoggingConfig';
-import { LogLevel } from './LogLevel';
-import { Logger, BaseLogger } from './Logger';
-import { LoggerAdapter } from './LoggerAdapter';
-import { Appenders, DisposableAppender } from './appenders/Appenders';
-import { BufferAppender } from './appenders/buffer/BufferAppender';
+import { Env } from '../config/env';
+import { LoggingConfig, LoggerConfigType } from './logging_config';
+import { LogLevel } from './log_level';
+import { Logger, BaseLogger } from './logger';
+import { LoggerAdapter } from './logger_adapter';
+import { Appenders, DisposableAppender } from './appenders/appenders';
+import { BufferAppender } from './appenders/buffer/buffer_appender';
 
 /**
  * The single purpose of `LoggerFactory` interface is to define a way to

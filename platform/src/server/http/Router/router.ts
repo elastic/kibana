@@ -2,9 +2,9 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { schema } from '@kbn/utils';
 
-import { RouteMethod, RouteSchemas, RouteConfig } from './Route';
-import { KibanaRequest } from './Request';
-import { KibanaResponse, ResponseFactory, responseFactory } from './Response';
+import { RouteMethod, RouteSchemas, RouteConfig } from './route';
+import { KibanaRequest } from './request';
+import { KibanaResponse, ResponseFactory, responseFactory } from './response';
 
 export class Router {
   readonly router: express.Router = express.Router();

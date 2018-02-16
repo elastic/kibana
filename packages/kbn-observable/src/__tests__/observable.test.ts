@@ -1,4 +1,4 @@
-import { Observable, SubscriptionObserver } from '../Observable';
+import { Observable, SubscriptionObserver } from '../observable';
 
 test('receives values when subscribed', async () => {
   let observer: SubscriptionObserver<any>;

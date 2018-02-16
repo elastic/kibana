@@ -1,4 +1,4 @@
-import { ElasticsearchConfig } from '../ElasticsearchConfig';
+import { ElasticsearchConfig } from '../elasticsearch_config';
 import { ClusterSchema } from '../schema';
 
 test('filters headers', () => {
