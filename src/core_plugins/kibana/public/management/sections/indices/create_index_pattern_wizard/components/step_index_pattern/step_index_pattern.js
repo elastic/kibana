@@ -112,7 +112,7 @@ export class StepIndexPattern extends Component {
   }
 
   renderStatusMessage(matchedIndices) {
-    const { query, isLoadingIndices, indexPatternExists } = this.state;
+    const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
 
     if (isLoadingIndices || indexPatternExists) {
       return null;
@@ -121,6 +121,7 @@ export class StepIndexPattern extends Component {
     return (
       <StatusMessage
         matchedIndices={matchedIndices}
+        isIncludingSystemIndices={isIncludingSystemIndices}
         query={query}
       />
     );

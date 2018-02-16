@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`props iconType 1`] = `
+<a
+  className="euiLink synopsis"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  href="link_to_item"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiIcon
+        size="xl"
+        type="logoApache"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="synopsisContent"
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        className="synopsisTitle"
+        size="s"
+      >
+        <h4>
+          Great tutorial
+        </h4>
+      </EuiTitle>
+      <EuiText
+        className="synopsisBody"
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            this is a great tutorial about...
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</a>
+`;
+
+exports[`props iconUrl 1`] = `
+<a
+  className="euiLink synopsis"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  href="link_to_item"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <img
+        alt=""
+        className="synopsisIcon"
+        src="icon_url"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="synopsisContent"
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        className="synopsisTitle"
+        size="s"
+      >
+        <h4>
+          Great tutorial
+        </h4>
+      </EuiTitle>
+      <EuiText
+        className="synopsisBody"
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            this is a great tutorial about...
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</a>
+`;
+
+exports[`render 1`] = `
+<a
+  className="euiLink synopsis"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  href="link_to_item"
+>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      className="synopsisContent"
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        className="synopsisTitle"
+        size="s"
+      >
+        <h4>
+          Great tutorial
+        </h4>
+      </EuiTitle>
+      <EuiText
+        className="synopsisBody"
+      >
+        <p>
+          <EuiTextColor
+            color="subdued"
+          >
+            this is a great tutorial about...
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</a>
+`;

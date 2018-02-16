@@ -16,7 +16,12 @@ module.exports = {
   overrides: [
     // Enable Prettier
     {
-      files: ['.eslintrc.js', 'packages/kbn-build/**/*.js'],
+      files: [
+        '.eslintrc.js',
+        'packages/kbn-pm/**/*',
+        'packages/kbn-datemath/**/*.js',
+        'packages/kbn-plugin-generator/**/*',
+      ],
       plugins: ['prettier'],
       rules: Object.assign(
         { 'prettier/prettier': 'error' },
@@ -27,7 +32,11 @@ module.exports = {
 
     // files not transpiled by babel can't using things like object-spread
     {
-      files: ['.eslintrc.js', 'packages/kbn-plugin-helpers/**/*.js'],
+      files: [
+        '.eslintrc.js',
+        'packages/kbn-plugin-helpers/**/*',
+        'packages/kbn-plugin-generator/**/*',
+      ],
       rules: {
         'prefer-object-spread/prefer-object-spread': 'off',
       },

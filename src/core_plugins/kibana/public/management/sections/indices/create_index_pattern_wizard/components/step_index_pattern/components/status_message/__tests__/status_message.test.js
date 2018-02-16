@@ -69,4 +69,28 @@ describe('StatusMessage', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  it('should show that system indices exist', () => {
+    const component = shallow(
+      <StatusMessage
+        matchedIndices={[]}
+        isIncludingSystemIndices={false}
+        query={''}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show that no indices exist', () => {
+    const component = shallow(
+      <StatusMessage
+        matchedIndices={[]}
+        isIncludingSystemIndices={true}
+        query={''}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
 });

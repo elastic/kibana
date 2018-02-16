@@ -56,7 +56,7 @@ export const tutorialSchema = {
   category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
   name: Joi.string().required(),
   shortDescription: Joi.string().required(),
-  iconPath: Joi.string(),
+  euiIconType: Joi.string(), //EUI icon type string, one of https://elastic.github.io/eui/#/icons
   longDescription: Joi.string().required(),
   completionTimeMinutes: Joi.number().integer(),
   previewImagePath: Joi.string(),
