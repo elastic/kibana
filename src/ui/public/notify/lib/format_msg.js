@@ -6,36 +6,36 @@ const has = _.has;
  * Formats the error message from an error object, extended elasticsearch
  * object or simple string; prepends optional second parameter to the message
  * @param  {Error|String} err
- * @param  {String} from - Prefix for message indicating source (optional)
+ * @param  {String} source - Prefix for message indicating source (optional)
  * @returns {string}
  */
-export function formatMsg(err, from) {
-  let rtn = '';
-  if (from) {
-    rtn += from + ': ';
+export function formatMsg(err, source) {
+  let message = '';
+  if (source) {
+    message += source + ': ';
   }
 
   const esMsg = formatESMsg(err);
 
   if (typeof err === 'string') {
-    rtn += err;
+    message += err;
   } else if (esMsg) {
-    rtn += esMsg;
+    message += esMsg;
   } else if (err instanceof Error) {
-    rtn += formatMsg.describeError(err);
+    message += formatMsg.describeError(err);
   } else if (has(err, 'status') && has(err, 'data')) {
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      rtn += 'An HTTP request has failed to connect. ' +
+      message += 'An HTTP request has failed to connect. ' +
              'Please check if the Kibana server is running and that your browser has a working connection, ' +
              'or contact your system administrator.';
     } else {
-      rtn += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
+      message += 'Error ' + err.status + ' ' + err.statusText + ': ' + err.data.message;
     }
   }
 
-  return rtn;
+  return message;
 }
 
 formatMsg.describeError = function (err) {

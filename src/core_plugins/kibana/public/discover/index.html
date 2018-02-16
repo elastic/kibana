@@ -63,8 +63,16 @@
 
           <!-- loading -->
           <div ng-show="resultState === 'loading'">
-            <div class="discover-overlay">
-              <div class="euiTitle">
+            <discover-fetch-error
+              ng-show="fetchError"
+              fetch-error="fetchError"
+            ></discover-fetch-error>
+
+            <div
+              ng-hide="fetchError"
+              class="discover-overlay"
+            >
+              <div class="euiTitle" >
                 <h2>Searching</h2>
               </div>
               <div class="euiSpacer euiSpacer--m"></div>

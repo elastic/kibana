@@ -15,7 +15,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -31,6 +31,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
+import '../components/fetch_error';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -449,6 +450,8 @@ function discoverController(
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
+    $scope.fetchError = undefined;
+
     $scope.updateTime();
 
     $scope.updateDataSource()
@@ -584,11 +587,17 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
+    $scope.fetchError = undefined;
+
     $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
       .catch((error) => {
-        notify.error(error);
-        // Restart.
-        beginSegmentedFetch();
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          notify.error(error);
+        }
       });
   }
   beginSegmentedFetch();
