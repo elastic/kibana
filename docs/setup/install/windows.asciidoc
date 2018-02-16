@@ -41,7 +41,7 @@ Kibana can be started from the command line as follows:
 
 [source,sh]
 --------------------------------------------
-.\bin\kibana
+.\bin\kibana.bat
 --------------------------------------------
 
 By default, Kibana runs in the foreground, prints its logs to `STDOUT`,
