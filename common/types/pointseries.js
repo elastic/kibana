@@ -18,11 +18,12 @@ export const pointseries = () => ({
       return firstRow[firstKey];
     },
     render: pointseries => {
+      console.log(datatable);
       return {
         type: 'render',
         as: 'table',
         value: {
-          datatable: datatable.from.pointseries(pointseries),
+          datatable: datatable().from.pointseries(pointseries),
         },
       };
     },
