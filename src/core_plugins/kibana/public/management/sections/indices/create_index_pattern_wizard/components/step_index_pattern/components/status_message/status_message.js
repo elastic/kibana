@@ -33,7 +33,7 @@ export const StatusMessage = ({
     else if (!isIncludingSystemIndices) {
       statusMessage = (
         <span>
-          No Elasticsearch indices match your pattern.  To view the matching system indices, toggle the switch in the upper right.
+          No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in the upper right.
         </span>
       );
     }
