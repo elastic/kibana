@@ -140,7 +140,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     getTableHeader() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('table.table.table-condensed thead tr th');
+        .findAllByCssSelector('table.euiTable thead tr th');
     }
 
     sortBy(columnName) {
