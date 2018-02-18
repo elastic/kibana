@@ -20,4 +20,4 @@ information about the server's resource usage and lists the installed plugins.
 
 image::images/kibana-status-page.png[]
 
-NOTE: For JSON-formatted server status details, use the API endpoint at `localhost:5601/api/status`.
+NOTE: For JSON-formatted server status details, use the API endpoint at `localhost:5601/api/status`
