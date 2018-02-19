@@ -28,10 +28,9 @@ const savedObjectsIndexCheckTimeout = (settings, log) => {
 const rewriteBasePath = (settings, log) => {
   if (_.has(settings, 'server.basePath') && !_.has(settings, 'server.rewriteBasePath')) {
     log(
-      'Setting server.basePath without server.rewriteBasePath is deprecated until Kibana 7.0, ' +
-      'when the default behavior of server.basePath will change and Kibana will start expecting ' +
-      'that all requests start with the server.basePath rather expecting you to rewrite the ' +
-      'requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
+      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
+      'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
+      'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
       'current behavior and silence this warning.'
     );
   }
