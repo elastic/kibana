@@ -1,5 +1,5 @@
 import { KibanaError } from '../';
-import { cleanStack } from './cleanStack';
+import { cleanStack } from './clean_stack';
 
 // TODO This is skipped because it fails depending on Node version. That might
 // not be a problem, but I think we should wait with including this test until

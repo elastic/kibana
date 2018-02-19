@@ -1,4 +1,4 @@
-import { Observable } from '../Observable';
+import { Observable } from '../observable';
 import { EmptyError } from '../errors';
 import { MonoTypeOperatorFunction } from '../interfaces';
 

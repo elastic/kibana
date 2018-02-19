@@ -1,6 +1,6 @@
-import { k$ } from '../../k$';
+import { k$ } from '../../k';
 import { first } from '../';
-import { Subject } from '../../Subject';
+import { Subject } from '../../subject';
 import { collect } from '../../lib/collect';
 
 test('returns the first value, then completes', async () => {

@@ -1,4 +1,4 @@
-import { k$ } from '../../k$';
+import { k$ } from '../../k';
 import { $from } from '../../factories';
 import { filter } from '../';
 import { collect } from '../../lib/collect';

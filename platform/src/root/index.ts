@@ -3,10 +3,10 @@ import { Observable } from '@kbn/observable';
 import { Server } from '../server';
 import { ConfigService, Env, RawConfig } from '../config';
 
-import { Logger } from '../logging/Logger';
-import { LoggingService } from '../logging/LoggingService';
-import { LoggerFactory, MutableLoggerFactory } from '../logging/LoggerFactory';
-import { LoggingConfig } from '../logging/LoggingConfig';
+import { Logger } from '../logging/logger';
+import { LoggingService } from '../logging/logging_service';
+import { LoggerFactory, MutableLoggerFactory } from '../logging/logger_factory';
+import { LoggingConfig } from '../logging/logging_config';
 
 export type OnShutdown = (reason?: Error) => void;
 

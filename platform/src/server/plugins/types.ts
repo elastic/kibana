@@ -1,4 +1,4 @@
-import { KibanaPluginApi } from './KibanaPluginApi';
+import { KibanaPluginApi } from './kibana_plugin_api';
 
 export type PluginName = string;
 export type PluginConfigPath = string | string[];

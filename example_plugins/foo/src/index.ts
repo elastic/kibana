@@ -1,7 +1,7 @@
 import { KibanaPluginConfig } from '@kbn/types';
 import { k$, first, toPromise } from '@kbn/observable';
 import { BarPluginType } from 'example-plugin-bar';
-import { FooConfig } from './FooConfig';
+import { FooConfig } from './foo_config';
 
 export const plugin: KibanaPluginConfig<BarPluginType> = {
   configPath: ['__newPlatform', 'foo'],

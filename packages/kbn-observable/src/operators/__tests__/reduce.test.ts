@@ -1,6 +1,6 @@
-import { k$ } from '../../k$';
+import { k$ } from '../../k';
 import { reduce } from '../';
-import { Subject } from '../../Subject';
+import { Subject } from '../../subject';
 import { collect } from '../../lib/collect';
 
 test('completes when source completes', async () => {

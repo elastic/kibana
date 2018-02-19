@@ -1,12 +1,12 @@
 /**@internal**/
-export { LegacyPlatformProxifier } from './LegacyPlatformProxifier';
+export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
 /**@internal**/
 export {
   LegacyConfigToRawConfigAdapter,
   LegacyConfig,
-} from './LegacyPlatformConfig';
+} from './legacy_platform_config';
 /**@internal**/
-export { LegacyKbnServer } from './LegacyKbnServer';
+export { LegacyKbnServer } from './legacy_kbn_server';
 
 import { k$, map, BehaviorSubject } from '@kbn/observable';
 import { Root } from '../root';

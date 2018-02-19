@@ -1,3 +1,3 @@
 export * from './get';
 export * from './pick';
-export * from './assertNever';
+export * from './assert_never';

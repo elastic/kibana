@@ -1,1 +1,1 @@
-export { EmptyError } from './EmptyError';
+export { EmptyError } from './empty_error';

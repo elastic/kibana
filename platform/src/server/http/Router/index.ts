@@ -1,2 +1,2 @@
-export { Router } from './Router';
-export { KibanaRequest } from './Request';
+export { Router } from './router';
+export { KibanaRequest } from './request';

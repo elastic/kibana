@@ -1,14 +1,14 @@
 import { Observable } from '@kbn/observable';
 
-import { ElasticsearchService } from './ElasticsearchService';
+import { ElasticsearchService } from './elasticsearch_service';
 import { registerElasticsearchRoutes } from './api';
 import { Router } from '../http';
-import { ElasticsearchConfigs } from './ElasticsearchConfigs';
+import { ElasticsearchConfigs } from './elasticsearch_configs';
 import { LoggerFactory } from '../../logging';
 
-export { ElasticsearchClusterType } from './ElasticsearchConfig';
-export { AdminClient } from './AdminClient';
-export { ScopedDataClient } from './ScopedDataClient';
+export { ElasticsearchClusterType } from './elasticsearch_config';
+export { AdminClient } from './admin_client';
+export { ScopedDataClient } from './scoped_data_client';
 export { ElasticsearchService, ElasticsearchConfigs };
 
 export class ElasticsearchModule {

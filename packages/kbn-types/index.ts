@@ -3,7 +3,7 @@ export {
   KibanaClassPlugin,
   KibanaPluginConfig,
 } from '../../platform/src/server/plugins/types';
-export { KibanaPluginApi } from '../../platform/src/server/plugins/KibanaPluginApi';
+export { KibanaPluginApi } from '../../platform/src/server/plugins/kibana_plugin_api';
 export { Logger, LoggerFactory } from '../../platform/src/logging';
 export {
   ElasticsearchService,

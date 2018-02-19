@@ -1,7 +1,7 @@
 import { KibanaPluginConfig } from '@kbn/types';
 
-import { BarConfig } from './BarConfig';
-import { BarExports, BarPluginType } from './BarExports';
+import { BarConfig } from './bar_config';
+import { BarExports, BarPluginType } from './bar_exports';
 
 export { BarConfig, BarPluginType };
 

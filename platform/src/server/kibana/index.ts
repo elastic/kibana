@@ -1,6 +1,6 @@
 import { Observable } from '@kbn/observable';
 
-import { KibanaConfig } from './KibanaConfig';
+import { KibanaConfig } from './kibana_config';
 
 export { KibanaConfig };
 

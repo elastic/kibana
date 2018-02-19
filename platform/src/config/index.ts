@@ -6,10 +6,10 @@
  */
 export const NEW_PLATFORM_CONFIG_ROOT = '__newPlatform';
 
-export { ConfigService } from './ConfigService';
-export { RawConfigService } from './RawConfigService';
-export { RawConfig } from './RawConfig';
+export { ConfigService } from './config_service';
+export { RawConfigService } from './raw_config_service';
+export { RawConfig } from './raw_config';
 /** @internal */
-export { ObjectToRawConfigAdapter } from './ObjectToRawConfigAdapter';
-export { Env } from './Env';
-export { ConfigWithSchema } from './ConfigWithSchema';
+export { ObjectToRawConfigAdapter } from './object_to_raw_config_adapter';
+export { Env } from './env';
+export { ConfigWithSchema } from './config_with_schema';

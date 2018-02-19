@@ -3,7 +3,7 @@ jest.mock('../version', () => ({
 }));
 
 import { parseArgv } from '../cli';
-import { captureTerminal } from './captureTerminal';
+import { captureTerminal } from './capture_terminal';
 
 test('displays help', () => {
   expect(captureTerminal(parseArgv, ['--help'])).toMatchSnapshot();
