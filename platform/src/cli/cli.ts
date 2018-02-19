@@ -1,5 +1,4 @@
-// TODO Fix build system so we can switch these to `import`s
-const yargs = require('yargs');
+import yargs from 'yargs';
 import { k$, map } from '@kbn/observable';
 
 import * as args from './args';
