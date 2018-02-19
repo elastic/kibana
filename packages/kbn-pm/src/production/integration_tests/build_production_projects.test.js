@@ -7,7 +7,7 @@ import { buildProductionProjects } from '../build_production_projects';
 import { getProjects } from '../../utils/projects';
 
 describe('kbn-pm production', function() {
-  it(
+  test(
     'builds and copies projects for production',
     async function() {
       const tmpDir = tempy.directory();
