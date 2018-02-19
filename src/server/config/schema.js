@@ -56,7 +56,7 @@ export default () => Joi.object({
     rewriteBasePath: Joi.boolean().when('basePath', {
       is: '',
       then: Joi.default(false).valid(false),
-      otherwise: Joi.default(false)
+      otherwise: Joi.default(false),
     }),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     ssl: Joi.object({
