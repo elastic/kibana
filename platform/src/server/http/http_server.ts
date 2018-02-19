@@ -1,6 +1,6 @@
-import * as express from 'express';
-import * as http from 'http';
-import * as https from 'https';
+import express from 'express';
+import http from 'http';
+import https from 'https';
 import { Server } from 'net';
 import { promisify } from 'bluebird';
 import { readFileSync } from 'fs';

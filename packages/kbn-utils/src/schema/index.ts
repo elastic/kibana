@@ -1,5 +1,4 @@
-// TODO Change to require, had problems with `.default`
-const typeDetect = require('type-detect');
+import typeDetect from 'type-detect';
 import { difference, isPlainObject } from 'lodash';
 import { duration as momentDuration, isDuration, Duration } from 'moment';
 
