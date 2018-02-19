@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 
 import {
-  absolutePathSnaphotSerializer,
+  absolutePathSnapshotSerializer,
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
@@ -58,7 +58,7 @@ function getFsMockCalls() {
   return fsMockCalls;
 }
 
-expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
+expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 jest.mock('./fs');

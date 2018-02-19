@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kbn-pm production builds and copies projects for production 1`] = `
+Array [
+  "packages/bar/package.json",
+  "packages/bar/src/index.js",
+  "packages/bar/target/index.js",
+  "packages/bar/yarn.lock",
+  "packages/foo/package.json",
+  "packages/foo/src/index.js",
+  "packages/foo/target/index.js",
+  "packages/foo/yarn.lock",
+]
+`;
