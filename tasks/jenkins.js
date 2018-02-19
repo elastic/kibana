@@ -33,6 +33,7 @@ module.exports = function (grunt) {
     'licenses',
     'test:server',
     'test:jest',
+    'test:jest_integration',
     'test:browser-ci',
     'test:api',
     'verifyTranslations',

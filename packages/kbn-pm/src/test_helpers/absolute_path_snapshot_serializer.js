@@ -21,7 +21,7 @@ const normalizePaths = value => {
   };
 };
 
-export const absolutePathSnaphotSerializer = {
+export const absolutePathSnapshotSerializer = {
   print: (value, serialize) => {
     return serialize(normalizePaths(value).clone);
   },
