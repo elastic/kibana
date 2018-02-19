@@ -1,7 +1,6 @@
 import { Server } from 'hapi';
 import { notFound } from 'boom';
 import { map, sample } from 'lodash';
-import { format as formatUrl } from 'url';
 import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
@@ -92,15 +91,9 @@ export default class BasePathProxy {
           passThrough: true,
           xforward: true,
           agent: this.proxyAgent,
-          mapUri(req, callback) {
-            callback(null, formatUrl({
-              protocol: server.info.protocol,
-              hostname: server.info.host,
-              port: targetPort,
-              pathname: req.params.kbnPath,
-              query: req.query,
-            }));
-          }
+          protocol: server.info.protocol,
+          host: server.info.host,
+          port: targetPort,
         }
       }
     });
