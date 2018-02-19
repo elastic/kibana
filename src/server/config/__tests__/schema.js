@@ -41,6 +41,14 @@ describe('Config schema', function () {
         expect(error).to.have.property('details');
         expect(error.details[0]).to.have.property('path', 'server.basePath');
       });
+
+      it('rejects things that are not strings', function () {
+        for (const value of [1, true, {}, [], /foo/]) {
+          const { error } = validate({ server: { basePath: value } });
+          expect(error).to.have.property('details');
+          expect(error.details[0]).to.have.property('path', 'server.basePath');
+        }
+      });
     });
 
     describe('rewriteBasePath', function () {
