@@ -4,17 +4,17 @@ import { relative } from 'path';
 import ora from 'ora';
 
 import { isDirectory } from '../utils/fs';
-import { Project } from '../utils/project';
-import { ProjectGraph } from '../utils/projects';
+import { ProjectGraph, ProjectMap } from '../utils/projects';
+import { CommandConfig } from './';
 
 export const name = 'clean';
 export const description =
   'Remove the node_modules and target directories from all projects.';
 
 export async function run(
-  projects: Map<string, Project>,
+  projects: ProjectMap,
   projectGraph: ProjectGraph,
-  { rootPath }: { rootPath: string }
+  { rootPath }: CommandConfig
 ) {
   const directoriesToDelete = [];
   for (const project of projects.values()) {

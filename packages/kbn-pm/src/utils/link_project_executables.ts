@@ -3,8 +3,7 @@ import { resolve, relative, dirname, sep } from 'path';
 import chalk from 'chalk';
 
 import { createSymlink, isFile, chmod, mkdirp } from './fs';
-import { ProjectGraph } from './projects';
-import { Project } from './project';
+import { ProjectGraph, ProjectMap } from './projects';
 
 /**
  * Yarn does not link the executables from dependencies that are installed
@@ -15,7 +14,7 @@ import { Project } from './project';
  * for linking was mostly adapted from lerna: https://github.com/lerna/lerna/blob/1d7eb9eeff65d5a7de64dea73613b1bf6bfa8d57/src/PackageUtilities.js#L348
  */
 export async function linkProjectExecutables(
-  projectsByName: Map<string, Project>,
+  projectsByName: ProjectMap,
   projectGraph: ProjectGraph
 ) {
   for (const [projectName, projectDeps] of projectGraph) {

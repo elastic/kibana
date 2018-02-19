@@ -1,17 +1,21 @@
 import chalk from 'chalk';
 
-import { Project } from '../utils/project';
-import { ProjectGraph, topologicallyBatchProjects } from '../utils/projects';
+import {
+  ProjectGraph,
+  ProjectMap,
+  topologicallyBatchProjects,
+} from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
+import { CommandConfig } from './';
 
 export const name = 'run';
 export const description =
   'Run script defined in package.json in each package that contains that script.';
 
 export async function run(
-  projects: Map<string, Project>,
+  projects: ProjectMap,
   projectGraph: ProjectGraph,
-  { extraArgs }: { extraArgs: string[] }
+  { extraArgs }: CommandConfig
 ) {
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 

@@ -1,17 +1,21 @@
 import chalk from 'chalk';
 
-import { Project } from '../utils/project';
-import { ProjectGraph, topologicallyBatchProjects } from '../utils/projects';
+import {
+  ProjectGraph,
+  ProjectMap,
+  topologicallyBatchProjects,
+} from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
+import { CommandConfig } from './';
 
 export const name = 'bootstrap';
 export const description = 'Install dependencies and crosslink projects';
 
 export async function run(
-  projects: Map<string, Project>,
+  projects: ProjectMap,
   projectGraph: ProjectGraph,
-  { options }: { options: { [key: string]: boolean } }
+  { options }: CommandConfig
 ) {
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 

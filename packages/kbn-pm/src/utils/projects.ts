@@ -7,6 +7,7 @@ import { Project } from './project';
 
 const glob = promisify(_glob);
 
+export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
 
 export async function getProjects(
@@ -71,7 +72,7 @@ function normalize(dir: string) {
   return path.normalize(dir);
 }
 
-export function buildProjectGraph(projects: Map<string, Project>) {
+export function buildProjectGraph(projects: ProjectMap) {
   const projectGraph = new Map();
 
   for (const project of projects.values()) {
@@ -95,7 +96,7 @@ export function buildProjectGraph(projects: Map<string, Project>) {
 }
 
 export function topologicallyBatchProjects(
-  projectsToBatch: Map<string, Project>,
+  projectsToBatch: ProjectMap,
   projectGraph: ProjectGraph
 ) {
   // We're going to be chopping stuff out of this array, so copy it.

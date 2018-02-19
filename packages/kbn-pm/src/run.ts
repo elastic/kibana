@@ -4,13 +4,8 @@ import indentString from 'indent-string';
 
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
-import { getProjectPaths } from './config';
-import { Command } from './commands';
-
-export interface CommandConfig {
-  rootPath: string;
-  options: { [key: string]: any };
-}
+import { getProjectPaths, ProjectPathOptions } from './config';
+import { Command, CommandConfig } from './commands';
 
 export async function runCommand(command: Command, config: CommandConfig) {
   try {
@@ -22,7 +17,10 @@ export async function runCommand(command: Command, config: CommandConfig) {
       )
     );
 
-    const projectPaths = getProjectPaths(config.rootPath, config.options);
+    const projectPaths = getProjectPaths(
+      config.rootPath,
+      config.options as ProjectPathOptions
+    );
 
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);
