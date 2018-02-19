@@ -1,4 +1,4 @@
-import { resolve, relative, dirname } from 'path';
+import { resolve, relative, dirname, sep } from 'path';
 
 import chalk from 'chalk';
 
@@ -30,11 +30,13 @@ export async function linkProjectExecutables(projectsByName, projectGraph) {
 
         const dest = resolve(binsDir, name);
 
+        // Get relative project path with normalized path separators.
+        const projectRelativePath = relative(project.path, srcPath)
+          .split(sep)
+          .join('/');
+
         console.log(
-          chalk`{dim [${project.name}]} ${name} -> {dim ${relative(
-            project.path,
-            srcPath
-          )}}`
+          chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`
         );
 
         await mkdirp(dirname(dest));

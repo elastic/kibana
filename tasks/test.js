@@ -42,6 +42,7 @@ module.exports = function (grunt) {
     'test:server',
     'test:ui',
     'test:jest',
+    'test:jest_integration',
     'test:browser',
     'test:api'
   ]);
