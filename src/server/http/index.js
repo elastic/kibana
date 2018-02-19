@@ -10,6 +10,7 @@ import shortUrlLookupProvider from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
 import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
+import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import xsrfMixin from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -17,6 +18,7 @@ export default async function (kbnServer, server, config) {
 
   const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);
+  await kbnServer.mixin(setupBasePathRewrite);
   await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
 
