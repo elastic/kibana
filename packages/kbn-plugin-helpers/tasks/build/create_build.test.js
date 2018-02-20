@@ -39,9 +39,9 @@ describe('creating the build', () => {
     expect(pkg.build.date).not.toBeUndefined();
   });
 
-  describe('buildIgnoreDependencies = false', () => {
+  describe('skipInstallDependencies = false', () => {
     it('installs node_modules as a part of build', async () => {
-      expect(PLUGIN.buildIgnoreDependencies).toBe(false);
+      expect(PLUGIN.skipInstallDependencies).toBe(false);
 
       await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
@@ -50,14 +50,14 @@ describe('creating the build', () => {
     });
   });
 
-  describe('buildIgnoreDependencies = true', () => {
-    // set buildIgnoreDependencies to true for these tests
-    beforeEach(() => PLUGIN.buildIgnoreDependencies = true);
+  describe('skipInstallDependencies = true', () => {
+    // set skipInstallDependencies to true for these tests
+    beforeEach(() => PLUGIN.skipInstallDependencies = true);
     // set it back to false after
-    afterEach(() => PLUGIN.buildIgnoreDependencies = false);
+    afterEach(() => PLUGIN.skipInstallDependencies = false);
 
     it('installs node_modules as a part of build', async () => {
-      expect(PLUGIN.buildIgnoreDependencies).toBe(true);
+      expect(PLUGIN.skipInstallDependencies).toBe(true);
 
       await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 

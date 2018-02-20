@@ -20,7 +20,7 @@ module.exports = function (root) {
     kibanaRoot: resolve(root, '../../kibana'),
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
     buildSourcePatterns: buildSourcePatterns,
-    buildIgnoreDependencies: false,
+    skipInstallDependencies: false,
     id: pkg.name,
     pkg: pkg,
     version: pkg.version,
