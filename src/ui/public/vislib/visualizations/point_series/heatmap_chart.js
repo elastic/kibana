@@ -117,7 +117,7 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
       const zAxisConfig = this.getValueAxis().axisConfig;
       const zAxisFormatter = zAxisConfig.get('labels.axisFormatter');
       const showLabels = zAxisConfig.get('labels.show');
-      const overwriteLabelColor = zAxisConfig.get('labels.overwriteColor');
+      const overwriteLabelColor = zAxisConfig.get('labels.overwriteColor', false);
 
       const layer = svg.append('g')
         .attr('class', 'series');
