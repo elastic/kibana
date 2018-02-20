@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { realpathSync } from 'fs';
 
 import { transformDeprecations, Config } from '../server/config';
 
@@ -46,6 +47,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     ...config.get('plugins.paths').map(createPackAtPath$),
     ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
   )
+    .distinct(({ pack, error }) => error || (pack && realpathSync(pack.getPath())))
     .share();
 
   const extendConfig$ = find$
