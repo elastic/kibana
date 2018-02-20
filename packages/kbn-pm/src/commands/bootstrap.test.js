@@ -9,7 +9,7 @@ jest.mock('../utils/link_project_executables', () => ({
 import { resolve } from 'path';
 
 import {
-  absolutePathSnaphotSerializer,
+  absolutePathSnapshotSerializer,
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
 import { run } from './bootstrap';
@@ -28,7 +28,7 @@ const createProject = (fields, path = '.') =>
     resolve(__dirname, path)
   );
 
-expect.addSnapshotSerializer(absolutePathSnaphotSerializer);
+expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 const noop = () => {};
