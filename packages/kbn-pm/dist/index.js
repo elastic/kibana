@@ -33124,7 +33124,10 @@ let linkProjectExecutables = exports.linkProjectExecutables = (() => {
 
           const dest = (0, _path.resolve)(binsDir, name);
 
-          console.log(_chalk2.default`{dim [${project.name}]} ${name} -> {dim ${(0, _path.relative)(project.path, srcPath)}}`);
+          // Get relative project path with normalized path separators.
+          const projectRelativePath = (0, _path.relative)(project.path, srcPath).split(_path.sep).join('/');
+
+          console.log(_chalk2.default`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
 
           yield (0, _fs.mkdirp)((0, _path.dirname)(dest));
           yield (0, _fs.createSymlink)(srcPath, dest, 'exec');
