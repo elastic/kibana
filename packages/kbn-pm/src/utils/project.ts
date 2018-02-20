@@ -8,7 +8,7 @@ import {
   runScriptInPackageStreaming,
 } from './scripts';
 import {
-  Package,
+  PackageJson,
   PackageDependencies,
   PackageScripts,
   isLinkDependency,
@@ -22,7 +22,7 @@ export class Project {
     return new Project(pkgJson, path);
   }
 
-  public readonly json: Package;
+  public readonly json: PackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
   public readonly targetLocation: string;
@@ -30,7 +30,7 @@ export class Project {
   public readonly allDependencies: PackageDependencies;
   public readonly scripts: PackageScripts;
 
-  constructor(packageJson: Package, projectPath: string) {
+  constructor(packageJson: PackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 

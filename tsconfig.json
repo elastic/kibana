@@ -1,8 +1,5 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "stripInternal": true,
-
     // Enables all strict type checking options.
     "strict": true,
 
@@ -19,6 +16,8 @@
     "module": "esnext",
 
     // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
+    // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
+    // ESNext module format is used.
     "allowSyntheticDefaultImports": true,
 
     // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
@@ -30,12 +29,6 @@
 
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
-
-    // Report error when not all code paths in function return a value.
-    "noImplicitReturns": false,
-
-    // Report errors on unused locals.
-    "noUnusedLocals": true,
 
     // Generate an external source map. There's also an `--inlineSourceMap` for
     // emitting a single file with source maps instead of having a separate file.

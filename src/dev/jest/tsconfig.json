@@ -12,6 +12,6 @@
     "target": "es2015"
   },
   "include": [
-    "../../../packages/kbn-pm/**/*"
+    "../../../**/*.ts"
   ]
 }

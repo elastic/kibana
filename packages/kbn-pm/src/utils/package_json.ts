@@ -2,7 +2,7 @@ import readPkg from 'read-pkg';
 import writePkg from 'write-pkg';
 import path from 'path';
 
-export type Package = { [k: string]: any };
+export type PackageJson = { [key: string]: any };
 export type PackageDependencies = { [key: string]: string };
 export type PackageScripts = { [key: string]: string };
 
@@ -10,11 +10,11 @@ export function readPackageJson(dir: string) {
   return readPkg(path.join(dir, 'package.json'), { normalize: false });
 }
 
-export function writePackageJson(path: string, json: Package) {
+export function writePackageJson(path: string, json: PackageJson) {
   return writePkg(path, json);
 }
 
-export const createProductionPackageJson = (pkgJson: Package) => ({
+export const createProductionPackageJson = (pkgJson: PackageJson) => ({
   ...pkgJson,
   dependencies: transformDependencies(pkgJson.dependencies),
 });
