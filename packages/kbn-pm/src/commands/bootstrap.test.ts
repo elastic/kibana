@@ -13,9 +13,9 @@ import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 
-const mockInstallInDir: jest.Mock = installInDir as any;
-const mockRunScriptInPackageStreaming: jest.Mock = runScriptInPackageStreaming as any;
-const mockLinkProjectExecutables: jest.Mock = linkProjectExecutables as any;
+const mockInstallInDir = installInDir as jest.Mock;
+const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
+const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 
 const createProject = (fields: { [key: string]: any }, path = '.') =>
   new Project(
