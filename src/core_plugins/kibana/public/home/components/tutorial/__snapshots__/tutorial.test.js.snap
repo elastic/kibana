@@ -105,7 +105,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
           Array [
             Object {
               "dataTestSubj": "onPremBtn",
-              "label": "On premise",
+              "label": "Self managed",
               "onClick": [Function],
             },
             Object {
@@ -115,7 +115,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             },
           ]
         }
-        selectedBtnLabel="On premise"
+        selectedBtnLabel="Self managed"
       />
     </div>
     <EuiSpacer
