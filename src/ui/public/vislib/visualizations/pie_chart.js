@@ -32,7 +32,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
 
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
-
+      this.ABBREVIATIONS = ['', 'k', 'Mil', 'Bn', 'Tn'];
       this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
 
@@ -327,6 +327,35 @@ export function VislibVisualizationsPieChartProvider(Private) {
       }
     }
 
+    readableNumber(number) {
+      let tier = Math.log10(Math.abs(number)) / 3 | 0;
+      if(tier === 0) return number;
+      if(tier > 4) tier = 4;
+      const postfix = this.ABBREVIATIONS[tier];
+      const scale = Math.pow(10, tier * 3);
+      const scaled = number / scale;
+      let formatted = String(scaled.toFixed(1));
+      if (/\.0$/.test(formatted)) {
+        formatted = formatted.substr(0, formatted.length - 2);
+      }
+      return formatted + postfix;
+    }
+
+    addDonutDescriptor(svg, width, height) {
+      self = this;
+      svg.append('text')
+        .style('text-anchor', 'middle')
+        .attr('font-size', function(chartData) { 
+            let dividend = Math.min(width, height);
+            let divisor = Math.max(chartData.raw.columns.length, 4);
+            return (dividend/divisor) + 'px';
+          })
+        .attr('dy', '.35em')
+        .text(function (chartData) {
+          return self.readableNumber(chartData.slices.sumOfChildren); 
+        });
+    }
+
     /**
      * Renders d3 visualization
      *
@@ -353,7 +382,9 @@ export function VislibVisualizationsPieChartProvider(Private) {
             .attr('height', height)
             .append('g')
             .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-
+          if(self._attr.isDonut) {
+            self.addDonutDescriptor(svg, width, height);
+          }
           const path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);
 
