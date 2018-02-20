@@ -8968,9 +8968,16 @@ class Project {
     throw new _errors.CliError(`[${this.name}] depends on [${project.name}], but it's not using the local package. ${updateMsg}`, meta);
   }
 
+  getBuildConfig() {
+    return this.json.kibana && this.json.kibana.build || {};
+  }
+
   skipFromBuild() {
-    const json = this.json;
-    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+    return this.getBuildConfig().skip === true;
+  }
+
+  getCopyBuildDirectory() {
+    return _path2.default.resolve(this.path, this.getBuildConfig().copyBuildDirectory || '.');
   }
 
   hasScript(name) {
@@ -35516,7 +35523,7 @@ let deleteTarget = (() => {
   var _ref3 = _asyncToGenerator(function* (project) {
     const targetDir = project.targetLocation;
 
-    if (yield (0, _fs.isDirectory)(targetDir)) {
+    if (yield (0, _fs2.isDirectory)(targetDir)) {
       yield (0, _del2.default)(targetDir, { force: true });
     }
   });
@@ -35550,14 +35557,24 @@ let copyToBuild = (() => {
     // dependencies. The primary reason for allowing the Kibana build process to
     // install the dependencies is that it will "dedupe" them, so we don't include
     // unnecessary copies of dependencies.
-    yield (0, _cpy2.default)(['**/*', '!package.json', '!node_modules/**'], buildProjectPath, {
-      cwd: project.path,
+    yield (0, _cpy2.default)(['**/*', '!node_modules/**'], buildProjectPath, {
+      cwd: project.getCopyBuildDirectory(),
       parents: true,
       nodir: true,
       dot: true
     });
 
-    const packageJson = project.json;
+    // attempt to read package.json from build output, use copy from project if it doesn't exist
+    let packageJson;
+    try {
+      packageJson = JSON.parse((0, _fs.readFileSync)((0, _path.resolve)(buildProjectPath, 'package.json'), 'utf8'));
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+      packageJson = project.json;
+    }
+
     const preparedPackageJson = (0, _package_json.createProductionPackageJson)(packageJson);
     yield (0, _package_json.writePackageJson)(buildProjectPath, preparedPackageJson);
   });
@@ -35567,11 +35584,13 @@ let copyToBuild = (() => {
   };
 })();
 
+var _path = __webpack_require__(1);
+
+var _fs = __webpack_require__(2);
+
 var _del = __webpack_require__(159);
 
 var _del2 = _interopRequireDefault(_del);
-
-var _path = __webpack_require__(1);
 
 var _cpy = __webpack_require__(296);
 
@@ -35583,7 +35602,7 @@ var _projects = __webpack_require__(11);
 
 var _package_json = __webpack_require__(13);
 
-var _fs = __webpack_require__(19);
+var _fs2 = __webpack_require__(19);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
