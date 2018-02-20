@@ -1,6 +1,10 @@
 const type = 'operator';
 
 const operators = {
+  ':': {
+    description: '<span class="suggestionItem__callout">equals</span> some value',
+    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
+  },
   '<=': {
     description: 'is <span class="suggestionItem__callout">less than or equal to</span> some value',
     fieldTypes: ['number', 'date', 'ip']
@@ -17,13 +21,9 @@ const operators = {
     description: 'is <span class="suggestionItem__callout">greater than</span> some value',
     fieldTypes: ['number', 'date', 'ip']
   },
-  ':': {
-    description: '<span class="suggestionItem__callout">equals</span> some value',
-    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
-  },
   ':*': {
     description: '<span class="suggestionItem__callout">exists</span>'
-  }
+  },
 };
 
 function getDescription({ fieldName, operator }) {
