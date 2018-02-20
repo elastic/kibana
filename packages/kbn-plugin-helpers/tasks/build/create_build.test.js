@@ -56,7 +56,7 @@ describe('creating the build', () => {
     // set it back to false after
     afterEach(() => PLUGIN.skipInstallDependencies = false);
 
-    it('installs node_modules as a part of build', async () => {
+    it('does not install node_modules as a part of build', async () => {
       expect(PLUGIN.skipInstallDependencies).toBe(true);
 
       await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
