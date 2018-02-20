@@ -13,121 +13,95 @@ const indices = [
   { name: '.kibana' }
 ];
 
+const partialIndices = [
+  { name: 'kibana' },
+  { name: 'es' },
+  { name: '.kibana' },
+];
+
+const exactIndices = [
+  { name: 'kibana' },
+  { name: '.kibana' },
+];
+
 describe('getMatchedIndices', () => {
-  describe('allIndices', () => {
-    it('should return all indices', () => {
-      const query = 'ki';
-      const { allIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(allIndices).toEqual(indices);
-    });
+  it('should return all indices', () => {
+    const {
+      allIndices,
+      exactMatchedIndices,
+      partialMatchedIndices,
+      visibleIndices,
+    } = getMatchedIndices(indices, partialIndices, exactIndices, '*', true);
 
-    it('should return all indices except for system indices', () => {
-      const query = 'ki';
-      const { allIndices } = getMatchedIndices(indices, indices, query, false);
-      expect(allIndices).toEqual([
-        { name: 'kibana' },
-        { name: 'es' },
-        { name: 'logstash' },
-        { name: 'packetbeat' },
-        { name: 'metricbeat' },
-      ]);
-    });
+    expect(allIndices).toEqual([
+      { name: 'kibana' },
+      { name: 'es' },
+      { name: 'logstash' },
+      { name: 'packetbeat' },
+      { name: 'metricbeat' },
+      { name: '.kibana' },
+    ]);
+
+    expect(exactMatchedIndices).toEqual([
+      { name: 'kibana' },
+      { name: '.kibana' },
+    ]);
+
+    expect(partialMatchedIndices).toEqual([
+      { name: 'kibana' },
+      { name: 'es' },
+      { name: '.kibana' },
+    ]);
+
+    expect(visibleIndices).toEqual([
+      { name: 'kibana' },
+      { name: '.kibana' },
+    ]);
   });
 
-  describe('exactMatchedIndices', () => {
-    it('should return all exact matched indices', () => {
-      const query = 'ki*';
-      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(exactMatchedIndices).toEqual([
-        { name: 'kibana' },
-        { name: '.kibana' },
-      ]);
-    });
+  it('should return all indices except for system indices', () => {
+    const {
+      allIndices,
+      exactMatchedIndices,
+      partialMatchedIndices,
+      visibleIndices,
+    } = getMatchedIndices(indices, partialIndices, exactIndices, '*', false);
 
-    it('should return all exact matched indices except for system indices', () => {
-      const query = 'ki*';
-      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, false);
-      expect(exactMatchedIndices).toEqual([
-        { name: 'kibana' },
-      ]);
-    });
+    expect(allIndices).toEqual([
+      { name: 'kibana' },
+      { name: 'es' },
+      { name: 'logstash' },
+      { name: 'packetbeat' },
+      { name: 'metricbeat' },
+    ]);
+
+    expect(exactMatchedIndices).toEqual([
+      { name: 'kibana' },
+    ]);
+
+    expect(partialMatchedIndices).toEqual([
+      { name: 'kibana' },
+      { name: 'es' },
+    ]);
+
+    expect(visibleIndices).toEqual([
+      { name: 'kibana' },
+    ]);
   });
 
-  describe('partialMatchedIndices', () => {
-    it('should return all partial matched indices', () => {
-      const query = 'ki*';
-      const partialIndices = indices.slice(1);
-      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, true);
-      expect(partialMatchedIndices).toEqual(partialIndices);
-    });
+  it('should return partial matches as visible if there are no exact', () => {
+    const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], '*', true);
 
-    it('should return all partial matched indices except for system indices', () => {
-      const query = 'ki*';
-      const partialIndices = indices.slice(1);
-      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, false);
-      expect(partialMatchedIndices).toEqual([
-        { name: 'es' },
-        { name: 'logstash' },
-        { name: 'packetbeat' },
-        { name: 'metricbeat' },
-      ]);
-    });
+    expect(visibleIndices).toEqual([
+      { name: 'kibana' },
+      { name: 'es' },
+      { name: '.kibana' },
+    ]);
   });
 
-  describe('visibleIndices', () => {
-    it('should return all visible indices', () => {
-      const query = 'foo*';
-      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(visibleIndices).toEqual(indices);
-    });
+  it('should return all indices as visible if there are no exact or partial', () => {
+    const { visibleIndices } = getMatchedIndices(indices, [], [], '*', true);
 
-    it('should return all visible indices except for system indices', () => {
-      const query = 'foo*';
-      const { visibleIndices } = getMatchedIndices(indices, indices, query, false);
-      expect(visibleIndices).toEqual([
-        { name: 'kibana' },
-        { name: 'es' },
-        { name: 'logstash' },
-        { name: 'packetbeat' },
-        { name: 'metricbeat' },
-      ]);
-    });
-  });
-
-  describe('systemIndices', () => {
-    it('should return all visible ccs indices', () => {
-      const query = 'cluster_one:*';
-      const indices = [
-        { name: 'cluster_one:kibana' },
-        { name: 'cluster_one:es' },
-        { name: 'cluster_two:kibana' },
-        { name: 'kibana' },
-        { name: 'cluster_one:.kibana' },
-      ];
-
-      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(visibleIndices).toEqual([
-        { name: 'cluster_one:kibana' },
-        { name: 'cluster_one:es' },
-        { name: 'cluster_one:.kibana' },
-      ]);
-    });
-
-    it('should return all visible ccs indices except for system indices', () => {
-      const query = 'cluster_one:*';
-      const indices = [
-        { name: 'cluster_one:kibana' },
-        { name: 'cluster_one:es' },
-        { name: 'cluster_two:kibana' },
-        { name: 'kibana' },
-        { name: 'cluster_one:.kibana' },
-      ];
-
-      const { visibleIndices } = getMatchedIndices(indices, indices, query, false);
-      expect(visibleIndices).toEqual([
-        { name: 'cluster_one:kibana' },
-        { name: 'cluster_one:es' },
-      ]);
-    });
+    expect(visibleIndices).toEqual(indices);
   });
 });

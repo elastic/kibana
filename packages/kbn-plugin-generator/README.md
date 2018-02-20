@@ -26,7 +26,7 @@ To target 6.3, use the `6.x` branch (until the `6.3` branch is created).
 ```sh
 git checkout 6.x
 yarn kbn bootstrap # always bootstrap when switching branches
-node scripts/generate_plugin
+node scripts/generate_plugin my_plugin_name
 # generates a plugin for Kibana 6.3 in `../kibana-extra/my_plugin_name`
 ```
 
