@@ -27,20 +27,20 @@ test('convertPanelDataPre_6_1 gives supplies width and height when missing', () 
   expect(panelData[1].version).toBe('6.3.0');
 });
 
-test('convertPanelDataPre_6_3 scales grid height', () => {
+test('convertPanelDataPre_6_3 scales panel dimensions', () => {
   const oldPanel = {
     gridData: {
       h: 3,
       w: 7,
-      x: 0,
+      x: 2,
       y: 5,
     },
     version: '6.2.0'
   };
   const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel);
-  expect(updatedPanel.gridData.w).toBe(oldPanel.gridData.w);
+  expect(updatedPanel.gridData.w).toBe(28);
   expect(updatedPanel.gridData.h).toBe(15);
-  expect(updatedPanel.gridData.x).toBe(oldPanel.gridData.x);
+  expect(updatedPanel.gridData.x).toBe(8);
   expect(updatedPanel.gridData.y).toBe(25);
   expect(updatedPanel.version).toBe('6.3.0');
 });
