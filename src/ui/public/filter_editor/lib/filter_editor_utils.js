@@ -83,7 +83,7 @@ export function buildFilter({ indexPattern, field, operator, params, filterBuild
 }
 
 export function areIndexPatternsProvided(indexPatterns) {
-  if (indexPatterns === undefined || indexPatterns.length === 0 || indexPatterns[0] === undefined) {
+  if (_.compact(indexPatterns).length === 0) {
     return false;
   }
   return true;
