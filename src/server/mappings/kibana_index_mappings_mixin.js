@@ -24,6 +24,16 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
           }
         }
       },
+      tags: {
+        properties: {
+          label: {
+            type: 'text'
+          },
+          tagJSON: {
+            type: 'keyword'
+          }
+        }
+      }
     }
   }
 };

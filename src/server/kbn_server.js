@@ -17,6 +17,7 @@ import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
+import { tagsMixin } from './tags';
 import { uiMixin } from '../ui';
 
 const rootDir = fromRoot('.');
@@ -70,6 +71,9 @@ export default class KbnServer {
 
       // notify any deffered setup logic that plugins have intialized
       Plugins.waitForInitResolveMixin,
+
+      // Saved object tags API
+      tagsMixin,
 
       () => {
         if (this.config.get('server.autoListen')) {

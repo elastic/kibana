@@ -1,4 +1,5 @@
 import uuid from 'uuid';
+import _ from 'lodash';
 
 import { getRootType } from '../../mappings';
 
@@ -8,6 +9,8 @@ import {
   includedFields,
   decorateEsError,
   errors,
+  validateAttributes,
+  validateBulkObjects,
 } from './lib';
 
 export class SavedObjectsClient {
@@ -105,6 +108,11 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
+    const validateResult = validateAttributes(attributes);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const {
       id,
       overwrite = false
@@ -119,11 +127,7 @@ export class SavedObjectsClient {
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+        body: this._createBody(type, time, attributes),
       });
 
       return {
@@ -152,6 +156,11 @@ export class SavedObjectsClient {
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
+    const validateResult = validateBulkObjects(options);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const {
       overwrite = false
     } = options;
@@ -166,11 +175,7 @@ export class SavedObjectsClient {
             _type: this._type,
           }
         },
-        {
-          type: object.type,
-          updated_at: time,
-          [object.type]: object.attributes
-        }
+        this._createBody(object.type, time, object.attributes)
       ];
     };
 
@@ -324,7 +329,7 @@ export class SavedObjectsClient {
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
-          attributes: hit._source[type],
+          attributes: this._getAttributes(type, hit._source),
         };
       }),
     };
@@ -375,7 +380,7 @@ export class SavedObjectsClient {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
+          attributes: this._getAttributes(type, doc._source)
         };
       })
     };
@@ -410,7 +415,7 @@ export class SavedObjectsClient {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: this._getAttributes(type, response._source)
     };
   }
 
@@ -424,6 +429,11 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const validateResult = validateAttributes(attributes);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
@@ -433,10 +443,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for',
       ignore: [404],
       body: {
-        doc: {
-          updated_at: time,
-          [type]: attributes
-        }
+        doc: this._createBody(type, time, attributes)
       },
     });
 
@@ -469,6 +476,29 @@ export class SavedObjectsClient {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  _createBody(type, time, attributes) {
+    const body = {
+      type,
+      updated_at: time,
+      [type]: _.cloneDeep(attributes)
+    };
+    // Tags are stored as a top level property but appear in attributes to the application.
+    // Host the tags property for storage
+    if (attributes.tags) {
+      body.tags = attributes.tags;
+      delete body[type].tags;
+    }
+    return body;
+  }
+
+  _getAttributes(type, source) {
+    const attributes = _.cloneDeep(source[type]);
+    if (source.tags) {
+      attributes.tags = source.tags;
+    }
+    return attributes;
   }
 
   _generateEsId(type, id) {
