@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "prettier": "prettier --single-quote --write './src/**/*.ts'"
+    "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.20",
