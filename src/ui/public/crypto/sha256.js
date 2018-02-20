@@ -1,5 +1,3 @@
-/* global Buffer */
-
 // ported from https://github.com/spalger/sha.js/blob/6557630d508873e262e94bff70c50bdd797c1df7/sha256.js
 // and https://github.com/spalger/sha.js/blob/6557630d508873e262e94bff70c50bdd797c1df7/hash.js
 

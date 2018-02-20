@@ -16,7 +16,21 @@ module.exports = function(options) {
       env: {
         es6: true,
         browser: true,
+
+        // Ideally we should not allow `commonjs` here, and purely depend on
+        // EcmaScript modules, but there are still too many uses of it to get
+        // rid of this setting yet.
         commonjs: true,
+      },
+
+      globals: {
+        // Webpack provides a polyfill. We allow using the global, but we don't
+        // allow it to be overwritten.
+        Buffer: false,
+
+        // We don't specify __filename or __dirname here, as they don't work
+        // exactly as most people would expect inside of Webpack. E.g. the value
+        // depends on the built file, not the source file etc.
       },
 
       rules: Object.assign(

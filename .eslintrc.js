@@ -27,17 +27,16 @@ module.exports = {
         'utilities/**/*.js',
         'packages/kbn-pm/**/*.js',
       ],
-      excludedFiles: ['src/ui/public/**/*.js'],
+      excludedFiles: ['src/**/public/**/*.js', 'src/**/common/**/*.js'],
     }),
 
     // Anything transpiled with `@kbn/babel-preset/webpack`
     uiConfig({
       files: [
-        'src/ui/public/**/*.js',
+        'src/**/public/**/*.js',
+        'src/**/common/**/*.js',
         'ui_framework/**/*.js',
         'webpackShims/**/*.js',
-        'src/test_utils/public/**/*.js',
-        'src/core_plugins/*/public/**/*.js',
         'test/functional/page_objects/**/*.js',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-test-subj-selector/**/*.js',
