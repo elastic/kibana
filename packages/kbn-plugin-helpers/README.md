@@ -69,5 +69,6 @@ Setting | Description
 ------- | -----------
 `skipArchive` | Don't create the zip file, leave the build path alone
 `buildDestination` | Target path for the build output, absolute or relative to the plugin root
+`skipInstallDependencies` | Don't install dependencies defined in package.json into build output
 `buildVersion` | Version for the build output
 `kibanaVersion` | Kibana version for the build output (added to package.json)
