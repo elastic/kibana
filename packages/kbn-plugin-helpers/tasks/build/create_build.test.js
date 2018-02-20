@@ -46,7 +46,7 @@ describe('creating the build', () => {
       await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
 
       expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).toContain('node_modules');
-      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET, 'node_modules'))).toContain('noop');
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET, 'node_modules'))).toContain('noop3');
     });
   });
 
