@@ -2,18 +2,35 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  KuiLinkButton,
-} from 'ui_framework/components';
-
-import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiText,
+  EuiButton,
 } from '@elastic/eui';
 
-export function Footer({ overviewDashboard }) {
-  if (overviewDashboard) {
+export function Footer({ overviewDashboard, launchApp }) {
+  if (overviewDashboard || launchApp) {
+    let button;
+    if (launchApp) {
+      button = (
+        <EuiButton
+          fill
+          href={launchApp.url}
+        >
+          {launchApp.label}
+        </EuiButton>
+      );
+    } else {
+      button = (
+        <EuiButton
+          fill
+          href={`#/dashboard/${overviewDashboard.id}`}
+        >
+          {overviewDashboard.linkLabel}
+        </EuiButton>
+      );
+    }
     return (
       <div>
         <EuiHorizontalRule />
@@ -31,12 +48,7 @@ export function Footer({ overviewDashboard }) {
           <EuiFlexItem
             grow={false}
           >
-            <KuiLinkButton
-              buttonType="primary"
-              href={`#/dashboard/${overviewDashboard.id}`}
-            >
-              {overviewDashboard.linkLabel}
-            </KuiLinkButton>
+            {button}
           </EuiFlexItem>
 
         </EuiFlexGroup>
@@ -47,6 +59,10 @@ export function Footer({ overviewDashboard }) {
 }
 
 Footer.propTypes = {
+  launchApp: PropTypes.shape({
+    url: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  }),
   overviewDashboard: PropTypes.shape({
     id: PropTypes.string.isRequired,
     linkLabel: PropTypes.string.isRequired,

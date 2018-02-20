@@ -148,7 +148,17 @@ export class Tutorial extends React.Component {
   }
 
   renderFooter = () => {
-    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
+    if (_.has(this.state, 'tutorial.artifacts.application')) {
+      const launchApp = {
+        url: this.props.addBasePath(this.state.tutorial.artifacts.application.path),
+        label: this.state.tutorial.artifacts.application.label
+      };
+      return (
+        <Footer
+          launchApp={launchApp}
+        />
+      );
+    } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
       const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
         return dashboard.isOverview;
       });
