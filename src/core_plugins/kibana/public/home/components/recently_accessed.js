@@ -63,10 +63,6 @@ export class RecentlyAccessed extends React.Component {
       );
     }
 
-    let dropdownLabel = `${dropdownLinks.length} more links`;
-    if (dropdownLinks.length === 1) {
-      dropdownLabel = `${dropdownLinks.length} more link`;
-    }
     const openPopoverComponent = (
       <EuiLink
         onClick={this.onButtonClick.bind(this)}
@@ -76,7 +72,7 @@ export class RecentlyAccessed extends React.Component {
           className="recentlyAccessedDropdownLabel"
           color="subdued"
         >
-          {dropdownLabel}
+          {`${dropdownLinks.length} more`}
         </EuiTextColor>
         <EuiIcon
           type="arrowDown"

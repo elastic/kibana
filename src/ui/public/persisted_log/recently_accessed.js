@@ -3,7 +3,7 @@ import { PersistedLog } from 'ui/persisted_log';
 class RecentlyAccessed {
   constructor() {
     const historyOptions = {
-      maxLength: 10,
+      maxLength: 20,
       filterDuplicates: true,
       isDuplicate: (oldItem, newItem) => {
         return oldItem.id === newItem.id;
