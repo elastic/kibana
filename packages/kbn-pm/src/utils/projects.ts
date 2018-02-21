@@ -16,7 +16,7 @@ export async function getProjects(
   rootPath: string,
   projectsPathsPatterns: string[]
 ) {
-  const projects = new Map();
+  const projects: ProjectMap = new Map();
 
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
@@ -31,7 +31,7 @@ export async function getProjects(
           `There are multiple projects with the same name [${project.name}]`,
           {
             name: project.name,
-            paths: [project.path, projects.get(project.name).path],
+            paths: [project.path, projects.get(project.name)!.path],
           }
         );
       }
@@ -75,7 +75,7 @@ function normalize(dir: string) {
 }
 
 export function buildProjectGraph(projects: ProjectMap) {
-  const projectGraph = new Map();
+  const projectGraph: ProjectGraph = new Map();
 
   for (const project of projects.values()) {
     const projectDeps = [];
