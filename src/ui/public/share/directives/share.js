@@ -153,7 +153,7 @@ app.directive('share', function (Private) {
           const isCopied = document.execCommand('copy');
           if (isCopied) {
             toastNotifications.add({
-              title: 'URL copied to clipboard',
+              title: 'URL was copied to the clipboard',
               'data-test-subj': 'shareCopyToClipboardSuccess',
             });
           } else {

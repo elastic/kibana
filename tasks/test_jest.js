@@ -3,15 +3,18 @@ const { resolve } = require('path');
 module.exports = function (grunt) {
   grunt.registerTask('test:jest', function () {
     const done = this.async();
-    runJest().then(done, done);
+    runJest(resolve(__dirname, '../scripts/jest.js')).then(done, done);
   });
 
-  function runJest() {
+  grunt.registerTask('test:jest_integration', function () {
+    const done = this.async();
+    runJest(resolve(__dirname, '../scripts/jest_integration.js')).then(done, done);
+  });
+
+  function runJest(jestScript) {
     const serverCmd = {
       cmd: 'node',
-      args: [
-        resolve(__dirname, '../scripts/jest.js')
-      ],
+      args: [jestScript],
       opts: { stdio: 'inherit' }
     };
 

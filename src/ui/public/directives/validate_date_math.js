@@ -1,4 +1,4 @@
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana').directive('validateDateMath', function () {

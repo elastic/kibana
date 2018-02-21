@@ -13,6 +13,7 @@ export function apmSpecProvider() {
       ' performance metrics and errors from inside your application.' +
       ' It allows you to monitor the performance of thousands of applications in real time.' +
       ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
+    euiIconType: 'apmApp',
     artifacts: {
       dashboards: [
         {

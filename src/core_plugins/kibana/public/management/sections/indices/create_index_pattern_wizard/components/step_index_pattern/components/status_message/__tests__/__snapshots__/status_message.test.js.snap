@@ -87,3 +87,31 @@ exports[`StatusMessage should render without a query 1`] = `
   </EuiTextColor>
 </EuiText>
 `;
+
+exports[`StatusMessage should show that no indices exist 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="default"
+  >
+    <span>
+      No Elasticsearch indices match your pattern.
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;
+
+exports[`StatusMessage should show that system indices exist 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="default"
+  >
+    <span>
+      No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in the upper right.
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;

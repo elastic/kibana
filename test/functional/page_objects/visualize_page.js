@@ -253,6 +253,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async setSelectByOptionText(selectId, optionText) {
+      const options = await find.allByCssSelector(`#${selectId} > option`);
+      const optionsTextPromises = options.map(async (optionElement) => {
+        return await optionElement.getVisibleText();
+      });
+      const optionsText = await Promise.all(optionsTextPromises);
+
+      const optionIndex = optionsText.indexOf(optionText);
+      if (optionIndex === -1) {
+        throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
+      }
+      await options[optionIndex].click();
+    }
+
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
     }
