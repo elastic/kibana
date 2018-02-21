@@ -2,7 +2,7 @@ import expect from 'expect.js';
 
 const DEFAULT_REQUEST = `
 
-GET _search
+ZZZGET _search
 {
   "query": {
     "match_all": {}
