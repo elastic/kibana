@@ -35,7 +35,7 @@ export class AddFilter extends Component {
             fullWidth
             value={filter}
             onChange={e => this.setState({ filter: e.target.value })}
-            placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')"
+            placeholder="source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')"
           />
         </EuiFlexItem>
         <EuiFlexItem>

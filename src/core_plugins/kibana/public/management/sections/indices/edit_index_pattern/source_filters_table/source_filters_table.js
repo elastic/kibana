@@ -26,6 +26,12 @@ export class SourceFiltersTable extends Component {
   constructor(props) {
     super(props);
 
+    // Source filters do not have any unique ids, only the value is stored.
+    // To ensure we can create a consistent and expected UX when managing
+    // source filters, we are assigning a unique id to each filter on the
+    // client side only
+    this.clientSideId = 0;
+
     this.state = {
       filterToDelete: undefined,
       isDeleteConfirmationModalVisible: false,
@@ -36,11 +42,14 @@ export class SourceFiltersTable extends Component {
   }
 
   componentWillMount() {
-    this.putFiltersInState();
+    this.updateFilters();
   }
 
-  putFiltersInState = () => {
-    const filters = this.props.indexPattern.sourceFilters;
+  updateFilters = () => {
+    const filters = this.props.indexPattern.sourceFilters.map(filter => ({
+      ...filter,
+      clientId: ++this.clientSideId,
+    }));
 
     this.setState({
       filters,
@@ -78,16 +87,16 @@ export class SourceFiltersTable extends Component {
 
   deleteFilter = async () =>  {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
-    const { filterToDelete } = this.state;
+    const { filterToDelete, filters } = this.state;
 
-    indexPattern.sourceFilters = indexPattern.sourceFilters.filter(filter => {
-      return filter.value !== filterToDelete.value;
+    indexPattern.sourceFilters = filters.filter(filter => {
+      return filter.clientId !== filterToDelete.clientId;
     });
 
     this.setState({ isSaving: true });
     await indexPattern.save();
     onAddOrRemoveFilter && onAddOrRemoveFilter();
-    this.putFiltersInState();
+    this.updateFilters();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
   }
@@ -103,23 +112,27 @@ export class SourceFiltersTable extends Component {
     this.setState({ isSaving: true });
     await indexPattern.save();
     onAddOrRemoveFilter && onAddOrRemoveFilter();
-    this.putFiltersInState();
+    this.updateFilters();
     this.setState({ isSaving: false });
   }
 
-  saveFilter = async ({ oldFilterValue, newFilterValue }) => {
+  saveFilter = async ({ filterId, newFilterValue }) => {
     const { indexPattern } = this.props;
+    const { filters } = this.state;
 
-    indexPattern.sourceFilters = indexPattern.sourceFilters.map(filter => {
-      if (filter.value === oldFilterValue) {
-        return { value: newFilterValue };
+    indexPattern.sourceFilters = filters.map(filter => {
+      if (filter.clientId === filterId) {
+        return {
+          value: newFilterValue,
+          clientId: filter.clientId,
+        };
       }
       return filter;
     });
 
     this.setState({ isSaving: true });
     await indexPattern.save();
-    this.putFiltersInState();
+    this.updateFilters();
     this.setState({ isSaving: false });
   }
 

@@ -35,19 +35,19 @@ export class Table extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      editingFilter: null,
+      editingFilterId: null,
       editingFilterValue: null,
     };
   }
 
-  startEditingFilter = field => this.setState({ editingFilter: field, editingFilterValue: field })
-  stopEditingFilter = () => this.setState({ editingFilter: null })
+  startEditingFilter = (id, value) => this.setState({ editingFilterId: id, editingFilterValue: value })
+  stopEditingFilter = () => this.setState({ editingFilterId: null })
   onEditingFilterChange = e => this.setState({ editingFilterValue: e.target.value })
 
   onEditFieldKeyPressed = ({ charCode }) => {
     if (keyCodes.ENTER === charCode) {
       this.props.saveFilter({
-        oldFilterValue: this.state.editingFilter,
+        filterId: this.state.editingFilterId,
         newFilterValue: this.state.editingFilterValue,
       });
       this.stopEditingFilter();
@@ -65,14 +65,14 @@ export class Table extends Component {
 
     const actions = [];
 
-    if (this.state.editingFilter) {
+    if (this.state.editingFilterId) {
       actions.push({
         name: 'Save',
         description: 'Save this field',
         icon: 'checkInCircleFilled',
         onClick: () => {
           saveFilter({
-            oldFilterValue: this.state.editingFilter,
+            filterId: this.state.editingFilterId,
             newFilterValue: this.state.editingFilterValue,
           });
           this.stopEditingFilter();
@@ -92,7 +92,7 @@ export class Table extends Component {
         name: 'Edit',
         description: 'Edit this field',
         icon: 'pencil',
-        onClick: filter => this.startEditingFilter(filter.value)
+        onClick: filter => this.startEditingFilter(filter.clientId, filter.value)
       });
       actions.push({
         name: 'Delete',
@@ -104,7 +104,7 @@ export class Table extends Component {
     }
 
     return {
-      recordId: 'id',
+      recordId: 'clientId',
       columns: [
         {
           field: 'value',
@@ -112,8 +112,8 @@ export class Table extends Component {
           description: `Filter name`,
           dataType: 'string',
           sortable: true,
-          render: value => {
-            if (this.state.editingFilter === value) {
+          render: (value, filter) => {
+            if (this.state.editingFilterId === filter.clientId) {
               return (
                 <EuiFieldText
                   value={this.state.editingFilterValue}

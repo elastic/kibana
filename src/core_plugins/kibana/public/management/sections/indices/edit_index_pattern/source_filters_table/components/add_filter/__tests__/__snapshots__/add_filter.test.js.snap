@@ -17,7 +17,7 @@ exports[`AddFilter should render normally 1`] = `
       fullWidth={true}
       isLoading={false}
       onChange={[Function]}
-      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with \\\\'user\\\\')"
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
       value=""
     />
   </EuiFlexItem>

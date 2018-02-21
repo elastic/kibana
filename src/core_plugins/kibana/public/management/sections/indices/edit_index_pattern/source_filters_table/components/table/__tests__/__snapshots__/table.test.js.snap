@@ -73,7 +73,7 @@ exports[`Table should render normally 1`] = `
           50,
         ],
       },
-      "recordId": "id",
+      "recordId": "clientId",
       "selection": undefined,
     }
   }

@@ -44,9 +44,11 @@ exports[`SourceFiltersTable should add a filter 1`] = `
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 2,
               "value": "tim*",
             },
             Object {
+              "clientId": 3,
               "value": "na*",
             },
           ],
@@ -102,6 +104,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 1,
               "value": "time*",
             },
           ],
@@ -148,6 +151,11 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         },
         "sourceFilters": Array [
           Object {
+            "clientId": 1,
+            "value": "tim*",
+          },
+          Object {
+            "clientId": 2,
             "value": "na*",
           },
         ],
@@ -168,10 +176,15 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 3,
+              "value": "tim*",
+            },
+            Object {
+              "clientId": 4,
               "value": "na*",
             },
           ],
-          "totalRecordCount": 1,
+          "totalRecordCount": 2,
         },
       }
     }
@@ -223,12 +236,15 @@ exports[`SourceFiltersTable should render normally 1`] = `
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 1,
               "value": "time*",
             },
             Object {
+              "clientId": 2,
               "value": "nam*",
             },
             Object {
+              "clientId": 3,
               "value": "age*",
             },
           ],
@@ -279,6 +295,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 1,
               "value": "tim*",
             },
           ],
@@ -328,6 +345,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
         "data": Object {
           "records": Array [
             Object {
+              "clientId": 1,
               "value": "tim*",
             },
           ],
@@ -371,7 +389,8 @@ exports[`SourceFiltersTable should update a filter 1`] = `
         },
         "sourceFilters": Array [
           Object {
-            "value": "ti*",
+            "clientId": 1,
+            "value": "tim*",
           },
         ],
       }
@@ -391,7 +410,8 @@ exports[`SourceFiltersTable should update a filter 1`] = `
         "data": Object {
           "records": Array [
             Object {
-              "value": "ti*",
+              "clientId": 2,
+              "value": "tim*",
             },
           ],
           "totalRecordCount": 1,

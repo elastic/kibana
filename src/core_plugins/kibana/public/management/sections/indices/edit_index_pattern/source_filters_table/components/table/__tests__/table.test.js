@@ -57,6 +57,7 @@ describe('Table', () => {
 
   it('should allow edits', async () => {
     const saveFilter = jest.fn();
+    const clientId = 1;
 
     const component = shallow(
       <Table
@@ -70,12 +71,12 @@ describe('Table', () => {
     );
 
     // Start the editing process
-    component.prop('config').columns[2].actions[0].onClick({ value: 'tim*' });
+    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
     // Ensure the state change propagates
     component.update();
 
     // Ensure the table cell switches to an input
-    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*'));
+    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
     expect(filterNameTableCell).toMatchSnapshot();
 
     // Also verify the action is now save
@@ -84,16 +85,16 @@ describe('Table', () => {
     // Let's also verify the close of the edit process
 
     // Change the value to something else
-    component.setState({ editingFilterValue: 'ti*' });
+    component.setState({ editingFilterId: clientId, editingFilterValue: 'ti*' });
 
     // Click the save button
     component.prop('config').columns[2].actions[0].onClick();
 
     // Ensure we call saveFilter properly
-    expect(saveFilter).toBeCalledWith({ newFilterValue: 'ti*', oldFilterValue: 'tim*' });
+    expect(saveFilter).toBeCalledWith({ filterId: clientId, newFilterValue: 'ti*' });
 
     // Ensure the state is properly reset
-    expect(component.state('editingFilter')).toBe(null);
+    expect(component.state('editingFilterId')).toBe(null);
   });
 
   it('should allow deletes', () => {
