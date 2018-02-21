@@ -171,12 +171,13 @@ export default function ({ getService, getPageObjects }) {
 
     Save this chart with the name Bar Example.
     */
-    it.skip('should change the Y-Axis extents', async function () {
-      await PageObjects.visualize.setAxisExtents(50, 250);
+    it('should change the Y-Axis extents', async function () {
+      await PageObjects.visualize.setAxisExtents('50', '250');
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
-      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      // same values as previous test except scaled down by the 50 for Y-Axis min
+      const expectedChartValues = [ 21, 15, 12, 5, 5 ];
+      const expectedChartValues2 = [127, 56, 103, 82, 112 ];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
