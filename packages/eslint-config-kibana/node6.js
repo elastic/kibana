@@ -1,3 +1,5 @@
+const baseRules = require('./rules/base');
+
 module.exports = function(options) {
   return Object.assign(
     {
@@ -5,6 +7,8 @@ module.exports = function(options) {
         es6: true,
         node: true,
       },
+
+      rules: baseRules,
     },
     options
   );

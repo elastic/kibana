@@ -1,3 +1,4 @@
+const baseRules = require('./rules/base');
 const babelRules = require('./rules/babel');
 const importRules = require('./rules/import');
 const objectSpreadRules = require('./rules/object_spread');
@@ -12,7 +13,13 @@ module.exports = function(options) {
         node: true,
       },
 
-      rules: Object.assign({}, babelRules, importRules, objectSpreadRules),
+      rules: Object.assign(
+        {},
+        baseRules,
+        babelRules,
+        importRules,
+        objectSpreadRules
+      ),
     },
     options
   );

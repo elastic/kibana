@@ -1,3 +1,4 @@
+const baseRules = require('./rules/base');
 const babelRules = require('./rules/babel');
 const importRules = require('./rules/import');
 const objectSpreadRules = require('./rules/object_spread');
@@ -82,6 +83,7 @@ module.exports = function(options) {
           'no-unsanitized/method': 'error',
           'no-unsanitized/property': 'error',
         },
+        baseRules,
         babelRules,
         importRules,
         objectSpreadRules

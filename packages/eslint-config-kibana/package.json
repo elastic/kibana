@@ -21,6 +21,11 @@
     "eslint-plugin-mocha": "^4.9.0",
     "eslint-plugin-no-unsanitized": "^2.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
-    "eslint-plugin-react": "^7.1.0"
+    "eslint-plugin-react": "^7.1.0",
+    "typescript": "^2.7.2",
+    "typescript-eslint-parser": "^14.0.0"
+  },
+  "dependencies": {
+    "lodash.mergewith": "^4.6.1"
   }
 }

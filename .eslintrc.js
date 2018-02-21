@@ -4,6 +4,7 @@ const serverConfig = require('@elastic/eslint-config-kibana/server');
 const uiConfig = require('@elastic/eslint-config-kibana/ui');
 const mochaConfig = require('@elastic/eslint-config-kibana/mocha');
 const jestConfig = require('@elastic/eslint-config-kibana/jest');
+const withTypeScript = require('@elastic/eslint-config-kibana/with_typescript');
 
 module.exports = {
   extends: ['@elastic/eslint-config-kibana'],
@@ -85,5 +86,11 @@ module.exports = {
         'packages/eslint-plugin-kibana-custom/**/*.js',
       ],
     }),
+
+    withTypeScript(
+      prettierConfig({
+        files: ['packages/kbn-pm/**/*.ts'],
+      })
+    ),
   ],
 };

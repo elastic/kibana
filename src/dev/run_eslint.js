@@ -4,6 +4,7 @@ import { DEFAULT_ESLINT_PATHS } from './eslint';
 const options = parse(process.argv);
 
 if (!options._.length && !options.printConfig) {
+  process.argv.push(...['--ext', 'js,ts']);
   process.argv.push(...DEFAULT_ESLINT_PATHS);
 }
 
