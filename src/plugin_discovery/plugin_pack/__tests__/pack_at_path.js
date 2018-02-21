@@ -71,6 +71,9 @@ describe('plugin discovery/plugin_pack', () => {
         assertInvalidPackError(error);
         expect(error.message).to.contain('must export a function');
       }));
+      it('directory with code that fails when required', () => checkError(resolve(PLUGINS_DIR, 'broken_code'), error => {
+        expect(error.message).to.contain('Cannot find module \'does-not-exist\'');
+      }));
     });
   });
 });
