@@ -104,7 +104,8 @@ export const pointseries = () => ({
               : '_all';
           } catch (e) {
             // TODO: handle invalid column names...
-            acc[dimension] = '_all';
+            // Do nothing if column does not exist
+            // acc[dimension] = '_all';
           }
           return acc;
         },

@@ -161,6 +161,30 @@ describe('pointseries', () => {
         ],
       });
     });
+    it('ignores missing columns', () => {
+      expect(fn(testTable, { x: 'name', y: 'notInTheTable' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'string',
+            role: 'dimension',
+            expression: 'name',
+          },
+          y: {
+            type: 'null',
+            role: 'dimension',
+            expression: 'notInTheTable',
+          },
+        },
+        rows: [
+          { x: 'product1' },
+          { x: 'product2' },
+          { x: 'product3' },
+          { x: 'product4' },
+          { x: 'product5' },
+        ],
+      });
+    });
     it('invalid args', () => {
       expect(fn(testTable, { x: 'name', y: 'quantity * 3' })).to.be.eql({
         type: 'pointseries',
