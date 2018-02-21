@@ -342,17 +342,17 @@ export function VislibVisualizationsPieChartProvider(Private) {
     }
 
     addDonutDescriptor(svg, width, height) {
-      self = this;
+      const self = this;
       svg.append('text')
         .style('text-anchor', 'middle')
-        .attr('font-size', function(chartData) { 
-            let dividend = Math.min(width, height);
-            let divisor = Math.max(chartData.raw.columns.length, 4);
-            return (dividend/divisor) + 'px';
-          })
+        .attr('font-size', function (chartData) {
+          const dividend = Math.min(width, height);
+          const divisor = Math.max(chartData.raw.columns.length, 4);
+          return (dividend / divisor) + 'px';
+        })
         .attr('dy', '.35em')
         .text(function (chartData) {
-          return self.readableNumber(chartData.slices.sumOfChildren); 
+          return self.readableNumber(chartData.slices.sumOfChildren);
         });
     }
 
