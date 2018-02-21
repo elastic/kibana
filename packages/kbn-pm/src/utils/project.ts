@@ -16,6 +16,11 @@ import {
 } from './package_json';
 import { CliError } from './errors';
 
+interface BuildConfig {
+  skip?: boolean;
+  intermediateBuildDirectory?: string;
+}
+
 export class Project {
   static async fromPath(path: string) {
     const pkgJson = await readPackageJson(path);
@@ -86,9 +91,27 @@ export class Project {
     );
   }
 
+  getBuildConfig(): BuildConfig {
+    return (this.json.kibana && this.json.kibana.build) || {};
+  }
+
+  /**
+   * Whether a package should not be included in the Kibana build artifact.
+   */
   skipFromBuild() {
-    const json = this.json;
-    return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+    return this.getBuildConfig().skip === true;
+  }
+
+  /**
+   * Returns the directory that should be copied into the Kibana build artifact.
+   * This config can be specified to only include the project's build artifacts
+   * instead of everything located in the project directory.
+   */
+  getIntermediateBuildDirectory() {
+    return path.resolve(
+      this.path,
+      this.getBuildConfig().intermediateBuildDirectory || '.'
+    );
   }
 
   hasScript(name: string) {

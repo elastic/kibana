@@ -1,5 +1,5 @@
 import del from 'del';
-import { relative, resolve } from 'path';
+import { relative, resolve, join } from 'path';
 import copy from 'cpy';
 
 import { getProjectPaths } from '../config';
@@ -11,8 +11,9 @@ import {
 import {
   createProductionPackageJson,
   writePackageJson,
+  readPackageJson,
 } from '../utils/package_json';
-import { isDirectory } from '../utils/fs';
+import { isDirectory, isFile } from '../utils/fs';
 import { Project } from '../utils/project';
 
 export async function buildProductionProjects({
@@ -85,20 +86,26 @@ async function copyToBuild(
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
-  // When copying all the files into the build, we exclude `package.json` as we
-  // write a separate "production-ready" `package.json` below, and we exclude
-  // `node_modules` because we want the Kibana build to actually install all
-  // dependencies. The primary reason for allowing the Kibana build process to
-  // install the dependencies is that it will "dedupe" them, so we don't include
-  // unnecessary copies of dependencies.
-  await copy(['**/*', '!package.json', '!node_modules/**'], buildProjectPath, {
-    cwd: project.path,
+  // When copying all the files into the build, we exclude `node_modules`
+  // because we want the Kibana build to actually install all dependencies. The
+  // primary reason for allowing the Kibana build process to install the
+  // dependencies is that it will "dedupe" them, so we don't include unnecessary
+  // copies of dependencies.
+  await copy(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getIntermediateBuildDirectory(),
     parents: true,
     nodir: true,
     dot: true,
   });
 
-  const packageJson = project.json;
+  // When a project is using an intermediate build directory, they might copy
+  // the `package.json` into that directory. If so, we want to use that as the
+  // basis for creating the production-ready `package.json`. Otherwise we fall
+  // back to using the project's already defined `package.json`.
+  const packageJson = (await isFile(join(buildProjectPath, 'package.json')))
+    ? await readPackageJson(buildProjectPath)
+    : project.json;
+
   const preparedPackageJson = createProductionPackageJson(packageJson);
   await writePackageJson(buildProjectPath, preparedPackageJson);
 }

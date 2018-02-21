@@ -7,7 +7,7 @@ export type PackageDependencies = { [key: string]: string };
 export type PackageScripts = { [key: string]: string };
 
 export function readPackageJson(dir: string) {
-  return readPkg(path.join(dir, 'package.json'), { normalize: false });
+  return readPkg(dir, { normalize: false });
 }
 
 export function writePackageJson(path: string, json: PackageJson) {
