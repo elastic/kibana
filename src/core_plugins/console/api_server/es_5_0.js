@@ -4,9 +4,7 @@ import { getSpec } from './spec'
 let parts = [
   require('./es_5_0/aliases'),
   require('./es_5_0/aggregations'),
-  require('./es_5_0/cluster'),
   require('./es_5_0/document'),
-  require('./es_5_0/field_stats'),
   require('./es_5_0/filter'),
   require('./es_5_0/nodes'),
   require('./es_5_0/globals'),

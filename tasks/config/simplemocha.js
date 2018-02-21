@@ -14,7 +14,8 @@ export default {
     src: [
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
-      'packages/kbn-build/**/__tests__/**/*.js',
+      'packages/kbn-pm/**/__tests__/**/*.js',
+      'packages/kbn-datemath/test/**/*.js',
       'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!**/__tests__/fixtures/**/*',

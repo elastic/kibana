@@ -3,7 +3,7 @@ import angular from 'angular';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
@@ -417,7 +417,7 @@ function discoverController(
 
             if (id) {
               toastNotifications.addSuccess({
-                title: `Saved '${savedSearch.title}'`,
+                title: `Search '${savedSearch.title}' was saved`,
                 'data-test-subj': 'saveSearchSuccess',
               });
 

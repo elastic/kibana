@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import './index_header';
 import './indexed_fields_table';
-import './scripted_fields_table';
 import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
@@ -10,6 +9,50 @@ import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
+
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { ScriptedFieldsTable } from './scripted_fields_table';
+
+const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
+
+function updateScriptedFieldsTable($scope, $state) {
+  if ($state.tab === 'scriptedFields') {
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <ScriptedFieldsTable
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          scriptedFieldLanguageFilter={$scope.scriptedFieldLanguageFilter}
+          helpers={{
+            redirectToRoute: (obj, route) => {
+              $scope.kbnUrl.redirectToRoute(obj, route);
+              $scope.$apply();
+            },
+            getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+          }}
+          onRemoveField={() => {
+            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+            $scope.refreshFilters();
+          }}
+        />,
+        node,
+      );
+    });
+  } else {
+    destroyScriptedFieldsTable();
+  }
+}
+
+function destroyScriptedFieldsTable() {
+  const node = document.getElementById(REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
 
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
@@ -45,6 +88,7 @@ uiModules.get('apps/management')
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
 
+    $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
     docTitle.change($scope.indexPattern.title);
@@ -54,7 +98,7 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = Private(IndicesEditSectionsProvider)($scope.indexPattern);
+      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
       $scope.refreshFilters();
     });
 
@@ -79,6 +123,7 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
+      updateScriptedFieldsTable($scope, $state);
       $state.save();
     };
 
@@ -140,4 +185,22 @@ uiModules.get('apps/management')
       $scope.indexPattern.timeFieldName = field.name;
       return $scope.indexPattern.save();
     };
+
+    $scope.$watch('fieldFilter', () => {
+      if ($scope.fieldFilter !== undefined && $state.tab === 'scriptedFields') {
+        updateScriptedFieldsTable($scope, $state);
+      }
+    });
+
+    $scope.$watch('scriptedFieldLanguageFilter', () => {
+      if ($scope.scriptedFieldLanguageFilter !== undefined && $state.tab === 'scriptedFields') {
+        updateScriptedFieldsTable($scope, $state);
+      }
+    });
+
+    $scope.$on('$destory', () => {
+      destroyScriptedFieldsTable();
+    });
+
+    updateScriptedFieldsTable($scope, $state);
   });

@@ -19,13 +19,15 @@ describe('Config schema', function () {
 
     describe('basePath', function () {
       it('accepts empty strings', function () {
-        const { error } = validate({ server: { basePath: '' } });
+        const { error, value } = validate({ server: { basePath: '' } });
         expect(error == null).to.be.ok();
+        expect(value.server.basePath).to.be('');
       });
 
       it('accepts strings with leading slashes', function () {
-        const { error } = validate({ server: { basePath: '/path' } });
+        const { error, value } = validate({ server: { basePath: '/path' } });
         expect(error == null).to.be.ok();
+        expect(value.server.basePath).to.be('/path');
       });
 
       it('rejects strings with trailing slashes', function () {
@@ -40,6 +42,45 @@ describe('Config schema', function () {
         expect(error.details[0]).to.have.property('path', 'server.basePath');
       });
 
+      it('rejects things that are not strings', function () {
+        for (const value of [1, true, {}, [], /foo/]) {
+          const { error } = validate({ server: { basePath: value } });
+          expect(error).to.have.property('details');
+          expect(error.details[0]).to.have.property('path', 'server.basePath');
+        }
+      });
+    });
+
+    describe('rewriteBasePath', function () {
+      it('defaults to false', () => {
+        const { error, value } = validate({});
+        expect(error).to.be(null);
+        expect(value.server.rewriteBasePath).to.be(false);
+      });
+
+      it('accepts false', function () {
+        const { error, value } = validate({ server: { rewriteBasePath: false } });
+        expect(error).to.be(null);
+        expect(value.server.rewriteBasePath).to.be(false);
+      });
+
+      it('accepts true if basePath set', function () {
+        const { error, value } = validate({ server: { basePath: '/foo', rewriteBasePath: true } });
+        expect(error).to.be(null);
+        expect(value.server.rewriteBasePath).to.be(true);
+      });
+
+      it('rejects true if basePath not set', function () {
+        const { error } = validate({ server: { rewriteBasePath: true } });
+        expect(error).to.have.property('details');
+        expect(error.details[0]).to.have.property('path', 'server.rewriteBasePath');
+      });
+
+      it('rejects strings', function () {
+        const { error } = validate({ server: { rewriteBasePath: 'foo' } });
+        expect(error).to.have.property('details');
+        expect(error.details[0]).to.have.property('path', 'server.rewriteBasePath');
+      });
     });
 
     describe('ssl', function () {

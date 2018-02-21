@@ -1,0 +1,11 @@
+{
+  "_scripts/{id}": {
+    "url_params": {},
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_scripts/{id}"
+    ]
+  }
+}
