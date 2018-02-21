@@ -78,7 +78,7 @@ async function buildProject(project: Project) {
 }
 
 /**
- * Copy the all the project's files from it's "intermediate build directory" and
+ * Copy all the project's files from its "intermediate build directory" and
  * into the build. The intermediate directory can either be the root of the
  * project or some other location defined in the project's `package.json`.
  *
