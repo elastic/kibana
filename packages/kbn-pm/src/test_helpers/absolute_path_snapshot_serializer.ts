@@ -3,9 +3,9 @@ import cloneDeepWith from 'lodash.clonedeepwith';
 
 const repoRoot = resolve(__dirname, '../../../../');
 
-const normalizePaths = value => {
+const normalizePaths = (value: any) => {
   let didReplacement = false;
-  const clone = cloneDeepWith(value, v => {
+  const clone = cloneDeepWith(value, (v: any) => {
     if (typeof v === 'string' && v.startsWith(repoRoot)) {
       didReplacement = true;
       return v
@@ -22,11 +22,11 @@ const normalizePaths = value => {
 };
 
 export const absolutePathSnapshotSerializer = {
-  print: (value, serialize) => {
+  print(value: any, serialize: (val: any) => string) {
     return serialize(normalizePaths(value).clone);
   },
 
-  test: value => {
+  test(value: any) {
     return normalizePaths(value).didReplacement;
   },
 };

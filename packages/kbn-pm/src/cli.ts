@@ -3,14 +3,12 @@ import dedent from 'dedent';
 import chalk from 'chalk';
 import { resolve } from 'path';
 
-import * as commands from './commands';
+import { commands } from './commands';
 import { runCommand } from './run';
-
-const getCommand = name => commands[name]; // eslint-disable-line import/namespace
 
 function help() {
   const availableCommands = Object.keys(commands)
-    .map(commandName => getCommand(commandName))
+    .map(commandName => commands[commandName])
     .map(command => `${command.name} - ${command.description}`);
 
   console.log(dedent`
@@ -30,7 +28,7 @@ function help() {
   `);
 }
 
-export async function run(argv) {
+export async function run(argv: string[]) {
   // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
@@ -65,7 +63,7 @@ export async function run(argv) {
 
   const commandOptions = { options, extraArgs, rootPath };
 
-  const command = getCommand(commandName);
+  const command = commands[commandName];
   if (command === undefined) {
     console.log(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
