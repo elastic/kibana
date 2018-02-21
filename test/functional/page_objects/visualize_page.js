@@ -663,7 +663,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const cy = await chart.getAttribute('cy');
         // the point_series_options test has data in the billions range and
         // getting 11 digits of precision with these calculations is very hard
-        return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(8));
+        return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(7));
       }
 
       // 4). pass the chartTypes to the getChartType function
