@@ -22902,7 +22902,7 @@ Object.defineProperty(exports, 'run', {
   }
 });
 
-var _production = __webpack_require__(323);
+var _production = __webpack_require__(324);
 
 Object.defineProperty(exports, 'buildProductionProjects', {
   enumerable: true,
@@ -40491,9 +40491,7 @@ let runCommand = exports.runCommand = (() => {
             const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths);
             const projectGraph = (0, _projects.buildProjectGraph)(projects);
             console.log(_chalk2.default.bold(`Found [${_chalk2.default.green(projects.size.toString())}] projects:\n`));
-            for (const pkg of projects.values()) {
-                console.log(`- ${pkg.name} (${pkg.path})`);
-            }
+            console.log((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
             yield command.run(projects, projectGraph, config);
         } catch (e) {
             console.log(_chalk2.default.bold.red(`\n[${command.name}] failed:\n`));
@@ -40536,6 +40534,8 @@ var _indentString2 = _interopRequireDefault(_indentString);
 var _errors = __webpack_require__(19);
 
 var _projects = __webpack_require__(13);
+
+var _projects_tree = __webpack_require__(323);
 
 var _config = __webpack_require__(170);
 
@@ -40898,10 +40898,134 @@ module.exports = (str, count, opts) => {
 
 
 Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.renderProjectsTree = renderProjectsTree;
+
+var _path = __webpack_require__(1);
+
+var _path2 = _interopRequireDefault(_path);
+
+var _chalk = __webpack_require__(5);
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const projectKey = Symbol('__project');
+function renderProjectsTree(rootPath, projects) {
+    const projectsTree = buildProjectsTree(rootPath, projects);
+    return treeToString(createTreeStructure(projectsTree));
+}
+function treeToString(tree) {
+    return [tree.name].concat(childrenToString(tree.children, '')).join('\n');
+}
+function childrenToString(tree, treePrefix) {
+    if (tree === undefined) {
+        return [];
+    }
+    let string = [];
+    tree.forEach((node, index) => {
+        const isLastNode = tree.length - 1 === index;
+        const nodePrefix = isLastNode ? '└── ' : '├── ';
+        const childPrefix = isLastNode ? '    ' : '│   ';
+        const childrenPrefix = treePrefix + childPrefix;
+        string.push(`${treePrefix}${nodePrefix}${node.name}`);
+        string = string.concat(childrenToString(node.children, childrenPrefix));
+    });
+    return string;
+}
+function createTreeStructure(tree) {
+    let name;
+    const children = [];
+    for (const [dir, project] of tree.entries()) {
+        // This is a leaf node (aka a project)
+        if (typeof project === 'string') {
+            name = _chalk2.default.green(project);
+            continue;
+        }
+        // If there's only one project and the key indicates it's a leaf node, we
+        // know that we're at a package folder that contains a package.json, so we
+        // "inline it" so we don't get unnecessary levels, i.e. we'll just see
+        // `foo` instead of `foo -> foo`.
+        if (project.size === 1 && project.has(projectKey)) {
+            const projectName = project.get(projectKey);
+            children.push({
+                name: dirOrProjectName(dir, projectName),
+                children: []
+            });
+            continue;
+        }
+        const subtree = createTreeStructure(project);
+        // If the name is specified, we know there's a package at the "root" of the
+        // subtree itself.
+        if (subtree.name !== undefined) {
+            const projectName = subtree.name;
+            children.push({
+                name: dirOrProjectName(dir, projectName),
+                children: subtree.children
+            });
+            continue;
+        }
+        // Special-case whenever we have one child, so we don't get unnecessary
+        // folders in the output. E.g. instead of `foo -> bar -> baz` we get
+        // `foo/bar/baz` instead.
+        if (subtree.children && subtree.children.length === 1) {
+            const child = subtree.children[0];
+            const newName = _chalk2.default.dim(_path2.default.join(dir.toString(), child.name));
+            children.push({
+                name: newName,
+                children: child.children
+            });
+            continue;
+        }
+        children.push({
+            name: _chalk2.default.dim(dir.toString()),
+            children: subtree.children
+        });
+    }
+    return { name, children };
+}
+function dirOrProjectName(dir, projectName) {
+    return dir === projectName ? _chalk2.default.green(dir) : _chalk2.default`{dim ${dir.toString()} ({reset.green ${projectName}})}`;
+}
+function buildProjectsTree(rootPath, projects) {
+    const tree = new Map();
+    for (const project of projects.values()) {
+        if (rootPath === project.path) {
+            tree.set(projectKey, project.name);
+        } else {
+            const relativeProjectPath = _path2.default.relative(rootPath, project.path);
+            addProjectToTree(tree, relativeProjectPath.split(_path2.default.sep), project);
+        }
+    }
+    return tree;
+}
+function addProjectToTree(tree, pathParts, project) {
+    if (pathParts.length === 0) {
+        tree.set(projectKey, project.name);
+    } else {
+        const [currentDir, ...rest] = pathParts;
+        if (!tree.has(currentDir)) {
+            tree.set(currentDir, new Map());
+        }
+        const subtree = tree.get(currentDir);
+        addProjectToTree(subtree, rest, project);
+    }
+}
+
+/***/ }),
+/* 324 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _build_production_projects = __webpack_require__(324);
+var _build_production_projects = __webpack_require__(325);
 
 Object.defineProperty(exports, 'buildProductionProjects', {
   enumerable: true,
@@ -40910,7 +41034,7 @@ Object.defineProperty(exports, 'buildProductionProjects', {
   }
 });
 
-var _prepare_project_dependencies = __webpack_require__(335);
+var _prepare_project_dependencies = __webpack_require__(336);
 
 Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
   enumerable: true,
@@ -40920,7 +41044,7 @@ Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
 });
 
 /***/ }),
-/* 324 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41050,7 +41174,7 @@ var _del2 = _interopRequireDefault(_del);
 
 var _path = __webpack_require__(1);
 
-var _cpy = __webpack_require__(325);
+var _cpy = __webpack_require__(326);
 
 var _cpy2 = _interopRequireDefault(_cpy);
 
@@ -41067,17 +41191,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /***/ }),
-/* 325 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const EventEmitter = __webpack_require__(14);
 const path = __webpack_require__(1);
-const arrify = __webpack_require__(326);
-const globby = __webpack_require__(327);
-const cpFile = __webpack_require__(329);
-const CpyError = __webpack_require__(334);
+const arrify = __webpack_require__(327);
+const globby = __webpack_require__(328);
+const cpFile = __webpack_require__(330);
+const CpyError = __webpack_require__(335);
 
 const preprocessSrcPath = (srcPath, opts) => opts.cwd ? path.resolve(opts.cwd, srcPath) : srcPath;
 
@@ -41171,7 +41295,7 @@ module.exports = (src, dest, opts) => {
 
 
 /***/ }),
-/* 326 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41186,7 +41310,7 @@ module.exports = function (val) {
 
 
 /***/ }),
-/* 327 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41195,7 +41319,7 @@ var Promise = __webpack_require__(166);
 var arrayUnion = __webpack_require__(167);
 var objectAssign = __webpack_require__(168);
 var glob = __webpack_require__(10);
-var pify = __webpack_require__(328);
+var pify = __webpack_require__(329);
 
 var globP = pify(glob, Promise).bind(glob);
 
@@ -41281,7 +41405,7 @@ module.exports.hasMagic = function (patterns, opts) {
 
 
 /***/ }),
-/* 328 */
+/* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41356,17 +41480,17 @@ pify.all = pify;
 
 
 /***/ }),
-/* 329 */
+/* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(1);
 const fsConstants = __webpack_require__(3).constants;
-const Buffer = __webpack_require__(330).Buffer;
+const Buffer = __webpack_require__(331).Buffer;
 const CpFileError = __webpack_require__(171);
-const fs = __webpack_require__(332);
-const ProgressEmitter = __webpack_require__(333);
+const fs = __webpack_require__(333);
+const ProgressEmitter = __webpack_require__(334);
 
 module.exports = (src, dest, opts) => {
 	if (!src || !dest) {
@@ -41516,11 +41640,11 @@ module.exports.sync = (src, dest, opts) => {
 
 
 /***/ }),
-/* 330 */
+/* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(331)
+var buffer = __webpack_require__(332)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -41584,13 +41708,13 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 331 */
+/* 332 */
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
-/* 332 */
+/* 333 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41743,7 +41867,7 @@ if (fs.copyFileSync) {
 
 
 /***/ }),
-/* 333 */
+/* 334 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41785,7 +41909,7 @@ module.exports = ProgressEmitter;
 
 
 /***/ }),
-/* 334 */
+/* 335 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41804,7 +41928,7 @@ module.exports = CpyError;
 
 
 /***/ }),
-/* 335 */
+/* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
