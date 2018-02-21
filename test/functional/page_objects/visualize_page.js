@@ -411,16 +411,30 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       customLabel.type(label);
     }
 
-    async setAxisExtents(min, max) {
-      const advancedLink = await find.byCssSelector('#axisOptionsValueAxis-1 > div:nth-child(2) > a > span.kuiSideBarOptionsLink__text');
-      log.debug('moveMouseTo advancedLink');
-      await advancedLink.session.moveMouseTo(advancedLink);
-      log.debug('now click advancedLink');
-      await advancedLink.click();
+    async setAxisExtents(min, max, axis = 'LeftAxis-1') {
+      const axisOptions = await find.byCssSelector(`div[aria-label="Toggle ${axis} options"]`);
+      const isOpen = await axisOptions.getAttribute('aria-expanded');
+      if (isOpen === 'false') {
+        log.debug(`click to open ${axis} options`);
+        await axisOptions.click();
+      }
+      // it would be nice to get the correct axis by name like "LeftAxis-1"
+      // instead of an incremented index, but this link isn't under the div above
+      const advancedLink =
+        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
 
+      const advancedLinkState = await advancedLink.getAttribute('class');
+      if (advancedLinkState.includes('fa-caret-right')) {
+        await advancedLink.session.moveMouseTo(advancedLink);
+        log.debug('click advancedLink');
+        await advancedLink.click();
+      }
       const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
-      await checkbox.session.moveMouseTo(checkbox);
-      await checkbox.click();
+      const checkboxState = await checkbox.getAttribute('class');
+      if (checkboxState.includes('ng-empty')) {
+        await checkbox.session.moveMouseTo(checkbox);
+        await checkbox.click();
+      }
       const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
       await maxField.type(max);
       const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
