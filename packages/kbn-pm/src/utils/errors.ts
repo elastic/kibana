@@ -1,6 +1,5 @@
 export class CliError extends Error {
-  constructor(message, meta = {}) {
+  constructor(message: string, public readonly meta = {}) {
     super(message);
-    this.meta = meta;
   }
 }

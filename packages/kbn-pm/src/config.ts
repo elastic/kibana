@@ -1,9 +1,14 @@
 import { resolve } from 'path';
 
+export type ProjectPathOptions = {
+  'skip-kibana-extra'?: boolean;
+  'skip-kibana'?: boolean;
+};
+
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths(rootPath, options) {
+export function getProjectPaths(rootPath: string, options: ProjectPathOptions) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
   const skipKibana = Boolean(options['skip-kibana']);
 

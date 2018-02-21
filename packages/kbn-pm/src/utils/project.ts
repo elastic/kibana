@@ -7,16 +7,30 @@ import {
   runScriptInPackage,
   runScriptInPackageStreaming,
 } from './scripts';
-import { readPackageJson, isLinkDependency } from './package_json';
+import {
+  PackageJson,
+  PackageDependencies,
+  PackageScripts,
+  isLinkDependency,
+  readPackageJson,
+} from './package_json';
 import { CliError } from './errors';
 
 export class Project {
-  static async fromPath(path) {
+  static async fromPath(path: string) {
     const pkgJson = await readPackageJson(path);
     return new Project(pkgJson, path);
   }
 
-  constructor(packageJson, projectPath) {
+  public readonly json: PackageJson;
+  public readonly packageJsonLocation: string;
+  public readonly nodeModulesLocation: string;
+  public readonly targetLocation: string;
+  public readonly path: string;
+  public readonly allDependencies: PackageDependencies;
+  public readonly scripts: PackageScripts;
+
+  constructor(packageJson: PackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
@@ -36,7 +50,7 @@ export class Project {
     return this.json.name;
   }
 
-  ensureValidProjectDependency(project) {
+  ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(
       path.relative(this.path, project.path)
     );
@@ -77,11 +91,11 @@ export class Project {
     return json.kibana && json.kibana.build && json.kibana.build.skip === true;
   }
 
-  hasScript(name) {
+  hasScript(name: string) {
     return name in this.scripts;
   }
 
-  getExecutables() {
+  getExecutables(): { [key: string]: string } {
     const raw = this.json.bin;
 
     if (!raw) {
@@ -95,7 +109,7 @@ export class Project {
     }
 
     if (typeof raw === 'object') {
-      const binsConfig = {};
+      const binsConfig: { [k: string]: string } = {};
       for (const binName of Object.keys(raw)) {
         binsConfig[binName] = path.resolve(this.path, raw[binName]);
       }
@@ -112,7 +126,7 @@ export class Project {
     );
   }
 
-  async runScript(scriptName, args = []) {
+  async runScript(scriptName: string, args: string[] = []) {
     console.log(
       chalk.bold(
         `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(
@@ -123,7 +137,7 @@ export class Project {
     return runScriptInPackage(scriptName, args, this);
   }
 
-  async runScriptStreaming(scriptName, args = []) {
+  async runScriptStreaming(scriptName: string, args: string[] = []) {
     return runScriptInPackageStreaming(scriptName, args, this);
   }
 
@@ -131,7 +145,7 @@ export class Project {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  async installDependencies({ extraArgs }) {
+  async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     console.log(
       chalk.bold(
         `\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`
@@ -142,6 +156,6 @@ export class Project {
 }
 
 // We normalize all path separators to `/` in generated files
-function normalizePath(path) {
+function normalizePath(path: string) {
   return path.replace(/[\\\/]+/g, '/');
 }

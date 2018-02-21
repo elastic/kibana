@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    // Enables all strict type checking options.
+    "strict": true,
+
+    // Library files to be included in the compilation. Basically which "core
+    // language features" TypeScript should enable.
+    "lib": ["es2015", "es2016", "es2017"],
+
+    // Which version of EcmaScript TypeScript should transpile to. Because of
+    // how Babel and Webpack is set up we currently target `esnext`, and let
+    // Babel take care of transpiling it down.
+    "target": "esnext",
+
+    // Specifies module code generation.
+    "module": "esnext",
+
+    // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
+    // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
+    // ESNext module format is used.
+    "allowSyntheticDefaultImports": true,
+
+    // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
+    "esModuleInterop": true,
+
+    // Resolve modules in the same way as Node.js. Aka make `require` works the
+    // same in TypeScript as it does in Node.js.
+    "moduleResolution": "node",
+
+    // Disallow inconsistently-cased references to the same file.
+    "forceConsistentCasingInFileNames": true,
+
+    // Generate an external source map. There's also an `--inlineSourceMap` for
+    // emitting a single file with source maps instead of having a separate file.
+    "sourceMap": true
+  },
+
+  "exclude": [
+    "node_modules"
+  ]
+}
