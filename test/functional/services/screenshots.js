@@ -50,7 +50,14 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async takeForFailure(name) {
-      return await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
+      // TODO: Replace characters in test names which can't be used in filenames, like *
+      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
+      const currentUrl = await remote.getCurrentUrl();
+      log.info(`Current URL is: ${currentUrl}`);
+      const htmlOutputFileName = resolve(FAILURE_DIRECTORY, `${name}.html`);
+      log.info(`Saving page source to: ${htmlOutputFileName}`);
+      const pageSource = await remote.getPageSource();
+      await writeFileAsync(htmlOutputFileName, pageSource);
     }
 
     async _take(path) {
