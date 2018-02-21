@@ -5,7 +5,18 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 
 const kueryParser = PEG.buildParser(grammar);
-const kqlParser = PEG.buildParser(kqlGrammar);
+const kqlParser = PEG.buildParser(kqlGrammar, {
+  allowedStartRules: ['start', 'Literal'],
+});
+
+export function fromLiteralExpression(expression, parseOptions) {
+  parseOptions = {
+    ...parseOptions,
+    startRule: 'Literal',
+  };
+
+  return fromExpression(expression, parseOptions, kqlParser);
+}
 
 export function fromKueryExpression(expression, parseOptions) {
   return fromExpression(expression, parseOptions, kueryParser);
@@ -26,14 +37,6 @@ function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
   };
 
   return parser.parse(expression, parseOptions);
-}
-
-export function toKueryExpression(node) {
-  if (!node || !node.type || !nodeTypes[node.type]) {
-    return '';
-  }
-
-  return nodeTypes[node.type].toKueryExpression(node);
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
