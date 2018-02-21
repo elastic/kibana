@@ -70,5 +70,27 @@ describe('plugin discovery', () => {
       expect(specs.map(s => s.getId()).sort())
         .to.eql(['bar:two', 'foo']);
     });
+
+    it('dedupes duplicate packs', async () => {
+      const { spec$ } = findPluginSpecs({
+        plugins: {
+          scanDirs: [PLUGIN_FIXTURES],
+          paths: [
+            resolve(PLUGIN_FIXTURES, 'foo'),
+            resolve(PLUGIN_FIXTURES, 'foo'),
+            resolve(PLUGIN_FIXTURES, 'bar'),
+            resolve(PLUGIN_FIXTURES, 'bar'),
+          ],
+        }
+      });
+
+      const specs = await spec$.toArray().toPromise();
+      expect(specs).to.have.length(3);
+      specs.forEach(spec => {
+        expect(spec).to.be.a(PluginSpec);
+      });
+      expect(specs.map(s => s.getId()).sort())
+        .to.eql(['bar:one', 'bar:two', 'foo']);
+    });
   });
 });
