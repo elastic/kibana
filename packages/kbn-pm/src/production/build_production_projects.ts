@@ -1,5 +1,5 @@
 import del from 'del';
-import { relative, resolve } from 'path';
+import { relative, resolve, join } from 'path';
 import copy from 'cpy';
 
 import { getProjectPaths } from '../config';
@@ -11,8 +11,9 @@ import {
 import {
   createProductionPackageJson,
   writePackageJson,
+  readPackageJson,
 } from '../utils/package_json';
-import { isDirectory } from '../utils/fs';
+import { isDirectory, isFile } from '../utils/fs';
 import { Project } from '../utils/project';
 
 export async function buildProductionProjects({
@@ -76,6 +77,17 @@ async function buildProject(project: Project) {
   }
 }
 
+/**
+ * Copy all the project's files from its "intermediate build directory" and
+ * into the build. The intermediate directory can either be the root of the
+ * project or some other location defined in the project's `package.json`.
+ *
+ * When copying all the files into the build, we exclude `node_modules` because
+ * we want the Kibana build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the Kibana build process to
+ * manage dependencies is that it will "dedupe" them, so we don't include
+ * unnecessary copies of dependencies.
+ */
 async function copyToBuild(
   project: Project,
   kibanaRoot: string,
@@ -85,20 +97,24 @@ async function copyToBuild(
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
-  // When copying all the files into the build, we exclude `package.json` as we
-  // write a separate "production-ready" `package.json` below, and we exclude
-  // `node_modules` because we want the Kibana build to actually install all
-  // dependencies. The primary reason for allowing the Kibana build process to
-  // install the dependencies is that it will "dedupe" them, so we don't include
-  // unnecessary copies of dependencies.
-  await copy(['**/*', '!package.json', '!node_modules/**'], buildProjectPath, {
-    cwd: project.path,
+  await copy(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getIntermediateBuildDirectory(),
     parents: true,
     nodir: true,
     dot: true,
   });
 
-  const packageJson = project.json;
+  // If a project is using an intermediate build directory, we special-case our
+  // handling of `package.json`, as the project build process might have copied
+  // (a potentially modified) `package.json` into the intermediate build
+  // directory already. If so, we want to use that `package.json` as the basis
+  // for creating the production-ready `package.json`. If it's not present in
+  // the intermediate build, we fall back to using the project's already defined
+  // `package.json`.
+  const packageJson = (await isFile(join(buildProjectPath, 'package.json')))
+    ? await readPackageJson(buildProjectPath)
+    : project.json;
+
   const preparedPackageJson = createProductionPackageJson(packageJson);
   await writePackageJson(buildProjectPath, preparedPackageJson);
 }
