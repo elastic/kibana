@@ -8,7 +8,6 @@ import { PluginPack } from '../plugin_pack';
 import {
   PLUGINS_DIR,
   assertInvalidDirectoryError,
-  assertInvalidPackError,
 } from './utils';
 
 describe('plugin discovery/packs in directory', () => {
@@ -55,15 +54,13 @@ describe('plugin discovery/packs in directory', () => {
         .map(result => result.pack)
         .filter(Boolean);
 
-      errors.forEach(assertInvalidPackError);
       packs.forEach(pack => expect(pack).to.be.a(PluginPack));
       // there should be one result for each item in PLUGINS_DIR
-      expect(results).to.have.length(8);
-      // six of the fixtures are errors of some sorta
-      expect(errors).to.have.length(6);
+      expect(results).to.have.length(9);
+      // six of the fixtures are errors of some sort
+      expect(errors).to.have.length(7);
       // two of them are valid
       expect(packs).to.have.length(2);
-
     });
   });
 });

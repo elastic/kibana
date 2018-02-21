@@ -110,6 +110,11 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         isInvalidPackError(result.error) ? [result.error] : []
       )),
 
+    otherError$: find$
+      .mergeMap(result => (
+        isUnhandledError(result.error) ? [result.error] : []
+      )),
+
     // { spec, message } objects produced when transforming deprecated
     // settings for a plugin spec
     deprecation$: extendConfig$
@@ -133,4 +138,12 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     invalidVersionSpec$: extendConfig$
       .mergeMap(result => result.invalidVersionSpecs),
   };
+}
+
+function isUnhandledError(error) {
+  return (
+    error != null &&
+    !isInvalidDirectoryError(error) &&
+    !isInvalidPackError(error)
+  );
 }
