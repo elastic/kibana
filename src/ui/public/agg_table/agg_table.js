@@ -108,6 +108,9 @@ uiModules
                 // so treat this field as numeric
                   isFieldNumeric = true;
                 }
+              } else if(aggType.name === 'cardinality') {
+                // Unique count aggregations always produce a numeric value
+                isFieldNumeric = true;
               } else if (field) {
               // if the metric has a field, check if it is either number or date
                 isFieldNumeric = field.type === 'number';
