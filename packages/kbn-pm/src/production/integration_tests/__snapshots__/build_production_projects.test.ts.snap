@@ -67,9 +67,6 @@ Object {
 
 exports[`kbn-pm production builds and copies projects for production: packages/quux/package.json 1`] = `
 Object {
-  "dependencies": Object {
-    "noop3": "999.999.999",
-  },
   "devDependencies": Object {
     "shx": "^0.2.2",
   },
