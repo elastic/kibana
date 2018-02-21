@@ -62,7 +62,7 @@ export async function ScreenshotsProvider({ getService }) {
 
     async _take(path) {
       try {
-        log.debug(`Taking screenshot "${path}"`);
+        log.info(`Taking screenshot "${path}"`);
         const [screenshot] = await Promise.all([
           remote.takeScreenshot(),
           fcb(cb => mkdirp(dirname(path), cb)),
