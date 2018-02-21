@@ -167,5 +167,15 @@
         "type": "keyword"
       }
     }
+  },
+  "tag": {
+    "properties": {
+      "color": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
   }
 }
