@@ -12,7 +12,6 @@ export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
-  const lifecycle = getService('lifecycle');
 
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
@@ -50,14 +49,7 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async takeForFailure(name) {
-      // TODO: Replace characters in test names which can't be used in filenames, like *
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
-      const currentUrl = await remote.getCurrentUrl();
-      log.info(`Current URL is: ${currentUrl}`);
-      const htmlOutputFileName = resolve(FAILURE_DIRECTORY, `${name}.html`);
-      log.info(`Saving page source to: ${htmlOutputFileName}`);
-      const pageSource = await remote.getPageSource();
-      await writeFileAsync(htmlOutputFileName, pageSource);
     }
 
     async _take(path) {
@@ -75,11 +67,5 @@ export async function ScreenshotsProvider({ getService }) {
     }
   }
 
-  const screenshots = new Screenshots();
-
-  lifecycle
-    .on('testFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()))
-    .on('testHookFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()));
-
-  return screenshots;
+  return new Screenshots();
 }

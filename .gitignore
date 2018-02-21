@@ -12,6 +12,7 @@ target
 .idea
 *.iml
 *.log
+/test/*/failure_debug
 /test/*/screenshots/diff
 /test/*/screenshots/failure
 /test/*/screenshots/session
