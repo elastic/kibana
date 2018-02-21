@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.navigateTo();
       // await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.createIndexPattern('shakes*', null);
+      await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
       expect(patternName).to.be('shakes*');
