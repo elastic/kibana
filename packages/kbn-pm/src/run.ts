@@ -4,9 +4,10 @@ import indentString from 'indent-string';
 
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
-import { getProjectPaths } from './config';
+import { getProjectPaths, ProjectPathOptions } from './config';
+import { Command, CommandConfig } from './commands';
 
-export async function runCommand(command, config) {
+export async function runCommand(command: Command, config: CommandConfig) {
   try {
     console.log(
       chalk.bold(
@@ -16,13 +17,16 @@ export async function runCommand(command, config) {
       )
     );
 
-    const projectPaths = getProjectPaths(config.rootPath, config.options);
+    const projectPaths = getProjectPaths(
+      config.rootPath,
+      config.options as ProjectPathOptions
+    );
 
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);
 
     console.log(
-      chalk.bold(`Found [${chalk.green(projects.size)}] projects:\n`)
+      chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
     );
     for (const pkg of projects.values()) {
       console.log(`- ${pkg.name} (${pkg.path})`);

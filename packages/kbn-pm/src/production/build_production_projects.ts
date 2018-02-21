@@ -13,8 +13,15 @@ import {
   writePackageJson,
 } from '../utils/package_json';
 import { isDirectory } from '../utils/fs';
+import { Project } from '../utils/project';
 
-export async function buildProductionProjects({ kibanaRoot, buildRoot }) {
+export async function buildProductionProjects({
+  kibanaRoot,
+  buildRoot,
+}: {
+  kibanaRoot: string;
+  buildRoot: string;
+}) {
   const projectPaths = getProjectPaths(kibanaRoot, {
     'skip-kibana': true,
     'skip-kibana-extra': true,
@@ -39,7 +46,10 @@ export async function buildProductionProjects({ kibanaRoot, buildRoot }) {
 /**
  * Returns only the projects that should be built into the production bundle
  */
-async function getProductionProjects(kibanaRoot, projectPaths) {
+async function getProductionProjects(
+  kibanaRoot: string,
+  projectPaths: string[]
+) {
   const projects = await getProjects(kibanaRoot, projectPaths);
 
   const buildProjects = new Map();
@@ -52,7 +62,7 @@ async function getProductionProjects(kibanaRoot, projectPaths) {
   return buildProjects;
 }
 
-async function deleteTarget(project) {
+async function deleteTarget(project: Project) {
   const targetDir = project.targetLocation;
 
   if (await isDirectory(targetDir)) {
@@ -60,13 +70,17 @@ async function deleteTarget(project) {
   }
 }
 
-async function buildProject(project) {
+async function buildProject(project: Project) {
   if (project.hasScript('build')) {
     await project.runScript('build');
   }
 }
 
-async function copyToBuild(project, kibanaRoot, buildRoot) {
+async function copyToBuild(
+  project: Project,
+  kibanaRoot: string,
+  buildRoot: string
+) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);

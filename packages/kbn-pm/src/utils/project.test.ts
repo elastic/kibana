@@ -1,15 +1,16 @@
 import { resolve, join } from 'path';
 
+import { PackageJson } from './package_json';
 import { Project } from './project';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
 
-const createProjectWith = (fields, path = '') =>
+const createProjectWith = (packageJson: PackageJson, path = '') =>
   new Project(
     {
       name: 'kibana',
       version: '1.0.0',
-      ...fields,
+      ...packageJson,
     },
     join(rootPath, path)
   );

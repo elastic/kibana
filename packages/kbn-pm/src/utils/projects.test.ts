@@ -5,6 +5,7 @@ import {
   buildProjectGraph,
   topologicallyBatchProjects,
 } from './projects';
+import { Project } from './project';
 import { getProjectPaths } from '../config';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
@@ -77,9 +78,9 @@ describe('#buildProjectGraph', () => {
     ]);
     const graph = buildProjectGraph(projects);
 
-    const expected = {};
+    const expected: { [k: string]: string[] } = {};
     for (const [projectName, projects] of graph.entries()) {
-      expected[projectName] = projects.map(project => project.name);
+      expected[projectName] = projects.map((project: Project) => project.name);
     }
 
     expect(expected).toMatchSnapshot();
