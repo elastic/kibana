@@ -6787,14 +6787,10 @@ var _writePkg = __webpack_require__(290);
 
 var _writePkg2 = _interopRequireDefault(_writePkg);
 
-var _path = __webpack_require__(1);
-
-var _path2 = _interopRequireDefault(_path);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function readPackageJson(dir) {
-    return (0, _readPkg2.default)(_path2.default.join(dir, 'package.json'), { normalize: false });
+    return (0, _readPkg2.default)(dir, { normalize: false });
 }
 function writePackageJson(path, json) {
     return (0, _writePkg2.default)(path, json);
@@ -9642,9 +9638,22 @@ class Project {
         }
         throw new _errors.CliError(`[${this.name}] depends on [${project.name}], but it's not using the local package. ${updateMsg}`, meta);
     }
+    getBuildConfig() {
+        return this.json.kibana && this.json.kibana.build || {};
+    }
+    /**
+     * Whether a package should not be included in the Kibana build artifact.
+     */
     skipFromBuild() {
-        const json = this.json;
-        return json.kibana && json.kibana.build && json.kibana.build.skip === true;
+        return this.getBuildConfig().skip === true;
+    }
+    /**
+     * Returns the directory that should be copied into the Kibana build artifact.
+     * This config can be specified to only include the project's build artifacts
+     * instead of everything located in the project directory.
+     */
+    getIntermediateBuildDirectory() {
+        return _path2.default.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
     }
     hasScript(name) {
         return name in this.scripts;
@@ -40994,25 +41003,38 @@ let buildProject = (() => {
         return _ref4.apply(this, arguments);
     };
 })();
+/**
+ * Copy all the project's files from its "intermediate build directory" and
+ * into the build. The intermediate directory can either be the root of the
+ * project or some other location defined in the project's `package.json`.
+ *
+ * When copying all the files into the build, we exclude `node_modules` because
+ * we want the Kibana build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the Kibana build process to
+ * manage dependencies is that it will "dedupe" them, so we don't include
+ * unnecessary copies of dependencies.
+ */
+
 
 let copyToBuild = (() => {
     var _ref5 = _asyncToGenerator(function* (project, kibanaRoot, buildRoot) {
         // We want the package to have the same relative location within the build
         const relativeProjectPath = (0, _path.relative)(kibanaRoot, project.path);
         const buildProjectPath = (0, _path.resolve)(buildRoot, relativeProjectPath);
-        // When copying all the files into the build, we exclude `package.json` as we
-        // write a separate "production-ready" `package.json` below, and we exclude
-        // `node_modules` because we want the Kibana build to actually install all
-        // dependencies. The primary reason for allowing the Kibana build process to
-        // install the dependencies is that it will "dedupe" them, so we don't include
-        // unnecessary copies of dependencies.
-        yield (0, _cpy2.default)(['**/*', '!package.json', '!node_modules/**'], buildProjectPath, {
-            cwd: project.path,
+        yield (0, _cpy2.default)(['**/*', '!node_modules/**'], buildProjectPath, {
+            cwd: project.getIntermediateBuildDirectory(),
             parents: true,
             nodir: true,
             dot: true
         });
-        const packageJson = project.json;
+        // If a project is using an intermediate build directory, we special-case our
+        // handling of `package.json`, as the project build process might have copied
+        // (a potentially modified) `package.json` into the intermediate build
+        // directory already. If so, we want to use that `package.json` as the basis
+        // for creating the production-ready `package.json`. If it's not present in
+        // the intermediate build, we fall back to using the project's already defined
+        // `package.json`.
+        const packageJson = (yield (0, _fs.isFile)((0, _path.join)(buildProjectPath, 'package.json'))) ? yield (0, _package_json.readPackageJson)(buildProjectPath) : project.json;
         const preparedPackageJson = (0, _package_json.createProductionPackageJson)(packageJson);
         yield (0, _package_json.writePackageJson)(buildProjectPath, preparedPackageJson);
     });

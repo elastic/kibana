@@ -1,10 +1,11 @@
 import tempy from 'tempy';
 import copy from 'cpy';
-import { resolve } from 'path';
+import { resolve, relative, join } from 'path';
 import globby from 'globby';
 
 import { buildProductionProjects } from '../build_production_projects';
 import { getProjects } from '../../utils/projects';
+import { readPackageJson } from '../../utils/package_json';
 
 describe('kbn-pm production', function() {
   test(
@@ -38,7 +39,15 @@ describe('kbn-pm production', function() {
       });
 
       expect(files.sort()).toMatchSnapshot();
+
+      for (const file of files) {
+        if (file.endsWith('package.json')) {
+          expect(await readPackageJson(join(buildRoot, file))).toMatchSnapshot(
+            file
+          );
+        }
+      }
     },
-    60 * 1000
+    2 * 60 * 1000
   );
 });
