@@ -85,11 +85,11 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],
-          [ 14018300000, 13284820000, 13198770000, 13093370000, 13067750000,
-            12976600000, 13561830000, 14339650000, 14011020000, 12775340000,
-            13304510000, 12988890000, 13143470000, 13244380000, 12154760000,
-            15907290000, 13757320000, 13022240000, 12807320000, 13375730000,
-            13190760000, 12627510000, 12731510000, 13153340000 ],
+          [ 14018300000, 13284800000, 13198800000, 13093400000, 13067800000,
+            12976600000, 13561800000, 14339600000, 14011000000, 12775300000,
+            13304500000, 12988900000, 13143500000, 13244400000, 12154800000,
+            15907300000, 13757300000, 13022200000, 12807300000, 13375700000,
+            13190800000, 12627500000, 12731500000, 13153300000 ],
         ];
 
         await retry.try(async () => {
@@ -121,9 +121,6 @@ export default function ({ getService, getPageObjects }) {
           .then(function () {
             return PageObjects.visualize.clickGo();
           })
-          .then(function () {
-            return PageObjects.common.sleep(2000);
-          })
           .then(function checkSeriesTypes() {
             pointSeriesVis.getHistogramSeries().then(length => {
               expect(length).to.be(1);
@@ -141,9 +138,6 @@ export default function ({ getService, getPageObjects }) {
         return pointSeriesVis.toggleGridCategoryLines()
           .then(function () {
             return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.common.sleep(2000);
           })
           .then(function () {
             return pointSeriesVis.getGridLines();
@@ -164,9 +158,6 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function () {
             return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.common.sleep(5000);
           })
           .then(function () {
             return pointSeriesVis.getGridLines();

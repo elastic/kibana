@@ -1,10 +1,8 @@
 import Bluebird from 'bluebird';
-import Keys from 'leadfoot/keys';
 
 export function ConsolePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   async function getVisibleTextFromAceEditor(editor) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -61,22 +59,5 @@ export function ConsolePageProvider({ getService }) {
     async getRequestFontSize() {
       return await this.getFontSize(await this.getRequestEditor());
     }
-
-    async setRequest(request) {
-      const input = await find.byCssSelector('#editor > div.ace_scroller > div');
-      await input.session.pressKeys([Keys.ARROW_RIGHT]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ARROW_DOWN]);
-      await input.session.pressKeys([Keys.ENTER]);
-      await input.session.pressKeys([Keys.ENTER]);
-      await input.session.pressKeys([Keys.ENTER]);
-      await input.session.pressKeys(request.split(''));
-    }
-
   };
 }
