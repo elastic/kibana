@@ -1,13 +1,21 @@
 import _glob from 'glob';
 import path from 'path';
-import promisify from 'pify';
+import { promisify } from 'bluebird';
 
 import { CliError } from './errors';
 import { Project } from './project';
 
-const glob = promisify(_glob);
+// Correct overload version of _glob can't be inferred automatically so we
+// should explicitly point to the right version with type parameters.
+const glob = promisify<string[], string, _glob.IOptions>(_glob);
 
-export async function getProjects(rootPath, projectsPathsPatterns) {
+export type ProjectMap = Map<string, Project>;
+export type ProjectGraph = Map<string, Project[]>;
+
+export async function getProjects(
+  rootPath: string,
+  projectsPathsPatterns: string[]
+) {
   const projects = new Map();
 
   for (const pattern of projectsPathsPatterns) {
@@ -35,7 +43,13 @@ export async function getProjects(rootPath, projectsPathsPatterns) {
   return projects;
 }
 
-function packagesFromGlobPattern({ pattern, rootPath }) {
+function packagesFromGlobPattern({
+  pattern,
+  rootPath,
+}: {
+  pattern: string;
+  rootPath: string;
+}) {
   const globOptions = {
     cwd: rootPath,
 
@@ -56,11 +70,11 @@ function packagesFromGlobPattern({ pattern, rootPath }) {
 // https://github.com/isaacs/node-glob/blob/master/common.js#L104
 // glob always returns "\\" as "/" in windows, so everyone
 // gets normalized because we can't have nice things.
-function normalize(dir) {
+function normalize(dir: string) {
   return path.normalize(dir);
 }
 
-export function buildProjectGraph(projects) {
+export function buildProjectGraph(projects: ProjectMap) {
   const projectGraph = new Map();
 
   for (const project of projects.values()) {
@@ -69,7 +83,7 @@ export function buildProjectGraph(projects) {
 
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
-        const dep = projects.get(depName);
+        const dep = projects.get(depName)!;
 
         project.ensureValidProjectDependency(dep);
 
@@ -83,15 +97,18 @@ export function buildProjectGraph(projects) {
   return projectGraph;
 }
 
-export function topologicallyBatchProjects(projectsToBatch, projectGraph) {
+export function topologicallyBatchProjects(
+  projectsToBatch: ProjectMap,
+  projectGraph: ProjectGraph
+) {
   // We're going to be chopping stuff out of this array, so copy it.
   const projects = [...projectsToBatch.values()];
 
   // This maps project names to the number of projects that depend on them.
   // As projects are completed their names will be removed from this object.
-  const refCounts = {};
+  const refCounts: { [k: string]: number } = {};
   projects.forEach(pkg =>
-    projectGraph.get(pkg.name).forEach(dep => {
+    projectGraph.get(pkg.name)!.forEach(dep => {
       if (!refCounts[dep.name]) refCounts[dep.name] = 0;
       refCounts[dep.name]++;
     })
@@ -102,7 +119,7 @@ export function topologicallyBatchProjects(projectsToBatch, projectGraph) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
     const batch = projects.filter(pkg => {
-      const projectDeps = projectGraph.get(pkg.name);
+      const projectDeps = projectGraph.get(pkg.name)!;
       return projectDeps.filter(dep => refCounts[dep.name] > 0).length === 0;
     });
 

@@ -31,15 +31,23 @@ export default {
   coverageReporters: [
     'html',
   ],
+  globals: {
+    'ts-jest': {
+      tsConfigFile: 'src/dev/jest/tsconfig.json',
+      skipBabel: true,
+    },
+  },
   moduleFileExtensions: [
     'js',
     'json',
+    'ts',
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
   ],
   testMatch: [
     '**/*.test.js',
+    '**/*.test.ts',
   ],
   testPathIgnorePatterns: [
     '<rootDir>/ui_framework/dist/',
@@ -50,6 +58,7 @@ export default {
   ],
   transform: {
     '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
+    '^.+\\.ts$': 'ts-jest',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',

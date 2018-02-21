@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    index: './src/index.js',
+    index: './src/index.ts',
   },
   target: 'node',
 
@@ -12,14 +12,23 @@ module.exports = {
     libraryTarget: 'commonjs2',
   },
 
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
+
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-        },
+        test: /\.ts$/,
+        use: [
+          {
+            loader: 'babel-loader',
+          },
+          {
+            loader: 'ts-loader',
+          },
+        ],
+        exclude: /node_modules/,
       },
       // Removing an unnecessary require from
       // https://github.com/ForbesLindesay/spawn-sync/blob/8ba6d1bd032917ff5f0cf68508b91bb628d16336/index.js#L3

@@ -5,12 +5,13 @@ import { isLinkDependency } from '../utils/package_json';
  * All external projects are located within `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
-const isKibanaDep = depVersion => depVersion.includes('../../kibana/');
+const isKibanaDep = (depVersion: string) =>
+  depVersion.includes('../../kibana/');
 
 /**
  * This prepares the dependencies for an _external_ project.
  */
-export async function prepareExternalProjectDependencies(projectPath) {
+export async function prepareExternalProjectDependencies(projectPath: string) {
   const project = await Project.fromPath(projectPath);
 
   if (!project.hasDependencies()) {

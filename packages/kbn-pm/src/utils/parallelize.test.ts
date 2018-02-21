@@ -13,12 +13,12 @@ test('parallelizes batches', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, obj => {
+  const parallelize = parallelizeBatches(batches, async obj => {
     obj.called = true;
-    return obj.promise;
+    await obj.promise;
   });
 
-  const completed = [];
+  const completed: string[] = [];
   parallelize.then(() => {
     completed.push('parallelizeBatches');
   });
@@ -61,7 +61,9 @@ test('rejects if any promise rejects', async () => {
   const baz = createPromiseWithResolve();
 
   const batches = [[foo, bar], [baz]];
-  const parallelize = parallelizeBatches(batches, obj => obj.promise);
+  const parallelize = parallelizeBatches(batches, async obj => {
+    await obj.promise;
+  });
 
   foo.reject(new Error('foo failed'));
 
@@ -69,11 +71,11 @@ test('rejects if any promise rejects', async () => {
 });
 
 function createPromiseWithResolve() {
-  let resolve;
-  let reject;
+  let resolve: (val?: any) => void;
+  let reject: (err?: any) => void;
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve;
     reject = _reject;
   });
-  return { promise, resolve, reject, called: false };
+  return { promise, resolve: resolve!, reject: reject!, called: false };
 }
