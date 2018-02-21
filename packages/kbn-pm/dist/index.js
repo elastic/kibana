@@ -41003,27 +41003,37 @@ let buildProject = (() => {
         return _ref4.apply(this, arguments);
     };
 })();
+/**
+ * Copy all the project's files from its "intermediate build directory" and
+ * into the build. The intermediate directory can either be the root of the
+ * project or some other location defined in the project's `package.json`.
+ *
+ * When copying all the files into the build, we exclude `node_modules` because
+ * we want the Kibana build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the Kibana build process to
+ * manage dependencies is that it will "dedupe" them, so we don't include
+ * unnecessary copies of dependencies.
+ */
+
 
 let copyToBuild = (() => {
     var _ref5 = _asyncToGenerator(function* (project, kibanaRoot, buildRoot) {
         // We want the package to have the same relative location within the build
         const relativeProjectPath = (0, _path.relative)(kibanaRoot, project.path);
         const buildProjectPath = (0, _path.resolve)(buildRoot, relativeProjectPath);
-        // When copying all the files into the build, we exclude `node_modules`
-        // because we want the Kibana build to actually install all dependencies. The
-        // primary reason for allowing the Kibana build process to install the
-        // dependencies is that it will "dedupe" them, so we don't include unnecessary
-        // copies of dependencies.
         yield (0, _cpy2.default)(['**/*', '!node_modules/**'], buildProjectPath, {
             cwd: project.getIntermediateBuildDirectory(),
             parents: true,
             nodir: true,
             dot: true
         });
-        // When a project is using an intermediate build directory, they might copy
-        // the `package.json` into that directory. If so, we want to use that as the
-        // basis for creating the production-ready `package.json`. Otherwise we fall
-        // back to using the project's already defined `package.json`.
+        // If a project is using an intermediate build directory, we special-case our
+        // handling of `package.json`, as the project build process might have copied
+        // (a potentially modified) `package.json` into the intermediate build
+        // directory already. If so, we want to use that `package.json` as the basis
+        // for creating the production-ready `package.json`. If it's not present in
+        // the intermediate build, we fall back to using the project's already defined
+        // `package.json`.
         const packageJson = (yield (0, _fs.isFile)((0, _path.join)(buildProjectPath, 'package.json'))) ? yield (0, _package_json.readPackageJson)(buildProjectPath) : project.json;
         const preparedPackageJson = (0, _package_json.createProductionPackageJson)(packageJson);
         yield (0, _package_json.writePackageJson)(buildProjectPath, preparedPackageJson);
