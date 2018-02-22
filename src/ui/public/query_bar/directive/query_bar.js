@@ -70,6 +70,7 @@ module.directive('queryBar', function () {
         this.localQuery.query = inputEl.value = query.substr(0, start) + text + query.substr(end);
         inputEl.setSelectionRange(start + text.length, start + text.length);
         this.updateSuggestions();
+        inputEl.focus();
       };
 
       $scope.$watch('queryBar.localQuery.language', (language) => {
