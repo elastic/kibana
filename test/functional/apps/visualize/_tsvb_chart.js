@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
-    describe.skip('Time Series', function () {
+    describe('Time Series', function () {
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe.skip('metric', () => {
+    describe('metric', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
       });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // add a gauge test
-    describe.skip('gauge', () => {
+    describe('gauge', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickGauge();
         log.debug('clicked on Gauge');
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // add a top N test
-    describe.skip('topN', () => {
+    describe('topN', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickTopN();
         log.debug('clicked on TopN');
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
 
 
 
-    describe.skip('markdown', () => {
+    describe('markdown', () => {
 
       before(async () => {
         await PageObjects.visualBuilder.clickMarkdown();
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('6');
       });
 
-      describe.skip('allow time offsets', () => {
+      describe('allow time offsets', () => {
         before(async () => {
           await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
           await PageObjects.visualBuilder.clickMarkdownData();
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should be able verify that values are displayed in the table', async () => {
         const tableData = await PageObjects.visualBuilder.getViewTable();
-        log.debug(`we are here ${tableData}`);
+        log.debug(`Values on ${tableData}`);
         const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
         expect(tableData).to.be(expectedData);
       });
