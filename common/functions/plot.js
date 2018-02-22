@@ -1,6 +1,7 @@
 import { groupBy, get, set, map, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
 import chroma from 'chroma-js';
+import { getType } from '../lib/get_type';
 
 export const plot = () => ({
   name: 'plot',
@@ -38,14 +39,12 @@ export const plot = () => ({
       default: 'nw',
     },
     yaxis: {
-      types: ['boolean'],
-      help: 'Show the y-axis?',
-      default: true,
+      types: ['boolean', 'axisConfig'],
+      help: 'Axis configuration, or false to disable',
     },
     xaxis: {
-      types: ['boolean'],
-      help: 'Show the x-axis?',
-      default: true,
+      types: ['boolean', 'axisConfig'],
+      help: 'Axis configuration, or false to disable',
     },
   },
   fn: (context, args) => {
@@ -68,6 +67,7 @@ export const plot = () => ({
           barWidth: get(seriesStyle, 'bars'),
           fill: 1,
           align: 'center',
+          horizontal: get(seriesStyle, 'horizontalBars', false),
         },
         // This is here intentionally even though it is the default.
         // We use the `size` plugins for this and if the user says they want points
@@ -154,6 +154,23 @@ export const plot = () => ({
       return args.legend;
     }
 
+    function axisConfig(name, argValue) {
+      if (getType(argValue) === 'axisConfig') {
+        // first value is used as the default
+        const acceptedPositions = name === 'x' ? ['bottom', 'top'] : ['left', 'right'];
+
+        const config = { show: true };
+        config.position = acceptedPositions.includes(argValue.position)
+          ? argValue.position
+          : acceptedPositions[0];
+        return config;
+      }
+
+      if (getType(argValue) === 'boolean') return { show: argValue };
+
+      return { show: true };
+    }
+
     const result = {
       type: 'render',
       as: 'plot',
@@ -182,7 +199,7 @@ export const plot = () => ({
             },
           },
           xaxis: {
-            show: args.xaxis,
+            ...axisConfig('x', args.xaxis),
             ticks:
               get(context.columns, 'x.type') === 'string'
                 ? map(ticks.x.hash, (position, name) => [position, name])
@@ -190,7 +207,7 @@ export const plot = () => ({
             mode: get(context.columns, 'x.type') === 'date' ? 'time' : undefined,
           },
           yaxis: {
-            show: args.yaxis,
+            ...axisConfig('y', args.yaxis),
             ticks:
               get(context.columns, 'y.type') === 'string'
                 ? map(ticks.y.hash, (position, name) => [position, name])

@@ -23,16 +23,14 @@ export const plot = () => ({
     {
       name: 'xaxis',
       displayName: 'X-Axis',
-      help: 'Enable or disable the x-axis',
-      argType: 'checkbox',
-      default: 'true',
+      help: 'Configure or disable the x-axis',
+      argType: 'axisConfig',
     },
     {
       name: 'yaxis',
       displayName: 'Y-Axis',
-      help: 'Enable or disable the Y-axis',
-      argType: 'checkbox',
-      default: 'true',
+      help: 'Configure or disable the Y-axis',
+      argType: 'axisConfig',
     },
     {
       name: 'font',

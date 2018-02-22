@@ -2,7 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 
-const getArgValueString = argValue => (typeof argValue === 'string' ? argValue : argValue.value);
+const getArgValueString = argValue => {
+  if (typeof argValue === 'object' && argValue !== null) return argValue.value;
+  return String(argValue);
+};
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const choices = typeInstance.options.choices;

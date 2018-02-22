@@ -31,7 +31,6 @@ export const repeatImage = () => ({
     },
   },
   fn: (count, args) => {
-    console.log('WTF', count, args);
     return {
       type: 'render',
       as: 'repeatImage',

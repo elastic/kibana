@@ -7,6 +7,7 @@ import { extendedTemplate } from './extended_template';
 import './container_style.less';
 
 const wrap = Component =>
+  // TODO: this should be in a helper
   withHandlers({
     getArgValue: ({ argValue }) => (name, alt) => {
       const args = get(argValue, 'chain.0.arguments', {});

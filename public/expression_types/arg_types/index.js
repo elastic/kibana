@@ -1,3 +1,4 @@
+import { axisConfig } from './axis_config';
 import { containerStyle } from './container_style';
 import { checkbox } from './checkbox';
 import { datacolumn } from './datacolumn';
@@ -13,6 +14,7 @@ import { string } from './string';
 import { font } from './font';
 
 export const argTypeSpecs = [
+  axisConfig,
   containerStyle,
   checkbox,
   datacolumn,

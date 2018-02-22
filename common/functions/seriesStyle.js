@@ -50,6 +50,12 @@ export const seriesStyle = () => ({
       help:
         'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
+    horizontalBars: {
+      types: ['null', 'boolean'],
+      displayName: 'Horizontal Bars Orientation',
+      help: 'Sets the orientation of bars in the chart to horizontal',
+      default: false,
+    },
   },
   fn: (context, args) => ({ type: name, ...args }),
 });
