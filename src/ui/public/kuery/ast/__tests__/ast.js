@@ -168,6 +168,96 @@ describe('kuery AST API', function () {
     });
   });
 
+  describe('fromKqlExpression', function () {
+
+    it('should return a match all "is" function for whitespace', function () {
+      const expected = nodeTypes.function.buildNode('is', '*', '*');
+      const actual = ast.fromKqlExpression('  ');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should return an "is" function with a null field for single literals', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const actual = ast.fromKqlExpression('foo');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should ignore extraneous whitespace at the beginning and end of the query', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const actual = ast.fromKqlExpression('  foo ');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should not split on whitespace', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo bar');
+      const actual = ast.fromKqlExpression('foo bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "and" as a binary operator', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = ast.fromKqlExpression('foo and bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "or" as a binary operator', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = ast.fromKqlExpression('foo or bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support negation of queries with a "not" prefix', function () {
+      const expected = nodeTypes.function.buildNode('not',
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', null, 'foo'),
+          nodeTypes.function.buildNode('is', null, 'bar'),
+        ])
+      );
+      const actual = ast.fromKqlExpression('not (foo or bar)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('"and" should have a higher precedence than "or"', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('and', [
+            nodeTypes.function.buildNode('is', null, 'bar'),
+            nodeTypes.function.buildNode('is', null, 'baz'),
+          ]),
+          nodeTypes.function.buildNode('is', null, 'qux'),
+        ])
+      ], 'operator');
+      const actual = ast.fromKqlExpression('foo or bar and baz or qux');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support grouping to override default precedence', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', null, 'foo'),
+          nodeTypes.function.buildNode('is', null, 'bar'),
+        ]),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = ast.fromKqlExpression('(foo or bar) and baz');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support matching against specific fields', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar');
+      const actual = ast.fromKqlExpression('foo:bar');
+      expectDeepEqual(actual, expected);
+    });
+
+  });
+
   describe('toElasticsearchQuery', function () {
 
     it('should return the given node type\'s ES query representation', function () {

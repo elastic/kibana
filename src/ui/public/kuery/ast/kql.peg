@@ -17,12 +17,6 @@
 
 start
   = OrQuery
-  / EmptyQuery
-
-EmptyQuery
-  = Space* {
-    return buildFunctionNode('and', []);
-  }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {

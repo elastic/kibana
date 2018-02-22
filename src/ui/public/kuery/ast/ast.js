@@ -23,6 +23,10 @@ export function fromKueryExpression(expression, parseOptions) {
 }
 
 export function fromKqlExpression(expression, parseOptions) {
+  if (expression.trim() === '') {
+    return nodeTypes.function.buildNode('is', '*', '*');
+  }
+
   return fromExpression(expression, parseOptions, kqlParser);
 }
 
