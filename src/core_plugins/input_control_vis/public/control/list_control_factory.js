@@ -78,7 +78,7 @@ class ListControl extends Control {
 
     const resp = await searchSource.fetch();
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: bucket.key.toString(), value: bucket.key.toString() };
+      return { label: this.format(bucket.key), value: bucket.key.toString() };
     }).sort((a, b) => {
       return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
     });
