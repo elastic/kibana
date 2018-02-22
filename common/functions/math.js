@@ -1,5 +1,5 @@
 import { evaluate } from 'tinymath';
-import { datatableToMathContext } from '../lib/datatable_to_math_context.js';
+import { pivotObjectArray } from '../lib/pivot_object_array.js';
 
 export const math = () => ({
   name: 'math',
@@ -21,7 +21,9 @@ export const math = () => ({
       throw new Error('Empty expression');
     }
     const isDatatable = context && context.type === 'datatable';
-    const mathContext = isDatatable ? datatableToMathContext(context) : { value: context };
+    const mathContext = isDatatable
+      ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
+      : { value: context };
     try {
       const result = evaluate(args._, mathContext);
       if (Array.isArray(result)) {
@@ -29,7 +31,7 @@ export const math = () => ({
           'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
         );
       }
-      if (typeof result !== 'number')
+      if (isNaN(result))
         throw new Error('Failed to execute math expression. Check your column names');
       return result;
     } catch (e) {

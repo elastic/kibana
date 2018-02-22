@@ -120,6 +120,39 @@ describe('pointseries', () => {
           { x: 'product5', y: 110594 },
         ],
       });
+      expect(fn(testTable, { x: 'name', y: 'count(price)' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'string',
+            role: 'dimension',
+            expression: 'name',
+          },
+          y: {
+            type: 'number',
+            role: 'measure',
+            expression: 'count(price)',
+          },
+        },
+        rows: [
+          { x: 'product1', y: 3 },
+          { x: 'product2', y: 3 },
+          { x: 'product3', y: 1 },
+          { x: 'product4', y: 1 },
+          { x: 'product5', y: 1 },
+        ],
+      });
+      expect(fn(testTable, { x: 'unique(name)' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'number',
+            role: 'measure',
+            expression: 'unique(name)',
+          },
+        },
+        rows: [{ x: 5 }],
+      });
     });
     it('args including random()', () => {
       const randomPointseries = fn(testTable, { x: 'time', y: 'random()' });
@@ -184,6 +217,39 @@ describe('pointseries', () => {
           { x: 'product5' },
         ],
       });
+      expect(fn(testTable, { y: 'notInTheTable' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          y: {
+            type: 'null',
+            role: 'dimension',
+            expression: 'notInTheTable',
+          },
+        },
+        rows: [{}],
+      });
+      expect(fn(testTable, { x: 'name', y: 'mean(notInTheTable)' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: {
+            type: 'string',
+            role: 'dimension',
+            expression: 'name',
+          },
+          y: {
+            type: 'number',
+            role: 'measure',
+            expression: 'mean(notInTheTable)',
+          },
+        },
+        rows: [
+          { x: 'product1', y: null },
+          { x: 'product2', y: null },
+          { x: 'product3', y: null },
+          { x: 'product4', y: null },
+          { x: 'product5', y: null },
+        ],
+      });
     });
     it('invalid args', () => {
       expect(fn(testTable, { x: 'name', y: 'quantity * 3' })).to.be.eql({
@@ -206,6 +272,22 @@ describe('pointseries', () => {
           { x: 'product3', y: null },
           { x: 'product4', y: null },
           { x: 'product5', y: null },
+        ],
+      });
+      expect(fn(testTable, { x: 'time', y: 'sum(notInTheTable)' })).to.be.eql({
+        type: 'pointseries',
+        columns: {
+          x: { type: 'date', role: 'dimension', expression: 'time' },
+          y: {
+            type: 'number',
+            role: 'measure',
+            expression: 'sum(notInTheTable)',
+          },
+        },
+        rows: [
+          { x: 1517842800950, y: null },
+          { x: 1517929200950, y: null },
+          { x: 1518015600950, y: null },
         ],
       });
     });

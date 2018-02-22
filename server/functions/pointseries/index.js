@@ -3,7 +3,6 @@ import uniqBy from 'lodash.uniqby';
 import moment from 'moment';
 import { evaluate } from 'tinymath';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
-import { datatableToMathContext } from '../../../common/lib/datatable_to_math_context.js';
 import { isColumnReference } from './lib/is_column_reference.js';
 import { getExpressionType } from './lib/get_expression_type';
 
@@ -128,14 +127,14 @@ export const pointseries = () => ({
     // Then compute that 1 value for each measure
     values(measureKeys).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
-      const subScope = datatableToMathContext(subtable);
+      const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
           if (Array.isArray(ev)) {
             throw new Error('Expressions must be wrapped in a function such as sum()');
           }
-          return evaluate(args[measure], subScope);
+          return ev;
         } catch (e) {
           // TODO: don't catch if eval to Array
           return null;

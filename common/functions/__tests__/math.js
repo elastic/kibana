@@ -34,6 +34,8 @@ describe('math', () => {
 
     it('math expressions, context as datatable', () => {
       expect(fn(testTable, { _: 'count(price)' })).to.be.equal(9);
+      expect(fn(testTable, { _: 'count(name)' })).to.be.equal(9);
+      expect(fn(testTable, { _: 'unique(in_stock)' })).to.be.equal(2);
       expect(fn(testTable, { _: 'sum(quantity)' })).to.be.equal(2508);
       expect(fn(testTable, { _: 'mean(price)' })).to.be.equal(320);
       expect(fn(testTable, { _: 'min(price)' })).to.be.equal(67);
@@ -63,12 +65,12 @@ describe('math', () => {
       expect(fn)
         .withArgs(testTable, { _: 'mean(name)' })
         .to.throwException(e => {
-          expect(e.message).to.be('Unknown variable: name');
+          expect(e.message).to.be('Failed to execute math expression. Check your column names');
         });
       expect(fn)
-        .withArgs(testTable, { _: 'max(in_stock)' })
+        .withArgs(testTable, { _: 'mean(in_stock)' })
         .to.throwException(e => {
-          expect(e.message).to.be('Unknown variable: in_stock');
+          expect(e.message).to.be('Failed to execute math expression. Check your column names');
         });
     });
     it('throws when missing expression', () => {
