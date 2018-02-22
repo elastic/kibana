@@ -1,0 +1,33 @@
+{
+  "name": "<%= kebabCase(name) %>",
+  "version": "0.0.0",
+  "description": "<%= description %>",
+  "main": "index.js",
+  "kibana": {
+    "version": "<%= (kbnVersion === 'master') ? 'kibana' : kbnVersion %>",
+    "templateVersion": "<%= templateVersion %>"
+  },
+  "scripts": {
+    "preinstall": "node ../../kibana/preinstall_check",
+    "kbn": "node ../../kibana/scripts/kbn",
+    "lint": "eslint **/*.js",
+    "start": "plugin-helpers start",
+    "test:server": "plugin-helpers test:server",
+    "test:browser": "plugin-helpers test:browser",
+    "build": "plugin-helpers build"
+  },
+  "devDependencies": {
+    "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
+    "@elastic/eslint-import-resolver-kibana": "^0.9.0",
+    "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
+    "babel-eslint": "^8.0.2",
+    "eslint": "^4.11.0",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-jest": "^21.3.2",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-prefer-object-spread": "^1.2.1",
+    "eslint-plugin-react": "^7.0.1",
+    "expect.js": "^0.3.1"
+  }
+}

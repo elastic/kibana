@@ -1,0 +1,15 @@
+{
+  "_cluster/settings": {
+    "url_params": {
+      "flat_settings": "__flag__",
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_cluster/settings"
+    ]
+  }
+}

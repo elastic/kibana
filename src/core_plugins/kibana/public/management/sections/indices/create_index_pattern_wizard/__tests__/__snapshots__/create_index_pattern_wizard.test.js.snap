@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateIndexPatternWizard should render step 1 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <StepIndexPattern
+    allIndices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+    esService={Object {}}
+    goToNextStep={[Function]}
+    initialQuery=""
+    isIncludingSystemIndices={false}
+    savedObjectsClient={Object {}}
+  />
+</div>
+`;
+
+exports[`CreateIndexPatternWizard should render step 2 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <StepTimeField
+    createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
+    indexPattern=""
+    indexPatternsService={Object {}}
+  />
+</div>
+`;
+
+exports[`CreateIndexPatternWizard should render the empty state 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <EmptyState
+    loadingDataDocUrl=""
+  />
+  <StepIndexPattern
+    allIndices={Array []}
+    esService={Object {}}
+    goToNextStep={[Function]}
+    initialQuery=""
+    isIncludingSystemIndices={false}
+    savedObjectsClient={Object {}}
+  />
+</div>
+`;
+
+exports[`CreateIndexPatternWizard should render the loading state 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <LoadingState />
+</div>
+`;

@@ -10,7 +10,7 @@ const indices = [
 describe('IndicesList', () => {
   it('should render normally', () => {
     const component = shallow(
-      <IndicesList indices={indices}/>
+      <IndicesList indices={indices} query=""/>
     );
 
     expect(component).toMatchSnapshot();
@@ -18,7 +18,7 @@ describe('IndicesList', () => {
 
   it('should change pages', () => {
     const component = shallow(
-      <IndicesList indices={indices}/>
+      <IndicesList indices={indices} query=""/>
     );
 
     const instance = component.instance();
@@ -32,7 +32,7 @@ describe('IndicesList', () => {
 
   it('should change per page', () => {
     const component = shallow(
-      <IndicesList indices={indices}/>
+      <IndicesList indices={indices} query="" />
     );
 
     const instance = component.instance();
@@ -42,10 +42,18 @@ describe('IndicesList', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should highlight the query in the matches', () => {
+    const component = shallow(
+      <IndicesList indices={indices} query="ki" />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
   describe('updating props', () => {
     it('should render all new indices', () => {
       const component = shallow(
-        <IndicesList indices={indices}/>
+        <IndicesList indices={indices} query=""/>
       );
 
       const moreIndices = [

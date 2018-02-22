@@ -1,8 +1,6 @@
 [[management-cross-cluster-search]]
 === Cross Cluster Search
 
-beta[]
-
 Elasticsearch supports the ability to run search and aggregation requests across multiple
 clusters using a module called _cross cluster search_.
 

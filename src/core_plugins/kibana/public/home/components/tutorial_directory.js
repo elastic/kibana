@@ -93,6 +93,7 @@ export class TutorialDirectory extends React.Component {
         return (
           <EuiFlexItem key={tutorial.name}>
             <Synopsis
+              iconType={tutorial.euiIconType}
               description={tutorial.shortDescription}
               title={tutorial.name}
               wrapInPanel

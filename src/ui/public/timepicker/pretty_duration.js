@@ -1,4 +1,4 @@
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { timeUnits } from './time_units';
 

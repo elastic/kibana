@@ -1,5 +1,17 @@
 @import (reference) "~ui/styles/variables";
 
+.global_nav_logo {
+  display: inline-block;
+
+  &:hover {
+    background-color: darken(@globalColorBlue, 15%);
+  }
+
+  &.active {
+    background-color: @globalColorBlue;
+  }
+}
+
 .global-nav-link {
   position: relative;
   width: @global-nav-closed-width;

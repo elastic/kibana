@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { getLineageMap, getParentCandidates } from '../../lineage';
 
 import {
   EuiButton,
@@ -84,9 +85,19 @@ export class ControlsTab extends Component {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
-  renderControls() {
-    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
+  handleParentChange = (controlIndex, evt) => {
+    const updatedControl = this.props.scope.vis.params.controls[controlIndex];
+    updatedControl.parent = evt.target.value;
+    this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
+  }
 
+  renderControls() {
+    const lineageMap = getLineageMap(this.props.scope.vis.params.controls);
+    return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
+      const parentCandidates = getParentCandidates(
+        this.props.scope.vis.params.controls,
+        controlParams.id,
+        lineageMap);
       return (
         <ControlEditor
           key={controlParams.id}
@@ -101,6 +112,8 @@ export class ControlsTab extends Component {
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}
+          parentCandidates={parentCandidates}
+          handleParentChange={this.handleParentChange}
         />
       );
     });
