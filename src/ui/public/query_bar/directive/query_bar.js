@@ -48,6 +48,12 @@ module.directive('queryBar', function () {
         });
       };
 
+      $scope.$watch('queryBar.query', (newQuery) => {
+        this.localQuery = {
+          ...newQuery
+        };
+      }, true);
+
       $scope.$watch('queryBar.localQuery.language', (language) => {
         this.persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
           maxLength: config.get('history:limit'),
@@ -57,12 +63,6 @@ module.directive('queryBar', function () {
       });
 
       $scope.$watch('queryBar.localQuery.query', this.updateTypeaheadItems);
-
-      $scope.$watch('queryBar.query', (newQuery) => {
-        this.localQuery = {
-          ...newQuery
-        };
-      }, true);
     })
   };
 
