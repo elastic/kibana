@@ -11,7 +11,9 @@ getServerFunctions.then(fns => {
   allFns = uniqBy([...functionsRegistry.toArray(), ...Object.values(fns)], 'name');
 });
 
+// TODO: Remove this autocomplete implementation.
 export function getAutocompleteProposals({ value, selection }) {
+  return [];
   const { start, end } = selection;
 
   // Don't propose anything when there is a multi-character selection
