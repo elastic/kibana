@@ -27,4 +27,16 @@ describe('AddFilter', () => {
 
     expect(onAddFilter).toBeCalledWith('tim*');
   });
+
+  it('should ignore strings with just spaces', async () => {
+    const component = shallow(
+      <AddFilter onAddFilter={() => {}}/>
+    );
+
+    // Set a value in the input field
+    component.find('EuiFieldText').simulate('keypress', ' ');
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
 });

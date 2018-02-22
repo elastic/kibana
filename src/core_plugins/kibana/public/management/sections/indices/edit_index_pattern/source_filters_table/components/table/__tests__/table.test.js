@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { Table } from '../table';
+import { keyCodes } from '@elastic/eui';
 
 const indexPattern = {};
 const model = {
@@ -114,5 +115,67 @@ describe('Table', () => {
     // Click the delete button
     component.prop('config').columns[2].actions[1].onClick();
     expect(deleteFilter).toBeCalled();
+  });
+
+  it('should save when in edit mode and the enter key is pressed', () => {
+    const saveFilter = jest.fn();
+    const clientId = 1;
+
+    const component = shallow(
+      <Table
+        indexPattern={indexPattern}
+        model={model}
+        deleteFilter={() => {}}
+        onDataCriteriaChange={() => {}}
+        fieldWildcardMatcher={() => {}}
+        saveFilter={saveFilter}
+      />
+    );
+
+    // Start the editing process
+    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
+    // Ensure the state change propagates
+    component.update();
+
+    // Get the rendered input cell
+    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+
+    // Press the enter key
+    filterNameTableCell.find('input').simulate('keypress', { charCode: keyCodes.ENTER });
+    expect(saveFilter).toBeCalled();
+
+    // It should reset
+    expect(component.state('editingFilterId')).toBe(null);
+  });
+
+  it('should cancel when in edit mode and the esc key is pressed', () => {
+    const saveFilter = jest.fn();
+    const clientId = 1;
+
+    const component = shallow(
+      <Table
+        indexPattern={indexPattern}
+        model={model}
+        deleteFilter={() => {}}
+        onDataCriteriaChange={() => {}}
+        fieldWildcardMatcher={() => {}}
+        saveFilter={saveFilter}
+      />
+    );
+
+    // Start the editing process
+    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
+    // Ensure the state change propagates
+    component.update();
+
+    // Get the rendered input cell
+    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+
+    // Press the enter key
+    filterNameTableCell.find('input').simulate('keypress', { charCode: keyCodes.ESCAPE });
+    expect(saveFilter).not.toBeCalled();
+
+    // It should reset
+    expect(component.state('editingFilterId')).toBe(null);
   });
 });

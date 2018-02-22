@@ -46,7 +46,8 @@ export class SourceFiltersTable extends Component {
   }
 
   updateFilters = () => {
-    const filters = this.props.indexPattern.sourceFilters.map(filter => ({
+    const sourceFilters = this.props.indexPattern.sourceFilters || [];
+    const filters = sourceFilters.map(filter => ({
       ...filter,
       clientId: ++this.clientSideId,
     }));

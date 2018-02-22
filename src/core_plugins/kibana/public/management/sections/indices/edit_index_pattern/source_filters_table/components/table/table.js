@@ -52,6 +52,9 @@ export class Table extends Component {
       });
       this.stopEditingFilter();
     }
+    if (keyCodes.ESCAPE === charCode) {
+      this.stopEditingFilter();
+    }
   }
 
   getTableConfig() {
