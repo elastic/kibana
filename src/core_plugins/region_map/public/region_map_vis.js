@@ -8,6 +8,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
+import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
   const VisFactory = Private(VisFactoryProvider);
@@ -40,6 +41,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         showAllShapes: true//still under consideration
       }
     },
+    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization: RegionMapsVisualization,
     editorConfig: {
       optionsTemplate: '<region_map-vis-params></region_map-vis-params>',

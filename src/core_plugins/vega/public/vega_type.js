@@ -2,6 +2,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { Status } from 'ui/vis/update_status';
 
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';
@@ -34,6 +35,7 @@ VisTypesRegistryProvider.register((Private) => {
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     visualization: VegaVisualization,
+    requiresUpdateStatus: [Status.DATA, Status.RESIZE],
     requestHandler: vegaRequestHandler,
     responseHandler: 'none',
     options: { showIndexSelection: false },

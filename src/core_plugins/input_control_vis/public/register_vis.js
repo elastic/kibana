@@ -7,7 +7,7 @@ import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import image from './images/icon-input-control.svg';
-
+import { Status } from 'ui/vis/update_status';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -20,6 +20,7 @@ function InputControlVisProvider(Private) {
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
     stage: 'lab',
+    requiresUpdateStatus: [Status.PARAMS, Status.TIME],
     feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,
     visConfig: {
