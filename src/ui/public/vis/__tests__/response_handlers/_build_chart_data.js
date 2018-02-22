@@ -2,18 +2,16 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
+import { Table } from 'ui/agg_response/tabify/_table';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
   let aggResponse;
-  let Table;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Table = Private(AggResponseTabifyTableProvider);
     aggResponse = Private(AggResponseIndexProvider);
     buildChartData = Private(BasicResponseHandlerProvider).handler;
   }));

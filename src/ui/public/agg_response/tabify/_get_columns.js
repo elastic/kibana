@@ -1,51 +1,46 @@
 import _ from 'lodash';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
 
-export function AggResponseGetColumnsProvider(Private) {
-  const AggConfig = Private(VisAggConfigProvider);
+export function getColumns(aggs, minimal, hierarchical) {
 
-  return function getColumns(vis, minimal) {
-    const aggs = vis.getAggConfig().getResponseAggs();
+  if (minimal == null) minimal = !hierarchical;
 
-    if (minimal == null) minimal = !vis.isHierarchical();
+  // todo: we shouldn't be doing this here ?
+  // if (!vis.getAggConfig().bySchemaGroup.metrics) {
+  //   aggs.push(new AggConfig(vis, {
+  //     type: 'count',
+  //     schema: vis.type.schemas.metrics[0].name
+  //   }));
+  // }
 
-    if (!vis.getAggConfig().bySchemaGroup.metrics) {
-      aggs.push(new AggConfig(vis, {
-        type: 'count',
-        schema: vis.type.schemas.metrics[0].name
-      }));
-    }
-
-    // pick the columns
-    if (minimal) {
-      return aggs.map(function (agg) {
-        return { aggConfig: agg };
-      });
-    }
-
-    // supposed to be bucket,...metrics,bucket,...metrics
-    const columns = [];
-
-    // seperate the metrics
-    const grouped = _.groupBy(aggs, function (agg) {
-      return agg.schema.group;
+  // pick the columns
+  if (minimal) {
+    return aggs.map(function (agg) {
+      return { aggConfig: agg };
     });
+  }
 
-    if (!grouped.buckets) {
-      // return just the metrics, in column format
-      return grouped.metrics.map(function (agg) {
-        return { aggConfig: agg };
-      });
-    }
+  // supposed to be bucket,...metrics,bucket,...metrics
+  const columns = [];
 
-    // return the buckets, and after each place all of the metrics
-    grouped.buckets.forEach(function (agg) {
-      columns.push({ aggConfig: agg });
-      grouped.metrics.forEach(function (metric) {
-        columns.push({ aggConfig: metric });
-      });
+  // seperate the metrics
+  const grouped = _.groupBy(aggs, function (agg) {
+    return agg.schema.group;
+  });
+
+  if (!grouped.buckets) {
+    // return just the metrics, in column format
+    return grouped.metrics.map(function (agg) {
+      return { aggConfig: agg };
     });
+  }
 
-    return columns;
-  };
+  // return the buckets, and after each place all of the metrics
+  grouped.buckets.forEach(function (agg) {
+    columns.push({ aggConfig: agg });
+    grouped.metrics.forEach(function (metric) {
+      columns.push({ aggConfig: metric });
+    });
+  });
+
+  return columns;
 }

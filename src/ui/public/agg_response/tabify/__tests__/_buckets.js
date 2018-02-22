@@ -1,15 +1,7 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
+import { Buckets } from 'ui/agg_response/tabify/_buckets';
 
 describe('Buckets wrapper', function () {
-  let Buckets;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Buckets = Private(AggResponseBucketsProvider);
-  }));
-
 
   function test(aggResp, count, keys) {
     it('reads the length', function () {
