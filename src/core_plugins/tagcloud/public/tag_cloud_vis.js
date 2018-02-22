@@ -7,6 +7,7 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
+import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -27,6 +28,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
       },
       template: tagCloudTemplate,
     },
+    requiresUpdateStatus: [Status.PARAMS, Status.RESIZE],
     responseHandler: 'tabify',
     editorConfig: {
       collections: {
@@ -59,5 +61,3 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
     }
   });
 });
-
-
