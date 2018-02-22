@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { metaSchema } from '../client';
 import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
 
 export const createFindRoute = (prereqs) => ({
@@ -16,7 +17,8 @@ export const createFindRoute = (prereqs) => ({
         type: Joi.string(),
         search: Joi.string().allow('').optional(),
         search_fields: Joi.array().items(Joi.string()).single(),
-        fields: Joi.array().items(Joi.string()).single()
+        fields: Joi.array().items(Joi.string()).single(),
+        meta: metaSchema,
       }).default()
     },
     handler(request, reply) {

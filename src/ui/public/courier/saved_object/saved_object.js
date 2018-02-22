@@ -246,6 +246,10 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         };
       }
 
+      if (this.tags) {
+        body.tags = this.tags;
+      }
+
       return body;
     };
 

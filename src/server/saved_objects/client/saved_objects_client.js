@@ -1,4 +1,5 @@
 import uuid from 'uuid';
+import _ from 'lodash';
 
 import { getRootType } from '../../mappings';
 
@@ -8,6 +9,9 @@ import {
   includedFields,
   decorateEsError,
   errors,
+  Meta,
+  validateAttributes,
+  validateBulkObjects,
 } from './lib';
 
 export class SavedObjectsClient {
@@ -105,6 +109,11 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
+    const validateResult = validateAttributes(attributes);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const {
       id,
       overwrite = false
@@ -119,11 +128,7 @@ export class SavedObjectsClient {
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+        body: this._createBody(type, time, attributes),
       });
 
       return {
@@ -152,6 +157,11 @@ export class SavedObjectsClient {
    * @returns {promise} - [{ id, type, version, attributes, error: { message } }]
    */
   async bulkCreate(objects, options = {}) {
+    const validateResult = validateBulkObjects(options);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const {
       overwrite = false
     } = options;
@@ -166,11 +176,7 @@ export class SavedObjectsClient {
             _type: this._type,
           }
         },
-        {
-          type: object.type,
-          updated_at: time,
-          [object.type]: object.attributes
-        }
+        this._createBody(object.type, time, object.attributes)
       ];
     };
 
@@ -260,7 +266,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, meta }], total, per_page, page }
    */
   async find(options = {}) {
     const {
@@ -313,19 +319,32 @@ export class SavedObjectsClient {
       };
     }
 
+    let meta;
+    if (options.meta) {
+      meta = new Meta(
+        options.meta,
+        async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
+      );
+      await meta.prepareMetaMap(response.hits.hits);
+    }
+
     return {
       page,
       per_page: perPage,
       total: response.hits.total,
       saved_objects: response.hits.hits.map(hit => {
         const { type, updated_at: updatedAt } = hit._source;
-        return {
+        const savedObject = {
           id: trimIdPrefix(hit._id, type),
           type,
           ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
-          attributes: hit._source[type],
+          attributes: this._getAttributes(type, hit._source),
         };
+        if (options.meta) {
+          savedObject.meta = meta.getMeta(hit);
+        }
+        return savedObject;
       }),
     };
   }
@@ -334,7 +353,8 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
+   * @param {object} [options={}]
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, meta }] }
    * @example
    *
    * bulkGet([
@@ -342,7 +362,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -357,6 +377,15 @@ export class SavedObjectsClient {
       }
     });
 
+    let meta;
+    if (options.meta) {
+      meta = new Meta(
+        options.meta,
+        async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
+      );
+      await meta.prepareMetaMap(response.docs);
+    }
+
     return {
       saved_objects: response.docs.map((doc, i) => {
         const { id, type } = objects[i];
@@ -370,13 +399,17 @@ export class SavedObjectsClient {
         }
 
         const time = doc._source.updated_at;
-        return {
+        const savedObject = {
           id,
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
+          attributes: this._getAttributes(type, doc._source)
         };
+        if (options.meta) {
+          savedObject.meta = meta.getMeta(doc);
+        }
+        return savedObject;
       })
     };
   }
@@ -386,9 +419,10 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * @returns {promise} - { id, type, version, attributes }
+   * @param {object} [options={}]
+   * @returns {promise} - { id, type, version, attributes, meta }
    */
-  async get(type, id) {
+  async get(type, id, options = {}) {
     const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -403,15 +437,28 @@ export class SavedObjectsClient {
       throw errors.createGenericNotFoundError();
     }
 
+    let meta;
+    if (options.meta) {
+      meta = new Meta(
+        options.meta,
+        async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
+      );
+      await meta.prepareMetaMap([response]);
+    }
+
     const { updated_at: updatedAt } = response._source;
 
-    return {
+    const savedObject = {
       id,
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: this._getAttributes(type, response._source)
     };
+    if (options.meta) {
+      savedObject.meta = meta.getMeta(response);
+    }
+    return savedObject;
   }
 
   /**
@@ -424,6 +471,11 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const validateResult = validateAttributes(attributes);
+    if (validateResult.error) {
+      throw errors.decorateBadRequestError(validateResult.error);
+    }
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
@@ -433,10 +485,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for',
       ignore: [404],
       body: {
-        doc: {
-          updated_at: time,
-          [type]: attributes
-        }
+        doc: this._createBody(type, time, attributes)
       },
     });
 
@@ -477,5 +526,28 @@ export class SavedObjectsClient {
 
   _getCurrentTime() {
     return new Date().toISOString();
+  }
+
+  _createBody(type, time, attributes) {
+    const body = {
+      type,
+      updated_at: time,
+      [type]: _.cloneDeep(attributes)
+    };
+    // Tags are stored as a top level property but appear in attributes to the application.
+    // Host the tags property for storage
+    if (attributes.tags) {
+      body.tags = attributes.tags;
+      delete body[type].tags;
+    }
+    return body;
+  }
+
+  _getAttributes(type, source) {
+    const attributes = _.cloneDeep(source[type]);
+    if (source.tags) {
+      attributes.tags = source.tags;
+    }
+    return attributes;
   }
 }
