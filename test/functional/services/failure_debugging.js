@@ -23,7 +23,6 @@ export async function FailureDebuggingProvider({ getService }) {
 
   async function savePageHtml(name) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
-    log.info('name=' + name.replace(/([^a-zA-Z0-9/-]+)/g, '_'));
     name = name.replace(/([^ a-zA-Z0-9/-]+)/g, '_');
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await remote.getPageSource();
