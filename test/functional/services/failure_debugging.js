@@ -1,16 +1,20 @@
 import { resolve } from 'path';
 import { writeFile } from 'fs';
-
+import mkdirp from 'mkdirp';
+import del from 'del';
 import { promisify } from 'bluebird';
 
 const writeFileAsync = promisify(writeFile);
+const mkdirAsync = promisify(mkdirp);
 
-export function FailureDebuggingProvider({ getService }) {
+export async function FailureDebuggingProvider({ getService }) {
   const screenshots = getService('screenshots');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const remote = getService('remote');
+
+  await del(config.get('failureDebugging.htmlDirectory'));
 
   async function logCurrentUrl() {
     const currentUrl = await remote.getCurrentUrl();
@@ -18,6 +22,9 @@ export function FailureDebuggingProvider({ getService }) {
   }
 
   async function savePageHtml(name) {
+    await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
+    log.info('name=' + name.replace(/([^a-zA-Z0-9/-]+)/g, '_'));
+    name = name.replace(/([^ a-zA-Z0-9/-]+)/g, '_');
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await remote.getPageSource();
     log.info(`Saving page source to: ${htmlOutputFileName}`);
@@ -30,8 +37,8 @@ export function FailureDebuggingProvider({ getService }) {
 
     await Promise.all([
       screenshots.takeForFailure(name),
-      savePageHtml(name),
-      logCurrentUrl()
+      logCurrentUrl(),
+      savePageHtml(name)
     ]);
   }
 
