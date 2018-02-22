@@ -9,6 +9,7 @@
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
+    "@kbn/utils": "link:../kbn-utils",
     "@types/bluebird": "^3.5.20",
     "@types/cmd-shim": "^2.0.0",
     "@types/cpy": "^5.1.0",

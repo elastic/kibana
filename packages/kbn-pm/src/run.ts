@@ -5,10 +5,10 @@ import indentString from 'indent-string';
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, ProjectPathOptions } from './config';
+import { getProjectPaths, projectPathsSchema } from './config';
 import { Command, CommandConfig } from './commands';
 
-export async function runCommand(command: Command, config: CommandConfig) {
+export async function runCommand(command: Command, config: CommandConfig<any>) {
   try {
     console.log(
       chalk.bold(
@@ -18,10 +18,9 @@ export async function runCommand(command: Command, config: CommandConfig) {
       )
     );
 
-    const projectPaths = getProjectPaths(
-      config.rootPath,
-      config.options as ProjectPathOptions
-    );
+    const projectPathOptions = projectPathsSchema.validate(config.options);
+
+    const projectPaths = getProjectPaths(config.rootPath, projectPathOptions);
 
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);

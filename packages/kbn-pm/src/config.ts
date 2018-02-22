@@ -1,9 +1,12 @@
 import { resolve } from 'path';
+import { schema } from '@kbn/utils';
 
-export type ProjectPathOptions = {
-  'skip-kibana-extra'?: boolean;
-  'skip-kibana'?: boolean;
-};
+export const projectPathsSchema = schema.partialObject({
+  'skip-kibana': schema.boolean(),
+  'skip-kibana-extra': schema.boolean(),
+});
+
+export type ProjectPathOptions = schema.TypeOf<typeof projectPathsSchema>;
 
 /**
  * Returns all the paths where plugins are located

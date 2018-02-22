@@ -42,12 +42,16 @@ export async function run(argv: string[]) {
   }
 
   const options = getopts(argv, {
+    boolean: ['skip-kibana', 'skip-kibana-extra'],
     alias: {
       h: 'help',
     },
   });
 
   const args = options._;
+
+  // We should no longer rely on `_` here, but rather on `args`.
+  delete options._;
 
   if (options.help || args.length === 0) {
     help();

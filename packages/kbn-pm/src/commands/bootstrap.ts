@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { schema } from '@kbn/utils';
 
 import {
   ProjectGraph,
@@ -9,7 +10,12 @@ import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
 import { Command } from './';
 
-export const BootstrapCommand: Command = {
+const bootstrapOptionsSchema = schema.partialObject({
+  'frozen-lockfile': schema.boolean()
+});
+type BootstrapOptionsType = schema.TypeOf<typeof bootstrapOptionsSchema>;
+
+export const BootstrapCommand: Command<BootstrapOptionsType> = {
   name: 'bootstrap',
   description: 'Install dependencies and crosslink projects',
 
