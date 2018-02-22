@@ -8,6 +8,7 @@ import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { Status } from 'ui/vis/update_status';
 
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
@@ -36,6 +37,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         wms: config.get('visualization:tileMap:WMSdefaults')
       }
     },
+    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     responseConverter: geoJsonConverter,
     responseHandler: 'basic',
     visualization: CoordinateMapsVisualization,
