@@ -1,6 +1,6 @@
-import * as http from 'http';
-import * as supertest from 'supertest';
-import * as Chance from 'chance';
+import http from 'http';
+import supertest from 'supertest';
+import Chance from 'chance';
 
 import { Env } from '../../../config/env';
 import { Router } from '../Router';

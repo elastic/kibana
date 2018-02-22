@@ -1,4 +1,5 @@
 const { resolve } = require('path');
+const { readdirSync } = require('fs');
 const del = require('del');
 const createBuild = require('./create_build');
 
@@ -36,5 +37,31 @@ describe('creating the build', () => {
     expect(pkg).toHaveProperty('build');
     expect(pkg.build.git).not.toBeUndefined();
     expect(pkg.build.date).not.toBeUndefined();
+  });
+
+  describe('skipInstallDependencies = false', () => {
+    it('installs node_modules as a part of build', async () => {
+      expect(PLUGIN.skipInstallDependencies).toBe(false);
+
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
+
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).toContain('node_modules');
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET, 'node_modules'))).toContain('noop3');
+    });
+  });
+
+  describe('skipInstallDependencies = true', () => {
+    // set skipInstallDependencies to true for these tests
+    beforeEach(() => PLUGIN.skipInstallDependencies = true);
+    // set it back to false after
+    afterEach(() => PLUGIN.skipInstallDependencies = false);
+
+    it('does not install node_modules as a part of build', async () => {
+      expect(PLUGIN.skipInstallDependencies).toBe(true);
+
+      await createBuild(PLUGIN, buildTarget, buildVersion, kibanaVersion, buildFiles);
+
+      expect(readdirSync(resolve(PLUGIN_BUILD_TARGET))).not.toContain('node_modules');
+    });
   });
 });

@@ -21,7 +21,7 @@ describe('CreateIndexPatternWizardRender', () => {
         indexPatterns: {},
         savedObjectsClient: {},
         config: {},
-        kbnUrl: {},
+        changeUrl: () => {},
       }
     );
 

@@ -1,5 +1,4 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     // Enables all strict type checking options.
     "strict": true,
@@ -13,13 +12,16 @@
     // Babel take care of transpiling it down.
     "target": "esnext",
 
-    // Ideally we should output `esnext` modules, but because of how default
-    // exports have historically been handled in TypeScript we can't do it yet.
-    // However, https://github.com/Microsoft/TypeScript/pull/19675 is targeted
-    // for the next release of TypeScript, which means we should be able to
-    // switch this to `esnext` and specify `--esModuleInterop` to have it work
-    // as expected.
-    "module": "commonjs",
+    // Specifies module code generation.
+    "module": "esnext",
+
+    // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
+    // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
+    // ESNext module format is used.
+    "allowSyntheticDefaultImports": true,
+
+    // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
+    "esModuleInterop": true,
 
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
@@ -27,12 +29,6 @@
 
     // Disallow inconsistently-cased references to the same file.
     "forceConsistentCasingInFileNames": true,
-
-    // Report error when not all code paths in function return a value.
-    "noImplicitReturns": false,
-
-    // Report errors on unused locals.
-    "noUnusedLocals": true,
 
     // Generate an external source map. There's also an `--inlineSourceMap` for
     // emitting a single file with source maps instead of having a separate file.
@@ -44,6 +40,7 @@
     // and released.
     "skipLibCheck": true
   },
+
   "exclude": [
     "node_modules"
   ]

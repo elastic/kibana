@@ -1,4 +1,4 @@
-import * as process from 'process';
+import process from 'process';
 import { resolve } from 'path';
 
 import { LegacyKbnServer } from '../legacy';

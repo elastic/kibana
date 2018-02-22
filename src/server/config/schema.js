@@ -53,6 +53,11 @@ export default () => Joi.object({
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
+    rewriteBasePath: Joi.boolean().when('basePath', {
+      is: '',
+      then: Joi.default(false).valid(false),
+      otherwise: Joi.default(false),
+    }),
     customResponseHeaders: Joi.object().unknown(true).default({}),
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),

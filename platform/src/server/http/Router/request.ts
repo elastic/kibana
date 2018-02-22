@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { schema } from '@kbn/utils';
 
 import { Headers, filterHeaders } from './headers';

@@ -1,4 +1,4 @@
-import * as url from 'url';
+import url from 'url';
 import { ConfigOptions } from 'elasticsearch';
 import { readFileSync } from 'fs';
 import { noop } from 'lodash';

@@ -58,7 +58,7 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
  *
  * Example: Read a file from the filesystem and get the data as an Observable:
  *
- *     import * as fs from 'fs';
+ *     import fs from 'fs';
  *     var readFileAsObservable = $bindNodeCallback(fs.readFile);
  *     var result = readFileAsObservable('./roadNames.txt', 'utf8');
  *     result.subscribe(

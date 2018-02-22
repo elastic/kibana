@@ -1,5 +1,5 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
+import express from 'express';
+import bodyParser from 'body-parser';
 import { schema } from '@kbn/utils';
 
 import { RouteMethod, RouteSchemas, RouteConfig } from './route';
