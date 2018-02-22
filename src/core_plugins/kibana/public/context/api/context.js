@@ -21,8 +21,10 @@ import _ from 'lodash';
 
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
-import { reverseSortDirective } from './utils/sorting';
+import { reverseSortDirection } from './utils/sorting';
 
+// look 1 day into the future/past initially
+const INITIAL_LIMIT_INCREMENT = 24 * 60 * 60 * 1000;
 
 function fetchContextProvider(courier, Private) {
   const SearchSource = Private(SearchSourceProvider);
@@ -32,34 +34,88 @@ function fetchContextProvider(courier, Private) {
     fetchSuccessors,
   };
 
-  async function fetchSuccessors(indexPatternId, anchorDocument, contextSort, size, filters) {
+  async function fetchSuccessors(
+    indexPatternId,
+    sortingField,
+    sortingDirection,
+    sortingValue,
+    tieBreakerField,
+    tieBreakerDirection,
+    tieBreakerValue,
+    size,
+    filters
+  ) {
     const successorsSearchSource = await createSearchSource(
       indexPatternId,
-      anchorDocument,
-      contextSort,
+      sortingField,
+      sortingDirection,
+      sortingValue,
+      tieBreakerField,
+      tieBreakerDirection,
+      tieBreakerValue,
       size,
       filters,
     );
-    const results = await performQuery(successorsSearchSource);
+    const results = await performQuery(
+      successorsSearchSource,
+      sortingField,
+      sortingDirection,
+      sortingValue,
+      sortingValue - INITIAL_LIMIT_INCREMENT,
+      size,
+      sortingValue * 2
+    );
     return results;
   }
 
-  async function fetchPredecessors(indexPatternId, anchorDocument, contextSort, size, filters) {
-    const predecessorsSort = contextSort.map(reverseSortDirective);
+  async function fetchPredecessors(
+    indexPatternId,
+    sortingField,
+    sortingDirection,
+    sortingValue,
+    tieBreakerField,
+    tieBreakerDirection,
+    tieBreakerValue,
+    size,
+    filters
+  ) {
+    const predecessorSortingDirection = reverseSortDirection(sortingDirection);
+    const predecessorTieBreakerDirection = reverseSortDirection(tieBreakerDirection);
     const predecessorsSearchSource = await createSearchSource(
       indexPatternId,
-      anchorDocument,
-      predecessorsSort,
+      sortingField,
+      predecessorSortingDirection,
+      sortingValue,
+      tieBreakerField,
+      predecessorTieBreakerDirection,
+      tieBreakerValue,
       size,
       filters,
     );
-    const reversedResults = await performQuery(predecessorsSearchSource);
+    const reversedResults = await performQuery(
+      predecessorsSearchSource,
+      sortingField,
+      predecessorSortingDirection,
+      sortingValue,
+      sortingValue + INITIAL_LIMIT_INCREMENT,
+      size,
+      sortingValue * 2
+    );
     const results = reversedResults.slice().reverse();
     return results;
   }
 
-  async function createSearchSource(indexPatternId, anchorDocument, sort, size, filters) {
-
+  async function createSearchSource(
+    indexPatternId,
+    sortingField,
+    sortingDirection,
+    sortingValue,
+    tieBreakerField,
+    tieBreakerDirection,
+    tieBreakerValue,
+    size,
+    filters
+  ) {
     const indexPattern = await courier.indexPatterns.get(indexPatternId);
 
     return new SearchSource()
@@ -68,20 +124,61 @@ function fetchContextProvider(courier, Private) {
       .set('version', true)
       .set('size', size)
       .set('filter', filters)
+      .set('searchAfter', [sortingValue, tieBreakerValue])
+      .set('sort', [
+        { [sortingField]: sortingDirection },
+        { [tieBreakerField]: tieBreakerDirection },
+      ]);
+  }
+
+  async function performQuery(
+    searchSource,
+    sortingField,
+    sortingDirection,
+    fromSortingValue,
+    toSortingValue,
+    expectedSize,
+    maxSortingValue
+  ) {
+    const response = await searchSource
       .set('query', {
         query: {
-          match_all: {},
+          constant_score: {
+            filter: {
+              // match_all: {},
+              range: {
+                [sortingField]: {
+                  [sortingDirection === 'asc' ? 'gte' : 'lte']: fromSortingValue,
+                  [sortingDirection === 'asc' ? 'lte' : 'gte']: toSortingValue,
+                }
+              },
+            },
+          },
         },
         language: 'lucene'
       })
-      .set('searchAfter', anchorDocument.sort)
-      .set('sort', sort);
-  }
+      .fetchAsRejectablePromise();
 
-  async function performQuery(searchSource) {
-    const response = await searchSource.fetchAsRejectablePromise();
+    const hits = _.get(response, ['hits', 'hits'], []);
+    const nextToSortingValue = toSortingValue + (toSortingValue - fromSortingValue);
 
-    return _.get(response, ['hits', 'hits'], []);
+    if (
+      hits.length >= expectedSize ||
+      nextToSortingValue > maxSortingValue ||
+      nextToSortingValue < 0
+    ) {
+      return hits;
+    } else {
+      return await performQuery(
+        searchSource,
+        sortingField,
+        sortingDirection,
+        fromSortingValue,
+        nextToSortingValue,
+        expectedSize,
+        maxSortingValue
+      );
+    }
   }
 }
 

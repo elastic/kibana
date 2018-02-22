@@ -35,9 +35,13 @@ function fetchAnchorProvider(courier, Private) {
       .set('size', 1)
       .set('query', {
         query: {
-          terms: {
-            _uid: [uid],
-          }
+          constant_score: {
+            filter: {
+              terms: {
+                _uid: [uid],
+              },
+            },
+          },
         },
         language: 'lucene'
       })

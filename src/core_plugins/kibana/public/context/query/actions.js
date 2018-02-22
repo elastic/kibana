@@ -103,7 +103,17 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setLoadingStatus(state)('predecessors');
 
     return Promise.try(() => (
-      fetchPredecessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], predecessorCount, filters)
+      fetchPredecessors(
+        indexPatternId,
+        sort[0],
+        sort[1],
+        anchor.sort[0],
+        tieBreakerField,
+        'asc',
+        anchor.sort[1],
+        predecessorCount,
+        filters
+      )
     ))
       .then(
         (predecessorDocuments) => {
@@ -134,7 +144,17 @@ export function QueryActionsProvider(courier, Notifier, Private, Promise) {
     setLoadingStatus(state)('successors');
 
     return Promise.try(() => (
-      fetchSuccessors(indexPatternId, anchor, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }], successorCount, filters)
+      fetchSuccessors(
+        indexPatternId,
+        sort[0],
+        sort[1],
+        anchor.sort[0],
+        tieBreakerField,
+        'asc',
+        anchor.sort[1],
+        successorCount,
+        filters
+      )
     ))
       .then(
         (successorDocuments) => {
