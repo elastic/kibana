@@ -179,7 +179,7 @@ export class RecentlyAccessed extends React.Component {
         <EuiSpacer size="s"/>
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="recentlyAccessedFlexItem">
             <EuiFlexGroup>
               {this.renderRecentlyAccessed()}
             </EuiFlexGroup>

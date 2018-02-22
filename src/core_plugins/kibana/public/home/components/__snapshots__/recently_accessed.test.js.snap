@@ -27,6 +27,7 @@ exports[`render 1`] = `
     wrap={false}
   >
     <EuiFlexItem
+      className="recentlyAccessedFlexItem"
       component="div"
       grow={false}
     >
