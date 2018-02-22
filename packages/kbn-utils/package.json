@@ -1,0 +1,23 @@
+{
+  "name": "@kbn/utils",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "./target/tsc/index.js",
+  "types": "./target/tsc-types/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build",
+    "prettier": "prettier --write './src/**/*.ts'"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.1.3",
+    "@types/lodash": "^4.14.104",
+    "@types/type-detect": "^4.0.1",
+    "prettier": "^1.10.2",
+    "typescript": "^2.7.2"
+  },
+  "dependencies": {
+    "type-detect": "^4.0.8"
+  }
+}
