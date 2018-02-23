@@ -6,8 +6,8 @@ export const getDefaultElement = () => {
     position: {
       top: 20,
       left: 20,
-      height: 500,
-      width: 700,
+      height: 300,
+      width: 500,
       angle: 0,
     },
     expression: `
@@ -34,7 +34,7 @@ export const getDefaultWorkpad = () => {
   return {
     name: 'Untitled Workpad',
     id: getId('workpad'),
-    width: 600,
+    width: 1080,
     height: 720,
     page: 0,
     pages: [page],
