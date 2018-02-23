@@ -24081,22 +24081,14 @@ exports.commands = undefined;
 
 var _bootstrap = __webpack_require__(187);
 
-var bootstrap = _interopRequireWildcard(_bootstrap);
-
 var _clean = __webpack_require__(298);
-
-var clean = _interopRequireWildcard(_clean);
 
 var _run = __webpack_require__(316);
 
-var run = _interopRequireWildcard(_run);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
 const commands = exports.commands = {
-    bootstrap,
-    clean,
-    run
+    bootstrap: _bootstrap.BootstrapCommand,
+    clean: _clean.CleanCommand,
+    run: _run.RunCommand
 };
 
 /***/ }),
@@ -24109,48 +24101,7 @@ const commands = exports.commands = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.run = exports.description = exports.name = undefined;
-
-let run = exports.run = (() => {
-    var _ref = _asyncToGenerator(function* (projects, projectGraph, { options }) {
-        const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-        const frozenLockfile = options['frozen-lockfile'] === true;
-        const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
-        console.log(_chalk2.default.bold('\nRunning installs in topological order:'));
-        for (const batch of batchedProjects) {
-            for (const project of batch) {
-                if (project.hasDependencies()) {
-                    yield project.installDependencies({ extraArgs });
-                }
-            }
-        }
-        console.log(_chalk2.default.bold('\nInstalls completed, linking package executables:\n'));
-        yield (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
-        /**
-         * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
-         * in the list of projects. We do this because some projects need to be
-         * transpiled before they can be used. Ideally we shouldn't do this unless we
-         * have to, as it will slow down the bootstrapping process.
-         */
-        console.log(_chalk2.default.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-        yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
-            var _ref2 = _asyncToGenerator(function* (pkg) {
-                if (pkg.hasScript('kbn:bootstrap')) {
-                    yield pkg.runScriptStreaming('kbn:bootstrap');
-                }
-            });
-
-            return function (_x4) {
-                return _ref2.apply(this, arguments);
-            };
-        })());
-        console.log(_chalk2.default.green.bold('\nBootstrapping completed!\n'));
-    });
-
-    return function run(_x, _x2, _x3) {
-        return _ref.apply(this, arguments);
-    };
-})();
+exports.BootstrapCommand = undefined;
 
 var _chalk = __webpack_require__(5);
 
@@ -24166,8 +24117,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const name = exports.name = 'bootstrap';
-const description = exports.description = 'Install dependencies and crosslink projects';
+const BootstrapCommand = exports.BootstrapCommand = {
+    name: 'bootstrap',
+    description: 'Install dependencies and crosslink projects',
+    run(projects, projectGraph, { options }) {
+        return _asyncToGenerator(function* () {
+            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
+            const frozenLockfile = options['frozen-lockfile'] === true;
+            const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+            console.log(_chalk2.default.bold('\nRunning installs in topological order:'));
+            for (const batch of batchedProjects) {
+                for (const project of batch) {
+                    if (project.hasDependencies()) {
+                        yield project.installDependencies({ extraArgs });
+                    }
+                }
+            }
+            console.log(_chalk2.default.bold('\nInstalls completed, linking package executables:\n'));
+            yield (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
+            /**
+             * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
+             * in the list of projects. We do this because some projects need to be
+             * transpiled before they can be used. Ideally we shouldn't do this unless we
+             * have to, as it will slow down the bootstrapping process.
+             */
+            console.log(_chalk2.default.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
+            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
+                var _ref = _asyncToGenerator(function* (pkg) {
+                    if (pkg.hasScript('kbn:bootstrap')) {
+                        yield pkg.runScriptStreaming('kbn:bootstrap');
+                    }
+                });
+
+                return function (_x) {
+                    return _ref.apply(this, arguments);
+                };
+            })());
+            console.log(_chalk2.default.green.bold('\nBootstrapping completed!\n'));
+        })();
+    }
+};
 
 /***/ }),
 /* 188 */
@@ -39004,36 +38993,7 @@ function times(n, ok, cb) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.run = exports.description = exports.name = undefined;
-
-let run = exports.run = (() => {
-    var _ref = _asyncToGenerator(function* (projects, projectGraph, { rootPath }) {
-        const directoriesToDelete = [];
-        for (const project of projects.values()) {
-            if (yield (0, _fs.isDirectory)(project.nodeModulesLocation)) {
-                directoriesToDelete.push(project.nodeModulesLocation);
-            }
-            if (yield (0, _fs.isDirectory)(project.targetLocation)) {
-                directoriesToDelete.push(project.targetLocation);
-            }
-        }
-        if (directoriesToDelete.length === 0) {
-            console.log(_chalk2.default.bold.green('\n\nNo directories to delete'));
-        } else {
-            console.log(_chalk2.default.bold.red('\n\nDeleting directories:\n'));
-            for (const dir of directoriesToDelete) {
-                const deleting = (0, _del2.default)(dir, { force: true });
-                // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
-                _ora2.default.promise(deleting, (0, _path.relative)(rootPath, dir));
-                yield deleting;
-            }
-        }
-    });
-
-    return function run(_x, _x2, _x3) {
-        return _ref.apply(this, arguments);
-    };
-})();
+exports.CleanCommand = undefined;
 
 var _del = __webpack_require__(165);
 
@@ -39055,8 +39015,34 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const name = exports.name = 'clean';
-const description = exports.description = 'Remove the node_modules and target directories from all projects.';
+const CleanCommand = exports.CleanCommand = {
+    name: 'clean',
+    description: 'Remove the node_modules and target directories from all projects.',
+    run(projects, projectGraph, { rootPath }) {
+        return _asyncToGenerator(function* () {
+            const directoriesToDelete = [];
+            for (const project of projects.values()) {
+                if (yield (0, _fs.isDirectory)(project.nodeModulesLocation)) {
+                    directoriesToDelete.push(project.nodeModulesLocation);
+                }
+                if (yield (0, _fs.isDirectory)(project.targetLocation)) {
+                    directoriesToDelete.push(project.targetLocation);
+                }
+            }
+            if (directoriesToDelete.length === 0) {
+                console.log(_chalk2.default.bold.green('\n\nNo directories to delete'));
+            } else {
+                console.log(_chalk2.default.bold.red('\n\nDeleting directories:\n'));
+                for (const dir of directoriesToDelete) {
+                    const deleting = (0, _del2.default)(dir, { force: true });
+                    // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
+                    _ora2.default.promise(deleting, (0, _path.relative)(rootPath, dir));
+                    yield deleting;
+                }
+            }
+        })();
+    }
+};
 
 /***/ }),
 /* 299 */
@@ -40426,35 +40412,7 @@ module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼",
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.run = exports.description = exports.name = undefined;
-
-let run = exports.run = (() => {
-    var _ref = _asyncToGenerator(function* (projects, projectGraph, { extraArgs }) {
-        const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-        if (extraArgs.length === 0) {
-            console.log(_chalk2.default.red.bold('\nNo script specified'));
-            process.exit(1);
-        }
-        const scriptName = extraArgs[0];
-        const scriptArgs = extraArgs.slice(1);
-        console.log(_chalk2.default.bold(`\nRunning script [${_chalk2.default.green(scriptName)}] in batched topological order\n`));
-        yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
-            var _ref2 = _asyncToGenerator(function* (pkg) {
-                if (pkg.hasScript(scriptName)) {
-                    yield pkg.runScriptStreaming(scriptName, scriptArgs);
-                }
-            });
-
-            return function (_x4) {
-                return _ref2.apply(this, arguments);
-            };
-        })());
-    });
-
-    return function run(_x, _x2, _x3) {
-        return _ref.apply(this, arguments);
-    };
-})();
+exports.RunCommand = undefined;
 
 var _chalk = __webpack_require__(5);
 
@@ -40468,8 +40426,33 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const name = exports.name = 'run';
-const description = exports.description = 'Run script defined in package.json in each package that contains that script.';
+const RunCommand = exports.RunCommand = {
+    name: 'run',
+    description: 'Run script defined in package.json in each package that contains that script.',
+    run(projects, projectGraph, { extraArgs }) {
+        return _asyncToGenerator(function* () {
+            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
+            if (extraArgs.length === 0) {
+                console.log(_chalk2.default.red.bold('\nNo script specified'));
+                process.exit(1);
+            }
+            const scriptName = extraArgs[0];
+            const scriptArgs = extraArgs.slice(1);
+            console.log(_chalk2.default.bold(`\nRunning script [${_chalk2.default.green(scriptName)}] in batched topological order\n`));
+            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
+                var _ref = _asyncToGenerator(function* (pkg) {
+                    if (pkg.hasScript(scriptName)) {
+                        yield pkg.runScriptStreaming(scriptName, scriptArgs);
+                    }
+                });
+
+                return function (_x) {
+                    return _ref.apply(this, arguments);
+                };
+            })());
+        })();
+    }
+};
 
 /***/ }),
 /* 317 */

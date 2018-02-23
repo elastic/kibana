@@ -81,9 +81,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.19":
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.19.tgz#f5e57151c20eb9ef0544155b09a1b9c5d8bfa6ef"
+"@elastic/eui@0.0.23":
+  version "0.0.23"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.23.tgz#01a3d88aeaff175da5d42b70d407d08a32783f3d"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -2075,9 +2075,9 @@ chokidar@^1.4.1, chokidar@^1.6.0, chokidar@^1.7.0:
   optionalDependencies:
     fsevents "^1.0.0"
 
-chromedriver@2.34.0:
-  version "2.34.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.34.0.tgz#f5f51c4f213c7cfec0c9d7d6fa76e19e308417aa"
+chromedriver@2.33.2:
+  version "2.33.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.33.2.tgz#8fc779d54b6e45bef55d264a1eceed52427a9b49"
   dependencies:
     del "^3.0.0"
     extract-zip "^1.6.5"

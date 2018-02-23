@@ -47,13 +47,13 @@ describe('kuery AST API', function () {
     });
 
     it('should return an "and" function for single literals', function () {
-      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')], 'implicit');
+      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
       const actual = fromKueryExpressionNoMeta('foo');
       expectDeepEqual(actual, expected);
     });
 
     it('should ignore extraneous whitespace at the beginning and end of the query', function () {
-      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')], 'implicit');
+      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
       const actual = fromKueryExpressionNoMeta('  foo ');
       expectDeepEqual(actual, expected);
     });
@@ -62,7 +62,7 @@ describe('kuery AST API', function () {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
-      ], 'implicit');
+      ]);
       const actual = fromKueryExpressionNoMeta('foo bar');
       expectDeepEqual(actual, expected);
     });
@@ -71,7 +71,7 @@ describe('kuery AST API', function () {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
-      ], 'operator');
+      ]);
       const actual = fromKueryExpressionNoMeta('foo and bar');
       expectDeepEqual(actual, expected);
     });
@@ -89,7 +89,7 @@ describe('kuery AST API', function () {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
-      ], 'operator');
+      ]);
       const actual = fromKueryExpressionNoMeta('foo or bar');
       expectDeepEqual(actual, expected);
     });
@@ -98,7 +98,7 @@ describe('kuery AST API', function () {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
-      ], 'function');
+      ]);
       const actual = fromKueryExpressionNoMeta('or(foo, bar)');
       expectDeepEqual(actual, expected);
     });
@@ -108,7 +108,7 @@ describe('kuery AST API', function () {
         nodeTypes.function.buildNode('or', [
           nodeTypes.literal.buildNode('foo'),
           nodeTypes.literal.buildNode('bar'),
-        ], 'function'), 'operator');
+        ]));
       const actual = fromKueryExpressionNoMeta('!or(foo, bar)');
       expectDeepEqual(actual, expected);
     });
@@ -120,10 +120,10 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('and', [
             nodeTypes.literal.buildNode('bar'),
             nodeTypes.literal.buildNode('baz'),
-          ], 'operator'),
+          ]),
           nodeTypes.literal.buildNode('qux'),
         ])
-      ], 'operator');
+      ]);
       const actual = fromKueryExpressionNoMeta('foo or bar and baz or qux');
       expectDeepEqual(actual, expected);
     });
@@ -133,9 +133,9 @@ describe('kuery AST API', function () {
         nodeTypes.function.buildNode('or', [
           nodeTypes.literal.buildNode('foo'),
           nodeTypes.literal.buildNode('bar'),
-        ], 'operator'),
+        ]),
         nodeTypes.literal.buildNode('baz'),
-      ], 'operator');
+      ]);
       const actual = fromKueryExpressionNoMeta('(foo or bar) and baz');
       expectDeepEqual(actual, expected);
     });
@@ -152,19 +152,222 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode(1000),
         nodeTypes.literal.buildNode(8000),
       ];
-      const expected = nodeTypes.function.buildNodeWithArgumentNodes('range', argumentNodes, 'operator');
+      const expected = nodeTypes.function.buildNodeWithArgumentNodes('range', argumentNodes);
       const actual = fromKueryExpressionNoMeta('bytes:[1000 to 8000]');
       expectDeepEqual(actual, expected);
     });
 
     it('should support functions with named arguments', function () {
-      const expected = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 }, 'function');
+      const expected = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
       const actual = fromKueryExpressionNoMeta('range(bytes, gt=1000, lt=8000)');
       expectDeepEqual(actual, expected);
     });
 
     it('should throw an error for unknown functions', function () {
       expect(ast.fromKueryExpression).withArgs('foo(bar)').to.throwException(/Unknown function "foo"/);
+    });
+  });
+
+  describe('fromKqlExpression', function () {
+
+    it('should return a match all "is" function for whitespace', function () {
+      const expected = nodeTypes.function.buildNode('is', '*', '*');
+      const actual = ast.fromKqlExpression('  ');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should return an "is" function with a null field for single literals', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const actual = ast.fromKqlExpression('foo');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should ignore extraneous whitespace at the beginning and end of the query', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo');
+      const actual = ast.fromKqlExpression('  foo ');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should not split on whitespace', function () {
+      const expected = nodeTypes.function.buildNode('is', null, 'foo bar');
+      const actual = ast.fromKqlExpression('foo bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "and" as a binary operator', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = ast.fromKqlExpression('foo and bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "or" as a binary operator', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = ast.fromKqlExpression('foo or bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support negation of queries with a "not" prefix', function () {
+      const expected = nodeTypes.function.buildNode('not',
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', null, 'foo'),
+          nodeTypes.function.buildNode('is', null, 'bar'),
+        ])
+      );
+      const actual = ast.fromKqlExpression('not (foo or bar)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('"and" should have a higher precedence than "or"', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('and', [
+            nodeTypes.function.buildNode('is', null, 'bar'),
+            nodeTypes.function.buildNode('is', null, 'baz'),
+          ]),
+          nodeTypes.function.buildNode('is', null, 'qux'),
+        ])
+      ]);
+      const actual = ast.fromKqlExpression('foo or bar and baz or qux');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support grouping to override default precedence', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', null, 'foo'),
+          nodeTypes.function.buildNode('is', null, 'bar'),
+        ]),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = ast.fromKqlExpression('(foo or bar) and baz');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support matching against specific fields', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar');
+      const actual = ast.fromKqlExpression('foo:bar');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should also not split on whitespace when matching specific fields', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz');
+      const actual = ast.fromKqlExpression('foo:bar baz');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should treat quoted values as phrases', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
+      const actual = ast.fromKqlExpression('foo:"bar baz"');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support a shorthand for matching multiple values against a single field', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', 'foo', 'bar'),
+        nodeTypes.function.buildNode('is', 'foo', 'baz'),
+      ]);
+      const actual = ast.fromKqlExpression('foo:(bar or baz)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "and" and "not" operators and grouping in the shorthand as well', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', 'foo', 'bar'),
+          nodeTypes.function.buildNode('is', 'foo', 'baz'),
+        ]),
+        nodeTypes.function.buildNode('not',
+          nodeTypes.function.buildNode('is', 'foo', 'qux')
+        ),
+      ]);
+      const actual = ast.fromKqlExpression('foo:((bar or baz) and not qux)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support exclusive range operators', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('range', 'bytes', {
+          gt: 1000,
+        }),
+        nodeTypes.function.buildNode('range', 'bytes', {
+          lt: 8000,
+        }),
+      ]);
+      const actual = ast.fromKqlExpression('bytes > 1000 and bytes < 8000');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support inclusive range operators', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('range', 'bytes', {
+          gte: 1000,
+        }),
+        nodeTypes.function.buildNode('range', 'bytes', {
+          lte: 8000,
+        }),
+      ]);
+      const actual = ast.fromKqlExpression('bytes >= 1000 and bytes <= 8000');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support wildcards in field names', function () {
+      const expected = nodeTypes.function.buildNode('is', 'machine*', 'osx');
+      const actual = ast.fromKqlExpression('machine*:osx');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support wildcards in values', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'ba*');
+      const actual = ast.fromKqlExpression('foo:ba*');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should create an exists "is" query when a field is given and "*" is the value', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', '*');
+      const actual = ast.fromKqlExpression('foo:*');
+      expectDeepEqual(actual, expected);
+    });
+
+  });
+
+  describe('fromLiteralExpression', function () {
+
+    it('should create literal nodes for unquoted values with correct primitive types', function () {
+      const stringLiteral = nodeTypes.literal.buildNode('foo');
+      const booleanFalseLiteral = nodeTypes.literal.buildNode(false);
+      const booleanTrueLiteral = nodeTypes.literal.buildNode(true);
+      const numberLiteral = nodeTypes.literal.buildNode(42);
+
+      expectDeepEqual(ast.fromLiteralExpression('foo'), stringLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('true'), booleanTrueLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('false'), booleanFalseLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('42'), numberLiteral);
+    });
+
+    it('should allow escaping of special characters with a backslash', function () {
+      const expected = nodeTypes.literal.buildNode('\\():<>"*');
+      // yo dawg
+      const actual = ast.fromLiteralExpression('\\\\\\(\\)\\:\\<\\>\\"\\*');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support double quoted strings that do not need escapes except for quotes', function () {
+      const expected = nodeTypes.literal.buildNode('\\():<>"*');
+      const actual = ast.fromLiteralExpression('"\\():<>\\"*"');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should detect wildcards and build wildcard AST nodes', function () {
+      const expected = nodeTypes.wildcard.buildNode('foo*bar');
+      const actual = ast.fromLiteralExpression('foo*bar');
+      expectDeepEqual(actual, expected);
     });
   });
 

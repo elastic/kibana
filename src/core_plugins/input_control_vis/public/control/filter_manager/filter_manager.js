@@ -14,6 +14,10 @@ export class FilterManager {
     return this.indexPattern;
   }
 
+  getField() {
+    return this.indexPattern.fields.byName[this.fieldName];
+  }
+
   createFilter() {
     throw new Error('Must implement createFilter.');
   }

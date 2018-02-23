@@ -25,6 +25,7 @@ exports[`parentCandidates 1`] = `
   >
     <EuiSelect
       fullWidth={false}
+      hasNoInitialSelection={false}
       isLoading={false}
       onChange={[Function]}
       options={

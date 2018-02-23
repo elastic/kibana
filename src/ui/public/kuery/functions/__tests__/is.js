@@ -24,7 +24,7 @@ describe('kuery functions', function () {
       });
 
       it('arguments should contain the provided fieldName and value as literals', function () {
-        const { arguments: [ fieldName, value ] } = is.buildNodeParams('response', 200);
+        const { arguments: [fieldName, value] } = is.buildNodeParams('response', 200);
 
         expect(fieldName).to.have.property('type', 'literal');
         expect(fieldName).to.have.property('value', 'response');
@@ -33,7 +33,22 @@ describe('kuery functions', function () {
         expect(value).to.have.property('value', 200);
       });
 
+      it('should detect wildcards in the provided arguments', function () {
+        const { arguments: [fieldName, value] } = is.buildNodeParams('machine*', 'win*');
 
+        expect(fieldName).to.have.property('type', 'wildcard');
+        expect(value).to.have.property('type', 'wildcard');
+      });
+
+      it('should default to a non-phrase query', function () {
+        const { arguments: [, , isPhrase] } = is.buildNodeParams('response', 200);
+        expect(isPhrase.value).to.be(false);
+      });
+
+      it('should allow specification of a phrase query', function () {
+        const { arguments: [, , isPhrase] } = is.buildNodeParams('response', 200, true);
+        expect(isPhrase.value).to.be(true);
+      });
     });
 
     describe('toElasticsearchQuery', function () {

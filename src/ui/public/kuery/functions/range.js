@@ -6,7 +6,7 @@ import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
-  const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
+  const fieldNameArg = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : nodeTypes.literal.buildNode(fieldName);
   const args = _.map(params, (value, key) => {
     return nodeTypes.namedArg.buildNode(key, value);
   });

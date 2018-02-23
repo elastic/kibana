@@ -7,6 +7,7 @@ import {
   getProjects,
   buildProjectGraph,
   topologicallyBatchProjects,
+  ProjectMap,
 } from '../utils/projects';
 import {
   createProductionPackageJson,
@@ -53,7 +54,7 @@ async function getProductionProjects(
 ) {
   const projects = await getProjects(kibanaRoot, projectPaths);
 
-  const buildProjects = new Map();
+  const buildProjects: ProjectMap = new Map();
   for (const [name, project] of projects.entries()) {
     if (!project.skipFromBuild()) {
       buildProjects.set(name, project);

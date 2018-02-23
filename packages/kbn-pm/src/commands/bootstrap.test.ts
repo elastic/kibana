@@ -7,7 +7,7 @@ import {
   absolutePathSnapshotSerializer,
   stripAnsiSnapshotSerializer,
 } from '../test_helpers';
-import { run } from './bootstrap';
+import { BootstrapCommand } from './bootstrap';
 import { PackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
@@ -77,7 +77,7 @@ test('handles dependencies of dependencies', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await run(projects, projectGraph, {
+  await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {},
     rootPath: '',
@@ -108,7 +108,7 @@ test('does not run installer if no deps in package', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await run(projects, projectGraph, {
+  await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {},
     rootPath: '',
@@ -132,7 +132,7 @@ test('handles "frozen-lockfile"', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await run(projects, projectGraph, {
+  await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {
       'frozen-lockfile': true,
@@ -166,7 +166,7 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await run(projects, projectGraph, {
+  await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {},
     rootPath: '',
