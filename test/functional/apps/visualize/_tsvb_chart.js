@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.visualBuilder.clickTable();
         await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
-        log.debug('clicked on TopN');
+        log.debug('clicked on Table');
       });
 
       it('should be able to set values for group by field and column name', async () => {
