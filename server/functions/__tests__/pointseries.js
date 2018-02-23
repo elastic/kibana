@@ -16,14 +16,7 @@ describe('pointseries', () => {
     it('empty datatable, invalid args', () => {
       expect(fn(emptyTable, { x: 'name', y: 'price' })).to.be.eql({
         type: 'pointseries',
-        columns: {
-          x: { type: 'null', role: 'dimension', expression: 'name' },
-          y: {
-            type: 'null',
-            role: 'dimension',
-            expression: 'price',
-          },
-        },
+        columns: {},
         rows: [],
       });
     });
@@ -202,11 +195,6 @@ describe('pointseries', () => {
             type: 'string',
             role: 'dimension',
             expression: 'name',
-          },
-          y: {
-            type: 'null',
-            role: 'dimension',
-            expression: 'notInTheTable',
           },
         },
         rows: [
