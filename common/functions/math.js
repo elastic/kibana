@@ -13,7 +13,8 @@ export const math = () => ({
   args: {
     _: {
       types: ['string'],
-      help: 'An evaluated tinymath expression. (See https://github.com/elastic/tinymath)',
+      help:
+        'An evaluated TinyMath expression. (See [TinyMath Functions](http://canvas.elastic.co/reference/tinymath.html))',
     },
   },
   fn: (context, args) => {
