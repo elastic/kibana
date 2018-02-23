@@ -15,7 +15,8 @@ import {
   getOperatorFromFilter,
   getParamsFromFilter,
   isFilterValid,
-  buildFilter
+  buildFilter,
+  areIndexPatternsProvided
 } from './lib/filter_editor_utils';
 import * as filterBuilder from '../filter_manager/lib';
 import { keyMap } from '../utils/key_map';
@@ -35,7 +36,13 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     controllerAs: 'filterEditor',
     bindToController: true,
     controller: callAfterBindingsWorkaround(function ($scope, $element) {
-      this.init = () => {
+      this.init = async () => {
+        if (!areIndexPatternsProvided(this.indexPatterns)) {
+          const defaultIndexPattern = await indexPatterns.getDefault();
+          if (defaultIndexPattern) {
+            this.indexPatterns = [defaultIndexPattern];
+          }
+        }
         const { filter } = this;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;

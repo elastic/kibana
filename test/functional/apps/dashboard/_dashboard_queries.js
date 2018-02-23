@@ -9,6 +9,7 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardVisualizations = getService('dashboardVisualizations');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
   describe('dashboard queries', function describeIndexTests() {
@@ -71,6 +72,19 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await dashboardExpect.pieSliceCount(0);
+    });
+
+    describe('visualizations without SearchSource', async function () {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.addVisualizations(['Visualization InputControl']);
+      });
+
+      it(`should have filter bar with 'Add a filter'`, async function () {
+        const hasAddFilter = await testSubjects.exists('addFilter');
+        expect(hasAddFilter).to.be(true);
+      });
     });
 
     describe('filters', async function () {

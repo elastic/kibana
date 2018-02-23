@@ -81,3 +81,7 @@ export function buildFilter({ indexPattern, field, operator, params, filterBuild
   filter.meta.negate = operator.negate;
   return filter;
 }
+
+export function areIndexPatternsProvided(indexPatterns) {
+  return _.compact(indexPatterns).length !== 0;
+}
