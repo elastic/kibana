@@ -207,13 +207,7 @@ describe('pointseries', () => {
       });
       expect(fn(testTable, { y: 'notInTheTable' })).to.be.eql({
         type: 'pointseries',
-        columns: {
-          y: {
-            type: 'null',
-            role: 'dimension',
-            expression: 'notInTheTable',
-          },
-        },
+        columns: {},
         rows: [{}],
       });
       expect(fn(testTable, { x: 'name', y: 'mean(notInTheTable)' })).to.be.eql({
