@@ -1,10 +1,11 @@
 import { createReasonableWait } from '../create_reasonable_wait';
-import sinon from 'sinon';
 
 describe('createReasonableWait', () => {
-  it('should eventually calls the callback', () => {
-    const callback = sinon.spy();
-    createReasonableWait(callback);
-    expect(callback.notCalled).toBeTruthy();
+  it('resolves all promises passed to it', async () => {
+    const promiseA = new Promise(resolve => resolve('a'));
+    const promiseB = new Promise(resolve => resolve('b'));
+    const [ a, b ] = await createReasonableWait(promiseA, promiseB);
+    expect(a).toBe('a');
+    expect(b).toBe('b');
   });
 });

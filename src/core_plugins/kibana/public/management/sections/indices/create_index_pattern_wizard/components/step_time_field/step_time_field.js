@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { extractTimeFields } from '../../lib/extract_time_fields';
+import { createReasonableWait, extractTimeFields } from '../../lib';
 
 import { Header } from './components/header';
 import { TimeField } from './components/time_field';
@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-
 
 export class StepTimeField extends Component {
   static propTypes = {
@@ -46,7 +45,7 @@ export class StepTimeField extends Component {
     const { indexPatternsService, indexPattern } = this.props;
 
     this.setState({ isFetchingTimeFields: true });
-    const fields = await indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern);
+    const [ fields ] = await createReasonableWait(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });
@@ -108,7 +107,7 @@ export class StepTimeField extends Component {
         ...timeFields.map(timeField => ({
           text: timeField.display,
           value: timeField.fieldName || '',
-          isDisabled: timeFields.isDisabled,
+          disabled: timeFields.isDisabled,
         }))
       ]
       : [];

@@ -74,19 +74,26 @@ export class StepIndexPattern extends Component {
     }
 
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
+
     if (query.endsWith('*')) {
-      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({ exactMatchedIndices, isLoadingIndices: false }));
+      const [ exactMatchedIndices ] = await createReasonableWait(getIndices(esService, query, MAX_SEARCH_SIZE));
+      this.setState({ exactMatchedIndices, isLoadingIndices: false });
+      return;
     }
-    else {
-      const partialMatchedIndices = await getIndices(esService, `${query}*`, MAX_SEARCH_SIZE);
-      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({
-        partialMatchedIndices,
-        exactMatchedIndices,
-        isLoadingIndices: false
-      }));
-    }
+
+    const [
+      partialMatchedIndices,
+      exactMatchedIndices,
+    ] = await createReasonableWait(
+      getIndices(esService, `${query}*`, MAX_SEARCH_SIZE),
+      getIndices(esService, query, MAX_SEARCH_SIZE),
+    );
+
+    this.setState({
+      partialMatchedIndices,
+      exactMatchedIndices,
+      isLoadingIndices: false
+    });
   }
 
   onQueryChanged = e => {
@@ -98,8 +105,7 @@ export class StepIndexPattern extends Component {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
-    }
-    else {
+    } else {
       if (query === '*' && appendedWildcard) {
         query = '';
         this.setState({ appendedWildcard: false });
