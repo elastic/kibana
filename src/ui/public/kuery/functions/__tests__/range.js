@@ -68,6 +68,28 @@ describe('kuery functions', function () {
         expectDeepEqual(result, expected);
       });
 
+      it('should support wildcard field names', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  bytes: {
+                    gt: 1000,
+                    lt: 8000
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', 'byt*', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(node, indexPattern);
+        expectDeepEqual(result, expected);
+      });
+
       it('should support scripted fields', function () {
         const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
