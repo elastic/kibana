@@ -15,6 +15,7 @@ uiModules
 .get('app/dashboard')
 .directive('dashboardPanel', function (savedVisualizations, savedSearches, Notifier, Private, $injector, getObjectLoadersForDashboard) {
   const filterManager = Private(FilterManagerProvider);
+  const intervalfilter = $injector.get('intervalfilter');
 
   const services = savedObjectManagementRegistry.all().map(function (serviceObj) {
     const service = $injector.get(serviceObj.service);
@@ -88,6 +89,21 @@ uiModules
     link: function ($scope, element) {
       if (!$scope.panel.id || !$scope.panel.type) return;
 
+      function setVisDateInterval(dateInterval) {
+        if(dateInterval && dateInterval.value !== 'auto') {
+          const intervalValue = dateInterval.value;
+          const visStateCopy = _.cloneDeep($scope.savedObj.vis.getState());
+          const aggs = _.get(visStateCopy, ['aggs']);
+          visStateCopy.aggs = aggs.map((agg) => {
+            if(agg.type === 'date_histogram') {
+              agg.params.interval = intervalValue;
+            }
+            return agg;
+          });
+          $scope.savedObj.vis.setState(visStateCopy);
+        }
+      }
+
       /**
        * Initializes the panel for the saved object.
        * @param {{savedObj: SavedObject, editUrl: String}} savedObjectInfo
@@ -104,6 +120,8 @@ uiModules
         // create child ui state from the savedObj
         const uiState = $scope.savedObj.uiStateJSON ? JSON.parse($scope.savedObj.uiStateJSON) : {};
         $scope.uiState = $scope.createChildUiState(getPersistedStateId($scope.panel), uiState);
+
+        setVisDateInterval(intervalfilter.dateInterval);
 
         if ($scope.panel.type === savedVisualizations.type && $scope.savedObj.vis) {
           $scope.savedObj.vis.setUiState($scope.uiState);
@@ -180,6 +198,10 @@ uiModules
       $scope.isViewOnlyMode = () => {
         return $scope.dashboardViewMode === DashboardViewMode.VIEW || $scope.isFullScreenMode;
       };
+
+      $scope.$listen(intervalfilter, 'fetch', (newInterval)=> {
+        setVisDateInterval(newInterval);
+      });
     }
   };
 });

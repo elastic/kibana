@@ -28,6 +28,8 @@ import 'ui/stringify/register';
 import 'ui/style_compile';
 import 'ui/timefilter';
 import 'ui/timepicker';
+import 'ui/intervalfilter';
+import 'ui/intervalpicker';
 import 'ui/tooltip';
 import 'ui/typeahead';
 import 'ui/url';

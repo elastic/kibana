@@ -68,7 +68,8 @@ uiModules
   };
 });
 
-function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, kbnBaseUrl) {
+function VisEditor($rootScope, $scope, $route, timefilter, intervalfilter,
+  AppState, $window, kbnUrl, courier, Private, Promise, kbnBaseUrl) {
   const docTitle = Private(DocTitleProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -92,6 +93,8 @@ function VisEditor($rootScope, $scope, $route, timefilter, AppState, $window, kb
 
   // Clone the _vis instance.
   const editableVis = vis.createEditableVis();
+
+  intervalfilter.enabled = false;
 
   // We intend to keep editableVis and vis in sync with one another, so calling `requesting` on
   // vis should call it on both.
