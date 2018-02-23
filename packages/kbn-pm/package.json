@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "webpack",
+    "kbn:watch": "webpack --watch --progress",
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
