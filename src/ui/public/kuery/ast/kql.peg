@@ -111,7 +111,7 @@ Literal
   = QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
-  = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
+  = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
     return buildLiteralNode(chars.join(''));
   }
 
@@ -153,6 +153,9 @@ UnquotedCharacter
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
+
+EscapedDoubleQuote
+  = '\\' char:'"' { return char; }
 
 Separator
   = Keyword / SpecialCharacter

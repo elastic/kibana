@@ -337,6 +337,40 @@ describe('kuery AST API', function () {
 
   });
 
+  describe('fromLiteralExpression', function () {
+
+    it('should create literal nodes for unquoted values with correct primitive types', function () {
+      const stringLiteral = nodeTypes.literal.buildNode('foo');
+      const booleanFalseLiteral = nodeTypes.literal.buildNode(false);
+      const booleanTrueLiteral = nodeTypes.literal.buildNode(true);
+      const numberLiteral = nodeTypes.literal.buildNode(42);
+
+      expectDeepEqual(ast.fromLiteralExpression('foo'), stringLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('true'), booleanTrueLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('false'), booleanFalseLiteral);
+      expectDeepEqual(ast.fromLiteralExpression('42'), numberLiteral);
+    });
+
+    it('should allow escaping of special characters with a backslash', function () {
+      const expected = nodeTypes.literal.buildNode('\\():<>"*');
+      // yo dawg
+      const actual = ast.fromLiteralExpression('\\\\\\(\\)\\:\\<\\>\\"\\*');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support double quoted strings that do not need escapes except for quotes', function () {
+      const expected = nodeTypes.literal.buildNode('\\():<>"*');
+      const actual = ast.fromLiteralExpression('"\\():<>\\"*"');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should detect wildcards and build wildcard AST nodes', function () {
+      const expected = nodeTypes.wildcard.buildNode('foo*bar');
+      const actual = ast.fromLiteralExpression('foo*bar');
+      expectDeepEqual(actual, expected);
+    });
+  });
+
   describe('toElasticsearchQuery', function () {
 
     it('should return the given node type\'s ES query representation', function () {
