@@ -20,7 +20,8 @@ import {
   getFieldOptions,
   getOperatorOptions,
   isFilterValid,
-  buildFilter
+  buildFilter,
+  areIndexPatternsProvided
 } from '../filter_editor_utils';
 
 describe('FilterEditorUtils', function () {
@@ -337,6 +338,19 @@ describe('FilterEditorUtils', function () {
       expect(filter).to.be.ok();
       expect(filter.meta.negate).to.be(operator.negate);
       expect(filterBuilder.buildExistsFilter.called).to.be.ok();
+    });
+  });
+
+  describe('areIndexPatternsProvided', function () {
+    it('should return false when index patterns are not provided', function () {
+      expect(areIndexPatternsProvided(undefined)).to.be(false);
+      expect(areIndexPatternsProvided([])).to.be(false);
+      expect(areIndexPatternsProvided([undefined])).to.be(false);
+    });
+
+    it('should return true when index patterns are provided', function () {
+      const indexPatternMock = {};
+      expect(areIndexPatternsProvided([indexPatternMock])).to.be(true);
     });
   });
 });
