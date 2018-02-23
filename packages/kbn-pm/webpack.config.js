@@ -1,6 +1,8 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
+
   entry: {
     index: './src/index.ts',
   },
@@ -53,5 +55,9 @@ module.exports = {
     // Don't replace built-in globals
     __filename: false,
     __dirname: false,
+  },
+
+  optimization: {
+    minimize: false,
   },
 };
