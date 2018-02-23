@@ -11,51 +11,16 @@ exports[`StepIndexPattern should disable the next step if the index pattern exis
     errors={Array []}
     goToNextStep={[Function]}
     isInputInvalid={false}
-    isNextStepDisabled={false}
+    isNextStepDisabled={true}
     onQueryChanged={[Function]}
     query="k*"
   />
   <EuiSpacer
     size="s"
   />
-  <StatusMessage
-    matchedIndices={
-      Object {
-        "allIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-          Object {
-            "name": "es",
-          },
-        ],
-        "exactMatchedIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-        "partialMatchedIndices": Array [],
-        "visibleIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-      }
-    }
-    query="k*"
-  />
+  <LoadingIndices />
   <EuiSpacer
     size="s"
-  />
-  <IndicesList
-    indices={
-      Array [
-        Object {
-          "name": "kibana",
-        },
-      ]
-    }
-    query="k*"
   />
 </EuiPanel>
 `;
@@ -96,51 +61,16 @@ exports[`StepIndexPattern should properly fetch indices for the initial query 1`
     errors={Array []}
     goToNextStep={[Function]}
     isInputInvalid={false}
-    isNextStepDisabled={false}
+    isNextStepDisabled={true}
     onQueryChanged={[Function]}
     query="k*"
   />
   <EuiSpacer
     size="s"
   />
-  <StatusMessage
-    matchedIndices={
-      Object {
-        "allIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-          Object {
-            "name": "es",
-          },
-        ],
-        "exactMatchedIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-        "partialMatchedIndices": Array [],
-        "visibleIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-      }
-    }
-    query="k*"
-  />
+  <LoadingIndices />
   <EuiSpacer
     size="s"
-  />
-  <IndicesList
-    indices={
-      Array [
-        Object {
-          "name": "kibana",
-        },
-      ]
-    }
-    query="k*"
   />
 </EuiPanel>
 `;
@@ -218,51 +148,16 @@ exports[`StepIndexPattern should render some indices 1`] = `
     errors={Array []}
     goToNextStep={[Function]}
     isInputInvalid={false}
-    isNextStepDisabled={false}
+    isNextStepDisabled={true}
     onQueryChanged={[Function]}
     query="k*"
   />
   <EuiSpacer
     size="s"
   />
-  <StatusMessage
-    matchedIndices={
-      Object {
-        "allIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-          Object {
-            "name": "es",
-          },
-        ],
-        "exactMatchedIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-        "partialMatchedIndices": Array [],
-        "visibleIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
-      }
-    }
-    query="k*"
-  />
+  <LoadingIndices />
   <EuiSpacer
     size="s"
-  />
-  <IndicesList
-    indices={
-      Array [
-        Object {
-          "name": "kibana",
-        },
-      ]
-    }
-    query="k*"
   />
 </EuiPanel>
 `;

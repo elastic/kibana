@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { createReasonableWait } from './lib';
@@ -145,10 +145,10 @@ export class CreateIndexPatternWizard extends Component {
     const content = this.renderContent();
 
     return (
-      <Fragment>
+      <div>
         {header}
         {content}
-      </Fragment>
+      </div>
     );
   }
 }
