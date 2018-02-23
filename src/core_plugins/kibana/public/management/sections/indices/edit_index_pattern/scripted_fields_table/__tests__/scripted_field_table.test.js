@@ -5,7 +5,7 @@ import { ScriptedFieldsTable } from '../scripted_fields_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
-  EuiTableOfRecords: 'eui-table-of-records',
+  EuiBasicTable: 'eui-basic-table',
   EuiTitle: 'eui-title',
   EuiText: 'eui-text',
   EuiButton: 'eui-button',
@@ -42,7 +42,7 @@ jest.mock('ui/documentation_links', () => ({
 
 const helpers = {
   redirectToRoute: () => {},
-  getRouteHref: () => {},
+  getRouteHref: () => '#',
 };
 
 const indexPattern = {

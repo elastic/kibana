@@ -4,18 +4,19 @@ import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 
 import { documentationLinks } from 'ui/documentation_links';
 
 import {
-  EuiButton,
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { Table } from './components/table';
-import { Header } from './components/header';
-import { CallOuts } from './components/call_outs';
-import { getTableOfRecordsState, DEFAULT_TABLE_OF_RECORDS_STATE } from './lib';
+import {
+  Table,
+  Header,
+  CallOuts,
+} from './components';
 
+import { getItemsOnPage } from './lib';
 
 export class ScriptedFieldsTable extends Component {
   static propTypes = {
@@ -37,7 +38,10 @@ export class ScriptedFieldsTable extends Component {
       fieldToDelete: undefined,
       isDeleteConfirmationModalVisible: false,
       fields: [],
-      ...DEFAULT_TABLE_OF_RECORDS_STATE,
+      pageIndex: 0,
+      pageSize: 10,
+      sortField: 'name',
+      sortDirection: 'asc',
     };
   }
 
@@ -61,34 +65,34 @@ export class ScriptedFieldsTable extends Component {
     this.setState({
       fields,
       deprecatedLangsInUse,
-      ...this.computeTableState(this.state.criteria, this.props, fields)
     });
   }
 
-  onDataCriteriaChange = criteria => {
-    this.setState(this.computeTableState(criteria));
-  }
+  onTableChange = (
+    pageIndex = this.state.pageIndex,
+    pageSize = this.state.pageSize,
+    sortField = this.state.sortField,
+    sortDirection = this.state.sortDirection
+  ) => {
+    this.setState({ pageIndex, pageSize, sortField, sortDirection });
+  };
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.fieldFilter !== nextProps.fieldFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
-    }
-    if (this.props.scriptedFieldLanguageFilter !== nextProps.scriptedFieldLanguageFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
-    }
-  }
+  getItemsOnPage = () => {
+    const { fields, pageIndex, pageSize, sortField, sortDirection } = this.state;
+    const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
 
-  computeTableState(criteria, props = this.props, fields = this.state.fields) {
     let items = fields;
-    if (props.fieldFilter) {
-      const fieldFilter = props.fieldFilter.toLowerCase();
-      items = items.filter(field => field.name.toLowerCase().includes(fieldFilter));
-    }
-    if (props.scriptedFieldLanguageFilter) {
-      items = items.filter(field => field.lang === props.scriptedFieldLanguageFilter);
+
+    if (fieldFilter) {
+      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
+      items = items.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
     }
 
-    return getTableOfRecordsState(items, criteria);
+    if (scriptedFieldLanguageFilter) {
+      items = items.filter(field => field.lang === this.props.scriptedFieldLanguageFilter);
+    }
+
+    return getItemsOnPage(items, pageIndex, pageSize, sortField, sortDirection);
   }
 
   renderCallOuts() {
@@ -148,40 +152,35 @@ export class ScriptedFieldsTable extends Component {
     } = this.props;
 
     const {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
       fields,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
     } = this.state;
 
-    const model = {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-    };
+    const itemsOnPage = this.getItemsOnPage();
 
     return (
       <div>
-        <Header/>
+        <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+
         {this.renderCallOuts()}
-        <EuiButton
-          data-test-subj="addScriptedFieldLink"
-          href={helpers.getRouteHref(indexPattern, 'addField')}
-        >
-          Add scripted field
-        </EuiButton>
+
         <EuiSpacer size="l" />
+
         { fields.length > 0 ?
           <Table
             indexPattern={indexPattern}
-            model={model}
+            itemsOnPage={itemsOnPage}
+            totalItemCount={fields.length}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortDirection={sortDirection}
             editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
             deleteField={this.startDeleteField}
-            onDataCriteriaChange={this.onDataCriteriaChange}
+            onChange={this.onTableChange}
           />
           : null
         }

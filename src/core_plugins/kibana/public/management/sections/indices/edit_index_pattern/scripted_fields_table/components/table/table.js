@@ -2,32 +2,36 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiTableOfRecords
+  EuiBasicTable
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
-    model: PropTypes.shape({
-      data: PropTypes.shape({
-        records: PropTypes.array.isRequired,
-        totalRecordCount: PropTypes.number.isRequired,
-      }).isRequired,
-      criteria: PropTypes.shape({
-        page: PropTypes.shape({
-          index: PropTypes.number.isRequired,
-          size: PropTypes.number.isRequired,
-        }).isRequired,
-        sort: PropTypes.shape({
-          field: PropTypes.string.isRequired,
-          direction: PropTypes.string.isRequired,
-        }).isRequired,
-      }).isRequired,
-    }),
+    itemsOnPage: PropTypes.array.isRequired,
+    totalItemCount: PropTypes.number.isRequired,
+    pageIndex: PropTypes.number.isRequired,
+    pageSize: PropTypes.number.isRequired,
+    sortField: PropTypes.string.isRequired,
+    sortDirection: PropTypes.string.isRequired,
     editField: PropTypes.func.isRequired,
     deleteField: PropTypes.func.isRequired,
-    onDataCriteriaChange: PropTypes.func.isRequired,
+    onChange: PropTypes.func.isRequired,
   }
+
+  onChange = ({ page = {}, sort = {} }) => {
+    const {
+      index: pageIndex,
+      size: pageSize,
+    } = page;
+
+    const {
+      field: sortField,
+      direction: sortDirection,
+    } = sort;
+
+    this.props.onChange(pageIndex, pageSize, sortField, sortDirection);
+  };
 
   renderFormatCell = (value) => {
     const { indexPattern } = this.props;
@@ -41,79 +45,87 @@ export class Table extends PureComponent {
     );
   }
 
-  getTableConfig() {
-    const { editField, deleteField, onDataCriteriaChange } = this.props;
-
-    return {
-      recordId: 'name',
-      columns: [
-        {
-          field: 'displayName',
-          name: 'Name',
-          description: `Name of the field`,
-          dataType: 'string',
-          sortable: true,
-        },
-        {
-          field: 'lang',
-          name: 'Lang',
-          description: `Language used for the field`,
-          dataType: 'string',
-          sortable: true,
-          render: value => {
-            return (
-              <span data-test-subj="scriptedFieldLang">
-                {value}
-              </span>
-            );
-          }
-        },
-        {
-          field: 'script',
-          name: 'Script',
-          description: `Script for the field`,
-          dataType: 'string',
-          sortable: true,
-        },
-        {
-          field: 'name',
-          name: 'Format',
-          description: `Format used for the field`,
-          render: this.renderFormatCell,
-          sortable: false,
-        },
-        {
-          name: '',
-          actions: [
-            {
-              name: 'Edit',
-              description: 'Edit this field',
-              icon: 'pencil',
-              onClick: editField,
-            },
-            {
-              name: 'Delete',
-              description: 'Delete this field',
-              icon: 'trash',
-              color: 'danger',
-              onClick: deleteField,
-            },
-          ]
-        }
-      ],
-      pagination: {
-        pageSizeOptions: [5, 10, 25, 50]
-      },
-      selection: undefined,
-      onDataCriteriaChange,
-    };
-  }
-
   render() {
-    const { model } = this.props;
+    const {
+      itemsOnPage,
+      totalItemCount,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
+      editField,
+      deleteField,
+    } = this.props;
+
+    const columns = [{
+      field: 'displayName',
+      name: 'Name',
+      description: `Name of the field`,
+      dataType: 'string',
+      sortable: true,
+    }, {
+      field: 'lang',
+      name: 'Lang',
+      description: `Language used for the field`,
+      dataType: 'string',
+      sortable: true,
+      render: value => {
+        return (
+          <span data-test-subj="scriptedFieldLang">
+            {value}
+          </span>
+        );
+      }
+    }, {
+      field: 'script',
+      name: 'Script',
+      description: `Script for the field`,
+      dataType: 'string',
+      sortable: true,
+    }, {
+      field: 'name',
+      name: 'Format',
+      description: `Format used for the field`,
+      render: this.renderFormatCell,
+      sortable: false,
+    }, {
+      name: '',
+      actions: [{
+        name: 'Edit',
+        description: 'Edit this field',
+        icon: 'pencil',
+        onClick: editField,
+      }, {
+        name: 'Delete',
+        description: 'Delete this field',
+        icon: 'trash',
+        color: 'danger',
+        onClick: deleteField,
+      }],
+    }];
+
+    const pagination = {
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions: [5, 10, 25, 50],
+    };
+
+    const sorting = {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    };
 
     return (
-      <EuiTableOfRecords config={this.getTableConfig()} model={model} />
+      <EuiBasicTable
+        items={itemsOnPage}
+        columns={columns}
+        pagination={pagination}
+        sorting={sorting}
+        onChange={this.onChange}
+      />
     );
   }
 }
