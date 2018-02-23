@@ -28,12 +28,6 @@
 
 start
   = OrQuery
-  / EmptyQuery
-
-EmptyQuery
-  = Space* {
-    return buildFunctionNode('and', []);
-  }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
@@ -180,7 +174,7 @@ Literal
   = QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
-  = '"' chars:(EscapedSpecialCharacter / [^"])* '"' {
+  = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
     return buildLiteralNode(chars.join(''));
   }
 
@@ -226,6 +220,9 @@ UnquotedCharacter
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
+
+EscapedDoubleQuote
+  = '\\' char:'"' { return char; }
 
 Separator
   = Keyword / SpecialCharacter

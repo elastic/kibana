@@ -22,6 +22,12 @@ uiModules
       controller() {
         this.devTools = devToolsRegistry.inOrder;
         this.currentPath = `#${$location.path()}`;
+
+        this.onClick = (item, $event) => {
+          if (item.disabled) {
+            $event.preventDefault();
+          }
+        };
       }
     };
   });
