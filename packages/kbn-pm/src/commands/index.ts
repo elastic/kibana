@@ -17,12 +17,12 @@ export interface Command {
   ) => Promise<void>;
 }
 
-import * as bootstrap from './bootstrap';
-import * as clean from './clean';
-import * as run from './run';
+import { BootstrapCommand } from './bootstrap';
+import { CleanCommand } from './clean';
+import { RunCommand } from './run';
 
 export const commands: { [key: string]: Command } = {
-  bootstrap,
-  clean,
-  run,
+  bootstrap: BootstrapCommand,
+  clean: CleanCommand,
+  run: RunCommand,
 };
