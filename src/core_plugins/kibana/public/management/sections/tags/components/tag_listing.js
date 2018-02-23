@@ -1,22 +1,20 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TagForm } from './tag_form';
+import { TagFormPopover } from './tag_form_popover';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiTitle,
-  EuiTableOfRecords,
   EuiPage,
-  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldSearch,
   EuiButton,
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiCallOut,
-  EuiPopover,
-  EuiPopoverTitle,
+  EuiInMemoryTable,
+  EuiBadge,
 } from '@elastic/eui';
 
 export class TagListing extends React.Component {
@@ -25,9 +23,9 @@ export class TagListing extends React.Component {
     super(props);
 
     this.state = {
-      showCreate: false,
+      isFetchingItems: true,
       showDeleteModal: false,
-      tags: []
+      tags: [],
     };
   }
 
@@ -43,21 +41,24 @@ export class TagListing extends React.Component {
     this.fetchTags();
   }
 
-  fetchTags() {
-
-  }
-
-  onCreateBtnClick = () => {
+  fetchTags = () => {
     this.setState({
-      showCreate: !this.state.showCreate,
-    });
+      isFetchingItems: true,
+    }, this.debouncedFetch);
   }
 
-  closeCreate = () => {
+  debouncedFetch = _.debounce(async () => {
+    const tags = await this.props.find('');
+
+    if (!this._isMounted) {
+      return;
+    }
+
     this.setState({
-      showCreate: false,
+      isFetchingItems: false,
+      tags: tags
     });
-  }
+  }, 300);
 
   closeDeleteModal = () => {
     this.setState({ showDeleteModal: false });
@@ -99,13 +100,55 @@ export class TagListing extends React.Component {
     );
   }
 
-  renderTable() {
+  renderTag = (item) => {
+    console.log("render tag");
     return (
-      <div>Table placeholder</div>
+      <TagFormPopover
+        button={(
+          <EuiBadge color={item.attributes.color}>
+            {item.attributes.title}
+          </EuiBadge>
+        )}
+        formTitle="Edit tag"
+        tagSavedObject={item}
+        save={this.props.save}
+        onSuccessfulSave={this.fetchTags}
+        anchorPosition="downLeft"
+      />
+    );
+  }
+
+  renderTable = () => {
+    const selection = {
+      itemId: (item) => {
+        return item.id;
+      }
+    };
+    const search = {
+      box: {
+        incremental: true
+      }
+    };
+    return (
+      <EuiInMemoryTable
+        loading={this.state.isFetchingItems}
+        items={this.state.tags}
+        selection={selection}
+        search={search}
+        columns={[
+          {
+            name: 'Title',
+            render: this.renderTag
+          }
+        ]}
+        pagination={true}
+        sorting={true}
+      />
     );
   }
 
   render() {
+    console.log("render called");
     return (
       <EuiPage>
 
@@ -120,26 +163,17 @@ export class TagListing extends React.Component {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="createTag"
-              ownFocus
+            <TagFormPopover
               button={(
-                <EuiButton onClick={this.onCreateBtnClick}>
+                <EuiButton>
                   Create tag
                 </EuiButton>
               )}
-              isOpen={this.state.showCreate}
-              closePopover={this.closeCreate}
+              formTitle="Create tag"
+              save={this.props.save}
+              onSuccessfulSave={this.fetchTags}
               anchorPosition="downRight"
-              withTitle
-            >
-              <EuiPopoverTitle>Create tag</EuiPopoverTitle>
-              <TagForm
-                onCancel={this.closeCreate}
-                save={this.props.save}
-                onSuccessfulSave={this.closeCreate}
-              />
-            </EuiPopover>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

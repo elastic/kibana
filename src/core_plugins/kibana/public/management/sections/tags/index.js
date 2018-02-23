@@ -26,7 +26,9 @@ uiRoutes
         return tagsClient.save(attributes, id, version);
       };
       $scope.delete = tagsClient.delete;
-      $scope.find = tagsClient.find;
+      $scope.find = (search) => {
+        return tagsClient.find(search);
+      };
     },
   });
 

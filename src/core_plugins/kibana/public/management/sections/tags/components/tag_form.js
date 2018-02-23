@@ -21,8 +21,8 @@ export class TagForm extends React.Component {
     super(props);
 
     this.state = {
-      title: props.title,
-      color: props.color,
+      title: props.tagSavedObject.attributes.title,
+      color: props.tagSavedObject.attributes.color,
       isTitleValid: true,
     };
   }
@@ -72,7 +72,7 @@ export class TagForm extends React.Component {
         title: this.state.title,
         color: this.state.color
       };
-      await this.props.save(attributes);
+      await this.props.save(attributes, this.props.tagSavedObject.id, this.props.tagSavedObject._version);
     } catch (e) {
       if (e instanceof DuplicateTitleError) {
         this.setState({
@@ -145,15 +145,19 @@ export class TagForm extends React.Component {
 }
 
 TagForm.propTypes = {
-  color: PropTypes.string,
-  title: PropTypes.string,
+  tagSavedObject: PropTypes.object,
+  savedObjectId: PropTypes.string,
   onCancel: PropTypes.func.isRequired,
   save: PropTypes.func.isRequired,
   onSuccessfulSave: PropTypes.func.isRequired,
 };
 
 TagForm.defaultProps = {
-  color: '#E8488B',
-  title: '',
+  tagSavedObject: {
+    attributes: {
+      color: '#E8488B',
+      title: '',
+    }
+  }
 };
 
