@@ -100,6 +100,33 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await gaugeCount.getVisibleText();
     }
 
+    async clickTable() {
+      await testSubjects.click('tableTsvbTypeBtn');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+
+    async selectGroupByField(fieldName) {
+      const element = await testSubjects.find('groupByField');
+      const input = await element.findByCssSelector('.Select-input input');
+      await input.type(fieldName);
+      const option = await element.findByCssSelector('.Select-option');
+      await option.click();
+    }
+
+    async setLabelValue(value) {
+      const el = await testSubjects.find('columnLabelName');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getViewTable() {
+      const tableView = await testSubjects.find('tableView');
+      return await tableView.getVisibleText();
+    }
+
+
   }
 
   return new VisualBuilderPage();
