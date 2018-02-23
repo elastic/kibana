@@ -256,6 +256,85 @@ describe('kuery AST API', function () {
       expectDeepEqual(actual, expected);
     });
 
+    it('should also not split on whitespace when matching specific fields', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz');
+      const actual = ast.fromKqlExpression('foo:bar baz');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should treat quoted values as phrases', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
+      const actual = ast.fromKqlExpression('foo:"bar baz"');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support a shorthand for matching multiple values against a single field', function () {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', 'foo', 'bar'),
+        nodeTypes.function.buildNode('is', 'foo', 'baz'),
+      ]);
+      const actual = ast.fromKqlExpression('foo:(bar or baz)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support "and" and "not" operators and grouping in the shorthand as well', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('or', [
+          nodeTypes.function.buildNode('is', 'foo', 'bar'),
+          nodeTypes.function.buildNode('is', 'foo', 'baz'),
+        ]),
+        nodeTypes.function.buildNode('not',
+          nodeTypes.function.buildNode('is', 'foo', 'qux')
+        ),
+      ]);
+      const actual = ast.fromKqlExpression('foo:((bar or baz) and not qux)');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support exclusive range operators', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('range', 'bytes', {
+          gt: 1000,
+        }),
+        nodeTypes.function.buildNode('range', 'bytes', {
+          lt: 8000,
+        }),
+      ]);
+      const actual = ast.fromKqlExpression('bytes > 1000 and bytes < 8000');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support inclusive range operators', function () {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('range', 'bytes', {
+          gte: 1000,
+        }),
+        nodeTypes.function.buildNode('range', 'bytes', {
+          lte: 8000,
+        }),
+      ]);
+      const actual = ast.fromKqlExpression('bytes >= 1000 and bytes <= 8000');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support wildcards in field names', function () {
+      const expected = nodeTypes.function.buildNode('is', 'machine*', 'osx');
+      const actual = ast.fromKqlExpression('machine*:osx');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should support wildcards in values', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', 'ba*');
+      const actual = ast.fromKqlExpression('foo:ba*');
+      expectDeepEqual(actual, expected);
+    });
+
+    it('should create an exists "is" query when a field is given and "*" is the value', function () {
+      const expected = nodeTypes.function.buildNode('is', 'foo', '*');
+      const actual = ast.fromKqlExpression('foo:*');
+      expectDeepEqual(actual, expected);
+    });
+
   });
 
   describe('toElasticsearchQuery', function () {
