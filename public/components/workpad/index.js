@@ -1,33 +1,49 @@
 import { connect } from 'react-redux';
-import { compose, withState } from 'recompose';
+import PropTypes from 'prop-types';
+import { compose, withState, getContext, withHandlers } from 'recompose';
 import { get } from 'lodash';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { getPageById, getSelectedPage, getWorkpad, getPages } from '../../state/selectors/workpad';
 import { getFullscreen, getEditing } from '../../state/selectors/app';
-import { nextPage, previousPage } from '../../state/actions/pages';
+import {
+  getPageById,
+  getSelectedPage,
+  getSelectedPageIndex,
+  getWorkpad,
+  getPages,
+} from '../../state/selectors/workpad';
 import { Workpad as Component } from './workpad';
 
-const mapStateToProps = state => {
-  return {
-    pages: getPages(state),
-    selectedPageId: getSelectedPage(state),
-    style: get(getPageById(state, getSelectedPage(state)), 'style'),
-    workpad: getWorkpad(state),
-    isFullscreen: getFullscreen(state),
-    isEditing: getEditing(state),
-  };
-};
+const mapStateToProps = state => ({
+  pages: getPages(state),
+  selectedPageId: getSelectedPage(state),
+  selectedPageNumber: getSelectedPageIndex(state) + 1,
+  style: get(getPageById(state, getSelectedPage(state)), 'style'),
+  workpad: getWorkpad(state),
+  isFullscreen: getFullscreen(state),
+  isEditing: getEditing(state),
+});
 
 const mapDispatchToProps = {
   undoHistory,
   redoHistory,
-  nextPage,
-  previousPage,
   fetchAllRenderables,
 };
 
 export const Workpad = compose(
+  getContext({
+    router: PropTypes.object,
+  }),
   withState('grid', 'setGrid', false),
-  connect(mapStateToProps, mapDispatchToProps)
+  connect(mapStateToProps, mapDispatchToProps),
+  withHandlers({
+    nextPage: props => () => {
+      const pageNumber = Math.min(props.selectedPageNumber + 1, props.workpad.pages.length);
+      props.router.navigateTo('loadWorkpad', { id: props.workpad.id, page: pageNumber });
+    },
+    previousPage: props => () => {
+      const pageNumber = Math.max(1, props.selectedPageNumber - 1);
+      props.router.navigateTo('loadWorkpad', { id: props.workpad.id, page: pageNumber });
+    },
+  })
 )(Component);

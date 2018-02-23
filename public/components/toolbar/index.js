@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
-import { compose, withState } from 'recompose';
-
+import PropTypes from 'prop-types';
+import { compose, withState, getContext, withHandlers } from 'recompose';
 import { getEditing } from '../../state/selectors/app';
 import { addElement, duplicateElement, elementLayer } from '../../state/actions/elements';
-import { nextPage, previousPage } from '../../state/actions/pages';
 import { getAssets } from '../../state/selectors/assets';
 import {
+  getWorkpad,
   getSelectedPage,
   getSelectedElement,
   getSelectedPageIndex,
@@ -15,6 +15,8 @@ import { Toolbar as Component } from './toolbar';
 
 const mapStateToProps = state => ({
   editing: getEditing(state),
+  workpadId: getWorkpad(state).id,
+  totalPages: getWorkpad(state).pages.length,
   selectedPage: getSelectedPage(state),
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   selectedElement: getSelectedElement(state),
@@ -23,8 +25,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
-  nextPage: () => dispatch(nextPage()),
-  previousPage: () => dispatch(previousPage()),
   duplicateElement: (pageId, element) => () => dispatch(duplicateElement(element, pageId)),
   elementLayer: (pageId, element) => movement =>
     dispatch(
@@ -52,5 +52,18 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const Toolbar = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  getContext({
+    router: PropTypes.object,
+  }),
+  withHandlers({
+    nextPage: props => () => {
+      const pageNumber = Math.min(props.selectedPageNumber + 1, props.totalPages);
+      props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
+    },
+    previousPage: props => () => {
+      const pageNumber = Math.max(1, props.selectedPageNumber - 1);
+      props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
+    },
+  }),
   withState('tray', 'setTray', props => props.tray)
 )(Component);

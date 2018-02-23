@@ -1,20 +1,20 @@
 import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
-import { addPage, loadPage, movePage, removePage, duplicatePage } from '../../state/actions/pages';
-import { getSelectedPage, getPages } from '../../state/selectors/workpad';
+import * as pageActions from '../../state/actions/pages';
+import { getSelectedPage, getWorkpad, getPages } from '../../state/selectors/workpad';
 import { PageManager as Component } from './page_manager';
 
 const mapStateToProps = state => ({
   pages: getPages(state),
   selectedPage: getSelectedPage(state),
+  workpadId: getWorkpad(state).id,
 });
 
 const mapDispatchToProps = dispatch => ({
-  addPage: () => dispatch(addPage()),
-  loadPage: id => dispatch(loadPage(id)),
-  movePage: (id, position) => dispatch(movePage(id, position)),
-  duplicatePage: id => dispatch(duplicatePage(id)),
-  removePage: id => dispatch(removePage(id)),
+  addPage: () => dispatch(pageActions.addPage()),
+  movePage: (id, position) => dispatch(pageActions.movePage(id, position)),
+  duplicatePage: id => dispatch(pageActions.duplicatePage(id)),
+  removePage: id => dispatch(pageActions.removePage(id)),
 });
 
 export const PageManager = compose(

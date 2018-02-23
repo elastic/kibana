@@ -1,23 +1,20 @@
 import { connect } from 'react-redux';
-import { selectElement } from '../../state/actions/transient';
-import { getEditing, getAppReady } from '../../state/selectors/app';
-
+import { getAppReady } from '../../state/selectors/app';
+import { appReady, appError } from '../../state/actions/app';
 import { App as Component } from './app';
 
 const mapStateToProps = state => {
-  const appReady = getAppReady(state);
+  // appReady could be an error object
+  const appState = getAppReady(state);
 
   return {
-    editing: getEditing(state),
-    appReady: typeof appReady === 'object' ? appReady : { ready: appReady },
+    appState: typeof appState === 'object' ? appState : { ready: appState },
   };
 };
 
-const mapDispatchToProps = dispatch => ({
-  deselectElement(ev) {
-    ev && ev.stopPropagation();
-    dispatch(selectElement(null));
-  },
-});
+const mapDispatchToProps = {
+  setAppReady: appReady,
+  setAppError: appError,
+};
 
 export const App = connect(mapStateToProps, mapDispatchToProps)(Component);

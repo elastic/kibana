@@ -16,6 +16,10 @@ const options = {
           location: resolve(__dirname, 'tasks', 'mocks', 'uiNotify'),
         },
         {
+          pattern: 'ui/storage',
+          location: resolve(__dirname, 'tasks', 'mocks', 'uiStorage'),
+        },
+        {
           pattern: 'socket.io-client',
           location: resolve(__dirname, 'tasks', 'mocks', 'socketClient'),
         },

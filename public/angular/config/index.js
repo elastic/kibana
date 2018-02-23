@@ -1,1 +1,2 @@
-// import './state_management'; // DISABLED UNTIL 6.2 is released
+import './state_management'; // Requires 6.2.0+
+import './location_provider';

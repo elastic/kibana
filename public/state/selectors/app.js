@@ -22,6 +22,7 @@ export function getBasePath(state) {
 }
 
 // return true only when the required parameters are in the state
-export function isAppReady() {
-  return true;
+export function isAppReady(state) {
+  const appReady = getAppReady(state);
+  return appReady === true;
 }

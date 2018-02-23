@@ -1,7 +1,8 @@
 {
   "plugins": [
     "transform-object-rest-spread",
-    "transform-async-to-generator"
+    "transform-async-to-generator",
+    "transform-class-properties"
   ],
   "presets": [
     "react",

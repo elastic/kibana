@@ -5,20 +5,21 @@ import { PageStack } from '../page_stack';
 import { Fullscreen } from '../fullscreen';
 import './workpad.less';
 
-export const Workpad = ({
-  selectedPageId,
-  pages,
-  style,
-  workpad,
-  fetchAllRenderables,
-  undoHistory,
-  redoHistory,
-  setGrid, // TODO: Get rid of grid when we improve the layout engine
-  grid,
-  nextPage,
-  previousPage,
-  isFullscreen,
-}) => {
+export const Workpad = props => {
+  const {
+    selectedPageId,
+    pages,
+    style,
+    workpad,
+    fetchAllRenderables,
+    undoHistory,
+    redoHistory,
+    setGrid, // TODO: Get rid of grid when we improve the layout engine
+    grid,
+    nextPage,
+    previousPage,
+    isFullscreen,
+  } = props;
   const { height, width } = workpad;
 
   // TODO: I think this is mixing in background color, that should be pushed down to a page component, otherwise reporting wont work right
@@ -28,9 +29,9 @@ export const Workpad = ({
     if (action === 'REFRESH') return fetchAllRenderables();
     if (action === 'UNDO') return undoHistory();
     if (action === 'REDO') return redoHistory();
+    if (action === 'GRID') return setGrid(!grid);
     if (action === 'PREV') return previousPage();
     if (action === 'NEXT') return nextPage();
-    if (action === 'GRID') return setGrid(!grid);
   };
 
   return (

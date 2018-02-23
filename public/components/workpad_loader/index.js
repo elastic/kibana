@@ -1,33 +1,34 @@
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { compose, withState, withHandlers } from 'recompose';
+import { compose, withState, getContext, withHandlers } from 'recompose';
 import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { createWorkpad, loadWorkpadById } from '../../state/actions/workpad';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = state => ({
   workpadId: getWorkpad(state).id,
 });
 
-const mapDispatchToProps = dispatch => ({
-  createWorkpad: async workpad => {
-    // workpad passed in, create and load it
-    if (workpad != null) {
-      await workpadService.create(workpad);
-      dispatch(loadWorkpadById(workpad.id));
-      return;
-    }
-
-    dispatch(createWorkpad());
-  },
-  loadWorkpadById: id => dispatch(loadWorkpadById(id)),
-});
-
 export const WorkpadLoader = compose(
-  connect(mapStateToProps, mapDispatchToProps),
+  getContext({
+    router: PropTypes.object,
+  }),
+  connect(mapStateToProps),
   withState('workpads', 'setWorkpads', null),
   withHandlers({
+    // Workpad creation via navigation
+    createWorkpad: props => async workpad => {
+      // workpad passed in, create and load it
+      if (workpad != null) {
+        await workpadService.create(workpad);
+        props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
+        return;
+      }
+
+      props.router.navigateTo('createWorkpad');
+    },
+
     // Workpad search
     findWorkpads: ({ setWorkpads }) => async text => {
       // TODO: handle search failures
@@ -45,9 +46,9 @@ export const WorkpadLoader = compose(
 
     // Remove workpad given an id
     removeWorkpad: props => async workpadId => {
-      const { setWorkpads, workpads, workpadId: loadedWorkpad, loadWorkpadById } = props;
+      const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      // TODO: handle the failed loading state
+      // TODO: handle the failed removal condition
       await workpadService.remove(workpadId);
 
       const remainingWorkpads = workpads.workpads.filter(w => w.id !== workpadId);
@@ -59,7 +60,9 @@ export const WorkpadLoader = compose(
       // load the first available workpad if the active one was removed
       if (loadedWorkpad === workpadId) {
         const nextWorkpad = workpadState.workpads[0];
-        nextWorkpad && loadWorkpadById(nextWorkpad.id);
+        if (nextWorkpad != null) {
+          props.router.navigateTo('loadWorkpad', { id: nextWorkpad.id, page: 1 });
+        }
       }
 
       // update the workpad list, filtering out the removed workpad

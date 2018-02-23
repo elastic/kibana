@@ -26,6 +26,7 @@ export const Toolbar = props => {
     nextPage,
     elementIsSelected,
     selectedPageNumber,
+    totalPages,
   } = props;
   const done = () => setTray(null);
   const showHideTray = exp => {
@@ -54,11 +55,11 @@ export const Toolbar = props => {
       {trays[tray] && <Tray>{trays[tray]}</Tray>}
 
       <Navbar>
-        <NavbarButton onClick={previousPage}>
+        <NavbarButton onClick={previousPage} disabled={selectedPageNumber <= 1}>
           <i className="fa fa-chevron-left" />
         </NavbarButton>
         {selectedPageNumber}
-        <NavbarButton onClick={nextPage}>
+        <NavbarButton onClick={nextPage} disabled={selectedPageNumber >= totalPages}>
           <i className="fa fa-chevron-right" />
         </NavbarButton>
 
@@ -128,5 +129,6 @@ Toolbar.propTypes = {
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   selectedPageNumber: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
   elementIsSelected: PropTypes.bool.isRequired,
 };

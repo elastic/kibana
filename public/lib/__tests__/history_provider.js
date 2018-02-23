@@ -1,7 +1,6 @@
 import expect from 'expect.js';
 import lzString from 'lz-string';
 import { historyProvider } from '../history_provider';
-import { createWindow } from './fixtures/window';
 
 function createState() {
   return {
@@ -21,26 +20,20 @@ function createState() {
 describe('historyProvider', () => {
   let history;
   let state;
-  let win;
-
-  function getListeners(name) {
-    return win.listeners[name] || [];
-  }
 
   beforeEach(() => {
-    win = createWindow();
-    history = historyProvider(win);
+    history = historyProvider();
     state = createState();
   });
 
   describe('instances', () => {
     it('should return the same instance for the same window object', () => {
-      expect(historyProvider(win)).to.be(history);
+      expect(historyProvider()).to.equal(history);
     });
 
     it('should return different instance for different window object', () => {
-      const win2 = createWindow();
-      expect(historyProvider(win2)).not.to.be(history);
+      const newWindow = {};
+      expect(historyProvider(newWindow)).not.to.be(history);
     });
   });
 
@@ -49,31 +42,42 @@ describe('historyProvider', () => {
       history.push(state);
     });
 
+    afterEach(() => {
+      // reset state back to initial after each test
+      history.undo();
+    });
+
     describe('push', () => {
-      it('should push state into window history', () => {
-        expect(win.history.pushState.calledOnce).to.be(true);
+      it('should add state to location', () => {
+        expect(history.getLocation().state).to.eql(state);
       });
 
       it('should push compressed state into history', () => {
-        const { args } = win.history.pushState.firstCall;
-        expect(args[0]).to.equal(lzString.compress(JSON.stringify(state)));
+        const hist = history.historyInstance;
+        expect(hist.location.state).to.equal(lzString.compress(JSON.stringify(state)));
       });
     });
 
     describe('undo', () => {
       it('should move history back', () => {
-        expect(win.history._getIndex()).to.equal(0);
+        // pushed location has state value
+        expect(history.getLocation().state).to.eql(state);
+
+        // back to initial location with null state
         history.undo();
-        expect(win.history._getIndex()).to.equal(-1);
+        expect(history.getLocation().state).to.be(null);
       });
     });
 
     describe('redo', () => {
       it('should move history forward', () => {
+        // back to initial location, with null state
         history.undo();
-        expect(win.history._getIndex()).to.equal(-1);
+        expect(history.getLocation().state).to.be(null);
+
+        // return to pushed location, with state value
         history.redo();
-        expect(win.history._getIndex()).to.equal(0);
+        expect(history.getLocation().state).to.eql(state);
       });
     });
   });
@@ -83,27 +87,31 @@ describe('historyProvider', () => {
       history.replace(state);
     });
 
+    afterEach(() => {
+      // reset history to default after each test
+      history.replace(null);
+    });
+
     describe('replace', () => {
       it('should replace state in window history', () => {
-        expect(win.history.replaceState.calledOnce).to.be(true);
+        expect(history.getLocation().state).to.eql(state);
       });
 
       it('should replace compressed state into history', () => {
-        const { args } = win.history.replaceState.firstCall;
-        expect(args[0]).to.equal(lzString.compress(JSON.stringify(state)));
+        const hist = history.historyInstance;
+        expect(hist.location.state).to.equal(lzString.compress(JSON.stringify(state)));
       });
     });
   });
 
   describe('onChange', () => {
-    it('should set the onpopstate handler', () => {
-      const handler = () => 'hello world';
-      expect(getListeners('popstate')).to.have.length(0);
-
-      history.onChange(handler);
-      expect(getListeners('popstate')).to.have.length(1);
-      expect(getListeners('popstate')[0]).to.a('function');
-    });
+    const createOnceHandler = (history, done, fn) => {
+      const teardown = history.onChange((location, prevLocation) => {
+        if (typeof fn === 'function') fn(location, prevLocation);
+        teardown();
+        done();
+      });
+    };
 
     it('should return a method to remove the listener', () => {
       const handler = () => 'hello world';
@@ -111,33 +119,85 @@ describe('historyProvider', () => {
 
       expect(teardownFn).to.be.a('function');
 
-      expect(getListeners('popstate')).to.have.length(1);
+      // teardown the listener
       teardownFn();
-      expect(getListeners('popstate')).to.have.length(0);
     });
 
-    it('should pass decompress state to handler', done => {
+    it('should call handler on state change', done => {
+      createOnceHandler(history, done, loc => {
+        expect(loc).to.be.a('object');
+      });
+
+      history.push({});
+    });
+
+    it('should pass location object to handler', done => {
+      createOnceHandler(history, done, location => {
+        expect(location.pathname).to.be.a('string');
+        expect(location.hash).to.be.a('string');
+        expect(location.state).to.be.an('object');
+        expect(location.action).to.equal('push');
+      });
+
       history.push(state);
+    });
 
-      const handler = curState => {
+    it('should pass decompressed state to handler', done => {
+      createOnceHandler(history, done, ({ state: curState }) => {
         expect(curState).to.eql(state);
-        done();
-      };
+      });
 
-      history.onChange(handler);
-      win.history._triggerChange();
+      history.push(state);
+    });
+
+    it('should pass in the previous location object to handler', done => {
+      createOnceHandler(history, done, (location, prevLocation) => {
+        expect(prevLocation.pathname).to.be.a('string');
+        expect(prevLocation.hash).to.be.a('string');
+        expect(prevLocation.state).to.be(null);
+        expect(prevLocation.action).to.equal('push');
+      });
+
+      history.push(state);
     });
   });
 
   describe('resetOnChange', () => {
-    it('resets the onpopstate handler', () => {
-      const handler = () => 'hello world';
-      history.onChange(handler);
-      expect(getListeners('popstate')).to.have.length(1);
-      expect(getListeners('popstate')[0]).to.a('function');
+    it('removes listeners', () => {
+      const createHandler = () => {
+        let callCount = 0;
 
+        function handlerFn() {
+          callCount += 1;
+        }
+        handlerFn.getCallCount = () => callCount;
+
+        return handlerFn;
+      };
+
+      const handler1 = createHandler();
+      const handler2 = createHandler();
+
+      // attach and test the first handler
+      history.onChange(handler1);
+
+      expect(handler1.getCallCount()).to.equal(0);
+      history.push({});
+      expect(handler1.getCallCount()).to.equal(1);
+
+      // attach and test the second handler
+      history.onChange(handler2);
+
+      expect(handler2.getCallCount()).to.equal(0);
+      history.push({});
+      expect(handler1.getCallCount()).to.equal(2);
+      expect(handler2.getCallCount()).to.equal(1);
+
+      // remove all handlers
       history.resetOnChange();
-      expect(getListeners('popstate')).to.have.length(0);
+      history.push({});
+      expect(handler1.getCallCount()).to.equal(2);
+      expect(handler2.getCallCount()).to.equal(1);
     });
   });
 
@@ -145,10 +205,11 @@ describe('historyProvider', () => {
     it('returns the decompressed object', () => {
       history.push(state);
 
-      const historyState = win.history._getHistory().state;
+      const hist = history.historyInstance;
+      const rawState = hist.location.state;
 
-      expect(historyState).to.be.a('string');
-      expect(history.parse(historyState)).to.eql(state);
+      expect(rawState).to.be.a('string');
+      expect(history.parse(rawState)).to.eql(state);
     });
 
     it('returns null with invalid JSON', () => {
@@ -160,10 +221,11 @@ describe('historyProvider', () => {
     it('returns the compressed string', () => {
       history.push(state);
 
-      const historyState = win.history._getHistory().state;
+      const hist = history.historyInstance;
+      const rawState = hist.location.state;
 
-      expect(historyState).to.be.a('string');
-      expect(history.encode(state)).to.eql(historyState);
+      expect(rawState).to.be.a('string');
+      expect(history.encode(state)).to.eql(rawState);
     });
   });
 });

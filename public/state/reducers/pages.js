@@ -1,6 +1,7 @@
 import { handleActions } from 'redux-actions';
 import { push, set, del, insert } from 'object-path-immutable';
 import { getId } from '../../lib/get_id.js';
+import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 
@@ -9,7 +10,7 @@ function setPageIndex(workpadState, index) {
   return set(workpadState, 'page', index);
 }
 
-function getIndexById(workpadState, id) {
+function getPageIndexById(workpadState, id) {
   return workpadState.pages.findIndex(page => page.id === id);
 }
 
@@ -31,7 +32,13 @@ export const pagesReducer = handleActions(
   {
     [actions.addPage]: (workpadState, { payload }) => {
       const withNewPage = addPage(workpadState, payload);
-      return setPageIndex(withNewPage, withNewPage.pages.length - 1);
+      const newState = setPageIndex(withNewPage, withNewPage.pages.length - 1);
+
+      // changes to the page require navigation
+      const router = routerProvider();
+      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
+
+      return newState;
     },
 
     [actions.duplicatePage]: (workpadState, { payload }) => {
@@ -43,42 +50,49 @@ export const pagesReducer = handleActions(
       return addPage(workpadState, clonePage(srcPage));
     },
 
-    [actions.nextPage]: workpadState => {
-      return setPageIndex(workpadState, workpadState.page + 1);
-    },
+    [actions.gotoPage]: (workpadState, { payload }) => {
+      const newState = setPageIndex(workpadState, payload);
 
-    [actions.previousPage]: workpadState => {
-      return setPageIndex(workpadState, workpadState.page - 1);
-    },
+      // changes to the page require navigation
+      const router = routerProvider();
+      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
 
-    [actions.loadPage]: (workpadState, { payload }) => {
-      const pageIndex = getIndexById(workpadState, payload);
-      if (pageIndex >= 0) return set(workpadState, 'page', pageIndex);
+      return newState;
     },
 
     [actions.movePage]: (workpadState, { payload }) => {
       const { id, position } = payload;
-      const pageIndex = getIndexById(workpadState, id);
+      const pageIndex = getPageIndexById(workpadState, id);
       const newIndex = pageIndex + position;
+
+      // TODO: do something better when given an invalid page id
+      if (pageIndex < 0) return workpadState;
 
       // don't move pages past the first or last position
       if (newIndex < 0 || newIndex >= workpadState.pages.length) return workpadState;
 
       // remove and re-insert the page
       const page = { ...workpadState.pages[pageIndex] };
-      const newState = insert(del(workpadState, `pages.${pageIndex}`), 'pages', page, newIndex);
+      let newState = insert(del(workpadState, `pages.${pageIndex}`), 'pages', page, newIndex);
 
       // adjust the selected page index and return the new state
       const selectedId = workpadState.pages[workpadState.page].id;
       const newSelectedIndex = newState.pages.findIndex(page => page.id === selectedId);
-      return set(newState, 'page', newSelectedIndex);
+      newState = set(newState, 'page', newSelectedIndex);
+
+      // changes to the page require navigation
+      const router = routerProvider();
+      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
+
+      return newState;
     },
 
     [actions.removePage]: (workpadState, { payload }) => {
       const curIndex = workpadState.page;
-      const delIndex = getIndexById(workpadState, payload);
+      const delIndex = getPageIndexById(workpadState, payload);
       if (delIndex >= 0) {
         let newState = del(workpadState, `pages.${delIndex}`);
+        const router = routerProvider();
         const wasSelected = curIndex === delIndex;
         const wasOnlyPage = newState.pages.length === 0;
         const newSelectedPage = curIndex >= delIndex ? curIndex - 1 : curIndex;
@@ -86,11 +100,18 @@ export const pagesReducer = handleActions(
         // if we removed the only page, create a new empty one
         if (wasOnlyPage) newState = addPage(newState);
 
-        // if we removed the only page or the selected one, select the first one
-        if (wasOnlyPage || wasSelected) return set(newState, 'page', 0);
+        if (wasOnlyPage || wasSelected) {
+          // if we removed the only page or the selected one, select the first one
+          newState = set(newState, 'page', 0);
+        } else {
+          // set the adjusted selected page on new state
+          newState = set(newState, 'page', newSelectedPage);
+        }
 
-        // set the adjusted selected page on new state
-        return set(newState, 'page', newSelectedPage);
+        // changes to the page require navigation
+        router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
+
+        return newState;
       }
     },
 

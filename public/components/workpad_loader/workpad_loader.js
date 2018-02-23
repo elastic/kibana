@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Form, Table } from 'react-bootstrap';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
+import { Link } from '../link';
 import { WorkpadUpload } from './workpad_upload';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
@@ -14,7 +15,6 @@ export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
     createWorkpad: PropTypes.func.isRequired,
-    loadWorkpadById: PropTypes.func.isRequired,
     findWorkpads: PropTypes.func.isRequired,
     downloadWorkpad: PropTypes.func.isRequired,
     removeWorkpad: PropTypes.func.isRequired,
@@ -33,22 +33,10 @@ export class WorkpadLoader extends React.PureComponent {
   }
 
   componentWillReceiveProps(newProps) {
-    // the workpadId prop will change when a new workpad is created
-    // if there is a create pending and the id changes, it means the creation is complete
-    // so the onClose method should be called
+    // the workpadId prop will change when a is created or loaded, close the toolbar when it does
     const { workpadId, onClose } = this.props;
-    if (this.state.createPending && workpadId !== newProps.workpadId) {
-      onClose();
-    }
+    if (workpadId !== newProps.workpadId) onClose();
   }
-
-  // load workpad by id
-  loadWorkpad = id => {
-    if (id !== this.props.workpadId) {
-      this.props.loadWorkpadById(id);
-      this.props.onClose();
-    }
-  };
 
   // create new empty workpad
   createWorkpad = () => {
@@ -127,25 +115,19 @@ export class WorkpadLoader extends React.PureComponent {
           {!isLoading &&
             workpads.workpads.map(wp => (
               <tr key={wp.id} className="canvas__workpad_loader--workpad">
-                <td
-                  width="97%"
-                  className="canvas__workpad_loader--name"
-                  onClick={() => this.loadWorkpad(wp.id)}
-                >
-                  {wp.name}
+                <td width="97%" className="canvas__workpad_loader--name">
+                  <Link
+                    name="loadWorkpad"
+                    params={{ id: wp.id }}
+                    aria-label={`Load workpad ${wp.id}`}
+                  >
+                    {wp.name}
+                  </Link>
                 </td>
-                <td
-                  width="1%"
-                  className="canvas__workpad_loader--created"
-                  onClick={() => this.loadWorkpad(wp.id)}
-                >
+                <td width="1%" className="canvas__workpad_loader--created">
                   {formatDate(wp['@created'])}
                 </td>
-                <td
-                  width="1%"
-                  className="canvas__workpad_loader--updated"
-                  onClick={() => this.loadWorkpad(wp.id)}
-                >
+                <td width="1%" className="canvas__workpad_loader--updated">
                   {formatDate(wp['@timestamp'])}
                 </td>
                 <td width="1%" className="canvas__workpad_loader--export">
