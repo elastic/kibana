@@ -23,6 +23,11 @@ const options = {
           pattern: 'socket.io-client',
           location: resolve(__dirname, 'tasks', 'mocks', 'socketClient'),
         },
+        {
+          // ugly hack so that importing non-js files works, required for the function docs
+          pattern: '.(less|png|svg)$',
+          location: resolve(__dirname, 'tasks', 'mocks', 'noop'),
+        },
       ],
     ],
   ],

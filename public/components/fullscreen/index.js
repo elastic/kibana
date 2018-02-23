@@ -3,15 +3,18 @@ import { compose, withProps, withState, withHandlers, lifecycle } from 'recompos
 import { debounce } from 'lodash';
 import { getFullscreen } from '../../state/selectors/app.js';
 import { defaultIdent } from '../../lib/fullscreen.js';
+import { getWindow } from '../../lib/get_window.js';
 import { Fullscreen as Component } from './fullscreen';
+
+const win = getWindow();
 
 const mapStateToProps = state => ({
   isFullscreen: getFullscreen(state),
 });
 
 const getWindowSize = () => ({
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: win.innerWidth,
+  height: win.innerHeight,
 });
 
 export const Fullscreen = compose(
@@ -28,10 +31,10 @@ export const Fullscreen = compose(
   connect(mapStateToProps),
   lifecycle({
     componentWillMount() {
-      window.addEventListener('resize', this.props.windowResizeHandler);
+      win.addEventListener('resize', this.props.windowResizeHandler);
     },
     componentWillUnmount() {
-      window.removeEventListener('resize', this.props.windowResizeHandler);
+      win.removeEventListener('resize', this.props.windowResizeHandler);
     },
   })
 )(Component);
