@@ -61,6 +61,9 @@ export const pointseries = () => ({
         };
 
         if (isColumnReference(mathExp)) {
+          // TODO: Check if column exists
+          if (!context.columns.filter(col => col.name === mathExp).length) return;
+
           dimensionNames.push(arg);
           col.type = getExpressionType(context.columns, mathExp);
           col.role = 'dimension';
