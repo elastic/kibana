@@ -26,6 +26,7 @@ export class TagListing extends React.Component {
       isFetchingItems: true,
       showDeleteModal: false,
       tags: [],
+      selectedIds: []
     };
   }
 
@@ -60,7 +61,8 @@ export class TagListing extends React.Component {
         // work around until EuiInMemoryTable.columns.field supports nested field names
         tag.title = tag.attributes.title;
         return tag;
-      })
+      }),
+      selectedIds: [],
     });
   }, 300);
 
@@ -80,11 +82,11 @@ export class TagListing extends React.Component {
         title: `Unable to delete tag(s)`,
         text: `${error}`,
       });
+      return;
     }
+
+    toastNotifications.addSuccess(`Selected tags were deleted`);
     this.fetchTags();
-    this.setState({
-      selectedIds: []
-    });
     this.closeDeleteModal();
   }
 
@@ -126,6 +128,12 @@ export class TagListing extends React.Component {
     const selection = {
       itemId: (item) => {
         return item.id;
+      },
+      onSelectionChange: (selectedItems) => {
+        const selectedIds = selectedItems.map((item) => {
+          return item.id;
+        });
+        this.setState({ selectedIds: selectedIds });
       }
     };
     const search = {
@@ -154,7 +162,21 @@ export class TagListing extends React.Component {
   }
 
   render() {
-    console.log("render called");
+    // work around until EuiInMemoryTable allows for passing button into search.
+    let deleteButton;
+    if (this.state.selectedIds.length > 0) {
+      deleteButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="danger"
+            onClick={this.openDeleteModal}
+          >
+            Delete selected
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
+
     return (
       <EuiPage>
 
@@ -183,6 +205,8 @@ export class TagListing extends React.Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
+
+        {deleteButton}
 
         {this.renderTable()}
 

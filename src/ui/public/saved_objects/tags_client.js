@@ -28,7 +28,7 @@ export class TagsClient {
       return this.savedObjectsClient.delete(TAG_TYPE, id);
     });
 
-    return Promise.all(deletePromises);
+    await Promise.all(deletePromises);
   }
 
   async find(search) {
