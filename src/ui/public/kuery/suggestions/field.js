@@ -6,10 +6,10 @@ function getDescription(fieldName) {
 
 export function getSuggestionsProvider({ indexPattern }) {
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
-    const search = `${prefix}${suffix}`;
+    const search = `${prefix}${suffix}`.toLowerCase();
     const filterableFields = indexPattern.fields.filter(field => field.filterable);
     const fieldNames = filterableFields.map(field => field.name);
-    const matchingFieldNames = fieldNames.filter(field => field.includes(search));
+    const matchingFieldNames = fieldNames.filter(field => field.toLowerCase().includes(search));
     const suggestions = matchingFieldNames.map(fieldName => {
       const text = fieldName + ' ';
       const description = getDescription(fieldName);
