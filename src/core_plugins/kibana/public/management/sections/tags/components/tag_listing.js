@@ -56,7 +56,11 @@ export class TagListing extends React.Component {
 
     this.setState({
       isFetchingItems: false,
-      tags: tags
+      tags: tags.map((tag) => {
+        // work around until EuiInMemoryTable.columns.field supports nested field names
+        tag.title = tag.attributes.title;
+        return tag;
+      })
     });
   }, 300);
 
@@ -100,8 +104,8 @@ export class TagListing extends React.Component {
     );
   }
 
-  renderTag = (item) => {
-    console.log("render tag");
+  renderTag = (field, item) => {
+    console.log("render column");
     return (
       <TagFormPopover
         button={(
@@ -137,8 +141,10 @@ export class TagListing extends React.Component {
         search={search}
         columns={[
           {
+            field: 'title',
             name: 'Title',
-            render: this.renderTag
+            render: this.renderTag,
+            sortable: true
           }
         ]}
         pagination={true}

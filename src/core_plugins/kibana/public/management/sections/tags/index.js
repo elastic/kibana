@@ -34,6 +34,6 @@ uiRoutes
 
 management.getSection('kibana').register('tags', {
   display: 'Tags',
-  order: 30,
+  order: 1,
   url: '#/management/kibana/tags/'
 });
