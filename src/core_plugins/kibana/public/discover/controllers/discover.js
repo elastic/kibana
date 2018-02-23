@@ -195,6 +195,8 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
   };
 
   const init = _.once(function () {
+    require('../components/discover_resize')();
+
     const showTotal = 5;
     $scope.failuresShown = showTotal;
     $scope.showAllFailures = function () {
