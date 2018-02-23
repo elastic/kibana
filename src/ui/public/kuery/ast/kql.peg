@@ -69,6 +69,12 @@ Expression
 
 FieldRangeExpression
   = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        suggestionTypes: ['conjunction']
+      };
+    }
     const range = buildNamedArgNode(operator, value);
     return buildFunctionNode('range', [field, range]);
   }
