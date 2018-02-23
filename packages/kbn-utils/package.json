@@ -11,6 +11,10 @@
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
+    "@types/type-detect": "^4.0.1",
     "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "type-detect": "^4.0.8"
   }
 }
