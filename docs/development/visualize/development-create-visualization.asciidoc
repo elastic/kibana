@@ -89,9 +89,42 @@ options or data change, and a destroy method which will be called to cleanup.
 The render function receives the data object and status object which tells what actually changed.
 Render function needs to return a promise, which should be resolved once the visualization is done rendering.
 
-Status object has the following properties: `aggs`, `data`, `params`, `resize`, `time`, `uiState`. Each of them is set to true if the matching
-object changed since last call to the render function or set to false otherwise. You can use it to make your 
-visualization rendering more efficient.
+The status object provides information about changes since the previous render call.
+Due to performance reasons you need to opt-in for each status change, that you want
+to be informed about by Kibana. This is done by using the `requiresUpdateStatus` key
+in your visualization registration object. You pass it an array, that contains all
+the status updates you want to receive. By default none of it will be calculated.
+
+The following snippet shows explain all available status updates. You should only
+activate those changes, that you actually use in your `render` method.
+
+["source","js"]
+-----------
+import { Status } from 'ui/vis/update_status';
+
+// ...
+return  VisFactory.createBaseVisualization({
+  // ...
+  requiresUpdateStatus: [
+    // Check for changes in the aggregation configuration for the visualization
+    Status.AGGS,
+    // Check for changes in the actual data returned from Elasticsearch
+    Status.DATA,
+    // Check for changes in the parameters (configuration) for the visualization
+    Status.PARAMS,
+    // Check if the visualization has changes its size
+    Status.RESIZE,
+    // Check if the time range for the visualization has been changed
+    Status.TIME,
+    // Check if the UI state of the visualization has been changed
+    Status.UI_STATE
+  ]
+});
+-----------
+
+If you activate any of these status updates, the `status` object passed as second
+parameter to the `render` method will contain a key for that status (e.g. `status[Status.DATA]`),
+that is either `true` if a change has been detected or `false` otherwise.
 
 
 image::images/visualize-flow.png[Main Flow]
