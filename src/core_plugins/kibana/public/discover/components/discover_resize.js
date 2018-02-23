@@ -1,20 +1,19 @@
 import $ from 'jquery';
 
 module.exports = function () {
-	const $fieldPanel = $('#discover_field');
-	const $fieldSidebar = $('#discover_field .sidebar-list');
-	var $resizer = $('#discover_resizer');
+  const $fieldPanel = $('#discover_field');
+  const $fieldSidebar = $('#discover_field .sidebar-list');
+  const $resizer = $('#discover_resizer');
 
-	function setEditorWidth(editorWidth) {
-		$fieldPanel.width(editorWidth);
-		$fieldSidebar.width(editorWidth);
-	}
+  function setEditorWidth(editorWidth) {
+    $fieldPanel.width(editorWidth);
+    $fieldSidebar.width(editorWidth);
+  }
 
-	$resizer
-	.on('mousedown', function (event) {
+  $resizer.on('mousedown', function (event) {
 	  $resizer.addClass('active');
-	  var startWidth = $fieldPanel.width();
-	  var startX = event.pageX;
+	  const startWidth = $fieldPanel.width();
+	  const startX = event.pageX;
 
 	  function onMove(event) {
 	    setEditorWidth(startWidth + event.pageX - startX);
@@ -26,5 +25,5 @@ module.exports = function () {
 	      $resizer.removeClass('active');
 	      $(this).off('mousemove', onMove);
 	    });
-	});
-}
+  });
+};
