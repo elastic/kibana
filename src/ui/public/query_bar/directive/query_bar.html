@@ -56,7 +56,7 @@
         <input
           ng-model="queryBar.localQuery.query"
           ng-trim="false"
-          ng-keyup="queryBar.handleKeyUp($event)"
+          ng-keydown="queryBar.handleKeyDown($event)"
           ng-change="queryBar.updateSuggestions()"
           ng-click="queryBar.updateSuggestions()"
           input-focus

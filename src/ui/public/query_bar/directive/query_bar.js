@@ -25,7 +25,7 @@ module.directive('queryBar', function () {
     controllerAs: 'queryBar',
     bindToController: true,
 
-    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, config, PersistedLog) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog) {
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
@@ -47,20 +47,23 @@ module.directive('queryBar', function () {
 
       this.suggestionTemplate = suggestionTemplate;
 
-      this.handleKeyUp = (event) => {
+      this.handleKeyDown = (event) => {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
           this.updateSuggestions();
         }
       };
 
       this.updateSuggestions = () => {
-        const inputEl = $element.find('input')[0];
-        const { selectionStart, selectionEnd, value } = inputEl;
-        const query = value;
-        return getSuggestions({ query, selectionStart, selectionEnd })
-          .then(suggestions => {
-            $scope.$apply(() => this.suggestions = suggestions);
-          });
+        $timeout(() => {
+          const inputEl = $element.find('input')[0];
+          if (!inputEl) return;
+          const { selectionStart, selectionEnd } = inputEl;
+          const { query } = this.localQuery;
+          return getSuggestions({ query, selectionStart, selectionEnd })
+            .then(suggestions => {
+              $scope.$apply(() => this.suggestions = suggestions);
+            });
+        });
       };
 
       // TODO: Figure out a better way to set selection
@@ -69,8 +72,8 @@ module.directive('queryBar', function () {
         const inputEl = $element.find('input')[0];
         this.localQuery.query = inputEl.value = query.substr(0, start) + text + query.substr(end);
         inputEl.setSelectionRange(start + text.length, start + text.length);
-        this.updateSuggestions();
         inputEl.focus();
+        this.updateSuggestions();
       };
 
       $scope.$watch('queryBar.localQuery.language', (language) => {
