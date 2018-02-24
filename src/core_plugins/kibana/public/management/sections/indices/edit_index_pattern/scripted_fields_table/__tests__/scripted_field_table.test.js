@@ -4,11 +4,8 @@ import { shallow } from 'enzyme';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 
 jest.mock('@elastic/eui', () => ({
-  EuiButton: 'eui-button',
-  EuiBasicTable: 'eui-basic-table',
   EuiTitle: 'eui-title',
   EuiText: 'eui-text',
-  EuiButton: 'eui-button',
   EuiHorizontalRule: 'eui-horizontal-rule',
   EuiSpacer: 'eui-spacer',
   EuiCallOut: 'eui-call-out',

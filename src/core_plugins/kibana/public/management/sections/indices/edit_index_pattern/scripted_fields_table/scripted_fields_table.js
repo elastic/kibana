@@ -16,8 +16,6 @@ import {
   CallOuts,
 } from './components';
 
-import { getItemsOnPage } from './lib';
-
 export class ScriptedFieldsTable extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
@@ -38,10 +36,6 @@ export class ScriptedFieldsTable extends Component {
       fieldToDelete: undefined,
       isDeleteConfirmationModalVisible: false,
       fields: [],
-      pageIndex: 0,
-      pageSize: 10,
-      sortField: 'name',
-      sortDirection: 'asc',
     };
   }
 
@@ -68,31 +62,20 @@ export class ScriptedFieldsTable extends Component {
     });
   }
 
-  onTableChange = (
-    pageIndex = this.state.pageIndex,
-    pageSize = this.state.pageSize,
-    sortField = this.state.sortField,
-    sortDirection = this.state.sortDirection
-  ) => {
-    this.setState({ pageIndex, pageSize, sortField, sortDirection });
-  };
-
-  getItemsOnPage = () => {
-    const { fields, pageIndex, pageSize, sortField, sortDirection } = this.state;
+  getFilteredItems = () => {
+    const { fields } = this.state;
     const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
-
-    let items = fields;
 
     if (fieldFilter) {
       const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
-      items = items.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
+      return fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
     }
 
     if (scriptedFieldLanguageFilter) {
-      items = items.filter(field => field.lang === this.props.scriptedFieldLanguageFilter);
+      return fields.filter(field => field.lang === this.props.scriptedFieldLanguageFilter);
     }
 
-    return getItemsOnPage(items, pageIndex, pageSize, sortField, sortDirection);
+    return fields;
   }
 
   renderCallOuts() {
@@ -151,15 +134,7 @@ export class ScriptedFieldsTable extends Component {
       indexPattern,
     } = this.props;
 
-    const {
-      fields,
-      pageIndex,
-      pageSize,
-      sortField,
-      sortDirection,
-    } = this.state;
-
-    const itemsOnPage = this.getItemsOnPage();
+    const items = this.getFilteredItems();
 
     return (
       <div>
@@ -169,18 +144,12 @@ export class ScriptedFieldsTable extends Component {
 
         <EuiSpacer size="l" />
 
-        { fields.length > 0 ?
+        { items.length > 0 ?
           <Table
             indexPattern={indexPattern}
-            itemsOnPage={itemsOnPage}
-            totalItemCount={fields.length}
-            pageIndex={pageIndex}
-            pageSize={pageSize}
-            sortField={sortField}
-            sortDirection={sortDirection}
+            items={items}
             editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
             deleteField={this.startDeleteField}
-            onChange={this.onTableChange}
           />
           : null
         }

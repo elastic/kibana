@@ -13,24 +13,14 @@ const indexPattern = {
   }
 };
 
-const itemsOnPage = [{ id: 1, name: 'Elastic' }];
-const totalItemCount = 1;
-const pageIndex = 0;
-const pageSize = 10;
-const sortField = 'name';
-const sortDirection = 'asc';
+const items = [{ id: 1, name: 'Elastic' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        itemsOnPage={itemsOnPage}
-        totalItemCount={totalItemCount}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        sortField={sortField}
-        sortDirection={sortDirection}
+        items={items}
         editField={() => {}}
         deleteField={() => {}}
         onChange={() => {}}
@@ -44,12 +34,7 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        itemsOnPage={itemsOnPage}
-        totalItemCount={totalItemCount}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        sortField={sortField}
-        sortDirection={sortDirection}
+        items={items}
         editField={() => {}}
         deleteField={() => {}}
         onChange={() => {}}
@@ -66,12 +51,7 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        itemsOnPage={itemsOnPage}
-        totalItemCount={totalItemCount}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        sortField={sortField}
-        sortDirection={sortDirection}
+        items={items}
         editField={editField}
         deleteField={() => {}}
         onChange={() => {}}
@@ -89,12 +69,7 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        itemsOnPage={itemsOnPage}
-        totalItemCount={totalItemCount}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        sortField={sortField}
-        sortDirection={sortDirection}
+        items={items}
         editField={() => {}}
         deleteField={deleteField}
         onChange={() => {}}

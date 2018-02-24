@@ -2,36 +2,16 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiBasicTable
+  EuiInMemoryTable,
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
-    itemsOnPage: PropTypes.array.isRequired,
-    totalItemCount: PropTypes.number.isRequired,
-    pageIndex: PropTypes.number.isRequired,
-    pageSize: PropTypes.number.isRequired,
-    sortField: PropTypes.string.isRequired,
-    sortDirection: PropTypes.string.isRequired,
+    items: PropTypes.array.isRequired,
     editField: PropTypes.func.isRequired,
     deleteField: PropTypes.func.isRequired,
-    onChange: PropTypes.func.isRequired,
   }
-
-  onChange = ({ page = {}, sort = {} }) => {
-    const {
-      index: pageIndex,
-      size: pageSize,
-    } = page;
-
-    const {
-      field: sortField,
-      direction: sortDirection,
-    } = sort;
-
-    this.props.onChange(pageIndex, pageSize, sortField, sortDirection);
-  };
 
   renderFormatCell = (value) => {
     const { indexPattern } = this.props;
@@ -47,12 +27,7 @@ export class Table extends PureComponent {
 
   render() {
     const {
-      itemsOnPage,
-      totalItemCount,
-      pageIndex,
-      pageSize,
-      sortField,
-      sortDirection,
+      items,
       editField,
       deleteField,
     } = this.props;
@@ -105,26 +80,15 @@ export class Table extends PureComponent {
     }];
 
     const pagination = {
-      pageIndex,
-      pageSize,
-      totalItemCount,
       pageSizeOptions: [5, 10, 25, 50],
     };
 
-    const sorting = {
-      sort: {
-        field: sortField,
-        direction: sortDirection,
-      },
-    };
-
     return (
-      <EuiBasicTable
-        items={itemsOnPage}
+      <EuiInMemoryTable
+        items={items}
         columns={columns}
         pagination={pagination}
-        sorting={sorting}
-        onChange={this.onChange}
+        sorting={true}
       />
     );
   }

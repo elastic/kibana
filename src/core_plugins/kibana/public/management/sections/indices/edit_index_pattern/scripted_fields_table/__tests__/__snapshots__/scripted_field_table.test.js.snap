@@ -24,7 +24,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    itemsOnPage={
+    items={
       Array [
         Object {
           "lang": "painless",
@@ -38,12 +38,6 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
         },
       ]
     }
-    onChange={[Function]}
-    pageIndex={0}
-    pageSize={10}
-    sortDirection="asc"
-    sortField="name"
-    totalItemCount={3}
   />
 </div>
 `;
@@ -68,7 +62,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    itemsOnPage={
+    items={
       Array [
         Object {
           "lang": "painless",
@@ -77,12 +71,6 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
         },
       ]
     }
-    onChange={[Function]}
-    pageIndex={0}
-    pageSize={10}
-    sortDirection="asc"
-    sortField="name"
-    totalItemCount={2}
   />
 </div>
 `;
@@ -122,7 +110,7 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    itemsOnPage={
+    items={
       Array [
         Object {
           "lang": "painless",
@@ -136,12 +124,6 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
         },
       ]
     }
-    onChange={[Function]}
-    pageIndex={0}
-    pageSize={10}
-    sortDirection="asc"
-    sortField="name"
-    totalItemCount={2}
   />
 </div>
 `;
@@ -166,7 +148,7 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    itemsOnPage={
+    items={
       Array [
         Object {
           "lang": "painless",
@@ -180,12 +162,6 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
         },
       ]
     }
-    onChange={[Function]}
-    pageIndex={0}
-    pageSize={10}
-    sortDirection="asc"
-    sortField="name"
-    totalItemCount={2}
   />
   <eui-overlay-mask>
     <eui-confirm-modal
