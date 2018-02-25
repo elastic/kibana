@@ -62,8 +62,7 @@ function fetchContextProvider(courier, Private) {
       timeSortDirection,
       timeValue,
       timeValue - INITIAL_LIMIT_INCREMENT,
-      size,
-      timeValue * 2
+      size
     );
     return results;
   }
@@ -100,8 +99,7 @@ function fetchContextProvider(courier, Private) {
       predecessorTimeSortDirection,
       timeValue,
       timeValue + INITIAL_LIMIT_INCREMENT,
-      size,
-      timeValue * 2
+      size
     );
     const results = reversedResults.slice().reverse();
     return results;
@@ -162,15 +160,22 @@ function fetchContextProvider(courier, Private) {
       .fetchAsRejectablePromise();
 
     const hits = _.get(response, ['hits', 'hits'], []);
-    const nextToTimeValue = toTimeValue + (toTimeValue - fromTimeValue);
+    const nextToTimeValue = clamp(
+      toTimeValue + (toTimeValue - fromTimeValue),
+      0,
+      maxTimeValue !== null ? maxTimeValue : Number.POSITIVE_INFINITY
+    );
 
     if (
       hits.length >= expectedSize ||
-      nextToTimeValue > maxTimeValue ||
-      nextToTimeValue < 0
+      (maxTimeValue !== null && toTimeValue >= maxTimeValue) ||
+      toTimeValue <= 0
     ) {
       return hits;
     } else {
+      if (maxTimeValue === null) {
+        maxTimeValue = await getMaxTimeValue(searchSource.get('index'), timeField);
+      }
       return await performQuery(
         searchSource,
         timeField,
@@ -181,6 +186,39 @@ function fetchContextProvider(courier, Private) {
         maxTimeValue
       );
     }
+  }
+
+  async function getMaxTimeValue(indexPattern, timeField) {
+    const searchSource = new SearchSource()
+      .inherits(false)
+      .set('index', indexPattern)
+      .set('size', 0)
+      .set('query': {
+        query: {
+          match_all: {},
+        },
+        language: 'lucene',
+      })
+      .set('aggs', {
+        max_time: {
+          max: {
+            field: timeField,
+          },
+        },
+      });
+
+    const response = await searchSource
+      .fetchAsRejectablePromise();
+
+    if (response.aggregations && response.aggregations.max_time) {
+      return response.aggregations.max_time.value;
+    } else {
+      return 0;
+    }
+  }
+
+  function clamp(value, minValue, maxValue) {
+    return Math.min(Math.max(value, minValue), maxValue);
   }
 }
 
