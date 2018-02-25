@@ -36,70 +36,72 @@ function fetchContextProvider(courier, Private) {
 
   async function fetchSuccessors(
     indexPatternId,
-    sortingField,
-    sortingDirection,
-    sortingValue,
+    timeField,
+    timeSortDirection,
+    timeValue,
     tieBreakerField,
-    tieBreakerDirection,
+    tieBreakerSortDirection,
     tieBreakerValue,
     size,
     filters
   ) {
     const successorsSearchSource = await createSearchSource(
       indexPatternId,
-      sortingField,
-      sortingDirection,
-      sortingValue,
+      timeField,
+      timeSortDirection,
+      timeValue,
       tieBreakerField,
-      tieBreakerDirection,
+      tieBreakerSortDirection,
       tieBreakerValue,
       size,
       filters,
     );
     const results = await performQuery(
       successorsSearchSource,
-      sortingField,
-      sortingDirection,
-      sortingValue,
-      sortingValue - INITIAL_LIMIT_INCREMENT,
+      timeField,
+      timeSortDirection,
+      timeValue,
+      timeValue - INITIAL_LIMIT_INCREMENT,
       size,
-      sortingValue * 2
+      timeValue * 2
     );
     return results;
   }
 
   async function fetchPredecessors(
     indexPatternId,
-    sortingField,
-    sortingDirection,
-    sortingValue,
+    timeField,
+    timeSortDirection,
+    timeValue,
     tieBreakerField,
-    tieBreakerDirection,
+    tieBreakerSortDirection,
     tieBreakerValue,
     size,
     filters
   ) {
-    const predecessorSortingDirection = reverseSortDirection(sortingDirection);
-    const predecessorTieBreakerDirection = reverseSortDirection(tieBreakerDirection);
+    const predecessorTimeSortDirection =
+      reverseSortDirection(timeSortDirection);
+    const predecessorTieBreakerSortDirection =
+      reverseSortDirection(tieBreakerSortDirection);
     const predecessorsSearchSource = await createSearchSource(
       indexPatternId,
-      sortingField,
-      predecessorSortingDirection,
-      sortingValue,
+      timeField,
+      predecessorTimeSortDirection,
+      timeValue,
       tieBreakerField,
-      predecessorTieBreakerDirection,
+      predecessorTieBreakerSortDirection,
       tieBreakerValue,
       size,
       filters,
     );
     const reversedResults = await performQuery(
       predecessorsSearchSource,
-      sortingField,
-      predecessorSortingDirection,
-      sortingValue,
-      sortingValue + INITIAL_LIMIT_INCREMENT,
+      timeField,
+      predecessorTimeSortDirection,
+      timeValue,
+      timeValue + INITIAL_LIMIT_INCREMENT,
       size,
-      sortingValue * 2
+      timeValue * 2
     );
     const results = reversedResults.slice().reverse();
     return results;
@@ -107,11 +109,11 @@ function fetchContextProvider(courier, Private) {
 
   async function createSearchSource(
     indexPatternId,
-    sortingField,
-    sortingDirection,
-    sortingValue,
+    timeField,
+    timeSortDirection,
+    timeValue,
     tieBreakerField,
-    tieBreakerDirection,
+    tieBreakerSortDirection,
     tieBreakerValue,
     size,
     filters
@@ -124,21 +126,21 @@ function fetchContextProvider(courier, Private) {
       .set('version', true)
       .set('size', size)
       .set('filter', filters)
-      .set('searchAfter', [sortingValue, tieBreakerValue])
+      .set('searchAfter', [timeValue, tieBreakerValue])
       .set('sort', [
-        { [sortingField]: sortingDirection },
-        { [tieBreakerField]: tieBreakerDirection },
+        { [timeField]: timeSortDirection },
+        { [tieBreakerField]: tieBreakerSortDirection },
       ]);
   }
 
   async function performQuery(
     searchSource,
-    sortingField,
-    sortingDirection,
-    fromSortingValue,
-    toSortingValue,
+    timeField,
+    timeSortDirection,
+    fromTimeValue,
+    toTimeValue,
     expectedSize,
-    maxSortingValue
+    maxTimeValue = null
   ) {
     const response = await searchSource
       .set('query', {
@@ -147,9 +149,9 @@ function fetchContextProvider(courier, Private) {
             filter: {
               // match_all: {},
               range: {
-                [sortingField]: {
-                  [sortingDirection === 'asc' ? 'gte' : 'lte']: fromSortingValue,
-                  [sortingDirection === 'asc' ? 'lte' : 'gte']: toSortingValue,
+                [timeField]: {
+                  [timeSortDirection === 'asc' ? 'gte' : 'lte']: fromTimeValue,
+                  [timeSortDirection === 'asc' ? 'lte' : 'gte']: toTimeValue,
                 }
               },
             },
@@ -160,23 +162,23 @@ function fetchContextProvider(courier, Private) {
       .fetchAsRejectablePromise();
 
     const hits = _.get(response, ['hits', 'hits'], []);
-    const nextToSortingValue = toSortingValue + (toSortingValue - fromSortingValue);
+    const nextToTimeValue = toTimeValue + (toTimeValue - fromTimeValue);
 
     if (
       hits.length >= expectedSize ||
-      nextToSortingValue > maxSortingValue ||
-      nextToSortingValue < 0
+      nextToTimeValue > maxTimeValue ||
+      nextToTimeValue < 0
     ) {
       return hits;
     } else {
       return await performQuery(
         searchSource,
-        sortingField,
-        sortingDirection,
-        fromSortingValue,
-        nextToSortingValue,
+        timeField,
+        timeSortDirection,
+        fromTimeValue,
+        nextToTimeValue,
         expectedSize,
-        maxSortingValue
+        maxTimeValue
       );
     }
   }
