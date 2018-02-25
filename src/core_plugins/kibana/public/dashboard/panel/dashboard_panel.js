@@ -39,22 +39,6 @@ export class DashboardPanel extends React.Component {
   }
 
   renderEmbeddedError() {
-    const { error } = this.props;
-    const errorMessage = error.message || JSON.stringify(error);
-    return <PanelError error={errorMessage} />;
-  }
-
-  renderEmbeddedContent() {
-    return (
-      <div
-        id="embeddedPanel"
-        className="panel-content"
-        ref={panelElement => this.panelElement = panelElement}
-      />
-    );
-  }
-
-  renderEmbeddedError() {
     return <PanelError error={this.props.error} />;
   }
 
