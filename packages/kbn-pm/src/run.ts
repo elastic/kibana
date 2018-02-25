@@ -5,8 +5,8 @@ import indentString from 'indent-string';
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, projectPathsSchema } from './config';
-import { Command, CommandConfig } from './commands';
+import { getProjectPaths, projectPathsFields } from './config';
+import { Command, CommandConfig } from './commands/command';
 
 export async function runCommand(command: Command, config: CommandConfig<any>) {
   try {
@@ -18,7 +18,7 @@ export async function runCommand(command: Command, config: CommandConfig<any>) {
       )
     );
 
-    const projectPathOptions = projectPathsSchema.validate(config.options);
+    const projectPathOptions = projectPathsFields.validate(config.options);
 
     const projectPaths = getProjectPaths(config.rootPath, projectPathOptions);
 

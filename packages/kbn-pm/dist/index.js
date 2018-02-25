@@ -39098,17 +39098,17 @@ module.exports = input => typeof input === 'string' ? input.replace(ansiRegex(),
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.projectPathsSchema = undefined;
+exports.projectPathsFields = undefined;
 exports.getProjectPaths = getProjectPaths;
 
 var _path = __webpack_require__(2);
 
 var _utils = __webpack_require__(25);
 
-const projectPathsSchema = exports.projectPathsSchema = _utils.schema.partialObject({
-    'skip-kibana': _utils.schema.boolean(),
-    'skip-kibana-extra': _utils.schema.boolean()
-});
+const projectPathsFields = exports.projectPathsFields = {
+    'skip-kibana': _utils.schema.maybe(_utils.schema.boolean()),
+    'skip-kibana-extra': _utils.schema.maybe(_utils.schema.boolean())
+};
 /**
  * Returns all the paths where plugins are located
  */
@@ -40440,9 +40440,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-const bootstrapOptionsSchema = _utils.schema.partialObject({
-    'frozen-lockfile': _utils.schema.boolean()
-});
+const bootstrapOptionsSchema = {
+    'frozen-lockfile': _utils.schema.maybe(_utils.schema.boolean())
+};
 const BootstrapCommand = exports.BootstrapCommand = {
     name: 'bootstrap',
     description: 'Install dependencies and crosslink projects',
@@ -70231,7 +70231,7 @@ let runCommand = exports.runCommand = (() => {
     var _ref = _asyncToGenerator(function* (command, config) {
         try {
             console.log(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
-            const projectPathOptions = _config.projectPathsSchema.validate(config.options);
+            const projectPathOptions = _config.projectPathsFields.validate(config.options);
             const projectPaths = (0, _config.getProjectPaths)(config.rootPath, projectPathOptions);
             const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths);
             const projectGraph = (0, _projects.buildProjectGraph)(projects);

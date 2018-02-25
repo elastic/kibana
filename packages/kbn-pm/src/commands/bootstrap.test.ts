@@ -79,7 +79,11 @@ test('handles dependencies of dependencies', async () => {
 
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
-    options: {},
+    options: {
+      'skip-kibana': false,
+      'skip-kibana-extra': false,
+      'frozen-lockfile': false,
+    },
     rootPath: '',
   });
 
@@ -110,7 +114,11 @@ test('does not run installer if no deps in package', async () => {
 
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
-    options: {},
+    options: {
+      'skip-kibana': false,
+      'skip-kibana-extra': false,
+      'frozen-lockfile': false,
+    },
     rootPath: '',
   });
 
@@ -135,6 +143,8 @@ test('handles "frozen-lockfile"', async () => {
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {
+      'skip-kibana': false,
+      'skip-kibana-extra': false,
       'frozen-lockfile': true,
     },
     rootPath: '',
@@ -168,7 +178,11 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
 
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
-    options: {},
+    options: {
+      'skip-kibana': false,
+      'skip-kibana-extra': false,
+      'frozen-lockfile': false,
+    },
     rootPath: '',
   });
 

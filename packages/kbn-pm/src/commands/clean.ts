@@ -11,6 +11,7 @@ export const CleanCommand: Command = {
   name: 'clean',
   description:
     'Remove the node_modules and target directories from all projects.',
+  schemaFields: undefined,
 
   async run(projects, projectGraph, { rootPath }) {
     const directoriesToDelete = [];

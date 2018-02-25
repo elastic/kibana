@@ -8,18 +8,20 @@ import {
 } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
-import { Command } from './';
+import { createCommand } from './command';
 
-const bootstrapOptionsSchema = schema.partialObject({
-  'frozen-lockfile': schema.boolean()
-});
-type BootstrapOptionsType = schema.TypeOf<typeof bootstrapOptionsSchema>;
-
-export const BootstrapCommand: Command<BootstrapOptionsType> = {
-  name: 'bootstrap',
-  description: 'Install dependencies and crosslink projects',
-
-  async run(projects, projectGraph, { options }) {
+export const BootstrapCommand = createCommand(
+  {
+    name: 'bootstrap',
+    description: 'Install dependencies and crosslink projects',
+    additionalOptions: {
+      'frozen-lockfile': {
+        description: 'freeze',
+        validate: schema.maybe(schema.boolean()),
+      },
+    },
+  },
+  async function(projects, projectGraph, { options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     const frozenLockfile = options['frozen-lockfile'] === true;
@@ -58,5 +60,5 @@ export const BootstrapCommand: Command<BootstrapOptionsType> = {
     });
 
     console.log(chalk.green.bold('\nBootstrapping completed!\n'));
-  },
-};
+  }
+);

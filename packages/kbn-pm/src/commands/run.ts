@@ -12,8 +12,9 @@ export const RunCommand: Command = {
   name: 'run',
   description:
     'Run script defined in package.json in each package that contains that script.',
+  schemaFields: undefined,
 
-  async run(projects, projectGraph, { extraArgs }) {
+  async run(projects, projectGraph, { extraArgs, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
