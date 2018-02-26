@@ -98,7 +98,8 @@ export function createPanelState(id, type, panelIndex, currentPanels) {
     version: chrome.getKibanaVersion(),
     panelIndex: panelIndex.toString(),
     type: type,
-    id: id
+    id: id,
+    embeddableConfig: {},
   };
 }
 
