@@ -28,6 +28,7 @@ export const math = () => ({
     try {
       const result = evaluate(args._, mathContext);
       if (Array.isArray(result)) {
+        if (result.length === 1) return result[0];
         throw new Error(
           'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
         );
