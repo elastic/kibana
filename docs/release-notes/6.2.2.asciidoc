@@ -8,7 +8,6 @@ Also see <<breaking-changes-6.0>>.
 === Bug fixes
 Design::
 * [Fixes #4475] Removing flex-basis: 0 to make items size properly in IE11 {pull}16557[#16557]
-* [Fixes #16608] Service to show confirmation prompt when leaving a dirty form {pull}16688[#16688]
 Management::
 * [Fixes #16304] [Management] Prevent react warnings in index pattern creation {pull}16520[#16520]
 Platform::
