@@ -11,11 +11,13 @@ export interface CommandConfig<T extends {}> {
 export interface CommandSchema {
   [key: string]: {
     description: string;
-    validate: schema.Any;
+    schema: schema.Any;
   };
 }
 
-type Validates<T extends CommandSchema> = { [P in keyof T]: T[P]['validate'] };
+type AdditionalOptionsSchemas<T extends CommandSchema> = {
+  [P in keyof T]: T[P]['schema']
+};
 
 export interface CommandRunOptions {
   [key: string]: schema.Any;
@@ -27,24 +29,22 @@ export interface CommandOptions<T> {
   additionalOptions?: T;
 }
 
-export type RunCommand<T extends CommandRunOptions> = (
+export type RunCommand<T extends CommandSchema> = (
   projects: ProjectMap,
   projectGraph: ProjectGraph,
-  config: CommandConfig<schema.ObjectResultType<T>>
+  config: CommandConfig<schema.ObjectResultType<AdditionalOptionsSchemas<T>>>
 ) => Promise<void>;
 
 export function createCommand<T extends CommandSchema = {}>(
-  { name, description, additionalOptions }: CommandOptions<T>,
-  run: RunCommand<Validates<T>>
+  commandOptions: CommandOptions<T>,
+  run: RunCommand<T>
 ): Command<T> {
   return {
-    name,
-    description,
-    additionalOptions,
+    ...commandOptions,
     run,
   };
 }
 
 export type Command<T extends CommandSchema = {}> = CommandOptions<T> & {
-  run: RunCommand<Validates<T>>;
+  run: RunCommand<T>;
 };

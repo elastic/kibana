@@ -17,7 +17,7 @@ export const BootstrapCommand = createCommand(
     additionalOptions: {
       'frozen-lockfile': {
         description: 'freeze',
-        validate: schema.maybe(schema.boolean()),
+        schema: schema.maybe(schema.boolean()),
       },
     },
   },
