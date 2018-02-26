@@ -1,13 +1,23 @@
 import chalk from 'chalk';
 import wrapAnsi from 'wrap-ansi';
 import indentString from 'indent-string';
+import { schema } from '@kbn/utils';
 
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, projectPathsFields, ProjectPathOptions } from './config';
-import { Command, CommandSchema, AdditionalOptionsSchemas, ValidatedOptions } from './commands/command';
-import { schema } from '@kbn/utils';
+import {
+  getProjectPaths,
+  projectPathsFields,
+  ProjectPathOptions,
+} from './config';
+import {
+  Command,
+  CommandSchema,
+  AdditionalOptionsSchemas,
+  ValidatedOptions,
+} from './commands/command';
+import { entries } from './utils/entries';
 
 type RunCommandConfig = {
   options: { [key: string]: any };
@@ -33,22 +43,19 @@ export async function runCommand<T extends CommandSchema>(
     let additionalFields = {} as AdditionalOptionsSchemas<T>;
 
     if (additionalOptions !== undefined) {
-      for (const [name, options] of Object.entries(additionalOptions)) {
+      for (const [name, options] of entries(additionalOptions)) {
         additionalFields[name] = options.schema;
       }
     }
 
-    const finalSchema = schema.object(Object.assign({},
-      projectPathsFields,
-      additionalFields,
-    )) as any as ProjectPathOptions & ValidatedOptions<T>;
+    const finalSchema = schema.object(
+      Object.assign({}, projectPathsFields, additionalFields)
+    );
 
-    const commandOptionsToValidate = {};
-
-    const options = finalSchema.validate(config.options);
+    const options = finalSchema.validate(config.options) as ProjectPathOptions &
+      ValidatedOptions<T>;
 
     const projectPaths = getProjectPaths(config.rootPath, options);
-
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);
 

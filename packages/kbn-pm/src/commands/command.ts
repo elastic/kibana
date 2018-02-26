@@ -17,10 +17,6 @@ export type ValidatedOptions<T extends CommandSchema> = schema.ObjectResultType<
   AdditionalOptionsSchemas<T>
 >;
 
-export interface CommandRunOptions {
-  [key: string]: schema.Any;
-}
-
 export interface CommandOptions<T> {
   name: string;
   description: string;
@@ -28,7 +24,7 @@ export interface CommandOptions<T> {
 }
 
 export type RunCommand<T extends CommandSchema> = (
-  obj: {
+  opts: {
     projects: ProjectMap;
     projectGraph: ProjectGraph;
     extraArgs: string[];

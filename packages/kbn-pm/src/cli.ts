@@ -3,11 +3,12 @@ import dedent from 'dedent';
 import chalk from 'chalk';
 import { resolve } from 'path';
 
+import { entries } from './utils/entries';
 import { commands, getCommand } from './commands';
 import { runCommand } from './run';
 
 function help() {
-  const availableCommands = Object.entries(commands).map(
+  const availableCommands = entries(commands).map(
     ([name, description]) => `${name} - ${description}`
   );
 

@@ -6,7 +6,9 @@ export const projectPathsFields = {
   'skip-kibana-extra': schema.boolean({ defaultValue: false }),
 };
 
-export type ProjectPathOptions = schema.ObjectResultType<typeof projectPathsFields>;
+export type ProjectPathOptions = schema.ObjectResultType<
+  typeof projectPathsFields
+>;
 
 /**
  * Returns all the paths where plugins are located
