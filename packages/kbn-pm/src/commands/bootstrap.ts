@@ -17,14 +17,14 @@ export const BootstrapCommand = createCommand(
     additionalOptions: {
       'frozen-lockfile': {
         description: 'freeze',
-        schema: schema.maybe(schema.boolean()),
+        schema: schema.boolean({ defaultValue: false }),
       },
     },
   },
-  async function(projects, projectGraph, { options }) {
+  async function({ projects, projectGraph, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-    const frozenLockfile = options['frozen-lockfile'] === true;
+    const frozenLockfile = options['frozen-lockfile'];
     const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
     console.log(chalk.bold('\nRunning installs in topological order:'));

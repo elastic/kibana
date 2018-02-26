@@ -15,7 +15,7 @@ export const RunCommand = createCommand(
       'Run script defined in package.json in each package that contains that script.',
   },
 
-  async function(projects, projectGraph, { extraArgs, options }) {
+  async function({ projects, projectGraph, extraArgs, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {

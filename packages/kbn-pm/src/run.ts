@@ -5,8 +5,8 @@ import indentString from 'indent-string';
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, projectPathsFields } from './config';
-import { Command, CommandSchema } from './commands/command';
+import { getProjectPaths, projectPathsFields, ProjectPathOptions } from './config';
+import { Command, CommandSchema, AdditionalOptionsSchemas, ValidatedOptions } from './commands/command';
 import { schema } from '@kbn/utils';
 
 type RunCommandConfig = {
@@ -30,7 +30,7 @@ export async function runCommand<T extends CommandSchema>(
 
     const { additionalOptions } = command;
 
-    let additionalFields: { [name: string]: schema.Any } = {};
+    let additionalFields = {} as AdditionalOptionsSchemas<T>;
 
     if (additionalOptions !== undefined) {
       for (const [name, options] of Object.entries(additionalOptions)) {
@@ -38,10 +38,12 @@ export async function runCommand<T extends CommandSchema>(
       }
     }
 
-    const finalSchema = schema.object({
-      ...projectPathsFields,
-      ...additionalFields,
-    });
+    const finalSchema = schema.object(Object.assign({},
+      projectPathsFields,
+      additionalFields,
+    )) as any as ProjectPathOptions & ValidatedOptions<T>;
+
+    const commandOptionsToValidate = {};
 
     const options = finalSchema.validate(config.options);
 
@@ -55,13 +57,13 @@ export async function runCommand<T extends CommandSchema>(
     );
     console.log(renderProjectsTree(config.rootPath, projects));
 
-    const commandOptions = {
+    await command.run({
+      projects,
+      projectGraph,
       rootPath: config.rootPath,
       extraArgs: config.extraArgs,
-      options
-    };
-
-    await command.run(projects, projectGraph, commandOptions);
+      options,
+    });
   } catch (e) {
     console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
 

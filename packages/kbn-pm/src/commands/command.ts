@@ -2,12 +2,6 @@ import { schema } from '@kbn/utils';
 import { ProjectGraph, ProjectMap } from '../utils/projects';
 import { ProjectPathOptions } from '../config';
 
-export interface CommandConfig<T extends {}> {
-  extraArgs: string[];
-  options: ProjectPathOptions & T;
-  rootPath: string;
-}
-
 export interface CommandSchema {
   [key: string]: {
     description: string;
@@ -15,11 +9,11 @@ export interface CommandSchema {
   };
 }
 
-type AdditionalOptionsSchemas<T extends CommandSchema> = {
+export type AdditionalOptionsSchemas<T extends CommandSchema> = {
   [P in keyof T]: T[P]['schema']
 };
 
-type ValidatedOptions<T extends CommandSchema> = schema.ObjectResultType<
+export type ValidatedOptions<T extends CommandSchema> = schema.ObjectResultType<
   AdditionalOptionsSchemas<T>
 >;
 
@@ -34,9 +28,13 @@ export interface CommandOptions<T> {
 }
 
 export type RunCommand<T extends CommandSchema> = (
-  projects: ProjectMap,
-  projectGraph: ProjectGraph,
-  config: CommandConfig<ValidatedOptions<T>>
+  obj: {
+    projects: ProjectMap;
+    projectGraph: ProjectGraph;
+    extraArgs: string[];
+    options: ProjectPathOptions & ValidatedOptions<T>;
+    rootPath: string;
+  }
 ) => Promise<void>;
 
 export function createCommand<T extends CommandSchema = {}>(

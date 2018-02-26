@@ -14,7 +14,7 @@ export const CleanCommand = createCommand(
       'Remove the node_modules and target directories from all projects.',
   },
 
-  async function(projects, projectGraph, { rootPath, options }) {
+  async function({ projects, rootPath, options }) {
     const directoriesToDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {
