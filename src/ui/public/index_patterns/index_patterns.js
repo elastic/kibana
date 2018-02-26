@@ -9,7 +9,7 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-export function IndexPatternsProvider(Notifier, Private) {
+export function IndexPatternsProvider(Notifier, Private, config) {
   const self = this;
 
   const IndexPattern = Private(IndexPatternProvider);
@@ -21,6 +21,15 @@ export function IndexPatternsProvider(Notifier, Private) {
 
     const cache = patternCache.get(id);
     return cache || patternCache.set(id, self.make(id));
+  };
+
+  self.getDefault = async () => {
+    const defaultIndexPatternId = config.get('defaultIndex');
+    if (defaultIndexPatternId) {
+      return await self.get(defaultIndexPatternId);
+    }
+
+    return null;
   };
 
   self.make = function (id) {

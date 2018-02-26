@@ -50,7 +50,7 @@ class TablePanelConfig extends Component {
               </div>
               <div className="vis_editor__vis_config-row">
                 <label className="vis_editor__label" htmlFor={htmlId('field')}>Group By Field</label>
-                <div className="vis_editor__row_item">
+                <div className="vis_editor__row_item" data-test-subj="groupByField">
                   <FieldSelect
                     id={htmlId('field')}
                     fields={this.props.fields}
@@ -63,6 +63,7 @@ class TablePanelConfig extends Component {
                 <input
                   id={htmlId('pivotLabelInput')}
                   className="vis_editor__input-grows"
+                  data-test-subj="columnLabelName"
                   type="text"
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
@@ -156,4 +157,3 @@ TablePanelConfig.propTypes = {
 };
 
 export default TablePanelConfig;
-
