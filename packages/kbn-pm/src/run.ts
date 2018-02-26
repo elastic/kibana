@@ -7,6 +7,7 @@ import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
 import { getProjectPaths, projectPathsFields } from './config';
 import { Command, CommandSchema } from './commands/command';
+import { schema } from '@kbn/utils';
 
 type RunCommandConfig = {
   options: { [key: string]: any };
@@ -29,14 +30,22 @@ export async function runCommand<T extends CommandSchema>(
 
     const { additionalOptions } = command;
 
+    let additionalFields: { [name: string]: schema.Any } = {};
+
     if (additionalOptions !== undefined) {
-      const v = Object.entries(additionalOptions);
-      console.log(additionalOptions);
+      for (const [name, options] of Object.entries(additionalOptions)) {
+        additionalFields[name] = options.schema;
+      }
     }
 
-    const projectPathOptions = projectPathsFields.validate(config.options);
+    const finalSchema = schema.object({
+      ...projectPathsFields,
+      ...additionalFields,
+    });
 
-    const projectPaths = getProjectPaths(config.rootPath, projectPathOptions);
+    const options = finalSchema.validate(config.options);
+
+    const projectPaths = getProjectPaths(config.rootPath, options);
 
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);
@@ -46,7 +55,13 @@ export async function runCommand<T extends CommandSchema>(
     );
     console.log(renderProjectsTree(config.rootPath, projects));
 
-    await command.run(projects, projectGraph, config);
+    const commandOptions = {
+      rootPath: config.rootPath,
+      extraArgs: config.extraArgs,
+      options
+    };
+
+    await command.run(projects, projectGraph, commandOptions);
   } catch (e) {
     console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
 
