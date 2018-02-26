@@ -14,7 +14,7 @@ export const BootstrapCommand = createCommand(
   {
     name: 'bootstrap',
     description: 'Install dependencies and crosslink projects',
-    additionalOptions: {
+    options: {
       'frozen-lockfile': {
         description: 'freeze',
         schema: schema.boolean({ defaultValue: false }),

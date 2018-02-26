@@ -20,7 +20,7 @@ export type ValidatedOptions<T extends CommandSchema> = schema.ObjectResultType<
 export interface CommandOptions<T> {
   name: string;
   description: string;
-  additionalOptions?: T;
+  options?: T;
 }
 
 export type RunCommand<T extends CommandSchema> = (

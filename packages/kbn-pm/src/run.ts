@@ -38,12 +38,12 @@ export async function runCommand<T extends CommandSchema>(
       )
     );
 
-    const { additionalOptions } = command;
+    const commandOptions = command.options;
 
     let additionalFields = {} as AdditionalOptionsSchemas<T>;
 
-    if (additionalOptions !== undefined) {
-      for (const [name, options] of entries(additionalOptions)) {
+    if (commandOptions !== undefined) {
+      for (const [name, options] of entries(commandOptions)) {
         additionalFields[name] = options.schema;
       }
     }

@@ -40491,7 +40491,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 const BootstrapCommand = exports.BootstrapCommand = (0, _command.createCommand)({
     name: 'bootstrap',
     description: 'Install dependencies and crosslink projects',
-    additionalOptions: {
+    options: {
         'frozen-lockfile': {
             description: 'freeze',
             schema: _utils.schema.boolean({ defaultValue: false })
@@ -70295,10 +70295,10 @@ let runCommand = exports.runCommand = (() => {
     var _ref = _asyncToGenerator(function* (command, config) {
         try {
             console.log(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
-            const { additionalOptions } = command;
+            const commandOptions = command.options;
             let additionalFields = {};
-            if (additionalOptions !== undefined) {
-                for (const [name, options] of (0, _entries.entries)(additionalOptions)) {
+            if (commandOptions !== undefined) {
+                for (const [name, options] of (0, _entries.entries)(commandOptions)) {
                     additionalFields[name] = options.schema;
                 }
             }
