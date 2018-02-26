@@ -91,6 +91,16 @@ module.directive('queryBar', function () {
           ...newQuery
         };
       }, true);
+
+      $scope.$watch('queryBar.localQuery.language', (language) => {
+        this.persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
+          maxLength: config.get('history:limit'),
+          filterDuplicates: true
+        });
+        this.updateTypeaheadItems();
+      });
+
+      $scope.$watch('queryBar.localQuery.query', this.updateTypeaheadItems);
     })
   };
 });
