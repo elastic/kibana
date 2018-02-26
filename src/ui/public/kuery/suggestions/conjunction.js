@@ -10,17 +10,17 @@ function getDescription(conjunction) {
 }
 
 export function getSuggestionsProvider() {
-  return function getConjunctionSuggestions({ prefix, start }) {
+  return function getConjunctionSuggestions({ prefix, end }) {
     if (!prefix.endsWith(' ')) return [];
     const suggestions = Object.keys(conjunctions).map(conjunction => {
-      const text = conjunction + ' ';
+      const text = `${conjunction} `;
       const description = getDescription(conjunction);
       return {
         type,
         text,
         description,
-        start: prefix.length + start,
-        end: prefix.length + start
+        start: end,
+        end
       };
     });
     return Promise.resolve(suggestions);
