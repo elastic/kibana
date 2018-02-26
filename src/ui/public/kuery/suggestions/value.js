@@ -1,4 +1,5 @@
 import chrome from 'ui/chrome';
+import { escapeKql } from './escape_kql';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
@@ -19,7 +20,7 @@ export function getSuggestionsProvider({ $http, indexPattern }) {
       field: field.name
     }).then(({ data }) => {
       return data.map(value => {
-        const text = value + ' ';
+        const text = `${escapeKql(value)} `;
         const description = getDescription({ fieldName, value });
         return { type, text, description, start, end };
       });

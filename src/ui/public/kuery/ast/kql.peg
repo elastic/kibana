@@ -38,7 +38,7 @@ OrQuery
   / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery{
+  = left:NotQuery And right:AndQuery {
     const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('and', [left, right]);

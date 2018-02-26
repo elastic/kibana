@@ -1,3 +1,5 @@
+import { escapeKql } from './escape_kql';
+
 const type = 'field';
 
 function getDescription(fieldName) {
@@ -11,7 +13,7 @@ export function getSuggestionsProvider({ indexPattern }) {
     const fieldNames = filterableFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(field => field.toLowerCase().includes(search));
     const suggestions = matchingFieldNames.map(fieldName => {
-      const text = fieldName + ' ';
+      const text = `${escapeKql(fieldName)} `;
       const description = getDescription(fieldName);
       return { type, text, description, start, end };
     });

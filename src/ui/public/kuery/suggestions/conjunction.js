@@ -15,13 +15,7 @@ export function getSuggestionsProvider() {
     const suggestions = Object.keys(conjunctions).map(conjunction => {
       const text = `${conjunction} `;
       const description = getDescription(conjunction);
-      return {
-        type,
-        text,
-        description,
-        start: end,
-        end
-      };
+      return { type, text, description, start: end, end };
     });
     return Promise.resolve(suggestions);
   };
