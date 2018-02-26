@@ -31,13 +31,13 @@ export class TagsClient {
     await Promise.all(deletePromises);
   }
 
-  async find(search) {
+  async find(search, limit = 10000) {
     const resp = await this.savedObjectsClient.find({
       type: TAG_TYPE,
       fields: ['title', 'color'],
       search: `${search}*`,
       search_fields: ['title'],
-      perPage: 10000,
+      perPage: limit,
     });
     return resp.savedObjects;
   }

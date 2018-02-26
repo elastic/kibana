@@ -24,6 +24,10 @@ import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import {
+  SavedObjectsClientProvider,
+  TagsClient,
+} from 'ui/saved_objects';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -61,6 +65,12 @@ app.directive('dashboardApp', function ($injector) {
       const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
+
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const tagsClient = new TagsClient(savedObjectsClient);
+      $scope.findTags = (search, size) => {
+        return tagsClient.find(search, size);
+      };
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
