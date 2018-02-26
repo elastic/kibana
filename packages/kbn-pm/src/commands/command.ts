@@ -15,13 +15,11 @@ export interface CommandSchema {
   };
 }
 
-type Validates<T extends CommandSchema> = {
-  [P in keyof T]: T[P]['validate'];
-}
+type Validates<T extends CommandSchema> = { [P in keyof T]: T[P]['validate'] };
 
 export interface CommandRunOptions {
-  [key: string]: schema.Any
-};
+  [key: string]: schema.Any;
+}
 
 export interface CommandOptions<T> {
   name: string;

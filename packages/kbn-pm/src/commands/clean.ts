@@ -5,15 +5,16 @@ import ora from 'ora';
 
 import { isDirectory } from '../utils/fs';
 import { ProjectGraph, ProjectMap } from '../utils/projects';
-import { Command } from './';
+import { createCommand, Command } from './command';
 
-export const CleanCommand: Command = {
-  name: 'clean',
-  description:
-    'Remove the node_modules and target directories from all projects.',
-  schemaFields: undefined,
+export const CleanCommand = createCommand(
+  {
+    name: 'clean',
+    description:
+      'Remove the node_modules and target directories from all projects.',
+  },
 
-  async run(projects, projectGraph, { rootPath }) {
+  async function(projects, projectGraph, { rootPath }) {
     const directoriesToDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {
@@ -37,5 +38,5 @@ export const CleanCommand: Command = {
         await deleting;
       }
     }
-  },
-};
+  }
+);

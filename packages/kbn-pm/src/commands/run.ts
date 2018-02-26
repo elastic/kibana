@@ -6,15 +6,16 @@ import {
   topologicallyBatchProjects,
 } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
-import { Command } from './';
+import { createCommand, Command } from './command';
 
-export const RunCommand: Command = {
-  name: 'run',
-  description:
-    'Run script defined in package.json in each package that contains that script.',
-  schemaFields: undefined,
+export const RunCommand = createCommand(
+  {
+    name: 'run',
+    description:
+      'Run script defined in package.json in each package that contains that script.',
+  },
 
-  async run(projects, projectGraph, { extraArgs, options }) {
+  async function(projects, projectGraph, { extraArgs, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
@@ -38,5 +39,5 @@ export const RunCommand: Command = {
         await pkg.runScriptStreaming(scriptName, scriptArgs);
       }
     });
-  },
-};
+  }
+);
