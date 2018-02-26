@@ -6,9 +6,18 @@ import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
 import { getProjectPaths, projectPathsFields } from './config';
-import { Command, CommandConfig } from './commands/command';
+import { Command, CommandSchema } from './commands/command';
 
-export async function runCommand(command: Command, config: CommandConfig<any>) {
+type RunCommandConfig = {
+  options: { [key: string]: any };
+  extraArgs: string[];
+  rootPath: string;
+};
+
+export async function runCommand<T extends CommandSchema>(
+  command: Command<T>,
+  config: RunCommandConfig
+) {
   try {
     console.log(
       chalk.bold(
@@ -17,6 +26,13 @@ export async function runCommand(command: Command, config: CommandConfig<any>) {
         )}]:\n`
       )
     );
+
+    const { additionalOptions } = command;
+
+    if (additionalOptions !== undefined) {
+      const v = Object.entries(additionalOptions);
+      console.log(additionalOptions);
+    }
 
     const projectPathOptions = projectPathsFields.validate(config.options);
 

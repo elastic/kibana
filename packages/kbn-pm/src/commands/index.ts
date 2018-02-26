@@ -8,3 +8,9 @@ export const commands = {
   clean: CleanCommand,
   run: RunCommand,
 };
+
+type Commands = typeof commands;
+
+export function getCommand(name: keyof Commands) {
+  return commands[name];
+}

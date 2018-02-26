@@ -19,6 +19,10 @@ type AdditionalOptionsSchemas<T extends CommandSchema> = {
   [P in keyof T]: T[P]['schema']
 };
 
+type ValidatedOptions<T extends CommandSchema> = schema.ObjectResultType<
+  AdditionalOptionsSchemas<T>
+>;
+
 export interface CommandRunOptions {
   [key: string]: schema.Any;
 }
@@ -32,7 +36,7 @@ export interface CommandOptions<T> {
 export type RunCommand<T extends CommandSchema> = (
   projects: ProjectMap,
   projectGraph: ProjectGraph,
-  config: CommandConfig<schema.ObjectResultType<AdditionalOptionsSchemas<T>>>
+  config: CommandConfig<ValidatedOptions<T>>
 ) => Promise<void>;
 
 export function createCommand<T extends CommandSchema = {}>(
@@ -45,6 +49,6 @@ export function createCommand<T extends CommandSchema = {}>(
   };
 }
 
-export type Command<T extends CommandSchema = {}> = CommandOptions<T> & {
+export type Command<T extends CommandSchema> = CommandOptions<T> & {
   run: RunCommand<T>;
 };
