@@ -47,6 +47,7 @@ const options = {
 
 function drawbubbleDefault(ctx, series, x, y, radius, c) {
   ctx.fillStyle = c;
+  if (series.bubbles.fill) ctx.globalAlpha = series.bubbles.fill;
   ctx.strokeStyle = c;
 
   ctx.lineWidth = Math.round(radius / 3);
