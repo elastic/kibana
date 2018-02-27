@@ -2,19 +2,19 @@
   <div class="suggestionItem__type">
     <div ng-switch="item.type">
       <div ng-switch-when="field">
-        <icon type="'list'"></icon>
+        <icon type="'kqlField'"></icon>
       </div>
       <div ng-switch-when="value">
-        <icon type="'bullseye'"></icon>
+        <icon type="'kqlValue'"></icon>
       </div>
       <div ng-switch-when="recentSearch">
-        <icon type="'calendar'"></icon>
+        <icon type="'search'"></icon>
       </div>
       <div ng-switch-when="conjunction">
-        <icon type="'merge'"></icon>
+        <icon type="'kqlSelector'"></icon>
       </div>
       <div ng-switch-when="operator">
-        <icon type="'dot'"></icon>
+        <icon type="'kqlOperand'"></icon>
       </div>
     </div>
   </div>
