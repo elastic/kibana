@@ -74,11 +74,10 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             ev.preventDefault();
             setRefresh(refreshInput.value);
           }}
+          style={{ display: 'flex' }}
         >
-          Interval: <input type="text" ref={i => (refreshInput = i)} />
-          <Button bsSize="xsmall" type="submit">
-            Set
-          </Button>
+          <input className="form-control" type="text" ref={i => (refreshInput = i)} />
+          <Button type="submit">Set</Button>
         </form>
       </div>
     </div>
