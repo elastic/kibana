@@ -167,7 +167,7 @@ describe('plugin generator sao integration', () => {
     });
 
     const contents = getFileContents(res.files['public/app.js']);
-    const controllerLine = contents.match('.controller(.*)')[1];
+    const controllerLine = contents.match('app.controller(.*)')[1];
 
     expect(controllerLine).toContain('someFancyPluginHelloWorld');
   });
