@@ -192,10 +192,6 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       return this;
     }
 
-    extend() {
-      return (new SearchSource()).inherits(this);
-    }
-
     /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
@@ -225,7 +221,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
     }
 
     /**
-     * Reverse of SourceAbstract#disable(), only need to call this if source was previously disabled
+     * Reverse of SearchSource#disable(), only need to call this if source was previously disabled
      */
     enable() {
       this._fetchDisabled = false;
@@ -302,8 +298,8 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
     }
 
     /**
-     * Change the entire state of a SourceAbstract
-     * @param {object|string} state - The SourceAbstract's new state, or a
+     * Change the entire state of a SearchSource
+     * @param {object|string} state - The SearchSource's new state, or a
      *   string of the state value to set
      */
     set(state, val) {
@@ -325,19 +321,19 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
     /**
      * Create a new dataSource object of the same type
      * as this, which inherits this dataSource's properties
-     * @return {SourceAbstract}
+     * @return {SearchSource}
      */
     extend() {
       return new SearchSource().inherits(this);
     }
 
     /**
-     * return a simple, encodable object representing the state of the SourceAbstract
+     * return a simple, encodable object representing the state of the SearchSource
      * @return {[type]} [description]
      */
     toJSON = function () {
       return _.clone(this._state);
-    }
+    };
 
     /**
      * Create a string representation of the object
@@ -575,7 +571,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * Walk the inheritance chain of a source and return it's
      * flat representaion (taking into account merging rules)
      * @returns {Promise}
-     * @resolved {Object|null} - the flat state of the SourceAbstract
+     * @resolved {Object|null} - the flat state of the SearchSource
      */
     _flatten() {
       const type = this._getType();
