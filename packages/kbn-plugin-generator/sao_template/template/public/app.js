@@ -18,7 +18,7 @@ const controller = ($scope, $route, $interval) => {
   const elem = document.getElementById("pluginReactRoot");
   let currentTime = moment($route.current.locals.currentTime);
   const props = {
-    title: "<%= this.startCase(name) %>",
+    title: "<%= startCase(name) %>",
     description: "<%= description %>",
     currentTime: currentTime.format("HH:mm:ss")
   };
@@ -32,7 +32,7 @@ const controller = ($scope, $route, $interval) => {
     elem && unmountComponentAtNode(elem);
   });
 };
-const controllerName = "<%= this.camelCase(name) %>HelloWorld";
+const controllerName = "<%= camelCase(name) %>HelloWorld";
 app.controller(controllerName, controller);
 uiRoutes.enable();
 uiRoutes.when("/", {
