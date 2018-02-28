@@ -39,8 +39,7 @@ const controller = ($scope, $route, $interval) => {
   });
 };
 
-const controllerName = "<%= camelCase(name) %>HelloWorld";
-app.controller(controllerName, controller);
+app.controller("<%= camelCase(name) %>HelloWorld", controller);
 
 uiRoutes.enable();
 uiRoutes.when("/", {

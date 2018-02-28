@@ -168,10 +168,8 @@ describe('plugin generator sao integration', () => {
 
     const contents = getFileContents(res.files['public/app.js']);
     const controllerLine = contents.match('.controller(.*)')[1];
-    const titleLine = contents.match('\\$scope.title(.*)')[1];
 
     expect(controllerLine).toContain('someFancyPluginHelloWorld');
-    expect(titleLine).toContain('Some Fancy Plugin');
   });
 
   it('includes dotfiles', async () => {
