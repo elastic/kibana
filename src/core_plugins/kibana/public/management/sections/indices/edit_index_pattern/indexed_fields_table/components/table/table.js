@@ -38,35 +38,39 @@ export class Table extends PureComponent {
 
   renderFieldName(name, isTimeField) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          {name}
-        </EuiFlexItem>
-        {isTimeField ? (
-          <EuiFlexItem>
-            <TooltipTrigger tooltip="This field represents the time that events occurred.">
-              <EuiIcon type="clock" color="primary" />
-            </TooltipTrigger>
+      <div data-test-subj="indexedFieldName">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {name}
           </EuiFlexItem>
-        ) : ''}
-      </EuiFlexGroup>
+          {isTimeField ? (
+            <EuiFlexItem>
+              <TooltipTrigger tooltip="This field represents the time that events occurred.">
+                <EuiIcon type="clock" color="primary" />
+              </TooltipTrigger>
+            </EuiFlexItem>
+          ) : ''}
+        </EuiFlexGroup>
+      </div>
     );
   }
 
   renderFieldType(type, isConflict) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          {type}
-        </EuiFlexItem>
-        {isConflict ? (
-          <EuiFlexItem>
-            <TooltipTrigger tooltip="The type of this field changes across indices. It is unavailable for many analysis functions.">
-              <EuiIcon type="alert" color="warning" />
-            </TooltipTrigger>
+      <div data-test-subj="indexedFieldType">
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {type}
           </EuiFlexItem>
-        ) : ''}
-      </EuiFlexGroup>
+          {isConflict ? (
+            <EuiFlexItem>
+              <TooltipTrigger tooltip="The type of this field changes across indices. It is unavailable for many analysis functions.">
+                <EuiIcon type="alert" color="warning" />
+              </TooltipTrigger>
+            </EuiFlexItem>
+          ) : ''}
+        </EuiFlexGroup>
+      </div>
     );
   }
 
