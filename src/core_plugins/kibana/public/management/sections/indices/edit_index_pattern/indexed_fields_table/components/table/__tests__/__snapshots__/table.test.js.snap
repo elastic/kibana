@@ -2,64 +2,91 @@
 
 exports[`Table should render conflicting type 1`] = `
 <div
-  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+  data-test-subj="indexedFieldType"
 >
-  <EuiFlexItem
+  <EuiFlexGroup
+    alignItems="center"
     component="div"
-    grow={false}
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
   >
-    conflict
-  </EuiFlexItem>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
-    <TooltipTrigger
-      clickHideDelay={1000}
-      display={false}
-      isSticky={false}
-      onClick={[Function]}
-      onEntered={[Function]}
-      onExited={[Function]}
-      placement="top"
-      size="auto"
-      theme="dark"
-      tooltip="The type of this field changes across indices. It is unavailable for many analysis functions."
-      trigger="hover"
+    <EuiFlexItem
+      component="div"
+      grow={false}
     >
-      <EuiIcon
-        color="warning"
-        size="m"
-        type="alert"
-      />
-    </TooltipTrigger>
-  </EuiFlexItem>
+      conflict
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <TooltipTrigger
+        clickHideDelay={1000}
+        display={false}
+        isSticky={false}
+        onClick={[Function]}
+        onEntered={[Function]}
+        onExited={[Function]}
+        placement="top"
+        size="auto"
+        theme="dark"
+        tooltip="The type of this field changes across indices. It is unavailable for many analysis functions."
+        trigger="hover"
+      >
+        <EuiIcon
+          color="warning"
+          size="m"
+          type="alert"
+        />
+      </TooltipTrigger>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
 exports[`Table should render normal field name 1`] = `
 <div
-  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+  data-test-subj="indexedFieldName"
 >
-  <EuiFlexItem
+  <EuiFlexGroup
+    alignItems="center"
     component="div"
-    grow={false}
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
   >
-    Elastic
-  </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      Elastic
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
 exports[`Table should render normal type 1`] = `
 <div
-  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+  data-test-subj="indexedFieldType"
 >
-  <EuiFlexItem
+  <EuiFlexGroup
+    alignItems="center"
     component="div"
-    grow={false}
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
   >
-    string
-  </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      string
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
@@ -190,37 +217,46 @@ exports[`Table should render the boolean template (true) 1`] = `
 
 exports[`Table should render timestamp field name 1`] = `
 <div
-  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+  data-test-subj="indexedFieldName"
 >
-  <EuiFlexItem
+  <EuiFlexGroup
+    alignItems="center"
     component="div"
-    grow={false}
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
   >
-    timestamp
-  </EuiFlexItem>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
-    <TooltipTrigger
-      clickHideDelay={1000}
-      display={false}
-      isSticky={false}
-      onClick={[Function]}
-      onEntered={[Function]}
-      onExited={[Function]}
-      placement="top"
-      size="auto"
-      theme="dark"
-      tooltip="This field represents the time that events occurred."
-      trigger="hover"
+    <EuiFlexItem
+      component="div"
+      grow={false}
     >
-      <EuiIcon
-        color="primary"
-        size="m"
-        type="clock"
-      />
-    </TooltipTrigger>
-  </EuiFlexItem>
+      timestamp
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <TooltipTrigger
+        clickHideDelay={1000}
+        display={false}
+        isSticky={false}
+        onClick={[Function]}
+        onEntered={[Function]}
+        onExited={[Function]}
+        placement="top"
+        size="auto"
+        theme="dark"
+        tooltip="This field represents the time that events occurred."
+        trigger="hover"
+      >
+        <EuiIcon
+          color="primary"
+          size="m"
+          type="clock"
+        />
+      </TooltipTrigger>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
