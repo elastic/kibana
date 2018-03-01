@@ -5,31 +5,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTableOfRecords,
+  EuiInMemoryTable,
   TooltipTrigger
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
-    model: PropTypes.shape({
-      data: PropTypes.shape({
-        records: PropTypes.array.isRequired,
-        totalRecordCount: PropTypes.number.isRequired,
-      }).isRequired,
-      criteria: PropTypes.shape({
-        page: PropTypes.shape({
-          index: PropTypes.number.isRequired,
-          size: PropTypes.number.isRequired,
-        }).isRequired,
-        sort: PropTypes.shape({
-          field: PropTypes.string.isRequired,
-          direction: PropTypes.string.isRequired,
-        }).isRequired,
-      }).isRequired,
-    }).isRequired,
-    editField: PropTypes.func.isRequired,
-    onDataCriteriaChange: PropTypes.func.isRequired,
+    items: PropTypes.array.isRequired,
+    editField: PropTypes.func.isRequired
   }
 
   renderBooleanTemplate(value) {
@@ -74,86 +58,83 @@ export class Table extends PureComponent {
     );
   }
 
-  getTableConfig() {
-    const { indexPattern, editField, onDataCriteriaChange } = this.props;
-
-    return {
-      recordId: 'name',
-      columns: [
-        {
-          field: 'displayName',
-          name: 'Name',
-          dataType: 'string',
-          sortable: true,
-          render: (value) => {
-            return this.renderFieldName(value, indexPattern.timeFieldName === value);
-          },
-        },
-        {
-          field: 'type',
-          name: 'Type',
-          dataType: 'string',
-          sortable: true,
-          render: (value) => {
-            return this.renderFieldType(value, value === 'conflict');
-          },
-        },
-        {
-          field: 'format',
-          name: 'Format',
-          dataType: 'string',
-          sortable: true,
-        },
-        {
-          field: 'searchable',
-          name: 'Searchable',
-          description: `These fields can be used in the filter bar`,
-          dataType: 'boolean',
-          sortable: true,
-          render: this.renderBooleanTemplate,
-        },
-        {
-          field: 'aggregatable',
-          name: 'Aggregatable',
-          description: `These fields can be used in visualization aggregations`,
-          dataType: 'boolean',
-          sortable: true,
-          render: this.renderBooleanTemplate,
-        },
-        {
-          field: 'excluded',
-          name: 'Excluded',
-          description: `Fields that are excluded from _source when it is fetched`,
-          dataType: 'boolean',
-          sortable: true,
-          render: this.renderBooleanTemplate,
-        },
-        {
-          name: '',
-          actions: [
-            {
-              name: 'Edit',
-              description: 'Edit',
-              icon: 'pencil',
-              onClick: editField,
-              type: 'icon',
-            },
-          ],
-        }
-      ],
-      pagination: {
-        pageSizeOptions: [5, 10, 25, 50]
-      },
-      selection: undefined,
-      onDataCriteriaChange,
-    };
-  }
-
   render() {
-    const { model } = this.props;
+    const { indexPattern, items, editField } = this.props;
+
+    const pagination = {
+      pageSizeOptions: [5, 10, 25, 50]
+    };
+
+    const columns = [
+      {
+        field: 'displayName',
+        name: 'Name',
+        dataType: 'string',
+        sortable: true,
+        render: (value) => {
+          return this.renderFieldName(value, indexPattern.timeFieldName === value);
+        },
+      },
+      {
+        field: 'type',
+        name: 'Type',
+        dataType: 'string',
+        sortable: true,
+        render: (value) => {
+          return this.renderFieldType(value, value === 'conflict');
+        },
+      },
+      {
+        field: 'format',
+        name: 'Format',
+        dataType: 'string',
+        sortable: true,
+      },
+      {
+        field: 'searchable',
+        name: 'Searchable',
+        description: `These fields can be used in the filter bar`,
+        dataType: 'boolean',
+        sortable: true,
+        render: this.renderBooleanTemplate,
+      },
+      {
+        field: 'aggregatable',
+        name: 'Aggregatable',
+        description: `These fields can be used in visualization aggregations`,
+        dataType: 'boolean',
+        sortable: true,
+        render: this.renderBooleanTemplate,
+      },
+      {
+        field: 'excluded',
+        name: 'Excluded',
+        description: `Fields that are excluded from _source when it is fetched`,
+        dataType: 'boolean',
+        sortable: true,
+        render: this.renderBooleanTemplate,
+      },
+      {
+        name: '',
+        actions: [
+          {
+            name: 'Edit',
+            description: 'Edit',
+            icon: 'pencil',
+            onClick: editField,
+            type: 'icon',
+          },
+        ],
+      }
+    ];
 
     return (
-      <EuiTableOfRecords config={this.getTableConfig()} model={model} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={true}
+      />
     );
   }
 }

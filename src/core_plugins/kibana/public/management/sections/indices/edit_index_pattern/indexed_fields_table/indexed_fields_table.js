@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 
 import { Table } from './components/table';
 import {
-  getFieldFormat,
-  getTableOfRecordsState,
-  DEFAULT_TABLE_OF_RECORDS_STATE
+  getFieldFormat
 } from './lib';
 
 
@@ -24,8 +22,7 @@ export class IndexedFieldsTable extends Component {
     super(props);
 
     this.state = {
-      fields: [],
-      ...DEFAULT_TABLE_OF_RECORDS_STATE,
+      fields: []
     };
   }
 
@@ -53,35 +50,24 @@ export class IndexedFieldsTable extends Component {
   fetchFields = async () => {
     const fields = this.mapFields(await this.props.indexPattern.getNonScriptedFields());
     this.setState({
-      fields,
-      ...this.computeTableState(this.state.criteria, this.props, fields),
+      fields
     });
   }
 
-  onDataCriteriaChange = criteria => {
-    this.setState(this.computeTableState(criteria));
-  }
+  getFilteredItems() {
+    const { fields } = this.state;
+    const { fieldFilter, indexedFieldTypeFilter } = this.props;
+    let filteredFields = fields;
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.fieldFilter !== nextProps.fieldFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
+    if (fieldFilter) {
+      const normalizedFieldFilter = fieldFilter.toLowerCase();
+      filteredFields = filteredFields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
     }
-    if (this.props.indexedFieldTypeFilter !== nextProps.indexedFieldTypeFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
-    }
-  }
-
-  computeTableState(criteria, props = this.props, fields = this.state.fields) {
-    let items = fields;
-    if (props.fieldFilter) {
-      const fieldFilter = props.fieldFilter.toLowerCase();
-      items = items.filter(field => field.name.toLowerCase().includes(fieldFilter));
-    }
-    if (props.indexedFieldTypeFilter) {
-      items = items.filter(field => field.type === props.indexedFieldTypeFilter);
+    if (indexedFieldTypeFilter) {
+      filteredFields = filteredFields.filter(field => field.type === indexedFieldTypeFilter);
     }
 
-    return getTableOfRecordsState(items, criteria);
+    return filteredFields;
   }
 
   render() {
@@ -89,29 +75,14 @@ export class IndexedFieldsTable extends Component {
       indexPattern,
     } = this.props;
 
-    const {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-    } = this.state;
-
-    const model = {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-    };
+    const items = this.getFilteredItems();
 
     return (
       <div>
         <Table
           indexPattern={indexPattern}
-          model={model}
+          items={items}
           editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-          onDataCriteriaChange={this.onDataCriteriaChange}
         />
       </div>
     );
