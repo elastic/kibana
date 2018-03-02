@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 import {
   EuiTableOfRecords,
   EuiFieldText,
+  EuiButtonIcon,
   keyCodes,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 export class Table extends Component {
@@ -153,7 +155,54 @@ export class Table extends Component {
         },
         {
           name: '',
-          actions,
+          align: RIGHT_ALIGNMENT,
+          width: '100',
+          render: (filter) => {
+            if (this.state.editingFilterId) {
+              return (
+                <div>
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      saveFilter({
+                        filterId: this.state.editingFilterId,
+                        newFilterValue: this.state.editingFilterValue,
+                      });
+                      this.stopEditingFilter();
+                    }}
+                    iconType="checkInCircleFilled"
+                    aria-label="Save"
+                  />
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      this.stopEditingFilter();
+                    }}
+                    iconType="cross"
+                    aria-label="Cancel"
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div>
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  onClick={() => deleteFilter(filter)}
+                  iconType="trash"
+                  aria-label="Delete"
+                />
+                <EuiButtonIcon
+                  size="s"
+                  onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                  iconType="pencil"
+                  aria-label="Edit"
+                />
+              </div>
+            );
+          },
         }
       ],
       pagination: {

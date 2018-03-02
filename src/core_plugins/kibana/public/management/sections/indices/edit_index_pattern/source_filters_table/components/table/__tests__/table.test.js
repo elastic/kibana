@@ -56,46 +56,68 @@ describe('Table', () => {
     expect(matchesTableCell).toMatchSnapshot();
   });
 
-  it('should allow edits', async () => {
+  describe('editing', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
+    let component;
 
-    const component = shallow(
-      <Table
-        indexPattern={indexPattern}
-        model={model}
-        deleteFilter={() => {}}
-        onDataCriteriaChange={() => {}}
-        fieldWildcardMatcher={() => {}}
-        saveFilter={saveFilter}
-      />
-    );
+    beforeEach(() => {
+      component = shallow(
+        <Table
+          indexPattern={indexPattern}
+          model={model}
+          deleteFilter={() => {}}
+          onDataCriteriaChange={() => {}}
+          fieldWildcardMatcher={() => {}}
+          saveFilter={saveFilter}
+        />
+      );
+    });
 
-    // Start the editing process
-    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
-    // Ensure the state change propagates
-    component.update();
+    it('should show an input field', () => {
+      // Start the editing process
+      const editingComponent = shallow(
+        // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
+        <div>
+          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        </div>
+      );
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
+      // Ensure the state change propagates
+      component.update();
 
-    // Ensure the table cell switches to an input
-    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
-    expect(filterNameTableCell).toMatchSnapshot();
+      // Ensure the table cell switches to an input
+      const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+      expect(filterNameTableCell).toMatchSnapshot();
+    });
 
-    // Also verify the action is now save
-    expect(component.prop('config').columns[2].actions[0].name).toBe('Save');
+    it('should show a save button', () => {
+      // Start the editing process
+      const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
-    // Let's also verify the close of the edit process
+      // Ensure the state change propagates
+      component.update();
 
-    // Change the value to something else
-    component.setState({ editingFilterId: clientId, editingFilterValue: 'ti*' });
+      // Verify save button
+      const saveTableCell = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      expect(saveTableCell).toMatchSnapshot();
+    });
 
-    // Click the save button
-    component.prop('config').columns[2].actions[0].onClick();
+    it('should exit on save', () => {
+      // Change the value to something else
+      component.setState({ editingFilterId: clientId, editingFilterValue: 'ti*' });
 
-    // Ensure we call saveFilter properly
-    expect(saveFilter).toBeCalledWith({ filterId: clientId, newFilterValue: 'ti*' });
+      // Click the save button
+      const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
-    // Ensure the state is properly reset
-    expect(component.state('editingFilterId')).toBe(null);
+      // Ensure we call saveFilter properly
+      expect(saveFilter).toBeCalledWith({ filterId: clientId, newFilterValue: 'ti*' });
+
+      // Ensure the state is properly reset
+      expect(component.state('editingFilterId')).toBe(null);
+    });
   });
 
   it('should allow deletes', () => {
@@ -113,7 +135,8 @@ describe('Table', () => {
     );
 
     // Click the delete button
-    component.prop('config').columns[2].actions[1].onClick();
+    const deleteCellComponent = shallow(component.prop('config').columns[2].render({ clientId: 1, value: 'tim*' }));
+    deleteCellComponent.find('EuiButtonIcon').at(0).simulate('click');
     expect(deleteFilter).toBeCalled();
   });
 
@@ -133,7 +156,8 @@ describe('Table', () => {
     );
 
     // Start the editing process
-    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
+    const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+    editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 
@@ -164,7 +188,8 @@ describe('Table', () => {
     );
 
     // Start the editing process
-    component.prop('config').columns[2].actions[0].onClick({ clientId, value: 'tim*' });
+    const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+    editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 

@@ -1,6 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Table should allow edits 1`] = `
+exports[`Table editing should show a save button 1`] = `
+<div>
+  <EuiButtonIcon
+    aria-label="Save"
+    color="primary"
+    iconType="checkInCircleFilled"
+    onClick={[Function]}
+    size="s"
+    type="button"
+  />
+  <EuiButtonIcon
+    aria-label="Cancel"
+    color="primary"
+    iconType="cross"
+    onClick={[Function]}
+    size="s"
+    type="button"
+  />
+</div>
+`;
+
+exports[`Table editing should show an input field 1`] = `
 <EuiFormControlLayout
   fullWidth={false}
   iconSide="left"
@@ -46,22 +67,10 @@ exports[`Table should render normally 1`] = `
           "sortable": true,
         },
         Object {
-          "actions": Array [
-            Object {
-              "description": "Edit this field",
-              "icon": "pencil",
-              "name": "Edit",
-              "onClick": [Function],
-            },
-            Object {
-              "color": "danger",
-              "description": "Delete this field",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-            },
-          ],
+          "align": "right",
           "name": "",
+          "render": [Function],
+          "width": "100",
         },
       ],
       "onDataCriteriaChange": [Function],
