@@ -20,7 +20,8 @@ export default {
       'test/fixtures/__tests__/*.js',
       '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
-      '!**/_*.js'
+      '!**/_*.js',
+      '!**/node_modules/**',
     ]
   }
 };
