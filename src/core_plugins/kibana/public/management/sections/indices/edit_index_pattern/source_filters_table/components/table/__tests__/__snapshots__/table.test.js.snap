@@ -2,22 +2,24 @@
 
 exports[`Table editing should show a save button 1`] = `
 <div>
-  <EuiButtonIcon
-    aria-label="Save"
-    color="primary"
-    iconType="checkInCircleFilled"
-    onClick={[Function]}
-    size="s"
-    type="button"
-  />
-  <EuiButtonIcon
-    aria-label="Cancel"
-    color="primary"
-    iconType="cross"
-    onClick={[Function]}
-    size="s"
-    type="button"
-  />
+  <React.Fragment>
+    <EuiButtonIcon
+      aria-label="Save"
+      color="primary"
+      iconType="checkInCircleFilled"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+    <EuiButtonIcon
+      aria-label="Cancel"
+      color="primary"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </React.Fragment>
 </div>
 `;
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -160,7 +160,7 @@ export class Table extends Component {
           render: (filter) => {
             if (this.state.editingFilterId) {
               return (
-                <div>
+                <Fragment>
                   <EuiButtonIcon
                     size="s"
                     onClick={() => {
@@ -181,12 +181,12 @@ export class Table extends Component {
                     iconType="cross"
                     aria-label="Cancel"
                   />
-                </div>
+                </Fragment>
               );
             }
 
             return (
-              <div>
+              <Fragment>
                 <EuiButtonIcon
                   size="s"
                   color="danger"
@@ -200,7 +200,7 @@ export class Table extends Component {
                   iconType="pencil"
                   aria-label="Edit"
                 />
-              </div>
+              </Fragment>
             );
           },
         }

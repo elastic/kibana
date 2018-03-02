@@ -93,14 +93,24 @@ describe('Table', () => {
 
     it('should show a save button', () => {
       // Start the editing process
-      const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      const editingComponent = shallow(
+        // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+        <div>
+          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        </div>
+      );
       editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
       // Ensure the state change propagates
       component.update();
 
       // Verify save button
-      const saveTableCell = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      const saveTableCell = shallow(
+        // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+        <div>
+          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        </div>
+      );
       expect(saveTableCell).toMatchSnapshot();
     });
 
@@ -109,7 +119,12 @@ describe('Table', () => {
       component.setState({ editingFilterId: clientId, editingFilterValue: 'ti*' });
 
       // Click the save button
-      const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+      const editingComponent = shallow(
+        // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+        <div>
+          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        </div>
+      );
       editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
       // Ensure we call saveFilter properly
@@ -135,7 +150,12 @@ describe('Table', () => {
     );
 
     // Click the delete button
-    const deleteCellComponent = shallow(component.prop('config').columns[2].render({ clientId: 1, value: 'tim*' }));
+    const deleteCellComponent = shallow(
+      // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+      <div>
+        {component.prop('config').columns[2].render({ clientId: 1, value: 'tim*' })}
+      </div>
+    );
     deleteCellComponent.find('EuiButtonIcon').at(0).simulate('click');
     expect(deleteFilter).toBeCalled();
   });
@@ -156,16 +176,26 @@ describe('Table', () => {
     );
 
     // Start the editing process
-    const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+    const editingComponent = shallow(
+      // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+      <div>
+        {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+      </div>
+    );
     editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 
     // Get the rendered input cell
-    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+    const filterNameTableCell = shallow(
+      // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+      <div>
+        {component.prop('config').columns[0].render('tim*', { clientId })}
+      </div>
+    );
 
     // Press the enter key
-    filterNameTableCell.find('input').simulate('keypress', { charCode: keyCodes.ENTER });
+    filterNameTableCell.find('EuiFieldText').simulate('keypress', { charCode: keyCodes.ENTER });
     expect(saveFilter).toBeCalled();
 
     // It should reset
@@ -188,16 +218,26 @@ describe('Table', () => {
     );
 
     // Start the editing process
-    const editingComponent = shallow(component.prop('config').columns[2].render({ clientId, value: 'tim*' }));
+    const editingComponent = shallow(
+      // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+      <div>
+        {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+      </div>
+    );
     editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 
     // Get the rendered input cell
-    const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+    const filterNameTableCell = shallow(
+      // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+      <div>
+        {component.prop('config').columns[0].render('tim*', { clientId })}
+      </div>
+    );
 
     // Press the enter key
-    filterNameTableCell.find('input').simulate('keypress', { charCode: keyCodes.ESCAPE });
+    filterNameTableCell.find('EuiFieldText').simulate('keypress', { charCode: keyCodes.ESCAPE });
     expect(saveFilter).not.toBeCalled();
 
     // It should reset
