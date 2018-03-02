@@ -2,22 +2,15 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { RequestQueueProvider } from '../../_request_queue';
-import { ErrorHandlerRequestProvider } from './error_handler';
 
 export function AbstractRequestProvider(Private, Promise) {
   const requestQueue = Private(RequestQueueProvider);
-  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
   return class AbstractReq {
     constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
-
-      this.setErrorHandler((...args) => {
-        this.retry();
-        return requestErrorHandler(...args);
-      });
 
       requestQueue.push(this);
     }

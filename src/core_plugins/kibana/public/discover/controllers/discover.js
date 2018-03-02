@@ -298,9 +298,6 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
         };
       }()));
 
-      $scope.searchSource.onError(function (err) {
-        notify.error(err);
-      }).catch(notify.fatal);
 
       function initForTime() {
         return setupVisualization().then($scope.updateTime);
@@ -356,7 +353,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     .catch(notify.error);
   };
 
-  $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
+  function initSegmentedFetch(segmented) {
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -456,7 +453,17 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
       $scope.fetchStatus = null;
     });
-  }).catch(notify.fatal);
+  }
+
+  function beginSegmentedFetch() {
+    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+      .catch((error) => {
+        notify.error(error);
+        // Restart.
+        beginSegmentedFetch();
+      });
+  }
+  beginSegmentedFetch();
 
   $scope.updateTime = function () {
     $scope.timeRange = {

@@ -166,30 +166,34 @@ uiModules
       }));
 
       if (_.get($scope, 'vis.type.requiresSearch')) {
+        function onResults(resp) {
+          // if ($scope.searchSource !== searchSource) return;
+          $scope.esResp = resp;
+          return $scope.searchSource.onResults().then(onResults);
+        }
+
+        function startSearching() {
+          $scope.searchSource.onResults()
+            .then(onResults)
+            .catch(error => {
+              $el.trigger('renderComplete');
+              if (isTermSizeZeroError(error)) {
+                return notify.error(
+                  `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+                  `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
+                  `the error.`
+                );
+              }
+
+              notify.error(error);
+              startSearching();
+            });
+        }
+
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!searchSource || attr.esResp) return;
 
-          // TODO: we need to have some way to clean up result requests
-          searchSource.onResults().then(function onResults(resp) {
-            if ($scope.searchSource !== searchSource) return;
-
-            $scope.esResp = resp;
-
-            return searchSource.onResults().then(onResults);
-          }).catch(notify.fatal);
-
-          searchSource.onError(e => {
-            $el.trigger('renderComplete');
-            if (isTermSizeZeroError(e)) {
-              return notify.error(
-                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
-                `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
-                `the error.`
-              );
-            }
-
-            notify.error(e);
-          }).catch(notify.fatal);
+          startSearching();
         }));
       }
 

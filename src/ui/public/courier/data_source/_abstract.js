@@ -4,7 +4,6 @@ import angular from 'angular';
 import 'ui/promises';
 
 import { RequestQueueProvider } from '../_request_queue';
-import { ErrorHandlersProvider } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
 import { DecorateQueryProvider } from './_decorate_query';
 import { FieldWildcardProvider } from '../../field_wildcard';
@@ -13,7 +12,6 @@ import { migrateFilter } from './_migrate_filter';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
   const requestQueue = Private(RequestQueueProvider);
-  const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getHighlightRequest = Private(getHighlightRequestProvider);
@@ -136,7 +134,12 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
       const defer = Promise.defer();
       defer.promise.then(resolve, reject);
 
-      self._createRequest(defer);
+      const request = self._createRequest(defer);
+
+      request.setErrorHandler((request, error) => {
+        reject(error);
+        request.abort();
+      });
     }, handler);
   };
 
@@ -145,26 +148,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter) {
    */
   SourceAbstract.prototype.getParent = function () {
     return this._parent;
-  };
-
-  /**
-   * similar to onResults, but allows a seperate loopy code path
-   * for error handling.
-   *
-   * @return {Promise}
-   */
-  SourceAbstract.prototype.onError = function (handler) {
-    const self = this;
-
-    return new PromiseEmitter(function (resolve, reject) {
-      const defer = Promise.defer();
-      defer.promise.then(resolve, reject);
-
-      errorHandlers.push({
-        source: self,
-        defer: defer
-      });
-    }, handler);
   };
 
   /**
