@@ -36,7 +36,7 @@ export const plot = () => ({
     legend: {
       types: ['string', 'boolean'],
       help: 'Legend position, nw, sw, ne, se or false',
-      default: 'nw',
+      default: 'ne',
     },
     yaxis: {
       types: ['boolean', 'axisConfig'],
@@ -181,7 +181,7 @@ export const plot = () => ({
           canvas: false,
           colors: colors,
           legend: {
-            show: !!args.legend,
+            show: data.length < 2 ? false : !!args.legend,
             position: getLegendPosition(),
             backgroundOpacity: 0,
             labelBoxBorderColor: 'transparent',
