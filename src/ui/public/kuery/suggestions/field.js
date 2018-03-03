@@ -1,4 +1,5 @@
 import { escapeKql } from './escape_kql';
+import { sortPrefixFirst } from '../../utils/sort_prefix_first';
 
 const type = 'field';
 
@@ -15,7 +16,8 @@ export function getSuggestionsProvider({ indexPattern }) {
       const lowerCased = name.toLowerCase();
       return lowerCased !== search && lowerCased.includes(search);
     });
-    const suggestions = matchingFieldNames.map(fieldName => {
+    const sortedFieldNames = sortPrefixFirst(matchingFieldNames, search);
+    const suggestions = sortedFieldNames.map(fieldName => {
       const text = `${escapeKql(fieldName)} `;
       const description = getDescription(fieldName);
       return { type, text, description, start, end };
