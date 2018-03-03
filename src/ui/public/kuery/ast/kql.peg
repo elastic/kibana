@@ -6,17 +6,6 @@
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
   const buildNamedArgNode = nodeTypes.namedArg.buildNode;
 
-  function getCursor(chars, location) {
-    const i = chars.findIndex(char => char.type === 'cursor');
-    return {
-      type: 'cursor',
-      prefix: chars.slice(0, i).join(''),
-      suffix: chars.slice(i + 1).join(''),
-      start: location.start.offset,
-      end: location.end.offset - '@kql-cursor@'.length
-    };
-  }
-
   function trimLeft(string) {
     return string.replace(/^[\s\uFEFF\xA0]+/g, '');
   }
@@ -62,7 +51,7 @@ Expression
   / ValueExpression
 
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
+  = field:Literal Space* operator:RangeOperator Space* value:(WordAtCursor / QuotedString / UnquotedLiteral) {
     if (value.type === 'cursor') {
       return {
         ...value,
@@ -142,7 +131,8 @@ NotListOfValues
   / ListOfValues
 
 Value
-  = value:QuotedString {
+  = WordAtCursor
+  / value:QuotedString {
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -151,12 +141,6 @@ Value
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
   / value:UnquotedLiteral {
-    if (value.type === 'cursor') {
-      return {
-        ...value,
-        suggestionTypes: ['value']
-      };
-    }
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -171,7 +155,7 @@ Not
   = 'not'i Space+
 
 Literal
-  = QuotedString / WildcardString / UnquotedLiteral
+  = WordAtCursor / QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
   = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
@@ -201,9 +185,6 @@ WildcardSequence
 
 UnquotedLiteral
   = chars:(UnquotedCharacter)+ {
-    if (chars.find(char => char.type === 'cursor')) {
-      return getCursor(chars, location());
-    }
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
@@ -214,8 +195,7 @@ UnquotedLiteral
   }
 
 UnquotedCharacter
-  = Cursor
-  / EscapedSpecialCharacter
+  = EscapedSpecialCharacter
   / !Separator char:. { return char; }
 
 EscapedSpecialCharacter
@@ -225,7 +205,7 @@ EscapedDoubleQuote
   = '\\' char:'"' { return char; }
 
 Separator
-  = Keyword / SpecialCharacter
+  = Cursor / Keyword / SpecialCharacter
 
 Keyword
   = Or / And / Not
@@ -242,7 +222,19 @@ RangeOperator
 Space
   = [\ \t\r\n]
 
+WordAtCursor
+  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+    const { start, end } = location();
+    return {
+      ...cursor,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      start: start.offset,
+      end: end.offset - 1
+    };
+  }
+
 Cursor
-  = &{ return parseCursor; } '@kql-cursor@' {
+  = &{ return parseCursor; } '\0' {
     return { type: 'cursor' };
   }

@@ -7,7 +7,7 @@ import * as conjunction from './conjunction';
 import * as recentSearch from './recent_search';
 
 const suggestionProviders = { field, value, operator, conjunction, recentSearch };
-const cursorMarker = '@kql-cursor@';
+const cursorMarker = '\0';
 
 export function getSuggestionsProvider({ $http, indexPattern, persistedLog }) {
   return ({ query, selectionStart, selectionEnd }) => {

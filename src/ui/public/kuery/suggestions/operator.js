@@ -3,7 +3,7 @@ const type = 'operator';
 const operators = {
   ':': {
     description: '<span class="suggestionItem__callout">equals</span> some value',
-    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape']
+    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape', 'boolean']
   },
   '<=': {
     description: 'is <span class="suggestionItem__callout">less than or equal to</span> some value',

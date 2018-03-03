@@ -14,19 +14,28 @@ function getDescription({ fieldName, value }) {
 export function getSuggestionsProvider({ $http, indexPattern }) {
   return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
     const field = indexPattern.fields.byName[fieldName];
-    if (!field || !field.aggregatable || field.type !== 'string') return [];
     const query = `${prefix}${suffix}`;
-    return $http.post(`${baseUrl}/${indexPattern.title}`, {
-      query,
-      field: field.name
-    }).then(({ data }) => {
-      return data
-        .filter(value => value !== query)
+
+    if (!field) {
+      return [];
+    } else if (field.type === 'boolean') {
+      return getSuggestions(['true', 'false']);
+    } else if (!field.aggregatable || field.type !== 'string') {
+      return [];
+    }
+
+    const queryParams = { query, field: field.name };
+    return $http.post(`${baseUrl}/${indexPattern.title}`, queryParams)
+      .then(({ data }) => getSuggestions(data));
+
+    function getSuggestions(values) {
+      return values
+        .filter(value => value.includes(query) && value !== query)
         .map(value => {
           const text = `${escapeKql(value)} `;
           const description = getDescription({ fieldName, value });
           return { type, text, description, start, end };
         });
-    });
+    }
   };
 }
