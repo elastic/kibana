@@ -1,83 +1,71 @@
-import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
+import React, { Component } from 'react';
 
-const module = uiModules.get('kibana/tagcloud', ['kibana']);
-module.controller('KbnTagCloudController', function ($scope, $element) {
+export class TagCloudVisualization extends Component {
 
-  const containerNode = $element[0];
-  const maxTagCount = 200;
-  let truncated = false;
-  let bucketAgg;
+  _renderTagCloud(props) {
+    if (props.updateStatus.resize) {
+      this.tagCloud.resize();
+    }
 
-  const tagCloud = new TagCloud(containerNode);
-  tagCloud.on('select', (event) => {
-    if (!bucketAgg) return;
-    const filter = bucketAgg.createFilter(event);
-    $scope.vis.API.queryFilter.addFilters(filter);
-  });
+    if (props.updateStatus.params) {
+      this.tagCloud.setOptions(props.vis.params);
+    }
 
-  tagCloud.on('renderComplete', () => {
+    if (!props.updateStatus.data) return;
 
-    const truncatedMessage = containerNode.querySelector('.tagcloud-truncated-message');
-    const incompleteMessage = containerNode.querySelector('.tagcloud-incomplete-message');
-
-    if (!$scope.vis.aggs[0] || !$scope.vis.aggs[1]) {
-      incompleteMessage.style.display = 'none';
-      truncatedMessage.style.display = 'none';
-      $scope.renderComplete();
+    if (!props.visData || !props.visData.tables.length) {
+      this.tagCloud.setData([]);
       return;
     }
 
-    const bucketName = containerNode.querySelector('.tagcloud-custom-label');
-    bucketName.textContent = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
-    truncatedMessage.style.display = truncated ? 'block' : 'none';
-
-    const status = tagCloud.getStatus();
-    if (TagCloud.STATUS.COMPLETE === status) {
-      incompleteMessage.style.display = 'none';
-    } else if (TagCloud.STATUS.INCOMPLETE === status) {
-      incompleteMessage.style.display = 'block';
-    }
-
-    $scope.renderComplete();
-  });
-
-  $scope.$watch('renderComplete', async function () {
-
-    if ($scope.updateStatus.resize) {
-      tagCloud.resize();
-    }
-
-    if ($scope.updateStatus.params) {
-      tagCloud.setOptions($scope.vis.params);
-    }
-
-    if (!$scope.esResponse || !$scope.esResponse.tables.length) {
-      tagCloud.setData([]);
-      return;
-    }
-
-    const data = $scope.esResponse.tables[0];
-    bucketAgg = data.columns[0].aggConfig;
+    const data = props.visData.tables[0];
+    this.bucketAgg = data.columns[0].aggConfig;
 
     const tags = data.rows.map(row => {
       const [tag, count] = row;
       return {
-        displayText: bucketAgg ? bucketAgg.fieldFormatter()(tag) : tag,
+        displayText: this.bucketAgg ? this.bucketAgg.fieldFormatter()(tag) : tag,
         rawText: tag,
         value: count
       };
     });
 
+    this.tagCloud.setData(tags);
+  }
 
-    if (tags.length > maxTagCount) {
-      tags.length = maxTagCount;
-      truncated = true;
-    } else {
-      truncated = false;
-    }
+  render() {
+    const { vis } = this.props;
+    return (
+      <div className="tagcloud-vis" ref={el => this.containerDiv = el}>
+        { !vis.params.hideLabel &&
+          <div className="tagcloud-custom-label">
+            {vis.aggs[0].makeLabel()} - {vis.aggs[1].makeLabel()}
+          </div>
+        }
+      </div>
+    );
+  }
 
-    tagCloud.setData(tags);
-  });
+  componentDidMount() {
+    this.tagCloud = new TagCloud(this.containerDiv);
 
-});
+    this.tagCloud.on('select', (event) => {
+      if (!this.bucketAgg) return;
+      const filter = this.bucketAgg.createFilter(event);
+      this.props.vis.API.queryFilter.addFilters(filter);
+    });
+
+    this.tagCloud.on('renderComplete', this.props.renderComplete);
+
+    this._renderTagCloud(this.props);
+  }
+
+  componentDidUpdate() {
+    this._renderTagCloud(this.props);
+  }
+
+  componentWillUnmount() {
+    this.tagCloud.destroy();
+  }
+}
