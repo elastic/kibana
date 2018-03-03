@@ -20,10 +20,8 @@ export type TypeOptions<T> = {
 const noop = () => {};
 
 export abstract class Type<V> {
-  // This is just to enable the `TypeOf` helper, and because TypeScript would
-  // fail if it wasn't initialized we use a "trick" to which basically just
-  // sets the value to `null` while still keeping the type.
-  readonly _type: V = null! as V;
+  // Needed to get `TypeOf` working
+  readonly _type!: V;
   private readonly defaultValue?: V | void;
   private readonly validateResult: (value: V) => string | void;
 
