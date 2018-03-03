@@ -1,4 +1,4 @@
-import { byteSize } from './';
+import { byteSize } from './byte_size_type';
 import { ByteSizeValue } from '../byte_size_value';
 
 test('returns value by default', () => {

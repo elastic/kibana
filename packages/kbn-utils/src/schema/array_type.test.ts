@@ -1,4 +1,7 @@
-import { arrayOf, string, object, maybe } from './';
+import { arrayOf } from './array_type';
+import { string } from './string_type';
+import { object } from './object_type';
+import { maybe } from './maybe_type';
 
 test('returns value if it matches the type', () => {
   const type = arrayOf(string());

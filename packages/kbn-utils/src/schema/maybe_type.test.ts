@@ -1,4 +1,5 @@
-import { maybe, string } from './';
+import { maybe } from './maybe_type';
+import { string } from './string_type';
 
 test('returns value if specified', () => {
   const type = maybe(string());

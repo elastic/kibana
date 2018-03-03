@@ -1,4 +1,4 @@
-import { literal } from './';
+import { literal } from './literal_type';
 
 test('handles string', () => {
   expect(literal('test').validate('test')).toBe('test');

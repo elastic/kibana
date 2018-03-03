@@ -1,4 +1,7 @@
-import { mapOf, object, string, number } from './';
+import { mapOf } from './map_of_type';
+import { object } from './object_type';
+import { string } from './string_type';
+import { number } from './number_type';
 
 test('handles object as input', () => {
   const type = mapOf(string(), string());

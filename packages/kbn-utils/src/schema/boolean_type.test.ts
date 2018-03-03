@@ -1,4 +1,4 @@
-import { boolean } from './';
+import { boolean } from './boolean_type';
 
 test('returns value by default', () => {
   expect(boolean().validate(true)).toBe(true);

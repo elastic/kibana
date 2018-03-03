@@ -1,6 +1,6 @@
 import { duration as momentDuration } from 'moment';
 
-import { duration } from './';
+import { duration } from './duration_type';
 
 test('returns value by default', () => {
   expect(duration().validate('123s')).toMatchSnapshot();

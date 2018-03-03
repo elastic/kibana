@@ -1,4 +1,9 @@
-import { oneOf, string, number, literal, object, maybe } from './';
+import { oneOf } from './one_of_type';
+import { string } from './string_type';
+import { number } from './number_type';
+import { literal } from './literal_type';
+import { object } from './object_type';
+import { maybe } from './maybe_type';
 
 test('handles string', () => {
   expect(oneOf([string()]).validate('test')).toBe('test');

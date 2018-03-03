@@ -1,4 +1,4 @@
-import { KibanaError } from '../errors';
+import { KibanaError } from '../../errors';
 
 export class TypeError extends KibanaError {
   constructor(error: Error | string, key?: string) {

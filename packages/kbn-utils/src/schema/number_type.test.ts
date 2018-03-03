@@ -1,4 +1,4 @@
-import { number } from './';
+import { number } from './number_type';
 
 test('returns value by default', () => {
   expect(number().validate(4)).toBe(4);

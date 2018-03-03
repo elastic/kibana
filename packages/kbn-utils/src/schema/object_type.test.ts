@@ -1,4 +1,6 @@
-import { object, partialObject, string, oneOf } from './';
+import { object, partialObject } from './object_type';
+import { string } from './string_type';
+import { oneOf } from './one_of_type';
 
 test('returns value by default', () => {
   const type = object({

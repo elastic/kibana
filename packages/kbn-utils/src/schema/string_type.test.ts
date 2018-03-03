@@ -1,4 +1,4 @@
-import { string } from './';
+import { string } from './string_type';
 
 test('returns value is string and defined', () => {
   expect(string().validate('test')).toBe('test');
