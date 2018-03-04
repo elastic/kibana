@@ -99,16 +99,21 @@ describe('buildRequestBody(req)', () => {
           filter: {
             match_all: {}
           },
-          'aggs': {
-            'timeseries': {
-              'date_histogram': {
-                'field': '@timestamp',
-                'interval': '10s',
-                'min_doc_count': 0,
-                'time_zone': 'UTC',
-                'extended_bounds': {
-                  'min': 1485463055881,
-                  'max': 1485463955881
+          meta: {
+            timeField: '@timestamp',
+            bucketSize: 10,
+            intervalString: '10s'
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                interval: '10s',
+                min_doc_count: 0,
+                time_zone: 'UTC',
+                extended_bounds: {
+                  min: 1485463055881,
+                  max: 1485463955881
                 }
               },
               aggs: {
