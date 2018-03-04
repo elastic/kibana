@@ -3,7 +3,7 @@ import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
 import expect from 'expect.js';
-import { fromKqlExpression, toElasticsearchQuery } from '../../../../kuery';
+import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
 
 let indexPattern;
 
@@ -35,7 +35,7 @@ describe('build query', function () {
 
       const expectedESQueries = queries.map(
         (query) => {
-          return toElasticsearchQuery(fromKqlExpression(query.query), indexPattern);
+          return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
         }
       );
 
