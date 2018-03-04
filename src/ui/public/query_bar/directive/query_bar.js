@@ -97,10 +97,8 @@ module.directive('queryBar', function () {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
-        this.updateTypeaheadItems();
+        this.updateSuggestions();
       });
-
-      $scope.$watch('queryBar.localQuery.query', this.updateTypeaheadItems);
     })
   };
 });
