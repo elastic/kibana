@@ -1,4 +1,4 @@
-@import (reference) "../../style/main";
+@import (reference) '../../style/main';
 
 .canvas__workpad_loader {
   height: 400px;
@@ -8,7 +8,8 @@
     width: 100%;
   }
 
-  .canvas__workpad_loader--created, .canvas__workpad_loader--updated {
+  .canvas__workpad_loader--created,
+  .canvas__workpad_loader--updated {
     white-space: nowrap;
   }
 
@@ -20,10 +21,8 @@
     color: @colorSecondary;
   }
 
-  .canvas__workpad_loader--workpad {
-    &:hover {
-      background-color: @darkGrey;
-    }
+  .canvas__workpad_loader--workpad a {
+    color: @white;
   }
 
   .canvas__workpad_loader--controls {
