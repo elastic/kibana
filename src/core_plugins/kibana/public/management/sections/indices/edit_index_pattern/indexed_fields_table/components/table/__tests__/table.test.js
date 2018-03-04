@@ -7,35 +7,19 @@ const indexPattern = {
   timeFieldName: 'timestamp'
 };
 
-const model = {
-  data: {
-    records: [
-      { name: 'Elastic', displayName: 'Elastic', searchable: true },
-      { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-      { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
-    ],
-    totalRecordCount: 3,
-  },
-  criteria: {
-    page: {
-      index: 0,
-      size: 10,
-    },
-    sort: {
-      field: 'displayName',
-      direction: 'asc'
-    },
-  }
-};
+const items = [
+  { name: 'Elastic', displayName: 'Elastic', searchable: true },
+  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
+  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+];
 
 describe('Table', () => {
   it('should render normally', async () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
@@ -46,13 +30,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[0].render('Elastic'));
+    const tableCell = shallow(component.prop('columns')[0].render('Elastic'));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -60,13 +43,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[0].render('timestamp', true));
+    const tableCell = shallow(component.prop('columns')[0].render('timestamp', true));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -74,13 +56,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[3].render(true));
+    const tableCell = shallow(component.prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -88,13 +69,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[3].render(false));
+    const tableCell = shallow(component.prop('columns')[3].render(false));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -102,13 +82,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[1].render('string'));
+    const tableCell = shallow(component.prop('columns')[1].render('string'));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -116,13 +95,12 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
-        onDataCriteriaChange={() => {}}
       />
     );
 
-    const tableCell = shallow(component.prop('config').columns[1].render('conflict', true));
+    const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -132,14 +110,13 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={editField}
-        onDataCriteriaChange={() => {}}
       />
     );
 
     // Click the edit button
-    component.prop('config').columns[6].actions[0].onClick();
+    component.prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();
   });
 });

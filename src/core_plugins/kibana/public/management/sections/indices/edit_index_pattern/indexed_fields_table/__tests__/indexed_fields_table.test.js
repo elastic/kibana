@@ -7,12 +7,8 @@ jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
   EuiFlexItem: 'eui-flex-item',
   EuiIcon: 'eui-icon',
-  EuiTableOfRecords: 'eui-table-of-records',
-  TooltipTrigger: 'tooltip-trigger',
-  Comparators: {
-    property: () => {},
-    default: () => {},
-  },
+  EuiInMemoryTable: 'eui-in-memory-table',
+  TooltipTrigger: 'tooltip-trigger'
 }));
 
 jest.mock('../components/table', () => ({

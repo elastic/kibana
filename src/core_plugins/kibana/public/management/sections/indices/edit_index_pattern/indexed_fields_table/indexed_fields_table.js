@@ -6,7 +6,6 @@ import {
   getFieldFormat
 } from './lib';
 
-
 export class IndexedFieldsTable extends Component {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,

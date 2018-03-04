@@ -91,114 +91,97 @@ exports[`Table should render normal type 1`] = `
 `;
 
 exports[`Table should render normally 1`] = `
-<EuiTableOfRecords
-  config={
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "field": "displayName",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "format",
+        "name": "Format",
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in the filter bar",
+        "field": "searchable",
+        "name": "Searchable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in visualization aggregations",
+        "field": "aggregatable",
+        "name": "Aggregatable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "Fields that are excluded from _source when it is fetched",
+        "field": "excluded",
+        "name": "Excluded",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "description": "Edit",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "displayName": "Elastic",
+        "name": "Elastic",
+        "searchable": true,
+      },
+      Object {
+        "displayName": "timestamp",
+        "name": "timestamp",
+        "type": "date",
+      },
+      Object {
+        "displayName": "conflictingField",
+        "name": "conflictingField",
+        "type": "conflict",
+      },
+    ]
+  }
+  pagination={
     Object {
-      "columns": Array [
-        Object {
-          "dataType": "string",
-          "field": "displayName",
-          "name": "Name",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "type",
-          "name": "Type",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "field": "format",
-          "name": "Format",
-          "sortable": true,
-        },
-        Object {
-          "dataType": "boolean",
-          "description": "These fields can be used in the filter bar",
-          "field": "searchable",
-          "name": "Searchable",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "boolean",
-          "description": "These fields can be used in visualization aggregations",
-          "field": "aggregatable",
-          "name": "Aggregatable",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "boolean",
-          "description": "Fields that are excluded from _source when it is fetched",
-          "field": "excluded",
-          "name": "Excluded",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "description": "Edit",
-              "icon": "pencil",
-              "name": "Edit",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "name": "",
-        },
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
       ],
-      "onDataCriteriaChange": [Function],
-      "pagination": Object {
-        "pageSizeOptions": Array [
-          5,
-          10,
-          25,
-          50,
-        ],
-      },
-      "recordId": "name",
-      "selection": undefined,
     }
   }
-  model={
-    Object {
-      "criteria": Object {
-        "page": Object {
-          "index": 0,
-          "size": 10,
-        },
-        "sort": Object {
-          "direction": "asc",
-          "field": "displayName",
-        },
-      },
-      "data": Object {
-        "records": Array [
-          Object {
-            "displayName": "Elastic",
-            "name": "Elastic",
-            "searchable": true,
-          },
-          Object {
-            "displayName": "timestamp",
-            "name": "timestamp",
-            "type": "date",
-          },
-          Object {
-            "displayName": "conflictingField",
-            "name": "conflictingField",
-            "type": "conflict",
-          },
-        ],
-        "totalRecordCount": 3,
-      },
-    }
-  }
+  sorting={true}
 />
 `;
 

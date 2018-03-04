@@ -234,7 +234,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .getVisibleText();
 
       await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector(`.euiPagination button.euiPaginationButton:nth-child(${pageButtons.indexOf(pageNum + '') + 1})`)
+        .findByCssSelector(`.euiPagination button.euiPaginationButton:nth-child(${pageButtons.indexOf(pageNum + '') + 2})`)
         .click();
 
       await PageObjects.header.waitUntilLoadingHasFinished();

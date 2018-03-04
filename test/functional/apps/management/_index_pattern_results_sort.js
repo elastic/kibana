@@ -44,52 +44,33 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.settings.removeIndexPattern();
         });
 
-        if(col.heading === 'Name') {
-          it('should be sorted ascending by default', function () {
-            return col.selector()
-              .then(function (rowText) {
-                expect(rowText).to.be(col.first);
-              });
-          });
+        it('should sort ascending', function () {
+          return PageObjects.settings.sortBy(col.heading)
+            .then(function getText() {
+              return col.selector();
+            })
+            .then(function (rowText) {
+              expect(rowText).to.be(col.first);
+            });
+        });
 
-          it('should sort descending', function () {
-            return PageObjects.settings.sortBy(col.heading)
-              .then(function getText() {
-                return col.selector();
-              })
-              .then(function (rowText) {
-                expect(rowText).to.be(col.last);
-              });
-          });
-        } else {
-          it('should sort ascending', function () {
-            return PageObjects.settings.sortBy(col.heading)
-              .then(function getText() {
-                return col.selector();
-              })
-              .then(function (rowText) {
-                expect(rowText).to.be(col.first);
-              });
-          });
-
-          it('should sort descending', function () {
-            return PageObjects.settings.sortBy(col.heading)
-              .then(function sortAgain() {
-                return PageObjects.settings.sortBy(col.heading);
-              })
-              .then(function getText() {
-                return col.selector();
-              })
-              .then(function (rowText) {
-                expect(rowText).to.be(col.last);
-              });
-          });
-        }
+        it('should sort descending', function () {
+          return PageObjects.settings.sortBy(col.heading)
+            .then(function sortAgain() {
+              return PageObjects.settings.sortBy(col.heading);
+            })
+            .then(function getText() {
+              return col.selector();
+            })
+            .then(function (rowText) {
+              expect(rowText).to.be(col.last);
+            });
+        });
       });
     });
 
     describe('field list pagination', function () {
-      const EXPECTED_DEFAULT_PAGE_SIZE = 10;
+      const EXPECTED_DEFAULT_PAGE_SIZE = 5;
       const EXPECTED_FIELD_COUNT = 86;
       const EXPECTED_LAST_PAGE_COUNT = EXPECTED_FIELD_COUNT % EXPECTED_DEFAULT_PAGE_SIZE;
       const LAST_PAGE_NUMBER = Math.ceil(EXPECTED_FIELD_COUNT / EXPECTED_DEFAULT_PAGE_SIZE);
