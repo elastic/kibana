@@ -82,7 +82,7 @@ module.directive('queryBar', function () {
           filterDuplicates: true
         });
         const { indexPattern } = this;
-        getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog });
+        getSuggestions = getSuggestionsProvider({ $http, config, indexPattern, persistedLog });
         this.updateSuggestions();
       });
 

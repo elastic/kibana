@@ -11,8 +11,11 @@ function getDescription({ fieldName, value }) {
   `;
 }
 
-export function getSuggestionsProvider({ $http, indexPattern }) {
-  return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
+export function getSuggestionsProvider({ $http, config, indexPattern }) {
+  const shouldSuggestValues = config.get('filterEditor:suggestValues');
+  return shouldSuggestValues ? getValueSuggestions : () => Promise.resolve([]);
+
+  function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
     const field = indexPattern.fields.byName[fieldName];
     const query = `${prefix}${suffix}`;
 
@@ -40,5 +43,5 @@ export function getSuggestionsProvider({ $http, indexPattern }) {
           return { type, text, description, start, end };
         });
     }
-  };
+  }
 }

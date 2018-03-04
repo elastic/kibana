@@ -9,7 +9,7 @@ import * as recentSearch from './recent_search';
 const suggestionProviders = { field, value, operator, conjunction, recentSearch };
 const cursorMarker = '\0';
 
-export function getSuggestionsProvider({ $http, indexPattern, persistedLog }) {
+export function getSuggestionsProvider({ $http, config, indexPattern, persistedLog }) {
   return ({ query, selectionStart, selectionEnd }) => {
     const markedQuery = `${query.substr(0, selectionStart)}${cursorMarker}${query.substr(selectionEnd)}`;
     let cursorNode;
@@ -21,7 +21,7 @@ export function getSuggestionsProvider({ $http, indexPattern, persistedLog }) {
     const { suggestionTypes = [] } = cursorNode;
     return Promise.all([...suggestionTypes, 'recentSearch'].map(type => {
       const { getSuggestionsProvider } = suggestionProviders[type];
-      const getSuggestions = getSuggestionsProvider({ $http, indexPattern, persistedLog, query });
+      const getSuggestions = getSuggestionsProvider({ $http, config, indexPattern, persistedLog, query });
       return getSuggestions(cursorNode);
     })).then(suggestionsByType => {
       return flatten(suggestionsByType);
