@@ -1,4 +1,4 @@
-import { cloneDeep } from 'lodash';
+import { cloneDeep, sortBy } from 'lodash';
 import moment from 'moment';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 import ci from './ci.json';
@@ -33,10 +33,13 @@ export const demodata = () => ({
           { name: 'state', type: 'string' },
           { name: 'project', type: 'string' },
         ],
-        rows: cloneDeep(ci).map(row => ({
-          ...row,
-          time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
-        })),
+        rows: sortBy(
+          cloneDeep(ci).map(row => ({
+            ...row,
+            time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
+          })),
+          'time'
+        ),
       },
       shirts: {
         columns: [
