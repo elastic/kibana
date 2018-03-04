@@ -16,7 +16,10 @@
 }
 
 start
-  = OrQuery
+  = Space* query:OrQuery? Space* {
+    if (query !== null) return query;
+    return nodeTypes.function.buildNode('is', '*', '*');
+  }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
