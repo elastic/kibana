@@ -1,5 +1,5 @@
 import chrome from 'ui/chrome';
-import { escapeKql } from './escape_kql';
+import { escapeQuotes } from './escape_kql';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
@@ -26,13 +26,16 @@ export function getSuggestionsProvider({ $http, indexPattern }) {
 
     const queryParams = { query, field: field.name };
     return $http.post(`${baseUrl}/${indexPattern.title}`, queryParams)
-      .then(({ data }) => getSuggestions(data));
+      .then(({ data }) => {
+        const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
+        return getSuggestions(quotedValues);
+      });
 
     function getSuggestions(values) {
       return values
         .filter(value => value.includes(query) && value !== query)
         .map(value => {
-          const text = `${escapeKql(value)} `;
+          const text = `${value} `;
           const description = getDescription({ fieldName, value });
           return { type, text, description, start, end };
         });

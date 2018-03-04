@@ -16,7 +16,7 @@
 }
 
 start
-  = OrQuery
+  = Space* query:OrQuery Space* { return query; }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
@@ -195,8 +195,12 @@ UnquotedLiteral
   }
 
 UnquotedCharacter
-  = EscapedSpecialCharacter
+  = EscapedKeyword
+  / EscapedSpecialCharacter
   / !Separator char:. { return char; }
+
+EscapedKeyword
+  = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
