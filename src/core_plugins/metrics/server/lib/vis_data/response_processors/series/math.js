@@ -4,17 +4,7 @@ import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 import getSplits from '../../helpers/get_splits';
 import mapBucket from '../../helpers/map_bucket';
-import mathjs from 'mathjs';
-
-const limitedEval = mathjs.eval;
-mathjs.import({
-  'import': function () { throw new Error('Function import is not allowed in your expression.'); },
-  'createUnit': function () { throw new Error('Function createUnit is not allowed in your expression.'); },
-  'eval': function () { throw new Error('Function eval is not allowed in your expression.'); },
-  'parse': function () { throw new Error('Function parse is not allowed in your expression.'); },
-  'simplify': function () { throw new Error('Function simplify is not allowed in your expression.'); },
-  'derivative': function () { throw new Error('Function derivative is not allowed in your expression.'); }
-}, { override: true });
+import { evaluate } from 'tinymath';
 
 export function mathAgg(resp, panel, series) {
   return next => results => {
@@ -30,7 +20,7 @@ export function mathAgg(resp, panel, series) {
     });
     const decoration = getDefaultDecoration(series);
     const splits = getSplits(resp, panel, series);
-    const mathSeries = splits.map((split) => {
+    const mathSeries = splits.map(split => {
       if (mathMetric.variables.length) {
         // Gather the data for the splits. The data will either be a sibling agg or
         // a standard metric/pipeline agg
@@ -43,7 +33,9 @@ export function mathAgg(resp, panel, series) {
             });
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
-            const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
+            const m = percentileMatch
+              ? { ...metric, percent: percentileMatch[1] }
+              : { ...metric };
             acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
           }
           return acc;
@@ -53,7 +45,7 @@ export function mathAgg(resp, panel, series) {
         const all = Object.keys(splitData).reduce((acc, key) => {
           acc[key] = {
             values: splitData[key].map(x => x[1]),
-            timestamps: splitData[key].map(x => x[0])
+            timestamps: splitData[key].map(x => x[0]),
           };
           return acc;
         }, {});
@@ -67,7 +59,7 @@ export function mathAgg(resp, panel, series) {
             label: split.label,
             color: split.color,
             data: [],
-            ...decoration
+            ...decoration,
           };
         }
         // Use the first var to collect all the timestamps
@@ -83,17 +75,19 @@ export function mathAgg(resp, panel, series) {
           const someNull = values(params).some(v => v == null);
           if (someNull) return [ts, null];
           // calculate the result based on the user's script and return the value
-          const result = limitedEval(mathMetric.script, {
+          const result = evaluate(mathMetric.script, {
             params: {
               ...params,
               _index: index,
               _timestamp: ts,
               _all: all,
-              _interval: split.meta.bucketSize * 1000
-            }
+              _interval: split.meta.bucketSize * 1000,
+            },
           });
           // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
-          if (typeof result === 'object') return [ts, last(flatten(result.valueOf()))];
+          if (typeof result === 'object') {
+            return [ts, last(flatten(result.valueOf()))];
+          }
           return [ts, result];
         });
         return {
@@ -101,7 +95,7 @@ export function mathAgg(resp, panel, series) {
           label: split.label,
           color: split.color,
           data,
-          ...decoration
+          ...decoration,
         };
       }
     });
