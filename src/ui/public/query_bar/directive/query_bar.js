@@ -48,7 +48,7 @@ module.directive('queryBar', function () {
       this.suggestionTemplate = suggestionTemplate;
 
       this.handleKeyDown = (event) => {
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
           this.updateSuggestions();
         }
       };
