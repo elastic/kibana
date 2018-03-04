@@ -1,5 +1,5 @@
 import { flatten } from 'lodash';
-import { fromKqlExpression } from '../ast';
+import { fromKueryExpression } from '../ast';
 import * as field from './field';
 import * as value from './value';
 import * as operator from './operator';
@@ -12,12 +12,14 @@ const cursorMarker = '\0';
 export function getSuggestionsProvider({ $http, config, indexPattern, persistedLog }) {
   return ({ query, selectionStart, selectionEnd }) => {
     const markedQuery = `${query.substr(0, selectionStart)}${cursorMarker}${query.substr(selectionEnd)}`;
+
     let cursorNode;
     try {
-      cursorNode = fromKqlExpression(markedQuery, { parseCursor: true });
+      cursorNode = fromKueryExpression(markedQuery, { parseCursor: true });
     } catch (e) {
       cursorNode = {};
     }
+
     const { suggestionTypes = [] } = cursorNode;
     return Promise.all([...suggestionTypes, 'recentSearch'].map(type => {
       const { getSuggestionsProvider } = suggestionProviders[type];
