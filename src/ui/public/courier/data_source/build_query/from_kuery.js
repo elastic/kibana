@@ -1,4 +1,4 @@
-import { fromKueryExpression, fromKqlExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
+import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
 import { documentationLinks } from '../../../documentation_links';
 
 const queryDocs = documentationLinks.query;
@@ -6,11 +6,11 @@ const queryDocs = documentationLinks.query;
 export function buildQueryFromKuery(indexPattern, queries = []) {
   const queryASTs = queries.map((query) => {
     try {
-      return fromKqlExpression(query.query);
+      return fromKueryExpression(query.query);
     }
     catch (parseError) {
       try {
-        fromKueryExpression(query.query);
+        fromLegacyKueryExpression(query.query);
       }
       catch (legacyParseError) {
         throw parseError;

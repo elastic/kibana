@@ -8,8 +8,8 @@ import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal.js'
 
 // Helpful utility allowing us to test the PEG parser by simply checking for deep equality between
 // the nodes the parser generates and the nodes our constructor functions generate.
-function fromKueryExpressionNoMeta(text) {
-  return ast.fromKueryExpression(text, { includeMetadata: false });
+function fromLegacyKueryExpressionNoMeta(text) {
+  return ast.fromLegacyKueryExpression(text, { includeMetadata: false });
 }
 
 let indexPattern;
@@ -21,10 +21,10 @@ describe('kuery AST API', function () {
     indexPattern = Private(StubbedLogstashIndexPatternProvider);
   }));
 
-  describe('fromKueryExpression', function () {
+  describe('fromLegacyKueryExpression', function () {
 
     it('should return location and text metadata for each AST node', function () {
-      const notNode = ast.fromKueryExpression('!foo:bar');
+      const notNode = ast.fromLegacyKueryExpression('!foo:bar');
       expect(notNode).to.have.property('text', '!foo:bar');
       expect(notNode.location).to.eql({ min: 0, max: 8 });
 
@@ -42,19 +42,19 @@ describe('kuery AST API', function () {
 
     it('should return a match all "is" function for whitespace', function () {
       const expected = nodeTypes.function.buildNode('is', '*', '*');
-      const actual = fromKueryExpressionNoMeta('  ');
+      const actual = fromLegacyKueryExpressionNoMeta('  ');
       expectDeepEqual(actual, expected);
     });
 
     it('should return an "and" function for single literals', function () {
       const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
-      const actual = fromKueryExpressionNoMeta('foo');
+      const actual = fromLegacyKueryExpressionNoMeta('foo');
       expectDeepEqual(actual, expected);
     });
 
     it('should ignore extraneous whitespace at the beginning and end of the query', function () {
       const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
-      const actual = fromKueryExpressionNoMeta('  foo ');
+      const actual = fromLegacyKueryExpressionNoMeta('  foo ');
       expectDeepEqual(actual, expected);
     });
 
@@ -63,7 +63,7 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
       ]);
-      const actual = fromKueryExpressionNoMeta('foo bar');
+      const actual = fromLegacyKueryExpressionNoMeta('foo bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -72,7 +72,7 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
       ]);
-      const actual = fromKueryExpressionNoMeta('foo and bar');
+      const actual = fromLegacyKueryExpressionNoMeta('foo and bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -81,7 +81,7 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
       ], 'function');
-      const actual = fromKueryExpressionNoMeta('and(foo, bar)');
+      const actual = fromLegacyKueryExpressionNoMeta('and(foo, bar)');
       expectDeepEqual(actual, expected);
     });
 
@@ -90,7 +90,7 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
       ]);
-      const actual = fromKueryExpressionNoMeta('foo or bar');
+      const actual = fromLegacyKueryExpressionNoMeta('foo or bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -99,7 +99,7 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode('foo'),
         nodeTypes.literal.buildNode('bar'),
       ]);
-      const actual = fromKueryExpressionNoMeta('or(foo, bar)');
+      const actual = fromLegacyKueryExpressionNoMeta('or(foo, bar)');
       expectDeepEqual(actual, expected);
     });
 
@@ -109,7 +109,7 @@ describe('kuery AST API', function () {
           nodeTypes.literal.buildNode('foo'),
           nodeTypes.literal.buildNode('bar'),
         ]));
-      const actual = fromKueryExpressionNoMeta('!or(foo, bar)');
+      const actual = fromLegacyKueryExpressionNoMeta('!or(foo, bar)');
       expectDeepEqual(actual, expected);
     });
 
@@ -124,7 +124,7 @@ describe('kuery AST API', function () {
           nodeTypes.literal.buildNode('qux'),
         ])
       ]);
-      const actual = fromKueryExpressionNoMeta('foo or bar and baz or qux');
+      const actual = fromLegacyKueryExpressionNoMeta('foo or bar and baz or qux');
       expectDeepEqual(actual, expected);
     });
 
@@ -136,13 +136,13 @@ describe('kuery AST API', function () {
         ]),
         nodeTypes.literal.buildNode('baz'),
       ]);
-      const actual = fromKueryExpressionNoMeta('(foo or bar) and baz');
+      const actual = fromLegacyKueryExpressionNoMeta('(foo or bar) and baz');
       expectDeepEqual(actual, expected);
     });
 
     it('should support a shorthand operator syntax for "is" functions', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', true);
-      const actual = fromKueryExpressionNoMeta('foo:bar');
+      const actual = fromLegacyKueryExpressionNoMeta('foo:bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -153,44 +153,44 @@ describe('kuery AST API', function () {
         nodeTypes.literal.buildNode(8000),
       ];
       const expected = nodeTypes.function.buildNodeWithArgumentNodes('range', argumentNodes);
-      const actual = fromKueryExpressionNoMeta('bytes:[1000 to 8000]');
+      const actual = fromLegacyKueryExpressionNoMeta('bytes:[1000 to 8000]');
       expectDeepEqual(actual, expected);
     });
 
     it('should support functions with named arguments', function () {
       const expected = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
-      const actual = fromKueryExpressionNoMeta('range(bytes, gt=1000, lt=8000)');
+      const actual = fromLegacyKueryExpressionNoMeta('range(bytes, gt=1000, lt=8000)');
       expectDeepEqual(actual, expected);
     });
 
     it('should throw an error for unknown functions', function () {
-      expect(ast.fromKueryExpression).withArgs('foo(bar)').to.throwException(/Unknown function "foo"/);
+      expect(ast.fromLegacyKueryExpression).withArgs('foo(bar)').to.throwException(/Unknown function "foo"/);
     });
   });
 
-  describe('fromKqlExpression', function () {
+  describe('fromKueryExpression', function () {
 
     it('should return a match all "is" function for whitespace', function () {
       const expected = nodeTypes.function.buildNode('is', '*', '*');
-      const actual = ast.fromKqlExpression('  ');
+      const actual = ast.fromKueryExpression('  ');
       expectDeepEqual(actual, expected);
     });
 
     it('should return an "is" function with a null field for single literals', function () {
       const expected = nodeTypes.function.buildNode('is', null, 'foo');
-      const actual = ast.fromKqlExpression('foo');
+      const actual = ast.fromKueryExpression('foo');
       expectDeepEqual(actual, expected);
     });
 
     it('should ignore extraneous whitespace at the beginning and end of the query', function () {
       const expected = nodeTypes.function.buildNode('is', null, 'foo');
-      const actual = ast.fromKqlExpression('  foo ');
+      const actual = ast.fromKueryExpression('  foo ');
       expectDeepEqual(actual, expected);
     });
 
     it('should not split on whitespace', function () {
       const expected = nodeTypes.function.buildNode('is', null, 'foo bar');
-      const actual = ast.fromKqlExpression('foo bar');
+      const actual = ast.fromKueryExpression('foo bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -199,7 +199,7 @@ describe('kuery AST API', function () {
         nodeTypes.function.buildNode('is', null, 'foo'),
         nodeTypes.function.buildNode('is', null, 'bar'),
       ]);
-      const actual = ast.fromKqlExpression('foo and bar');
+      const actual = ast.fromKueryExpression('foo and bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -208,7 +208,7 @@ describe('kuery AST API', function () {
         nodeTypes.function.buildNode('is', null, 'foo'),
         nodeTypes.function.buildNode('is', null, 'bar'),
       ]);
-      const actual = ast.fromKqlExpression('foo or bar');
+      const actual = ast.fromKueryExpression('foo or bar');
       expectDeepEqual(actual, expected);
     });
 
@@ -219,7 +219,7 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('is', null, 'bar'),
         ])
       );
-      const actual = ast.fromKqlExpression('not (foo or bar)');
+      const actual = ast.fromKueryExpression('not (foo or bar)');
       expectDeepEqual(actual, expected);
     });
 
@@ -234,7 +234,7 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('is', null, 'qux'),
         ])
       ]);
-      const actual = ast.fromKqlExpression('foo or bar and baz or qux');
+      const actual = ast.fromKueryExpression('foo or bar and baz or qux');
       expectDeepEqual(actual, expected);
     });
 
@@ -246,25 +246,25 @@ describe('kuery AST API', function () {
         ]),
         nodeTypes.function.buildNode('is', null, 'baz'),
       ]);
-      const actual = ast.fromKqlExpression('(foo or bar) and baz');
+      const actual = ast.fromKueryExpression('(foo or bar) and baz');
       expectDeepEqual(actual, expected);
     });
 
     it('should support matching against specific fields', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar');
-      const actual = ast.fromKqlExpression('foo:bar');
+      const actual = ast.fromKueryExpression('foo:bar');
       expectDeepEqual(actual, expected);
     });
 
     it('should also not split on whitespace when matching specific fields', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz');
-      const actual = ast.fromKqlExpression('foo:bar baz');
+      const actual = ast.fromKueryExpression('foo:bar baz');
       expectDeepEqual(actual, expected);
     });
 
     it('should treat quoted values as phrases', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'bar baz', true);
-      const actual = ast.fromKqlExpression('foo:"bar baz"');
+      const actual = ast.fromKueryExpression('foo:"bar baz"');
       expectDeepEqual(actual, expected);
     });
 
@@ -273,7 +273,7 @@ describe('kuery AST API', function () {
         nodeTypes.function.buildNode('is', 'foo', 'bar'),
         nodeTypes.function.buildNode('is', 'foo', 'baz'),
       ]);
-      const actual = ast.fromKqlExpression('foo:(bar or baz)');
+      const actual = ast.fromKueryExpression('foo:(bar or baz)');
       expectDeepEqual(actual, expected);
     });
 
@@ -287,7 +287,7 @@ describe('kuery AST API', function () {
           nodeTypes.function.buildNode('is', 'foo', 'qux')
         ),
       ]);
-      const actual = ast.fromKqlExpression('foo:((bar or baz) and not qux)');
+      const actual = ast.fromKueryExpression('foo:((bar or baz) and not qux)');
       expectDeepEqual(actual, expected);
     });
 
@@ -300,7 +300,7 @@ describe('kuery AST API', function () {
           lt: 8000,
         }),
       ]);
-      const actual = ast.fromKqlExpression('bytes > 1000 and bytes < 8000');
+      const actual = ast.fromKueryExpression('bytes > 1000 and bytes < 8000');
       expectDeepEqual(actual, expected);
     });
 
@@ -313,25 +313,25 @@ describe('kuery AST API', function () {
           lte: 8000,
         }),
       ]);
-      const actual = ast.fromKqlExpression('bytes >= 1000 and bytes <= 8000');
+      const actual = ast.fromKueryExpression('bytes >= 1000 and bytes <= 8000');
       expectDeepEqual(actual, expected);
     });
 
     it('should support wildcards in field names', function () {
       const expected = nodeTypes.function.buildNode('is', 'machine*', 'osx');
-      const actual = ast.fromKqlExpression('machine*:osx');
+      const actual = ast.fromKueryExpression('machine*:osx');
       expectDeepEqual(actual, expected);
     });
 
     it('should support wildcards in values', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', 'ba*');
-      const actual = ast.fromKqlExpression('foo:ba*');
+      const actual = ast.fromKueryExpression('foo:ba*');
       expectDeepEqual(actual, expected);
     });
 
     it('should create an exists "is" query when a field is given and "*" is the value', function () {
       const expected = nodeTypes.function.buildNode('is', 'foo', '*');
-      const actual = ast.fromKqlExpression('foo:*');
+      const actual = ast.fromKueryExpression('foo:*');
       expectDeepEqual(actual, expected);
     });
 

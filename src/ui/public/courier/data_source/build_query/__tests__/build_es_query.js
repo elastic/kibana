@@ -2,7 +2,7 @@ import { BuildESQueryProvider } from '../build_es_query';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-import { fromKqlExpression, toElasticsearchQuery } from '../../../../kuery';
+import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import { DecorateQueryProvider } from '../../_decorate_query';
 
@@ -53,7 +53,7 @@ describe('build query', function () {
             { match_all: {} },
           ],
           filter: [
-            toElasticsearchQuery(fromKqlExpression('extension:jpg'), indexPattern),
+            toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
           ],
           should: [],
           must_not: [],
