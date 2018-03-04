@@ -174,7 +174,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`dashboard__visualization ${reversedClass}`}>
+      <div className={`dashboard__visualization ${reversedClass}`} data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}
