@@ -23,10 +23,6 @@ export function fromLegacyKueryExpression(expression, parseOptions) {
 }
 
 export function fromKueryExpression(expression, parseOptions) {
-  if (expression.trim() === '') {
-    return nodeTypes.function.buildNode('is', '*', '*');
-  }
-
   return fromExpression(expression, parseOptions, kueryParser);
 }
 
