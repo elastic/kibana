@@ -12,6 +12,8 @@ export const TooltipIcon = ({ icon = 'info', text, placement }) => {
 
   if (!Object.keys(icons).includes(icon)) throw new Error('Unsupported icon type');
 
+  return null; // TODO: Fix tips, put them back in
+
   return (
     <Tooltip text={text} placement={placement}>
       <i className={classes.concat(icons[icon]).join(' ')} />

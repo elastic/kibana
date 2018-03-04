@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Tooltip } from '../tooltip';
+//import { Tooltip } from '../tooltip';
 
 export const SidebarSectionTitle = ({ title, tip, children }) => {
   const renderTitle = () => {
+    /* TODO: Fix tips, put them back in
     if (tip) {
       return (
         <Tooltip placement="left" text={tip}>
@@ -11,7 +12,7 @@ export const SidebarSectionTitle = ({ title, tip, children }) => {
         </Tooltip>
       );
     }
-
+  */
     return <span>{title}</span>;
   };
 
