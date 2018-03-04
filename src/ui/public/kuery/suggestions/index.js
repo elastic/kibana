@@ -12,7 +12,12 @@ const cursorMarker = '\0';
 export function getSuggestionsProvider({ $http, indexPattern, persistedLog }) {
   return ({ query, selectionStart, selectionEnd }) => {
     const markedQuery = `${query.substr(0, selectionStart)}${cursorMarker}${query.substr(selectionEnd)}`;
-    const cursorNode = fromKqlExpression(markedQuery, { parseCursor: true });
+    let cursorNode;
+    try {
+      cursorNode = fromKqlExpression(markedQuery, { parseCursor: true });
+    } catch (e) {
+      cursorNode = {};
+    }
     const { suggestionTypes = [] } = cursorNode;
     return Promise.all([...suggestionTypes, 'recentSearch'].map(type => {
       const { getSuggestionsProvider } = suggestionProviders[type];
