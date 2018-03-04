@@ -33,7 +33,7 @@ class TagCloud extends EventEmitter {
     this.resize();
 
     //SETTING (non-configurable)
-    this._fontFamily = 'Impact';
+    this._fontFamily = 'Open Sans, sans-serif';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
     this._spiral = 'archimedean';//layout shape
