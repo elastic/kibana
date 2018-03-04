@@ -1,6 +1,6 @@
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
-import { grid } from './grid';
+//import { grid } from './grid';
 import { image } from './image';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
@@ -14,7 +14,7 @@ export const elementSpecs = [
   timeFilter,
   dropdownFilter,
   debug,
-  grid,
+  //grid,
   image,
   repeatImage,
   revealImage,
