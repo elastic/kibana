@@ -48,67 +48,50 @@ exports[`Table should render filter matches 1`] = `
 `;
 
 exports[`Table should render normally 1`] = `
-<EuiTableOfRecords
-  config={
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "description": "Filter name",
+        "field": "value",
+        "name": "Filter",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "description": "Language used for the field",
+        "field": "value",
+        "name": "Matches",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "align": "right",
+        "name": "",
+        "render": [Function],
+        "width": "100",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "value": "tim*",
+      },
+    ]
+  }
+  pagination={
     Object {
-      "columns": Array [
-        Object {
-          "dataType": "string",
-          "description": "Filter name",
-          "field": "value",
-          "name": "Filter",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "description": "Language used for the field",
-          "field": "value",
-          "name": "Matches",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "align": "right",
-          "name": "",
-          "render": [Function],
-          "width": "100",
-        },
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
       ],
-      "onDataCriteriaChange": [Function],
-      "pagination": Object {
-        "pageSizeOptions": Array [
-          5,
-          10,
-          25,
-          50,
-        ],
-      },
-      "recordId": "clientId",
-      "selection": undefined,
     }
   }
-  model={
-    Object {
-      "criteria": Object {
-        "page": Object {
-          "index": 0,
-          "size": 10,
-        },
-        "sort": Object {
-          "direction": "asc",
-          "field": "value",
-        },
-      },
-      "data": Object {
-        "records": Array [
-          Object {
-            "value": "tim*",
-          },
-        ],
-        "totalRecordCount": 1,
-      },
-    }
-  }
+  sorting={true}
 />
 `;

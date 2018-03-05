@@ -12,7 +12,6 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
-import { getTableOfRecordsState, DEFAULT_TABLE_OF_RECORDS_STATE } from './lib';
 
 
 export class SourceFiltersTable extends Component {
@@ -37,7 +36,6 @@ export class SourceFiltersTable extends Component {
       isDeleteConfirmationModalVisible: false,
       isSaving: false,
       filters: [],
-      ...DEFAULT_TABLE_OF_RECORDS_STATE,
     };
   }
 
@@ -45,37 +43,26 @@ export class SourceFiltersTable extends Component {
     this.updateFilters();
   }
 
-  updateFilters = () => {
+  updateFilters = (filterFilter = this.props.filterFilter) => {
     const sourceFilters = this.props.indexPattern.sourceFilters || [];
-    const filters = sourceFilters.map(filter => ({
+
+    let filters = sourceFilters.map(filter => ({
       ...filter,
       clientId: ++this.clientSideId,
     }));
 
-    this.setState({
-      filters,
-      ...this.computeTableState(this.state.criteria, this.props, filters)
-    });
-  }
+    if (filterFilter) {
+      const filterFilterToLowercase = filterFilter.toLowerCase();
+      filters = filters.filter(filter => filter.value.toLowerCase().includes(filterFilterToLowercase));
+    }
 
-  onDataCriteriaChange = criteria => {
-    this.setState(this.computeTableState(criteria));
+    this.setState({ filters });
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.filterFilter !== nextProps.filterFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
+      this.updateFilters(nextProps.filterFilter);
     }
-  }
-
-  computeTableState(criteria, props = this.props, filters = this.state.filters) {
-    let items = filters;
-    if (props.filterFilter) {
-      const filterFilter = props.filterFilter.toLowerCase();
-      items = items.filter(filter => filter.value.toLowerCase().includes(filterFilter));
-    }
-
-    return getTableOfRecordsState(items, criteria);
   }
 
   startDeleteFilter = filter => {
@@ -164,22 +151,7 @@ export class SourceFiltersTable extends Component {
       fieldWildcardMatcher,
     } = this.props;
 
-    const {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-      isSaving,
-    } = this.state;
-
-    const model = {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-    };
+    const { filters, isSaving } = this.state;
 
     return (
       <div>
@@ -187,14 +159,13 @@ export class SourceFiltersTable extends Component {
         <AddFilter onAddFilter={this.onAddFilter}/>
         <EuiSpacer size="l" />
         { isSaving ? <EuiLoadingSpinner/> : null }
-        { data.records.length > 0 ?
+        { filters.length > 0 ?
           <Table
             indexPattern={indexPattern}
-            model={model}
+            items={filters}
             fieldWildcardMatcher={fieldWildcardMatcher}
             deleteFilter={this.startDeleteFilter}
             saveFilter={this.saveFilter}
-            onDataCriteriaChange={this.onDataCriteriaChange}
           />
           : null
         }

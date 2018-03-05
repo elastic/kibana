@@ -29,34 +29,18 @@ exports[`SourceFiltersTable should add a filter 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 2,
+          "value": "tim*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 2,
-              "value": "tim*",
-            },
-            Object {
-              "clientId": 3,
-              "value": "na*",
-            },
-          ],
-          "totalRecordCount": 2,
+        Object {
+          "clientId": 3,
+          "value": "na*",
         },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>
@@ -89,30 +73,14 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 4,
+          "value": "time*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 1,
-              "value": "time*",
-            },
-          ],
-          "totalRecordCount": 1,
-        },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>
@@ -161,34 +129,18 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 3,
+          "value": "tim*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 3,
-              "value": "tim*",
-            },
-            Object {
-              "clientId": 4,
-              "value": "na*",
-            },
-          ],
-          "totalRecordCount": 2,
+        Object {
+          "clientId": 4,
+          "value": "na*",
         },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>
@@ -221,38 +173,22 @@ exports[`SourceFiltersTable should render normally 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "time*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 1,
-              "value": "time*",
-            },
-            Object {
-              "clientId": 2,
-              "value": "nam*",
-            },
-            Object {
-              "clientId": 3,
-              "value": "age*",
-            },
-          ],
-          "totalRecordCount": 3,
+        Object {
+          "clientId": 2,
+          "value": "nam*",
         },
-      }
+        Object {
+          "clientId": 3,
+          "value": "age*",
+        },
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>
@@ -280,30 +216,14 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 1,
-              "value": "tim*",
-            },
-          ],
-          "totalRecordCount": 1,
-        },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>
@@ -330,30 +250,14 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 1,
-              "value": "tim*",
-            },
-          ],
-          "totalRecordCount": 1,
-        },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
   <eui-overlay-mask>
@@ -395,30 +299,14 @@ exports[`SourceFiltersTable should update a filter 1`] = `
         ],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "clientId": 2,
+          "value": "tim*",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "clientId": 2,
-              "value": "tim*",
-            },
-          ],
-          "totalRecordCount": 1,
-        },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
     saveFilter={[Function]}
   />
 </div>

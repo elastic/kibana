@@ -5,31 +5,15 @@ import { Table } from '../table';
 import { keyCodes } from '@elastic/eui';
 
 const indexPattern = {};
-const model = {
-  data: {
-    records: [{ value: 'tim*' }],
-    totalRecordCount: 1,
-  },
-  criteria: {
-    page: {
-      index: 0,
-      size: 10,
-    },
-    sort: {
-      field: 'value',
-      direction: 'asc'
-    },
-  }
-};
+const items = [{ value: 'tim*' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         deleteFilter={() => {}}
-        onDataCriteriaChange={() => {}}
         fieldWildcardMatcher={() => {}}
         saveFilter={() => {}}
       />
@@ -44,15 +28,14 @@ describe('Table', () => {
         indexPattern={{
           getNonScriptedFields: () => ([{ name: 'time' }, { name: 'value' }])
         }}
-        model={model}
+        items={items}
         deleteFilter={() => {}}
-        onDataCriteriaChange={() => {}}
         fieldWildcardMatcher={filter => field => field.includes(filter[0])}
         saveFilter={() => {}}
       />
     );
 
-    const matchesTableCell = shallow(component.prop('config').columns[1].render('tim'));
+    const matchesTableCell = shallow(component.prop('columns')[1].render('tim'));
     expect(matchesTableCell).toMatchSnapshot();
   });
 
@@ -65,9 +48,8 @@ describe('Table', () => {
       component = shallow(
         <Table
           indexPattern={indexPattern}
-          model={model}
+          items={items}
           deleteFilter={() => {}}
-          onDataCriteriaChange={() => {}}
           fieldWildcardMatcher={() => {}}
           saveFilter={saveFilter}
         />
@@ -79,7 +61,7 @@ describe('Table', () => {
       const editingComponent = shallow(
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
         <div>
-          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
         </div>
       );
       editingComponent.find('EuiButtonIcon').at(1).simulate('click');
@@ -87,7 +69,7 @@ describe('Table', () => {
       component.update();
 
       // Ensure the table cell switches to an input
-      const filterNameTableCell = shallow(component.prop('config').columns[0].render('tim*', { clientId }));
+      const filterNameTableCell = shallow(component.prop('columns')[0].render('tim*', { clientId }));
       expect(filterNameTableCell).toMatchSnapshot();
     });
 
@@ -96,7 +78,7 @@ describe('Table', () => {
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>
-          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
         </div>
       );
       editingComponent.find('EuiButtonIcon').at(1).simulate('click');
@@ -108,7 +90,7 @@ describe('Table', () => {
       const saveTableCell = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>
-          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
         </div>
       );
       expect(saveTableCell).toMatchSnapshot();
@@ -122,7 +104,7 @@ describe('Table', () => {
       const editingComponent = shallow(
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>
-          {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+          {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
         </div>
       );
       editingComponent.find('EuiButtonIcon').at(0).simulate('click');
@@ -141,9 +123,8 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         deleteFilter={deleteFilter}
-        onDataCriteriaChange={() => {}}
         fieldWildcardMatcher={() => {}}
         saveFilter={() => {}}
       />
@@ -153,7 +134,7 @@ describe('Table', () => {
     const deleteCellComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>
-        {component.prop('config').columns[2].render({ clientId: 1, value: 'tim*' })}
+        {component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}
       </div>
     );
     deleteCellComponent.find('EuiButtonIcon').at(0).simulate('click');
@@ -167,9 +148,8 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         deleteFilter={() => {}}
-        onDataCriteriaChange={() => {}}
         fieldWildcardMatcher={() => {}}
         saveFilter={saveFilter}
       />
@@ -179,7 +159,7 @@ describe('Table', () => {
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>
-        {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
       </div>
     );
     editingComponent.find('EuiButtonIcon').at(1).simulate('click');
@@ -190,7 +170,7 @@ describe('Table', () => {
     const filterNameTableCell = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>
-        {component.prop('config').columns[0].render('tim*', { clientId })}
+        {component.prop('columns')[0].render('tim*', { clientId })}
       </div>
     );
 
@@ -209,9 +189,8 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         deleteFilter={() => {}}
-        onDataCriteriaChange={() => {}}
         fieldWildcardMatcher={() => {}}
         saveFilter={saveFilter}
       />
@@ -221,7 +200,7 @@ describe('Table', () => {
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>
-        {component.prop('config').columns[2].render({ clientId, value: 'tim*' })}
+        {component.prop('columns')[2].render({ clientId, value: 'tim*' })}
       </div>
     );
     editingComponent.find('EuiButtonIcon').at(1).simulate('click');
@@ -232,7 +211,7 @@ describe('Table', () => {
     const filterNameTableCell = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>
-        {component.prop('config').columns[0].render('tim*', { clientId })}
+        {component.prop('columns')[0].render('tim*', { clientId })}
       </div>
     );
 
