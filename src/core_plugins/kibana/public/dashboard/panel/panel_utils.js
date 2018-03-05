@@ -1,8 +1,6 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
-import _ from 'lodash';
-
 export class PanelUtils {
 
   static convertOldPanelData(panel) {
@@ -21,16 +19,6 @@ export class PanelUtils {
     delete panel.col;
 
     return panel;
-  }
-
-  /**
-   * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
-   * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
-   * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
-   * @param panels {Array<Object>}
-   */
-  static findPanelByPanelIndex(panelIndex, panels) {
-    return _.find(panels, (panel) => panel.panelIndex === panelIndex);
   }
 
   static initPanelIndexes(panels) {
