@@ -85,10 +85,7 @@ export class RangeControl extends Component {
       errorMessage,
     });
 
-    if (isRangeValid) {
-      // THERE IS A BUG HERE! This bug is not caught via the jest tests because in real usage it occurs with the
-      // interaction of stageFilters being called with an empty string. Since this interaction is outside react, we
-      // can't include a nice jest test for it.
+    if (isRangeValid && isMaxValid && isMinValid) {
       this.handleOnChangeComplete({ min, max });
     }
   };
