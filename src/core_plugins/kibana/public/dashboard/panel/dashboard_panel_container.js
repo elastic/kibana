@@ -10,7 +10,6 @@ import {
 } from '../actions';
 
 import {
-  getPanel,
   getEmbeddable,
   getFullScreenMode,
   getViewMode,
@@ -29,13 +28,12 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
 
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    panel: getPanel(dashboard, panelId),
   };
 };
 
 const mapDispatchToProps = (dispatch, { embeddableFactory, panelId, getContainerApi }) => ({
-  renderEmbeddable: (panelElement, panel) => (
-    dispatch(renderEmbeddable(embeddableFactory, panelElement, panel, getContainerApi()))
+  renderEmbeddable: (panelElement) => (
+    dispatch(renderEmbeddable(embeddableFactory, panelElement, panelId, getContainerApi()))
   ),
   onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableFactory)),
 });
