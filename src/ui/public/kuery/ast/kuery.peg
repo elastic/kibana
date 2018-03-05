@@ -1,5 +1,6 @@
 // Initialization block
 {
+  console.log('Hello, world!');
   const { parseCursor, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
@@ -161,9 +162,12 @@ Literal
   = WordAtCursor / QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
-  = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
+  = '"' chars:QuotedCharacter* '"' {
     return buildLiteralNode(chars.join(''));
   }
+
+QuotedCharacter
+  = !Cursor char:(EscapedDoubleQuote / [^"]) { return char; }
 
 WildcardString
   = sequences:WildcardSequence+ {
@@ -230,7 +234,17 @@ Space
   = [\ \t\r\n]
 
 WordAtCursor
-  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+    const { start, end } = location();
+    return {
+      ...cursor,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      start: start.offset,
+      end: end.offset - 1
+    };
+  }
+  / prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       ...cursor,
