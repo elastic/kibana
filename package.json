@@ -53,8 +53,8 @@
     "node": ">=6.0.0"
   },
   "dependencies": {
-    "axios": "^0.17.1",
-    "chalk": "^2.3.0",
+    "axios": "^0.18.0",
+    "chalk": "^2.3.2",
     "es6-promisify": "^6.0.0",
     "find-up": "^2.1.0",
     "inquirer": "^5.0.1",
@@ -62,22 +62,22 @@
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "mkdirp": "^0.5.1",
-    "ora": "^1.4.0",
+    "ora": "^2.0.0",
     "strip-json-comments": "^2.0.1",
     "yargs": "^11.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^22.1.1",
-    "babel-eslint": "^8.2.1",
-    "eslint": "^4.16.0",
+    "@types/jest": "^22.1.4",
+    "babel-eslint": "^8.2.2",
+    "eslint": "^4.18.2",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.0",
     "husky": "^0.14.3",
-    "jest": "^22.1.4",
+    "jest": "^22.4.2",
     "lint-staged": "^7.0.0",
-    "nock": "^9.1.6",
-    "prettier": "^1.10.2"
+    "nock": "^9.2.3",
+    "prettier": "^1.11.1"
   }
 }
