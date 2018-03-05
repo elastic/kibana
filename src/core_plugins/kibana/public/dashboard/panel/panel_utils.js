@@ -4,26 +4,6 @@ import chrome from 'ui/chrome';
 import _ from 'lodash';
 
 export class PanelUtils {
-  /**
-   * Fills in default parameters where not specified.
-   * @param {PanelState} panel
-   */
-  static initializeDefaults(panel) {
-    panel.gridData = panel.gridData || {};
-    panel.gridData.w = panel.gridData.w || DEFAULT_PANEL_WIDTH;
-    panel.gridData.h = panel.gridData.h || DEFAULT_PANEL_HEIGHT;
-
-    if (!panel.id) {
-      // In the interest of backwards comparability
-      if (panel.visId) {
-        panel.id = panel.visId;
-        panel.type = 'visualization';
-        delete panel.visId;
-      } else {
-        throw new Error('Missing object id on panel');
-      }
-    }
-  }
 
   static convertOldPanelData(panel) {
     panel.gridData = {
