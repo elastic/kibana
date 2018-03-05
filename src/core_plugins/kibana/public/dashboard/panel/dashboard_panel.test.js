@@ -18,7 +18,7 @@ import {
 
 function getProps(props = {}) {
   const defaultTestProps = {
-    panel: { panelIndex: 'foo1' },
+    panelId: 'foo1',
     renderEmbeddable: jest.fn(),
     viewOnlyMode: false,
     onDestroy: () => {},
