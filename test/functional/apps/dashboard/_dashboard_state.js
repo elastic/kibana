@@ -96,6 +96,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
+      let inViewMode = await testSubjects.exists('dashboardEditMode');
+      expect(inViewMode).to.be(true);
+
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
@@ -103,6 +106,9 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.header.clickDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
+
+      inViewMode = await testSubjects.exists('dashboardEditMode');
+      expect(inViewMode).to.be(true);
 
       const headers = await PageObjects.discover.getColumnHeaders();
       expect(headers.length).to.be(3);
