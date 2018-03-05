@@ -39,6 +39,8 @@ out an open PR:
 - For all other questions, check out the [FAQ.md](FAQ.md) and
 [wiki](https://github.com/elastic/kibana/wiki).
 
+In addition to contributing code, you can triage issues which may include reproducing bug reports or asking for vital information, such as version numbers or reproduction instructions. If you would like to start triaging issues, one easy way to get started is to [subscribe to kibana on CodeTriage](https://www.codetriage.com/elastic/kibana).
+
 ### Snapshot Builds
 
 For the daring, snapshot builds are available. These builds are created nightly and have undergone no formal QA, so they should never be run in production. All builds are 64 bit.
