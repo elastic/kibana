@@ -28,7 +28,7 @@ function updateSourceFiltersTable($scope, $state) {
       render(
         <SourceFiltersTable
           indexPattern={$scope.indexPattern}
-          fieldFilter={$scope.fieldFilter}
+          filterFilter={$scope.fieldFilter}
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
           onAddOrRemoveFilter={() => {
             $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
