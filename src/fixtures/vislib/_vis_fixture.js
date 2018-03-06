@@ -1,3 +1,5 @@
+/* global afterEach */
+
 import _ from 'lodash';
 import $ from 'jquery';
 import { VislibVisProvider } from 'ui/vislib/vis';

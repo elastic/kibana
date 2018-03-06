@@ -1,13 +1,10 @@
-module.exports = {
-  overrides: [
+module.exports = function(options) {
+  return Object.assign(
     {
-      files: ['**/*.test.js'],
-      plugins: [
-        'jest',
-      ],
+      plugins: ['jest'],
 
       env: {
-        'jest/globals': true,
+        jest: true,
       },
 
       rules: {
@@ -15,6 +12,7 @@ module.exports = {
         'jest/no-focused-tests': 'error',
         'jest/no-identical-title': 'error',
       },
-    }
-  ]
+    },
+    options
+  );
 };

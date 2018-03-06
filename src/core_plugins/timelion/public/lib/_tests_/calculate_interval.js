@@ -1,3 +1,5 @@
+/* global __filename */
+
 const filename = require('path').basename(__filename);
 const fn = require(`../calculate_interval`);
 const moment = require('moment');
