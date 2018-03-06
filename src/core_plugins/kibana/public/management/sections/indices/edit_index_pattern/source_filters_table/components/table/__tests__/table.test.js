@@ -35,7 +35,7 @@ describe('Table', () => {
       />
     );
 
-    const matchesTableCell = shallow(component.prop('columns')[1].render('tim'));
+    const matchesTableCell = shallow(component.prop('columns')[1].render('tim', { clientId: 1 }));
     expect(matchesTableCell).toMatchSnapshot();
   });
 
@@ -94,6 +94,43 @@ describe('Table', () => {
         </div>
       );
       expect(saveTableCell).toMatchSnapshot();
+    });
+
+    it('should update the matches dynamically as input value is changed', () => {
+      const localComponent = shallow(
+        <Table
+          indexPattern={{
+            getNonScriptedFields: () => ([{ name: 'time' }, { name: 'value' }])
+          }}
+          items={items}
+          deleteFilter={() => {}}
+          fieldWildcardMatcher={(query) => () => { return query.includes('time*'); }}
+          saveFilter={saveFilter}
+        />
+      );
+      // Start the editing process
+      const editingComponent = shallow(
+        // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+        <div>
+          {localComponent.prop('columns')[2].render({ clientId, value: 'tim*' })}
+        </div>
+      );
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
+
+      // Update the value
+      localComponent.setState({ editingFilterValue: 'time*' });
+
+      // Ensure the state change propagates
+      localComponent.update();
+
+      // Verify updated matches
+      const matchesTableCell = shallow(
+        // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
+        <div>
+          {localComponent.prop('columns')[1].render('tim*', { clientId })}
+        </div>
+      );
+      expect(matchesTableCell).toMatchSnapshot();
     });
 
     it('should exit on save', () => {

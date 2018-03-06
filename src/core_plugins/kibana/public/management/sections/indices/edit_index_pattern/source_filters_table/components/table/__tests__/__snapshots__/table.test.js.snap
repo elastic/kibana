@@ -41,6 +41,14 @@ exports[`Table editing should show an input field 1`] = `
 </EuiFormControlLayout>
 `;
 
+exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
+<div>
+  <span>
+    time, value
+  </span>
+</div>
+`;
+
 exports[`Table should render filter matches 1`] = `
 <span>
   time

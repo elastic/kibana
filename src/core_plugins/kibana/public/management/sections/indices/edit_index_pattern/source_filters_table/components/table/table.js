@@ -51,46 +51,6 @@ export class Table extends Component {
       saveFilter,
     } = this.props;
 
-    // const actions = [];
-
-    // if (this.state.editingFilterId) {
-    //   actions.push({
-    //     name: 'Save',
-    //     description: 'Save this field',
-    //     icon: 'checkInCircleFilled',
-    //     onClick: () => {
-    //       saveFilter({
-    //         filterId: this.state.editingFilterId,
-    //         newFilterValue: this.state.editingFilterValue,
-    //       });
-    //       this.stopEditingFilter();
-    //     }
-    //   });
-    //   actions.push({
-    //     name: 'Cancel',
-    //     description: 'Cancel editing this field',
-    //     icon: 'cross',
-    //     onClick: () => {
-    //       this.stopEditingFilter();
-    //     }
-    //   });
-    // }
-    // else {
-    //   actions.push({
-    //     name: 'Edit',
-    //     description: 'Edit this field',
-    //     icon: 'pencil',
-    //     onClick: filter => this.startEditingFilter(filter.clientId, filter.value)
-    //   });
-    //   actions.push({
-    //     name: 'Delete',
-    //     description: 'Delete this field',
-    //     icon: 'trash',
-    //     color: 'danger',
-    //     onClick: deleteFilter,
-    //   });
-    // }
-
     return [
       {
         field: 'value',
@@ -120,8 +80,11 @@ export class Table extends Component {
         description: `Language used for the field`,
         dataType: 'string',
         sortable: true,
-        render: value => {
-          const matcher = fieldWildcardMatcher([ value ]);
+        render: (value, filter) => {
+          const realtimeValue = this.state.editingFilterId === filter.clientId
+            ? this.state.editingFilterValue
+            : value;
+          const matcher = fieldWildcardMatcher([ realtimeValue ]);
           const matches = indexPattern.getNonScriptedFields().map(f => f.name).filter(matcher).sort();
           if (matches.length) {
             return (
