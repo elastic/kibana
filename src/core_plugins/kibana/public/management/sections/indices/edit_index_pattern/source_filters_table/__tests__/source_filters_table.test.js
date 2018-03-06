@@ -47,8 +47,6 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
-
     expect(component).toMatchSnapshot();
   });
 
@@ -60,11 +58,7 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
-
     component.setProps({ filterFilter: 'ti' });
-    await component.update();
-
     expect(component).toMatchSnapshot();
   });
 
@@ -77,8 +71,6 @@ describe('SourceFiltersTable', () => {
         fieldWildcardMatcher={() => {}}
       />
     );
-
-    await component.update(); // Fire `componentWillMount()`
 
     expect(component).toMatchSnapshot();
   });
@@ -93,9 +85,7 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
     component.setState({ isSaving: true });
-
     expect(component).toMatchSnapshot();
   });
 
@@ -109,10 +99,8 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
     component.instance().startDeleteFilter({ value: 'tim*' });
-    await component.update();
-
+    component.update(); // We are not calling `.setState` directly so we need to re-render
     expect(component).toMatchSnapshot();
   });
 
@@ -128,11 +116,10 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
     component.instance().startDeleteFilter({ value: 'tim*' });
-    await component.update();
+    component.update(); // We are not calling `.setState` directly so we need to re-render
     await component.instance().deleteFilter();
-    await component.update();
+    component.update(); // We are not calling `.setState` directly so we need to re-render
 
     expect(save).toBeCalled();
     expect(component).toMatchSnapshot();
@@ -150,9 +137,8 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
     await component.instance().onAddFilter('na*');
-    await component.update();
+    component.update(); // We are not calling `.setState` directly so we need to re-render
 
     expect(save).toBeCalled();
     expect(component).toMatchSnapshot();
@@ -170,9 +156,8 @@ describe('SourceFiltersTable', () => {
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
     await component.instance().saveFilter({ oldFilterValue: 'tim*', newFilterValue: 'ti*' });
-    await component.update();
+    component.update(); // We are not calling `.setState` directly so we need to re-render
 
     expect(save).toBeCalled();
     expect(component).toMatchSnapshot();
