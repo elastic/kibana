@@ -284,7 +284,7 @@
     "makelogs": "^4.0.3",
     "marked-text-renderer": "0.1.0",
     "mocha": "3.3.0",
-    "mock-fs": "4.2.0",
+    "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
     "ncp": "2.0.0",
     "nock": "8.0.0",
@@ -310,7 +310,7 @@
     "yo": "2.0.0"
   },
   "engines": {
-    "node": "6.12.2",
+    "node": "8.9.4",
     "yarn": "^1.3.2"
   }
 }
