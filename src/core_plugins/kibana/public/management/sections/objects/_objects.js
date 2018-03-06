@@ -10,6 +10,34 @@ import { uiModules } from 'ui/modules';
 import { showChangeIndexModal } from './show_change_index_modal';
 import { SavedObjectNotFound } from 'ui/errors';
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { ObjectsTable } from './components/objects_table';
+
+const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
+
+function updateObjectsTable($scope, services) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <ObjectsTable
+        services={services}
+      />,
+      node,
+    );
+  });
+}
+
+function destroyObjectsTable() {
+  const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
+
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -42,6 +70,14 @@ uiModules.get('apps/management')
       controllerAs: 'managementObjectsController',
       controller: function ($scope, $injector, $q, AppState) {
         const notify = new Notifier({ location: 'Saved Objects' });
+
+        const services = savedObjectManagementRegistry.all().map(obj => ({
+          service: $injector.get(obj.service),
+          serviceName: obj.service,
+          title: obj.title,
+        }));
+        updateObjectsTable($scope, services);
+        $scope.$on('$destroy', destroyObjectsTable);
 
         // TODO: Migrate all scope variables to the controller.
         const $state = $scope.state = new AppState();
