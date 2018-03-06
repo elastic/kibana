@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { createSelector } from 'reselect';
 
 import { Table } from './components/table';
 import {
@@ -53,34 +54,36 @@ export class IndexedFieldsTable extends Component {
     });
   }
 
-  getFilteredItems() {
-    const { fields } = this.state;
-    const { fieldFilter, indexedFieldTypeFilter } = this.props;
-    let filteredFields = fields;
+  getFilteredFields = createSelector(
+    (state) => state.fields,
+    (state, props) => props.fieldFilter,
+    (state, props) => props.indexedFieldTypeFilter,
+    (fields, fieldFilter, indexedFieldTypeFilter) => {
+      if (fieldFilter) {
+        const normalizedFieldFilter = fieldFilter.toLowerCase();
+        fields = fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
+      }
 
-    if (fieldFilter) {
-      const normalizedFieldFilter = fieldFilter.toLowerCase();
-      filteredFields = filteredFields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
-    }
-    if (indexedFieldTypeFilter) {
-      filteredFields = filteredFields.filter(field => field.type === indexedFieldTypeFilter);
-    }
+      if (indexedFieldTypeFilter) {
+        fields = fields.filter(field => field.type === indexedFieldTypeFilter);
+      }
 
-    return filteredFields;
-  }
+      return fields;
+    }
+  );
 
   render() {
     const {
       indexPattern,
     } = this.props;
 
-    const items = this.getFilteredItems();
+    const fields = this.getFilteredFields(this.state, this.props);
 
     return (
       <div>
         <Table
           indexPattern={indexPattern}
-          items={items}
+          items={fields}
           editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
         />
       </div>
