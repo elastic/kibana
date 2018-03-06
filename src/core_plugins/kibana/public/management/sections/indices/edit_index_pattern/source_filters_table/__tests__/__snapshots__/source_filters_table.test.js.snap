@@ -76,7 +76,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
     items={
       Array [
         Object {
-          "clientId": 4,
+          "clientId": 1,
           "value": "time*",
         },
       ]

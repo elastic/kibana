@@ -12,7 +12,7 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
-
+import { callWhenChanged } from '../../../../lib';
 
 export class SourceFiltersTable extends Component {
   static propTypes = {
@@ -43,27 +43,27 @@ export class SourceFiltersTable extends Component {
     this.updateFilters();
   }
 
-  updateFilters = (filterFilter = this.props.filterFilter) => {
+  updateFilters = () => {
     const sourceFilters = this.props.indexPattern.sourceFilters || [];
-
-    let filters = sourceFilters.map(filter => ({
+    const filters = sourceFilters.map(filter => ({
       ...filter,
       clientId: ++this.clientSideId,
     }));
 
-    if (filterFilter) {
-      const filterFilterToLowercase = filterFilter.toLowerCase();
-      filters = filters.filter(filter => filter.value.toLowerCase().includes(filterFilterToLowercase));
-    }
-
     this.setState({ filters });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.filterFilter !== nextProps.filterFilter) {
-      this.updateFilters(nextProps.filterFilter);
+  getFilteredFilters = callWhenChanged(
+    [() => this.state.filters, () => this.props.filterFilter],
+    (filters, filterFilter) => {
+      if (filterFilter) {
+        const filterFilterToLowercase = filterFilter.toLowerCase();
+        return filters.filter(filter => filter.value.toLowerCase().includes(filterFilterToLowercase));
+      }
+
+      return filters;
     }
-  }
+  );
 
   startDeleteFilter = filter => {
     this.setState({ filterToDelete: filter, isDeleteConfirmationModalVisible: true });
@@ -151,7 +151,9 @@ export class SourceFiltersTable extends Component {
       fieldWildcardMatcher,
     } = this.props;
 
-    const { filters, isSaving } = this.state;
+    const { isSaving } = this.state;
+
+    const filteredFilters = this.getFilteredFilters();
 
     return (
       <div>
@@ -159,10 +161,10 @@ export class SourceFiltersTable extends Component {
         <AddFilter onAddFilter={this.onAddFilter}/>
         <EuiSpacer size="l" />
         { isSaving ? <EuiLoadingSpinner/> : null }
-        { filters.length > 0 ?
+        { filteredFilters.length > 0 ?
           <Table
             indexPattern={indexPattern}
-            items={filters}
+            items={filteredFilters}
             fieldWildcardMatcher={fieldWildcardMatcher}
             deleteFilter={this.startDeleteFilter}
             saveFilter={this.saveFilter}
