@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { createSelector } from 'reselect';
 
 import {
   EuiSpacer,
@@ -12,7 +13,6 @@ import {
 import { Table } from './components/table';
 import { Header } from './components/header';
 import { AddFilter } from './components/add_filter';
-import { callWhenChanged } from '../../../../lib';
 
 export class SourceFiltersTable extends Component {
   static propTypes = {
@@ -53,8 +53,9 @@ export class SourceFiltersTable extends Component {
     this.setState({ filters });
   }
 
-  getFilteredFilters = callWhenChanged(
-    [() => this.state.filters, () => this.props.filterFilter],
+  getFilteredFilters = createSelector(
+    (state) => state.filters,
+    (state, props) => props.filterFilter,
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
@@ -153,7 +154,7 @@ export class SourceFiltersTable extends Component {
 
     const { isSaving } = this.state;
 
-    const filteredFilters = this.getFilteredFilters();
+    const filteredFilters = this.getFilteredFilters(this.state, this.props);
 
     return (
       <div>
