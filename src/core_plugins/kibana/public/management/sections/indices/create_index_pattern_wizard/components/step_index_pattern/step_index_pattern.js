@@ -195,7 +195,7 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(`Your input contains invalid characters or spaces. Please omit: ${characterList}`);
+      errors.push(`An index pattern cannot contain spaces or the characters: ${characterList}`);
       containsErrors = true;
     }
 

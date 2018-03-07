@@ -6,7 +6,7 @@ exports[`StepIndexPattern step 1 renders errors when input is invalid 1`] = `
   data-test-subj="createIndexPatternStep1Header"
   errors={
     Array [
-      "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
+      "An index pattern cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
     ]
   }
   goToNextStep={[Function]}
