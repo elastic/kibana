@@ -7,15 +7,15 @@ import * as conjunction from './conjunction';
 import * as recentSearch from './recent_search';
 
 const suggestionProviders = { field, value, operator, conjunction, recentSearch };
-const cursorMarker = '\0';
+const cursor = '\0';
 
 export function getSuggestionsProvider({ $http, config, indexPattern, persistedLog }) {
   return ({ query, selectionStart, selectionEnd }) => {
-    const markedQuery = `${query.substr(0, selectionStart)}${cursorMarker}${query.substr(selectionEnd)}`;
+    const cursoredQuery = `${query.substr(0, selectionStart)}${cursor}${query.substr(selectionEnd)}`;
 
     let cursorNode;
     try {
-      cursorNode = fromKueryExpression(markedQuery, { parseCursor: true });
+      cursorNode = fromKueryExpression(cursoredQuery, { parseCursor: true });
     } catch (e) {
       cursorNode = {};
     }

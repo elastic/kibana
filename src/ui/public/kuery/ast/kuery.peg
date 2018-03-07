@@ -1,6 +1,5 @@
 // Initialization block
 {
-
   const { parseCursor, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
@@ -24,16 +23,16 @@ start
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
-    if (cursor) return cursor;
+    if (left.type === 'cursor') return left;
+    if (right.type === 'cursor') return right;
     return buildFunctionNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
   = left:NotQuery And right:AndQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
-    if (cursor) return cursor;
+    if (left.type === 'cursor') return left;
+    if (right.type === 'cursor') return right;
     return buildFunctionNode('and', [left, right]);
   }
   / NotQuery
@@ -55,7 +54,7 @@ Expression
   / ValueExpression
 
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:(WordAtCursor / QuotedString / UnquotedLiteral) {
+  = field:Literal Space* operator:RangeOperator Space* value:Value {
     if (value.type === 'cursor') {
       return {
         ...value,
@@ -81,7 +80,7 @@ FieldValueExpression
 ValueExpression
   = partial:Value {
     if (partial.type === 'cursor') {
-      const fieldName = (partial.prefix + partial.suffix).trim();
+      const fieldName = `${partial.prefix}${partial.suffix}`.trim();
       return {
         ...partial,
         fieldName,
@@ -135,8 +134,8 @@ NotListOfValues
   / ListOfValues
 
 Value
-  = WordAtCursor
-  / value:QuotedString {
+  = value:QuotedString {
+    if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -145,6 +144,7 @@ Value
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
   / value:UnquotedLiteral {
+    if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -159,10 +159,20 @@ Not
   = 'not'i Space+
 
 Literal
-  = WordAtCursor / QuotedString / WildcardString / UnquotedLiteral
+  = QuotedString / WildcardString / UnquotedLiteral
 
 QuotedString
-  = '"' chars:QuotedCharacter* '"' {
+  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+    };
+  }
+  / '"' chars:QuotedCharacter* '"' {
     return buildLiteralNode(chars.join(''));
   }
 
@@ -191,7 +201,17 @@ WildcardSequence
   }
 
 UnquotedLiteral
-  = chars:UnquotedCharacter+ {
+  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+    };
+  }
+  / chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
@@ -203,7 +223,7 @@ UnquotedLiteral
 
 UnquotedCharacter
   = EscapedSpecialCharacter
-  / !Separator char:. { return char; }
+  / !Cursor !Separator char:. { return char; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
@@ -212,7 +232,7 @@ EscapedDoubleQuote
   = '\\' char:'"' { return char; }
 
 Separator
-  = Cursor / Keyword / SpecialCharacter
+  = Keyword / SpecialCharacter
 
 Keyword
   = Or / And / Not
@@ -229,29 +249,5 @@ RangeOperator
 Space
   = [\ \t\r\n]
 
-WordAtCursor
-  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
-    const { start, end } = location();
-    return {
-      ...cursor,
-      prefix: prefix.join(''),
-      suffix: suffix.join(''),
-      start: start.offset,
-      end: end.offset - 1
-    };
-  }
-  / prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
-    const { start, end } = location();
-    return {
-      ...cursor,
-      prefix: prefix.join(''),
-      suffix: suffix.join(''),
-      start: start.offset,
-      end: end.offset - 1
-    };
-  }
-
 Cursor
-  = &{ return parseCursor; } '\0' {
-    return { type: 'cursor' };
-  }
+  = &{ return parseCursor; } cursor:'\0' { return cursor; }
