@@ -15,6 +15,3 @@ export function toElasticsearchQuery(node) {
   return ast.toElasticsearchQuery(node.value);
 }
 
-export function toKueryExpression(node) {
-  return `${node.name}=${ast.toKueryExpression(node.value)}`;
-}

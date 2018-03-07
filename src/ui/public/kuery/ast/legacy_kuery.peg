@@ -40,17 +40,14 @@
 }
 
 start
-  = Query
-  / space* {
-    return addMeta(nodeTypes.function.buildNode('and', []), text(), location());
-  }
-
-Query
   = space? query:OrQuery space? {
     if (query.type === 'literal') {
       return addMeta(nodeTypes.function.buildNode('and', [query]), text(), location());
     }
     return query;
+  }
+  / whitespace:[\ \t\r\n]* {
+    return addMeta(nodeTypes.function.buildNode('is', '*', '*', false), text(), location());
   }
 
 OrQuery
@@ -60,40 +57,67 @@ OrQuery
   / AndQuery
 
 AndQuery
-  = left:NotQuery space 'and'i space right:AndQuery {
+  = left:NegatedClause space 'and'i space right:AndQuery {
     return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
   }
-  / NotQuery
+  / left:NegatedClause space !'or'i right:AndQuery {
+    return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
+  }
+  / NegatedClause
 
-NotQuery
-  = 'not'i space clause:Clause {
+NegatedClause
+  = [!] clause:Clause {
     return addMeta(nodeTypes.function.buildNode('not', clause), text(), location());
   }
   / Clause
 
 Clause
-  = '(' subQuery:Query ')' {
+  = '(' subQuery:start ')' {
     return subQuery;
   }
   / Term
 
 Term
-  = field:literal_arg_type space? ':' space? value:literal_arg_type {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value]), text(), location());
+  = field:literal_arg_type ':' value:literal_arg_type {
+    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value, nodeTypes.literal.buildNode(true)]), text(), location());
   }
-  / field:literal_arg_type space? ':' space? '[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
+  / field:literal_arg_type ':[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
     return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt]), text(), location());
   }
+  / function
   / !Keywords literal:literal_arg_type { return literal; }
+
+function_name
+ = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
+
+function "function"
+ = name:function_name space? '(' space? arg_list:arg_list? space? ')' {
+  return addMeta(nodeTypes.function.buildNodeWithArgumentNodes(name, arg_list || []), text(), location());
+ }
+
+arg_list
+ = first:argument rest:(space? ',' space? arg:argument {return arg})* space? ','? {
+  return [first].concat(rest);
+ }
+
+argument
+ = name:function_name space? '=' space? value:arg_type {
+  return addMeta(nodeTypes.namedArg.buildNode(name, value), text(), location());
+ }
+ / element:arg_type {return element}
+
+arg_type
+ = OrQuery
+ / literal_arg_type
 
 literal_arg_type
  = literal:literal {
-   var result = addMeta(nodeTypes.literal.buildNode(literal), text(), location());
-   return result;
+  var result = addMeta(nodeTypes.literal.buildNode(literal), text(), location());
+  return result;
  }
 
 Keywords
-  = 'or'i / 'and'i / 'not'i
+  = 'and'i / 'or'i
 
  /* ----- Core types ----- */
 
@@ -121,3 +145,6 @@ dq_char
 sq_char
   = "\\" sequence:("'" / "\\") { return sequence; }
   / [^'] // everything except '
+
+integer
+ = digits:[0-9]+ {return parseInt(digits.join(''))}

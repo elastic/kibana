@@ -23,13 +23,8 @@ describe('kuery functions', function () {
         expect(is.buildNodeParams).withArgs('foo').to.throwException(/value is a required argument/);
       });
 
-      it('should return "arguments" and "serializeStyle" params', function () {
-        const result = is.buildNodeParams('response', 200);
-        expect(result).to.only.have.keys('arguments', 'serializeStyle');
-      });
-
       it('arguments should contain the provided fieldName and value as literals', function () {
-        const { arguments: [ fieldName, value ] } = is.buildNodeParams('response', 200);
+        const { arguments: [fieldName, value] } = is.buildNodeParams('response', 200);
 
         expect(fieldName).to.have.property('type', 'literal');
         expect(fieldName).to.have.property('value', 'response');
@@ -38,11 +33,22 @@ describe('kuery functions', function () {
         expect(value).to.have.property('value', 200);
       });
 
-      it('serializeStyle should default to "operator"', function () {
-        const { serializeStyle } = is.buildNodeParams('response', 200);
-        expect(serializeStyle).to.be('operator');
+      it('should detect wildcards in the provided arguments', function () {
+        const { arguments: [fieldName, value] } = is.buildNodeParams('machine*', 'win*');
+
+        expect(fieldName).to.have.property('type', 'wildcard');
+        expect(value).to.have.property('type', 'wildcard');
       });
 
+      it('should default to a non-phrase query', function () {
+        const { arguments: [, , isPhrase] } = is.buildNodeParams('response', 200);
+        expect(isPhrase.value).to.be(false);
+      });
+
+      it('should allow specification of a phrase query', function () {
+        const { arguments: [, , isPhrase] } = is.buildNodeParams('response', 200, true);
+        expect(isPhrase.value).to.be(true);
+      });
     });
 
     describe('toElasticsearchQuery', function () {
@@ -61,7 +67,7 @@ describe('kuery functions', function () {
         const expected = {
           multi_match: {
             query: 200,
-            type: 'phrase',
+            type: 'best_fields',
             lenient: true,
           }
         };
@@ -71,39 +77,74 @@ describe('kuery functions', function () {
         expectDeepEqual(result, expected);
       });
 
-      it('should return an ES multi_match query when fieldName is "*"', function () {
-        const expected = {
-          multi_match: {
-            query: 200,
-            fields: ['*'],
-            type: 'phrase',
-            lenient: true,
-          }
-        };
-
+      it('should return an ES bool query with a sub-query for each field when fieldName is "*"', function () {
         const node = nodeTypes.function.buildNode('is', '*', 200);
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expectDeepEqual(result, expected);
+        expect(result).to.have.property('bool');
+        expect(result.bool.should).to.have.length(indexPattern.fields.length);
       });
 
       it('should return an ES exists query when value is "*"', function () {
         const expected = {
-          exists: { field: 'response' }
+          bool: {
+            should: [
+              { exists: { field: 'extension' } },
+            ],
+            minimum_should_match: 1
+          }
         };
 
-        const node = nodeTypes.function.buildNode('is', 'response', '*');
+        const node = nodeTypes.function.buildNode('is', 'extension', '*');
         const result = is.toElasticsearchQuery(node, indexPattern);
         expectDeepEqual(result, expected);
       });
 
-      it('should return an ES match_phrase query when a concrete fieldName and value are provided', function () {
+      it('should return an ES match query when a concrete fieldName and value are provided', function () {
         const expected = {
-          match_phrase: {
-            response: 200
+          bool: {
+            should: [
+              { match: { extension: 'jpg' } },
+            ],
+            minimum_should_match: 1
           }
         };
 
-        const node = nodeTypes.function.buildNode('is', 'response', 200);
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expectDeepEqual(result, expected);
+      });
+
+      it('should support creation of phrase queries', function () {
+        const expected = {
+          bool: {
+            should: [
+              { match_phrase: { extension: 'jpg' } },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg', true);
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expectDeepEqual(result, expected);
+      });
+
+      it('should create a query_string query for wildcard values', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                query_string: {
+                  fields: ['extension'],
+                  query: 'jpg*'
+                }
+              },
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
         const result = is.toElasticsearchQuery(node, indexPattern);
         expectDeepEqual(result, expected);
       });
@@ -111,23 +152,7 @@ describe('kuery functions', function () {
       it('should support scripted fields', function () {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
-        expect(result).to.have.key('script');
-      });
-
-    });
-
-    describe('toKueryExpression', function () {
-
-      it('should serialize "is" nodes with an operator syntax', function () {
-        const node = nodeTypes.function.buildNode('is', 'response', 200, 'operator');
-        const result = is.toKueryExpression(node);
-        expect(result).to.be('"response":200');
-      });
-
-      it('should throw an error for nodes with unknown or undefined serialize styles', function () {
-        const node = nodeTypes.function.buildNode('is', 'response', 200, 'notValid');
-        expect(is.toKueryExpression)
-          .withArgs(node).to.throwException(/Cannot serialize "is" function as "notValid"/);
+        expect(result.bool.should[0]).to.have.key('script');
       });
 
     });
