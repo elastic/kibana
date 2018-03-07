@@ -1,6 +1,6 @@
 // Initialization block
 {
-  console.log('Hello, world!');
+
   const { parseCursor, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
@@ -202,12 +202,8 @@ UnquotedLiteral
   }
 
 UnquotedCharacter
-  = EscapedKeyword
-  / EscapedSpecialCharacter
+  = EscapedSpecialCharacter
   / !Separator char:. { return char; }
-
-EscapedKeyword
-  = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
