@@ -16,23 +16,29 @@
 }
 
 start
-  = Space* query:OrQuery? Space* {
+  = Space* query:OrQuery? trailing:OptionalSpace {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
     if (query !== null) return query;
     return nodeTypes.function.buildNode('is', '*', '*');
   }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
-    if (left.type === 'cursor') return left;
-    if (right.type === 'cursor') return right;
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
   = left:NotQuery And right:AndQuery {
-    if (left.type === 'cursor') return left;
-    if (right.type === 'cursor') return right;
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildFunctionNode('and', [left, right]);
   }
   / NotQuery
@@ -45,7 +51,15 @@ NotQuery
   / SubQuery
 
 SubQuery
-  = '(' Space* query:OrQuery Space* ')' { return query; }
+  = '(' Space* query:OrQuery trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return query;
+  }
   / Expression
 
 Expression
@@ -84,7 +98,7 @@ ValueExpression
       return {
         ...partial,
         fieldName,
-        suggestionTypes: ['field', 'operator']
+        suggestionTypes: ['field', 'operator', 'conjunction']
       };
     }
     const field = buildLiteralNode(null);
@@ -92,7 +106,15 @@ ValueExpression
   }
 
 ListOfValues
-  = '(' Space* partial:OrListOfValues Space* ')' { return partial; }
+  = '(' Space* partial:OrListOfValues trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return partial;
+  }
   / Value
 
 OrListOfValues
@@ -224,6 +246,19 @@ UnquotedLiteral
 UnquotedCharacter
   = EscapedSpecialCharacter
   / !Cursor !Separator char:. { return char; }
+
+OptionalSpace
+  = prefix:Space* cursor:Cursor suffix:Space* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+    };
+  }
+  / Space*
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
