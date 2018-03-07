@@ -4,9 +4,6 @@ import chrome from 'ui/chrome';
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_WIDTH_SCALE_FACTOR = 4;
 
-const PANEL_HEIGHT_SCALE_FACTOR = 5;
-const PANEL_WIDTH_SCALE_FACTOR = 4;
-
 export class PanelUtils {
 
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
