@@ -68,6 +68,8 @@ export function uiRegistry(spec) {
       ? $injector.invoke(invokeProviders, undefined, { providers })
       : providers.map(Private);
 
+    iaOpts.initialSet = iaOpts.initialSet.filter(item => !_.isEmpty(item));
+
     // index all of the modules
     let modules = new IndexedArray(iaOpts);
 
