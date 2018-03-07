@@ -25,19 +25,6 @@ describe('kuery node types', function () {
 
     });
 
-    describe('toKueryExpression', function () {
-
-      it('should return the literal value represented by the given node', function () {
-        const numberNode = literal.buildNode(200);
-        expect(literal.toKueryExpression(numberNode)).to.be(200);
-      });
-
-      it('should wrap string values in double quotes', function () {
-        const stringNode = literal.buildNode('foo');
-        expect(literal.toKueryExpression(stringNode)).to.be('"foo"');
-      });
-
-    });
 
   });
 

@@ -36,7 +36,7 @@ describe('build query', function () {
 
     it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
       const queries = [
-        { query: 'foo:bar', language: 'kuery' },
+        { query: 'extension:jpg', language: 'kuery' },
         { query: 'bar:baz', language: 'lucene' },
       ];
       const filters = [
@@ -53,7 +53,7 @@ describe('build query', function () {
             { match_all: {} },
           ],
           filter: [
-            toElasticsearchQuery(fromKueryExpression('foo:bar'), indexPattern),
+            toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
           ],
           should: [],
           must_not: [],
