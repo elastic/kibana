@@ -1,13 +1,25 @@
-import _ from 'lodash';
-import { fromKueryExpression, fromKqlExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
+import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
+import { documentationLinks } from '../../../documentation_links';
 
-export function buildQueryFromKuery(indexPattern, queries) {
-  const queryASTs = _.map(queries, query => fromKueryExpression(query.query));
-  return buildQuery(indexPattern, queryASTs);
-}
+const queryDocs = documentationLinks.query;
 
-export function buildQueryFromKql(indexPattern, queries) {
-  const queryASTs = _.map(queries, query => fromKqlExpression(query.query));
+export function buildQueryFromKuery(indexPattern, queries = []) {
+  const queryASTs = queries.map((query) => {
+    try {
+      return fromKueryExpression(query.query);
+    }
+    catch (parseError) {
+      try {
+        fromLegacyKueryExpression(query.query);
+      }
+      catch (legacyParseError) {
+        throw parseError;
+      }
+      throw new Error(
+        `It looks like you're using an outdated Kuery syntax. See what changed in the [docs](${queryDocs.kueryQuerySyntax})!`
+      );
+    }
+  });
   return buildQuery(indexPattern, queryASTs);
 }
 

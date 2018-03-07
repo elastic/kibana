@@ -1,150 +1,179 @@
-/*
- * Kuery parser
- */
-
-/*
- * Initialization block
- */
+// Initialization block
 {
-  var nodeTypes = options.helpers.nodeTypes;
+  const { nodeTypes } = options.helpers;
+  const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
+  const buildLiteralNode = nodeTypes.literal.buildNode;
+  const buildWildcardNode = nodeTypes.wildcard.buildNode;
+  const buildNamedArgNode = nodeTypes.namedArg.buildNode;
 
-  if (options.includeMetadata === undefined) {
-    options.includeMetadata = true;
+  function trimLeft(string) {
+    return string.replace(/^[\s\uFEFF\xA0]+/g, '');
   }
 
-  function addMeta(source, text, location) {
-    if (options.includeMetadata) {
-      return Object.assign(
-        {},
-        source,
-        {
-          text: text,
-          location: simpleLocation(location),
-        }
-      );
-    }
-
-    return source;
-  }
-
-  function simpleLocation(location) {
-    // Returns an object representing the position of the function within the expression,
-    // demarcated by the position of its first character and last character. We calculate these values
-    // using the offset because the expression could span multiple lines, and we don't want to deal
-    // with column and line values.
-    return {
-      min: location.start.offset,
-      max: location.end.offset
-    }
+  function trimRight(string) {
+    return string.replace(/[\s\uFEFF\xA0]+$/g, '');
   }
 }
 
 start
-  = space? query:OrQuery space? {
-    if (query.type === 'literal') {
-      return addMeta(nodeTypes.function.buildNode('and', [query], 'implicit'), text(), location());
-    }
-    return query;
-  }
-  / whitespace:[\ \t\r\n]* {
-    return addMeta(nodeTypes.function.buildNode('is', '*', '*'), text(), location());
+  = Space* query:OrQuery? Space* {
+    if (query !== null) return query;
+    return nodeTypes.function.buildNode('is', '*', '*');
   }
 
 OrQuery
-  = left:AndQuery space 'or'i space right:OrQuery {
-    return addMeta(nodeTypes.function.buildNode('or', [left, right], 'operator'), text(), location());
+  = left:AndQuery Or right:OrQuery {
+    return buildFunctionNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
-  = left:NegatedClause space 'and'i space right:AndQuery {
-    return addMeta(nodeTypes.function.buildNode('and', [left, right], 'operator'), text(), location());
+  = left:NotQuery And right:AndQuery{
+    return buildFunctionNode('and', [left, right]);
   }
-  / left:NegatedClause space !'or'i right:AndQuery {
-    return addMeta(nodeTypes.function.buildNode('and', [left, right], 'implicit'), text(), location());
+  / NotQuery
+
+NotQuery
+  = Not query:SubQuery {
+    return buildFunctionNode('not', [query]);
   }
-  / NegatedClause
+  / SubQuery
 
-NegatedClause
-  = [!] clause:Clause {
-    return addMeta(nodeTypes.function.buildNode('not', clause, 'operator'), text(), location());
-  }
-  / Clause
+SubQuery
+  = '(' Space* query:OrQuery Space* ')' { return query; }
+  / Expression
 
-Clause
-  = '(' subQuery:start ')' {
-    return subQuery;
-  }
-  / Term
+Expression
+  = FieldRangeExpression
+  / FieldValueExpression
+  / ValueExpression
 
-Term
-  = field:literal_arg_type ':' value:literal_arg_type {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value], 'operator'), text(), location());
-  }
-  / field:literal_arg_type ':[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt], 'operator'), text(), location());
-  }
-  / function
-  / !Keywords literal:literal_arg_type { return literal; }
-
-function_name
- = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
-
-function "function"
- = name:function_name space? '(' space? arg_list:arg_list? space? ')' {
-  return addMeta(nodeTypes.function.buildNodeWithArgumentNodes(name, arg_list || [], 'function'), text(), location());
- }
-
-arg_list
- = first:argument rest:(space? ',' space? arg:argument {return arg})* space? ','? {
-  return [first].concat(rest);
- }
-
-argument
- = name:function_name space? '=' space? value:arg_type {
-  return addMeta(nodeTypes.namedArg.buildNode(name, value), text(), location());
- }
- / element:arg_type {return element}
-
-arg_type
- = OrQuery
- / literal_arg_type
-
-literal_arg_type
- = literal:literal {
-  var result = addMeta(nodeTypes.literal.buildNode(literal), text(), location());
-  return result;
- }
-
-Keywords
-  = 'and'i / 'or'i
-
- /* ----- Core types ----- */
-
-literal "literal"
-  =  '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
-  / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
-  / 'true'  { return true; } // unquoted literals from here down
-  / 'false' { return false; }
-  / 'null'  { return null; }
-  / string:[^\[\]()"',:=\ \t]+ { // this also matches numbers via Number()
-   var result = string.join('');
-   // Sort of hacky, but PEG doesn't have backtracking so
-   // a number rule is hard to read, and performs worse
-   if (isNaN(Number(result))) return result;
-   return Number(result)
+FieldRangeExpression
+  = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
+    const range = buildNamedArgNode(operator, value);
+    return buildFunctionNode('range', [field, range]);
   }
 
-space
- = [\ \t\r\n]+
+FieldValueExpression
+  = field:Literal Space* ':' Space* partial:ListOfValues {
+    return partial(field);
+  }
 
-dq_char
-  = "\\" sequence:('"' / "\\") { return sequence; }
-  / [^"] // everything except "
+ValueExpression
+  = partial:Value {
+    const field = buildLiteralNode(null);
+    return partial(field);
+  }
 
-sq_char
-  = "\\" sequence:("'" / "\\") { return sequence; }
-  / [^'] // everything except '
+ListOfValues
+  = '(' Space* partial:OrListOfValues Space* ')' { return partial; }
+  / Value
 
-integer
- = digits:[0-9]+ {return parseInt(digits.join(''))}
+OrListOfValues
+  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+  }
+  / AndListOfValues
+
+AndListOfValues
+  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
+    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+  }
+  / NotListOfValues
+
+NotListOfValues
+  = Not partial:ListOfValues {
+    return (field) => buildFunctionNode('not', [partial(field)]);
+  }
+  / ListOfValues
+
+Value
+  = value:QuotedString {
+    const isPhrase = buildLiteralNode(true);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+  / value:WildcardString {
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+  / value:UnquotedLiteral {
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
+
+Or
+  = Space+ 'or'i Space+
+
+And
+  = Space+ 'and'i Space+
+
+Not
+  = 'not'i Space+
+
+Literal
+  = QuotedString / WildcardString / UnquotedLiteral
+
+QuotedString
+  = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
+    return buildLiteralNode(chars.join(''));
+  }
+
+WildcardString
+  = sequences:WildcardSequence+ {
+    const compactedSequences = sequences.reduce((acc, arr, i) => {
+      const compacted = arr.filter(value => value !== '');
+      return [...acc, ...compacted];
+    }, []);
+    if (typeof compactedSequences[0] === 'string') {
+      compactedSequences[0] = trimLeft(compactedSequences[0]);
+    }
+    const lastIndex = compactedSequences.length - 1;
+    if (typeof compactedSequences[lastIndex] === 'string') {
+      compactedSequences[lastIndex] = trimRight(compactedSequences[lastIndex]);
+    }
+    return buildWildcardNode(compactedSequences);
+  }
+
+WildcardSequence
+  = left:UnquotedCharacter* '*' right:UnquotedCharacter* {
+    return [left.join(''), nodeTypes.wildcard.wildcardSymbol, right.join('')];
+  }
+
+UnquotedLiteral
+  = chars:UnquotedCharacter+ {
+    const sequence = chars.join('').trim();
+    if (sequence === 'null') return buildLiteralNode(null);
+    if (sequence === 'true') return buildLiteralNode(true);
+    if (sequence === 'false') return buildLiteralNode(false);
+    const number = Number(sequence);
+    const value = isNaN(number) ? sequence : number;
+    return buildLiteralNode(value);
+  }
+
+UnquotedCharacter
+  = EscapedSpecialCharacter
+  / !Separator char:. { return char; }
+
+EscapedSpecialCharacter
+  = '\\' char:SpecialCharacter { return char; }
+
+EscapedDoubleQuote
+  = '\\' char:'"' { return char; }
+
+Separator
+  = Keyword / SpecialCharacter
+
+Keyword
+  = Or / And / Not
+
+SpecialCharacter
+  = [\\():<>"*]
+
+RangeOperator
+  = '<=' { return 'lte'; }
+  / '>=' { return 'gte'; }
+  / '<' { return 'lt'; }
+  / '>' { return 'gt'; }
+
+Space
+  = [\ \t\r\n]

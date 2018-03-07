@@ -281,6 +281,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItem('response');
         await PageObjects.discover.clickFieldListPlusFilter('response', 200);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.query('php');
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         let queryString = await queryBar.getQueryString();
         expect(queryString).to.not.be.empty();
@@ -293,8 +295,10 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.discover.clickFieldListPlusFilter('response', 200);
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.query('php');
         queryString = await queryBar.getQueryString();
-        expect(queryString).to.be.empty();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(queryString).to.not.be.empty();
         expect(await filterBar.hasFilter('response', 200)).to.be(true);
 
         await queryBar.setLanguage('kuery');
