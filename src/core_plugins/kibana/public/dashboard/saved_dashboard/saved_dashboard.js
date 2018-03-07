@@ -1,6 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
@@ -41,6 +42,9 @@ module.factory('SavedDashboard', function (courier, config) {
       // object, clear it. It was a mistake
       clearSavedIndexPattern: true
     });
+
+
+    this.showInRecenltyAccessed = true;
   }
 
   // save these objects with the 'dashboard' type
@@ -76,6 +80,10 @@ module.factory('SavedDashboard', function (courier, config) {
   SavedDashboard.fieldOrder = ['title', 'description'];
 
   SavedDashboard.searchsource = true;
+
+  SavedDashboard.prototype.getFullPath = function () {
+    return `/app/kibana#${createDashboardEditUrl(this.id)}`;
+  };
 
   return SavedDashboard;
 });

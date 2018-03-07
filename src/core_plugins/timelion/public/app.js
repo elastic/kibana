@@ -42,9 +42,9 @@ require('ui/routes')
           .then((savedSheet) => {
             if ($route.current.params.id) {
               recentlyAccessed.add(
-                `/app/timelion#/${$route.current.params.id}`,
+                savedSheet.getFullPath(),
                 savedSheet.title,
-                $route.current.params.id);
+                savedSheet.id);
             }
             return savedSheet;
           })

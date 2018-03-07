@@ -68,7 +68,7 @@ uiRoutes
 
         return savedDashboards.get(id)
           .then((savedDashboard) => {
-            recentlyAccessed.add(`/app/kibana#/dashboard/${id}`, savedDashboard.title, id);
+            recentlyAccessed.add(savedDashboard.getFullPath(), savedDashboard.title, id);
             return savedDashboard;
           })
           .catch((error) => {

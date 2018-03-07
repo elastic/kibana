@@ -50,9 +50,9 @@ uiRoutes
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
-              `/app/kibana#${VisualizeConstants.EDIT_PATH}/${$route.current.params.id}`,
+              savedVis.getFullPath(),
               savedVis.title,
-              $route.current.params.id);
+              savedVis.id);
             return savedVis;
           })
           .catch(courier.redirectWhenMissing({
