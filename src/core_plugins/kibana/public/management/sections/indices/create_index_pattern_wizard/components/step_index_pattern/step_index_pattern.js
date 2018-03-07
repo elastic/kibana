@@ -6,7 +6,7 @@ import {
   containsInvalidCharacters,
   getMatchedIndices,
   canAppendWildcard,
-  createReasonableWait
+  ensureMinimumTime
 } from '../../lib';
 import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
@@ -76,7 +76,7 @@ export class StepIndexPattern extends Component {
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
 
     if (query.endsWith('*')) {
-      const [ exactMatchedIndices ] = await createReasonableWait(getIndices(esService, query, MAX_SEARCH_SIZE));
+      const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, query, MAX_SEARCH_SIZE));
       this.setState({ exactMatchedIndices, isLoadingIndices: false });
       return;
     }
@@ -84,10 +84,10 @@ export class StepIndexPattern extends Component {
     const [
       partialMatchedIndices,
       exactMatchedIndices,
-    ] = await createReasonableWait(
+    ] = await ensureMinimumTime([
       getIndices(esService, `${query}*`, MAX_SEARCH_SIZE),
       getIndices(esService, query, MAX_SEARCH_SIZE),
-    );
+    ]);
 
     this.setState({
       partialMatchedIndices,

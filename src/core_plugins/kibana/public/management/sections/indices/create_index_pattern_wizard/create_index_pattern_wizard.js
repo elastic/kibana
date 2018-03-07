@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { createReasonableWait } from './lib';
+import { ensureMinimumTime } from './lib';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -42,7 +42,7 @@ export class CreateIndexPatternWizard extends Component {
   fetchIndices = async () => {
     this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
     const { services } = this.props;
-    const [ allIndices ] = await createReasonableWait(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
+    const allIndices = await ensureMinimumTime(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
     this.setState({ allIndices, isInitiallyLoadingIndices: false });
   }
 

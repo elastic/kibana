@@ -7,7 +7,9 @@ jest.mock('../components/indices_list', () => ({ IndicesList: 'IndicesList' }));
 jest.mock('../components/loading_indices', () => ({ LoadingIndices: 'LoadingIndices' }));
 jest.mock('../components/status_message', () => ({ StatusMessage: 'StatusMessage' }));
 jest.mock('../components/header', () => ({ Header: 'Header' }));
-jest.mock('../../../lib/create_reasonable_wait', () => ({ createReasonableWait: (...promises) => Promise.all(promises) }));
+jest.mock('../../../lib/ensure_minimum_time', () => ({
+  ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
+}));
 jest.mock('../../../lib/get_indices', () => ({
   getIndices: () => {
     return [

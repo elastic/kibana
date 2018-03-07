@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { createReasonableWait, extractTimeFields } from '../../lib';
+import { ensureMinimumTime, extractTimeFields } from '../../lib';
 
 import { Header } from './components/header';
 import { TimeField } from './components/time_field';
@@ -45,7 +45,7 @@ export class StepTimeField extends Component {
     const { indexPatternsService, indexPattern } = this.props;
 
     this.setState({ isFetchingTimeFields: true });
-    const [ fields ] = await createReasonableWait(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
+    const fields = await ensureMinimumTime(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });
