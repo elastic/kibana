@@ -23,6 +23,17 @@ describe('Registry', function () {
       reg.register(mod);
       // modules are not exposed, so this is the most that we can test
     });
+
+    it('filters out empty items', function () {
+      const reg = uiRegistry();
+
+      reg.register(() => ({ id: 17 }));
+      reg.register(() => ({})); // this one should be filtered out
+      reg.register(() => ({ name: 'foo' }));
+
+      const modules = Private(reg);
+      expect(modules).to.have.length(2);
+    });
   });
 
   describe('as a module', function () {
