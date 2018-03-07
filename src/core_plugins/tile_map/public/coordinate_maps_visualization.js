@@ -117,39 +117,11 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       const indexPatternName = agg.vis.indexPattern.id;
       const field = agg.fieldName();
-      const query = this.vis.API.queryManager.getQuery();
-      const language = query.language;
+      const filter = { meta: { negate: false, index: indexPatternName } };
+      filter[filterName] = { ignore_unmapped: true };
+      filter[filterName][field] = filterData;
 
-      if (['lucene', 'kql'].includes(language)) {
-        const filter = { meta: { negate: false, index: indexPatternName } };
-        filter[filterName] = { ignore_unmapped: true };
-        filter[filterName][field] = filterData;
-
-        this.vis.API.queryFilter.addFilters([filter]);
-      }
-      else if (language === 'kuery') {
-        const { fromKueryExpression, toKueryExpression, nodeTypes } = this.vis.API.kuery;
-        let newQuery;
-
-        if (filterName === 'geo_bounding_box') {
-          newQuery = nodeTypes.function.buildNode('geoBoundingBox', field, _.mapKeys(filterData, (value, key) => _.camelCase(key)));
-        }
-        else if (filterName === 'geo_polygon') {
-          newQuery = nodeTypes.function.buildNode('geoPolygon', field, filterData.points);
-        }
-        else {
-          throw new Error(`Kuery does not support ${filterName} queries`);
-        }
-
-        const allQueries = _.isEmpty(query.query)
-          ? [newQuery]
-          : [fromKueryExpression(query.query), newQuery];
-
-        this.vis.API.queryManager.setQuery({
-          query: toKueryExpression(nodeTypes.function.buildNode('and', allQueries, 'implicit')),
-          language: 'kuery'
-        });
-      }
+      this.vis.API.queryFilter.addFilters([filter]);
 
       this.vis.updateState();
     }
