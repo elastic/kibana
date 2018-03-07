@@ -68,7 +68,6 @@ export class RangeControl extends Component {
     let errorMessage = '';
 
     if ((!isMinValid && isMaxValid) || (isMinValid && !isMaxValid)) {
-      console.log('both must be set');
       isRangeValid = false;
       errorMessage = 'both min and max must be set';
     }
