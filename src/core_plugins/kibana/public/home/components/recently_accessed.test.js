@@ -30,7 +30,7 @@ describe('more popover', () => {
     />);
 
     const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
-    expect(0).toBe(moreRecentlyAccessed.length);
+    expect(moreRecentlyAccessed.length).toBe(0);
   });
 
   test('should not be rendered when recently accessed list size is NUM_LONG_LINKS', () => {
@@ -39,7 +39,7 @@ describe('more popover', () => {
     />);
 
     const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
-    expect(0).toBe(moreRecentlyAccessed.length);
+    expect(moreRecentlyAccessed.length).toBe(0);
   });
 
   describe('recently accessed list size exceeds NUM_LONG_LINKS', () => {
@@ -49,7 +49,7 @@ describe('more popover', () => {
       />);
 
       const moreRecentlyAccessed = findTestSubject(component, 'openMoreRecentlyAccessedPopover');
-      expect(1).toBe(moreRecentlyAccessed.length);
+      expect(moreRecentlyAccessed.length).toBe(1);
     });
 
     test('should only contain overflow recently accessed items when opened', () => {
@@ -65,9 +65,9 @@ describe('more popover', () => {
       while (i < numberOfRecentlyAccessed) {
         const item = findTestSubject(component, `moreRecentlyAccessedItem${i}`);
         if (i < NUM_LONG_LINKS) {
-          expect(0).toBe(item.length);
+          expect(item.length).toBe(0);
         } else {
-          expect(1).toBe(item.length);
+          expect(item.length).toBe(1);
         }
         i++;
       }

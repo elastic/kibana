@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
@@ -42,12 +42,12 @@ export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccesse
   let recentlyAccessedPanel;
   if (recentlyAccessed.length > 0) {
     recentlyAccessedPanel = (
-      <React.Fragment>
+      <Fragment>
         <RecentlyAccessed
           recentlyAccessed={recentlyAccessed}
         />
         <EuiSpacer size="l" />
-      </React.Fragment>
+      </Fragment>
     );
   }
 

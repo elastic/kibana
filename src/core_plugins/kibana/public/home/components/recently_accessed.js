@@ -1,5 +1,5 @@
 import './recently_accessed.less';
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -16,7 +16,7 @@ import {
 
 export const NUM_LONG_LINKS = 5;
 
-export class RecentlyAccessed extends React.Component {
+export class RecentlyAccessed extends Component {
 
   constructor(props) {
     super(props);
