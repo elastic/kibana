@@ -25,6 +25,7 @@ export const Header = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
+              iconType="exportAction"
             >
               Export Everything
             </EuiButton>
@@ -32,6 +33,7 @@ export const Header = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
+              iconType="importAction"
             >
               Import
             </EuiButton>
@@ -39,7 +41,7 @@ export const Header = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="xs"/>
+    <EuiSpacer size="s"/>
     <EuiText>
       <p>
         <EuiTextColor color="subdued">
