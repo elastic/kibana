@@ -96,6 +96,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
 
+      const inViewMode = await testSubjects.exists('dashboardEditMode');
+      expect(inViewMode).to.be(true);
+
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
