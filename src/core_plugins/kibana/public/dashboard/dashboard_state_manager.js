@@ -14,6 +14,7 @@ import {
   updateTitle,
   updateDescription,
   updateHidePanelTitles,
+  updateTags,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -27,6 +28,7 @@ import {
   getDescription,
   getUseMargins,
   getHidePanelTitles,
+  getTags,
 } from '../selectors';
 
 /**
@@ -44,6 +46,7 @@ import {
  * State that is only stored in the Store:
  *  - embeddables
  *  - maximizedPanelId
+ *  - tags
  *
  * State that is shared and needs to be synced:
  * - fullScreenMode - changes propagate from AppState -> Store and from Store -> AppState.
@@ -449,6 +452,22 @@ export class DashboardStateManager {
     Object.assign(panel, panelAttributes);
     this.saveState();
     return panel;
+  }
+
+  getTags() {
+    return getTags(store.getState());
+  }
+
+  addTag(tag) {
+    const tags = this.getTags();
+    store.dispatch(updateTags([...tags, tag]));
+  }
+
+  deleteTag(tagId) {
+    const tags = this.getTags().filter(tag => {
+      return tag.id !== tagId;
+    });
+    store.dispatch(updateTags([...tags]));
   }
 
   /**

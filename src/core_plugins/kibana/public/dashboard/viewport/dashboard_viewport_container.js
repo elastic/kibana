@@ -8,6 +8,7 @@ import {
   getDescription,
   getUseMargins,
   getFullScreenMode,
+  getTags,
 } from '../selectors';
 
 const mapStateToProps = ({ dashboard }) => {
@@ -19,6 +20,7 @@ const mapStateToProps = ({ dashboard }) => {
     title: getTitle(dashboard),
     useMargins: getUseMargins(dashboard),
     isFullScreenMode: getFullScreenMode(dashboard),
+    tags: getTags(dashboard),
   };
 };
 

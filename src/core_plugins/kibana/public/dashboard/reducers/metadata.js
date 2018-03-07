@@ -1,5 +1,9 @@
 import { handleActions } from 'redux-actions';
-import { updateTitle, updateDescription } from '../actions';
+import {
+  updateTitle,
+  updateDescription,
+  updateTags,
+} from '../actions';
 
 export const metadata = handleActions({
   [updateTitle]: (state, { payload }) => ({
@@ -12,7 +16,13 @@ export const metadata = handleActions({
     description: payload
   }),
 
+  [updateTags]: (state, { payload }) => ({
+    ...state,
+    tags: payload
+  }),
+
 }, {
   title: '',
   description: '',
+  tags: [],
 });

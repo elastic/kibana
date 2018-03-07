@@ -11,4 +11,5 @@ export {
 export {
   updateDescription,
   updateTitle,
+  updateTags,
 } from './metadata';

@@ -111,13 +111,15 @@ export class TagsSelect extends Component {
     }
 
     return this.state.tags.map(tag => {
-      const checked = false;
+      const onClick = () => {
+        this.props.onSelect(tag);
+      }
       return (
         <EuiFilterSelectItem
-          checked={checked}
           key={tag.id}
+          onClick={onClick}
         >
-          {tag.attributes.title}
+          {tag.title}
         </EuiFilterSelectItem>
       );
     });
@@ -150,4 +152,5 @@ export class TagsSelect extends Component {
 
 TagsSelect.propTypes = {
   find: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
 };

@@ -96,12 +96,17 @@ export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
  */
 export const getMetadata = dashboard => dashboard.metadata;
 /**
- * @param dashboard {MetadataState}
+ * @param dashboard {DashboardState}
  * @return {string}
  */
 export const getTitle = dashboard => dashboard.metadata.title;
 /**
- * @param dashboard {MetadataState}
+ * @param dashboard {DashboardState}
  * @return {string}
  */
 export const getDescription = dashboard => dashboard.metadata.description;
+/**
+ * @param dashboard {DashboardState}
+ * @return {array} Arrary of tag saved objects
+ */
+export const getTags = dashboard => dashboard.metadata.tags;

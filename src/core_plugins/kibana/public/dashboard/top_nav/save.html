@@ -57,7 +57,11 @@
       </label>
     </div>
 
-    <tags-input find="findTags"/>
+    <tags-input
+      find="findTags"
+      on-select="addTag"
+      tags="model.tags"
+    />
   </div>
 
   <saved-object-save-as-check-box

@@ -10,6 +10,8 @@ export class TagsInput extends Component {
 
   constructor(props) {
     super(props);
+
+    console.log("tags", this.props.tags);
   }
 
   render() {
@@ -17,6 +19,7 @@ export class TagsInput extends Component {
       <EuiFilterGroup>
         <TagsSelect
           find={this.props.find}
+          onSelect={this.props.onSelect}
         />
       </EuiFilterGroup>
     );
@@ -25,4 +28,10 @@ export class TagsInput extends Component {
 
 TagsInput.propTypes = {
   find: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  tags: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired,
+  })).isRequired,
 };

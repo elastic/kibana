@@ -28,3 +28,4 @@ export const getHidePanelTitles = state => DashboardSelectors.getHidePanelTitles
 
 export const getTitle = state => DashboardSelectors.getTitle(getDashboard(state));
 export const getDescription = state => DashboardSelectors.getDescription(getDashboard(state));
+export const getTags = state => DashboardSelectors.getTags(getDashboard(state));

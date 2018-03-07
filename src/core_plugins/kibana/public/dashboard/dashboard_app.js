@@ -66,18 +66,30 @@ app.directive('dashboardApp', function ($injector) {
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
-      const savedObjectsClient = Private(SavedObjectsClientProvider);
-      const tagsClient = new TagsClient(savedObjectsClient);
-      $scope.findTags = (search, size) => {
-        return tagsClient.find(search, size);
-      };
-
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
         docTitle.change(dash.title);
       }
 
       const dashboardStateManager = new DashboardStateManager(dash, AppState, dashboardConfig.getHideWriteControls());
+
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const tagsClient = new TagsClient(savedObjectsClient);
+      $scope.findTags = async (search, size) => {
+        const tags = await tagsClient.find(search, size);
+        return tags.map(savedObject => {
+          return {
+            id: savedObject.id,
+            title: savedObject.attributes.title,
+            color: savedObject.attributes.color,
+          }
+        });
+      };
+      $scope.addTag = (tag) => {
+        dashboardStateManager.addTag(tag);
+        updateState();
+        console.log("updated tags", $scope.model.tags)
+      };
 
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
@@ -107,6 +119,7 @@ app.directive('dashboardApp', function ($injector) {
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
+          tags: dashboardStateManager.getTags(),
         };
         $scope.panels = dashboardStateManager.getPanels();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
