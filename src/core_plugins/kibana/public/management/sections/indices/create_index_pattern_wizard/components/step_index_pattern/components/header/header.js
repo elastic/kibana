@@ -19,8 +19,9 @@ export const Header = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  ...rest
 }) => (
-  <div>
+  <div {...rest}>
     <EuiTitle size="s">
       <h2>
         Step 1 of 2: Define index pattern

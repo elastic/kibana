@@ -124,7 +124,7 @@ export class StepIndexPattern extends Component {
     }
 
     return (
-      <LoadingIndices/>
+      <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
     );
   }
 
@@ -157,6 +157,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <IndicesList
+        data-test-subj="createIndexPatternStep1IndicesList"
         query={query}
         indices={indicesToList}
       />
@@ -203,6 +204,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <Header
+        data-test-subj="createIndexPatternStep1Header"
         isInputInvalid={isInputInvalid}
         errors={errors}
         characterList={characterList}
