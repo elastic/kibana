@@ -4,7 +4,10 @@
  * won't have time to register it as a spinner. This function ensures the spinner (or whatever
  * you're showing the user) displays for at least 300 ms, even if the request completes before then.
  */
-export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = 300) {
+
+export const DEFAULT_MINIMUM_TIME_MS = 300;
+
+export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = DEFAULT_MINIMUM_TIME_MS) {
   let returnValue;
 
   // Block on the async action and start the clock.
