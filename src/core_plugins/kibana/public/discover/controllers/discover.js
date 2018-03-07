@@ -86,7 +86,7 @@ uiRoutes
           .then((savedSearch) => {
             if (savedSearchId) {
               recentlyAccessed.add(
-                `#/discover/${savedSearchId}`,
+                `/app/kibana#/discover/${savedSearchId}`,
                 savedSearch.title,
                 savedSearchId);
             }

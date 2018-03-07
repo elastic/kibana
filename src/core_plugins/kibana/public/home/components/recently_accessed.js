@@ -26,13 +26,13 @@ export class RecentlyAccessed extends React.Component {
     };
   }
 
-  onButtonClick() {
+  onButtonClick = () => {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
   }
 
-  closePopover() {
+  closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
@@ -65,7 +65,7 @@ export class RecentlyAccessed extends React.Component {
 
     const openPopoverComponent = (
       <EuiLink
-        onClick={this.onButtonClick.bind(this)}
+        onClick={this.onButtonClick}
         data-test-subj="openMoreRecentlyAccessedPopover"
       >
         <EuiTextColor
@@ -92,7 +92,7 @@ export class RecentlyAccessed extends React.Component {
         ownFocus
         button={openPopoverComponent}
         isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover.bind(this)}
+        closePopover={this.closePopover}
         anchorPosition={anchorPosition}
       >
         <ul>

@@ -62,7 +62,7 @@ describe('more popover', () => {
       moreRecentlyAccessed.simulate('click');
 
       let i = 0;
-      while(i < numberOfRecentlyAccessed) {
+      while (i < numberOfRecentlyAccessed) {
         const item = findTestSubject(component, `moreRecentlyAccessedItem${i}`);
         if (i < NUM_LONG_LINKS) {
           expect(0).toBe(item.length);

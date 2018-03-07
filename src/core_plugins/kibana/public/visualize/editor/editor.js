@@ -50,7 +50,7 @@ uiRoutes
         return savedVisualizations.get($route.current.params.id)
           .then((savedVis) => {
             recentlyAccessed.add(
-              `#${VisualizeConstants.EDIT_PATH}/${$route.current.params.id}`,
+              `/app/kibana#${VisualizeConstants.EDIT_PATH}/${$route.current.params.id}`,
               savedVis.title,
               $route.current.params.id);
             return savedVis;

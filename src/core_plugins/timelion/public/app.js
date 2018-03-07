@@ -6,7 +6,6 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
-import chrome from 'ui/chrome';
 
 require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
@@ -43,7 +42,7 @@ require('ui/routes')
           .then((savedSheet) => {
             if ($route.current.params.id) {
               recentlyAccessed.add(
-                `${chrome.addBasePath('/app/timelion')}#/${$route.current.params.id}`,
+                `/app/timelion#/${$route.current.params.id}`,
                 savedSheet.title,
                 $route.current.params.id);
             }
