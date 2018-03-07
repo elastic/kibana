@@ -1,0 +1,18 @@
+{
+  "name": "@kbn/es",
+  "main": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "chalk": "^2.3.1",
+    "dedent": "^0.7.0",
+    "elasticsearch": "^14.1.0",
+    "mkdirp": "^0.5.1",
+    "node-fetch": "^2.0.0",
+    "simple-git": "^1.91.0",
+    "tar-fs": "^1.16.0",
+    "zlib": "^1.0.5"
+  }
+}

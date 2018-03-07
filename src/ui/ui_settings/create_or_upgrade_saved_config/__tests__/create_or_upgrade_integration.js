@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { createEsTestCluster } from '../../../../test_utils/es';
+import { createTestCluster } from '../../../../test_utils/es';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
 import { createToolingLog } from '../../../../dev';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
@@ -16,17 +16,16 @@ describe('createOrUpgradeSavedConfig()', () => {
     log.pipe(process.stdout);
     log.indent(6);
 
-    const es = createEsTestCluster({
-      log: msg => log.debug(msg),
-      name: 'savedObjects/healthCheck/integration',
-    });
-
-    this.timeout(es.getStartTimeout());
     log.info('starting elasticsearch');
     log.indent(2);
-    await es.start();
+
+    const es = createTestCluster();
+    this.timeout(es.getStartTimeout());
+
     log.indent(-2);
     cleanup.push(() => es.stop());
+
+    await es.start();
 
     kbnServer = createServerWithCorePlugins();
     await kbnServer.ready();
