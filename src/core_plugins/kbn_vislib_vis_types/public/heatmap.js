@@ -40,7 +40,8 @@ export default function HeatmapVisType(Private) {
           labels: {
             show: false,
             rotate: 0,
-            color: '#555'
+            overwriteColor: false,
+            color: '#555',
           }
         }]
       },

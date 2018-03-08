@@ -15,17 +15,17 @@ export function IndicesEditSectionsProvider() {
 
     return [
       {
-        title: 'fields',
+        title: 'Fields',
         index: 'indexedFields',
         count: fieldCount.indexed
       },
       {
-        title: 'scripted fields',
+        title: 'Scripted fields',
         index: 'scriptedFields',
         count: fieldCount.scripted
       },
       {
-        title: 'source filters',
+        title: 'Source filters',
         index: 'sourceFilters',
         count: fieldCount.sourceFilters
       }

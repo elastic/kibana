@@ -6,7 +6,7 @@ import './absolute_panel';
 import _ from 'lodash';
 import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { Notifier } from 'ui/notify';
 import 'ui/timepicker/timepicker.less';

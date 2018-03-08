@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
@@ -21,13 +21,10 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function () {
           return PageObjects.header.waitUntilLoadingHasFinished();
-        })
-        .then(function sleep() {
-          return PageObjects.common.sleep(1003);
         });
     });
 
-    describe('Visual Builder Time Series', function () {
+    describe('Time Series', function () {
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -54,10 +51,9 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('Visual Builder metric', () => {
+    describe('metric', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.common.sleep(1003);
       });
 
       it('should not display spy panel toggle button', async function () {
@@ -76,11 +72,42 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('Visual Builder markdown', () => {
+    // add a gauge test
+    describe('gauge', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickGauge();
+        log.debug('clicked on Gauge');
+      });
+
+      it('should verfiy gauge label and count display', async function () {
+        const labelString = await PageObjects.visualBuilder.getGaugeLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
+        expect(gaugeCount).to.be('156');
+      });
+    });
+
+    // add a top N test
+    describe('topN', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickTopN();
+        log.debug('clicked on TopN');
+      });
+
+      it('should verfiy topN label and count display', async function () {
+        const labelString = await PageObjects.visualBuilder.getTopNLabel();
+        expect(labelString).to.be('Count');
+        const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
+        expect(gaugeCount).to.be('156');
+      });
+    });
+
+
+
+    describe('markdown', () => {
 
       before(async () => {
         await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.common.sleep(1003);
         await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
@@ -96,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('6');
       });
 
-      describe.skip('allow time offsets', () => {
+      describe('allow time offsets', () => {
         before(async () => {
           await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
           await PageObjects.visualBuilder.clickMarkdownData();
@@ -121,5 +148,31 @@ export default function ({ getService, getPageObjects }) {
       });
 
     });
+    // add a table sanity timestamp
+    describe('table', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickTable();
+        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        log.debug('clicked on Table');
+      });
+
+      it('should be able to set values for group by field and column name', async () => {
+        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
+        await PageObjects.visualBuilder.setLabelValue('OS');
+        log.debug('finished setting field and column name');
+      });
+
+      it('should be able verify that values are displayed in the table', async () => {
+        const tableData = await PageObjects.visualBuilder.getViewTable();
+        log.debug(`Values on ${tableData}`);
+        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+        expect(tableData).to.be(expectedData);
+      });
+
+
+
+    });
+
+
   });
 }

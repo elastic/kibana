@@ -10,5 +10,8 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
+const { resolve } = require('path');
+process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.js'));
+
 require('../src/babel-register');
 require('../src/dev/jest/cli');

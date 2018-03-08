@@ -1,0 +1,17 @@
+{
+  // Specific changes to TS config needed to run the tests.
+
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    // In production we run the TS output through Babel or Webpack, so we can
+    // output `esnext` while the tests are ran directly on the TypeScript
+    // output. We therefore need to the target to match what is available when
+    // Jest is running. When upgrading Node.js versions we can therefore likely
+    // update the target to a newer version of EcmaScript.
+    "target": "es2015"
+  },
+  "include": [
+    "../../../**/*.ts"
+  ]
+}

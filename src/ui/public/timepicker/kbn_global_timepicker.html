@@ -1,9 +1,17 @@
-<div ng-show="timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled" data-shared-timefilter="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled}}" class="kuiLocalMenu" data-test-subj="globalTimepicker">
+<div
+  ng-show="timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled"
+  data-shared-timefilter-from="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled ? timefilter.getBounds().min.utc().format() : null }}"
+  data-shared-timefilter-to="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled ? timefilter.getBounds().max.utc().format() : null }}"
+  class="kuiLocalMenu"
+  data-test-subj="globalTimepicker"
+>
   <button
     class="kuiLocalMenuItem"
     aria-label="{{ timefilter.refreshInterval.pause ? 'Resume refreshing data' : 'Pause refreshing data' }}"
     ng-click="toggleRefresh()"
     ng-show="timefilter.isAutoRefreshSelectorEnabled && (timefilter.refreshInterval.value > 0)"
+    data-test-subj="globalTimepickerAutoRefreshButton"
+    data-test-subj-state="{{ timefilter.refreshInterval.pause ? 'inactive' : 'active' }}"
   >
     <span
       class="kuiIcon"

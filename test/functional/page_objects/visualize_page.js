@@ -253,6 +253,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async setSelectByOptionText(selectId, optionText) {
+      const options = await find.allByCssSelector(`#${selectId} > option`);
+      const optionsTextPromises = options.map(async (optionElement) => {
+        return await optionElement.getVisibleText();
+      });
+      const optionsText = await Promise.all(optionsTextPromises);
+
+      const optionIndex = optionsText.indexOf(optionText);
+      if (optionIndex === -1) {
+        throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
+      }
+      await options[optionIndex].click();
+    }
+
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
     }
@@ -783,6 +797,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async doesSelectedLegendColorExist(color) {
       return await testSubjects.exists(`legendSelectedColor-${color}`);
+    }
+
+    async getPieSlice(name) {
+      return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
+    }
+
+    async getAllPieSlices(name) {
+      return await testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
+    }
+
+    async getPieSliceStyle(name) {
+      log.debug(`VisualizePage.getPieSliceStyle(${name})`);
+      const pieSlice = await this.getPieSlice(name);
+      return await pieSlice.getAttribute('style');
+    }
+
+    async getAllPieSliceStyles(name) {
+      log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
+      const pieSlices = await this.getAllPieSlices(name);
+      return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
     }
   }
 

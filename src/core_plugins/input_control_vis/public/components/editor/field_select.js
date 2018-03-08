@@ -5,7 +5,6 @@ import Select from 'react-select';
 
 import {
   EuiFormRow,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 export class FieldSelect extends Component {
@@ -63,8 +62,7 @@ export class FieldSelect extends Component {
       return null;
     }
 
-    const idGenerator = htmlIdGenerator();
-    const selectId = idGenerator('fieldSelect');
+    const selectId = `fieldSelect-${this.props.controlIndex}`;
     return (
       <EuiFormRow
         id={selectId}
@@ -89,5 +87,6 @@ FieldSelect.propTypes = {
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string,
-  filterField: PropTypes.func
+  filterField: PropTypes.func,
+  controlIndex: PropTypes.number.isRequired,
 };

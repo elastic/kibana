@@ -2,6 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
+import { getLineageMap } from './lineage';
 
 class VisController {
   constructor(el, vis) {
@@ -44,30 +45,62 @@ class VisController {
   }
 
   async initControls() {
-    return await Promise.all(
-      this.vis.params.controls.filter((controlParams) => {
-        // ignore controls that do not have indexPattern or field
-        return controlParams.indexPattern && controlParams.fieldName;
-      })
-        .map((controlParams) => {
-          const factory = controlFactory(controlParams);
-          return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
-        })
-    );
+    const controlParamsList = this.vis.params.controls.filter((controlParams) => {
+      // ignore controls that do not have indexPattern or field
+      return controlParams.indexPattern && controlParams.fieldName;
+    });
+
+    const controlFactoryPromises = controlParamsList.map((controlParams) => {
+      const factory = controlFactory(controlParams);
+      return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
+    });
+    const controls = await Promise.all(controlFactoryPromises);
+
+    const getControl = (id) => {
+      return controls.find(control => {
+        return id === control.id;
+      });
+    };
+
+    const controlInitPromises = [];
+    getLineageMap(controlParamsList).forEach((lineage, controlId) => {
+      // first lineage item is the control. remove it
+      lineage.shift();
+      const ancestors = [];
+      lineage.forEach(ancestorId => {
+        ancestors.push(getControl(ancestorId));
+      });
+      const control = getControl(controlId);
+      control.setAncestors(ancestors);
+      controlInitPromises.push(control.fetch());
+    });
+
+    await Promise.all(controlInitPromises);
+    return controls;
   }
 
-  stageFilter(controlIndex, newValue) {
+  async stageFilter(controlIndex, newValue) {
     this.controls[controlIndex].set(newValue);
     if (this.vis.params.updateFiltersOnChange) {
       // submit filters on each control change
       this.submitFilters();
     } else {
       // Do not submit filters, just update vis so controls are updated with latest value
+      await this.updateNestedControls();
       this.drawVis();
     }
   }
 
   submitFilters() {
+    // Clean up filter pills for nested controls that are now disabled because ancestors are not set
+    this.controls.map(async (control) => {
+      if (control.hasAncestors() && control.hasUnsetAncestor()) {
+        control.filterManager.findFilters().forEach((existingFilter) => {
+          this.vis.API.queryFilter.removeFilter(existingFilter);
+        });
+      }
+    });
+
     const stagedControls = this.controls.filter((control) => {
       return control.hasChanged();
     });
@@ -97,11 +130,21 @@ class VisController {
     this.drawVis();
   }
 
-  updateControlsFromKbn() {
+  async updateControlsFromKbn() {
     this.controls.forEach((control) => {
       control.reset();
     });
+    await this.updateNestedControls();
     this.drawVis();
+  }
+
+  async updateNestedControls() {
+    const fetchPromises = this.controls.map(async (control) => {
+      if (control.hasAncestors()) {
+        await control.fetch();
+      }
+    });
+    return await Promise.all(fetchPromises);
   }
 
   hasChanges() {
