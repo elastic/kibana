@@ -36,7 +36,7 @@ exports[`StepIndexPattern should render normally 1`] = `
     errors={Array []}
     goToNextStep={[Function]}
     isInputInvalid={false}
-    isNextStepDisabled={true}
+    isNextStepDisabled={false}
     onQueryChanged={[Function]}
     query="k"
   />
@@ -54,14 +54,19 @@ exports[`StepIndexPattern should render normally 1`] = `
             "name": "es",
           },
         ],
-        "exactMatchedIndices": Array [],
-        "partialMatchedIndices": Array [],
-        "visibleIndices": Array [
+        "exactMatchedIndices": Array [
           Object {
             "name": "kibana",
           },
+        ],
+        "partialMatchedIndices": Array [
           Object {
-            "name": "es",
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
           },
         ],
       }
@@ -76,9 +81,6 @@ exports[`StepIndexPattern should render normally 1`] = `
       Array [
         Object {
           "name": "kibana",
-        },
-        Object {
-          "name": "es",
         },
       ]
     }
@@ -120,11 +122,7 @@ exports[`StepIndexPattern should render some indices 1`] = `
             "name": "kibana",
           },
         ],
-        "partialMatchedIndices": Array [
-          Object {
-            "name": "kibana",
-          },
-        ],
+        "partialMatchedIndices": Array [],
         "visibleIndices": Array [
           Object {
             "name": "kibana",
@@ -174,7 +172,7 @@ exports[`StepIndexPattern should render the loading state 1`] = `
 </EuiPanel>
 `;
 
-exports[`StepIndexPattern should show errors 1`] = `
+exports[`StepIndexPattern should search for partial indices for queries not ending in a wildcard 1`] = `
 <EuiPanel
   grow={true}
   hasShadow={false}
@@ -182,16 +180,12 @@ exports[`StepIndexPattern should show errors 1`] = `
 >
   <Header
     characterList="\\\\, /, ?, \\", <, >, |"
-    errors={
-      Array [
-        "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
-      ]
-    }
+    errors={Array []}
     goToNextStep={[Function]}
-    isInputInvalid={true}
-    isNextStepDisabled={true}
+    isInputInvalid={false}
+    isNextStepDisabled={false}
     onQueryChanged={[Function]}
-    query="?"
+    query="k"
   />
   <EuiSpacer
     size="s"
@@ -224,7 +218,7 @@ exports[`StepIndexPattern should show errors 1`] = `
         ],
       }
     }
-    query="?"
+    query="k"
   />
   <EuiSpacer
     size="s"
@@ -237,6 +231,35 @@ exports[`StepIndexPattern should show errors 1`] = `
         },
       ]
     }
+  />
+</EuiPanel>
+`;
+
+exports[`StepIndexPattern should show errors 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={
+      Array [
+        "Your input contains invalid characters or spaces. Please omit: \\\\, /, ?, \\", <, >, |",
+      ]
+    }
+    goToNextStep={[Function]}
+    isInputInvalid={true}
+    isNextStepDisabled={true}
+    onQueryChanged={[Function]}
+    query="?"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <LoadingIndices />
+  <EuiSpacer
+    size="s"
   />
 </EuiPanel>
 `;
