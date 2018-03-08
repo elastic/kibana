@@ -68,7 +68,7 @@ module.exports =
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
-/******/ 	// object with all compiled WebAssmbly.Modules
+/******/ 	// object with all compiled WebAssembly.Modules
 /******/ 	__webpack_require__.w = {};
 /******/
 /******/

@@ -59,9 +59,9 @@
     "strip-ansi": "^4.0.0",
     "strong-log-transformer": "^1.0.6",
     "tempy": "^0.2.1",
-    "ts-loader": "^4.0.0",
+    "ts-loader": "^4.0.1",
     "typescript": "^2.7.2",
-    "webpack": "^4.0.1",
+    "webpack": "^4.1.1",
     "webpack-cli": "^2.0.10",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^3.1.0"
