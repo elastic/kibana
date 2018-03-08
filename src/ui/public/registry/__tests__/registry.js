@@ -24,11 +24,13 @@ describe('Registry', function () {
       // modules are not exposed, so this is the most that we can test
     });
 
-    it('filters out empty items', function () {
-      const reg = uiRegistry();
+    it('skips registering empty items if so specified', function () {
+      const reg = uiRegistry({
+        skipEmptyItems: true
+      });
 
       reg.register(() => ({ id: 17 }));
-      reg.register(() => ({})); // this one should be filtered out
+      reg.register(() => ({})); // this one should be skipped
       reg.register(() => ({ name: 'foo' }));
 
       const modules = Private(reg);

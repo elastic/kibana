@@ -2,6 +2,8 @@ import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokeProviders');
 
+const isEmptyObject = (item) => _.isObject(item) && _.isEmpty(item);
+
 /**
  * Create a registry, which is just a Private module provider.
  *
@@ -35,6 +37,7 @@ const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokePro
  * # init
  * @param {Function} [spec.constructor] - an injectable function that is called when
  *                                      the registry is first instanciated by the app.
+ * @param {boolean} [spec.skipEmptyItems] - whether to skip registering empty items; default = false
  *
  * # IndexedArray params
  * @param {array[String]} [spec.index] - passed to the IndexedArray constructor
@@ -49,6 +52,7 @@ export function uiRegistry(spec) {
   spec = spec || {};
 
   const constructor = _.has(spec, 'constructor') && spec.constructor;
+  const skipEmptyItems = _.has(spec, 'skipEmptyItems') && spec.skipEmptyItems;
   const invokeProviders = _.has(spec, 'invokeProviders') && spec.invokeProviders;
   const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
   const props = _.omit(spec, notPropsOptNames);
@@ -68,7 +72,9 @@ export function uiRegistry(spec) {
       ? $injector.invoke(invokeProviders, undefined, { providers })
       : providers.map(Private);
 
-    iaOpts.initialSet = iaOpts.initialSet.filter(item => !_.isEmpty(item));
+    if (skipEmptyItems) {
+      iaOpts.initialSet = iaOpts.initialSet.filter(item => !isEmptyObject(item));
+    }
 
     // index all of the modules
     let modules = new IndexedArray(iaOpts);
