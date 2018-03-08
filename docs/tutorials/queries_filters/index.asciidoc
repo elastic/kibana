@@ -44,7 +44,7 @@ We can also match the entire phrase:
 "to be or not to be"
 --------------------
 
-Or in specifc fields:
+Or in specific fields:
 
 [source,shell]
 -------------
@@ -59,7 +59,7 @@ capitalized:
 food AND love
 -------------
 
-Or parantheses:
+Or parentheses:
 
 [source,shell]
 ----------------------------------------
