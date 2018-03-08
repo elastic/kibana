@@ -66,6 +66,7 @@ function updateIndexedFieldsTable($scope, $state) {
 
       render(
         <IndexedFieldsTable
+          fields={$scope.fields}
           indexPattern={$scope.indexPattern}
           fieldFilter={$scope.fieldFilter}
           fieldWildcardMatcher={$scope.fieldWildcardMatcher}
@@ -138,6 +139,7 @@ uiModules.get('apps/management')
     $scope.$watch('indexPattern.fields', function () {
       $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
       $scope.refreshFilters();
+      $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);
       updateScriptedFieldsTable($scope, $state);
     });
@@ -180,7 +182,10 @@ uiModules.get('apps/management')
     $scope.refreshFields = function () {
       const confirmModalOptions = {
         confirmButtonText: 'Refresh',
-        onConfirm: () => { $scope.indexPattern.refreshFields(); },
+        onConfirm: async () => {
+          await $scope.indexPattern.refreshFields();
+          $scope.fields = $scope.indexPattern.getNonScriptedFields();
+        },
         title: 'Refresh field list?'
       };
       confirmModal(

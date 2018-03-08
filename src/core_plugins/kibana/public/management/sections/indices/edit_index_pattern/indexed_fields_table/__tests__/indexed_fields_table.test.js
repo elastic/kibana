@@ -22,18 +22,21 @@ const helpers = {
   redirectToRoute: () => {},
 };
 
+const fields = [
+  { name: 'Elastic', displayName: 'Elastic', searchable: true },
+  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
+  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+];
+
 const indexPattern = {
-  getNonScriptedFields: () => ([
-    { name: 'Elastic', displayName: 'Elastic', searchable: true },
-    { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-    { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
-  ])
+  getNonScriptedFields: () => fields,
 };
 
 describe('IndexedFieldsTable', () => {
   it('should render normally', async () => {
     const component = shallow(
       <IndexedFieldsTable
+        fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
         fieldWildcardMatcher={() => {}}
@@ -52,6 +55,7 @@ describe('IndexedFieldsTable', () => {
   it('should filter based on the query bar', async () => {
     const component = shallow(
       <IndexedFieldsTable
+        fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
         fieldWildcardMatcher={() => {}}
@@ -72,6 +76,7 @@ describe('IndexedFieldsTable', () => {
   it('should filter based on the type filter', async () => {
     const component = shallow(
       <IndexedFieldsTable
+        fields={fields}
         indexPattern={indexPattern}
         helpers={helpers}
         fieldWildcardMatcher={() => {}}

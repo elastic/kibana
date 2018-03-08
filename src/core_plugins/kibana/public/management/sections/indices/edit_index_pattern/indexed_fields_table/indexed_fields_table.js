@@ -9,6 +9,7 @@ import {
 
 export class IndexedFieldsTable extends Component {
   static propTypes = {
+    fields: PropTypes.array.isRequired,
     indexPattern: PropTypes.object.isRequired,
     fieldFilter: PropTypes.string,
     indexedFieldTypeFilter: PropTypes.string,
@@ -22,19 +23,24 @@ export class IndexedFieldsTable extends Component {
     super(props);
 
     this.state = {
-      fields: []
+      fields: this.mapFields(this.props.fields)
     };
   }
 
-  componentWillMount() {
-    this.fetchFields();
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.fields !== this.props.fields) {
+      this.setState({
+        fields: this.mapFields(nextProps.fields)
+      });
+    }
   }
 
   mapFields(fields) {
     const { indexPattern, fieldWildcardMatcher } = this.props;
-    const fieldWildcardMatch = fieldWildcardMatcher((indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value) || []));
+    const sourceFilters = indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
+    const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
-    return fields
+    return fields && fields
       .map((field) => {
         return {
           ...field,
@@ -44,14 +50,7 @@ export class IndexedFieldsTable extends Component {
           format: getFieldFormat(indexPattern, field.name),
           excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
         };
-      });
-  }
-
-  fetchFields = async () => {
-    const fields = this.mapFields(await this.props.indexPattern.getNonScriptedFields());
-    this.setState({
-      fields
-    });
+      }) || [];
   }
 
   getFilteredFields = createSelector(
