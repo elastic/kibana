@@ -55,7 +55,7 @@ export class CreateIndexPatternWizard extends Component {
     const createdId = await emptyPattern.create();
 
     if (!services.config.get('defaultIndex')) {
-      services.config.set('defaultIndex', createdId);
+      await services.config.set('defaultIndex', createdId);
     }
 
     services.indexPatterns.cache.clear(createdId);
