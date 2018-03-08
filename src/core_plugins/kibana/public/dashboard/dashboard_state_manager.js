@@ -90,6 +90,15 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
 
+    const joinedTags = _.get(savedDashboard, 'join.tags', {});
+    const initialTags =  Object.keys(joinedTags).map(id => {
+      return {
+        id: id,
+        title: joinedTags[id].title,
+        color: joinedTags[id].color,
+      };
+    });
+
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
     store.dispatch(setPanels(this.getPanels()));
@@ -99,6 +108,7 @@ export class DashboardStateManager {
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
+    store.dispatch(updateTags(initialTags));
 
     this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
@@ -550,9 +560,13 @@ export class DashboardStateManager {
 
   /**
    * Saves the current application state to the URL.
+   * Saves current store state to dashboard saved object.
    */
   saveState() {
     this.appState.save();
+    this.savedDashboard.tags = this.getTags().map(tag => {
+      return tag.id;
+    });
   }
 
   /**

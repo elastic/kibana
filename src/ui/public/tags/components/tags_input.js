@@ -5,6 +5,7 @@ import { TagsSelect } from './tags_select';
 import {
   EuiFilterGroup,
   EuiBadge,
+  EuiFilterButton,
 } from '@elastic/eui';
 
 export class TagsInput extends Component {
@@ -22,15 +23,16 @@ export class TagsInput extends Component {
           event.stopPropagation();
         };
         return (
-          <EuiBadge
-            key={tag.id}
-            color={tag.color}
-            iconType="cross"
-            iconSide="right"
-            onClick={deleteTag}
-          >
-            {tag.title}
-          </EuiBadge>
+          <EuiFilterButton key={tag.id}>
+            <EuiBadge
+              color={tag.color}
+              iconType="cross"
+              iconSide="right"
+              onClick={deleteTag}
+            >
+              {tag.title}
+            </EuiBadge>
+          </EuiFilterButton>
         );
       });
     }
