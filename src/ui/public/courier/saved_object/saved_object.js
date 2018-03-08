@@ -18,6 +18,7 @@ import MappingSetupProvider from 'ui/utils/mapping_setup';
 import { SearchSourceProvider } from '../data_source/search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
 import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
@@ -344,6 +345,9 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           this.id = resp.id;
         })
         .then(() => {
+          if (this.showInRecenltyAccessed && this.getFullPath) {
+            recentlyAccessed.add(this.getFullPath(), this.title, this.id);
+          }
           this.isSaving = false;
           this.lastSavedTitle = this.title;
           return this.id;
