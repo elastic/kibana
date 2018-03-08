@@ -124,14 +124,14 @@ export class OnServerTable extends React.Component {
   }
 
   onCriteriaChange(criteria) {
-    this.fetchData(criteria, this.state.query);
     this.setState({ criteria });
+    this.fetchData(criteria, this.state.query);
   }
 
   onQueryChange(query) {
+    this.setState({ query });
     this.fetchData(this.state.criteria, query);
     this.props.onSearchChanged && this.props.onSearchChanged(query);
-    this.setState({ query });
   }
 
   render() {

@@ -99,7 +99,7 @@ export class Table extends PureComponent {
       //   </EuiButton>,
       // ],
       box: {
-        incremental: true, //clientSideSearchingEnabled,
+        incremental: clientSideSearchingEnabled,
       },
       filters: [
         {

@@ -27,6 +27,22 @@ const TAB_CONFIG = [
   },
 ];
 
+
+async function smoothServerInteraction(block, minimumTimeMs = 300) {
+  return await ensureMinimumTime(block, minimumTimeMs);
+}
+
+// let timeoutId;
+// async function cancelPreviousAttempts(block, timeToBlockMs = 100) {
+//   timeoutId && clearTimeout(timeoutId);
+//   return new Promise(resolve => {
+//     timeoutId = setTimeout(async () => {
+//       await block();
+//       resolve();
+//     }, timeToBlockMs);
+//   });
+// }
+
 // TODO: maybe use this in the other tables too
 async function ensureMinimumTime(block, minimumTimeMs = 300) {
   // console.log(`ensureMinimumTime() minimumTimeMs=${minimumTimeMs}`);
@@ -43,7 +59,7 @@ async function ensureMinimumTime(block, minimumTimeMs = 300) {
 
 function getQueryText(query) {
   return query && query.ast.getTermClauses().length
-    ? query.ast.getTermClauses()[0].value
+    ? query.ast.getTermClauses().map(clause => clause.value).join(' ')
     : '';
 }
 
@@ -55,17 +71,6 @@ function getSavedObjectIcon(type) {
     case 'index-pattern': return 'indexPatternApp';
     case 'tag': return 'apps';
   }
-}
-
-let timeoutId;
-async function cancelPreviousAttempts(block, timeToBlockMs = 100) {
-  timeoutId && clearTimeout(timeoutId);
-  return new Promise(resolve => {
-    timeoutId = setTimeout(async () => {
-      await block();
-      resolve();
-    }, timeToBlockMs);
-  });
 }
 
 export class ObjectsTable extends Component {
@@ -136,30 +141,28 @@ export class ObjectsTable extends Component {
     // const minimumTime = getQueryText(activeQuery) === queryText ? 300 : 750;
 
     // TODO: is there a good way to stop existing calls if the input changes?
-    await cancelPreviousAttempts(async () => {
-      await ensureMinimumTime(async () => {
-        // console.log('Searching...');
-        // TODO: this is dumb, change it
-        for (const { service } of visibleServices) {
-          const data = await service.findAll(
-            queryText,
-            clientSideSearchThreshold + 1,
-            ['title', 'id']
-          );
-          for (const hit of data.hits) {
-            savedObjects.push({
-              ...hit,
-              // service: service,
-              // serviceName,
-              // title: title,
-              type: service.type,
-              icon: getSavedObjectIcon(service.type),
-              // data: data.hits,
-              // total: data.total
-            });
-          }
+    await smoothServerInteraction(async () => {
+      // console.log(`Searching for ${queryText}...`);
+      // TODO: this is dumb, change it
+      for (const { service } of visibleServices) {
+        const data = await service.findAll(
+          queryText,
+          clientSideSearchThreshold + 1,
+          ['title', 'id']
+        );
+        for (const hit of data.hits) {
+          savedObjects.push({
+            ...hit,
+            // service: service,
+            // serviceName,
+            // title: title,
+            type: service.type,
+            icon: getSavedObjectIcon(service.type),
+            // data: data.hits,
+            // total: data.total
+          });
         }
-      });
+      }
     });
 
     return savedObjects;
