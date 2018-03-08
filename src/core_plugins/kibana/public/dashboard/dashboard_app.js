@@ -73,24 +73,6 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardStateManager = new DashboardStateManager(dash, AppState, dashboardConfig.getHideWriteControls());
 
-      const savedObjectsClient = Private(SavedObjectsClientProvider);
-      const tagsClient = new TagsClient(savedObjectsClient);
-      $scope.findTags = async (search, size) => {
-        const tags = await tagsClient.find(search, size);
-        return tags.map(savedObject => {
-          return {
-            id: savedObject.id,
-            title: savedObject.attributes.title,
-            color: savedObject.attributes.color,
-          }
-        });
-      };
-      $scope.addTag = (tag) => {
-        dashboardStateManager.addTag(tag);
-        updateState();
-        console.log("updated tags", $scope.model.tags)
-      };
-
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
       $scope.containerApi = new DashboardContainerAPI(
@@ -123,6 +105,26 @@ app.directive('dashboardApp', function ($injector) {
         };
         $scope.panels = dashboardStateManager.getPanels();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
+      };
+
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const tagsClient = new TagsClient(savedObjectsClient);
+      $scope.findTags = async (search, size) => {
+        const tags = await tagsClient.find(search, size);
+        return tags.map(savedObject => {
+          return {
+            id: savedObject.id,
+            title: savedObject.attributes.title,
+            color: savedObject.attributes.color,
+          };
+        });
+      };
+      $scope.addTag = (tag) => {
+        dashboardStateManager.addTag(tag);
+        updateState();
+      };
+      $scope.deleteTag = (id) => {
+        dashboardStateManager.deleteTag(id);
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.

@@ -111,13 +111,22 @@ export class TagsSelect extends Component {
     }
 
     return this.state.tags.map(tag => {
-      const onClick = () => {
-        this.props.onSelect(tag);
+      let checked;
+      if (this.props.usedTags.includes(tag.id)) {
+        checked = 'on';
       }
+      const onClick = () => {
+        if (checked === 'on') {
+          this.props.onDelete(tag.id);
+        } else {
+          this.props.onAdd(tag);
+        }
+      };
       return (
         <EuiFilterSelectItem
           key={tag.id}
           onClick={onClick}
+          checked={checked}
         >
           {tag.title}
         </EuiFilterSelectItem>
@@ -152,5 +161,7 @@ export class TagsSelect extends Component {
 
 TagsSelect.propTypes = {
   find: PropTypes.func.isRequired,
-  onSelect: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  usedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
