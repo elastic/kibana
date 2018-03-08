@@ -10,7 +10,7 @@ import {
   defaults as paginationBarDefaults
 } from '@elastic/eui/lib/components/basic_table/pagination_bar';
 import { isBoolean, isString } from '@elastic/eui/lib/services/predicate';
-import { Comparators } from '@elastic/eui/lib/services/sort';
+// import { Comparators } from '@elastic/eui/lib/services/sort';
 import {
   Query,
   QueryType,
@@ -86,10 +86,12 @@ export class OnServerTable extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(prevState => {
-      const data = this.computeData(nextProps.items, prevState.criteria);
-      return { data };
-    });
+    if (nextProps.items !== this.props.items) {
+      this.setState(prevState => {
+        const data = this.computeData(nextProps.items, prevState.criteria);
+        return { data };
+      });
+    }
   }
 
   fetchData = async (
@@ -104,22 +106,22 @@ export class OnServerTable extends React.Component {
     });
   }
 
-  computeData(items, criteria, query) {
+  computeData(items/*, criteria, query*/) {
     if (!items) {
       return { items: [], totalCount: 0 };
     }
-    if (query) {
-      // items = Query.execute(query, items);
-    }
-    if (criteria.sort) {
-      items = items.sort(Comparators.property(criteria.sort.field, Comparators.default(criteria.sort.direction)));
-    }
+    // if (query) {
+    //   items = Query.execute(query, items);
+    // }
+    // if (criteria.sort) {
+    //   items = items.sort(Comparators.property(criteria.sort.field, Comparators.default(criteria.sort.direction)));
+    // }
     const totalCount = items.length;
-    if (criteria.page) {
-      const { index, size } = criteria.page;
-      const from = index * size;
-      items = items.slice(from, Math.min(from + size, items.length));
-    }
+    // if (criteria.page) {
+    //   const { index, size } = criteria.page;
+    //   const from = index * size;
+    //   items = items.slice(from, Math.min(from + size, items.length));
+    // }
     return { items, totalCount };
   }
 
