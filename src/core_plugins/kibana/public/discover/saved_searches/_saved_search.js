@@ -26,6 +26,8 @@ module.factory('SavedSearch', function (courier) {
         version: 1
       }
     });
+
+    this.showInRecenltyAccessed = true;
   }
 
   SavedSearch.type = 'search';
@@ -43,6 +45,10 @@ module.factory('SavedSearch', function (courier) {
   SavedSearch.fieldOrder = ['title', 'description'];
 
   SavedSearch.searchSource = true;
+
+  SavedSearch.prototype.getFullPath = function () {
+    return `/app/kibana#/discover/${this.id}`;
+  };
 
   return SavedSearch;
 });
