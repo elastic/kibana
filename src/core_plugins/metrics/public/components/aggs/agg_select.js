@@ -173,6 +173,7 @@ function AggSelect(props) {
   }
 
   const handleChange = value => {
+    if (!value) return;
     if (value.disabled) return;
     if (value.value) props.onChange(value);
   };
