@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "6.2.2",
+  "version": "6.2.3",
   "branch": "6.x",
   "build": {
     "number": 8467,
@@ -76,7 +76,7 @@
     "@elastic/datemath": "4.0.2",
     "@elastic/eui": "0.0.14",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.3.0",
+    "@elastic/numeral": "2.3.1",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
@@ -232,7 +232,7 @@
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.34.0",
+    "chromedriver": "2.33.2",
     "classnames": "2.2.5",
     "enzyme": "3.2.0",
     "enzyme-adapter-react-16": "^1.1.1",
