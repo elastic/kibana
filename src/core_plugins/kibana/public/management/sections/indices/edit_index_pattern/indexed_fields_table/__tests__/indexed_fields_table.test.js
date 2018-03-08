@@ -43,11 +43,8 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
+    await new Promise(resolve => process.nextTick(resolve));
+    component.update();
 
     expect(component).toMatchSnapshot();
   });
@@ -62,11 +59,7 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
+    await new Promise(resolve => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
     component.update();
 
@@ -83,11 +76,7 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
+    await new Promise(resolve => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: 'date' });
     component.update();
 
