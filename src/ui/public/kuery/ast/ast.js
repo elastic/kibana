@@ -1,13 +1,7 @@
-import legacyKueryGrammar from 'raw-loader!./legacy_kuery.peg';
-import kueryGrammar from 'raw-loader!./kuery.peg';
-import PEG from 'pegjs';
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
-
-const legacyKueryParser = PEG.buildParser(legacyKueryGrammar);
-const kueryParser = PEG.buildParser(kueryGrammar, {
-  allowedStartRules: ['start', 'Literal'],
-});
+import { parse as parseKuery } from './kuery';
+import { parse as parseLegacyKuery } from './legacy_kuery';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -15,18 +9,18 @@ export function fromLiteralExpression(expression, parseOptions) {
     startRule: 'Literal',
   };
 
-  return fromExpression(expression, parseOptions, kueryParser);
+  return fromExpression(expression, parseOptions, parseKuery);
 }
 
 export function fromLegacyKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, legacyKueryParser);
+  return fromExpression(expression, parseOptions, parseLegacyKuery);
 }
 
 export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, kueryParser);
+  return fromExpression(expression, parseOptions, parseKuery);
 }
 
-function fromExpression(expression, parseOptions = {}, parser = kueryParser) {
+function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
   if (_.isUndefined(expression)) {
     throw new Error('expression must be a string, got undefined instead');
   }
@@ -36,7 +30,7 @@ function fromExpression(expression, parseOptions = {}, parser = kueryParser) {
     helpers: { nodeTypes }
   };
 
-  return parser.parse(expression, parseOptions);
+  return parse(expression, parseOptions);
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
