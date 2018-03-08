@@ -9,10 +9,6 @@
   },
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
-  "scripts": {
-    "test": "jest",
-    "test:dev": "jest --watch"
-  },
   "dependencies": {
     "argv-split": "^2.0.1",
     "commander": "^2.9.0",
@@ -20,10 +16,9 @@
     "gulp-rename": "1.2.2",
     "gulp-zip": "^4.1.0",
     "inquirer": "^1.2.2",
+    "minimatch": "^3.0.4",
+    "through2": "^2.0.3",
     "through2-map": "^3.0.0",
-    "vinyl-fs": "2.3.1"
-  },
-  "devDependencies": {
-    "jest": "^17.0.3"
+    "vinyl-fs": "^3.0.0"
   }
 }

@@ -14,7 +14,7 @@ export function nginxMetricsSpecProvider() {
                      ' [ngx_http_stub_status_module](http://nginx.org/en/docs/http/ngx_http_stub_status_module.html),' +
                      '  which must be enabled in your Nginx installation.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-nginx.html).',
-    //iconPath: '', TODO
+    euiIconType: 'logoNginx',
     artifacts: {
       dashboards: [
         {

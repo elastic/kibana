@@ -8,6 +8,7 @@ export async function scanMixin(kbnServer, server, config) {
     pack$,
     invalidDirectoryError$,
     invalidPackError$,
+    otherError$,
     deprecation$,
     invalidVersionSpec$,
     spec$,
@@ -35,6 +36,11 @@ export async function scanMixin(kbnServer, server, config) {
         tmpl: 'Skipping non-plugin directory at <%= path %>',
         path: error.path
       });
+    }),
+
+    otherError$.do(error => {
+      // rethrow unhandled errors, which will fail the server
+      throw error;
     }),
 
     invalidVersionSpec$

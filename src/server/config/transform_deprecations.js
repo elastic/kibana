@@ -25,6 +25,17 @@ const savedObjectsIndexCheckTimeout = (settings, log) => {
   }
 };
 
+const rewriteBasePath = (settings, log) => {
+  if (_.has(settings, 'server.basePath') && !_.has(settings, 'server.rewriteBasePath')) {
+    log(
+      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
+      'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
+      'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
+      'current behavior and silence this warning.'
+    );
+  }
+};
+
 const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
@@ -37,6 +48,7 @@ const deprecations = [
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
+  rewriteBasePath,
 ];
 
 export const transformDeprecations = createTransform(deprecations);

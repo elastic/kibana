@@ -37,6 +37,7 @@ export class StepIndexPattern extends Component {
     super(props);
     this.state = {
       partialMatchedIndices: [],
+      exactMatchedIndices: [],
       isLoadingIndices: false,
       existingIndexPatterns: [],
       indexPatternExists: false,
@@ -73,12 +74,22 @@ export class StepIndexPattern extends Component {
     }
 
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
-    const esQuery = query.endsWith('*') ? query : `${query}*`;
-    const partialMatchedIndices = await getIndices(esService, esQuery, MAX_SEARCH_SIZE);
-    createReasonableWait(() => this.setState({ partialMatchedIndices, isLoadingIndices: false }));
+    if (query.endsWith('*')) {
+      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
+      createReasonableWait(() => this.setState({ exactMatchedIndices, isLoadingIndices: false }));
+    }
+    else {
+      const partialMatchedIndices = await getIndices(esService, `${query}*`, MAX_SEARCH_SIZE);
+      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
+      createReasonableWait(() => this.setState({
+        partialMatchedIndices,
+        exactMatchedIndices,
+        isLoadingIndices: false
+      }));
+    }
   }
 
-  onQueryChanged = (e) => {
+  onQueryChanged = e => {
     const { appendedWildcard } = this.state;
     const { target } = e;
 
@@ -112,7 +123,7 @@ export class StepIndexPattern extends Component {
   }
 
   renderStatusMessage(matchedIndices) {
-    const { query, isLoadingIndices, indexPatternExists } = this.state;
+    const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
 
     if (isLoadingIndices || indexPatternExists) {
       return null;
@@ -121,6 +132,7 @@ export class StepIndexPattern extends Component {
     return (
       <StatusMessage
         matchedIndices={matchedIndices}
+        isIncludingSystemIndices={isIncludingSystemIndices}
         query={query}
       />
     );
@@ -198,9 +210,15 @@ export class StepIndexPattern extends Component {
 
   render() {
     const { isIncludingSystemIndices, allIndices } = this.props;
-    const { query, partialMatchedIndices } = this.state;
+    const { query, partialMatchedIndices, exactMatchedIndices } = this.state;
 
-    const matchedIndices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
+    const matchedIndices = getMatchedIndices(
+      allIndices,
+      partialMatchedIndices,
+      exactMatchedIndices,
+      query,
+      isIncludingSystemIndices
+    );
 
     return (
       <EuiPanel paddingSize="l">

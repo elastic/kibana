@@ -5,7 +5,7 @@ import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
 import _ from 'lodash';
-import { CATEGORY } from 'ui/vis/vis_category';
+import { CATEGORY, CATEGORY_DISPLAY_NAMES } from 'ui/vis/vis_category';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import routes from 'ui/routes';
@@ -35,15 +35,6 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
-  const visTypeCategoryToHumanReadableMap = {
-    [CATEGORY.BASIC]: 'Basic Charts',
-    [CATEGORY.DATA]: 'Data',
-    [CATEGORY.GRAPHIC]: 'Graphic',
-    [CATEGORY.MAP]: 'Maps',
-    [CATEGORY.OTHER]: 'Other',
-    [CATEGORY.TIME]: 'Time Series'
-  };
-
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
@@ -59,7 +50,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
 
   visTypes.forEach(visType => {
 
-    const categoryName = visType.category;
+    let categoryName = visType.category;
 
     if (categoryName === CATEGORY.HIDDEN) {
       return;
@@ -69,10 +60,17 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
       return;
     }
 
+    // If the specified category doesn't have a valu ein our display names
+    // mapping (most likely because the vis specified a random category, not using
+    // CATEGORY values), just move it to the OTHER category.
+    if (!CATEGORY_DISPLAY_NAMES[categoryName]) {
+      categoryName = CATEGORY.OTHER;
+    }
+
     // Create category object if it doesn't exist yet.
     if (!categoryToVisTypesMap[categoryName]) {
       categoryToVisTypesMap[categoryName] = {
-        label: visTypeCategoryToHumanReadableMap[categoryName],
+        label: CATEGORY_DISPLAY_NAMES[categoryName],
         list: [],
       };
     }

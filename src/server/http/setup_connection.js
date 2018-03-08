@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import { map } from 'lodash';
 import secureOptions from './secure_options';
 
 export default function (kbnServer, server, config) {
@@ -36,18 +35,28 @@ export default function (kbnServer, server, config) {
     return;
   }
 
-  server.connection({
+  const connection = server.connection({
     ...connectionOptions,
     tls: {
       key: readFileSync(config.get('server.ssl.key')),
       cert: readFileSync(config.get('server.ssl.certificate')),
-      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      ca: config.get('server.ssl.certificateAuthorities').map(ca => readFileSync(ca, 'utf8')),
       passphrase: config.get('server.ssl.keyPassphrase'),
 
       ciphers: config.get('server.ssl.cipherSuites').join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
       honorCipherOrder: true,
       secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
+    }
+  });
+
+  const badRequestResponse = new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii');
+  connection.listener.on('clientError', (err, socket) => {
+    if (socket.writable) {
+      socket.end(badRequestResponse);
+    }
+    else {
+      socket.destroy(err);
     }
   });
 }

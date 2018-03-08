@@ -80,7 +80,7 @@ uiModules
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
             vis.size = [container.width(), container.height()];
-            const status = getUpdateStatus($scope);
+            const status = getUpdateStatus(vis.type.requiresUpdateStatus, $scope);
             const renderPromise = visualization.render(visData, status);
             $scope.$apply();
             return renderPromise;

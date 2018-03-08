@@ -42,6 +42,7 @@ module.exports = function (grunt) {
     'test:server',
     'test:ui',
     'test:jest',
+    'test:jest_integration',
     'test:browser',
     'test:api'
   ]);
@@ -99,7 +100,8 @@ module.exports = function (grunt) {
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'run:eslint',
       'licenses',
-      'test:quick'
+      'test:quick',
+      'verifyTranslations',
     ]));
   });
 

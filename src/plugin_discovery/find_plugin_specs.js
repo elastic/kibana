@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { realpathSync } from 'fs';
 
 import { transformDeprecations, Config } from '../server/config';
 
@@ -32,6 +33,27 @@ function bufferAllResults(observable) {
 }
 
 /**
+ * Determine a distinct value for each result from find$
+ * so they can be deduplicated
+ * @param  {{error?,pack?}} result
+ * @return {Any}
+ */
+function getDistinctKeyForFindResult(result) {
+  // errors are distinct by their message
+  if (result.error) {
+    return result.error.message;
+  }
+
+  // packs are distinct by their absolute and real path
+  if (result.pack) {
+    return realpathSync(result.pack.getPath());
+  }
+
+  // non error/pack results shouldn't exist, but if they do they are all unique
+  return result;
+}
+
+/**
  *  Creates a collection of observables for discovering pluginSpecs
  *  using Kibana's defaults, settings, and config service
  *
@@ -46,6 +68,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     ...config.get('plugins.paths').map(createPackAtPath$),
     ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
   )
+    .distinct(getDistinctKeyForFindResult)
     .share();
 
   const extendConfig$ = find$
@@ -108,6 +131,11 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         isInvalidPackError(result.error) ? [result.error] : []
       )),
 
+    otherError$: find$
+      .mergeMap(result => (
+        isUnhandledError(result.error) ? [result.error] : []
+      )),
+
     // { spec, message } objects produced when transforming deprecated
     // settings for a plugin spec
     deprecation$: extendConfig$
@@ -131,4 +159,12 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     invalidVersionSpec$: extendConfig$
       .mergeMap(result => result.invalidVersionSpecs),
   };
+}
+
+function isUnhandledError(error) {
+  return (
+    error != null &&
+    !isInvalidDirectoryError(error) &&
+    !isInvalidPackError(error)
+  );
 }

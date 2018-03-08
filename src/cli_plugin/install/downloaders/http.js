@@ -3,6 +3,7 @@ import Progress from '../progress';
 import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
+import HttpsProxyAgent from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';
 
 function getProxyAgent(sourceUrl, logger) {
@@ -13,7 +14,12 @@ function getProxyAgent(sourceUrl, logger) {
   }
 
   logger.log(`Picked up proxy ${proxy} from environment variable.`);
-  return new HttpProxyAgent(proxy);
+
+  if (/^https/.test(sourceUrl)) {
+    return new HttpsProxyAgent(proxy);
+  } else {
+    return new HttpProxyAgent(proxy);
+  }
 }
 
 function sendRequest({ sourceUrl, timeout }, logger) {

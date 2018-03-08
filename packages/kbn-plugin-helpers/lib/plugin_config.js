@@ -1,5 +1,4 @@
 const resolve = require('path').resolve;
-const statSync = require('fs').statSync;
 const readFileSync = require('fs').readFileSync;
 const configFile = require('./config_file');
 
@@ -10,35 +9,20 @@ module.exports = function (root) {
   const config = configFile(root);
 
   const buildSourcePatterns = [
+    'yarn.lock',
     'package.json',
     'index.js',
     '{lib,public,server,webpackShims,translations}/**/*',
   ];
-
-  // add shrinkwrap and lock files, if they exist
-  ['npm-shrinkwrap.json', 'yarn.lock']
-    .forEach(function (file) {
-      if (fileExists(resolve(root, file))) {
-        buildSourcePatterns.push(file);
-      }
-    });
 
   return Object.assign({
     root: root,
     kibanaRoot: resolve(root, '../../kibana'),
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
     buildSourcePatterns: buildSourcePatterns,
+    skipInstallDependencies: false,
     id: pkg.name,
     pkg: pkg,
     version: pkg.version,
   }, config);
 };
-
-function fileExists(path) {
-  try {
-    const stat = statSync(path);
-    return stat.isFile();
-  } catch (e) {
-    return false;
-  }
-}

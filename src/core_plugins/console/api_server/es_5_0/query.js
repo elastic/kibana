@@ -229,12 +229,12 @@ export default function (api) {
     more_like_this: {
       __template: {
         'fields': ['FIELD'],
-        'like_text': 'text like this one',
+        'like': 'text like this one',
         'min_term_freq': 1,
         'max_query_terms': 12
       },
       fields: ['{field}'],
-      like_text: '',
+      like: '',
       percent_terms_to_match: 0.3,
       min_term_freq: 2,
       max_query_terms: 25,
@@ -256,7 +256,7 @@ export default function (api) {
     mlt: {
       __template: {
         'fields': ['FIELD'],
-        'like_text': 'text like this one',
+        'like': 'text like this one',
         'min_term_freq': 1,
         'max_query_terms': 12
       },
