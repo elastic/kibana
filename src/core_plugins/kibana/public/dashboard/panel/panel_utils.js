@@ -1,29 +1,7 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
-import _ from 'lodash';
-
 export class PanelUtils {
-  /**
-   * Fills in default parameters where not specified.
-   * @param {PanelState} panel
-   */
-  static initializeDefaults(panel) {
-    panel.gridData = panel.gridData || {};
-    panel.gridData.w = panel.gridData.w || DEFAULT_PANEL_WIDTH;
-    panel.gridData.h = panel.gridData.h || DEFAULT_PANEL_HEIGHT;
-
-    if (!panel.id) {
-      // In the interest of backwards comparability
-      if (panel.visId) {
-        panel.id = panel.visId;
-        panel.type = 'visualization';
-        delete panel.visId;
-      } else {
-        throw new Error('Missing object id on panel');
-      }
-    }
-  }
 
   static convertOldPanelData(panel) {
     panel.gridData = {
@@ -41,16 +19,6 @@ export class PanelUtils {
     delete panel.col;
 
     return panel;
-  }
-
-  /**
-   * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
-   * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
-   * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
-   * @param panels {Array<Object>}
-   */
-  static findPanelByPanelIndex(panelIndex, panels) {
-    return _.find(panels, (panel) => panel.panelIndex === panelIndex);
   }
 
   static initPanelIndexes(panels) {
