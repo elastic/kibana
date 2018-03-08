@@ -24,17 +24,18 @@ describe('Registry', function () {
       // modules are not exposed, so this is the most that we can test
     });
 
-    it('skips registering empty items if so specified', function () {
+    it('applies the filter function if one is specified', function () {
       const reg = uiRegistry({
-        skipEmptyItems: true
+        filter: item => item.value % 2 === 0 // register only even numbers
       });
 
-      reg.register(() => ({ id: 17 }));
-      reg.register(() => ({})); // this one should be skipped
-      reg.register(() => ({ name: 'foo' }));
+      reg.register(() => ({ value: 17 }));
+      reg.register(() => ({ value: 18 })); // only this one should get registered
+      reg.register(() => ({ value: 19 }));
 
       const modules = Private(reg);
-      expect(modules).to.have.length(2);
+      expect(modules).to.have.length(1);
+      expect(modules[0].value).to.be(18);
     });
   });
 

@@ -5,7 +5,7 @@ export const FeatureCatalogueRegistryProvider = uiRegistry({
   index: ['id'],
   group: ['category'],
   order: ['title'],
-  skipEmptyItems: true
+  filter: value => Object.keys(value).length > 0
 });
 
 export const FeatureCatalogueCategory = {

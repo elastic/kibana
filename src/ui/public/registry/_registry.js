@@ -2,8 +2,6 @@ import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokeProviders');
 
-const isEmptyObject = (item) => _.isObject(item) && _.isEmpty(item);
-
 /**
  * Create a registry, which is just a Private module provider.
  *
@@ -37,7 +35,10 @@ const isEmptyObject = (item) => _.isObject(item) && _.isEmpty(item);
  * # init
  * @param {Function} [spec.constructor] - an injectable function that is called when
  *                                      the registry is first instanciated by the app.
- * @param {boolean} [spec.skipEmptyItems] - whether to skip registering empty items; default = false
+ * @param {boolean} [spec.filter] - function that will be used to filter items before
+ *                                registering them. Function will called on each item and
+ *                                should return true to keep the item (register it) or
+ *                                skip it (don't register it)
  *
  * # IndexedArray params
  * @param {array[String]} [spec.index] - passed to the IndexedArray constructor
@@ -52,7 +53,7 @@ export function uiRegistry(spec) {
   spec = spec || {};
 
   const constructor = _.has(spec, 'constructor') && spec.constructor;
-  const skipEmptyItems = _.has(spec, 'skipEmptyItems') && spec.skipEmptyItems;
+  const filter = _.has(spec, 'filter') && spec.filter;
   const invokeProviders = _.has(spec, 'invokeProviders') && spec.invokeProviders;
   const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
   const props = _.omit(spec, notPropsOptNames);
@@ -72,8 +73,8 @@ export function uiRegistry(spec) {
       ? $injector.invoke(invokeProviders, undefined, { providers })
       : providers.map(Private);
 
-    if (skipEmptyItems) {
-      iaOpts.initialSet = iaOpts.initialSet.filter(item => !isEmptyObject(item));
+    if (filter && _.isFunction(filter)) {
+      iaOpts.initialSet = iaOpts.initialSet.filter(item => filter(item));
     }
 
     // index all of the modules
