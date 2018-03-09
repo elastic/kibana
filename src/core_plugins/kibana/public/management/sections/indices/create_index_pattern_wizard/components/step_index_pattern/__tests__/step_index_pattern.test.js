@@ -15,14 +15,13 @@ jest.mock('../../../lib/get_indices', () => ({
     ];
   },
 }));
-jest.mock('../../../lib/is_query_a_match', () => ({ isQueryAMatch: () => true }));
 
 const allIndices = [{ name: 'kibana' }, { name: 'es' }];
 const esService = {};
 const goToNextStep = () => {};
 
 describe('StepIndexPattern', () => {
-  it('should render normally', () => {
+  it('should render normally', async () => {
     const component = shallow(
       <StepIndexPattern
         allIndices={allIndices}
@@ -32,6 +31,11 @@ describe('StepIndexPattern', () => {
         initialQuery={'k'}
       />
     );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
 
     expect(component).toMatchSnapshot();
   });
@@ -64,11 +68,10 @@ describe('StepIndexPattern', () => {
     const instance = component.instance();
 
     await instance.onQueryChanged({
-      nativeEvent: { data: 'k' },
       target: { value: 'k' }
     });
 
-    component.update();
+    await component.update();
 
     expect(component).toMatchSnapshot();
   });
@@ -86,7 +89,6 @@ describe('StepIndexPattern', () => {
     const instance = component.instance();
 
     await instance.onQueryChanged({
-      nativeEvent: { data: '?' },
       target: { value: '?' }
     });
 
@@ -101,11 +103,6 @@ describe('StepIndexPattern', () => {
         allIndices={allIndices}
         isIncludingSystemIndices={false}
         esService={esService}
-        savedObjectsClient={{
-          find: () => ({ savedObjects: [
-            { attributes: { title: 'k*' } }
-          ] })
-        }}
         goToNextStep={goToNextStep}
       />
     );
@@ -114,6 +111,25 @@ describe('StepIndexPattern', () => {
 
     instance.onQueryChanged({ target: { value: 'k' } });
     await component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should search for partial indices for queries not ending in a wildcard', async () => {
+    const component = shallow(
+      <StepIndexPattern
+        allIndices={allIndices}
+        isIncludingSystemIndices={false}
+        esService={esService}
+        goToNextStep={goToNextStep}
+        initialQuery="k"
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
 
     expect(component).toMatchSnapshot();
   });
