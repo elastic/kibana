@@ -33,7 +33,7 @@ module.exports = (function() {
 
         peg$FAILED = {},
 
-        peg$startRuleFunctions = { start: peg$parsestart, Literal: peg$parseLiteral },
+        peg$startRuleFunctions = { start: peg$parsestart, Literal: peg$parseLiteral, WildcardString: peg$parseWildcardString },
         peg$startRuleFunction  = peg$parsestart,
 
         peg$c0 = function(query, trailing) {

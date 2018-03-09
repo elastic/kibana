@@ -9,7 +9,7 @@ module.exports = function (grunt) {
         src: 'src/ui/public/kuery/ast/kuery.peg',
         dest: 'src/ui/public/kuery/ast/kuery.js',
         options: {
-          allowedStartRules: ['start', 'Literal']
+          allowedStartRules: ['start', 'Literal', 'WildcardString']
         }
       }
     },
