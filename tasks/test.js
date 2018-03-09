@@ -43,6 +43,7 @@ module.exports = function (grunt) {
     'test:ui',
     'test:jest',
     'test:jest_integration',
+    'test:projects',
     'test:browser',
     'test:api'
   ]);
@@ -106,4 +107,31 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
+
+  grunt.registerTask('test:projects', function () {
+    const done = this.async();
+    runProjectsTests().then(done, done);
+  });
+
+  function runProjectsTests() {
+    const serverCmd = {
+      cmd: 'yarn',
+      args: ['kbn', 'run', 'test', '--skip-kibana', '--skip-kibana-extra'],
+      opts: { stdio: 'inherit' }
+    };
+
+    return new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const error = new Error(`projects tests exited with code ${code}`);
+          grunt.fail.fatal(error);
+          reject(error);
+          return;
+        }
+
+        grunt.log.writeln(result);
+        resolve();
+      });
+    });
+  }
 };
