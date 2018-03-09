@@ -97,6 +97,10 @@ export function getUiSettingDefaults() {
       type: 'select',
       description: 'Controls the default sort direction for time based index patterns in the Discover app.',
     },
+    'discover:showDateHistogramVisualization': {
+      value: true,
+      description: 'Determines whether to show the date histogram visualization in the Discover app.'
+    },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +

@@ -101,7 +101,11 @@
               </span>
             </button>
 
-            <section aria-label="Histogram of found documents" class="discover-timechart" ng-if="opts.timefield">
+            <section
+              ng-if="opts.timefield && opts.showViz"
+              aria-label="Histogram of found documents"
+              class="discover-timechart"
+            >
               <header>
                 <center class="small">
                   <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>

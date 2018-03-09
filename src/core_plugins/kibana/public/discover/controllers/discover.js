@@ -295,6 +295,7 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
+    showViz: config.get('discover:showDateHistogramVisualization'),
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
@@ -354,7 +355,7 @@ function discoverController(
 
         $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield) return;
+          if (!$scope.opts.timefield || !$scope.opts.showViz) return;
 
           const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
 
@@ -409,7 +410,7 @@ function discoverController(
             };
           }()));
 
-        if ($scope.opts.timefield) {
+        if ($scope.opts.timefield && $scope.opts.showViz) {
           setupVisualization();
           $scope.updateTime();
         }
@@ -535,7 +536,7 @@ function discoverController(
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
 
-      if ($scope.opts.timefield) {
+      if ($scope.opts.timefield && $scope.opts.showViz) {
         $scope.searchSource.rawResponse = merged;
         Promise
           .resolve(responseHandler($scope.vis, merged))
@@ -666,8 +667,9 @@ function discoverController(
   };
 
   function setupVisualization() {
-    // If no timefield has been specified we don't create a histogram of messages
-    if (!$scope.opts.timefield) return;
+    // If no timefield has been specified or the visualization is disabled
+    // we don't create a histogram of messages
+    if (!$scope.opts.timefield || !$scope.opts.showViz) return;
 
     const visStateAggs = [
       {
