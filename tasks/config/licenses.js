@@ -42,7 +42,6 @@ module.exports = function () {
       overrides: {
         // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
         'elasticsearch-browser@13.0.1': ['Apache-2.0'],
-        '@elastic/eslint-plugin-kibana-custom@1.1.0': 'Apache-2.0',
         // TODO can be removed once we upgrade past colors.js@1.0.0
         'colors@0.5.1': ['MIT'],
         // TODO can be removed once we upgrade past map-stream@0.5.0
