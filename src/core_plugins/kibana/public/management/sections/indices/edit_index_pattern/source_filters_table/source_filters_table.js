@@ -6,7 +6,6 @@ import {
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiLoadingSpinner,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
@@ -166,17 +165,14 @@ export class SourceFiltersTable extends Component {
         <Header />
         <AddFilter onAddFilter={this.onAddFilter} />
         <EuiSpacer size="l" />
-        {isSaving ? <EuiLoadingSpinner /> : null}
-        {filteredFilters.length > 0 ? (
-          <Table
-            isSaving={isSaving}
-            indexPattern={indexPattern}
-            items={filteredFilters}
-            fieldWildcardMatcher={fieldWildcardMatcher}
-            deleteFilter={this.startDeleteFilter}
-            saveFilter={this.saveFilter}
-          />
-        ) : null}
+        <Table
+          isSaving={isSaving}
+          indexPattern={indexPattern}
+          items={filteredFilters}
+          fieldWildcardMatcher={fieldWildcardMatcher}
+          deleteFilter={this.startDeleteFilter}
+          saveFilter={this.saveFilter}
+        />
 
         {this.renderDeleteConfirmationModal()}
       </div>

@@ -62,19 +62,6 @@ describe('SourceFiltersTable', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should hide the table if there are no scripted fields', async () => {
-    const component = shallow(
-      <SourceFiltersTable
-        indexPattern={{
-          sourceFilters: []
-        }}
-        fieldWildcardMatcher={() => {}}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
   it('should should a loading indicator when saving', async () => {
     const component = shallow(
       <SourceFiltersTable

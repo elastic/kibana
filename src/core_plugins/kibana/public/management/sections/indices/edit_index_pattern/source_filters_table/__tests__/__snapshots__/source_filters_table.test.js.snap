@@ -88,18 +88,6 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 </div>
 `;
 
-exports[`SourceFiltersTable should hide the table if there are no scripted fields 1`] = `
-<div>
-  <header />
-  <AddFilter
-    onAddFilter={[Function]}
-  />
-  <eui-spacer
-    size="l"
-  />
-</div>
-`;
-
 exports[`SourceFiltersTable should remove a filter 1`] = `
 <div>
   <header />
@@ -207,7 +195,6 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
   <eui-spacer
     size="l"
   />
-  <eui-loading-spinner />
   <Table
     deleteFilter={[Function]}
     fieldWildcardMatcher={[Function]}
