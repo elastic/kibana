@@ -8,18 +8,26 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log, server, chromedriverApi) {
+async function attemptToCreateCommand(log, server, driverApi) {
   const attemptId = ++attemptCounter;
+  var capabilities = {};
+
+  switch(driverApi.getBrowserName()) {
+    case 'firefox':
+      capabilities = { browserName: 'firefox' };
+  }
 
   log.debug('[leadfoot:command] Creating session');
-  const session = await server.createSession({ browserName: 'chrome' });
+  debugger;
+  const session = await server.createSession(capabilities);
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Registerying session for teardown');
-  chromedriverApi.beforeStop(async () => session.quit());
+  driverApi.beforeStop(async () => session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Completing session capabilities');
+  log.debug(session);
   await server._fillCapabilities(session);
   if (attemptId !== attemptCounter) return; // abort
 
@@ -29,7 +37,7 @@ async function attemptToCreateCommand(log, server, chromedriverApi) {
   return { command: new Command(session) };
 }
 
-export async function initLeadfootCommand({ log, chromedriverApi }) {
+export async function initLeadfootCommand({ log, driverApi }) {
   return await Promise.race([
     (async () => {
       await delay(2 * MINUTE);
@@ -41,7 +49,7 @@ export async function initLeadfootCommand({ log, chromedriverApi }) {
       // backend (chromedriver in this case). it helps with session management
       // and all communication to the remote browser go through it, so we shim
       // some of it's methods to enable very verbose logging.
-      const server = initVerboseRemoteLogging(log, new Server(chromedriverApi.getUrl()));
+      const server = initVerboseRemoteLogging(log, new Server(driverApi.getUrl()));
 
       // by default, calling server.createSession() automatically fixes the webdriver
       // "capabilities" hash so that leadfoot knows the hoops it has to jump through
@@ -54,12 +62,11 @@ export async function initLeadfootCommand({ log, chromedriverApi }) {
       // `server._fillCapabilities()` ourselves to do the fixing once we have a reference
       // to the session and have registered it for teardown before stopping the
       // chromedriverApi.
-      server.fixSessionCapabilities = false;
 
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, server, chromedriverApi)
+          attemptToCreateCommand(log, server, driverApi)
         ]);
 
         if (!command) {
