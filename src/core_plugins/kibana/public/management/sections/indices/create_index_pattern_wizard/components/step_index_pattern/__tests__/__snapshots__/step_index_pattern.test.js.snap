@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StepIndexPattern step 1 renders errors when input is invalid 1`] = `
+exports[`StepIndexPattern renders errors when input is invalid 1`] = `
 <Header
   characterList="\\\\, /, ?, \\", <, >, |"
   data-test-subj="createIndexPatternStep1Header"
@@ -17,7 +17,7 @@ exports[`StepIndexPattern step 1 renders errors when input is invalid 1`] = `
 />
 `;
 
-exports[`StepIndexPattern step 1 renders indices which match the initial query 1`] = `
+exports[`StepIndexPattern renders indices which match the initial query 1`] = `
 <IndicesList
   data-test-subj="createIndexPatternStep1IndicesList"
   indices={
@@ -31,7 +31,7 @@ exports[`StepIndexPattern step 1 renders indices which match the initial query 1
 />
 `;
 
-exports[`StepIndexPattern step 1 renders matching indices when input is valid 1`] = `
+exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
 <IndicesList
   data-test-subj="createIndexPatternStep1IndicesList"
   indices={
@@ -45,7 +45,7 @@ exports[`StepIndexPattern step 1 renders matching indices when input is valid 1`
 />
 `;
 
-exports[`StepIndexPattern step 1 renders the loading state 1`] = `
+exports[`StepIndexPattern renders the loading state 1`] = `
 <LoadingIndices
   data-test-subj="createIndexPatternStep1Loading"
 />
