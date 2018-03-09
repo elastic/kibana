@@ -86,6 +86,12 @@ export class PersistedState {
     return this._set(params.key, params.value, true);
   }
 
+  clearAllKeys() {
+    Object.getOwnPropertyNames(this._changedState).forEach(key => {
+      this.set(key, null);
+    });
+  }
+
   reset(path) {
     const keyPath = this._getIndex(path);
     const origValue = _.get(this._defaultState, keyPath);
