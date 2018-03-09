@@ -1,4 +1,4 @@
-import get from 'lodash';
+import { get, has } from 'lodash';
 import mockElasticsearch from './elasticsearch_plugin';
 
 const config = {
@@ -18,9 +18,10 @@ export class Plugin {
         elasticsearch: mockElasticsearch,
       },
       config: () => ({
-        get: (key) => get(config, key),
+        get: key => get(config, key),
+        has: key => has(config, key),
       }),
-      route: (def) => this.routes.push(def),
+      route: def => this.routes.push(def),
     };
 
     const { init } = this.props;
