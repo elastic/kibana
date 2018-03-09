@@ -1,0 +1,245 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table should render conflicting type 1`] = `
+<div
+  data-test-subj="indexedFieldType"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      conflict
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <TooltipTrigger
+        clickHideDelay={1000}
+        display={false}
+        isSticky={false}
+        onClick={[Function]}
+        onEntered={[Function]}
+        onExited={[Function]}
+        placement="top"
+        size="auto"
+        theme="dark"
+        tooltip="The type of this field changes across indices. It is unavailable for many analysis functions."
+        trigger="hover"
+      >
+        <EuiIcon
+          color="warning"
+          size="m"
+          type="alert"
+        />
+      </TooltipTrigger>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Table should render normal field name 1`] = `
+<div
+  data-test-subj="indexedFieldName"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      Elastic
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Table should render normal type 1`] = `
+<div
+  data-test-subj="indexedFieldType"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      string
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "field": "displayName",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "format",
+        "name": "Format",
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in the filter bar",
+        "field": "searchable",
+        "name": "Searchable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in visualization aggregations",
+        "field": "aggregatable",
+        "name": "Aggregatable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "Fields that are excluded from _source when it is fetched",
+        "field": "excluded",
+        "name": "Excluded",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "description": "Edit",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "displayName": "Elastic",
+        "name": "Elastic",
+        "searchable": true,
+      },
+      Object {
+        "displayName": "timestamp",
+        "name": "timestamp",
+        "type": "date",
+      },
+      Object {
+        "displayName": "conflictingField",
+        "name": "conflictingField",
+        "type": "conflict",
+      },
+    ]
+  }
+  pagination={
+    Object {
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  sorting={true}
+/>
+`;
+
+exports[`Table should render the boolean template (false) 1`] = `<span />`;
+
+exports[`Table should render the boolean template (true) 1`] = `
+<dot
+  className="euiIcon euiIcon--medium euiIcon--secondary"
+  height="16"
+  viewBox="0 0 16 16"
+  width="16"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlnsXlink="http://www.w3.org/1999/xlink"
+/>
+`;
+
+exports[`Table should render timestamp field name 1`] = `
+<div
+  data-test-subj="indexedFieldName"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="s"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      timestamp
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <TooltipTrigger
+        clickHideDelay={1000}
+        display={false}
+        isSticky={false}
+        onClick={[Function]}
+        onEntered={[Function]}
+        onExited={[Function]}
+        placement="top"
+        size="auto"
+        theme="dark"
+        tooltip="This field represents the time that events occurred."
+        trigger="hover"
+      >
+        <EuiIcon
+          color="primary"
+          size="m"
+          type="clock"
+        />
+      </TooltipTrigger>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

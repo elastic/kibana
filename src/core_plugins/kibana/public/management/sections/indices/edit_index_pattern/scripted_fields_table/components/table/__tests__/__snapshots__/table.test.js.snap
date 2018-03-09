@@ -8,7 +8,7 @@ exports[`Table should render normally 1`] = `
         Object {
           "dataType": "string",
           "description": "Name of the field",
-          "field": "name",
+          "field": "displayName",
           "name": "Name",
           "sortable": true,
         },
@@ -62,7 +62,7 @@ exports[`Table should render normally 1`] = `
           50,
         ],
       },
-      "recordId": "id",
+      "recordId": "name",
       "selection": undefined,
     }
   }
