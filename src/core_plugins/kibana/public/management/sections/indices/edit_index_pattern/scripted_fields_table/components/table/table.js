@@ -45,10 +45,10 @@ export class Table extends PureComponent {
     const { editField, deleteField, onDataCriteriaChange } = this.props;
 
     return {
-      recordId: 'id',
+      recordId: 'name',
       columns: [
         {
-          field: 'name',
+          field: 'displayName',
           name: 'Name',
           description: `Name of the field`,
           dataType: 'string',
