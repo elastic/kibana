@@ -1,1 +1,1 @@
-import './indexed_fields_table';
+export { IndexedFieldsTable } from './indexed_fields_table';
