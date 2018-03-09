@@ -1,13 +1,11 @@
-import _glob from 'glob';
+import globSync from 'glob';
 import path from 'path';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
 
-// Correct overload version of _glob can't be inferred automatically so we
-// should explicitly point to the right version with type parameters.
-const glob = promisify<string[], string, _glob.IOptions>(_glob);
+const glob = promisify(globSync);
 
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
