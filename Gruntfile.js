@@ -23,7 +23,7 @@ module.exports = function (grunt) {
         case 'win32':
           return 'IE';
         default:
-          return 'Chrome';
+          return 'firefox';
       }
     }()),
 
