@@ -23,7 +23,6 @@ export async function FailureDebuggingProvider({ getService }) {
 
   async function savePageHtml(name) {
     await mkdirAsync(config.get('failureDebugging.htmlDirectory'));
-    name = name.replace(/([^ a-zA-Z0-9/-]+)/g, '_');
     const htmlOutputFileName = resolve(config.get('failureDebugging.htmlDirectory'), `${name}.html`);
     const pageSource = await remote.getPageSource();
     log.info(`Saving page source to: ${htmlOutputFileName}`);
@@ -31,8 +30,8 @@ export async function FailureDebuggingProvider({ getService }) {
   }
 
   async function onFailure(error, test) {
-    // TODO: Replace characters in test names which can't be used in filenames, like *
-    const name = test.fullTitle();
+    // Replace characters in test names which can't be used in filenames, like *
+    const name = test.fullTitle().replace(/([^ a-zA-Z0-9/-]+)/g, '_');
 
     await Promise.all([
       screenshots.takeForFailure(name),

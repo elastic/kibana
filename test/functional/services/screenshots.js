@@ -45,12 +45,10 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async take(name) {
-      name = name.replace(/([^ a-zA-Z0-9/-]+)/g, '_');
       return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`));
     }
 
     async takeForFailure(name) {
-      name = name.replace(/([^ a-zA-Z0-9/-]+)/g, '_');
       await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
     }
 
