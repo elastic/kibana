@@ -471,6 +471,7 @@ export class DashboardStateManager {
   addTag(tag) {
     const tags = this.getTags();
     store.dispatch(updateTags([...tags, tag]));
+    this.isDirty = true;
   }
 
   deleteTag(tagId) {
@@ -478,6 +479,7 @@ export class DashboardStateManager {
       return tag.id !== tagId;
     });
     store.dispatch(updateTags([...tags]));
+    this.isDirty = true;
   }
 
   /**
