@@ -38,7 +38,7 @@ describe('buildHierarchicalData()', function () {
       };
       const buckets = extractBuckets(bucket);
       expect(buckets).to.be.an(Array);
-      expect(buckets).to.be(bucket.buckets);
+      expect(buckets).to.eql(bucket.buckets);
     });
 
     it('should attach keys using agg.getKey for array of buckets', () => {
