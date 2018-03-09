@@ -8,14 +8,15 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
-
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
+import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 
-const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
+const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
+const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 
 function updateSourceFiltersTable($scope, $state) {
   if ($state.tab === 'sourceFilters') {
@@ -49,11 +50,6 @@ function destroySourceFiltersTable() {
   node && unmountComponentAtNode(node);
 }
 
-import { IndexedFieldsTable } from './indexed_fields_table';
-import { ScriptedFieldsTable } from './scripted_fields_table';
-
-const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
-const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
 
 function updateScriptedFieldsTable($scope, $state) {
   if ($state.tab === 'scriptedFields') {
