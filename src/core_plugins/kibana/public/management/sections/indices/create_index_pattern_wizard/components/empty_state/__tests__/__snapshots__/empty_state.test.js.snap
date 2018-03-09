@@ -55,7 +55,7 @@ exports[`EmptyState should render normally 1`] = `
         </p>
       </EuiText>
       <EuiSpacer
-        size="xs"
+        size="m"
       />
       <EuiFlexGroup
         alignItems="center"
@@ -71,9 +71,11 @@ exports[`EmptyState should render normally 1`] = `
         >
           <EuiButton
             color="primary"
+            data-test-subj="refreshIndicesButton"
             fill={false}
             iconSide="left"
-            iconType="faceHappy"
+            iconType="refresh"
+            onClick={[Function]}
             type="button"
           >
             Check for new data
