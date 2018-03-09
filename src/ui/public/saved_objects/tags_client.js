@@ -9,8 +9,8 @@ export class TagsClient {
   }
 
   async save(attributes, id, version) {
-    const duplicates = await findObjectByTitle(this.savedObjectsClient, TAG_TYPE, attributes.title);
-    if (duplicates) {
+    const duplicate = await findObjectByTitle(this.savedObjectsClient, TAG_TYPE, attributes.title);
+    if (duplicate && duplicate.id !== id) {
       throw new DuplicateTitleError(`A tag with the title '${attributes.title}' already exists.`);
     }
 
@@ -31,7 +31,7 @@ export class TagsClient {
     await Promise.all(deletePromises);
   }
 
-  async find(search, limit = 10000) {
+  async find(search, limit = 100) {
     const resp = await this.savedObjectsClient.find({
       type: TAG_TYPE,
       fields: ['title', 'color'],

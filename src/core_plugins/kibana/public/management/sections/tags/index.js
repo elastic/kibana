@@ -29,7 +29,7 @@ uiRoutes
         return tagsClient.delete(ids);
       };
       $scope.find = (search) => {
-        return tagsClient.find(search);
+        return tagsClient.find(search, 10000);
       };
     },
   });

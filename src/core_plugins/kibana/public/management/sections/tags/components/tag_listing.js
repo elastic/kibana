@@ -55,6 +55,9 @@ export class TagListing extends React.Component {
       return;
     }
 
+    tags.sort((a, b) => {
+      return a.attributes.title.toLowerCase().localeCompare(b.attributes.title.toLowerCase());
+    });
     this.setState({
       isFetchingItems: false,
       tags: tags.map((tag) => {
@@ -107,7 +110,6 @@ export class TagListing extends React.Component {
   }
 
   renderTag = (field, item) => {
-    console.log("render column");
     return (
       <TagFormPopover
         button={(
