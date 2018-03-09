@@ -12,10 +12,7 @@ export function getSuggestionsProvider({ indexPattern }) {
     const search = `${prefix}${suffix}`.toLowerCase();
     const filterableFields = indexPattern.fields.filter(field => field.filterable);
     const fieldNames = filterableFields.map(field => field.name);
-    const matchingFieldNames = fieldNames.filter(name => {
-      const lowerCased = name.toLowerCase();
-      return lowerCased !== search && lowerCased.includes(search);
-    });
+    const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames, search);
     const suggestions = sortedFieldNames.map(fieldName => {
       const text = `${escapeKql(fieldName)} `;

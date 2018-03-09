@@ -36,7 +36,7 @@ export function getSuggestionsProvider({ $http, config, indexPattern }) {
 
     function getSuggestions(values) {
       return values
-        .filter(value => value.includes(query) && value !== query)
+        .filter(value => value.toLowerCase().includes(query.toLowerCase()))
         .map(value => {
           const text = `${value} `;
           const description = getDescription({ fieldName, value });
