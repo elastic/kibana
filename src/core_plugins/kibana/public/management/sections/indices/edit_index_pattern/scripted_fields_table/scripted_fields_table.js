@@ -66,16 +66,24 @@ export class ScriptedFieldsTable extends Component {
     const { fields } = this.state;
     const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
 
-    if (fieldFilter) {
-      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
-      return fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
-    }
+    let languageFilteredFields = fields;
 
     if (scriptedFieldLanguageFilter) {
-      return fields.filter(field => field.lang === this.props.scriptedFieldLanguageFilter);
+      languageFilteredFields = fields.filter(
+        field => field.lang === this.props.scriptedFieldLanguageFilter
+      );
     }
 
-    return fields;
+    let filteredFields = languageFilteredFields;
+
+    if (fieldFilter) {
+      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
+      filteredFields = languageFilteredFields.filter(
+        field => field.name.toLowerCase().includes(normalizedFieldFilter)
+      );
+    }
+
+    return filteredFields;
   }
 
   renderCallOuts() {
@@ -144,15 +152,13 @@ export class ScriptedFieldsTable extends Component {
 
         <EuiSpacer size="l" />
 
-        { items.length > 0 ?
-          <Table
-            indexPattern={indexPattern}
-            items={items}
-            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-            deleteField={this.startDeleteField}
-          />
-          : null
-        }
+        <Table
+          indexPattern={indexPattern}
+          items={items}
+          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          deleteField={this.startDeleteField}
+        />
+
         {this.renderDeleteConfirmationModal()}
       </div>
     );
