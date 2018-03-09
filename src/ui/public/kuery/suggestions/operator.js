@@ -28,7 +28,7 @@ const operators = {
 
 function getDescription({ fieldName, operator }) {
   const { description } = operators[operator];
-  return `<p>Filter results where ${fieldName} ${description}</p>`;
+  return `<p>Filter results where <span class="suggestionItem__callout">${fieldName}</span> ${description}</p>`;
 }
 
 export function getSuggestionsProvider({ indexPattern }) {
