@@ -16,7 +16,8 @@ export class Table extends Component {
     deleteFilter: PropTypes.func.isRequired,
     fieldWildcardMatcher: PropTypes.func.isRequired,
     saveFilter: PropTypes.func.isRequired,
-  }
+    isSaving: PropTypes.bool.isRequired,
+  };
 
   constructor(props) {
     super(props);
@@ -26,22 +27,24 @@ export class Table extends Component {
     };
   }
 
-  startEditingFilter = (id, value) => this.setState({ editingFilterId: id, editingFilterValue: value })
-  stopEditingFilter = () => this.setState({ editingFilterId: null })
-  onEditingFilterChange = e => this.setState({ editingFilterValue: e.target.value })
+  startEditingFilter = (id, value) =>
+    this.setState({ editingFilterId: id, editingFilterValue: value });
+  stopEditingFilter = () => this.setState({ editingFilterId: null });
+  onEditingFilterChange = e =>
+    this.setState({ editingFilterValue: e.target.value });
 
-  onEditFieldKeyPressed = ({ charCode }) => {
-    if (keyCodes.ENTER === charCode) {
+  onEditFieldKeyDown = ({ keyCode }) => {
+    if (keyCodes.ENTER === keyCode) {
       this.props.saveFilter({
         filterId: this.state.editingFilterId,
         newFilterValue: this.state.editingFilterValue,
       });
       this.stopEditingFilter();
     }
-    if (keyCodes.ESCAPE === charCode) {
+    if (keyCodes.ESCAPE === keyCode) {
       this.stopEditingFilter();
     }
-  }
+  };
 
   getColumns() {
     const {
@@ -62,17 +65,16 @@ export class Table extends Component {
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <EuiFieldText
+                autoFocus
                 value={this.state.editingFilterValue}
                 onChange={this.onEditingFilterChange}
-                onKeyPress={this.onEditFieldKeyPressed}
+                onKeyDown={this.onEditFieldKeyDown}
               />
             );
           }
 
-          return (
-            <span>{value}</span>
-          );
-        }
+          return <span>{value}</span>;
+        },
       },
       {
         field: 'value',
@@ -81,27 +83,30 @@ export class Table extends Component {
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
-          const realtimeValue = this.state.editingFilterId === filter.clientId
-            ? this.state.editingFilterValue
-            : value;
-          const matcher = fieldWildcardMatcher([ realtimeValue ]);
-          const matches = indexPattern.getNonScriptedFields().map(f => f.name).filter(matcher).sort();
+          const realtimeValue =
+            this.state.editingFilterId === filter.clientId
+              ? this.state.editingFilterValue
+              : value;
+          const matcher = fieldWildcardMatcher([realtimeValue]);
+          const matches = indexPattern
+            .getNonScriptedFields()
+            .map(f => f.name)
+            .filter(matcher)
+            .sort();
           if (matches.length) {
-            return (
-              <span>
-                {matches.join(', ')}
-              </span>
-            );
+            return <span>{matches.join(', ')}</span>;
           }
 
-          return (<em>The source filter doesn&apos;t match any known fields.</em>);
-        }
+          return (
+            <em>The source filter doesn&apos;t match any known fields.</em>
+          );
+        },
       },
       {
         name: '',
         align: RIGHT_ALIGNMENT,
         width: '100',
-        render: (filter) => {
+        render: filter => {
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <Fragment>
@@ -140,19 +145,21 @@ export class Table extends Component {
               />
               <EuiButtonIcon
                 size="s"
-                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                onClick={() =>
+                  this.startEditingFilter(filter.clientId, filter.value)
+                }
                 iconType="pencil"
                 aria-label="Edit"
               />
             </Fragment>
           );
         },
-      }
+      },
     ];
   }
 
   render() {
-    const { items } = this.props;
+    const { items, isSaving } = this.props;
     const columns = this.getColumns();
     const pagination = {
       pageSizeOptions: [5, 10, 25, 50],
@@ -160,6 +167,7 @@ export class Table extends Component {
 
     return (
       <EuiInMemoryTable
+        loading={isSaving}
         items={items}
         columns={columns}
         pagination={pagination}

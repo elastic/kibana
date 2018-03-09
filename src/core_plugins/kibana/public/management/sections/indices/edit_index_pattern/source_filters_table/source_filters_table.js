@@ -20,7 +20,7 @@ export class SourceFiltersTable extends Component {
     filterFilter: PropTypes.string,
     fieldWildcardMatcher: PropTypes.func.isRequired,
     onAddOrRemoveFilter: PropTypes.func,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -51,15 +51,17 @@ export class SourceFiltersTable extends Component {
     }));
 
     this.setState({ filters });
-  }
+  };
 
   getFilteredFilters = createSelector(
-    (state) => state.filters,
+    state => state.filters,
     (state, props) => props.filterFilter,
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
-        return filters.filter(filter => filter.value.toLowerCase().includes(filterFilterToLowercase));
+        return filters.filter(filter =>
+          filter.value.toLowerCase().includes(filterFilterToLowercase)
+        );
       }
 
       return filters;
@@ -67,14 +69,20 @@ export class SourceFiltersTable extends Component {
   );
 
   startDeleteFilter = filter => {
-    this.setState({ filterToDelete: filter, isDeleteConfirmationModalVisible: true });
-  }
+    this.setState({
+      filterToDelete: filter,
+      isDeleteConfirmationModalVisible: true,
+    });
+  };
 
   hideDeleteConfirmationModal = () => {
-    this.setState({ filterToDelete: undefined, isDeleteConfirmationModalVisible: false });
-  }
+    this.setState({
+      filterToDelete: undefined,
+      isDeleteConfirmationModalVisible: false,
+    });
+  };
 
-  deleteFilter = async () =>  {
+  deleteFilter = async () => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
     const { filterToDelete, filters } = this.state;
 
@@ -88,14 +96,14 @@ export class SourceFiltersTable extends Component {
     this.updateFilters();
     this.setState({ isSaving: false });
     this.hideDeleteConfirmationModal();
-  }
+  };
 
-  onAddFilter = async (value) => {
+  onAddFilter = async value => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
 
     indexPattern.sourceFilters = [
-      ...indexPattern.sourceFilters || [],
-      { value }
+      ...(indexPattern.sourceFilters || []),
+      { value },
     ];
 
     this.setState({ isSaving: true });
@@ -103,7 +111,7 @@ export class SourceFiltersTable extends Component {
     onAddOrRemoveFilter && onAddOrRemoveFilter();
     this.updateFilters();
     this.setState({ isSaving: false });
-  }
+  };
 
   saveFilter = async ({ filterId, newFilterValue }) => {
     const { indexPattern } = this.props;
@@ -123,7 +131,7 @@ export class SourceFiltersTable extends Component {
     await indexPattern.save();
     this.updateFilters();
     this.setState({ isSaving: false });
-  }
+  };
 
   renderDeleteConfirmationModal() {
     const { filterToDelete } = this.state;
@@ -147,10 +155,7 @@ export class SourceFiltersTable extends Component {
   }
 
   render() {
-    const {
-      indexPattern,
-      fieldWildcardMatcher,
-    } = this.props;
+    const { indexPattern, fieldWildcardMatcher } = this.props;
 
     const { isSaving } = this.state;
 
@@ -158,20 +163,20 @@ export class SourceFiltersTable extends Component {
 
     return (
       <div>
-        <Header/>
-        <AddFilter onAddFilter={this.onAddFilter}/>
+        <Header />
+        <AddFilter onAddFilter={this.onAddFilter} />
         <EuiSpacer size="l" />
-        { isSaving ? <EuiLoadingSpinner/> : null }
-        { filteredFilters.length > 0 ?
+        {isSaving ? <EuiLoadingSpinner /> : null}
+        {filteredFilters.length > 0 ? (
           <Table
+            isSaving={isSaving}
             indexPattern={indexPattern}
             items={filteredFilters}
             fieldWildcardMatcher={fieldWildcardMatcher}
             deleteFilter={this.startDeleteFilter}
             saveFilter={this.saveFilter}
           />
-          : null
-        }
+        ) : null}
 
         {this.renderDeleteConfirmationModal()}
       </div>

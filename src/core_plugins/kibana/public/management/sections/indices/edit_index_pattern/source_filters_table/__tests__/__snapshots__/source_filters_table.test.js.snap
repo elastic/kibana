@@ -29,6 +29,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {
@@ -73,6 +74,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {
@@ -129,6 +131,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {
@@ -173,6 +176,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {
@@ -216,6 +220,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
         ],
       }
     }
+    isSaving={true}
     items={
       Array [
         Object {
@@ -250,6 +255,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {
@@ -299,6 +305,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
         ],
       }
     }
+    isSaving={false}
     items={
       Array [
         Object {

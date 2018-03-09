@@ -31,9 +31,10 @@ exports[`Table editing should show an input field 1`] = `
 >
   <EuiValidatableControl>
     <input
+      autoFocus={true}
       className="euiFieldText"
       onChange={[Function]}
-      onKeyPress={[Function]}
+      onKeyDown={[Function]}
       type="text"
       value="tim*"
     />
@@ -90,6 +91,7 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
+  loading={true}
   pagination={
     Object {
       "pageSizeOptions": Array [
