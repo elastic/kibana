@@ -9,7 +9,7 @@ import {
   includedFields,
   decorateEsError,
   errors,
-  Meta,
+  Join,
   validateAttributes,
   validateBulkObjects,
 } from './lib';
@@ -266,7 +266,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, meta }], total, per_page, page }
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, join }], total, per_page, page }
    */
   async find(options = {}) {
     const {
@@ -278,6 +278,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
+      join: joinTypes,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -319,13 +320,13 @@ export class SavedObjectsClient {
       };
     }
 
-    let meta;
-    if (options.meta) {
-      meta = new Meta(
-        options.meta,
+    let join;
+    if (joinTypes) {
+      join = new Join(
+        joinTypes,
         async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
       );
-      await meta.prepareMetaMap(response.hits.hits);
+      await join.prepareJoin(response.hits.hits);
     }
 
     return {
@@ -341,8 +342,8 @@ export class SavedObjectsClient {
           version: hit._version,
           attributes: this._getAttributes(type, hit._source),
         };
-        if (options.meta) {
-          savedObject.meta = meta.getMeta(hit);
+        if (join) {
+          savedObject.join = join.getJoined(hit);
         }
         return savedObject;
       }),
@@ -354,7 +355,7 @@ export class SavedObjectsClient {
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @param {object} [options={}]
-   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, meta }] }
+   * @returns {promise} - { saved_objects: [{ id, type, version, attributes, join }] }
    * @example
    *
    * bulkGet([
@@ -363,6 +364,10 @@ export class SavedObjectsClient {
    * ])
    */
   async bulkGet(objects = [], options = {}) {
+    const {
+      join: joinTypes,
+    } = options;
+
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -377,13 +382,13 @@ export class SavedObjectsClient {
       }
     });
 
-    let meta;
-    if (options.meta) {
-      meta = new Meta(
-        options.meta,
+    let join;
+    if (joinTypes) {
+      join = new Join(
+        joinTypes,
         async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
       );
-      await meta.prepareMetaMap(response.docs);
+      await join.prepareJoin(response.docs);
     }
 
     return {
@@ -406,8 +411,8 @@ export class SavedObjectsClient {
           version: doc._version,
           attributes: this._getAttributes(type, doc._source)
         };
-        if (options.meta) {
-          savedObject.meta = meta.getMeta(doc);
+        if (join) {
+          savedObject.join = join.getJoined(doc);
         }
         return savedObject;
       })
@@ -420,9 +425,13 @@ export class SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * @returns {promise} - { id, type, version, attributes, meta }
+   * @returns {promise} - { id, type, version, attributes, join }
    */
   async get(type, id, options = {}) {
+    const {
+      join: joinTypes,
+    } = options;
+
     const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -437,13 +446,13 @@ export class SavedObjectsClient {
       throw errors.createGenericNotFoundError();
     }
 
-    let meta;
-    if (options.meta) {
-      meta = new Meta(
-        options.meta,
+    let join;
+    if (joinTypes) {
+      join = new Join(
+        joinTypes,
         async (bulkGetObjects) => { return await this.bulkGet(bulkGetObjects); }
       );
-      await meta.prepareMetaMap([response]);
+      await join.prepareJoin([response]);
     }
 
     const { updated_at: updatedAt } = response._source;
@@ -455,8 +464,8 @@ export class SavedObjectsClient {
       version: response._version,
       attributes: this._getAttributes(type, response._source)
     };
-    if (options.meta) {
-      savedObject.meta = meta.getMeta(response);
+    if (join) {
+      savedObject.join = join.getJoined(response);
     }
     return savedObject;
   }

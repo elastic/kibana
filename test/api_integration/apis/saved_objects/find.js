@@ -33,13 +33,13 @@ export default function ({ getService }) {
           })
       ));
 
-      describe('meta', () => {
+      describe('join', () => {
         it('should join tags', async () => (
           await supertest
-            .get(`/api/saved_objects/visualization?fields=title&fields=tags&meta=tags`)
+            .get(`/api/saved_objects/visualization?fields=title&fields=tags&join=tags`)
             .expect(200)
             .then(resp => {
-              expect(resp.body.saved_objects[0].meta).to.eql({
+              expect(resp.body.saved_objects[0].join).to.eql({
                 tags: {
                   'f16f0200-1804-11e8-9684-d7923ac6f695': {
                     color: 'blue',

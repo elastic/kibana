@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { metaSchema } from '../client';
+import { joinParameterSchema } from '../client';
 
 export const createGetRoute = (prereqs) => ({
   path: '/api/saved_objects/{type}/{id}',
@@ -12,7 +12,7 @@ export const createGetRoute = (prereqs) => ({
         id: Joi.string().required(),
       }).required(),
       query: Joi.object().keys({
-        meta: metaSchema,
+        join: joinParameterSchema,
       })
     },
     handler(request, reply) {

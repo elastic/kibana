@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
 export class SavedObject {
-  constructor(client, { id, type, version, attributes, meta, updated_at } = {}) { // eslint-disable-line camelcase
+  constructor(client, { id, type, version, attributes, join, updated_at } = {}) { // eslint-disable-line camelcase
     this._client = client;
     this.id = id;
     this.type = type;
     this.attributes = attributes || {};
-    this.join = meta || {};
+    this.join = join || {};
     this.updatedAt = updated_at; // eslint-disable-line camelcase
     this._version = version;
   }

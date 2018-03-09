@@ -1,22 +1,22 @@
 import _ from 'lodash';
 import Joi from 'joi';
 
-const META_TYPES = {
+const JOIN_TYPES = {
   TAGS: 'tags',
 };
 
-export const metaSchema = Joi.array().items(Joi.string().valid(Object.values(META_TYPES))).single();
+export const joinParameterSchema = Joi.array().items(Joi.string().valid(Object.values(JOIN_TYPES))).single();
 
-export class Meta {
-  constructor(metaTypes, bulkGet) {
-    this.metaTypes = Array.isArray(metaTypes) ? metaTypes : [metaTypes];
+export class Join {
+  constructor(joinTypes, bulkGet) {
+    this.joinTypes = Array.isArray(joinTypes) ? joinTypes : [joinTypes];
     this.bulkGet = bulkGet;
   }
 
   _extractBulkGetObjects(docs) {
     const bulkGetObjects = [];
     docs.forEach((doc) => {
-      if (this.metaTypes.includes(META_TYPES.TAGS)) {
+      if (this.joinTypes.includes(JOIN_TYPES.TAGS)) {
         _.get(doc, '_source.tags', []).forEach((tagId) => {
           bulkGetObjects.push({
             id: tagId,
@@ -28,29 +28,29 @@ export class Meta {
     return bulkGetObjects;
   }
 
-  async prepareMetaMap(docs) {
-    this.metaMap = new Map();
+  async prepareJoin(docs) {
+    this.joinMap = new Map();
 
     const bulkGetResponce = await this.bulkGet(this._extractBulkGetObjects(docs));
     bulkGetResponce.saved_objects.forEach((savedObject) => {
-      this.metaMap.set(
+      this.joinMap.set(
         savedObject.id,
         savedObject.error ? undefined : savedObject.attributes);
     });
   }
 
-  getMeta(doc) {
-    if (!this.metaMap) {
-      throw new Error('prepareMetaMap must be called (and returned Promise resolved) before getMeta can be called.');
+  getJoined(doc) {
+    if (!this.joinMap) {
+      throw new Error('prepareJoin must be called (and returned Promise resolved) before getJoined can be called.');
     }
 
-    const meta = {};
-    if (this.metaTypes.includes(META_TYPES.TAGS)) {
-      meta.tags = {};
+    const join = {};
+    if (this.joinTypes.includes(JOIN_TYPES.TAGS)) {
+      join.tags = {};
       _.get(doc, '_source.tags', []).forEach((tagId) => {
-        meta.tags[tagId] = this.metaMap.get(tagId);
+        join.tags[tagId] = this.joinMap.get(tagId);
       });
     }
-    return meta;
+    return join;
   }
 }

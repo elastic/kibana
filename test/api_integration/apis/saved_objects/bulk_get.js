@@ -74,10 +74,10 @@ export default function ({ getService }) {
           })
       ));
 
-      describe('meta', () => {
+      describe('join', () => {
         it('should join tags', async () => (
           await supertest
-            .post(`/api/saved_objects/bulk_get?meta=tags`)
+            .post(`/api/saved_objects/bulk_get?join=tags`)
             .send([
               {
                 type: 'visualization',
@@ -93,7 +93,7 @@ export default function ({ getService }) {
               expect(resp.body.saved_objects[0].attributes.tags).to.eql([
                 'f16f0200-1804-11e8-9684-d7923ac6f695'
               ]);
-              expect(resp.body.saved_objects[0].meta).to.eql({
+              expect(resp.body.saved_objects[0].join).to.eql({
                 tags: {
                   'f16f0200-1804-11e8-9684-d7923ac6f695': {
                     color: 'blue',
@@ -106,7 +106,7 @@ export default function ({ getService }) {
                 'f16f0200-1804-11e8-9684-d7923ac6f695',
                 'ee93a770-1804-11e8-9684-d7923ac6f695'
               ]);
-              expect(resp.body.saved_objects[1].meta).to.eql({
+              expect(resp.body.saved_objects[1].join).to.eql({
                 tags: {
                   'ee93a770-1804-11e8-9684-d7923ac6f695': {
                     color: 'red',

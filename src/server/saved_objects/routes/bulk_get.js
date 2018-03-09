@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { metaSchema } from '../client';
+import { joinParameterSchema } from '../client';
 
 export const createBulkGetRoute = (prereqs) => ({
   path: '/api/saved_objects/bulk_get',
@@ -12,7 +12,7 @@ export const createBulkGetRoute = (prereqs) => ({
         id: Joi.string().required(),
       }).required()),
       query: Joi.object().keys({
-        meta: metaSchema,
+        join: joinParameterSchema,
       })
     },
     handler(request, reply) {

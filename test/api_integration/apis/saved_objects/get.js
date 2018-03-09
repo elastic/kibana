@@ -36,16 +36,16 @@ export default function ({ getService }) {
           })
       ));
 
-      describe('meta', () => {
+      describe('join', () => {
         it('should join tags', async () => (
           await supertest
-            .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab?meta=tags`)
+            .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab?join=tags`)
             .expect(200)
             .then(resp => {
               expect(resp.body.attributes.tags).to.eql([
                 'f16f0200-1804-11e8-9684-d7923ac6f695'
               ]);
-              expect(resp.body.meta).to.eql({
+              expect(resp.body.join).to.eql({
                 tags: {
                   'f16f0200-1804-11e8-9684-d7923ac6f695': {
                     color: 'blue',
