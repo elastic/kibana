@@ -63,6 +63,33 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
+  describe('{tags}', () => {
+    it('includes just a tags filter', () => {
+      const type = null;
+      const search = null;
+      const searchFields = null;
+      const body = getQueryParams(MAPPINGS, type, search, searchFields, ['tagId1', 'tagId2']);
+
+      expect(body)
+        .to.eql({
+          query: {
+            bool: {
+              filter: [
+                {
+                  'bool': {
+                    'should': [
+                      { 'term': { 'tags': 'tagId1' } },
+                      { 'term': { 'tags': 'tagId2' } }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+  });
+
   describe('{search}', () => {
     it('includes just a sqs query', () => {
       expect(getQueryParams(MAPPINGS, null, 'us*'))
@@ -175,14 +202,22 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('{type,search,searchFields}', () => {
+  describe('{type,search,searchFields, tags}', () => {
     it('includes bool, and sqs with field list', () => {
-      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title']))
+      expect(getQueryParams(MAPPINGS, 'saved', 'y*', ['title'], ['tagId1', 'tagId2']))
         .to.eql({
           query: {
             bool: {
               filter: [
-                { term: { type: 'saved' } }
+                { term: { type: 'saved' } },
+                {
+                  'bool': {
+                    'should': [
+                      { 'term': { 'tags': 'tagId1' } },
+                      { 'term': { 'tags': 'tagId2' } }
+                    ]
+                  }
+                }
               ],
               must: [
                 {

@@ -9,7 +9,8 @@ export function getSearchDsl(mappings, options = {}) {
     search,
     searchFields,
     sortField,
-    sortOrder
+    sortOrder,
+    tags,
   } = options;
 
   if (!type && sortField) {
@@ -21,7 +22,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, search, searchFields),
+    ...getQueryParams(mappings, type, search, searchFields, tags),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

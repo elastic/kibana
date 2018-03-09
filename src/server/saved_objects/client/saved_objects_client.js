@@ -278,6 +278,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
+      tags,
       join: joinTypes,
     } = options;
 
@@ -302,7 +303,8 @@ export class SavedObjectsClient {
           searchFields,
           type,
           sortField,
-          sortOrder
+          sortOrder,
+          tags,
         })
       }
     };

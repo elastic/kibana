@@ -18,6 +18,7 @@ export const createFindRoute = (prereqs) => ({
         search: Joi.string().allow('').optional(),
         search_fields: Joi.array().items(Joi.string()).single(),
         fields: Joi.array().items(Joi.string()).single(),
+        tags: Joi.array().items(Joi.string()).single(),
         join: joinParameterSchema,
       }).default()
     },

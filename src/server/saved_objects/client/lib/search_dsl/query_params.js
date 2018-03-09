@@ -22,24 +22,44 @@ function getFieldsForTypes(searchFields, types) {
 }
 
 /**
- *  Get the "query" related keys for the search body
+ *  Get the 'query' related keys for the search body
  *  @param  {EsMapping} mapping mappings from Ui
  *  @param  {Object} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param  {Array<string>} tags array of tag saved object id(s)
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
-  if (!type && !search) {
+export function getQueryParams(mappings, type, search, searchFields, tags) {
+  if (!type && !search && !tags) {
     return {};
+  }
+
+  const filterList = [];
+  if (type) {
+    const typeFilter = { term: { type } };
+    filterList.push(typeFilter);
+  }
+  if (tags) {
+    const shouldList = tags.map(tagId => {
+      return {
+        term: {
+          tags: tagId
+        }
+      };
+    });
+    const tagsFilter = {
+      bool: {
+        should: shouldList
+      }
+    };
+    filterList.push(tagsFilter);
   }
 
   const bool = {};
 
-  if (type) {
-    bool.filter = [
-      { term: { type } }
-    ];
+  if (filterList.length > 0) {
+    bool.filter = filterList;
   }
 
   if (search) {
