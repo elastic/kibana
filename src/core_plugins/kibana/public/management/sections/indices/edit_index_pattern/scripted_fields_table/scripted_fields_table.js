@@ -4,18 +4,17 @@ import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 
 import { documentationLinks } from 'ui/documentation_links';
 
 import {
-  EuiButton,
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { Table } from './components/table';
-import { Header } from './components/header';
-import { CallOuts } from './components/call_outs';
-import { getTableOfRecordsState, DEFAULT_TABLE_OF_RECORDS_STATE } from './lib';
-
+import {
+  Table,
+  Header,
+  CallOuts,
+} from './components';
 
 export class ScriptedFieldsTable extends Component {
   static propTypes = {
@@ -37,7 +36,6 @@ export class ScriptedFieldsTable extends Component {
       fieldToDelete: undefined,
       isDeleteConfirmationModalVisible: false,
       fields: [],
-      ...DEFAULT_TABLE_OF_RECORDS_STATE,
     };
   }
 
@@ -61,34 +59,31 @@ export class ScriptedFieldsTable extends Component {
     this.setState({
       fields,
       deprecatedLangsInUse,
-      ...this.computeTableState(this.state.criteria, this.props, fields)
     });
   }
 
-  onDataCriteriaChange = criteria => {
-    this.setState(this.computeTableState(criteria));
-  }
+  getFilteredItems = () => {
+    const { fields } = this.state;
+    const { fieldFilter, scriptedFieldLanguageFilter } = this.props;
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.fieldFilter !== nextProps.fieldFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
-    }
-    if (this.props.scriptedFieldLanguageFilter !== nextProps.scriptedFieldLanguageFilter) {
-      this.setState(this.computeTableState(this.state.criteria, nextProps));
-    }
-  }
+    let languageFilteredFields = fields;
 
-  computeTableState(criteria, props = this.props, fields = this.state.fields) {
-    let items = fields;
-    if (props.fieldFilter) {
-      const fieldFilter = props.fieldFilter.toLowerCase();
-      items = items.filter(field => field.name.toLowerCase().includes(fieldFilter));
-    }
-    if (props.scriptedFieldLanguageFilter) {
-      items = items.filter(field => field.lang === props.scriptedFieldLanguageFilter);
+    if (scriptedFieldLanguageFilter) {
+      languageFilteredFields = fields.filter(
+        field => field.lang === this.props.scriptedFieldLanguageFilter
+      );
     }
 
-    return getTableOfRecordsState(items, criteria);
+    let filteredFields = languageFilteredFields;
+
+    if (fieldFilter) {
+      const normalizedFieldFilter = this.props.fieldFilter.toLowerCase();
+      filteredFields = languageFilteredFields.filter(
+        field => field.name.toLowerCase().includes(normalizedFieldFilter)
+      );
+    }
+
+    return filteredFields;
   }
 
   renderCallOuts() {
@@ -147,44 +142,23 @@ export class ScriptedFieldsTable extends Component {
       indexPattern,
     } = this.props;
 
-    const {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-      fields,
-    } = this.state;
-
-    const model = {
-      data,
-      criteria: {
-        page,
-        sort,
-      },
-    };
+    const items = this.getFilteredItems();
 
     return (
       <div>
-        <Header/>
+        <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+
         {this.renderCallOuts()}
-        <EuiButton
-          data-test-subj="addScriptedFieldLink"
-          href={helpers.getRouteHref(indexPattern, 'addField')}
-        >
-          Add scripted field
-        </EuiButton>
+
         <EuiSpacer size="l" />
-        { fields.length > 0 ?
-          <Table
-            indexPattern={indexPattern}
-            model={model}
-            editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
-            deleteField={this.startDeleteField}
-            onDataCriteriaChange={this.onDataCriteriaChange}
-          />
-          : null
-        }
+
+        <Table
+          indexPattern={indexPattern}
+          items={items}
+          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          deleteField={this.startDeleteField}
+        />
+
         {this.renderDeleteConfirmationModal()}
       </div>
     );
