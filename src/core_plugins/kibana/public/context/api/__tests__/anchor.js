@@ -108,8 +108,12 @@ describe('context app', function () {
           expect(setQuerySpy.calledOnce).to.be(true);
           expect(setQuerySpy.firstCall.args[1]).to.eql({
             query: {
-              terms: {
-                _uid: ['UID'],
+              constant_score: {
+                filter: {
+                  terms: {
+                    _uid: ['UID'],
+                  },
+                }
               }
             },
             language: 'lucene'
