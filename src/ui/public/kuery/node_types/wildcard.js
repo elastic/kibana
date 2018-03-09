@@ -1,4 +1,4 @@
-import { fromLiteralExpression } from '../ast/ast';
+import { fromWildcardExpression } from '../ast/ast';
 
 export const wildcardSymbol = Symbol('*');
 
@@ -13,13 +13,9 @@ function escapeQueryString(string) {
 }
 
 export function buildNode(value) {
-  if (typeof value === 'string') {
-    return fromLiteralExpression(value);
-  }
-
   return {
     type: 'wildcard',
-    value,
+    value: fromWildcardExpression(value)
   };
 }
 

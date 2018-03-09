@@ -6,13 +6,22 @@ import { nodeTypes } from '../node_types/index';
 
 const legacyKueryParser = PEG.buildParser(legacyKueryGrammar);
 const kueryParser = PEG.buildParser(kueryGrammar, {
-  allowedStartRules: ['start', 'Literal'],
+  allowedStartRules: ['start', 'Literal', 'WildcardString'],
 });
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
     ...parseOptions,
     startRule: 'Literal',
+  };
+
+  return fromExpression(expression, parseOptions, kueryParser);
+}
+
+export function fromWildcardExpression(expression, parseOptions) {
+  parseOptions = {
+    ...parseOptions,
+    startRule: 'WildcardString',
   };
 
   return fromExpression(expression, parseOptions, kueryParser);
