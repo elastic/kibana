@@ -5,10 +5,12 @@ export function AggResponseBucketsProvider() {
   function Buckets(aggResp, aggParams) {
     if (_.has(aggResp, 'buckets')) {
       this.buckets = aggResp.buckets;
-    } else {
+    } else if (aggResp) {
       // Some Bucket Aggs only return a single bucket (like filter).
       // In those instances, the aggResp is the content of the single bucket.
       this.buckets = [aggResp];
+    } else {
+      this.buckets = [];
     }
 
     this.objectMode = _.isPlainObject(this.buckets);

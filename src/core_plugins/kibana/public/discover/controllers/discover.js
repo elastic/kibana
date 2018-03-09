@@ -30,6 +30,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -80,7 +81,17 @@ uiRoutes
           });
       },
       savedSearch: function (courier, savedSearches, $route) {
-        return savedSearches.get($route.current.params.id)
+        const savedSearchId = $route.current.params.id;
+        return savedSearches.get(savedSearchId)
+          .then((savedSearch) => {
+            if (savedSearchId) {
+              recentlyAccessed.add(
+                savedSearch.getFullPath(),
+                savedSearch.title,
+                savedSearchId);
+            }
+            return savedSearch;
+          })
           .catch(courier.redirectWhenMissing({
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
