@@ -1,21 +1,21 @@
 import { EventEmitter } from 'events';
 
-import { createLocalChromedriverApi } from './chromedriver_local_api';
-import { createRemoteChromedriverApi } from './chromedriver_remote_api';
+import { createLocalBrowserdriverApi } from './browserdriver_local_api';
+import { createRemoteBrowserdriverApi } from './browserdriver_remote_api';
 import { ping } from './ping';
 
 const noop = () => {};
 
 /**
- *  Api for interacting with a local or remote instance of Chromedriver
+ *  Api for interacting with a local or remote instance of a browser
  *
  *  @type {Object}
  */
-export class ChromedriverApi extends EventEmitter {
-  static async factory(log, url) {
+export class BrowserdriverApi extends EventEmitter {
+  static async factory(log, url, browser) {
     return (await ping(url))
-      ? createRemoteChromedriverApi(log, url)
-      : createLocalChromedriverApi(log, url);
+      ? createRemoteBrowserdriverApi(log, url)
+      : createLocalBrowserdriverApi(log, url, browser);
   }
 
   constructor(options = {}) {
@@ -25,19 +25,22 @@ export class ChromedriverApi extends EventEmitter {
       url,
       start = noop,
       stop = noop,
+      browser,
     } = options;
 
     if (!url) {
       throw new TypeError('url is a required parameter');
     }
-
+    this._browser = browser;
     this._url = url;
     this._state = undefined;
     this._callCustomStart = () => start(this);
     this._callCustomStop = () => stop(this);
     this._beforeStopFns = [];
   }
-
+  getBrowserName() {
+    return this._browser;
+  }
   getUrl() {
     return this._url;
   }
@@ -52,7 +55,7 @@ export class ChromedriverApi extends EventEmitter {
 
   async start() {
     if (this._state !== undefined) {
-      throw new Error('Chromedriver can only be started once');
+      throw new Error('Driver can only be started once');
     }
 
     this._state = 'started';
@@ -61,7 +64,7 @@ export class ChromedriverApi extends EventEmitter {
 
   async stop() {
     if (this._state !== 'started') {
-      throw new Error('Chromedriver can only be stopped after being started');
+      throw new Error('Driver can only be stopped after being started');
     }
 
     this._state = 'stopped';
