@@ -7,7 +7,7 @@ import calculateLabel from '../../../common/calculate_label';
 import basicAggs from '../../../common/basic_aggs';
 
 function createTypeFilter(restrict, exclude) {
-  return (metric) => {
+  return metric => {
     if (_.includes(exclude, metric.type)) return false;
     switch (restrict) {
       case 'basic':
@@ -18,25 +18,20 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
-
 // This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
 export function filterRows(row) {
-  return  !/_bucket$/.test(row.type)
-    && !/^series/.test(row.type)
-    && !/^percentile/.test(row.type);
+  return (
+    !/_bucket$/.test(row.type) &&
+    !/^series/.test(row.type) &&
+    !/^percentile/.test(row.type) &&
+    !/^top_hit/.test(row.type)
+  );
 }
 
 function MetricSelect(props) {
-  const {
-    restrict,
-    metric,
-    onChange,
-    value,
-    exclude
-  } = props;
+  const { restrict, metric, onChange, value, exclude } = props;
 
-  const metrics = props.metrics
-    .filter(createTypeFilter(restrict, exclude));
+  const metrics = props.metrics.filter(createTypeFilter(restrict, exclude));
 
   const siblings = calculateSiblings(metrics, metric);
 
@@ -50,25 +45,25 @@ function MetricSelect(props) {
       row.percentiles.forEach(p => {
         if (p.value) {
           const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
-          acc.push({ value: `${row.id}[${value}]`, label: `${label} (${value})` });
+          acc.push({
+            value: `${row.id}[${value}]`,
+            label: `${label} (${value})`,
+          });
         }
       });
       return acc;
     }, []);
 
-
-  const options = siblings
-    .filter(filterRows)
-    .map(row => {
-      const label = calculateLabel(row, metrics);
-      return { value: row.id, label };
-    });
+  const options = siblings.filter(filterRows).map(row => {
+    const label = calculateLabel(row, metrics);
+    return { value: row.id, label };
+  });
 
   return (
     <Select
       aria-label="Select metric"
       placeholder="Select metric..."
-      options={[ ...options, ...props.additionalOptions, ...percentileOptions]}
+      options={[...options, ...props.additionalOptions, ...percentileOptions]}
       value={value}
       onChange={onChange}
     />
@@ -88,7 +83,7 @@ MetricSelect.propTypes = {
   metric: PropTypes.object,
   onChange: PropTypes.func,
   restrict: PropTypes.string,
-  value: PropTypes.string
+  value: PropTypes.string,
 };
 
 export default MetricSelect;
