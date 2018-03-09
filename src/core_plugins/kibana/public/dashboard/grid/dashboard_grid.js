@@ -7,7 +7,10 @@ import classNames from 'classnames';
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+} from '../dashboard_constants';
 import sizeMe from 'react-sizeme';
 
 const config = { monitorWidth: true };
@@ -58,7 +61,7 @@ function ResponsiveGrid({
       isResizable={true}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
-      rowHeight={20}
+      rowHeight={DASHBOARD_GRID_HEIGHT}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
