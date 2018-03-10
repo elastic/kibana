@@ -83,6 +83,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   }
 
   $scope.removeWorkspace = function () {
+    if (!window.confirm('This will delete the current workspace, are you sure?'))
+      return;
+
     let workspaceIds = this.workspaces;
     const workspaceToDelete = this.activeWorkspace;
     const i = workspaceIds.indexOf(workspaceToDelete);
