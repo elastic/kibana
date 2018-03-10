@@ -89,7 +89,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     let workspaceIds = this.workspaces;
     const workspaceToDelete = this.activeWorkspace;
     const i = workspaceIds.indexOf(workspaceToDelete);
-    if (i == -1)
+    if (i === -1)
       return;
 
     workspaceIds.splice(i, 1);
