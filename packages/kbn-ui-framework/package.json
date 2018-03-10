@@ -1,0 +1,75 @@
+{
+  "name": "@kbn/ui-framework",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "grunt prodBuild",
+    "docSiteStart": "grunt docSiteStart",
+    "docSiteBuild": "grunt docSiteBuild",
+    "createComponent": "yo ./generator-kui/app/component.js",
+    "documentComponent": "yo ./generator-kui/app/documentation.js"
+  },
+  "kibana": {
+    "build": {
+      "intermediateBuildDirectory": "target"
+    }
+  },
+  "dependencies": {
+    "classnames": "2.2.5",
+    "focus-trap-react": "^3.1.1",
+    "lodash": "3.10.1",
+    "prop-types": "15.5.8",
+    "react": "^16.2.0",
+    "react-ace": "^5.9.0",
+    "react-color": "^2.13.8",
+    "tabbable": "1.1.0",
+    "uuid": "3.0.1"
+  },
+  "peerDependencies": {
+    "enzyme": "3.2.0",
+    "enzyme-adapter-react-16": "^1.1.1"
+  },
+  "devDependencies": {
+    "@elastic/eui": "0.0.23",
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "autoprefixer": "6.5.4",
+    "babel-core": "6.21.0",
+    "babel-loader": "7.1.2",
+    "babel-polyfill": "6.20.0",
+    "brace": "0.10.0",
+    "chalk": "2.3.0",
+    "chokidar": "1.6.0",
+    "css-loader": "0.28.7",
+    "expose-loader": "0.7.3",
+    "file-loader": "1.1.4",
+    "grunt": "1.0.1",
+    "grunt-babel": "^7.0.0",
+    "grunt-contrib-clean": "^1.1.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "highlight.js": "9.0.0",
+    "html": "1.0.0",
+    "html-loader": "0.5.1",
+    "imports-loader": "0.7.1",
+    "jquery": "^3.3.1",
+    "keymirror": "0.1.1",
+    "moment": "^2.20.1",
+    "node-sass": "4.5.3",
+    "postcss": "^5.0.10",
+    "postcss-loader": "2.0.6",
+    "raw-loader": "0.5.1",
+    "react-dom": "^16.2.0",
+    "react-redux": "^5.0.6",
+    "react-router": "^3.2.0",
+    "react-router-dom": "4.2.2",
+    "react-router-redux": "^4.0.8",
+    "redux": "3.7.2",
+    "redux-thunk": "2.2.0",
+    "sass-loader": "6.0.6",
+    "sinon": "1.17.2",
+    "style-loader": "0.19.0",
+    "webpack": "3.6.0",
+    "webpack-dev-server": "2.9.1",
+    "yeoman-generator": "1.1.1",
+    "yo": "2.0.0"
+  }
+}

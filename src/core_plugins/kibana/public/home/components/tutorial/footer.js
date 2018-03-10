@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   KuiLinkButton,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   EuiFlexGroup,

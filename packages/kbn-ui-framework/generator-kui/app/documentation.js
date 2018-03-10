@@ -28,4 +28,4 @@ module.exports = class extends Generator {
       fileType: this.config.fileType,
     });
   }
-}
+};
