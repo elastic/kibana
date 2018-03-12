@@ -14,3 +14,5 @@ If you'd prefer to use Kibana's internal plugin API, then check out
 include::development/core-development.asciidoc[]
 
 include::development/plugin-development.asciidoc[]
+
+include::development/pr-review.asciidoc[]
