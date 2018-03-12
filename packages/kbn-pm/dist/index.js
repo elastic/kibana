@@ -33252,7 +33252,6 @@ const CleanCommand = exports.CleanCommand = {
                 console.log(_chalk2.default.bold.red('\n\nDeleting directories:\n'));
                 for (const dir of directoriesToDelete) {
                     const deleting = (0, _del2.default)(dir, { force: true });
-                    // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
                     _ora2.default.promise(deleting, (0, _path.relative)(rootPath, dir));
                     yield deleting;
                 }
