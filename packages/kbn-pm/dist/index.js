@@ -24972,7 +24972,7 @@ const CleanCommand = {
       for (const dir of directoriesToDelete) {
         const deleting = (0, _del.default)(dir, {
           force: true
-        }); // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
+        });
 
         _ora.default.promise(deleting, (0, _path.relative)(rootPath, dir));
 

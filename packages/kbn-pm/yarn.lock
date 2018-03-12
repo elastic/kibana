@@ -578,9 +578,9 @@
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
 
-"@types/ora@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@types/ora/-/ora-1.3.1.tgz#53db0e10b7ea2f014548e87ea81c755986502e52"
+"@types/ora@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@types/ora/-/ora-1.3.2.tgz#ded29aeec023deaa1e56b99cb51234954f35a7cd"
   dependencies:
     "@types/node" "*"
 
