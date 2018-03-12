@@ -6,16 +6,9 @@ import {
 } from './footer';
 
 test('render', () => {
-  const component = shallow(<Footer/>);
+  const component = shallow(<Footer
+    url={'/app/myapp'}
+    label={'launch myapp'}
+  />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
-});
-
-describe('props', () => {
-  test('url', () => {
-    const component = shallow(<Footer
-      url={'/app/myapp'}
-      label={'launch myapp'}
-    />);
-    expect(component).toMatchSnapshot(); // eslint-disable-line
-  });
 });

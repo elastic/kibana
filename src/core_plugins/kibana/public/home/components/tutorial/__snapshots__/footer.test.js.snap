@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`props url 1`] = `
+exports[`render 1`] = `
 <div>
   <EuiHorizontalRule
     margin="l"
@@ -41,5 +41,3 @@ exports[`props url 1`] = `
   </EuiFlexGroup>
 </div>
 `;
-
-exports[`render 1`] = `""`;

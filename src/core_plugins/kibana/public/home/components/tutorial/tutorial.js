@@ -163,12 +163,14 @@ export class Tutorial extends React.Component {
       }
     }
 
-    return (
-      <Footer
-        label={label}
-        url={url}
-      />
-    );
+    if (url && label) {
+      return (
+        <Footer
+          label={label}
+          url={url}
+        />
+      );
+    }
   }
 
   render() {

@@ -10,10 +10,6 @@ import {
 } from '@elastic/eui';
 
 export function Footer({ url, label }) {
-  if (!url) {
-    return null;
-  }
-
   return (
     <div>
       <EuiHorizontalRule />
@@ -46,6 +42,6 @@ export function Footer({ url, label }) {
 }
 
 Footer.propTypes = {
-  url: PropTypes.string,
-  label: PropTypes.string,
+  url: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
 };
