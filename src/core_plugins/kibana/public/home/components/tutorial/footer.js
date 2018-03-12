@@ -11,7 +11,7 @@ import {
 
 export function Footer({ url, label }) {
   if (!url) {
-    return;
+    return null;
   }
 
   return (
