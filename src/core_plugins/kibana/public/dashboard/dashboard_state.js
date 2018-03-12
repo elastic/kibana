@@ -14,12 +14,14 @@ function getStateDefaults(dashboard) {
     title: dashboard.title,
     description: dashboard.description,
     timeRestore: dashboard.timeRestore,
+    dateIntervalRestore: dashboard.dateIntervalRestore,
     panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
     options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
     uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
     query: FilterUtils.getQueryFilterForDashboard(dashboard),
     filters: FilterUtils.getFilterBarsForDashboard(dashboard),
     viewMode: dashboard.id ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
+    dateInterval: dashboard.dateInterval
   };
 }
 
@@ -187,6 +189,22 @@ export class DashboardState {
     return this.savedDashboard.timeRestore;
   }
 
+  getDateIntervalRestore() {
+    return this.appState.dateIntervalRestore;
+  }
+
+  setDateIntervalRestore(dateIntervalRestore) {
+    this.appState.dateIntervalRestore = dateIntervalRestore;
+    this.saveState();
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  getIsDateIntervalSavedWithDashboard() {
+    return this.savedDashboard.dateIntervalRestore;
+  }
+
   getDashboardFilterBars() {
     return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
   }
@@ -257,11 +275,12 @@ export class DashboardState {
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
-  getIsDirty(timeFilter) {
+  getIsDirty(timeFilter, intervalFilter) {
     return this.isDirty ||
       // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
       // changes are not tracked by the state monitor.
-      this.getFiltersChanged(timeFilter);
+      this.getFiltersChanged(timeFilter) ||
+      this.getDateIntervalChanged(intervalFilter);
   }
 
   getPanels() {
@@ -318,6 +337,15 @@ export class DashboardState {
     return this.getChangedFilterTypes(timeFilter).length > 0;
   }
 
+  getDateIntervalChanged(intervalFilter) {
+    if (this.savedDashboard.dateIntervalRestore &&
+        (this.savedDashboard.dateInterval &&
+        !_.isEqual(this.savedDashboard.dateInterval, intervalFilter.dateInterval))
+      ) {
+      return true;
+    }
+    return false;
+  }
   /**
    * Updates timeFilter to match the time saved with the dashboard.
    * @param timeFilter
@@ -345,6 +373,14 @@ export class DashboardState {
     }
   }
 
+  syncDateIntervalWithDashboard(intervalFilter) {
+    if(!this.getIsDateIntervalSavedWithDashboard()) {
+      throw new Error('The date interval is not saved with this dashboard so should not be synced.');
+    }
+
+    intervalFilter.dateInterval = this.savedDashboard.dateInterval;
+  }
+
   /**
    * Saves the current application state to the URL.
    */
@@ -361,7 +397,7 @@ export class DashboardState {
    * @returns {Promise<string>} A promise that if resolved, will contain the id of the newly saved
    * dashboard.
    */
-  saveDashboard(toJson, timeFilter) {
+  saveDashboard(toJson, timeFilter, intervalfilter) {
     this.saveState();
 
     const timeRestoreObj = _.pick(timeFilter.refreshInterval, ['display', 'pause', 'section', 'value']);
@@ -374,6 +410,9 @@ export class DashboardState {
     this.savedDashboard.timeTo = this.savedDashboard.timeRestore ? convertTimeToString(timeFilter.time.to) : undefined;
     this.savedDashboard.refreshInterval = this.savedDashboard.timeRestore ? timeRestoreObj : undefined;
     this.savedDashboard.optionsJSON = toJson(this.appState.options);
+
+    this.savedDashboard.dateIntervalRestore = this.appState.dateIntervalRestore;
+    this.savedDashboard.dateInterval = this.appState.dateIntervalRestore ? intervalfilter.dateInterval : undefined;
 
     return this.savedDashboard.save()
       .then((id) => {

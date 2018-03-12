@@ -31,8 +31,9 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, intervalfilter, Private) {
   timefilter.enabled = false;
+  intervalfilter.enabled = false;
 
   const VisType = Private(VisVisTypeProvider);
 
@@ -179,7 +180,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, intervalfilter, kbnUrl) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
@@ -201,6 +202,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
   };
 
   timefilter.enabled = false;
+  intervalfilter.enabled = false;
 
   $scope.indexPattern = {
     selection: null,

@@ -77,6 +77,7 @@ app.directive('dashboardApp', function ($injector) {
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const timefilter = $injector.get('timefilter');
+  const intervalfilter = $injector.get('intervalfilter');
   const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
@@ -107,6 +108,10 @@ app.directive('dashboardApp', function ($injector) {
         dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
+      if (dashboardState.getIsDateIntervalSavedWithDashboard() && !getAppState.previouslyStored()) {
+        dashboardState.syncDateIntervalWithDashboard(intervalfilter);
+      }
+
       const updateState = () => {
         // Following the "best practice" of always have a '.' in your ng-models –
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
@@ -114,6 +119,7 @@ app.directive('dashboardApp', function ($injector) {
           query: dashboardState.getQuery(),
           darkTheme: dashboardState.getDarkTheme(),
           timeRestore: dashboardState.getTimeRestore(),
+          dateIntervalRestore: dashboardState.getDateIntervalRestore(),
           title: dashboardState.getTitle(),
           description: dashboardState.getDescription(),
         };
@@ -133,6 +139,7 @@ app.directive('dashboardApp', function ($injector) {
       let pendingVisCount = _.size(dashboardState.getPanels());
 
       timefilter.enabled = true;
+      intervalfilter.enabled = true;
       dash.searchSource.highlightAll(true);
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);
@@ -144,6 +151,7 @@ app.directive('dashboardApp', function ($injector) {
         courier.fetch(...args);
       };
       $scope.timefilter = timefilter;
+      $scope.intervalfilter = intervalfilter;
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
@@ -154,7 +162,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),
         dashboardState.getViewMode(),
-        dashboardState.getIsDirty(timefilter));
+        dashboardState.getIsDirty(timefilter, intervalfilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardState.saveState();
       $scope.getShouldShowEditHelp = () => !dashboardState.getPanels().length && dashboardState.getIsEditMode();
@@ -207,6 +215,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
       $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
       $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+      $scope.$watch('model.dateIntervalRestore', () => dashboardState.setDateIntervalRestore($scope.model.dateIntervalRestore));
       $scope.indexPatterns = [];
 
       $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
@@ -220,6 +229,7 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
+      $scope.$listen(intervalfilter, 'fetch', $scope.refresh);
 
       function updateViewMode(newMode) {
         $scope.topNavMenu = getTopNavConfig(newMode, navActions); // eslint-disable-line no-use-before-define
@@ -230,7 +240,7 @@ app.directive('dashboardApp', function ($injector) {
       const onChangeViewMode = (newMode) => {
         const isPageRefresh = newMode === dashboardState.getViewMode();
         const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
-        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
+        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter, intervalfilter);
 
         if (!willLoseChanges) {
           updateViewMode(newMode);
@@ -249,10 +259,18 @@ app.directive('dashboardApp', function ($injector) {
           if (dashboardState.getIsTimeSavedWithDashboard()) {
             dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
           }
+
+          if (dashboardState.getIsDateIntervalSavedWithDashboard()) {
+            dashboardState.syncDateIntervalWithDashboard(intervalfilter);
+          }
         }
 
+        const changes = dashboardState.getChangedFilterTypes(timefilter);
+        if(dashboardState.getIsDateIntervalSavedWithDashboard(intervalfilter)) {
+          changes.push('date interval');
+        }
         confirmModal(
-          getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
+          getUnsavedChangesWarningMessage(changes),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
@@ -264,7 +282,7 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
+        return dashboardState.saveDashboard(angular.toJson, timefilter, intervalfilter).then(function (id) {
           $scope.kbnTopNav.close('save');
           if (id) {
             notify.info(`Saved Dashboard as "${dash.title}"`);
@@ -362,7 +380,8 @@ app.directive('dashboardApp', function ($injector) {
         addVis: $scope.addVis,
         addNewVis,
         addSearch: $scope.addSearch,
-        timefilter: $scope.timefilter
+        timefilter: $scope.timefilter,
+        intervalfilter: $scope.intervalfilter
       };
 
       $scope.$emit('application.load');

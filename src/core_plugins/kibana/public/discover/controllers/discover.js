@@ -14,6 +14,7 @@ import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
+import 'ui/intervalfilter';
 import 'ui/share';
 import { VisProvider } from 'ui/vis';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -98,7 +99,7 @@ app.directive('discoverApp', function () {
 });
 
 function discoverController($scope, config, courier, $route, $window, Notifier,
-  AppState, timefilter, Promise, Private, kbnUrl) {
+  AppState, timefilter, intervalfilter, Promise, Private, kbnUrl) {
 
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -141,6 +142,8 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     testId: 'discoverShareButton',
   }];
   $scope.timefilter = timefilter;
+
+  $scope.intervalfilter = intervalfilter;
 
 
   // the saved savedSearch
@@ -191,10 +194,13 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
-    timefilter: $scope.timefilter
+    timefilter: $scope.timefilter,
+    intervalfilter: $scope.intervalfilter
   };
 
   const init = _.once(function () {
+    require('../components/discover_resize')();
+
     const showTotal = 5;
     $scope.failuresShown = showTotal;
     $scope.showAllFailures = function () {
@@ -243,6 +249,7 @@ function discoverController($scope, config, courier, $route, $window, Notifier,
 
       $scope.$watch('opts.timefield', function (timefield) {
         timefilter.enabled = !!timefield;
+        intervalfilter.enabled = false;
       });
 
       $scope.$watch('state.interval', function () {

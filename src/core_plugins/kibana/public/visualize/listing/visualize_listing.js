@@ -11,9 +11,11 @@ export function VisualizeListingController($injector) {
   const pagerFactory = $injector.get('pagerFactory');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
+  const intervalfilter = $injector.get('intervalfilter');
   const config = $injector.get('config');
 
   timefilter.enabled = false;
+  intervalfilter.enabled = false;
 
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
