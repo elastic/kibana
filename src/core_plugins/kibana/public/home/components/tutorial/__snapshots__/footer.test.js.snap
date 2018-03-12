@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`props launchApp 1`] = `
+exports[`props url 1`] = `
 <div>
   <EuiHorizontalRule
     margin="l"
@@ -36,48 +36,6 @@ exports[`props launchApp 1`] = `
         type="button"
       >
         launch myapp
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`props overviewDashboard 1`] = `
-<div>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    component="div"
-    gutterSize="l"
-    justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiText>
-        <p>
-          When all steps are complete, you're ready to explore your data.
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        fill={true}
-        href="#/dashboard/1234"
-        iconSide="left"
-        type="button"
-      >
-        My Overview Dashboard
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>

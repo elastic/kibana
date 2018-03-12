@@ -148,27 +148,27 @@ export class Tutorial extends React.Component {
   }
 
   renderFooter = () => {
+    let label;
+    let url;
     if (_.has(this.state, 'tutorial.artifacts.application')) {
-      const launchApp = {
-        url: this.props.addBasePath(this.state.tutorial.artifacts.application.path),
-        label: this.state.tutorial.artifacts.application.label
-      };
-      return (
-        <Footer
-          launchApp={launchApp}
-        />
-      );
+      label = this.state.tutorial.artifacts.application.label;
+      url = this.props.addBasePath(this.state.tutorial.artifacts.application.path);
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
       const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
         return dashboard.isOverview;
       });
-
-      return (
-        <Footer
-          overviewDashboard={overviewDashboard}
-        />
-      );
+      if (overviewDashboard) {
+        label = overviewDashboard.linkLabel;
+        url = this.props.addBasePath(`/app/kibana#/dashboard/${overviewDashboard.id}`);
+      }
     }
+
+    return (
+      <Footer
+        label={label}
+        url={url}
+      />
+    );
   }
 
   render() {
