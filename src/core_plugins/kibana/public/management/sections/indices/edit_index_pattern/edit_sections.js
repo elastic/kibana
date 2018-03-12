@@ -10,7 +10,7 @@ export function IndicesEditSectionsProvider() {
     _.defaults(fieldCount, {
       indexed: 0,
       scripted: 0,
-      sourceFilters: 0
+      sourceFilters: indexPattern.sourceFilters ? indexPattern.sourceFilters.length : 0,
     });
 
     return [
