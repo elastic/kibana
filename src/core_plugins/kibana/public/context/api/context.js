@@ -61,7 +61,7 @@ function fetchContextProvider(courier, Private) {
       timeField,
       timeSortDirection,
       timeValue,
-      timeValue - INITIAL_LIMIT_INCREMENT,
+      timeValue + INITIAL_LIMIT_INCREMENT * (timeSortDirection === 'asc' ? 1 : -1),
       size
     );
     return results;
@@ -98,7 +98,7 @@ function fetchContextProvider(courier, Private) {
       timeField,
       predecessorTimeSortDirection,
       timeValue,
-      timeValue + INITIAL_LIMIT_INCREMENT,
+      timeValue + INITIAL_LIMIT_INCREMENT * (timeSortDirection === 'desc' ? 1 : -1),
       size
     );
     const results = reversedResults.slice().reverse();
@@ -193,7 +193,7 @@ function fetchContextProvider(courier, Private) {
       .inherits(false)
       .set('index', indexPattern)
       .set('size', 0)
-      .set('query': {
+      .set('query', {
         query: {
           match_all: {},
         },
