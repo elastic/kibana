@@ -47,13 +47,13 @@ export default function ({ getService, getPageObjects }) {
           .then(function (headers) {
             log.debug('header.length = ' + headers.length);
             const expectedHeaders = [
-              'name',
-              'type',
-              'format',
-              'searchable',
-              'aggregatable',
-              'excluded',
-              'controls'
+              'Name',
+              'Type',
+              'Format',
+              'Searchable',
+              'Aggregatable',
+              'Excluded',
+              ''
             ];
 
             expect(headers.length).to.be(expectedHeaders.length);

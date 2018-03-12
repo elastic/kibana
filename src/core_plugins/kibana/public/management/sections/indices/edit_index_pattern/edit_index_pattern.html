@@ -137,18 +137,11 @@
 
       <!-- Tab content -->
       <div class="kuiVerticalRhythm">
-        <indexed-fields-table
-          ng-show="state.tab == 'indexedFields'"
-          class="fields indexed-fields"
-        ></indexed-fields-table>
+        <div id="reactIndexedFieldsTable"></div>
 
         <div id="reactScriptedFieldsTable"></div>
 
-        <source-filters-table
-          ng-show="state.tab == 'sourceFilters'"
-          index-pattern="indexPattern"
-          class="fields source-filters"
-        ></source-filters-table>
+        <div id="reactSourceFiltersTable"></div>
       </div>
     </div>
   </kbn-management-indices>

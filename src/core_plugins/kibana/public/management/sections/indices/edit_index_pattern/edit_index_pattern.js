@@ -1,20 +1,55 @@
 import _ from 'lodash';
 import './index_header';
-import './indexed_fields_table';
 import './scripted_field_editor';
-import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
 import { fatalError } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-
+import { FieldWildcardProvider } from 'ui/field_wildcard';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { SourceFiltersTable } from './source_filters_table';
+import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 
+const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
+const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
 const REACT_SCRIPTED_FIELDS_DOM_ELEMENT_ID = 'reactScriptedFieldsTable';
+
+function updateSourceFiltersTable($scope, $state) {
+  if ($state.tab === 'sourceFilters') {
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <SourceFiltersTable
+          indexPattern={$scope.indexPattern}
+          filterFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+          onAddOrRemoveFilter={() => {
+            $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
+            $scope.refreshFilters();
+            $scope.$apply();
+          }}
+        />,
+        node,
+      );
+    });
+  } else {
+    destroySourceFiltersTable();
+  }
+}
+
+function destroySourceFiltersTable() {
+  const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
 
 function updateScriptedFieldsTable($scope, $state) {
   if ($state.tab === 'scriptedFields') {
@@ -54,6 +89,41 @@ function destroyScriptedFieldsTable() {
   node && unmountComponentAtNode(node);
 }
 
+function updateIndexedFieldsTable($scope, $state) {
+  if ($state.tab === 'indexedFields') {
+    $scope.$$postDigest(() => {
+      const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
+      if (!node) {
+        return;
+      }
+
+      render(
+        <IndexedFieldsTable
+          fields={$scope.fields}
+          indexPattern={$scope.indexPattern}
+          fieldFilter={$scope.fieldFilter}
+          fieldWildcardMatcher={$scope.fieldWildcardMatcher}
+          indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
+          helpers={{
+            redirectToRoute: (obj, route) => {
+              $scope.kbnUrl.redirectToRoute(obj, route);
+              $scope.$apply();
+            },
+          }}
+        />,
+        node,
+      );
+    });
+  } else {
+    destroyIndexedFieldsTable();
+  }
+}
+
+function destroyIndexedFieldsTable() {
+  const node = document.getElementById(REACT_INDEXED_FIELDS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
     template,
@@ -87,7 +157,9 @@ uiModules.get('apps/management')
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
     const notify = new Notifier();
     const $state = $scope.state = new AppState();
+    const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
 
+    $scope.fieldWildcardMatcher = fieldWildcardMatcher;
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
@@ -100,6 +172,9 @@ uiModules.get('apps/management')
     $scope.$watch('indexPattern.fields', function () {
       $scope.editSections = $scope.editSectionsProvider($scope.indexPattern);
       $scope.refreshFilters();
+      $scope.fields = $scope.indexPattern.getNonScriptedFields();
+      updateIndexedFieldsTable($scope, $state);
+      updateScriptedFieldsTable($scope, $state);
     });
 
     $scope.refreshFilters = function () {
@@ -123,7 +198,9 @@ uiModules.get('apps/management')
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
+      updateIndexedFieldsTable($scope, $state);
       updateScriptedFieldsTable($scope, $state);
+      updateSourceFiltersTable($scope, $state);
       $state.save();
     };
 
@@ -139,7 +216,10 @@ uiModules.get('apps/management')
     $scope.refreshFields = function () {
       const confirmModalOptions = {
         confirmButtonText: 'Refresh',
-        onConfirm: () => { $scope.indexPattern.refreshFields(); },
+        onConfirm: async () => {
+          await $scope.indexPattern.refreshFields();
+          $scope.fields = $scope.indexPattern.getNonScriptedFields();
+        },
         title: 'Refresh field list?'
       };
       confirmModal(
@@ -187,8 +267,24 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('fieldFilter', () => {
-      if ($scope.fieldFilter !== undefined && $state.tab === 'scriptedFields') {
-        updateScriptedFieldsTable($scope, $state);
+      if ($scope.fieldFilter === undefined) {
+        return;
+      }
+
+      switch($state.tab) {
+        case 'indexedFields':
+          updateIndexedFieldsTable($scope, $state);
+        case 'scriptedFields':
+          updateScriptedFieldsTable($scope, $state);
+      }
+    });
+
+    $scope.$watch('indexedFieldTypeFilter', () => {
+      if ($scope.indexedFieldTypeFilter !== undefined && $state.tab === 'indexedFields') {
+        updateIndexedFieldsTable($scope, $state);
+      }
+      if ($scope.fieldFilter !== undefined && $state.tab === 'sourceFilters') {
+        updateSourceFiltersTable($scope, $state);
       }
     });
 
@@ -199,8 +295,10 @@ uiModules.get('apps/management')
     });
 
     $scope.$on('$destory', () => {
+      destroyIndexedFieldsTable();
       destroyScriptedFieldsTable();
     });
 
     updateScriptedFieldsTable($scope, $state);
+    updateSourceFiltersTable($scope, $state);
   });
