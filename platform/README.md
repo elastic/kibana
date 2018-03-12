@@ -8,7 +8,6 @@
 # all commands from the root directory
 yarn kbn bootstrap
 yarn kbn run build --skip-kibana --skip-kibana-extra
-yarn ts:build
 ```
 
 If you get into a weird state you might clean the `target` directories,
