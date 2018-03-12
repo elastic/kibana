@@ -19,8 +19,9 @@ export const Header = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  ...rest
 }) => (
-  <div>
+  <div {...rest}>
     <EuiTitle size="s">
       <h2>
         Step 1 of 2: Define index pattern
@@ -39,7 +40,7 @@ export const Header = ({
             helpText={
               <div>
                 <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
-                <p>You can&apos;t use empty spaces or the characters <strong>{characterList}</strong>.</p>
+                <p>You can&apos;t use spaces or the characters <strong>{characterList}</strong>.</p>
               </div>
             }
           >

@@ -6125,6 +6125,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getProjects = getProjects;
 exports.buildProjectGraph = buildProjectGraph;
 exports.topologicallyBatchProjects = topologicallyBatchProjects;
+exports.includeTransitiveProjects = includeTransitiveProjects;
 
 var _glob = _interopRequireDefault(__webpack_require__(9));
 
@@ -6252,6 +6253,27 @@ function topologicallyBatchProjects(projectsToBatch, projectGraph) {
   }
 
   return batches;
+}
+
+function includeTransitiveProjects(subsetOfProjects, allProjects, {
+  onlyProductionDependencies = false
+} = {}) {
+  const dependentProjects = new Map(); // the current list of packages we are expanding using breadth-first-search
+
+  const toProcess = [...subsetOfProjects];
+
+  while (toProcess.length > 0) {
+    const project = toProcess.shift();
+    const dependencies = onlyProductionDependencies ? project.productionDependencies : project.allDependencies;
+    Object.keys(dependencies).forEach(dep => {
+      if (allProjects.has(dep)) {
+        toProcess.push(allProjects.get(dep));
+      }
+    });
+    dependentProjects.set(project.name, project);
+  }
+
+  return dependentProjects;
 }
 
 /***/ }),
@@ -20619,7 +20641,9 @@ class Project {
     this.packageJsonLocation = _path.default.resolve(this.path, 'package.json');
     this.nodeModulesLocation = _path.default.resolve(this.path, 'node_modules');
     this.targetLocation = _path.default.resolve(this.path, 'target');
-    this.allDependencies = _extends({}, this.json.devDependencies || {}, this.json.dependencies || {});
+    this.productionDependencies = this.json.dependencies || {};
+    this.devDependencies = this.json.devDependencies || {};
+    this.allDependencies = _extends({}, this.devDependencies, this.productionDependencies);
     this.scripts = this.json.scripts || {};
   }
 
@@ -20652,14 +20676,6 @@ class Project {
 
   getBuildConfig() {
     return this.json.kibana && this.json.kibana.build || {};
-  }
-  /**
-   * Whether a package should not be included in the Kibana build artifact.
-   */
-
-
-  skipFromBuild() {
-    return this.getBuildConfig().skip === true;
   }
   /**
    * Returns the directory that should be copied into the Kibana build artifact.
@@ -22837,11 +22853,7 @@ async function buildProductionProjects({
   kibanaRoot,
   buildRoot
 }) {
-  const projectPaths = (0, _config.getProjectPaths)(kibanaRoot, {
-    'skip-kibana': true,
-    'skip-kibana-extra': true
-  });
-  const projects = await getProductionProjects(kibanaRoot, projectPaths);
+  const projects = await getProductionProjects(kibanaRoot);
   const projectGraph = (0, _projects.buildProjectGraph)(projects);
   const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
@@ -22856,21 +22868,22 @@ async function buildProductionProjects({
   }
 }
 /**
- * Returns only the projects that should be built into the production bundle
+ * Returns the subset of projects that should be built into the production
+ * bundle. As we copy these into Kibana's `node_modules` during the build step,
+ * and let Kibana's build process be responsible for installing dependencies,
+ * we only include Kibana's transitive _production_ dependencies.
  */
 
 
-async function getProductionProjects(kibanaRoot, projectPaths) {
-  const projects = await (0, _projects.getProjects)(kibanaRoot, projectPaths);
-  const buildProjects = new Map();
+async function getProductionProjects(rootPath) {
+  const projectPaths = (0, _config.getProjectPaths)(rootPath, {});
+  const projects = await (0, _projects.getProjects)(rootPath, projectPaths);
+  const productionProjects = (0, _projects.includeTransitiveProjects)([projects.get('kibana')], projects, {
+    onlyProductionDependencies: true
+  }); // We remove Kibana, as we're already building Kibana
 
-  for (const [name, project] of projects.entries()) {
-    if (!project.skipFromBuild()) {
-      buildProjects.set(name, project);
-    }
-  }
-
-  return buildProjects;
+  productionProjects.delete('kibana');
+  return productionProjects;
 }
 
 async function deleteTarget(project) {

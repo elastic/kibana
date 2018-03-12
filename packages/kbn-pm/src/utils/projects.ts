@@ -143,3 +143,32 @@ export function topologicallyBatchProjects(
 
   return batches;
 }
+
+export function includeTransitiveProjects(
+  subsetOfProjects: Project[],
+  allProjects: ProjectMap,
+  { onlyProductionDependencies = false } = {}
+) {
+  const dependentProjects: ProjectMap = new Map();
+
+  // the current list of packages we are expanding using breadth-first-search
+  const toProcess = [...subsetOfProjects];
+
+  while (toProcess.length > 0) {
+    const project = toProcess.shift()!;
+
+    const dependencies = onlyProductionDependencies
+      ? project.productionDependencies
+      : project.allDependencies;
+
+    Object.keys(dependencies).forEach(dep => {
+      if (allProjects.has(dep)) {
+        toProcess.push(allProjects.get(dep)!);
+      }
+    });
+
+    dependentProjects.set(project.name, project);
+  }
+
+  return dependentProjects;
+}

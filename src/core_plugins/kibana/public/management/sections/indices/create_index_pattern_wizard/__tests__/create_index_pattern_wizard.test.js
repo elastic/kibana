@@ -28,43 +28,7 @@ const services = {
 };
 
 describe('CreateIndexPatternWizard', () => {
-  it('should render step 1', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard
-        loadingDataDocUrl={loadingDataDocUrl}
-        initialQuery={initialQuery}
-        services={services}
-      />
-    );
-
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render step 2', async () => {
-    const component = shallow(
-      <CreateIndexPatternWizard
-        loadingDataDocUrl={loadingDataDocUrl}
-        initialQuery={initialQuery}
-        services={services}
-      />
-    );
-
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    component.setState({ step: 2 });
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render the loading state', async () => {
+  it(`defaults to the loading state`, async () => {
     const component = shallow(
       <CreateIndexPatternWizard
         loadingDataDocUrl={loadingDataDocUrl}
@@ -76,7 +40,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render the empty state', async () => {
+  it('renders the empty state when there are no indices', async () => {
     const component = shallow(
       <CreateIndexPatternWizard
         loadingDataDocUrl={loadingDataDocUrl}
@@ -85,18 +49,53 @@ describe('CreateIndexPatternWizard', () => {
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [],
+    });
 
-    // Remove all indices
-    component.setState({ allIndices: [] });
-
+    await component.update();
     expect(component).toMatchSnapshot();
   });
 
-  it('should create an index pattern', async () => {
+  it('renders index pattern step when there are indices', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [{}],
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders time field step when step is set to 2', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [{}],
+      step: 2,
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('invokes the provided services when creating an index pattern', async () => {
     const get = jest.fn();
     const set = jest.fn();
     const create = jest.fn().mockImplementation(() => 'id');
