@@ -1,5 +1,13 @@
 {
   "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // We rely on Webpack to emit TypeScript
+    "noEmit": true,
+
+    // @types/execa fails because the Node6 typings are missing some changes
+    // that have gone into the Node8 typings
+    "skipLibCheck": true
+  },
   "exclude": [
     "dist"
   ],

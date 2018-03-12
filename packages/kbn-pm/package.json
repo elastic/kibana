@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "prettier": "prettier --write './src/**/*.ts'"
+    "prettier": "prettier --write './src/**/*.ts'",
+    "type-check": "tsc"
   },
   "devDependencies": {
     "@types/cmd-shim": "^2.0.0",
