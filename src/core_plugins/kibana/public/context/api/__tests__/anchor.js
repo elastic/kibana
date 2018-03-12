@@ -21,6 +21,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
+import { createCourierStub } from './_stubs';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 
 import { fetchAnchorProvider } from '../anchor';
@@ -165,17 +166,6 @@ describe('context app', function () {
     });
   });
 });
-
-
-function createCourierStub() {
-  return {
-    indexPatterns: {
-      get: sinon.spy((indexPatternId) => Promise.resolve({
-        id: indexPatternId,
-      })),
-    },
-  };
-}
 
 function createSearchSourceStubProvider(hits) {
   const searchSourceStub = {
