@@ -4,7 +4,6 @@ import { relative } from 'path';
 import ora from 'ora';
 
 import { isDirectory } from '../utils/fs';
-import { ProjectGraph, ProjectMap } from '../utils/projects';
 import { Command } from './';
 
 export const CleanCommand: Command = {
@@ -31,8 +30,7 @@ export const CleanCommand: Command = {
 
       for (const dir of directoriesToDelete) {
         const deleting = del(dir, { force: true });
-        // Remove once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/23699 is merged.
-        (ora as any).promise(deleting, relative(rootPath, dir));
+        ora.promise(deleting, relative(rootPath, dir));
         await deleting;
       }
     }
