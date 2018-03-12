@@ -6066,6 +6066,7 @@ let getProjects = exports.getProjects = (() => {
 
 exports.buildProjectGraph = buildProjectGraph;
 exports.topologicallyBatchProjects = topologicallyBatchProjects;
+exports.includeTransitiveProjects = includeTransitiveProjects;
 
 var _glob = __webpack_require__(7);
 
@@ -6155,6 +6156,22 @@ function topologicallyBatchProjects(projectsToBatch, projectGraph) {
         });
     }
     return batches;
+}
+function includeTransitiveProjects(subsetOfProjects, allProjects, { onlyProductionDependencies = false } = {}) {
+    const dependentProjects = new Map();
+    // the current list of packages we are expanding using breadth-first-search
+    const toProcess = [...subsetOfProjects];
+    while (toProcess.length > 0) {
+        const project = toProcess.shift();
+        const dependencies = onlyProductionDependencies ? project.productionDependencies : project.allDependencies;
+        Object.keys(dependencies).forEach(dep => {
+            if (allProjects.has(dep)) {
+                toProcess.push(allProjects.get(dep));
+            }
+        });
+        dependentProjects.set(project.name, project);
+    }
+    return dependentProjects;
 }
 
 /***/ }),
@@ -8869,7 +8886,9 @@ class Project {
         this.packageJsonLocation = _path2.default.resolve(this.path, 'package.json');
         this.nodeModulesLocation = _path2.default.resolve(this.path, 'node_modules');
         this.targetLocation = _path2.default.resolve(this.path, 'target');
-        this.allDependencies = _extends({}, this.json.devDependencies || {}, this.json.dependencies || {});
+        this.productionDependencies = this.json.dependencies || {};
+        this.devDependencies = this.json.devDependencies || {};
+        this.allDependencies = _extends({}, this.devDependencies, this.productionDependencies);
         this.scripts = this.json.scripts || {};
     }
     get name() {
@@ -8895,12 +8914,6 @@ class Project {
     }
     getBuildConfig() {
         return this.json.kibana && this.json.kibana.build || {};
-    }
-    /**
-     * Whether a package should not be included in the Kibana build artifact.
-     */
-    skipFromBuild() {
-        return this.getBuildConfig().skip === true;
     }
     /**
      * Returns the directory that should be copied into the Kibana build artifact.
@@ -35244,11 +35257,7 @@ exports.buildProductionProjects = undefined;
 
 let buildProductionProjects = exports.buildProductionProjects = (() => {
     var _ref = _asyncToGenerator(function* ({ kibanaRoot, buildRoot }) {
-        const projectPaths = (0, _config.getProjectPaths)(kibanaRoot, {
-            'skip-kibana': true,
-            'skip-kibana-extra': true
-        });
-        const projects = yield getProductionProjects(kibanaRoot, projectPaths);
+        const projects = yield getProductionProjects(kibanaRoot);
         const projectGraph = (0, _projects.buildProjectGraph)(projects);
         const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
         const projectNames = [...projects.values()].map(function (project) {
@@ -35269,23 +35278,24 @@ let buildProductionProjects = exports.buildProductionProjects = (() => {
     };
 })();
 /**
- * Returns only the projects that should be built into the production bundle
+ * Returns the subset of projects that should be built into the production
+ * bundle. As we copy these into Kibana's `node_modules` during the build step,
+ * and let Kibana's build process be responsible for installing dependencies,
+ * we only include Kibana's transitive _production_ dependencies.
  */
 
 
 let getProductionProjects = (() => {
-    var _ref2 = _asyncToGenerator(function* (kibanaRoot, projectPaths) {
-        const projects = yield (0, _projects.getProjects)(kibanaRoot, projectPaths);
-        const buildProjects = new Map();
-        for (const [name, project] of projects.entries()) {
-            if (!project.skipFromBuild()) {
-                buildProjects.set(name, project);
-            }
-        }
-        return buildProjects;
+    var _ref2 = _asyncToGenerator(function* (rootPath) {
+        const projectPaths = (0, _config.getProjectPaths)(rootPath, {});
+        const projects = yield (0, _projects.getProjects)(rootPath, projectPaths);
+        const productionProjects = (0, _projects.includeTransitiveProjects)([projects.get('kibana')], projects, { onlyProductionDependencies: true });
+        // We remove Kibana, as we're already building Kibana
+        productionProjects.delete('kibana');
+        return productionProjects;
     });
 
-    return function getProductionProjects(_x2, _x3) {
+    return function getProductionProjects(_x2) {
         return _ref2.apply(this, arguments);
     };
 })();
@@ -35298,7 +35308,7 @@ let deleteTarget = (() => {
         }
     });
 
-    return function deleteTarget(_x4) {
+    return function deleteTarget(_x3) {
         return _ref3.apply(this, arguments);
     };
 })();
@@ -35310,7 +35320,7 @@ let buildProject = (() => {
         }
     });
 
-    return function buildProject(_x5) {
+    return function buildProject(_x4) {
         return _ref4.apply(this, arguments);
     };
 })();
@@ -35350,7 +35360,7 @@ let copyToBuild = (() => {
         yield (0, _package_json.writePackageJson)(buildProjectPath, preparedPackageJson);
     });
 
-    return function copyToBuild(_x6, _x7, _x8) {
+    return function copyToBuild(_x5, _x6, _x7) {
         return _ref5.apply(this, arguments);
     };
 })();
