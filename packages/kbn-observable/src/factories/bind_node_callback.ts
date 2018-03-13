@@ -52,19 +52,20 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
  * Converts a Node.js-style callback API to a function that returns an
  * Observable.
  *
- * Does NOT handle functions whose callbacks have
- * more than two parameters. Only the first value after the
- * error argument will be returned.
+ * NB! Does NOT handle functions whose callbacks have more than two parameters.
+ * Only the first value after the error argument will be returned.
  *
  * Example: Read a file from the filesystem and get the data as an Observable:
  *
- *     import fs from 'fs';
- *     var readFileAsObservable = $bindNodeCallback(fs.readFile);
- *     var result = readFileAsObservable('./roadNames.txt', 'utf8');
- *     result.subscribe(
- *       x => console.log(x),
- *       e => console.error(e)
- *     );
+ * ```
+ * import fs from 'fs';
+ * var readFileAsObservable = $bindNodeCallback(fs.readFile);
+ * var result = readFileAsObservable('./roadNames.txt', 'utf8');
+ * result.subscribe(
+ *   x => console.log(x),
+ *   e => console.error(e)
+ * );
+ * ```
  */
 export function $bindNodeCallback<T>(callbackFunc: Function) {
   return function(this: any, ...args: any[]): Observable<T> {

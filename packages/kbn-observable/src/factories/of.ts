@@ -1,8 +1,11 @@
 import { Observable } from '../observable';
 
-/**
- * Alias for `Observable.of`
- */
 export function $of<T>(...items: T[]): Observable<T> {
-  return Observable.of(...items);
+  return new Observable(observer => {
+    for (const item of items) {
+      observer.next(item);
+    }
+
+    observer.complete();
+  });
 }

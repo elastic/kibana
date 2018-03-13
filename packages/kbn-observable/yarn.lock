@@ -2,13 +2,13 @@
 # yarn lockfile v1
 
 
-"@kbn/internal-native-observable@link:../kbn-internal-native-observable":
-  version "0.0.0"
-  uid ""
-
 "@types/jest@^22.1.4":
   version "22.1.4"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.1.4.tgz#5c0c06a9bb495c67e0a78002a952f151e2ae58a1"
+
+prettier@^1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
 
 rxjs@5.4.3:
   version "5.4.3"

@@ -69,7 +69,6 @@ export function pipe<T, R>(...fns: UnaryFunction<T, R>[]): UnaryFunction<T, R> {
 
 const noop: () => any = () => {};
 
-/* @internal */
 export function pipeFromArray<T, R>(
   fns: UnaryFunction<T, R>[]
 ): UnaryFunction<T, R> {

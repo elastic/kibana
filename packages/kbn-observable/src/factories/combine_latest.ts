@@ -1,40 +1,39 @@
-import { Observable, ObservableInput } from '../observable';
-import { $from } from '../factories';
+import { Observable } from '../observable';
 
 const pending = Symbol('awaiting first value');
 
 export function $combineLatest<T, T2>(
-  v1: ObservableInput<T>,
-  v2: ObservableInput<T2>
+  v1: Observable<T>,
+  v2: Observable<T2>
 ): Observable<[T, T2]>;
 export function $combineLatest<T, T2, T3>(
-  v1: ObservableInput<T>,
-  v2: ObservableInput<T2>,
-  v3: ObservableInput<T3>
+  v1: Observable<T>,
+  v2: Observable<T2>,
+  v3: Observable<T3>
 ): Observable<[T, T2, T3]>;
 export function $combineLatest<T, T2, T3, T4>(
-  v1: ObservableInput<T>,
-  v2: ObservableInput<T2>,
-  v3: ObservableInput<T3>,
-  v4: ObservableInput<T4>
+  v1: Observable<T>,
+  v2: Observable<T2>,
+  v3: Observable<T3>,
+  v4: Observable<T4>
 ): Observable<[T, T2, T3, T4]>;
 export function $combineLatest<T, T2, T3, T4, T5>(
-  v1: ObservableInput<T>,
-  v2: ObservableInput<T2>,
-  v3: ObservableInput<T3>,
-  v4: ObservableInput<T4>,
-  v5: ObservableInput<T5>
+  v1: Observable<T>,
+  v2: Observable<T2>,
+  v3: Observable<T3>,
+  v4: Observable<T4>,
+  v5: Observable<T5>
 ): Observable<[T, T2, T3, T4, T5]>;
 export function $combineLatest<T, T2, T3, T4, T5, T6>(
-  v1: ObservableInput<T>,
-  v2: ObservableInput<T2>,
-  v3: ObservableInput<T3>,
-  v4: ObservableInput<T4>,
-  v5: ObservableInput<T5>,
-  v6: ObservableInput<T6>
+  v1: Observable<T>,
+  v2: Observable<T2>,
+  v3: Observable<T3>,
+  v4: Observable<T4>,
+  v5: Observable<T5>,
+  v6: Observable<T6>
 ): Observable<[T, T2, T3, T4, T5, T6]>;
 export function $combineLatest<T>(
-  ...observables: ObservableInput<T>[]
+  ...observables: Observable<T>[]
 ): Observable<T[]>;
 
 /**
@@ -47,7 +46,7 @@ export function $combineLatest<T>(
  * @return {Observable}
  */
 export function $combineLatest<T>(
-  ...observables: ObservableInput<T>[]
+  ...observables: Observable<T>[]
 ): Observable<T[]> {
   return new Observable(observer => {
     // create an array that will receive values as observables
@@ -59,7 +58,7 @@ export function $combineLatest<T>(
     let activeCount = values.length;
 
     const subs = observables.map((observable, i) =>
-      $from(observable).subscribe({
+      observable.subscribe({
         next(value) {
           if (values[i] === pending) {
             needFirstCount--;

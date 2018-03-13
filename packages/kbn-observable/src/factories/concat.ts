@@ -19,6 +19,7 @@ export function $concat<T>(...observables: Observable<T>[]) {
 
       if (i >= observables.length) {
         observer.complete();
+        return;
       }
 
       subscription = observables[i].subscribe({

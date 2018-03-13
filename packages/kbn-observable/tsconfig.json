@@ -2,9 +2,8 @@
   "extends": "../../tsconfig",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/tsc-types",
     "stripInternal": true,
-    "outDir": "./target/tsc"
+    "outDir": "./target"
   },
   "include": [
     "./src/**/*.ts"

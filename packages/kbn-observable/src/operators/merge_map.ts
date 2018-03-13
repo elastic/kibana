@@ -1,6 +1,5 @@
-import { Observable, ObservableInput } from '../observable';
+import { Observable } from '../observable';
 import { OperatorFunction } from '../interfaces';
-import { $from } from '../factories';
 
 /**
  * Projects each source value to an Observable which is merged in the output
@@ -9,9 +8,9 @@ import { $from } from '../factories';
  * Example:
  *
  * ```js
- * const source = Observable.from([1, 2, 3]);
- * const observable = k$(source)(
- *   mergeMap(x => Observable.of('a', x + 1))
+ * const source = $from([1, 2, 3]);
+ * const observable = source.pipe(
+ *   mergeMap(x => $of('a', x + 1))
  * );
  * ```
  *
@@ -34,7 +33,7 @@ import { $from } from '../factories';
  *
  * ```js
  * mergeMap(val =>
- *   k$(someFn(val))(
+ *   someFn(val).pipe(
  *     map(newVal => ({ val, newVal })
  *   )
  * )
@@ -47,7 +46,7 @@ import { $from } from '../factories';
  * Observable, returns an Observable.
  */
 export function mergeMap<T, R>(
-  project: (value: T, index: number) => ObservableInput<R>
+  project: (value: T, index: number) => Observable<R>
 ): OperatorFunction<T, R> {
   return function mergeMapOperation(source) {
     return new Observable(destination => {
@@ -66,7 +65,7 @@ export function mergeMap<T, R>(
           }
           active++;
 
-          $from(result).subscribe({
+          result.subscribe({
             next(innerValue) {
               destination.next(innerValue);
             },

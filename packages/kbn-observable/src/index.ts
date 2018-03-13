@@ -1,8 +1,8 @@
-export { k$ } from './k';
+import * as operators from './operators';
 
 export * from './observable';
-export { Subject } from './subject';
-export { BehaviorSubject } from './behavior_subject';
+export { Subject, SubjectWithCurrentValue } from './subjects';
 
-export * from './operators';
 export * from './factories';
+export * from './operators';
+export { operators };

@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#subscribe throws if more than one argument is specified 1`] = `"Specifying multiple arguments to \\"subscribe\\" is not allowed. If you want to specify \\"error\\" or \\"complete\\" handler, pass in an object instead."`;
+
+exports[`SubscriptionObserver#complete catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from complete],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#complete cleanup function is called when method throws: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from complete],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#error catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from error],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#error cleanup function is called when method throws: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from error],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#next catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from next],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#next subscription is not closed when next throws an error: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from next],
+  ],
+]
+`;
+
+exports[`observable#toPromise rejects if error received 1`] = `
+Array [
+  Array [
+    [Error: fail],
+  ],
+]
+`;
