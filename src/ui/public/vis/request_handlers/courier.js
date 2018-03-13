@@ -5,10 +5,39 @@ import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_hand
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
 
+  /**
+   * TODO: This code can be removed as soon as we got rid of inheritance in the
+   * searchsource and pass down every filter explicitly.
+   * we're only adding one range filter against the timeFieldName to ensure
+   * that our filter is the only one applied and override the global filters.
+   * this does rely on the "implementation detail" that filters are added first
+   * on the leaf SearchSource and subsequently on the parents.
+   */
+  function removeSearchSourceParentTimefilter(searchSource) {
+    searchSource.addFilterPredicate((filter, state) => {
+      if (!filter.range) {
+        return true;
+      }
+
+      const timeFieldName = searchSource.index().timeFieldName;
+      if (!timeFieldName) {
+        return true;
+      }
+
+      return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
+    });
+
+  }
+
   return {
     name: 'courier',
-    handler: function (vis, appState, uiState, queryFilter, searchSource) {
+    handler: function (vis, { appState, queryFilter, searchSource, timeRange }) {
 
+      searchSource.filter(() => {
+        return timefilter.get(searchSource.index(), timeRange);
+      });
+
+      removeSearchSourceParentTimefilter(searchSource, timeRange);
 
       if (queryFilter && vis.editorMode) {
         searchSource.set('filter', queryFilter.getFilters());

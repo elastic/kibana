@@ -17,6 +17,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     this.savedVisualizations = savedVisualizations;
     this.name = 'visualization';
     this.Promise = Promise;
+    this.timefilter = timefilter;
     this.brushEvent = utilsBrushEventProvider(timefilter);
     this.filterBarClickHandler = filterBarClickHandlerProvider(Private);
   }
