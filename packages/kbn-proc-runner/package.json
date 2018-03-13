@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/proc-runner",
+  "main": "./index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "@kbn/plugin-helpers": "link:../kbn-plugin-helpers",
+    "ansicolors": "0.3.2",
+    "chalk": "^2.3.0"
+  }
+}
+
