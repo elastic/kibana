@@ -23,7 +23,7 @@ describe('kbn-pm production', function() {
         dot: true,
       });
 
-      const projects = await getProjects(tmpDir, ['./packages/*']);
+      const projects = await getProjects(tmpDir, ['.', './packages/*']);
 
       for (const project of projects.values()) {
         // This will both install dependencies and generate `yarn.lock` files

@@ -5,7 +5,6 @@ import { SourceFiltersTable } from '../source_filters_table';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
-  EuiTableOfRecords: 'eui-table-of-records',
   EuiTitle: 'eui-title',
   EuiText: 'eui-text',
   EuiButton: 'eui-button',
