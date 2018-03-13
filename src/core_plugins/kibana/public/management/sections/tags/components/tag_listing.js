@@ -126,6 +126,21 @@ export class TagListing extends React.Component {
     );
   }
 
+  renderDeleteButton() {
+    if (this.state.selectedIds.length === 0) {
+      return;
+    }
+
+    return (
+      <EuiButton
+        color="danger"
+        onClick={this.openDeleteModal}
+      >
+        Delete selected
+      </EuiButton>
+    );
+  }
+
   renderTable = () => {
     const selection = {
       itemId: (item) => {
@@ -139,6 +154,7 @@ export class TagListing extends React.Component {
       }
     };
     const search = {
+      toolsLeft: this.renderDeleteButton(),
       box: {
         incremental: true
       }
@@ -164,21 +180,6 @@ export class TagListing extends React.Component {
   }
 
   render() {
-    // work around until EuiInMemoryTable allows for passing button into search.
-    let deleteButton;
-    if (this.state.selectedIds.length > 0) {
-      deleteButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="danger"
-            onClick={this.openDeleteModal}
-          >
-            Delete selected
-          </EuiButton>
-        </EuiFlexItem>
-      );
-    }
-
     return (
       <EuiPage>
 
@@ -207,8 +208,6 @@ export class TagListing extends React.Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-
-        {deleteButton}
 
         {this.renderTable()}
 
