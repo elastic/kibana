@@ -4,11 +4,8 @@ import { shallow } from 'enzyme';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 
 jest.mock('@elastic/eui', () => ({
-  EuiButton: 'eui-button',
-  EuiTableOfRecords: 'eui-table-of-records',
   EuiTitle: 'eui-title',
   EuiText: 'eui-text',
-  EuiButton: 'eui-button',
   EuiHorizontalRule: 'eui-horizontal-rule',
   EuiSpacer: 'eui-spacer',
   EuiCallOut: 'eui-call-out',
@@ -42,7 +39,7 @@ jest.mock('ui/documentation_links', () => ({
 
 const helpers = {
   redirectToRoute: () => {},
-  getRouteHref: () => {},
+  getRouteHref: () => '#',
 };
 
 const indexPattern = {

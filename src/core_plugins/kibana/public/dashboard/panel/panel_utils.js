@@ -1,31 +1,13 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
-import _ from 'lodash';
+const PANEL_HEIGHT_SCALE_FACTOR = 5;
+const PANEL_WIDTH_SCALE_FACTOR = 4;
 
 export class PanelUtils {
-  /**
-   * Fills in default parameters where not specified.
-   * @param {PanelState} panel
-   */
-  static initializeDefaults(panel) {
-    panel.gridData = panel.gridData || {};
-    panel.gridData.w = panel.gridData.w || DEFAULT_PANEL_WIDTH;
-    panel.gridData.h = panel.gridData.h || DEFAULT_PANEL_HEIGHT;
 
-    if (!panel.id) {
-      // In the interest of backwards comparability
-      if (panel.visId) {
-        panel.id = panel.visId;
-        panel.type = 'visualization';
-        delete panel.visId;
-      } else {
-        throw new Error('Missing object id on panel');
-      }
-    }
-  }
-
-  static convertOldPanelData(panel) {
+  // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
+  static convertPanelDataPre_6_1(panel) { // eslint-disable-line camelcase
     panel.gridData = {
       x: panel.col - 1,
       y: panel.row - 1,
@@ -43,14 +25,29 @@ export class PanelUtils {
     return panel;
   }
 
-  /**
-   * Returns the panel with the given panelIndex from the panels array (*NOT* the panel at the given index).
-   * @param panelIndex {number} - Note this is *NOT* the index of the panel in the panels array.
-   * panelIndex is really a panelId, but is called panelIndex for BWC reasons.
-   * @param panels {Array<Object>}
-   */
-  static findPanelByPanelIndex(panelIndex, panels) {
-    return _.find(panels, (panel) => panel.panelIndex === panelIndex);
+  // 6.3 changed the panel dimensions to allow finer control over sizing
+  // 1) decrease column height from 100 to 20.
+  // 2) increase rows from 12 to 48
+  // Need to scale pre 6.3 panels so they maintain the same layout
+  static convertPanelDataPre_6_3(panel) { // eslint-disable-line camelcase
+    panel.gridData.w = panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR;
+    panel.gridData.x = panel.gridData.x * PANEL_WIDTH_SCALE_FACTOR;
+    panel.gridData.h = panel.gridData.h * PANEL_HEIGHT_SCALE_FACTOR;
+    panel.gridData.y = panel.gridData.y * PANEL_HEIGHT_SCALE_FACTOR;
+    panel.version = chrome.getKibanaVersion();
+
+    return panel;
+  }
+
+  static parseVersion(version = '6.0.0') {
+    const versionSplit = version.split('.');
+    if (versionSplit.length < 3) {
+      throw new Error(`Invalid version, ${version}, expected <major>.<minor>.<patch>`);
+    }
+    return {
+      major: parseInt(versionSplit[0], 10),
+      minor: parseInt(versionSplit[1], 10)
+    };
   }
 
   static initPanelIndexes(panels) {

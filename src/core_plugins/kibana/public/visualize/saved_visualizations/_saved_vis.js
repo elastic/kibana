@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
+import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 
 uiModules
   .get('app/visualize')
@@ -45,6 +46,8 @@ uiModules
 
         afterESResp: this._afterEsResp
       });
+
+      this.showInRecenltyAccessed = true;
     }
 
     SavedVis.type = 'visualization';
@@ -62,6 +65,10 @@ uiModules
     SavedVis.fieldOrder = ['title', 'description'];
 
     SavedVis.searchSource = true;
+
+    SavedVis.prototype.getFullPath = function () {
+      return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
+    };
 
     SavedVis.prototype._afterEsResp = function () {
       const self = this;

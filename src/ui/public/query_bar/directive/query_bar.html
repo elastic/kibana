@@ -3,11 +3,20 @@
   name="queryBarForm"
   ng-submit="queryBar.submit()"
 >
-  <div class="typeahead" kbn-typeahead="{{queryBar.typeaheadKey()}}" on-select="queryBar.submit()" role="search">
-    <div class="kuiLocalSearch">
+  <kbn-typeahead
+    items="queryBar.typeaheadItems"
+    on-select="queryBar.onTypeaheadSelect(item)"
+  >
+    <div
+      class="kuiLocalSearch"
+      role="search"
+    >
 
       <!-- Lucene input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'lucene'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'lucene'"
+      >
         <input
           parse-query
           input-focus
@@ -38,7 +47,10 @@
       </div>
 
       <!-- kuery input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kuery'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'kuery'"
+      >
         <input
           ng-model="queryBar.localQuery.query"
           input-focus
@@ -67,22 +79,6 @@
         </div>
       </div>
 
-      <!-- kql input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kql'">
-        <input
-          ng-model="queryBar.localQuery.query"
-          input-focus
-          disable-input-focus="queryBar.disableAutoFocus"
-          kbn-typeahead-input
-          placeholder="Search... (e.g. status:200 AND extension:PHP)"
-          aria-label="Search input"
-          aria-describedby="discoverKuerySyntaxHint"
-          type="text"
-          class="kuiLocalSearchInput"
-          ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
-          data-test-subj="queryInput"
-        />
-      </div>
 
       <select
         class="kuiLocalSearchSelect"
@@ -104,6 +100,5 @@
         <span class="fa fa-search" aria-hidden="true"></span>
       </button>
     </div>
-    <kbn-typeahead-items></kbn-typeahead-items>
-  </div>
+  </kbn-typeahead>
 </form>

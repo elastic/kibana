@@ -20,4 +20,15 @@
   .metric-container--light {
     color: white;
   }
+
+  .metric-container--filterable {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    transform: translate(0, 0);
+
+    &:hover, &:focus {
+      box-shadow: none;
+      transform: translate(0, -2px);
+    }
+  }
 }

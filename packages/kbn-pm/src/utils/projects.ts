@@ -1,13 +1,11 @@
-import _glob from 'glob';
+import globSync from 'glob';
 import path from 'path';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
 
-// Correct overload version of _glob can't be inferred automatically so we
-// should explicitly point to the right version with type parameters.
-const glob = promisify<string[], string, _glob.IOptions>(_glob);
+const glob = promisify(globSync);
 
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
@@ -16,7 +14,7 @@ export async function getProjects(
   rootPath: string,
   projectsPathsPatterns: string[]
 ) {
-  const projects = new Map();
+  const projects: ProjectMap = new Map();
 
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
@@ -31,7 +29,7 @@ export async function getProjects(
           `There are multiple projects with the same name [${project.name}]`,
           {
             name: project.name,
-            paths: [project.path, projects.get(project.name).path],
+            paths: [project.path, projects.get(project.name)!.path],
           }
         );
       }
@@ -75,7 +73,7 @@ function normalize(dir: string) {
 }
 
 export function buildProjectGraph(projects: ProjectMap) {
-  const projectGraph = new Map();
+  const projectGraph: ProjectGraph = new Map();
 
   for (const project of projects.values()) {
     const projectDeps = [];
@@ -144,4 +142,33 @@ export function topologicallyBatchProjects(
   }
 
   return batches;
+}
+
+export function includeTransitiveProjects(
+  subsetOfProjects: Project[],
+  allProjects: ProjectMap,
+  { onlyProductionDependencies = false } = {}
+) {
+  const dependentProjects: ProjectMap = new Map();
+
+  // the current list of packages we are expanding using breadth-first-search
+  const toProcess = [...subsetOfProjects];
+
+  while (toProcess.length > 0) {
+    const project = toProcess.shift()!;
+
+    const dependencies = onlyProductionDependencies
+      ? project.productionDependencies
+      : project.allDependencies;
+
+    Object.keys(dependencies).forEach(dep => {
+      if (allProjects.has(dep)) {
+        toProcess.push(allProjects.get(dep)!);
+      }
+    });
+
+    dependentProjects.set(project.name, project);
+  }
+
+  return dependentProjects;
 }

@@ -1,21 +1,26 @@
-import grammar from 'raw-loader!./kuery.peg';
-import kqlGrammar from 'raw-loader!./kql.peg';
-import PEG from 'pegjs';
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
+import { parse as parseKuery } from './kuery';
+import { parse as parseLegacyKuery } from './legacy_kuery';
 
-const kueryParser = PEG.buildParser(grammar);
-const kqlParser = PEG.buildParser(kqlGrammar);
+export function fromLiteralExpression(expression, parseOptions) {
+  parseOptions = {
+    ...parseOptions,
+    startRule: 'Literal',
+  };
+
+  return fromExpression(expression, parseOptions, parseKuery);
+}
+
+export function fromLegacyKueryExpression(expression, parseOptions) {
+  return fromExpression(expression, parseOptions, parseLegacyKuery);
+}
 
 export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, kueryParser);
+  return fromExpression(expression, parseOptions, parseKuery);
 }
 
-export function fromKqlExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, kqlParser);
-}
-
-function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
+function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
   if (_.isUndefined(expression)) {
     throw new Error('expression must be a string, got undefined instead');
   }
@@ -25,15 +30,7 @@ function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
     helpers: { nodeTypes }
   };
 
-  return parser.parse(expression, parseOptions);
-}
-
-export function toKueryExpression(node) {
-  if (!node || !node.type || !nodeTypes[node.type]) {
-    return '';
-  }
-
-  return nodeTypes[node.type].toKueryExpression(node);
+  return parse(expression, parseOptions);
 }
 
 export function toElasticsearchQuery(node, indexPattern) {

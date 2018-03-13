@@ -28,13 +28,13 @@ export default function ({ getService, getPageObjects }) {
       // set the page size to All again, https://github.com/elastic/kibana/issues/5030
       // TODO: remove this after issue #5030 is closed
       async function fix5030() {
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.settings.setPageSize(50);
         await PageObjects.common.sleep(1000);
       }
 
       beforeEach(async function () {
         // increase Popularity of geo.coordinates
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.settings.setPageSize(50);
         await PageObjects.common.sleep(1000);
         log.debug('Starting openControlsByName (' + fieldName + ')');
         await PageObjects.settings.openControlsByName(fieldName);

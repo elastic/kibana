@@ -30,6 +30,8 @@ module.factory('SavedSheet', function (courier, config) {
         version: 1,
       }
     });
+
+    this.showInRecenltyAccessed = true;
   }
 
   // save these objects with the 'sheet' type
@@ -51,6 +53,10 @@ module.factory('SavedSheet', function (courier, config) {
 
   // Order these fields to the top, the rest are alphabetical
   SavedSheet.fieldOrder = ['title', 'description'];
+
+  SavedSheet.prototype.getFullPath = function () {
+    return `/app/timelion#/${this.id}`;
+  };
 
   return SavedSheet;
 });
