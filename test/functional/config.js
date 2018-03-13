@@ -25,6 +25,7 @@ import {
   ScreenshotsProvider,
   DashboardVisualizationProvider,
   DashboardExpectProvider,
+  FailureDebuggingProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -73,6 +74,7 @@ export default async function ({ readConfigFile }) {
       screenshots: ScreenshotsProvider,
       dashboardVisualizations: DashboardVisualizationProvider,
       dashboardExpect: DashboardExpectProvider,
+      failureDebugging: FailureDebuggingProvider,
     },
     servers: commonConfig.get('servers'),
     apps: {
