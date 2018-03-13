@@ -62,7 +62,7 @@ function createCallCluster(index) {
 
 describe('es/healthCheck/patchKibanaIndex()', () => {
   describe('general', () => {
-    it('reads the _mappings feature of the indexName', async () => {
+    it('reads the mapping for the indexName', async () => {
       const indexName = chance.word();
       const mappings = createRandomMappings();
       const callCluster = createCallCluster(createIndex(indexName, mappings));
@@ -74,9 +74,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
-        feature: '_mappings'
-      }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({}));
     });
   });
 
