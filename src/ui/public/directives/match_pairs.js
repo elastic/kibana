@@ -26,15 +26,15 @@ module.directive('matchPairs', () => ({
       const { target, key, metaKey } = e;
       const { value, selectionStart, selectionEnd } = target;
 
-      if (shouldMoveSelectionForward()) {
-        moveSelectionForward();
+      if (shouldMoveCursorForward()) {
+        moveCursorForward();
       } else if (shouldInsertMatchingCloser()) {
         insertMatchingCloser();
       } else if (shouldRemovePair()) {
         removePair();
       }
 
-      function shouldMoveSelectionForward() {
+      function shouldMoveCursorForward() {
         if (!closers.includes(key)) return false;
 
         // Never move selection forward for multi-character selections
@@ -70,7 +70,7 @@ module.directive('matchPairs', () => ({
         return pairs.includes(value.substr(selectionEnd - 1, 2));
       }
 
-      function moveSelectionForward() {
+      function moveCursorForward() {
         e.preventDefault();
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
       }
