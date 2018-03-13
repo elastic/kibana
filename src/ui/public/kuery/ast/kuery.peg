@@ -199,7 +199,8 @@ QuotedString
   }
 
 QuotedCharacter
-  = !Cursor char:(EscapedDoubleQuote / [^"]) { return char; }
+  = '\\' char:[\\"] { return char; }
+  / !Cursor char:[^"] { return char; }
 
 WildcardString
   = sequences:WildcardSequence+ {
