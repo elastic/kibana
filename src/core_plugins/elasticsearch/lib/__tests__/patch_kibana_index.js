@@ -45,15 +45,17 @@ function createIndex(name, mappings = {}) {
 function createCallCluster(index) {
   return sinon.spy(async (method, params) => {
     switch (method) {
-      case 'indices.get':
+      case 'indices.getMapping':
         if (!index) {
           return { status: 404 };
         } else {
           expect(params).to.have.property('index', Object.keys(index)[0]);
           return cloneDeep(index);
         }
+
       case 'indices.putMapping':
         return { ok: true };
+
       default:
         throw new Error(`stub not expecting callCluster('${method}')`);
     }
@@ -137,7 +139,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({ index: indexName }));
     });
 
     it('adds properties that are not in index', async () => {
@@ -157,7 +159,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledTwice(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({ index: indexName }));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({ index: indexName }));
       sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({
         index: indexName,
         type: getRootType(mappings),
@@ -179,7 +181,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledTwice(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.get', sinon.match({
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({
         index: indexName
       }));
       sinon.assert.calledWithExactly(callCluster, 'indices.putMapping', sinon.match({
