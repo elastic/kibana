@@ -25,10 +25,10 @@ See the documentation in [`scripts/jest.js`](../scripts/jest.js) for more option
 
 There are four steps to creating a new component:
 
-1. Create the SCSS for the component in `ui_framework/src/components`.
+1. Create the SCSS for the component in `packages/kbn-ui-framework/src/components`.
 2. Create the React portion of the component.
 3. Write tests.
-4. Document it with examples in `ui_framework/doc_site`.
+4. Document it with examples in `packages/kbn-ui-framework/doc_site`.
 
 You can do this using Yeoman (the easy way), or you can do it manually (the hard way).
 
@@ -77,13 +77,13 @@ and re-export the generated JS and SCSS files.
 
 #### Create component SCSS
 
-1. Create a directory for your component in `ui_framework/src/components`.
+1. Create a directory for your component in `packages/kbn-ui-framework/src/components`.
 2. In this directory, create `_{component name}.scss`.
 3. _Optional:_ Create any other components that should be [logically-grouped](#logically-grouped-components)
 in this directory.
 4. Create an `_index.scss` file in this directory that import all of the new component SCSS files
 you created.
-5. Import the `_index.scss` file into `ui_framework/src/components/index.scss`.
+5. Import the `_index.scss` file into `packages/kbn-ui-framework/src/components/index.scss`.
 
 This makes your styles available to Kibana and the UI Framework documentation.
 
@@ -91,7 +91,7 @@ This makes your styles available to Kibana and the UI Framework documentation.
 
 1. Create the React component(s) in the same directory as the related SCSS file(s).
 2. Export these components from an `index.js` file.
-3. Re-export these components from `ui_framework/src/components/index.js`.
+3. Re-export these components from `packages/kbn-ui-framework/src/components/index.js`.
 
 This makes your React component available for import into Kibana.
 
@@ -107,11 +107,11 @@ To see how well the components have been covered by tests, you can run
 
 #### Document the component with examples
 
-1. Create a directory for your example in `ui_framework/doc_site/src/views`. Name it the name of the
+1. Create a directory for your example in `packages/kbn-ui-framework/doc_site/src/views`. Name it the name of the
 component.
 2. Create a `{component name}_example.js` file inside the directory. You'll use this file to define
 the different examples for your component.
-3. Add the route to this file in `ui_framework/doc_site/src/services/routes/Routes.js`.
+3. Add the route to this file in `packages/kbn-ui-framework/doc_site/src/services/routes/Routes.js`.
 4. In the `{component name}_example.js` file you created, define examples which demonstrate the component and describe
 its role from a UI perspective.
 

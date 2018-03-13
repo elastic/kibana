@@ -1,21 +1,16 @@
 const path = require('path');
 module.exports = {
+  context: __dirname,
+
   devtool: 'source-map',
 
   entry: {
-    guide: './ui_framework/doc_site/src/index.js'
+    guide: './src/index.js'
   },
 
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js'
-  },
-
-  resolve: {
-    modules: [
-      path.resolve(__dirname, 'src/ui_framework/doc_site'),
-      'node_modules',
-    ]
   },
 
   // These are necessasry for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
