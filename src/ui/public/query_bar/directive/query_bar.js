@@ -55,16 +55,14 @@ module.directive('queryBar', function () {
       };
 
       this.updateSuggestions = () => {
-        $timeout(() => {
-          const inputEl = $element.find('input')[0];
-          if (!inputEl) return;
-          const { selectionStart, selectionEnd } = inputEl;
-          const { query } = this.localQuery;
-          return getSuggestions({ query, selectionStart, selectionEnd })
-            .then(suggestions => {
-              $scope.$apply(() => this.suggestions = suggestions);
-            });
-        });
+        const inputEl = $element.find('input')[0];
+        if (!inputEl) return;
+        const { selectionStart, selectionEnd } = inputEl;
+        const { query } = this.localQuery;
+        return getSuggestions({ query, selectionStart, selectionEnd })
+          .then(suggestions => {
+            $scope.$apply(() => this.suggestions = suggestions);
+          });
       };
 
       // TODO: Figure out a better way to set selection
