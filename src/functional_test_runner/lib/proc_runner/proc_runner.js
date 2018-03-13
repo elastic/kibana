@@ -1,7 +1,7 @@
 import moment from 'moment';
 
-import { log } from '../log';
-import { createCliError } from '../errors';
+import { log } from './log';
+import { createCliError } from './errors';
 import { createProc } from './proc';
 import { observeSignals } from './observe_signals';
 

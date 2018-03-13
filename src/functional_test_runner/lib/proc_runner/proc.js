@@ -6,7 +6,7 @@ import { brightBlack } from 'ansicolors';
 import treeKill from 'tree-kill';
 import { fromNode as fcb } from 'bluebird';
 
-import { log } from '../log';
+import { log } from './log';
 import { observeLines } from './observe_lines';
 import { observeChildProcess } from './observe_child_process';
 
@@ -29,11 +29,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
   const childProcess = spawn(cmd, args, {
     cwd,
     env,
-    stdio: [
-      stdin ? 'pipe' : 'ignore',
-      'pipe',
-      'pipe'
-    ]
+    stdio: [stdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
   });
 
   if (stdin) {
@@ -41,29 +37,29 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
   }
 
   return new class Proc {
-    name = name
+    name = name;
 
-    lines$ = Rx.Observable
-      .merge(
-        observeLines(childProcess.stdout),
-        observeLines(childProcess.stderr),
+    lines$ = Rx.Observable.merge(
+      observeLines(childProcess.stdout),
+      observeLines(childProcess.stderr)
+    )
+      .do(line =>
+        log.write(` ${brightBlack('proc')}  [${brightBlack(name)}] ${line}`)
       )
-      .do(line => log.write(` ${brightBlack('proc')}  [${brightBlack(name)}] ${line}`))
-      .share()
+      .share();
 
-    outcome$ = observeChildProcess(name, childProcess)
-      .share()
+    outcome$ = observeChildProcess(name, childProcess).share();
 
-    outcomePromise = Rx.Observable
-      .merge(this.lines$.ignoreElements(), this.outcome$)
-      .toPromise()
+    outcomePromise = Rx.Observable.merge(
+      this.lines$.ignoreElements(),
+      this.outcome$
+    ).toPromise();
 
-    closedPromise = this.outcomePromise
-      .then(() => {}, () => {})
+    closedPromise = this.outcomePromise.then(() => {}, () => {});
 
     async stop(signal) {
       await fcb(cb => treeKill(childProcess.pid, signal, cb));
       await this.closedPromise;
     }
-  };
+  }();
 }
