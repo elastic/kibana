@@ -10,5 +10,5 @@ test('render', () => {
     url={'/app/myapp'}
     label={'launch myapp'}
   />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
