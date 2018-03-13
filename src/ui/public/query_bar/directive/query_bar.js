@@ -38,6 +38,7 @@ module.directive('queryBar', function () {
           persistedLog.add(this.localQuery.query);
         }
         this.onSubmit({ $query: this.localQuery });
+        this.suggestions = [];
       };
 
       this.selectLanguage = () => {
