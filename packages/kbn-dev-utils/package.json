@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/utils",
+  "name": "@kbn/dev-utils",
   "main": "./target/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
