@@ -162,6 +162,7 @@ export class Table extends Component {
     const { items, isSaving } = this.props;
     const columns = this.getColumns();
     const pagination = {
+      initialPageSize: 10,
       pageSizeOptions: [5, 10, 25, 50],
     };
 
