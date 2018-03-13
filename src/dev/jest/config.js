@@ -40,7 +40,7 @@ export default {
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
-    '<rootDir>/packages/kbn-ui-framework/target/',
+    'target/',
   ],
   testMatch: [
     '**/*.test.js',
