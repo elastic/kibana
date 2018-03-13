@@ -6,7 +6,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
@@ -29,10 +29,7 @@ export class Table extends PureComponent {
           </EuiFlexItem>
           {isTimeField ? (
             <EuiFlexItem>
-              <EuiToolTip
-                position="top"
-                content="This field represents the time that events occurred."
-              >
+              <EuiToolTip content="This field represents the time that events occurred.">
                 <EuiIcon type="clock" color="primary" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -51,10 +48,7 @@ export class Table extends PureComponent {
           </EuiFlexItem>
           {isConflict ? (
             <EuiFlexItem>
-              <EuiToolTip
-                position="top"
-                content="The type of this field changes across indices. It is unavailable for many analysis functions."
-              >
+              <EuiToolTip content="The type of this field changes across indices. It is unavailable for many analysis functions.">
                 <EuiIcon type="alert" color="warning" />
               </EuiToolTip>
             </EuiFlexItem>
