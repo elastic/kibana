@@ -63,6 +63,7 @@ exports[`Table should render normally 1`] = `
   }
   pagination={
     Object {
+      "initialPageSize": 10,
       "pageSizeOptions": Array [
         5,
         10,
