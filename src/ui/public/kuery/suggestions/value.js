@@ -1,13 +1,14 @@
 import chrome from 'ui/chrome';
 import { escapeQuotes } from './escape_kql';
+import { escape } from 'lodash';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
 
 function getDescription({ fieldName, value }) {
   return `
-    <p>Find results where <span class="suggestionItem__callout">${fieldName}</span>
-    is <span class="suggestionItem__callout">${value}</span></p>
+    <p>Find results where <span class="suggestionItem__callout">${escape(fieldName)}</span>
+    is <span class="suggestionItem__callout">${escape(value)}</span></p>
   `;
 }
 

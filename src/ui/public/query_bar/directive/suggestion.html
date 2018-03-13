@@ -18,6 +18,6 @@
       </div>
     </div>
   </div>
-  <div class="suggestionItem__text" ng-bind-html="item.text"></div>
-  <div class="suggestionItem__description" ng-if="item.type !== 'recentSearch'" ng-bind-html="item.description"></div>
+  <div class="suggestionItem__text">{{item.text}}</div>
+  <div class="suggestionItem__description" ng-bind-html="item.description"></div>
 </div>

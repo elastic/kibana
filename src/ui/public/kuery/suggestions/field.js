@@ -1,10 +1,11 @@
 import { escapeKql } from './escape_kql';
 import { sortPrefixFirst } from '../../utils/sort_prefix_first';
+import { escape } from 'lodash';
 
 const type = 'field';
 
 function getDescription(fieldName) {
-  return `<p>Filter results that contain <span class="suggestionItem__callout">${fieldName}</span></p>`;
+  return `<p>Filter results that contain <span class="suggestionItem__callout">${escape(fieldName)}</span></p>`;
 }
 
 export function getSuggestionsProvider({ indexPattern }) {

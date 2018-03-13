@@ -1,5 +1,4 @@
 const type = 'recentSearch';
-const description = 'Run this query you performed earlier';
 
 export function getSuggestionsProvider({ persistedLog, query }) {
   return function getRecentSearchSuggestions() {
@@ -9,7 +8,7 @@ export function getSuggestionsProvider({ persistedLog, query }) {
       const text = recentSearch;
       const start = 0;
       const end = query.length;
-      return { type, text, description, start, end };
+      return { type, text, start, end };
     });
     return Promise.resolve(suggestions);
   };

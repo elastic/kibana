@@ -1,8 +1,8 @@
 const type = 'conjunction';
 
 const conjunctions = {
-  and: `<p>Requires that <span class="suggestionItem__callout">both arguments</span> joined together both return true</p>`,
-  or: `<p>Requires <span class="suggestionItem__callout">one or more of</span> the arguments joined together must return true</p>`
+  and: `<p>Requires <span class="suggestionItem__callout">both arguments</span> to be true</p>`,
+  or: `<p>Requires <span class="suggestionItem__callout">one or more arguments</span> to be true</p>`
 };
 
 function getDescription(conjunction) {
