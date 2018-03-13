@@ -71,7 +71,9 @@ module.directive('queryBar', function () {
       this.onSuggestionSelect = ({ text, start, end }) => {
         const { query } = this.localQuery;
         const inputEl = $element.find('input')[0];
-        this.localQuery.query = inputEl.value = query.substr(0, start) + text + query.substr(end);
+        const { selectionStart, selectionEnd } = inputEl;
+        const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
+        this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
         inputEl.setSelectionRange(start + text.length, start + text.length);
         inputEl.focus();
         this.updateSuggestions();
