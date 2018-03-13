@@ -210,7 +210,7 @@ export class DashboardListing extends React.Component {
 
   render() {
     return (
-      <EuiPage>
+      <EuiPage data-test-subj="dashboardLandingPage">
 
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
@@ -223,7 +223,10 @@ export class DashboardListing extends React.Component {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}>
+            <EuiButton
+              href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
+              data-test-subj="newDashboardLink"
+            >
               Create new dashboard
             </EuiButton>
           </EuiFlexItem>

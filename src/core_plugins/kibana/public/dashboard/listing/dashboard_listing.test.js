@@ -36,5 +36,5 @@ test('renders DashboardListing', () => {
     delete={() => {}}
     listingLimit={1000}
   />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
