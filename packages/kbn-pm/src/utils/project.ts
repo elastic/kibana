@@ -33,6 +33,8 @@ export class Project {
   public readonly targetLocation: string;
   public readonly path: string;
   public readonly allDependencies: PackageDependencies;
+  public readonly productionDependencies: PackageDependencies;
+  public readonly devDependencies: PackageDependencies;
   public readonly scripts: PackageScripts;
 
   constructor(packageJson: PackageJson, projectPath: string) {
@@ -43,15 +45,17 @@ export class Project {
     this.nodeModulesLocation = path.resolve(this.path, 'node_modules');
     this.targetLocation = path.resolve(this.path, 'target');
 
+    this.productionDependencies = this.json.dependencies || {};
+    this.devDependencies = this.json.devDependencies || {};
     this.allDependencies = {
-      ...(this.json.devDependencies || {}),
-      ...(this.json.dependencies || {}),
+      ...this.devDependencies,
+      ...this.productionDependencies,
     };
 
     this.scripts = this.json.scripts || {};
   }
 
-  get name() {
+  get name(): string {
     return this.json.name;
   }
 
@@ -93,13 +97,6 @@ export class Project {
 
   getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
-  }
-
-  /**
-   * Whether a package should not be included in the Kibana build artifact.
-   */
-  skipFromBuild() {
-    return this.getBuildConfig().skip === true;
   }
 
   /**

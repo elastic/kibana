@@ -21,6 +21,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -47,6 +48,13 @@ uiRoutes
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
+          .then((savedVis) => {
+            recentlyAccessed.add(
+              savedVis.getFullPath(),
+              savedVis.title,
+              savedVis.id);
+            return savedVis;
+          })
           .catch(courier.redirectWhenMissing({
             'visualization': '/visualize',
             'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,

@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import { map } from 'lodash';
 import secureOptions from './secure_options';
 
 export default function (kbnServer, server, config) {
@@ -41,7 +40,7 @@ export default function (kbnServer, server, config) {
     tls: {
       key: readFileSync(config.get('server.ssl.key')),
       cert: readFileSync(config.get('server.ssl.certificate')),
-      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      ca: config.get('server.ssl.certificateAuthorities').map(ca => readFileSync(ca, 'utf8')),
       passphrase: config.get('server.ssl.keyPassphrase'),
 
       ciphers: config.get('server.ssl.cipherSuites').join(':'),

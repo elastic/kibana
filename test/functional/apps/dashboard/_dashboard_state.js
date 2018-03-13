@@ -58,6 +58,59 @@ export default function ({ getService, getPageObjects }) {
           expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
       });
+
+      describe('for embeddable config color parameters on a visualization', () => {
+        it('updates a pie slice color on a soft refresh', async function () {
+          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+          await PageObjects.visualize.clickLegendOption('80,000');
+          await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
+            let whitePieSliceCounts = 0;
+            allPieSlicesColor.forEach(style => {
+              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+                whitePieSliceCounts++;
+              }
+            });
+
+            expect(whitePieSliceCounts).to.be(1);
+          });
+        });
+
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
+        it.skip('and updates the pie slice legend color', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
+            expect(colorExists).to.be(true);
+          });
+        });
+
+        it('resets a pie slice color to the original when removed', async function () {
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            // The default green color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+          });
+        });
+
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
+        it.skip('resets the legend color as well', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
+            expect(colorExists).to.be(true);
+          });
+        });
+      });
     });
 
     it('Overriding colors on an area chart is preserved', async () => {
@@ -95,6 +148,9 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
+
+      const inViewMode = await testSubjects.exists('dashboardEditMode');
+      expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');

@@ -13,17 +13,16 @@ export default function stdMetric(resp, panel, series) {
     }
     if (/_bucket$/.test(metric.type)) return next(results);
     const decoration = getDefaultDecoration(series);
-    getSplits(resp, panel, series).forEach((split) => {
+    getSplits(resp, panel, series).forEach(split => {
       const data = split.timeseries.buckets.map(mapBucket(metric));
       results.push({
         id: `${split.id}`,
         label: split.label,
         color: split.color,
         data,
-        ...decoration
+        ...decoration,
       });
     });
     return next(results);
   };
 }
-

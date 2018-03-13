@@ -15,6 +15,9 @@ export default {
   emit: _.noop,
   on: _.noop,
   off: _.noop,
+  clearAllKeys: function () {
+    values = {};
+  },
   _reset: function () {
     values = {};
   }

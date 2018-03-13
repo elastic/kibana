@@ -57,12 +57,12 @@ exports[`StepTimeField should render a selected timeField 1`] = `
           "value": "",
         },
         Object {
-          "isDisabled": undefined,
+          "disabled": undefined,
           "text": "@timestamp",
           "value": "@timestamp",
         },
         Object {
-          "isDisabled": undefined,
+          "disabled": undefined,
           "text": "name",
           "value": "name",
         },
@@ -251,12 +251,12 @@ exports[`StepTimeField should render timeFields 1`] = `
           "value": "",
         },
         Object {
-          "isDisabled": undefined,
+          "disabled": undefined,
           "text": "@timestamp",
           "value": "@timestamp",
         },
         Object {
-          "isDisabled": undefined,
+          "disabled": undefined,
           "text": "name",
           "value": "name",
         },

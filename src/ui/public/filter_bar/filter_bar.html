@@ -27,7 +27,6 @@
 
   <div
     class="filter-bar"
-    ng-show="filters.length || showAddFilterButton()"
   >
     <filter-pill
       ng-repeat="filter in filters track by $index"
@@ -41,7 +40,6 @@
 
     <div
       class="filter-link"
-      ng-show="showAddFilterButton()"
     >
       <div class="filter-description small">
         <button

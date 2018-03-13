@@ -97,6 +97,7 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiSelect
             fullWidth={false}
+            hasNoInitialSelection={false}
             isLoading={false}
             onChange={[Function]}
             options={

@@ -4,6 +4,7 @@ import indentString from 'indent-string';
 
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
+import { renderProjectsTree } from './utils/projects_tree';
 import { getProjectPaths, ProjectPathOptions } from './config';
 import { Command, CommandConfig } from './commands';
 
@@ -28,9 +29,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
     console.log(
       chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`)
     );
-    for (const pkg of projects.values()) {
-      console.log(`- ${pkg.name} (${pkg.path})`);
-    }
+    console.log(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, config);
   } catch (e) {

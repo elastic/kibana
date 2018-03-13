@@ -3,7 +3,7 @@ export function getEmbeddableFactoryMock(config) {
   const embeddableFactoryMockDefaults = {
     getEditPath: () => {},
     getTitleFor: () => {},
-    render: jest.fn(),
+    render: jest.fn(() => Promise.resolve({})),
     destroy: () => {},
     addDestroyEmeddable: () => {},
   };
