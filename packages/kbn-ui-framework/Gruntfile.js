@@ -48,7 +48,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
-  grunt.registerTask('docSitebuild', function () {
+  grunt.registerTask('docSiteBuild', function () {
     const done = this.async();
 
     const serverCmd = {

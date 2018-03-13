@@ -67,7 +67,7 @@
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
     "uiFramework:start": "cd packages/kbn-ui-framework && yarn docSiteStart",
-    "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSitebuild",
+    "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent"
   },
