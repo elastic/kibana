@@ -294,8 +294,12 @@ Using 'none' as your request handles means your visualization does not require a
 
 [[development-custom-request-handler]]
 ==== custom request handler
-You can define your custom request handler by providing a function with the following definition:
-`function (vis, appState, uiState, searchSource) { ... }`
+You can define your custom request handler by providing a function with the following signature:
+`function (vis, { uiState, appState, timeRange }) { ... }`
+
+The `timeRange` will be an object with a `from` and `to` key, that can contain
+datemath expressions, like `now-7d`. You can use the `datemath` library to parse
+them.
 
 This function must return a promise, which should get resolved with new data that will be passed to responseHandler.
 
@@ -306,7 +310,7 @@ It's up to function to decide when it wants to issue a new request or return pre
 -----------
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
-const myRequestHandler = async (vis, appState, uiState, searchSource) => {
+const myRequestHandler = async (vis, { appState, uiState, timeRange }) => {
   const data = ... parse ...
   return data;
 };
