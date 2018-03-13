@@ -6,14 +6,14 @@ import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
-import dashboardListingTemplate from './listing/dashboard_listing.html';
+import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
-import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { SavedObjectNotFound } from 'ui/errors';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -21,8 +21,12 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller: DashboardListingController,
-    controllerAs: 'listingController',
+    controller($scope, Private, config) {
+      const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+
+      $scope.dashboardService = services.dashboards;
+      $scope.listingLimit = config.get('savedObjects:listingLimit');
+    },
     resolve: {
       dash: function ($route, Private, courier, kbnUrl) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);

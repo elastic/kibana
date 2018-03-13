@@ -1,168 +1,247 @@
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/pager_control';
-import 'ui/pager';
-import './dashboard_listing.less';
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'lodash';
+import { toastNotifications } from 'ui/notify';
+import {
+  EuiTitle,
+  EuiInMemoryTable,
+  EuiPage,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiConfirmModal,
+  EuiCallOut,
+} from '@elastic/eui';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortableProperties } from '@elastic/eui';
-import { ConfirmationButtonTypes } from 'ui/modals';
 
-export function DashboardListingController($injector, $scope, $location) {
-  const $filter = $injector.get('$filter');
-  const confirmModal = $injector.get('confirmModal');
-  const Notifier = $injector.get('Notifier');
-  const pagerFactory = $injector.get('pagerFactory');
-  const Private = $injector.get('Private');
-  const timefilter = $injector.get('timefilter');
-  const config = $injector.get('config');
-  const dashboardConfig = $injector.get('dashboardConfig');
+const tableColumns = [
+  {
+    field: 'title',
+    name: 'Title',
+    sortable: true,
+    sortable: true,
+    render: (field, record) => (
+      <EuiLink href={`#${createDashboardEditUrl(record.id)}`}>
+        {field}
+      </EuiLink>
+    )
+  },
+  {
+    field: 'description',
+    name: 'Description',
+    dataType: 'string',
+    sortable: true
+  }
+];
 
-  timefilter.disableAutoRefreshSelector();
-  timefilter.disableTimeRangeSelector();
+const EMPTY_FILTER = '';
 
-  const limitTo = $filter('limitTo');
-  // TODO: Extract this into an external service.
-  const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
-  const dashboardService = services.dashboards;
-  const notify = new Notifier({ location: 'Dashboard' });
+export class DashboardListing extends React.Component {
 
-  let selectedItems = [];
-  const sortableProperties = new SortableProperties([
-    {
-      name: 'title',
-      getValue: item => item.title.toLowerCase(),
-      isAscending: true,
-    },
-    {
-      name: 'description',
-      getValue: item => item.description.toLowerCase(),
-      isAscending: true
-    }
-  ],
-  'title');
+  constructor(props) {
+    super(props);
 
-  const calculateItemsOnPage = () => {
-    this.items = sortableProperties.sortItems(this.items);
-    this.pager.setTotalItems(this.items.length);
-    this.pageOfItems = limitTo(this.items, this.pager.pageSize, this.pager.startIndex);
-  };
-
-  const fetchItems = () => {
-    this.isFetchingItems = true;
-
-    dashboardService.find(this.filter, config.get('savedObjects:listingLimit'))
-      .then(result => {
-        this.isFetchingItems = false;
-        this.items = result.hits;
-        this.totalItems = result.total;
-        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
-        this.listingLimit = config.get('savedObjects:listingLimit');
-        calculateItemsOnPage();
-      });
-  };
-
-  const deselectAll = () => {
-    selectedItems = [];
-  };
-
-  const selectAll = () => {
-    selectedItems = this.pageOfItems.slice(0);
-  };
-
-  this.isFetchingItems = false;
-  this.items = [];
-  this.pageOfItems = [];
-  this.filter = ($location.search()).filter || '';
-
-  this.pager = pagerFactory.create(this.items.length, 20, 1);
-
-  this.hideWriteControls = dashboardConfig.getHideWriteControls();
-
-  $scope.$watch(() => this.filter, () => {
-    deselectAll();
-    fetchItems();
-    $location.search('filter', this.filter);
-  });
-  this.isAscending = (name) => sortableProperties.isAscendingByName(name);
-  this.getSortedProperty = () => sortableProperties.getSortedProperty();
-
-  this.sortOn = function sortOn(propertyName) {
-    sortableProperties.sortOn(propertyName);
-    deselectAll();
-    calculateItemsOnPage();
-  };
-
-  this.toggleAll = function toggleAll() {
-    if (this.areAllItemsChecked()) {
-      deselectAll();
-    } else {
-      selectAll();
-    }
-  };
-
-  this.toggleItem = function toggleItem(item) {
-    if (this.isItemChecked(item)) {
-      const index = selectedItems.indexOf(item);
-      selectedItems.splice(index, 1);
-    } else {
-      selectedItems.push(item);
-    }
-  };
-
-  this.isItemChecked = function isItemChecked(item) {
-    return selectedItems.indexOf(item) !== -1;
-  };
-
-  this.areAllItemsChecked = function areAllItemsChecked() {
-    return this.getSelectedItemsCount() === this.pageOfItems.length;
-  };
-
-  this.getSelectedItemsCount = function getSelectedItemsCount() {
-    return selectedItems.length;
-  };
-
-  this.deleteSelectedItems = function deleteSelectedItems() {
-    const doDelete = () => {
-      const selectedIds = selectedItems.map(item => item.id);
-
-      dashboardService.delete(selectedIds)
-        .then(fetchItems)
-        .then(() => {
-          deselectAll();
-        })
-        .catch(error => notify.error(error));
+    this.state = {
+      isFetchingItems: false,
+      showDeleteModal: false,
+      showLimitError: false,
+      filter: EMPTY_FILTER,
+      dashboards: [],
+      selectedIds: [],
     };
+  }
 
-    confirmModal(
-      `You can't recover deleted dashboards.`,
-      {
-        confirmButtonText: 'Delete',
-        onConfirm: doDelete,
-        defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-        title: 'Delete selected dashboards?'
+  componentWillMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.debouncedFetch.cancel();
+  }
+
+  componentDidMount() {
+    this.fetchItems();
+  }
+
+  fetchItems = () => {
+    this.setState({
+      isFetchingItems: true,
+    }, this.debouncedFetch);
+  }
+
+  debouncedFetch = _.debounce(async () => {
+    const response = await this.props.dashboardService.find(this.state.filter, this.props.listingLimit);
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({
+      isFetchingItems: false,
+      dashboards: response.hits,
+      totalDashboards: response.total,
+      showLimitError: response.total > this.props.listingLimit,
+    });
+  }, 300);
+
+  deleteSelectedItems = async () => {
+    try {
+      await this.props.dashboardService.delete(this.state.selectedIds);
+    } catch (error) {
+      toastNotifications.addWarning({
+        title: `Unable to delete dashboard(s)`,
+        text: `${error}`,
       });
+    }
+    this.fetchItems();
+    this.setState({
+      selectedIds: []
+    });
+    this.closeDeleteModal();
+  }
+
+  closeDeleteModal = () => {
+    this.setState({ showDeleteModal: false });
   };
 
-  this.onPageNext = () => {
-    deselectAll();
-    this.pager.nextPage();
-    calculateItemsOnPage();
+  openDeleteModal = () => {
+    this.setState({ showDeleteModal: true });
   };
 
-  this.onPagePrevious = () => {
-    deselectAll();
-    this.pager.previousPage();
-    calculateItemsOnPage();
-  };
+  hasFilter = () => {
+    return this.state.filter !== EMPTY_FILTER;
+  }
 
-  this.getUrlForItem = function getUrlForItem(item) {
-    return `#${createDashboardEditUrl(item.id)}`;
-  };
+  renderConfirmDeleteModal() {
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Delete selected dashboards?"
+          onCancel={this.closeDeleteModal}
+          onConfirm={this.deleteSelectedItems}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete"
+        >
+          <p>{`You can't recover deleted dashboards.`}</p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  }
 
-  this.getEditUrlForItem = function getEditUrlForItem(item) {
-    return `#${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`;
-  };
+  renderDeleteButton() {
+    if (this.state.selectedIds.length === 0) {
+      return;
+    }
 
-  this.getCreateDashboardHref = function getCreateDashboardHref() {
-    return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
-  };
+    return (
+      <EuiButton
+        color="danger"
+        onClick={this.openDeleteModal}
+      >
+        Delete selected
+      </EuiButton>
+    );
+  }
+
+  renderListingLimitWarning() {
+    if (this.state.showLimitError) {
+      return (
+        <React.Fragment>
+          <EuiCallOut
+            title="Listing limit exceeded"
+            color="warning"
+            iconType="help"
+          >
+            <p>
+              You have {this.state.totalDashboards} dashboards,
+              but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {this.props.listingLimit}.
+              You can change this setting under <EuiLink href="#/management/kibana/settings">Advanced Settings</EuiLink>.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </React.Fragment>
+      );
+    }
+  }
+
+  shouldFetch(newFilter, oldFilter) {
+    return !newFilter.includes(oldFilter);
+  }
+
+  renderTable() {
+    const search = {
+      toolsLeft: this.renderDeleteButton(),
+      box: {
+        incremental: true,
+      },
+      onChange: (query) => {
+        if (this.state.showLimitError || this.shouldFetch(query.text, this.state.filter)) {
+          this.setState({
+            filter: query.text
+          }, this.fetchItems);
+        }
+        return true;
+      },
+    };
+    const selection = {
+      itemId: 'id',
+      onSelectionChange: (selection) => {
+        this.setState({
+          selectedIds: selection.map(item => { return item.id; })
+        });
+      }
+    };
+    return (
+      <EuiInMemoryTable
+        items={this.state.dashboards}
+        loading={this.state.isFetchingItems}
+        columns={tableColumns}
+        sorting={true}
+        selection={selection}
+        search={search}
+      />
+    );
+  }
+
+  render() {
+    return (
+      <EuiPage>
+
+        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
+
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>
+                Dashboard
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}>
+              Create new dashboard
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
+        {this.renderListingLimitWarning()}
+
+        {this.renderTable()}
+
+      </EuiPage>
+    );
+  }
 }
+
+DashboardListing.propTypes = {
+  dashboardService: PropTypes.shape({
+    find: PropTypes.func.isRequired,
+    delete: PropTypes.func.isRequired,
+  }),
+  listingLimit: PropTypes.number.isRequired,
+};
