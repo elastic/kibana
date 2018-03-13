@@ -62,6 +62,7 @@ export class Table extends PureComponent {
     const { indexPattern, items, editField } = this.props;
 
     const pagination = {
+      initialPageSize: 10,
       pageSizeOptions: [5, 10, 25, 50]
     };
 
