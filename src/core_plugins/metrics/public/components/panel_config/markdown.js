@@ -10,7 +10,7 @@ import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
-import { KuiCodeEditor } from 'ui_framework/components';
+import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import { htmlIdGenerator } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
