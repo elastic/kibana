@@ -246,7 +246,8 @@ UnquotedLiteral
 
 UnquotedCharacter
   = EscapedSpecialCharacter
-  / !Cursor !Separator char:. { return char; }
+  / EscapedKeyword
+  / !SpecialCharacter !Keyword !Cursor char:. { return char; }
 
 OptionalSpace
   = prefix:Space* cursor:Cursor suffix:Space* {
@@ -264,11 +265,8 @@ OptionalSpace
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
 
-EscapedDoubleQuote
-  = '\\' char:'"' { return char; }
-
-Separator
-  = Keyword / SpecialCharacter
+EscapedKeyword
+  = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
 Keyword
   = Or / And / Not
