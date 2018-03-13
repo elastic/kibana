@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { statSync } from 'fs';
 
 import Rx from 'rxjs/Rx';
-import { brightBlack } from 'ansicolors';
+import { gray } from 'chalk';
 import treeKill from 'tree-kill';
 import { fromNode as fcb } from 'bluebird';
 
@@ -43,9 +43,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       observeLines(childProcess.stdout),
       observeLines(childProcess.stderr)
     )
-      .do(line =>
-        log.write(` ${brightBlack('proc')}  [${brightBlack(name)}] ${line}`)
-      )
+      .do(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`))
       .share();
 
     outcome$ = observeChildProcess(name, childProcess).share();

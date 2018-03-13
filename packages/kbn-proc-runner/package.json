@@ -6,7 +6,6 @@
   "private": true,
   "dependencies": {
     "@kbn/plugin-helpers": "link:../kbn-plugin-helpers",
-    "ansicolors": "0.3.2",
     "chalk": "^2.3.0"
   }
 }
