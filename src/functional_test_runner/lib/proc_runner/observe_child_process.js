@@ -1,6 +1,6 @@
 import Rx from 'rxjs/Rx';
 
-import { createCliError } from '../errors';
+import { createCliError } from './errors';
 
 /**
  *  Creates an Observable from a childProcess that:
@@ -14,10 +14,9 @@ import { createCliError } from '../errors';
  */
 export function observeChildProcess(name, childProcess) {
   // observe first exit event
-  const exit$ = Rx.Observable
-    .fromEvent(childProcess, 'exit')
+  const exit$ = Rx.Observable.fromEvent(childProcess, 'exit')
     .first()
-    .map((code) => {
+    .map(code => {
       // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
       if (code > 0 && !(code === 143 || code === 130)) {
         throw createCliError(`[${name}] exitted with code ${code}`);
@@ -27,15 +26,12 @@ export function observeChildProcess(name, childProcess) {
     });
 
   // observe first close event
-  const close$ = Rx.Observable
-    .fromEvent(childProcess, 'close')
-    .first();
+  const close$ = Rx.Observable.fromEvent(childProcess, 'close').first();
 
   // observe first error event until there is a close event
-  const error$ = Rx.Observable
-    .fromEvent(childProcess, 'error')
+  const error$ = Rx.Observable.fromEvent(childProcess, 'error')
     .first()
-    .mergeMap((err) => Rx.Observable.throw(err))
+    .mergeMap(err => Rx.Observable.throw(err))
     .takeUntil(close$);
 
   return Rx.Observable.merge(exit$, close$.ignoreElements(), error$);
