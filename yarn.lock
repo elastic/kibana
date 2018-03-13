@@ -3508,11 +3508,11 @@ ejs@^2.2.4, ejs@^2.3.1:
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.7.tgz#cc872c168880ae3c7189762fd5ffc00896c9518a"
 
-elasticsearch-browser@14.2.0:
+elasticsearch-browser@^14.2.0:
   version "14.2.0"
   resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-14.2.0.tgz#4437d2c97457dc019e77e54d9a174ed760b319a6"
 
-elasticsearch@14.2.0, elasticsearch@^14.2.0:
+elasticsearch@^14.2.0:
   version "14.2.0"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-14.2.0.tgz#ef7c6e505cb41525a0751b5156e8c0fbd1f02d62"
   dependencies:
