@@ -1,7 +1,7 @@
 function makeComponentName(str, usePrefix = true) {
   const words = str.split('_');
 
-  const componentName = words.map(function(word) {
+  const componentName = words.map(function (word) {
     return upperCaseFirstLetter(word);
   }).join('');
 
@@ -9,13 +9,13 @@ function makeComponentName(str, usePrefix = true) {
 }
 
 function lowerCaseFirstLetter(str) {
-  return str.replace(/\w\S*/g, function(txt) {
+  return str.replace(/\w\S*/g, function (txt) {
     return txt.charAt(0).toLowerCase() + txt.substr(1);
   });
 }
 
 function upperCaseFirstLetter(str) {
-  return str.replace(/\w\S*/g, function(txt) {
+  return str.replace(/\w\S*/g, function (txt) {
     return txt.charAt(0).toUpperCase() + txt.substr(1);
   });
 }
