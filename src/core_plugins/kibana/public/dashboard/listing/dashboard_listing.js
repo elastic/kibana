@@ -74,7 +74,7 @@ export class DashboardListing extends React.Component {
   }
 
   debouncedFetch = _.debounce(async () => {
-    const response = await this.props.dashboardService.find(this.state.filter, this.props.listingLimit);
+    const response = await this.props.find(this.state.filter);
 
     if (!this._isMounted) {
       return;
@@ -90,7 +90,7 @@ export class DashboardListing extends React.Component {
 
   deleteSelectedItems = async () => {
     try {
-      await this.props.dashboardService.delete(this.state.selectedIds);
+      await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addWarning({
         title: `Unable to delete dashboard(s)`,
@@ -201,6 +201,7 @@ export class DashboardListing extends React.Component {
         loading={this.state.isFetchingItems}
         columns={tableColumns}
         sorting={true}
+        pagination={true}
         selection={selection}
         search={search}
       />
@@ -239,9 +240,7 @@ export class DashboardListing extends React.Component {
 }
 
 DashboardListing.propTypes = {
-  dashboardService: PropTypes.shape({
-    find: PropTypes.func.isRequired,
-    delete: PropTypes.func.isRequired,
-  }),
+  find: PropTypes.func.isRequired,
+  delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
 };

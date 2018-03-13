@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardListing 1`] = `
+<EuiPage>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={false}
+        href="#/dashboard"
+        iconSide="left"
+        type="button"
+      >
+        Create new dashboard
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={Array []}
+    loading={true}
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;

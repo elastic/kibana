@@ -24,8 +24,13 @@ uiRoutes
     controller($scope, Private, config) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
-      $scope.dashboardService = services.dashboards;
       $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.find = (search) => {
+        return services.dashboards.find(search, $scope.listingLimit);
+      };
+      $scope.delete = (ids) => {
+        return services.dashboards.delete(ids);
+      };
     },
     resolve: {
       dash: function ($route, Private, courier, kbnUrl) {
