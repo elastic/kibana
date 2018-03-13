@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   KuiButton,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   keyCodes,

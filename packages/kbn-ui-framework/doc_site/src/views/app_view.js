@@ -13,7 +13,7 @@ import {
 } from '../components';
 
 // Inject version into header.
-const pkg = require('../../../../package.json');
+const pkg = require('../../../../../package.json');
 
 export class AppView extends Component {
   constructor(props) {

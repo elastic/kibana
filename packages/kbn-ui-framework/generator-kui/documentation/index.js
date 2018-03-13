@@ -1,8 +1,9 @@
 const chalk = require('chalk');
+const { resolve } = require('path');
 const Generator = require('yeoman-generator');
 const utils = require('../utils');
 
-const DOCUMENTATION_PAGE_PATH = 'ui_framework/doc_site/src/views';
+const DOCUMENTATION_PAGE_PATH = resolve(__dirname, '../../doc_site/src/views');
 
 module.exports = class extends Generator {
   constructor(args, options) {
@@ -12,7 +13,7 @@ module.exports = class extends Generator {
   }
 
   prompting() {
-    let prompts = [{
+    const prompts = [{
       message: 'What\'s the name of the component you\'re documenting? Use snake_case, please.',
       name: 'name',
       type: 'input',
@@ -21,7 +22,8 @@ module.exports = class extends Generator {
 
     if (this.fileType === 'demo') {
       prompts.push({
-        message: `What's the name of the directory this demo should go in? (Within ui_framework/doc_site/src/views). Use snake_case, please.`,
+        message:
+          `What's the name of the directory this demo should go in? (Within ${DOCUMENTATION_PAGE_PATH}). Use snake_case, please.`,
         name: 'folderName',
         type: 'input',
         store: true,
@@ -194,7 +196,7 @@ module.exports = class extends Generator {
         `  hasReact: ${chalk.magenta('true')},\n` +
         `}`
       );
-    }
+    };
 
     this.log('------------------------------------------------');
     this.log(chalk.bold('Import snippets:'));
@@ -214,4 +216,4 @@ module.exports = class extends Generator {
     }
     this.log('------------------------------------------------');
   }
-}
+};

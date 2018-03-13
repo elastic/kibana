@@ -7,7 +7,7 @@ import {
   KuiCardDescriptionTitle,
   KuiCardDescriptionText,
   KuiCardFooter,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   EuiButton,
