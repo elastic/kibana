@@ -3,8 +3,10 @@ import { statSync } from 'fs';
 
 import Rx from 'rxjs/Rx';
 import { gray } from 'chalk';
+
 import treeKill from 'tree-kill';
-import { fromNode as fcb } from 'bluebird';
+import { promisify } from 'util';
+const treeKillAsync = promisify(treeKill);
 
 import { log } from './log';
 import { observeLines } from './observe_lines';
@@ -56,7 +58,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
     closedPromise = this.outcomePromise.then(() => {}, () => {});
 
     async stop(signal) {
-      await fcb(cb => treeKill(childProcess.pid, signal, cb));
+      await treeKillAsync(childProcess.pid, signal);
       await this.closedPromise;
     }
   }();

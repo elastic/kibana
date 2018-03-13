@@ -6,7 +6,9 @@
   "private": true,
   "dependencies": {
     "@kbn/plugin-helpers": "link:../kbn-plugin-helpers",
-    "chalk": "^2.3.0"
+    "chalk": "^2.3.0",
+    "moment": "^2.20.1",
+    "tree-kill": "1.1.0"
   }
 }
 
