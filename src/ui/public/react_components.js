@@ -2,7 +2,7 @@ import 'ngreact';
 
 import {
   KuiToolBarSearchBox,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   EuiConfirmModal,

@@ -61,12 +61,12 @@ at any time.
 
 Since we have some components that are used multiple times on the page, you must
 make sure every instance of that component has a unique `id`. To make the generation
-of those `id`s easier, you can use the `htmlIdGenerator` service in the `ui_framework/services`.
+of those `id`s easier, you can use the `htmlIdGenerator` service in the `@kbn/ui-framework/services`.
 
 A react component could use it as follows:
 
 ```jsx
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@kbn/ui-framework/services';
 
 render() {
   // Create a new generator that will create ids deterministic
