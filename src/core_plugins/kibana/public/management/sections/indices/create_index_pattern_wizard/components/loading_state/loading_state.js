@@ -1,19 +1,17 @@
 import React from 'react';
 
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiTextColor,
+  EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
-  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 
-export const LoadingState = ({
-
-}) => (
+export const LoadingState = () => (
   <EuiPanel paddingSize="l">
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -22,15 +20,20 @@ export const LoadingState = ({
             <h2 style={{ textAlign: 'center' }}>Checking for Elasticsearch data</h2>
           </EuiTextColor>
         </EuiTitle>
+
         <EuiSpacer size="s"/>
-        <EuiText size="s">
-          <p style={{ textAlign: 'center' }}>
-            <EuiIcon type="faceSad"/>
-            <EuiTextColor color="subdued">
+
+        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l"/>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
               Reticulating splines...
-            </EuiTextColor>
-          </p>
-        </EuiText>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

@@ -22,25 +22,16 @@ exports[`Table should render conflicting type 1`] = `
       component="div"
       grow={true}
     >
-      <TooltipTrigger
-        clickHideDelay={1000}
-        display={false}
-        isSticky={false}
-        onClick={[Function]}
-        onEntered={[Function]}
-        onExited={[Function]}
-        placement="top"
-        size="auto"
-        theme="dark"
-        tooltip="The type of this field changes across indices. It is unavailable for many analysis functions."
-        trigger="hover"
+      <EuiToolTip
+        content="The type of this field changes across indices. It is unavailable for many analysis functions."
+        position="top"
       >
         <EuiIcon
           color="warning"
           size="m"
           type="alert"
         />
-      </TooltipTrigger>
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -173,6 +164,7 @@ exports[`Table should render normally 1`] = `
   }
   pagination={
     Object {
+      "initialPageSize": 10,
       "pageSizeOptions": Array [
         5,
         10,
@@ -220,25 +212,16 @@ exports[`Table should render timestamp field name 1`] = `
       component="div"
       grow={true}
     >
-      <TooltipTrigger
-        clickHideDelay={1000}
-        display={false}
-        isSticky={false}
-        onClick={[Function]}
-        onEntered={[Function]}
-        onExited={[Function]}
-        placement="top"
-        size="auto"
-        theme="dark"
-        tooltip="This field represents the time that events occurred."
-        trigger="hover"
+      <EuiToolTip
+        content="This field represents the time that events occurred."
+        position="top"
       >
         <EuiIcon
           color="primary"
           size="m"
           type="clock"
         />
-      </TooltipTrigger>
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

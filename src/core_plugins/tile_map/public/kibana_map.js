@@ -17,7 +17,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     },
     onAdd: function (leafletMap) {
       this._leafletMap = leafletMap;
-      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" aria-label="Fit Data Bounds"></a>')
+      $(this._fitContainer).html('<a class="kuiIcon fa-crop" href="#" title="Fit Data Bounds" aria-label="Fit Data Bounds"></a>')
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
