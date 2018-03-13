@@ -58,13 +58,17 @@ export class TimeCache {
     return this._cachedBounds;
   }
 
+  setTimeRange(timeRange) {
+    this._timeRange = timeRange;
+  }
+
   /**
    * Get parsed min/max values
    * @returns {{min: number, max: number}}
    * @private
    */
   _getBounds() {
-    const bounds = this._timefilter.getBounds();
+    const bounds = this._timefilter.calculateBounds(this._timeRange);
     return {
       min: bounds.min.valueOf(),
       max: bounds.max.valueOf()
