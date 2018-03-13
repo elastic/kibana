@@ -12,7 +12,7 @@ import {
   KuiListingTable,
   KuiListingTableNoMatchesPrompt,
   KuiListingTableLoadingPrompt
-} from '@kbn/ui-framework/components';
+} from 'ui_framework/components';
 
 import {
   EuiOverlayMask,

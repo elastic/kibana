@@ -20,7 +20,7 @@ import {
   KuiToolBar,
   KuiToolBarSection,
   KuiPager,
-} from '@kbn/ui-framework/components';
+} from 'ui_framework/components';
 
 import { keyCodes } from '@elastic/eui';
 

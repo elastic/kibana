@@ -5,7 +5,7 @@ import {
   KuiEmptyTablePromptPanel,
   KuiLinkButton,
   KuiButtonIcon,
-} from '@kbn/ui-framework/components';
+} from 'ui_framework/components';
 
 export function NoVisualizationsPrompt() {
   return (

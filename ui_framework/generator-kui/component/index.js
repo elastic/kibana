@@ -1,5 +1,4 @@
 const chalk = require('chalk');
-const { resolve } = require('path');
 const Generator = require('yeoman-generator');
 const utils = require('../utils');
 
@@ -19,7 +18,7 @@ module.exports = class extends Generator {
       message: `Where do you want to create this component's files?`,
       type: 'input',
       name: 'path',
-      default: resolve(__dirname, '../../src/components'),
+      default: 'ui_framework/src/components',
       store: true,
     }, {
       message: 'Does it need its own directory?',
@@ -111,6 +110,7 @@ module.exports = class extends Generator {
   end() {
     const showImportComponentSnippet = () => {
       const componentName = this.config.vars.componentName;
+      const componentPath = this.config.componentPath;
 
       this.log(chalk.white(`\n// Export component (e.. from component's index.js).`));
       this.log(
@@ -143,4 +143,4 @@ module.exports = class extends Generator {
     }
     this.log('------------------------------------------------');
   }
-};
+}

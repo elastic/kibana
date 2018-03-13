@@ -4,7 +4,7 @@ import chrome from 'ui/chrome';
 
 import {
   KuiButton,
-} from '@kbn/ui-framework/components';
+} from 'ui_framework/components';
 
 import {
   keyCodes,
@@ -53,3 +53,4 @@ export class ExitFullScreenButton extends PureComponent {
 ExitFullScreenButton.propTypes = {
   onExitFullScreenMode: PropTypes.func.isRequired,
 };
+

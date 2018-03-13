@@ -1,61 +1,21 @@
-const sass = require('node-sass');
-const postcss = require('postcss');
-const postcssConfig = require('../../src/optimize/postcss.config');
-const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+import sass from 'node-sass';
+import postcss from 'postcss';
+import postcssConfig from '../src/optimize/postcss.config';
+import chokidar from 'chokidar';
+import debounce from 'lodash/function/debounce';
 
 const platform = require('os').platform();
 const isPlatformWindows = /^win/.test(platform);
 
 module.exports = function (grunt) {
-  grunt.initConfig({
-    clean: {
-      target: ['target'],
-    },
-    copy: {
-      makeProdBuild: {
-        expand: true,
-        src: [
-          'components/**/*',
-          'dist/**/*',
-          'src/**/*',
-          'package.json',
-          '!**/*.test.js',
-          '!**/__snapshots__/**/*',
-        ],
-        dest: 'target',
-      }
-    },
-    babel: {
-      prodBuild: {
-        expand: true,
-        src: [
-          'target/components/**/*.js',
-          'target/src/**/*.js',
-        ],
-        dest: '.',
-        options: {
-          presets: [
-            require.resolve('@kbn/babel-preset/webpack')
-          ]
-        },
-      }
-    }
-  });
-
-  grunt.loadNpmTasks('grunt-babel');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
-
-  grunt.registerTask('docSiteBuild', function () {
+  grunt.registerTask('uiFramework:build', function () {
     const done = this.async();
 
     const serverCmd = {
       cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack.cmd' : './node_modules/.bin/webpack',
       args: [
         '-p',
-        '--config=doc_site/webpack.config.js',
+        '--config=ui_framework/doc_site/webpack.config.js',
         '--devtool=null', // Prevent the source map from being generated
       ],
       opts: { stdio: 'inherit' }
@@ -80,12 +40,12 @@ module.exports = function (grunt) {
     uiFrameworkServerBuild.then(done);
   });
 
-  grunt.registerTask('docSiteStart', function () {
+  grunt.registerTask('uiFramework:start', function () {
     const done = this.async();
     Promise.all([uiFrameworkWatch(), uiFrameworkServerStart()]).then(done);
   });
 
-  grunt.registerTask('compileCss', function () {
+  grunt.registerTask('uiFramework:compileCss', function () {
     const done = this.async();
     uiFrameworkCompile().then(done);
   });
@@ -94,10 +54,10 @@ module.exports = function (grunt) {
     const serverCmd = {
       cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
-        '--config=doc_site/webpack.config.js',
+        '--config=ui_framework/doc_site/webpack.config.js',
         '--hot',
         '--inline',
-        '--content-base=doc_site/build',
+        '--content-base=ui_framework/doc_site/build',
         '--host=0.0.0.0',
         '--port=8020',
       ],
@@ -123,8 +83,8 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    const src = 'src/index.scss';
-    const dest = 'dist/ui_framework.css';
+    const src = 'ui_framework/src/index.scss';
+    const dest = 'ui_framework/dist/ui_framework.css';
 
     return new Promise(resolve => {
       sass.render({
@@ -156,7 +116,7 @@ module.exports = function (grunt) {
       grunt.util.spawn({
         cmd: isPlatformWindows ? '.\\node_modules\\.bin\\grunt.cmd' : './node_modules/.bin/grunt',
         args: [
-          'compileCss',
+          'uiFramework:compileCss',
         ],
       }, (error, result) => {
         if (error) {
@@ -170,7 +130,7 @@ module.exports = function (grunt) {
     return new Promise(() => {
       debouncedCompile();
 
-      chokidar.watch('src', { ignoreInitial: true }).on('all', (event, path) => {
+      chokidar.watch('ui_framework/src', { ignoreInitial: true }).on('all', (event, path) => {
         grunt.log.writeln(event, path);
         debouncedCompile();
       });

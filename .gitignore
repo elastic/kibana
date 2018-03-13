@@ -34,8 +34,8 @@ selenium
 *.swp
 *.swo
 *.out
-/packages/kbn-ui-framework/doc_site/build/*
-!/packages/kbn-ui-framework/doc_site/build/index.html
+ui_framework/doc_site/build
+!ui_framework/doc_site/build/index.html
 package-lock.json
 .yo-rc.json
 /.vscode

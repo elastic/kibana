@@ -4,7 +4,7 @@ import {
   KuiPopover,
   KuiContextMenu,
   KuiKeyboardAccessible,
-} from '@kbn/ui-framework/components';
+} from 'ui_framework/components';
 
 import { PanelOptionsMenuForm } from './panel_options_menu_form';
 
