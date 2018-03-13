@@ -31,7 +31,7 @@ class MetricVisValue extends Component {
         <div
           className={containerClassName}
           style={{ backgroundColor: metric.bgColor }}
-          onClick={hasFilter ? this.onClick : null}
+          onClick={hasFilter ? this.onClick : () => {}}
           tabIndex={hasFilter ? 0 : null}
           role={hasFilter ? 'button' : null}
         >
