@@ -5,7 +5,7 @@ import { IndexedArray } from 'ui/indexed_array';
 
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [
-  { name: 'John', id: 69, username: 'beast', group: 'admins' },
+  { name: 'John', id: 6, username: 'beast', group: 'admins' },
   { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
   { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
@@ -170,9 +170,9 @@ describe('IndexedArray', function () {
 
       const ordered = reg.inIdOrder;
       expect(ordered[0].id).to.be(0);
-      expect(ordered[1].id).to.be(42);
-      expect(ordered[2].id).to.be(55);
-      expect(ordered[3].id).to.be(69);
+      expect(ordered[1].id).to.be(6);
+      expect(ordered[2].id).to.be(42);
+      expect(ordered[3].id).to.be(55);
     });
   });
 });
