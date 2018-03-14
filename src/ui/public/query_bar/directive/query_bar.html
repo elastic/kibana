@@ -24,6 +24,7 @@
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
+          ng-change="queryBar.updateSuggestions()"
           ng-model="queryBar.localQuery.query"
           placeholder="Search... (e.g. status:200 AND extension:PHP)"
           aria-label="Search input"

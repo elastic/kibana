@@ -1,16 +1,18 @@
-import { flatten } from 'lodash';
+import { flatten, mapValues } from 'lodash';
 import { fromKueryExpression } from '../ast';
-import * as field from './field';
-import * as value from './value';
-import * as operator from './operator';
-import * as conjunction from './conjunction';
-import * as recentSearch from './recent_search';
+import { getSuggestionsProvider as field } from './field';
+import { getSuggestionsProvider as value } from './value';
+import { getSuggestionsProvider as operator } from './operator';
+import { getSuggestionsProvider as conjunction } from './conjunction';
 
-const suggestionProviders = { field, value, operator, conjunction, recentSearch };
 const cursor = '\0';
 
 export function getSuggestionsProvider({ $http, config, indexPattern, persistedLog }) {
-  return ({ query, selectionStart, selectionEnd }) => {
+  const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
+    return provider({ $http, config, indexPattern, persistedLog });
+  });
+
+  return function getSuggestions({ query, selectionStart, selectionEnd }) {
     const cursoredQuery = `${query.substr(0, selectionStart)}${cursor}${query.substr(selectionEnd)}`;
 
     let cursorNode;
@@ -21,10 +23,8 @@ export function getSuggestionsProvider({ $http, config, indexPattern, persistedL
     }
 
     const { suggestionTypes = [] } = cursorNode;
-    return Promise.all([...suggestionTypes, 'recentSearch'].map(type => {
-      const { getSuggestionsProvider } = suggestionProviders[type];
-      const getSuggestions = getSuggestionsProvider({ $http, config, indexPattern, persistedLog, query });
-      return getSuggestions(cursorNode);
+    return Promise.all(suggestionTypes.map(type => {
+      return getSuggestionsByType[type](cursorNode);
     })).then(suggestionsByType => {
       return flatten(suggestionsByType);
     });
