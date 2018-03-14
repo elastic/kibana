@@ -370,10 +370,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async toggleOpenEditor(index) {
-      // const toggle = await find.byCssSelector(`[data-test-subj="toggleEditor"][aria-controls="visAggEditorParams${index}"]`);
+      // index, see selectYAxisAggregation
       const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
-      // await PageObjects.common.sleep(4008);
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
       if (toggleOpen === 'false') {
         log.debug(`toggle ${index} click()`);
@@ -382,18 +381,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectYAxisAggregation(agg, field, label, index = 1) {
-
-      // await PageObjects.common.sleep(4007);
+      // index starts on the first "count" metric at 1
+      // Each new metric or aggregation added to a visualization gets the next index.
+      // So to modify a metric or aggregation tests need to keep track of the
+      // order they are added.
       await this.toggleOpenEditor(index);
-
-      // await PageObjects.common.sleep(4009);
       const aggSelect = await find
         .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
       // open agg selection list
       await aggSelect.click();
-      // await PageObjects.common.sleep(4002);
       // select our agg
-      // await testSubjects.click(agg); // <--can't get this to work if there's a space in "Unique Count"
       const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
       const fieldSelect = await find

@@ -1,8 +1,6 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  // const kibanaServer = getService('kibanaServer');
-  // const remote = getService('remote');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -11,6 +9,10 @@ export default function ({ getService, getPageObjects }) {
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
   describe('Shakespeare', function describeIndexTests() {
+    // index starts on the first "count" metric at 1
+    // Each new metric or aggregation added to a visualization gets the next index.
+    // So to modify a metric or aggregation tests need to keep track of the
+    // order they are added.
     let aggIndex = 1;
 
     before(async function () {
@@ -24,7 +26,6 @@ export default function ({ getService, getPageObjects }) {
     it('should create shakespeare index pattern', async function () {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.navigateTo();
-      // await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -62,7 +63,9 @@ export default function ({ getService, getPageObjects }) {
     */
     it('should configure metric Unique Count Speaking Parts', async function () {
       log.debug('Metric = Unique Count, speaker, Speaking Parts');
+      // this first change to the YAxis metric agg uses the default aggIndex of 1
       await PageObjects.visualize.selectYAxisAggregation('Unique Count', 'speaker', 'Speaking Parts');
+      // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
       await PageObjects.visualize.waitForVisualization();
@@ -117,7 +120,6 @@ export default function ({ getService, getPageObjects }) {
     it('should configure Max aggregation metric on speech_number', async function () {
       await PageObjects.visualize.clickAddMetric();
       await PageObjects.visualize.clickBucket('Y-Axis');
-      // await PageObjects.common.sleep(5001);
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
       await PageObjects.visualize.clickGo();
