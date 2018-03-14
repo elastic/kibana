@@ -38,37 +38,12 @@ export default async function (kbnServer, server, config) {
     });
   });
 
-  // provide a simple way to expose static files
-  server.decorate('server', 'exposeStaticFile', function (routePath, filePath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        file: filePath
-      },
-      config: { auth: false }
-    });
-  });
-
   // helper for creating view managers for servers
   server.decorate('server', 'setupViews', function (path, engines) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
       engines: _.assign({ jade: require('jade') }, engines || {})
-    });
-  });
-
-  server.decorate('server', 'redirectToSlash', function (route) {
-    this.route({
-      path: route,
-      method: 'GET',
-      handler: function (req, reply) {
-        return reply.redirect(format({
-          search: req.url.search,
-          pathname: req.url.pathname + '/',
-        }));
-      }
     });
   });
 
