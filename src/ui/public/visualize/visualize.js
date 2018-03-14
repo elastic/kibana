@@ -78,6 +78,8 @@ uiModules
           // will be removed in the future).
           const timeRange = $scope.timeRange || timefilter.time;
 
+          $scope.vis.filters.timeRange = timeRange;
+
           const handlerParams = {
             appState: $scope.appState,
             uiState: $scope.uiState,

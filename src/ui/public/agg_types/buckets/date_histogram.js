@@ -27,13 +27,9 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   }
 
   function getBounds(vis) {
-    // TODO: How do we get access to the request handlers timeRange here?
-    if (!vis.getTimeRange) {
-      return timefilter.getActiveBounds();
+    if (timefilter.isTimeRangeSelectorEnabled) {
+      return timefilter.calculateBounds(vis.filters.timeRange);
     }
-
-    const timeRange = vis.getTimeRange();
-    return timefilter.calculateBounds(timeRange);
   }
 
   function setBounds(agg, force) {
