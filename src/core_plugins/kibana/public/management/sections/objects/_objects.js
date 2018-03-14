@@ -16,7 +16,7 @@ import { ObjectsTable } from './components/objects_table';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, services) {
+function updateObjectsTable($scope, savedObjectsClient) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
     if (!node) {
@@ -25,7 +25,7 @@ function updateObjectsTable($scope, services) {
 
     render(
       <ObjectsTable
-        services={services}
+        savedObjectsClient={savedObjectsClient}
       />,
       node,
     );
@@ -71,12 +71,7 @@ uiModules.get('apps/management')
       controller: function ($scope, $injector, $q, AppState) {
         const notify = new Notifier({ location: 'Saved Objects' });
 
-        const services = savedObjectManagementRegistry.all().map(obj => ({
-          service: $injector.get(obj.service),
-          serviceName: obj.service,
-          title: obj.title,
-        }));
-        updateObjectsTable($scope, services);
+        updateObjectsTable($scope, savedObjectsClient);
         $scope.$on('$destroy', destroyObjectsTable);
 
         // TODO: Migrate all scope variables to the controller.

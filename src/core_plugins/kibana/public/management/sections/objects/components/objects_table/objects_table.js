@@ -9,24 +9,23 @@ import { NoResults } from './components/no_results';
 
 import { EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
-const TAB_CONFIG = [
-  {
-    id: 'dashboard',
-    name: 'Dashboards',
-    disabled: false,
-  },
-  {
-    id: 'search',
-    name: 'Searches',
-    disabled: false,
-  },
-  {
-    id: 'visualization',
-    name: 'Visualizations',
-    disabled: false,
-  },
-];
-
+// const TAB_CONFIG = [
+//   {
+//     id: 'dashboard',
+//     name: 'Dashboards',
+//     disabled: false,
+//   },
+//   {
+//     id: 'search',
+//     name: 'Searches',
+//     disabled: false,
+//   },
+//   {
+//     id: 'visualization',
+//     name: 'Visualizations',
+//     disabled: false,
+//   },
+// ];
 
 async function smoothServerInteraction(block, minimumTimeMs = 300) {
   return await ensureMinimumTime(block, minimumTimeMs);
@@ -59,28 +58,36 @@ async function ensureMinimumTime(block, minimumTimeMs = 300) {
 
 function getQueryText(query) {
   return query && query.ast.getTermClauses().length
-    ? query.ast.getTermClauses().map(clause => clause.value).join(' ')
+    ? query.ast
+      .getTermClauses()
+      .map(clause => clause.value)
+      .join(' ')
     : '';
 }
 
 function getSavedObjectIcon(type) {
   switch (type) {
-    case 'search': return 'search';
-    case 'visualization': return 'visualizeApp';
-    case 'dashboard': return 'dashboardApp';
-    case 'index-pattern': return 'indexPatternApp';
-    case 'tag': return 'apps';
+    case 'search':
+      return 'search';
+    case 'visualization':
+      return 'visualizeApp';
+    case 'dashboard':
+      return 'dashboardApp';
+    case 'index-pattern':
+      return 'indexPatternApp';
+    case 'tag':
+      return 'apps';
   }
 }
 
 export class ObjectsTable extends Component {
   static propTypes = {
-    services: PropTypes.array.isRequired,
+    savedObjectsClient: PropTypes.object.isRequired,
     clientSideSearchThreshold: PropTypes.number,
   };
 
   static defaultProps = {
-    clientSideSearchThreshold: 100,
+    clientSideSearchThreshold: 10,
   };
 
   constructor(props) {
@@ -103,69 +110,75 @@ export class ObjectsTable extends Component {
   setupData = async () => {
     const { clientSideSearchThreshold } = this.props;
 
-    const savedObjects = await this.fetchSavedObjects();
+    const { pageOfItems } = await this.fetchSavedObjects();
     // const totalCount = savedObjects.length;
     const clientSideSearchingEnabled =
-      savedObjects.length < clientSideSearchThreshold;
+      pageOfItems.length < clientSideSearchThreshold;
 
     this.setState({
-      savedObjects,
+      savedObjects: pageOfItems,
       clientSideSearchingEnabled,
     });
-  }
+  };
 
-  fetchSavedObjects = async (criteria, query) => {
-    const { services, clientSideSearchThreshold } = this.props;
-    // const { activeQuery } = this.state;
-
-    // console.log('fetchSavedObjects()', criteria, query);
+  fetchSavedObjects = async (
+    query,
+    pageIndex,
+    pageSize,
+    // sortField,
+    // sortDirection
+  ) => {
+    const {
+      savedObjectsClient,
+      clientSideSearchThreshold,
+      clientSideSearchingEnabled,
+    } = this.props;
 
     const queryText = getQueryText(query);
     const visibleTypes =
       query && query.ast.getFieldClauses('type')
         ? query.ast.getFieldClauses('type')[0].value
         : undefined;
-    const visibleServices = visibleTypes
-      ? services.filter(({ service: { type } }) => visibleTypes.includes(type))
-      : services;
 
-    const savedObjects = [];
+    let savedObjects = [];
+    let totalItemCount = 0;
 
-    // We want to enable incremental searching
-    // for both use cases but we need some sensible debounce
-    // rate when making server round trips. It's slightly
-    // complicated because we can get away with something shorter
-    // if the user is just changing filters, since those won't
-    // fire a change event as often as a user typing into the query bar
-    // OR MAYBE JUST DEBOUNCE THE SEARCH
-    // const minimumTime = getQueryText(activeQuery) === queryText ? 300 : 750;
+    const page = clientSideSearchingEnabled ? 1 : (pageIndex || 0) + 1;
+    const perPage = clientSideSearchingEnabled
+      ? clientSideSearchThreshold + 1
+      : pageSize;
 
     // TODO: is there a good way to stop existing calls if the input changes?
     await smoothServerInteraction(async () => {
-      // console.log(`Searching for ${queryText}...`);
-      // TODO: this is dumb, change it
-      for (const { service } of visibleServices) {
-        const data = await service.findAll(
-          queryText,
-          clientSideSearchThreshold + 1,
-          ['title', 'id']
+      const data = await savedObjectsClient.find({
+        search: queryText ? `${queryText}*` : undefined,
+        perPage,
+        page,
+        // sortField,
+        // sortOrder: sortDirection,
+        fields: ['title', 'id'],
+      });
+
+      savedObjects = data.savedObjects.map(savedObject => ({
+        title: savedObject.attributes.title,
+        type: savedObject.type,
+        id: savedObject.id,
+        icon: getSavedObjectIcon(savedObject.type),
+      }));
+
+      if (visibleTypes) {
+        savedObjects = savedObjects.filter(savedObject =>
+          visibleTypes.includes(savedObject.type)
         );
-        for (const hit of data.hits) {
-          savedObjects.push({
-            ...hit,
-            // service: service,
-            // serviceName,
-            // title: title,
-            type: service.type,
-            icon: getSavedObjectIcon(service.type),
-            // data: data.hits,
-            // total: data.total
-          });
-        }
       }
+
+      totalItemCount = data.total;
     });
 
-    return savedObjects;
+    return {
+      pageOfItems: savedObjects,
+      totalItemCount,
+    };
   };
 
   getFilteredSavedObjects = createSelector(
@@ -205,18 +218,18 @@ export class ObjectsTable extends Component {
 
   render() {
     const {
+      // activeType,
       savedObjects,
-      activeType,
       // activeQuery,
       clientSideSearchingEnabled,
       // totalCount,
     } = this.state;
 
-    const tabConfig = TAB_CONFIG.map(tab => ({
-      ...tab,
-      count: savedObjects.filter(obj => obj.type === tab.id).length,
-    }));
-    const currentTab = tabConfig.find(tab => tab.id === activeType);
+    // const tabConfig = TAB_CONFIG.map(tab => ({
+    //   ...tab,
+    //   count: savedObjects.filter(obj => obj.type === tab.id).length,
+    // }));
+    // const currentTab = tabConfig.find(tab => tab.id === activeType);
 
     const filteredSavedObjects = this.getFilteredSavedObjects(this.state);
     const selectionConfig = {
@@ -262,7 +275,7 @@ export class ObjectsTable extends Component {
             fetchData={this.fetchSavedObjects}
           />
         ) : (
-          <NoResults currentTab={currentTab} />
+          <NoResults/>
         )}
         <EuiSpacer size="xxl" />
       </div>
