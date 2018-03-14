@@ -1,4 +1,5 @@
 import { writeFileSync } from 'fs';
+import { resolve } from 'path';
 import { getInstalledPackages } from './lib';
 
 import {
@@ -38,10 +39,11 @@ export default function licensesCSVReport(grunt) {
     try {
       const overrides = grunt.config.get('licenses.options.overrides');
       const file = grunt.option('csv');
+      const directory = grunt.option('directory');
       const release = Boolean(grunt.option('release'));
 
       const packages = await getInstalledPackages({
-        directory: grunt.config.get('root'),
+        directory: directory ? resolve(directory) : grunt.config.get('root'),
         licenseOverrides: overrides,
         dev: !release
       });

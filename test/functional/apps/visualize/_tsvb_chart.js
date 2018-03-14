@@ -103,6 +103,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
+
     describe('markdown', () => {
 
       before(async () => {
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         expect(text).to.be('6');
       });
 
-      describe.skip('allow time offsets', () => {
+      describe('allow time offsets', () => {
         before(async () => {
           await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
           await PageObjects.visualBuilder.clickMarkdownData();
@@ -147,5 +148,31 @@ export default function ({ getService, getPageObjects }) {
       });
 
     });
+    // add a table sanity timestamp
+    describe('table', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.clickTable();
+        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        log.debug('clicked on Table');
+      });
+
+      it('should be able to set values for group by field and column name', async () => {
+        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
+        await PageObjects.visualBuilder.setLabelValue('OS');
+        log.debug('finished setting field and column name');
+      });
+
+      it('should be able verify that values are displayed in the table', async () => {
+        const tableData = await PageObjects.visualBuilder.getViewTable();
+        log.debug(`Values on ${tableData}`);
+        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+        expect(tableData).to.be(expectedData);
+      });
+
+
+
+    });
+
+
   });
 }

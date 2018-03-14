@@ -47,6 +47,7 @@ module.exports = function () {
         // TODO can be removed once we upgrade past map-stream@0.5.0
         'map-stream@0.1.0': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
+        'png-js@0.1.1': ['MIT'],
       }
     }
   };
