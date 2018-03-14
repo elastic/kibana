@@ -12,5 +12,5 @@ async function registerPlugins(server) {
 }
 
 export function registerHapiPlugins(server) {
-  return registerPlugins(server);
+  registerPlugins(server);
 }

@@ -11,6 +11,6 @@ export function setupLogging(server, config) {
   });
 }
 
-export function mixin(kbnServer, server, config) {
+export function loggingMixin(kbnServer, server, config) {
   return setupLogging(server, config);
 }
