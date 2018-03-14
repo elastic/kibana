@@ -6,8 +6,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
   const pointSeriesVis = PageObjects.pointSeries;
 
-
-  describe('visualize app', function describeIndexTests() {
+  describe('point series', function describeIndexTests() {
     before(function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
@@ -86,19 +85,20 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartValues = [
           [ 37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
             1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29 ],
-          [ 14018296036, 13284815935, 13198764883, 13093365683, 13067752146, 12976598848,
-            13561826081, 14339648875, 14011021362, 12775336396, 13304506791, 12988890398,
-            13143466970, 13244378772, 12154757448, 15907286281, 13757317120, 13022240959,
-            12807319386, 13375732998, 13190755620, 12627508458, 12731510199, 13153337344  ],
+          [ 14018300000, 13284800000, 13198800000, 13093400000, 13067800000,
+            12976600000, 13561800000, 14339600000, 14011000000, 12775300000,
+            13304500000, 12988900000, 13143500000, 13244400000, 12154800000,
+            15907300000, 13757300000, 13022200000, 12807300000, 13375700000,
+            13190800000, 12627500000, 12731500000, 13153300000 ],
         ];
 
         await retry.try(async () => {
-          const data = await PageObjects.visualize.getLineChartData('fill="#00a69b"');
+          const data = await PageObjects.visualize.getLineChartData('Count');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
           expect(data).to.eql(expectedChartValues[0]);
 
-          const avgMemoryData = await PageObjects.visualize.getLineChartData('fill="#57c17b"', 'ValueAxis-2');
+          const avgMemoryData = await PageObjects.visualize.getLineChartData('Average machine.ram', 'ValueAxis-2');
           log.debug('average memory data=' + avgMemoryData);
           log.debug('data.length=' + avgMemoryData.length);
           expect(avgMemoryData).to.eql(expectedChartValues[1]);
@@ -121,9 +121,6 @@ export default function ({ getService, getPageObjects }) {
           .then(function () {
             return PageObjects.visualize.clickGo();
           })
-          .then(function () {
-            return PageObjects.common.sleep(2000);
-          })
           .then(function checkSeriesTypes() {
             pointSeriesVis.getHistogramSeries().then(length => {
               expect(length).to.be(1);
@@ -141,9 +138,6 @@ export default function ({ getService, getPageObjects }) {
         return pointSeriesVis.toggleGridCategoryLines()
           .then(function () {
             return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.common.sleep(2000);
           })
           .then(function () {
             return pointSeriesVis.getGridLines();
@@ -164,9 +158,6 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function () {
             return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return PageObjects.common.sleep(5000);
           })
           .then(function () {
             return pointSeriesVis.getGridLines();
