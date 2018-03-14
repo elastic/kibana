@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "@kbn/babel-preset": "link:packages/kbn-babel-preset",
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
     "chance": "1.0.6",
     "expect.js": "0.3.1"
   }
