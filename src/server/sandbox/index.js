@@ -1,10 +1,10 @@
 import sandbox from 'sandbox';
+import uuid from 'uuid';
 import { spawnGatekeeper } from './spawn_gatekeeper';
 import { SyntheticProcess } from './synthetic_process';
 import { GatekeeperChannel } from './gatekeeper_channel';
 import { getValidProcesses } from './get_valid_processes';
 
-let incrementor = 0;
 let spawnChildProcess;
 
 export async function initializeSandbox(kbnServer) {
@@ -21,7 +21,7 @@ export async function initializeSandbox(kbnServer) {
   }
 
   spawnChildProcess = async (command, args) => {
-    const channel = new GatekeeperChannel(gatekeeperProcess, incrementor++);
+    const channel = new GatekeeperChannel(gatekeeperProcess, uuid.v4());
     return await SyntheticProcess.spawn(channel, command, args);
   };
 }
