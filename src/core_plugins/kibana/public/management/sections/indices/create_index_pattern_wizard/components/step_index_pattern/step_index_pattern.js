@@ -41,10 +41,13 @@ export class StepIndexPattern extends Component {
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
     };
+
+    this.lastQuery = null;
   }
 
   async componentWillMount() {
     if (this.state.query) {
+      this.lastQuery = this.state.query;
       this.fetchIndices(this.state.query);
     }
   }
@@ -55,16 +58,29 @@ export class StepIndexPattern extends Component {
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
     if (query.endsWith('*')) {
       const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({ exactMatchedIndices, isLoadingIndices: false }));
+      createReasonableWait(() => {
+        // If the search changed, discard this state
+        if (query !== this.lastQuery) {
+          return;
+        }
+        this.setState({ exactMatchedIndices, isLoadingIndices: false });
+      });
     }
     else {
       const partialMatchedIndices = await getIndices(esService, `${query}*`, MAX_SEARCH_SIZE);
       const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({
-        partialMatchedIndices,
-        exactMatchedIndices,
-        isLoadingIndices: false
-      }));
+      createReasonableWait(() => {
+        // If the search changed, discard this state
+        if (query !== this.lastQuery) {
+          return;
+        }
+
+        this.setState({
+          partialMatchedIndices,
+          exactMatchedIndices,
+          isLoadingIndices: false
+        });
+      });
     }
   }
 
@@ -85,6 +101,7 @@ export class StepIndexPattern extends Component {
       }
     }
 
+    this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
   }
