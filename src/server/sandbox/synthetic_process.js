@@ -16,9 +16,13 @@ export class SyntheticProcess {
   stdout = new SyntheticStream();
   stderr = new SyntheticStream();
 
-  constructor(channel, command, args) {
+  static async spawn(channel, command, args) {
+    await channel.send('spawn', { command, args });
+    return new SyntheticProcess(channel);
+  }
+
+  constructor(channel) {
     this._channel = channel;
-    this._channel.send('spawn', { command, args });
 
     this._channel.onMessage(({ type, payload }) => {
       switch (type) {

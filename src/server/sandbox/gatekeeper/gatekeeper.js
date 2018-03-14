@@ -1,6 +1,9 @@
+import path from 'path';
 import { GatedProcess } from './gated_process';
+import { parseValidProcesses } from './parse_valid_processes';
+import { calculateMd5 } from './checksum';
 
-const validProcesses = process.argv.length > 1 ? process.argv[2].split(',') : [];
+const validProcesses = parseValidProcesses(process.argv);
 
 const processes = new Map();
 
@@ -10,24 +13,34 @@ process.on('disconnect', () => {
   }
 });
 
-process.on('message', ({ id, message: { type, payload } }) => {
-  switch(type) {
-    case 'spawn': {
-      const { command, args } = payload;
-      if (validProcesses.indexOf(command) < 0) {
-        throw new Error(`Invalid process ${command}`);
-      }
+process.on('message', async ({ processId, message: { id, type, payload } }) => {
+  try {
+    switch(type) {
+      case 'spawn': {
+        const { command, args } = payload;
 
-      const gatedProcess = new GatedProcess(id, command, args);
-      processes.set(id, gatedProcess);
-      break;
+        const commandMd5 = await calculateMd5(command);
+        const commandFilename = path.basename(command);
+
+        if (!validProcesses.find(({ filename, md5 }) => filename === commandFilename && md5 === commandMd5)) {
+          throw new Error(`Invalid process ${command} ${commandMd5}`);
+        }
+
+        const gatedProcess = new GatedProcess(processId, command, args);
+        processes.set(processId, gatedProcess);
+        break;
+      }
+      case 'kill': {
+        const gatedProcess = processes.get(processId);
+        gatedProcess.kill();
+        break;
+      }
+      default:
+        throw new Error(`Unknown message type ${type}`);
     }
-    case 'kill': {
-      const gatedProcess = processes.get(id);
-      gatedProcess.kill();
-      break;
-    }
-    default:
-      throw new Error(`Unknown message type ${type}`);
+
+    process.send({ processId, message: { id, type: 'ack', payload: { success: true } } });
+  } catch (err) {
+    process.send({ processId, message: { id, type: 'ack', payload: { success: false, error: err.toString() } } });
   }
 });

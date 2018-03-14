@@ -2,8 +2,8 @@ import { safeChildProcess } from '../safe_child_process';
 import { spawn } from 'child_process';
 
 export class GatedProcess {
-  constructor(id, command, args) {
-    this._id = id;
+  constructor(processId, command, args) {
+    this._processId = processId;
     this._process = spawn(command, args);
     safeChildProcess(this._process);
 
@@ -25,6 +25,6 @@ export class GatedProcess {
   }
 
   _send(type, payload) {
-    process.send({ id: this._id, message: { type, payload } });
+    process.send({ processId: this._processId, message: { type, payload } });
   }
 }

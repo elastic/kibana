@@ -28,7 +28,7 @@ const getExecArgv = () => {
 };
 
 export function spawnGatekeeper(validProcesses) {
-  const childProcess = fork(require.resolve('./gatekeeper'), [validProcesses.join(',')], {
+  const childProcess = fork(require.resolve('./gatekeeper'), [validProcesses.map(proc => `${proc.filename}:${proc.md5}`).join(',')], {
     execArgv: getExecArgv()
   });
 
