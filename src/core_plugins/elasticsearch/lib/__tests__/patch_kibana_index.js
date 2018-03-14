@@ -76,7 +76,10 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       });
 
       sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({}));
+      sinon.assert.calledWithExactly(callCluster, 'indices.getMapping', sinon.match({
+        ignore: [404],
+        index: indexName,
+      }));
     });
   });
 
