@@ -155,7 +155,7 @@ cd kibana
 Install the version of node.js listed in the `.nvmrc` file _(this can be easily automated with tools such as [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))_
 
 ```bash
-nvm use"
+nvm use
 ```
 
 Install the latest version of [yarn](https://yarnpkg.com).
