@@ -92,13 +92,13 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  getConnections(callback: (error?: Error, count?: number) => void) {
+  getConnections(callback: (error: Error | null, count?: number) => void) {
     // This method is used by `even-better` (before we start platform).
     // It seems that the latest version of parent `good` doesn't use this anymore.
     if (this.server) {
       this.server.getConnections(callback);
     } else {
-      callback(undefined, 0);
+      callback(null, 0);
     }
   }
 
