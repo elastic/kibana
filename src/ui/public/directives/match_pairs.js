@@ -26,56 +26,10 @@ module.directive('matchPairs', () => ({
       const { target, key, metaKey } = e;
       const { value, selectionStart, selectionEnd } = target;
 
-      if (shouldMoveCursorForward()) {
-        moveCursorForward();
-      } else if (shouldInsertMatchingCloser()) {
-        insertMatchingCloser();
-      } else if (shouldRemovePair()) {
-        removePair();
-      }
-
-      function shouldMoveCursorForward() {
-        if (!closers.includes(key)) return false;
-
-        // Never move selection forward for multi-character selections
-        if (selectionStart !== selectionEnd) return false;
-
-        // Move selection foward if the key is the same as the closer in front of the selection
-        return value.charAt(selectionEnd) === key;
-      }
-
-      function shouldInsertMatchingCloser() {
-        if (!openers.includes(key)) return false;
-
-        // Always insert for multi-character selections
-        if (selectionStart !== selectionEnd) return true;
-
-        const precedingCharacter = value.charAt(selectionStart - 1);
-        const followingCharacter = value.charAt(selectionStart + 1);
-
-        // Don't insert if the preceding character is a backslash
-        if (precedingCharacter === '\\') return false;
-
-        // Don't insert if it's a quote and the either of the preceding/following characters is alphanumeric
-        return !(['"', `'`].includes(key) && (isAlphanumeric(precedingCharacter) || isAlphanumeric(followingCharacter)));
-      }
-
-      function shouldRemovePair() {
-        if (key !== 'Backspace' || metaKey) return false;
-
-        // Never remove for multi-character selections
-        if (selectionStart !== selectionEnd) return false;
-
-        // Remove if the preceding/following characters are a pair
-        return pairs.includes(value.substr(selectionEnd - 1, 2));
-      }
-
-      function moveCursorForward() {
+      if (shouldMoveCursorForward(key, value, selectionStart, selectionEnd)) {
         e.preventDefault();
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
-      }
-
-      function insertMatchingCloser() {
+      } else if (shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd)) {
         e.preventDefault();
         ngModel.$setViewValue(
           value.substr(0, selectionStart) + key +
@@ -84,9 +38,7 @@ module.directive('matchPairs', () => ({
         );
         ngModel.$render();
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
-      }
-
-      function removePair() {
+      } else if (shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd)) {
         e.preventDefault();
         ngModel.$setViewValue(value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1));
         ngModel.$render();
@@ -95,6 +47,42 @@ module.directive('matchPairs', () => ({
     });
   }
 }));
+
+function shouldMoveCursorForward(key, value, selectionStart, selectionEnd) {
+  if (!closers.includes(key)) return false;
+
+  // Never move selection forward for multi-character selections
+  if (selectionStart !== selectionEnd) return false;
+
+  // Move selection foward if the key is the same as the closer in front of the selection
+  return value.charAt(selectionEnd) === key;
+}
+
+function shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd) {
+  if (!openers.includes(key)) return false;
+
+  // Always insert for multi-character selections
+  if (selectionStart !== selectionEnd) return true;
+
+  const precedingCharacter = value.charAt(selectionStart - 1);
+  const followingCharacter = value.charAt(selectionStart + 1);
+
+  // Don't insert if the preceding character is a backslash
+  if (precedingCharacter === '\\') return false;
+
+  // Don't insert if it's a quote and the either of the preceding/following characters is alphanumeric
+  return !(['"', `'`].includes(key) && (isAlphanumeric(precedingCharacter) || isAlphanumeric(followingCharacter)));
+}
+
+function shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd) {
+  if (key !== 'Backspace' || metaKey) return false;
+
+  // Never remove for multi-character selections
+  if (selectionStart !== selectionEnd) return false;
+
+  // Remove if the preceding/following characters are a pair
+  return pairs.includes(value.substr(selectionEnd - 1, 2));
+}
 
 function isAlphanumeric(value = '') {
   return value.match(/[a-zA-Z0-9_]/);
