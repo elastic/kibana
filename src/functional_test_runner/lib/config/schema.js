@@ -109,4 +109,9 @@ export const schema = Joi.object().keys({
   screenshots: Joi.object().keys({
     directory: Joi.string().default(defaultRelativeToConfigPath('screenshots'))
   }).default(),
+
+  // settings for the failureDebugging module
+  failureDebugging: Joi.object().keys({
+    htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
+  }).default(),
 }).default();

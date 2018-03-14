@@ -16,6 +16,11 @@ export async function getIndices(es, rawPattern, limit) {
     return [];
   }
 
+  // ES does not like just a `,*` and will throw a `[string_index_out_of_bounds_exception] String index out of range: 0`
+  if (pattern.startsWith(',')) {
+    return [];
+  }
+
   // We need to always provide a limit and not rely on the default
   if (!limit) {
     throw '`getIndices()` was called without the required `limit` parameter.';

@@ -19,6 +19,12 @@ describe('getIndices', () => {
     expect((await getIndices(null, '*:')).length).toBe(0);
   });
 
+  it('should ignore a single comma', async () => {
+    expect((await getIndices(null, ',')).length).toBe(0);
+    expect((await getIndices(null, ',*')).length).toBe(0);
+    expect((await getIndices(null, ',foobar')).length).toBe(0);
+  });
+
   it('should trim the input', async () => {
     let index;
     const es = {
