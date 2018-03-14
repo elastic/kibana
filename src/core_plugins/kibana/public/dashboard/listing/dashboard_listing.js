@@ -67,12 +67,6 @@ export class DashboardListing extends React.Component {
     this.fetchItems();
   }
 
-  fetchItems = () => {
-    this.setState({
-      isFetchingItems: true,
-    }, this.debouncedFetch);
-  }
-
   debouncedFetch = _.debounce(async () => {
     const response = await this.props.find(this.state.filter);
 
@@ -87,6 +81,12 @@ export class DashboardListing extends React.Component {
       showLimitError: response.total > this.props.listingLimit,
     });
   }, 300);
+
+  fetchItems = () => {
+    this.setState({
+      isFetchingItems: true,
+    }, this.debouncedFetch);
+  }
 
   deleteSelectedItems = async () => {
     try {

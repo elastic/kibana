@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders DashboardListing 1`] = `
-<EuiPage>
+exports[`after fetch renders table rows 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
@@ -28,6 +30,230 @@ exports[`renders DashboardListing 1`] = `
     >
       <EuiButton
         color="primary"
+        data-test-subj="newDashboardLink"
+        fill={false}
+        href="#/dashboard"
+        iconSide="left"
+        type="button"
+      >
+        Create new dashboard
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "description": "dashboard1 desc",
+          "id": "dashboard1",
+          "title": "dashboard1 title",
+        },
+        Object {
+          "description": "dashboard2 desc",
+          "id": "dashboard2",
+          "title": "dashboard2 title",
+        },
+      ]
+    }
+    loading={false}
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;
+
+exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="newDashboardLink"
+        fill={false}
+        href="#/dashboard"
+        iconSide="left"
+        type="button"
+      >
+        Create new dashboard
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <React.Fragment>
+    <EuiCallOut
+      color="warning"
+      iconType="help"
+      size="m"
+      title="Listing limit exceeded"
+    >
+      <p>
+        You have 
+        2
+         dashboards, but your 
+        <strong>
+          listingLimit
+        </strong>
+         setting prevents the table below from displaying more than 
+        1
+        . You can change this setting under 
+        <EuiLink
+          color="primary"
+          href="#/management/kibana/settings"
+          type="button"
+        >
+          Advanced Settings
+        </EuiLink>
+        .
+      </p>
+    </EuiCallOut>
+    <EuiSpacer
+      size="m"
+    />
+  </React.Fragment>
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "description": "dashboard1 desc",
+          "id": "dashboard1",
+          "title": "dashboard1 title",
+        },
+        Object {
+          "description": "dashboard2 desc",
+          "id": "dashboard2",
+          "title": "dashboard2 title",
+        },
+      ]
+    }
+    loading={false}
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;
+
+exports[`renders table in loading state 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="newDashboardLink"
         fill={false}
         href="#/dashboard"
         iconSide="left"
