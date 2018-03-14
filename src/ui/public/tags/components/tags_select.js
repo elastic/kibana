@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
-  EuiFilterButton,
   EuiPopover,
   EuiPopoverTitle,
   EuiFieldSearch,
@@ -11,6 +10,8 @@ import {
   EuiSpacer,
   EuiFilterSelectItem,
   EuiIcon,
+  EuiLink,
+  EuiFormHelpText,
 } from '@elastic/eui';
 
 export class TagsSelect extends Component {
@@ -74,14 +75,11 @@ export class TagsSelect extends Component {
 
   renderButton() {
     return (
-      <EuiFilterButton
-        iconType="arrowDown"
+      <EuiLink
         onClick={this.onBtnClick}
-        isSelected={this.state.show}
-        hasActiveFilters={true}
       >
-        Add Tags
-      </EuiFilterButton>
+        Attach tags
+      </EuiLink>
     );
   }
 
@@ -152,6 +150,9 @@ export class TagsSelect extends Component {
             value={this.state.search}
             onChange={this.fetchTags}
           />
+          <EuiFormHelpText style={{ paddingBottom: 0 }}>
+            Manage and add tags over in <a href="/app/management/kibana/tags">tag management</a>
+          </EuiFormHelpText>
         </EuiPopoverTitle>
         {this.renderPopoverBody()}
       </EuiPopover>

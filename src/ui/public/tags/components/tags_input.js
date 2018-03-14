@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import { TagsSelect } from './tags_select';
 
 import {
-  EuiFilterGroup,
   EuiBadge,
-  EuiFilterButton,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 export class TagsInput extends Component {
@@ -23,16 +23,17 @@ export class TagsInput extends Component {
           event.stopPropagation();
         };
         return (
-          <EuiFilterButton key={tag.id}>
+          <EuiFlexItem grow={false}>
             <EuiBadge
               color={tag.color}
               iconType="cross"
               iconSide="right"
-              onClick={deleteTag}
+              iconOnClick={deleteTag}
+              key={tag.id}
             >
               {tag.title}
             </EuiBadge>
-          </EuiFilterButton>
+          </EuiFlexItem>
         );
       });
     }
@@ -40,15 +41,17 @@ export class TagsInput extends Component {
       return tag.id;
     });
     return (
-      <EuiFilterGroup>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
         {tags}
-        <TagsSelect
-          find={this.props.find}
-          onAdd={this.props.onAdd}
-          onDelete={this.props.onDelete}
-          usedTags={usedTags}
-        />
-      </EuiFilterGroup>
+        <EuiFlexItem grow={false}>
+          <TagsSelect
+            find={this.props.find}
+            onAdd={this.props.onAdd}
+            onDelete={this.props.onDelete}
+            usedTags={usedTags}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

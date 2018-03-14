@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  cloneElement,
+} from 'react';
+
 import PropTypes from 'prop-types';
 import { TagForm } from './tag_form';
 
@@ -39,11 +42,7 @@ export class TagFormPopover extends React.Component {
       <EuiPopover
         id="tagFormPopover"
         ownFocus
-        button={(
-          <div onClick={this.onBtnClick}>
-            {this.props.button}
-          </div>
-        )}
+        button={cloneElement(this.props.button, { onClick: this.onBtnClick })}
         isOpen={this.state.show}
         closePopover={this.close}
         anchorPosition={this.props.anchorPosition}
@@ -70,5 +69,3 @@ TagFormPopover.propTypes = {
   onSuccessfulSave: PropTypes.func.isRequired,
   anchorPosition: PropTypes.string,
 };
-
-

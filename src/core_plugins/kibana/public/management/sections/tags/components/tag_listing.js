@@ -196,7 +196,7 @@ export class TagListing extends React.Component {
           <EuiFlexItem grow={false}>
             <TagFormPopover
               button={(
-                <EuiButton>
+                <EuiButton fill>
                   Create tag
                 </EuiButton>
               )}
@@ -222,5 +222,3 @@ TagListing.propTypes = {
   delete: PropTypes.func.isRequired,
   find: PropTypes.func.isRequired,
 };
-
-

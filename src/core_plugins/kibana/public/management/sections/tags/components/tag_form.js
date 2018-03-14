@@ -8,6 +8,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
 
@@ -121,19 +122,21 @@ export class TagForm extends React.Component {
           />
         </EuiFormRow>
 
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
+              size="s"
               onClick={this.props.onCancel}
             >
               Cancel
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
               onClick={this.handleSaveClick}
+              size="s"
             >
               Save
             </EuiButton>
@@ -160,4 +163,3 @@ TagForm.defaultProps = {
     }
   }
 };
-
