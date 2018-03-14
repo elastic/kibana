@@ -152,7 +152,7 @@ git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
-Install the version of node.js listed in the `.nvmrc` file _(this can be easily automated with tools such as [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))_
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm), [nvm-windows](https://github.com/coreybutler/nvm-windows) or [avn](https://github.com/wbyoung/avn). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
 
 ```bash
 nvm use
