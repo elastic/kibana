@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         // sleep a bit before trying to get the chart data
         return PageObjects.common.sleep(3000)
           .then(function () {
-            return PageObjects.visualize.getLineChartData('fill="#00a69b"')
+            return PageObjects.visualize.getLineChartData()
               .then(function showData(data) {
                 log.debug('data=' + data);
                 const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
           })
           .then(function () {
             return retry.try(function () {
-              return PageObjects.visualize.getLineChartData('fill="#00a69b"')
+              return PageObjects.visualize.getLineChartData()
                 .then(function showData(data) {
                   log.debug('data=' + data);
                   const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
