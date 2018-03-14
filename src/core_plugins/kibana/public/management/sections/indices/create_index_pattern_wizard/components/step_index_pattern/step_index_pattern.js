@@ -45,11 +45,14 @@ export class StepIndexPattern extends Component {
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
     };
+
+    this.lastQuery = null;
   }
 
   async componentWillMount() {
     this.fetchExistingIndexPatterns();
     if (this.state.query) {
+      this.lastQuery = this.state.query;
       this.fetchIndices(this.state.query);
     }
   }
@@ -78,7 +81,7 @@ export class StepIndexPattern extends Component {
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, query, MAX_SEARCH_SIZE));
       // If the search changed, discard this state
-      if (query !== this.state.query) {
+      if (query !== this.lastQuery) {
         return;
       }
       this.setState({ exactMatchedIndices, isLoadingIndices: false });
@@ -94,7 +97,7 @@ export class StepIndexPattern extends Component {
     ]);
 
     // If the search changed, discard this state
-    if (query !== this.state.query) {
+    if (query !== this.lastQuery) {
       return;
     }
 
@@ -121,6 +124,7 @@ export class StepIndexPattern extends Component {
       }
     }
 
+    this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
   }
