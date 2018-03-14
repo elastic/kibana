@@ -1,5 +1,6 @@
 import { fork } from 'child_process';
 import { safeChildProcess } from './safe_child_process';
+import { serializeArgument } from './valid_processes';
 
 
 let debugPortOffset = 1;
@@ -28,7 +29,7 @@ const getExecArgv = () => {
 };
 
 export function spawnGatekeeper(validProcesses) {
-  const childProcess = fork(require.resolve('./gatekeeper'), [validProcesses.map(proc => `${proc.filename}:${proc.md5}`).join(',')], {
+  const childProcess = fork(require.resolve('./gatekeeper'), [serializeArgument(validProcesses)], {
     execArgv: getExecArgv()
   });
 

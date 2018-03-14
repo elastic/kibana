@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import { spawnGatekeeper } from './spawn_gatekeeper';
 import { SyntheticProcess } from './synthetic_process';
 import { GatekeeperChannel } from './gatekeeper_channel';
-import { getValidProcesses } from './get_valid_processes';
+import { getValidProcesses } from './valid_processes';
 
 let spawnChildProcess;
 

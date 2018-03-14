@@ -1,9 +1,12 @@
 import path from 'path';
 import { GatedProcess } from './gated_process';
-import { parseValidProcesses } from './parse_valid_processes';
+import { deserializeArgument } from '../valid_processes';
 import { calculateMd5 } from './checksum';
 
-const validProcesses = parseValidProcesses(process.argv);
+if (process.argv.length < 2) {
+  throw new Error('Valid processes should be provided as the third argument');
+}
+const validProcesses = deserializeArgument(process.argv[2]);
 
 const processes = new Map();
 

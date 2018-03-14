@@ -1,6 +1,6 @@
 import { get } from 'lodash';
 import { Observable } from 'rxjs';
-import { findPluginSpecs } from '../../plugin_discovery';
+import { findPluginSpecs } from '../../../plugin_discovery';
 
 export async function getValidProcesses(settings) {
   const {
