@@ -11,6 +11,6 @@ async function registerPlugins(server) {
   });
 }
 
-export default function (kbnServer, server) {
+export function registerHapiPlugins(server) {
   registerPlugins(server);
 }
