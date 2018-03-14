@@ -10,6 +10,6 @@ export function getSuggestionsProvider({ persistedLog, query }) {
       const end = query.length;
       return { type, text, start, end };
     });
-    return Promise.resolve(suggestions);
+    return suggestions;
   };
 }

@@ -44,6 +44,6 @@ export function getSuggestionsProvider({ indexPattern }) {
       const description = getDescription({ fieldName, operator });
       return { type, text, description, start: end, end };
     });
-    return Promise.resolve(suggestions);
+    return suggestions;
   };
 }

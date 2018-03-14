@@ -17,6 +17,6 @@ export function getSuggestionsProvider() {
       const description = getDescription(conjunction);
       return { type, text, description, start: end, end };
     });
-    return Promise.resolve(suggestions);
+    return suggestions;
   };
 }

@@ -20,6 +20,6 @@ export function getSuggestionsProvider({ indexPattern }) {
       const description = getDescription(fieldName);
       return { type, text, description, start, end };
     });
-    return Promise.resolve(suggestions);
+    return suggestions;
   };
 }
