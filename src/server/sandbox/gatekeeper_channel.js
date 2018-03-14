@@ -8,17 +8,17 @@ export class GatekeeperChannel {
     this._gatekeeperProcess = gatekeeperProcess;
     this._processId = processId;
 
-    this._gatekeeperProcess.on('message', ({ processId, message }) => {
+    this._gatekeeperProcess.on('message', ({ processId, ack, message }) => {
       if (this._processId !== processId) {
         return;
       }
 
-      if (message.type === 'ack') {
-        const messageAck = this._messageAcks[message.id];
-        if (message.payload.success) {
+      if (ack) {
+        const messageAck = this._messageAcks[ack.id];
+        if (ack.success) {
           messageAck.resolve();
         } else {
-          messageAck.reject(message.payload.error);
+          messageAck.reject(ack.error);
         }
         return;
       }

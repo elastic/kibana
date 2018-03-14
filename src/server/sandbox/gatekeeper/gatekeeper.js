@@ -42,8 +42,8 @@ process.on('message', async ({ processId, message: { id, type, payload } }) => {
         throw new Error(`Unknown message type ${type}`);
     }
 
-    process.send({ processId, message: { id, type: 'ack', payload: { success: true } } });
+    process.send({ processId, ack: { id, success: true } });
   } catch (err) {
-    process.send({ processId, message: { id, type: 'ack', payload: { success: false, error: err.toString() } } });
+    process.send({ processId, ack: { id, success: false, error: err.toString() } });
   }
 });
