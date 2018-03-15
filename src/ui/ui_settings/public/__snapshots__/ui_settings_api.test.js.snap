@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#batchSet batches changes for 200ms, sends all at once 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "changes": Object {
+          "foo": "bar",
+        },
+      },
+      "method": "POST",
+      "path": "/api/kibana/settings",
+    },
+  ],
+]
+`;
+
+exports[`#batchSet resolves promises with resolve value of Api.request() 1`] = `
+Array [
+  "foobar",
+  "foobar",
+  "foobar",
+  "foobar",
+]
+`;

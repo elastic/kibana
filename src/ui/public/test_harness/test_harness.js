@@ -23,9 +23,12 @@ setupTestSharding();
 // allows test_harness.less to have higher priority selectors
 document.body.setAttribute('id', 'test-harness-body');
 
-// prevent accidental ajax requests
 before(() => {
+  // prevent accidental ajax requests
   sinon.useFakeXMLHttpRequest();
+
+  // disable config api
+  sinon.stub(chrome.getUiSettingsClient()._api, 'batchSet', () => ({ settings: {} }));
 });
 
 beforeEach(function () {
