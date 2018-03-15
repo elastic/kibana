@@ -107,6 +107,7 @@ module.directive('queryBar', function () {
       $scope.$watch('queryBar.indexPatterns', () => {
         this.getIndexPatterns().then(indexPatterns => {
           this.getKuerySuggestions = getSuggestionsProvider({ $http, config, indexPatterns });
+          this.updateSuggestions();
         });
       });
 

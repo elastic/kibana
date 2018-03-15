@@ -88,6 +88,7 @@ typeahead.directive('kbnTypeahead', function () {
 
       this.onFocus = () => {
         this.isFocused = true;
+        this.isHidden = true;
       };
 
       this.onBlur = () => {
