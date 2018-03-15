@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import chrome from 'ui/chrome';
 import {
   KuiCardGroup,
   KuiCard,
@@ -20,7 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export function AddData({ addBasePath, isCloudEnabled }) {
+const apmUiEnabled = chrome.getInjected('apmUiEnabled');
+export function AddData({ addBasePath }) {
 
   const renderCards = () => {
     const cardStyle = {
@@ -60,7 +62,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
       <div className="kuiVerticalRhythm">
         <KuiCardGroup>
 
-          {!isCloudEnabled && getApmCard()}
+          {apmUiEnabled !== false && getApmCard()}
 
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
