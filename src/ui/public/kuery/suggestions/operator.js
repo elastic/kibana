@@ -22,13 +22,13 @@ const operators = {
     fieldTypes: ['number', 'date', 'ip']
   },
   ':*': {
-    description: '<span class="suggestionItem__callout">exists</span>'
+    description: '<span class="suggestionItem__callout">exists</span> in any form'
   },
 };
 
-function getDescription({ fieldName, operator }) {
+function getDescription({ operator }) {
   const { description } = operators[operator];
-  return `<p>Filter results where <span class="suggestionItem__callout">${fieldName}</span> ${description}</p>`;
+  return `<p>${description}</p>`;
 }
 
 export function getSuggestionsProvider({ indexPattern }) {
@@ -41,7 +41,7 @@ export function getSuggestionsProvider({ indexPattern }) {
     });
     const suggestions = matchingOperators.map(operator => {
       const text = operator + ' ';
-      const description = getDescription({ fieldName, operator });
+      const description = getDescription({ operator });
       return { type, text, description, start: end, end };
     });
     return suggestions;

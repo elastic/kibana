@@ -38,6 +38,10 @@
     background-color: tint(@globalColorTeal, 90%);
     color: @globalColorTeal;
   }
+
+  .suggestionItem__text {
+    width: auto;
+  }
 }
 
 &.suggestionItem--operator {
@@ -49,8 +53,8 @@
 
 &.suggestionItem--conjunction {
   .suggestionItem__type {
-    background-color: tint(@globalColorLightGray, 15%);
-    color: @globalColorMediumGray;
+    background-color: tint(@globalColorPurple, 90%);
+    color: @globalColorPurple;
   }
 }
 
@@ -141,7 +145,7 @@
 
           .suggestionItem--conjunction {
             .suggestionItem__type {
-              background-color: @globalColorLightGray;
+              background-color: tint(@globalColorPurple, 80%);
             }
           }
         }
