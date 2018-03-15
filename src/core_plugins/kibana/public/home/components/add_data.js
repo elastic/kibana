@@ -182,5 +182,5 @@ export function AddData({ addBasePath, apmUiEnabled }) {
 
 AddData.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  isCloudEnabled: PropTypes.bool.isRequired,
+  apmUiEnabled: PropTypes.bool.isRequired,
 };

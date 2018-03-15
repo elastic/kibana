@@ -66,7 +66,6 @@ export function HomeApp({ addBasePath, directories, recentlyAccessed }) {
           <Home
             addBasePath={addBasePath}
             directories={directories}
-            isCloudEnabled={isCloudEnabled}
             apmUiEnabled={apmUiEnabled}
             recentlyAccessed={recentlyAccessed}
           />
