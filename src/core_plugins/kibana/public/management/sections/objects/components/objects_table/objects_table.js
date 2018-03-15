@@ -67,6 +67,7 @@ export class ObjectsTable extends Component {
       activeQuery: '',
       selectedSavedObjectIds: [],
       clientSideSearchingEnabled: false,
+      isPerformingInitialFetch: false,
     };
   }
 
@@ -77,6 +78,8 @@ export class ObjectsTable extends Component {
   fetchAllData = async () => {
     const { clientSideSearchThreshold } = this.props;
 
+    this.setState({ isPerformingInitialFetch: true });
+
     const { pageOfItems, totalItemCount } = await this.fetchSavedObjects(
       Query.parse('')
     );
@@ -86,6 +89,7 @@ export class ObjectsTable extends Component {
     this.setState({
       savedObjects: pageOfItems,
       clientSideSearchingEnabled,
+      isPerformingInitialFetch: false,
     });
   };
 
@@ -93,7 +97,6 @@ export class ObjectsTable extends Component {
     const {
       savedObjectsClient,
       clientSideSearchThreshold,
-      clientSideSearchingEnabled,
     } = this.props;
 
     if (!query) {
@@ -112,8 +115,8 @@ export class ObjectsTable extends Component {
     let savedObjects = [];
     let totalItemCount = 0;
 
-    const page = clientSideSearchingEnabled ? 1 : (pageIndex || 0) + 1;
-    const perPage = clientSideSearchingEnabled
+    const page = isNaN(pageIndex) ? 1 : (pageIndex || 0) + 1;
+    const perPage = isNaN(pageSize)
       ? clientSideSearchThreshold + 1
       : pageSize;
 
@@ -126,7 +129,6 @@ export class ObjectsTable extends Component {
         fields: ['title', 'id'],
       });
 
-      // console.log(data.savedObjects);
       savedObjects = data.savedObjects.map(savedObject => ({
         title: savedObject.attributes.title,
         type: savedObject.type,
@@ -178,7 +180,7 @@ export class ObjectsTable extends Component {
   );
 
   render() {
-    const { savedObjects, clientSideSearchingEnabled } = this.state;
+    const { savedObjects, clientSideSearchingEnabled, isPerformingInitialFetch } = this.state;
 
     const selectionConfig = {
       itemId: 'id',
@@ -195,6 +197,7 @@ export class ObjectsTable extends Component {
           selectionConfig={selectionConfig}
           onSearchChanged={this.onSearchChanged}
           clientSideSearchingEnabled={clientSideSearchingEnabled}
+          isPerformingInitialFetch={isPerformingInitialFetch}
           filterOptions={this.getFilterOptions(savedObjects)}
           fetchData={this.fetchSavedObjects}
         />

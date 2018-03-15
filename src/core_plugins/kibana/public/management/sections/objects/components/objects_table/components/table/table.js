@@ -17,6 +17,7 @@ export class Table extends Component {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     clientSideSearchingEnabled: PropTypes.bool.isRequired,
+    isPerformingInitialFetch: PropTypes.bool.isRequired,
     filterOptions: PropTypes.array.isRequired,
     fetchData: PropTypes.func,
     onSearchChanged: PropTypes.func,
@@ -65,7 +66,7 @@ export class Table extends Component {
   }
 
   render() {
-    if (this.props.clientSideSearchingEnabled) {
+    if (this.props.clientSideSearchingEnabled || this.props.isPerformingInitialFetch) {
       return (
         <InMemoryTable
           columns={this.getColumns()}
