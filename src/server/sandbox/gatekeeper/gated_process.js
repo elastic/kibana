@@ -19,9 +19,9 @@ export class GatedProcess {
     });
   }
 
-  kill() {
+  kill(signal) {
     this._process.removeAllListeners();
-    this._process.kill();
+    this._process.kill(signal);
   }
 
   _send(type, payload) {
