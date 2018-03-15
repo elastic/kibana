@@ -28,7 +28,7 @@ VisTypesRegistryProvider.register(function (Private) {
         showLabel: true
       }
     },
-    requiresUpdateStatus: [Status.PARAMS, Status.RESIZE],
+    requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
     visualization: TagCloudVisualization,
     responseHandler: 'tabify',
     editorConfig: {
