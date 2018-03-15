@@ -26,7 +26,7 @@ const operators = {
   },
 };
 
-function getDescription({ operator }) {
+function getDescription(operator) {
   const { description } = operators[operator];
   return `<p>${description}</p>`;
 }
@@ -41,7 +41,7 @@ export function getSuggestionsProvider({ indexPattern }) {
     });
     const suggestions = matchingOperators.map(operator => {
       const text = operator + ' ';
-      const description = getDescription({ operator });
+      const description = getDescription(operator);
       return { type, text, description, start: end, end };
     });
     return suggestions;

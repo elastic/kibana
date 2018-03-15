@@ -32,9 +32,7 @@ export function getSuggestionsProvider({ $http, config, indexPattern }) {
         .filter(value => value.toLowerCase().includes(query.toLowerCase()))
         .map(value => {
           const text = `${value} `;
-          // Values can get long, and they don't really need a description.
-          const description = '';
-          return { type, text, description, start, end };
+          return { type, text, start, end };
         });
     }
   }
