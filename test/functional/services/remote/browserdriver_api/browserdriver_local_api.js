@@ -21,9 +21,6 @@ export function createLocalBrowserdriverApi(log, url, browser) {
     default:
       runningDriver = CHROMEDRIVER_EXEC;
   }
-
-  log.debug(FIREFOXDRIVER_EXEC);
-  log.debug(CHROMEDRIVER_EXEC);
   let proc = null;
 
   return new BrowserdriverApi({

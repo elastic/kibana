@@ -270,7 +270,7 @@
     "karma-junit-reporter": "1.2.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
-    "leadfoot": "1.7.4",
+    "leadfoot": "silne30/leadfoot#validation_for_response_in_ff58",
     "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.0.4",
