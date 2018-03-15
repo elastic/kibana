@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
-import Tooltip from '../../tooltip';
+import { EuiToolTip } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 
 function getColor(rules, colorKey, value) {
@@ -103,7 +103,7 @@ class TableVis extends Component {
       );
       if (!isSortable(metric)) {
         headerContent = (
-          <Tooltip text="This Column is Not Sortable">{headerContent}</Tooltip>
+          <EuiToolTip content="This Column is Not Sortable">{headerContent}</EuiToolTip>
         );
       }
 
