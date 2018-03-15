@@ -21,8 +21,9 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($scope, Private, config) {
+    controller($injector, $scope, Private, config) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+      const dashboardConfig = $injector.get('dashboardConfig');
 
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.find = (search) => {
@@ -31,6 +32,7 @@ uiRoutes
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);
       };
+      $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
     },
     resolve: {
       dash: function ($route, Private, courier, kbnUrl) {

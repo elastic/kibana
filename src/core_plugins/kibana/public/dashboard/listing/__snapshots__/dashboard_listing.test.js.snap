@@ -1,5 +1,193 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`after fetch hideWriteControls 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={Array []}
+    loading={false}
+    message={
+      <EuiText>
+        <h2>
+          <EuiTextColor
+            color="subdued"
+          >
+            Looks like you don't have any dashboards.
+          </EuiTextColor>
+        </h2>
+      </EuiText>
+    }
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "data-test-subj": "searchFilter",
+          "incremental": true,
+        },
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;
+
+exports[`after fetch renders call to action when no dashboards exist 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="newDashboardLink"
+        fill={false}
+        href="#/dashboard"
+        iconSide="left"
+        type="button"
+      >
+        Create new dashboard
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={Array []}
+    loading={false}
+    message={
+      <UNDEFINED>
+        <EuiText>
+          <h2>
+            <EuiTextColor
+              color="subdued"
+            >
+              Looks like you don't have any dashboards. Let's create some!
+            </EuiTextColor>
+          </h2>
+        </EuiText>
+        <EuiButton
+          color="primary"
+          data-test-subj="createDashboardPromptButton"
+          fill={true}
+          href="#/dashboard"
+          iconSide="left"
+          iconType="plusInCircle"
+          type="button"
+        >
+          Create new dashboard
+        </EuiButton>
+      </UNDEFINED>
+    }
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "data-test-subj": "searchFilter",
+          "incremental": true,
+        },
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;
+
 exports[`after fetch renders table rows 1`] = `
 <EuiPage
   data-test-subj="dashboardLandingPage"
@@ -63,22 +251,24 @@ exports[`after fetch renders table rows 1`] = `
     items={
       Array [
         Object {
+          "description": "dashboard0 desc",
+          "id": "dashboard0",
+          "title": "dashboard0 title",
+        },
+        Object {
           "description": "dashboard1 desc",
           "id": "dashboard1",
           "title": "dashboard1 title",
         },
-        Object {
-          "description": "dashboard2 desc",
-          "id": "dashboard2",
-          "title": "dashboard2 title",
-        },
       ]
     }
     loading={false}
+    message="No dashboards matched your search."
     pagination={true}
     search={
       Object {
         "box": Object {
+          "data-test-subj": "searchFilter",
           "incremental": true,
         },
         "onChange": [Function],
@@ -190,22 +380,24 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     items={
       Array [
         Object {
+          "description": "dashboard0 desc",
+          "id": "dashboard0",
+          "title": "dashboard0 title",
+        },
+        Object {
           "description": "dashboard1 desc",
           "id": "dashboard1",
           "title": "dashboard1 title",
         },
-        Object {
-          "description": "dashboard2 desc",
-          "id": "dashboard2",
-          "title": "dashboard2 title",
-        },
       ]
     }
     loading={false}
+    message="No dashboards matched your search."
     pagination={true}
     search={
       Object {
         "box": Object {
+          "data-test-subj": "searchFilter",
           "incremental": true,
         },
         "onChange": [Function],
@@ -285,10 +477,12 @@ exports[`renders table in loading state 1`] = `
     }
     items={Array []}
     loading={true}
+    message="No dashboards matched your search."
     pagination={true}
     search={
       Object {
         "box": Object {
+          "data-test-subj": "searchFilter",
           "incremental": true,
         },
         "onChange": [Function],

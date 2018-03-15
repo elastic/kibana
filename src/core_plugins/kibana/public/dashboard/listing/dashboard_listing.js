@@ -14,6 +14,8 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 
@@ -172,11 +174,50 @@ export class DashboardListing extends React.Component {
     return !newFilter.includes(oldFilter);
   }
 
+  renderMessage() {
+    if (!this.state.isFetchingItems && this.state.dashboards.length === 0 && !this.state.filter) {
+      if (this.props.hideWriteControls) {
+        return (
+          <EuiText>
+            <h2>
+              <EuiTextColor color="subdued">
+                {`Looks like you don't have any dashboards.`}
+              </EuiTextColor>
+            </h2>
+          </EuiText>
+        );
+      }
+
+      return (
+        <React.Fragment>
+          <EuiText>
+            <h2>
+              <EuiTextColor color="subdued">
+                {`Looks like you don't have any dashboards. Let's create some!`}
+              </EuiTextColor>
+            </h2>
+          </EuiText>
+          <EuiButton
+            href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createDashboardPromptButton"
+          >
+            Create new dashboard
+          </EuiButton>
+        </React.Fragment>
+      );
+    }
+
+    return 'No dashboards matched your search.';
+  }
+
   renderTable() {
     const search = {
       toolsLeft: this.renderDeleteButton(),
       box: {
         incremental: true,
+        ['data-test-subj']: 'searchFilter'
       },
       onChange: (query) => {
         if (this.state.showLimitError || this.shouldFetch(query.text, this.state.filter)) {
@@ -185,7 +226,7 @@ export class DashboardListing extends React.Component {
           }, this.fetchItems);
         }
         return true;
-      },
+      }
     };
     const selection = {
       itemId: 'id',
@@ -204,11 +245,25 @@ export class DashboardListing extends React.Component {
         pagination={true}
         selection={selection}
         search={search}
+        message={this.renderMessage()}
       />
     );
   }
 
   render() {
+    let createButton;
+    if (!this.props.hideWriteControls) {
+      createButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
+            data-test-subj="newDashboardLink"
+          >
+            Create new dashboard
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
     return (
       <EuiPage data-test-subj="dashboardLandingPage">
 
@@ -222,14 +277,9 @@ export class DashboardListing extends React.Component {
               </h1>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
-              data-test-subj="newDashboardLink"
-            >
-              Create new dashboard
-            </EuiButton>
-          </EuiFlexItem>
+
+          {createButton}
+
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
@@ -246,4 +296,5 @@ DashboardListing.propTypes = {
   find: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
+  hideWriteControls: PropTypes.bool.isRequired,
 };
