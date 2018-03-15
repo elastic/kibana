@@ -1,192 +1,136 @@
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
   EuiBasicTable,
-  ColumnType,
-  SelectionType
-} from '@elastic/eui/lib/components/basic_table/basic_table';
-import {
-  defaults as paginationBarDefaults
-} from '@elastic/eui/lib/components/basic_table/pagination_bar';
-import { isBoolean, isString } from '@elastic/eui/lib/services/predicate';
-// import { Comparators } from '@elastic/eui/lib/services/sort';
-import {
+  EuiSearchBar,
   Query,
-  QueryType,
-  SearchFiltersFiltersType,
-  SearchBoxConfigPropTypes, EuiSearchBar
-} from '@elastic/eui/lib/components/search_bar';
-import { EuiSpacer } from '@elastic/eui/lib/components/spacer/spacer';
+} from '@elastic/eui';
 
-const OnServerTablePropTypes = {
-  columns: PropTypes.arrayOf(ColumnType).isRequired,
-  fetch: PropTypes.func.isRequired,
-  loading: PropTypes.bool,
-  onSearchChanged: PropTypes.func,
-  message: PropTypes.string,
-  error: PropTypes.string,
-  search: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({
-    defaultQuery: QueryType,
-    box: PropTypes.shape(SearchBoxConfigPropTypes),
-    filters: SearchFiltersFiltersType,
-  })]),
-  pagination: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.shape({
-      pageSizeOptions: PropTypes.arrayOf(PropTypes.number)
-    })
-  ]),
-  sorting: PropTypes.bool,
-  selection: SelectionType
-};
-
-const initialQuery = (props) => {
-  const { search } = props;
-  if (!search) {
-    return undefined;
-  }
-  const query = search.defaultQuery || '';
-  return isString(query) ? Query.parse(query) : query;
-};
-
-const initialCriteria = (props) => {
-  const { pagination } = props;
-  return {
-    page: !pagination ? undefined : {
-      index: 0,
-      size: pagination.pageSizeOptions ? pagination.pageSizeOptions[0] : paginationBarDefaults.pageSizeOptions[0]
-    }
-  };
-};
-
-export class OnServerTable extends React.Component {
-
-  static propTypes = OnServerTablePropTypes;
-  static defaultProps = {
-    pagination: false,
-    sorting: false
+export class OnServerTable extends Component {
+  static propTypes = {
+    columns: PropTypes.array.isRequired,
+    selectionConfig: PropTypes.shape({
+      itemId: PropTypes.string.isRequired,
+      selectable: PropTypes.func,
+      selectableMessage: PropTypes.func,
+      onSelectionChange: PropTypes.func.isRequired,
+    }).isRequired,
+    filterOptions: PropTypes.array.isRequired,
+    fetchData: PropTypes.func.isRequired,
+    onSearchChanged: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
 
-    const criteria = initialCriteria(props);
-    const query = initialQuery(props);
     this.state = {
-      data: this.computeData([], criteria, query),
-      isFetchingData: false,
-      query,
-      criteria,
+      pageIndex: 0,
+      pageSize: 5,
+      selectedItems: [],
+      multiAction: false,
+      query: Query.parse(''),
+      pageOfItems: [],
+      totalItemCount: 0,
+      isSearching: false,
     };
   }
 
   componentWillMount() {
-    this.fetchData();
+    this.fetchItems();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.items !== this.props.items) {
-      this.setState(prevState => {
-        const data = this.computeData(nextProps.items, prevState.criteria);
-        return { data };
-      });
-    }
-  }
+  onQueryChanged = query => {
+    this.setState({ query });
+    this.fetchItems(query);
+  };
 
-  fetchData = async (
-    criteria = this.state.criteria,
+  async fetchItems(
     query = this.state.query,
-  ) => {
-    this.setState({ isFetchingData: true });
-    const items = await this.props.fetch(criteria, query);
+    pageIndex = this.state.pageIndex,
+    pageSize = this.state.pageSize
+  ) {
+    this.setState({ isSearching: true });
+
+    const { pageOfItems = [], totalItemCount = 0 } = await this.props.fetchData(
+      query,
+      pageIndex,
+      pageSize
+    );
+
     this.setState({
-      data: this.computeData(items, criteria, query),
-      isFetchingData: false,
+      pageOfItems,
+      totalItemCount,
+      isSearching: false,
     });
   }
 
-  computeData(items/*, criteria, query*/) {
-    if (!items) {
-      return { items: [], totalCount: 0 };
-    }
-    // if (query) {
-    //   items = Query.execute(query, items);
-    // }
-    // if (criteria.sort) {
-    //   items = items.sort(Comparators.property(criteria.sort.field, Comparators.default(criteria.sort.direction)));
-    // }
-    const totalCount = items.length;
-    // if (criteria.page) {
-    //   const { index, size } = criteria.page;
-    //   const from = index * size;
-    //   items = items.slice(from, Math.min(from + size, items.length));
-    // }
-    return { items, totalCount };
-  }
+  onTableChange = async ({ page = {} }) => {
+    const { index: pageIndex, size: pageSize } = page;
 
-  onCriteriaChange(criteria) {
-    this.setState({ criteria });
-    this.fetchData(criteria, this.state.query);
-  }
+    this.setState({
+      pageIndex,
+      pageSize,
+    });
 
-  onQueryChange(query) {
-    this.setState({ query });
-    this.fetchData(this.state.criteria, query);
-    this.props.onSearchChanged && this.props.onSearchChanged(query);
-  }
+    this.fetchItems(undefined, pageIndex, pageSize);
+  };
 
   render() {
-    const { criteria, data, isFetchingData } = this.state;
-    const { message, error, selection } = this.props;
-    const { items, totalCount } = data;
-    const pagination = !this.props.pagination ? undefined : {
-      pageIndex: criteria.page.index,
-      pageSize: criteria.page.size,
-      totalItemCount: totalCount,
-      ...(isBoolean(this.props.pagination) ? {} : this.props.pagination)
-    };
-    const sorting = !this.props.sorting ? undefined : {
-      sort: criteria.sort
-    };
-    const searchBar = this.resolveSearchBar();
-    const table = (
-      <EuiBasicTable
-        items={message ? [] : items} // if message is configured, we force showing it instead of the items
-        columns={this.props.columns}
-        pagination={pagination}
-        sorting={sorting}
-        selection={selection}
-        onChange={this.onCriteriaChange.bind(this)}
-        error={error}
-        loading={isFetchingData}
-        noItemsMessage={message}
-      />
-    );
+    const {
+      pageIndex,
+      pageSize,
+      pageOfItems,
+      totalItemCount,
+      isSearching,
+    } = this.state;
+    const { filterOptions, columns } = this.props;
 
-    if (!searchBar) {
-      return table;
-    }
+    const pagination = {
+      pageIndex: pageIndex,
+      pageSize: pageSize,
+      totalItemCount: totalItemCount,
+      pageSizeOptions: [5, 10, 20, 50],
+    };
+
+    const selection = {
+      itemId: 'id',
+      onSelectionChange: this.onSelectionChange,
+    };
+
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: 'Type',
+        multiSelect: 'or',
+        options: filterOptions,
+      },
+      {
+        type: 'field_value_selection',
+        field: 'tag',
+        name: 'Tags',
+        multiSelect: 'or',
+        options: [],
+      },
+    ];
 
     return (
-      <div>
-        {searchBar}
-        <EuiSpacer size="l"/>
-        {table}
-      </div>
-    );
-  }
-
-  resolveSearchBar() {
-    const { search } = this.props;
-    if (search) {
-      const searchBarProps = isBoolean(search) ? {} : search;
-      return (
+      <Fragment>
         <EuiSearchBar
-          onChange={this.onQueryChange.bind(this)}
-          {...searchBarProps}
+          filters={filters}
+          onChange={this.onQueryChanged}
+          onParse={({ error }) => this.setState({ error })}
         />
-      );
-    }
+        <EuiBasicTable
+          loading={isSearching}
+          items={pageOfItems}
+          columns={columns}
+          pagination={pagination}
+          selection={selection}
+          onChange={this.onTableChange}
+        />
+      </Fragment>
+    );
   }
 }
