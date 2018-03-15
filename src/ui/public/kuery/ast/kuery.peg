@@ -192,6 +192,7 @@ QuotedString
       end: end.offset - cursor.length,
       prefix: prefix.join(''),
       suffix: suffix.join(''),
+      text: text().replace(cursor, '')
     };
   }
   / '"' chars:QuotedCharacter* '"' {
@@ -232,6 +233,7 @@ UnquotedLiteral
       end: end.offset - cursor.length,
       prefix: prefix.join(''),
       suffix: suffix.join(''),
+      text: text().replace(cursor, '')
     };
   }
   / chars:UnquotedCharacter+ {
@@ -258,6 +260,7 @@ OptionalSpace
       end: end.offset - cursor.length,
       prefix: prefix.join(''),
       suffix: suffix.join(''),
+      text: text().replace(cursor, '')
     };
   }
   / Space*

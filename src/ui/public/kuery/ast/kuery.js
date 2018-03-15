@@ -175,6 +175,7 @@ module.exports = (function() {
               end: end.offset - cursor.length,
               prefix: prefix.join(''),
               suffix: suffix.join(''),
+              text: text().replace(cursor, '')
             };
           },
         peg$c30 = function(chars) {
