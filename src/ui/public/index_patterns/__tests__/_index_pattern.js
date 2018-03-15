@@ -346,8 +346,7 @@ describe('index pattern', function () {
 
       it('is fulfilled by the result of interval toIndexList', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList[0]).to.equal('foo');
-        expect(indexList[1]).to.equal('bar');
+        expect(indexList).to.equal('foo,bar');
       });
 
       describe('with sort order', function () {
@@ -372,7 +371,7 @@ describe('index pattern', function () {
 
       it('is fulfilled using the id', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql([indexPattern.title]);
+        expect(indexList).to.eql(indexPattern.title);
       });
     });
 
@@ -387,7 +386,7 @@ describe('index pattern', function () {
 
       it('is fulfilled by id', async function () {
         const indexList = await indexPattern.toIndexList();
-        expect(indexList).to.eql([indexPattern.title]);
+        expect(indexList).to.eql(indexPattern.title);
       });
     });
   });
