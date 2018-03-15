@@ -116,7 +116,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             var transitionTimeout;
             var popupTimeout;
             var appendToBody = angular.isDefined( options.appendToBody ) ? options.appendToBody : false;
-            var triggers = [getTriggers( undefined )];
+            var triggers = getTriggers( undefined );
             var hasEnableExp = angular.isDefined(attrs[prefix+'Enable']);
             var ttScope = scope.$new(true);
 
@@ -294,28 +294,21 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             }
 
             var unregisterTriggers = function () {
-              for (var i = 0; i < triggers.length; i++) {
-                element.unbind(triggers[i].show, showTooltipBind);
-                element.unbind(triggers[i].hide, hideTooltipBind);
-              }
+              element.unbind(triggers.show, showTooltipBind);
+              element.unbind(triggers.hide, hideTooltipBind);
             };
 
             function prepTriggers() {
-              var triggerVal = attrs[ prefix + 'Trigger' ] || '';
-              var val = triggerVal.split(' ');
+              var val = attrs[ prefix + 'Trigger' ];
               unregisterTriggers();
 
-              triggers = [];
-              for (var i = 0; i < val.length; i++) {
-                var trigger = getTriggers( val[i] );
-                triggers.push(trigger);
+              triggers = getTriggers( val );
 
-                if ( trigger.show === trigger.hide ) {
-                  element.bind( trigger.show, toggleTooltipBind );
-                } else {
-                  element.bind( trigger.show, showTooltipBind );
-                  element.bind( trigger.hide, hideTooltipBind );
-                }
+              if ( triggers.show === triggers.hide ) {
+                element.bind( triggers.show, toggleTooltipBind );
+              } else {
+                element.bind( triggers.show, showTooltipBind );
+                element.bind( triggers.hide, hideTooltipBind );
               }
             }
             prepTriggers();
