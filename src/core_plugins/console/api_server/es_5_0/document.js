@@ -1,40 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('index_doc', {
-    methods: ['PUT', 'POST'],
-    patterns: [
-      "{index}/{type}/{id}"
-    ],
-    url_params: {
-      "version": 1,
-      "version_type": ["external", "internal"],
-      "op_type": ["create"],
-      "routing": "",
-      "parent": "",
-      "timestamp": "",
-      "ttl": "5m",
-      "consistency": ["qurom", "one", "all"],
-      "refresh": "__flag__",
-      "timeout": "1m"
-    }
-  });
-  api.addEndpointDescription('index_doc_no_id', {
-    methods: ['POST'],
-    patterns: [
-      "{index}/{type}"
-    ],
-    url_params: {
-      "version": 1,
-      "version_type": ["external", "internal"],
-      "routing": "",
-      "parent": "",
-      "timestamp": "",
-      "ttl": "5m",
-      "consistency": ["qurom", "one", "all"],
-      "refresh": "__flag__",
-      "timeout": "1m"
-    }
-  });
-
   api.addEndpointDescription('_update', {
     methods: ['POST'],
     patterns: [
