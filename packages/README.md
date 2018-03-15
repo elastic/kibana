@@ -49,6 +49,11 @@ Today a package can follow the pattern of having a `__tests__` directory in each
 
 A package using the `.test.js` naming convention will have those tests automatically picked up by Jest and run by the unit test runner, currently mapped to the Kibana `test` script in the root `package.json`.
 
+* `node scripts/jest` runs all Jest tests in Kibana.
+
 If a package's tests should be run with Mocha, you'll have to opt-in to run them by appending the package's test file pattern(s) to Kibana's `tasks/config/simplemocha.js` file. These will then be run by the unit test runner.
+
+* `yarn test` or `./node_modules/.bin/grunt test` runs all unit tests, including Mocha tests.
+* `./node_modules/.bin/grunt simplemocha:all` runs all Mocha tests.
 
 Each package can also specify its own `test` script in the package's `package.json`, for cases where you'd prefer to run the tests from the local package directory.
