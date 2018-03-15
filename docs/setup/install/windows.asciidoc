@@ -8,6 +8,10 @@ link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
 link:/downloads/past-releases[Past Releases page].
 
+. <<install-windows,Download and install the `.zip` package>>.
+include::{xkb-repo-dir}/setup/xpack-passwords.asciidoc[]
+. <<windows-running,Start {kib}>>.
+
 [[install-windows]]
 ==== Download and install the `.zip` package
 
