@@ -289,7 +289,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           if (!Array.isArray(detailedIndices)) {
             return detailedIndices.index;
           }
-          return _.pluck(detailedIndices, 'index');
+          return detailedIndices.map(({ index }) => index).join(',');
         });
     }
 
