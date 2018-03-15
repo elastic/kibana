@@ -10,15 +10,15 @@ const module = uiModules.get('kibana/config');
  * to expose the exact same API as the config service that has existed since forever.
  * @name config
  */
-module.service(`config`, function ($rootScope) {
+module.service(`config`, function ($rootScope, Promise) {
   const uiSettings = chrome.getUiSettingsClient();
 
   // direct bind sync methods
-  this.getAll = uiSettings.getAll.bind(uiSettings);
-  this.get = uiSettings.get.bind(uiSettings);
-  this.isDeclared = uiSettings.isDeclared.bind(uiSettings);
-  this.isDefault = uiSettings.isDefault.bind(uiSettings);
-  this.isCustom = uiSettings.isCustom.bind(uiSettings);
+  this.getAll = (...args) => uiSettings.getAll(...args);
+  this.get = (...args) => uiSettings.get(...args);
+  this.isDeclared = (...args) => uiSettings.isDeclared(...args);
+  this.isDefault = (...args) => uiSettings.isDefault(...args);
+  this.isCustom = (...args) => uiSettings.isCustom(...args);
 
   // modify remove() to use angular Promises
   this.remove = (key) => (
@@ -40,11 +40,19 @@ module.service(`config`, function ($rootScope) {
   //////////////////////////////
 
   const subscription = uiSettings.subscribe(({ key, newValue, oldValue }) => {
-    // tie into angular digest cycle
-    $rootScope.$evalAsync(() => {
+    const emit = () => {
       $rootScope.$broadcast('change:config',        newValue, oldValue, key, this);
       $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
-    });
+    };
+
+    // this is terrible, but necessary to emulate the same API
+    // that the `config` service had before where changes were
+    // emitted to scopes synchronously. All methods that don't
+    // require knowing if we are currently in a digest cycle are
+    // async and would deliver events too late for several usecases
+    //
+    // If you copy this code elsewhere you better have a good reason :)
+    $rootScope.$$phase ? emit() : $rootScope.$apply(emit);
   });
   $rootScope.$on('$destroy', () => subscription.unsubscribe());
 
