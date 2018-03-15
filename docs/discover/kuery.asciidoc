@@ -1,20 +1,26 @@
 [[kuery-query]]
-=== Kuery
+=== Kibana Query Language Enhancements
 
 experimental[This functionality is experimental and may be changed or removed completely in a future release.]
 
 [NOTE]
 ============
-Breaking changes were made to Kuery's experimental syntax in 6.3. Read on for details of the new syntax.
+In 6.0 we introduced an experimental query language called Kuery. We've taken what we learned from that experiment
+and applied it to the standard Kibana query language. As a result, Kuery is no longer available as a standalone 
+option. Saved searches using Kuery will automatically be opted in to using the language enhancements described on 
+this page. However, some breaking changes have been made to the query syntax, so read on for the full details on 
+what's new.
 ============
 
-Kuery is a new query language built specifically for Kibana. It aims to simplify the search experience in Kibana
-and enable the creation of helpful features like auto-complete, seamless migration of saved searches, additional
-query types, and more. Kuery is a basic experience today but we're hard at work building these additional features on
-top of the foundation Kuery provides.
+Starting in 6.3, you can choose to opt-in to a number of exciting experimental query language enhancements under the
+options menu in the query bar. Currently, opting in will enable autocomplete functionality, scripted field support,
+and a simplified, easier to use syntax. We're hard at work building even more features for you to try out. Take 
+these features for a spin and let us know what you think!  
 
-If you're familiar with Kibana's old lucene query syntax, you should feel right at home with Kuery. Both languages 
-are very similar, but there are some differences we'll note along the way.
+==== New Simplified Syntax
+
+If you're familiar with Kibana's old lucene query syntax, you should feel right at home with the new syntax. The basics
+stay the same, we've simply refined things to make the query language easier to use. Read about the changes below.
 
 `response:200` will match documents where the response field matches the value 200.
 
@@ -24,8 +30,8 @@ the message field's configured analyzer and will match documents that contain th
 they appear. This means documents with "quick brown fox" will match, but so will "quick fox brown". Remember to use quotes if you want
 to search for a phrase.
 
-Unlike lucene, Kuery will not split on whitespace. Multiple search terms must be separated by explicit
-boolean operators. Note that boolean operators in Kuery are not case sensitive.
+The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
+boolean operators. Note that boolean operators are not case sensitive.
 
 `response:200 extension:php` in lucene would become `response:200 and extension:php`.
  This will match documents where response matches 200 and extension matches php.
@@ -55,9 +61,9 @@ Entire groups can also be inverted.
 
 `response:200 and not (extension:php or extension:css)`
 
-Ranges in Kuery are similar to lucene with a small syntactical difference. 
+Ranges are similar to lucene with a small syntactical difference. 
 
-Instead of `bytes:>1000`, Kuery omits the colon: `bytes > 1000`. 
+Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`. 
 
 `>, >=, <, <=` are all valid range operators.
 

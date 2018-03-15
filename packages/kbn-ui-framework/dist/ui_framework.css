@@ -2764,7 +2764,7 @@ main {
    */
 .kuiLocalSearchAssistedInput__assistance {
   position: absolute;
-  right: 12px;
+  right: 6px;
   top: 50%;
   /* 1 */
   z-index: 2;

@@ -6,7 +6,6 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
-  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const defaultSettings = {
@@ -233,81 +232,6 @@ export default function ({ getService, getPageObjects }) {
         expect(phrases.length).to.be(1);
         expect(phrases[0]).to.be('jpg');
       });
-    });
-
-    describe('query language switching', function () {
-
-      after(async function () {
-        await kibanaServer.uiSettings.replace(defaultSettings);
-
-        log.debug('discover');
-        await PageObjects.common.navigateToApp('discover');
-      });
-
-      it('should not show a language switcher by default', async function () {
-        const languageSwitcherExists = await queryBar.hasLanguageSwitcher();
-        expect(languageSwitcherExists).to.be(false);
-      });
-
-      it('should show a language switcher after it has been enabled in the advanced settings', async function () {
-        await kibanaServer.uiSettings.update({
-          'search:queryLanguage:switcher:enable': true
-        });
-        await PageObjects.common.navigateToApp('discover');
-        const languageSwitcherExists = await queryBar.hasLanguageSwitcher();
-        expect(languageSwitcherExists).to.be(true);
-      });
-
-      it('should use lucene by default', async function () {
-        const currentLanguage = await queryBar.getCurrentLanguage();
-        expect(currentLanguage).to.be('lucene');
-      });
-
-      it('should allow changing the default language in advanced settings', async function () {
-        await kibanaServer.uiSettings.update({
-          'search:queryLanguage': 'kuery'
-        });
-        await PageObjects.common.navigateToApp('discover');
-
-        const languageSwitcherExists = await queryBar.hasLanguageSwitcher();
-        expect(languageSwitcherExists).to.be(true);
-
-        const currentLanguage = await queryBar.getCurrentLanguage();
-        expect(currentLanguage).to.be('kuery');
-      });
-
-      it('should reset the query and filters when the language is switched', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.clickFieldListItem('response');
-        await PageObjects.discover.clickFieldListPlusFilter('response', 200);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.query('php');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        let queryString = await queryBar.getQueryString();
-        expect(queryString).to.not.be.empty();
-
-        await queryBar.setLanguage('lucene');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        queryString = await queryBar.getQueryString();
-        expect(queryString).to.be.empty();
-        expect(await filterBar.hasFilter('response', 200)).to.be(false);
-
-        await PageObjects.discover.clickFieldListPlusFilter('response', 200);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.query('php');
-        queryString = await queryBar.getQueryString();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(queryString).to.not.be.empty();
-        expect(await filterBar.hasFilter('response', 200)).to.be(true);
-
-        await queryBar.setLanguage('kuery');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        queryString = await queryBar.getQueryString();
-        expect(queryString).to.be.empty();
-        expect(await filterBar.hasFilter('response', 200)).to.be(false);
-      });
-
     });
 
     describe('data-shared-item', function () {

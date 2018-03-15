@@ -54,7 +54,7 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, localStorage) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
@@ -121,7 +121,10 @@ app.directive('dashboardApp', function ($injector) {
       });
 
       dashboardStateManager.applyFilters(
-        dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
+        dashboardStateManager.getQuery() || {
+          query: '',
+          language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        },
         filterBar.getFilters()
       );
 
@@ -170,11 +173,6 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.updateQueryAndFetch = function (query) {
-        // reset state if language changes
-        if ($scope.model.query.language && $scope.model.query.language !== query.language) {
-          filterBar.removeAll();
-          dashboardStateManager.getAppState().$newFilters = [];
-        }
         $scope.model.query = migrateLegacyQuery(query);
         dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
         $scope.refresh();

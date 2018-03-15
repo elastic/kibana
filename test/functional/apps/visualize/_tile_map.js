@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickMapZoomOut();
 
         await PageObjects.visualize.openSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         await PageObjects.visualize.selectTableInSpyPaneSelect();
         const actualTableData = await PageObjects.visualize.getDataTableData();
         compareTableData(expectedTableData, actualTableData.trim().split('\n'));
