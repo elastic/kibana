@@ -67,12 +67,13 @@ module.directive('queryBar', function () {
       };
 
       // TODO: Figure out a better way to set selection
-      this.onSuggestionSelect = ({ text, start, end }) => {
+      this.onSuggestionSelect = ({ type, text, start, end }) => {
         const { query } = this.localQuery;
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd } = inputEl;
         const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
         this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
+        if (type === 'recentSearch') this.submit();
         inputEl.setSelectionRange(start + text.length, start + text.length);
         inputEl.focus();
         this.updateSuggestions();
