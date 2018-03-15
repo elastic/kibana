@@ -7,9 +7,9 @@ import { getSuggestionsProvider as conjunction } from './conjunction';
 
 const cursor = '\0';
 
-export function getSuggestionsProvider({ $http, config, indexPattern, persistedLog }) {
+export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
-    return provider({ $http, config, indexPattern, persistedLog });
+    return provider({ $http, config, indexPatterns });
   });
 
   return function getSuggestions({ query, selectionStart, selectionEnd }) {
@@ -23,10 +23,10 @@ export function getSuggestionsProvider({ $http, config, indexPattern, persistedL
     }
 
     const { suggestionTypes = [] } = cursorNode;
-    return Promise.all(suggestionTypes.map(type => {
+    const suggestionsByType = suggestionTypes.map(type => {
       return getSuggestionsByType[type](cursorNode);
-    })).then(suggestionsByType => {
-      return flatten(suggestionsByType);
     });
+    return Promise.all(suggestionsByType)
+      .then(suggestionsByType => flatten(suggestionsByType));
   };
 }

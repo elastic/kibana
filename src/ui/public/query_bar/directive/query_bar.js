@@ -1,3 +1,4 @@
+import { compact } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
@@ -20,18 +21,22 @@ module.directive('queryBar', function () {
       appName: '=?',
       onSubmit: '&',
       disableAutoFocus: '=',
-      indexPattern: '='
+      indexPatterns: '='
     },
     controllerAs: 'queryBar',
     bindToController: true,
 
-    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns) {
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
 
       let persistedLog;
-      const getKuerySuggestions = getSuggestionsProvider({ $http, config, indexPattern: this.indexPattern });
+
+      this.getIndexPatterns = () => {
+        if (compact(this.indexPatterns).length) return Promise.resolve(this.indexPatterns);
+        return Promise.all([indexPatterns.getDefault()]);
+      };
 
       this.submit = () => {
         if (this.localQuery.query) {
@@ -57,10 +62,10 @@ module.directive('queryBar', function () {
       this.updateSuggestions = () => {
         const { query } = this.localQuery;
         this.suggestions = getRecentSearchSuggestions(query);
-        if (this.localQuery.language !== 'kuery') return;
+        if (this.localQuery.language !== 'kuery' || !this.getKuerySuggestions) return;
 
         const { selectionStart, selectionEnd } = $element.find('input')[0];
-        getKuerySuggestions({ query, selectionStart, selectionEnd })
+        this.getKuerySuggestions({ query, selectionStart, selectionEnd })
           .then(suggestions => {
             $scope.$apply(() => this.suggestions = [...suggestions, ...this.suggestions]);
           });
@@ -93,6 +98,12 @@ module.directive('queryBar', function () {
           ...newQuery
         };
       }, true);
+
+      $scope.$watch('queryBar.indexPatterns', () => {
+        this.getIndexPatterns().then(indexPatterns => {
+          this.getKuerySuggestions = getSuggestionsProvider({ $http, config, indexPatterns });
+        });
+      });
 
       function getRecentSearchSuggestions(query) {
         const recentSearches = persistedLog.get();

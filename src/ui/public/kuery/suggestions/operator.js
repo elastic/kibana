@@ -1,3 +1,4 @@
+import { flatten } from 'lodash';
 const type = 'operator';
 
 const operators = {
@@ -31,19 +32,21 @@ function getDescription(operator) {
   return `<p>${description}</p>`;
 }
 
-export function getSuggestionsProvider({ indexPattern }) {
+export function getSuggestionsProvider({ indexPatterns }) {
+  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
   return function getOperatorSuggestions({ end, fieldName }) {
-    const field = indexPattern.fields.byName[fieldName];
-    if (!field) return [];
-    const matchingOperators = Object.keys(operators).filter(operator => {
-      const { fieldTypes } = operators[operator];
-      return !fieldTypes || fieldTypes.includes(field.type);
-    });
-    const suggestions = matchingOperators.map(operator => {
-      const text = operator + ' ';
-      const description = getDescription(operator);
-      return { type, text, description, start: end, end };
-    });
-    return suggestions;
+    const fields = allFields.filter(field => field.name === fieldName);
+    return flatten(fields.map(field => {
+      const matchingOperators = Object.keys(operators).filter(operator => {
+        const { fieldTypes } = operators[operator];
+        return !fieldTypes || fieldTypes.includes(field.type);
+      });
+      const suggestions = matchingOperators.map(operator => {
+        const text = operator + ' ';
+        const description = getDescription(operator);
+        return { type, text, description, start: end, end };
+      });
+      return suggestions;
+    }));
   };
 }
