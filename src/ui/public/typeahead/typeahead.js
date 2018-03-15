@@ -20,7 +20,7 @@ typeahead.directive('kbnTypeahead', function () {
     },
     bindToController: true,
     controllerAs: 'typeahead',
-    controller: function () {
+    controller: function ($element) {
       this.isHidden = true;
       this.selectedIndex = null;
 
@@ -36,6 +36,7 @@ typeahead.directive('kbnTypeahead', function () {
         } else {
           this.selectedIndex = this.items.length - 1;
         }
+        this.scrollSelectedIntoView();
       };
 
       this.selectNext = () => {
@@ -44,6 +45,14 @@ typeahead.directive('kbnTypeahead', function () {
         } else {
           this.selectedIndex = 0;
         }
+        this.scrollSelectedIntoView();
+      };
+
+      this.scrollSelectedIntoView = () => {
+        const parent = $element.find('.typeahead-items')[0];
+        const child = $element.find('.typeahead-item').eq(this.selectedIndex)[0];
+        parent.scrollTop = Math.min(parent.scrollTop, child.offsetTop);
+        parent.scrollTop = Math.max(parent.scrollTop, child.offsetTop + child.offsetHeight - parent.offsetHeight);
       };
 
       this.isVisible = () => {
