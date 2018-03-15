@@ -8,16 +8,12 @@ function removeLineBreak(str) {
 }
 
 describe('compare .nvmrc and .node-version files', () => {
-  it('should match', () => {
-    return Promise.all([
+  it('should match', async () => {
+    const [nvmrc, nodeVersion] = await Promise.all([
       readFile('./.nvmrc', { encoding: 'utf-8' }),
       readFile('./.node-version', { encoding: 'utf-8' }),
-    ])
-      .then(([nvmrc, nodeVersion]) => {
-        expect(removeLineBreak(nvmrc)).to.be(removeLineBreak(nodeVersion));
-      })
-      .catch(e => {
-        expect().fail(e);
-      });
+    ]);
+
+    expect(removeLineBreak(nvmrc)).to.be(removeLineBreak(nodeVersion));
   });
 });
