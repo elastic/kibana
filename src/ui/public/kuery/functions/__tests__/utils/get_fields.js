@@ -3,6 +3,7 @@ import expect from 'expect.js';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 import { nodeTypes } from 'ui/kuery';
+import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;
 
@@ -15,11 +16,14 @@ describe('getFields', function () {
 
   describe('field names without a wildcard', function () {
 
-    it('should thrown an error if the field does not exist in the index pattern', function () {
+    it('should return a simple field object if the field does not exist in the index pattern', function () {
       const fieldNameNode = nodeTypes.literal.buildNode('nonExistentField');
-      expect(getFields).withArgs(fieldNameNode, indexPattern).to.throwException(
-        /Field nonExistentField does not exist in index pattern logstash-\*/
-      );
+      const expected = [{
+        name: 'nonExistentField',
+        scripted: false,
+      }];
+      const actual = getFields(fieldNameNode, indexPattern);
+      expectDeepEqual(actual, expected);
     });
 
     it('should return the single matching field in an array', function () {
@@ -49,20 +53,25 @@ describe('getFields', function () {
       expect(results[0].name).to.be('foo*');
 
       // ensure the wildcard is not actually being parsed
-      expect(getFields).withArgs(nodeTypes.literal.buildNode('fo*'), indexPatternWithWildField).to.throwException(
-        /Field fo\* does not exist in index pattern wildIndex/
-      );
-
+      const expected = [{
+        name: 'fo*',
+        scripted: false,
+      }];
+      const actual = getFields(nodeTypes.literal.buildNode('fo*'), indexPatternWithWildField);
+      expectDeepEqual(actual, expected);
     });
   });
 
   describe('field name patterns with a wildcard', function () {
 
-    it('should thrown an error if the pattern does not match any fields in the index pattern', function () {
+    it('should use the exact pattern if it does not match any fields in the index pattern', function () {
       const fieldNameNode = nodeTypes.wildcard.buildNode('nonExistent*');
-      expect(getFields).withArgs(fieldNameNode, indexPattern).to.throwException(
-        /No fields match the pattern nonExistent\* in index pattern logstash-\*/
-      );
+      const expected = [{
+        name: 'nonExistent*',
+        scripted: false,
+      }];
+      const actual = getFields(fieldNameNode, indexPattern);
+      expectDeepEqual(actual, expected);
     });
 
     it('should return all fields that match the pattern in an array', function () {
