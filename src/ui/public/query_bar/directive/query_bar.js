@@ -77,11 +77,16 @@ module.directive('queryBar', function () {
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd } = inputEl;
         const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
+
         this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
-        if (type === 'recentSearch') this.submit();
         inputEl.setSelectionRange(start + text.length, start + text.length);
         inputEl.focus();
-        this.updateSuggestions();
+
+        if (type === 'recentSearch') {
+          this.submit();
+        } else {
+          this.updateSuggestions();
+        }
       };
 
       $scope.$watch('queryBar.localQuery.language', (language) => {
