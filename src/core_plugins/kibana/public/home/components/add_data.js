@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import chrome from 'ui/chrome';
 import {
   KuiCardGroup,
   KuiCard,
@@ -21,8 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-const apmUiEnabled = chrome.getInjected('apmUiEnabled');
-export function AddData({ addBasePath }) {
+export function AddData({ addBasePath, apmUiEnabled }) {
 
   const renderCards = () => {
     const cardStyle = {

@@ -17,6 +17,7 @@ import { recentlyAccessedShape } from './recently_accessed';
 export function HomeApp({ addBasePath, directories, recentlyAccessed }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
+  const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -66,6 +67,7 @@ export function HomeApp({ addBasePath, directories, recentlyAccessed }) {
             addBasePath={addBasePath}
             directories={directories}
             isCloudEnabled={isCloudEnabled}
+            apmUiEnabled={apmUiEnabled}
             recentlyAccessed={recentlyAccessed}
           />
         </Route>

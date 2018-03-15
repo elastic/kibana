@@ -18,7 +18,7 @@ import {
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccessed }) {
+export function Home({ addBasePath, directories, isCloudEnabled, apmUiEnabled, recentlyAccessed }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -59,6 +59,7 @@ export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccesse
       <AddData
         addBasePath={addBasePath}
         isCloudEnabled={isCloudEnabled}
+        apmUiEnabled={apmUiEnabled}
       />
 
       <EuiSpacer size="l" />
