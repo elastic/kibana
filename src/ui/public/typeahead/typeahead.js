@@ -64,20 +64,26 @@ typeahead.directive('kbnTypeahead', function () {
       this.onKeyDown = (event) => {
         const { keyCode } = event;
 
-        this.isHidden = keyCode === ESCAPE;
+        if (keyCode === ESCAPE) this.isHidden = true;
 
         if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
           this.submit();
         } else if (keyCode === UP) {
           event.preventDefault();
+          this.isHidden = false;
           this.selectPrevious();
         } else if (keyCode === DOWN) {
           event.preventDefault();
+          this.isHidden = false;
           this.selectNext();
         } else {
           this.selectedIndex = null;
         }
+      };
+
+      this.onKeyPress = () => {
+        this.isHidden = false;
       };
 
       this.onFocus = () => {
