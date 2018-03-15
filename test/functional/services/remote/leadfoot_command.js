@@ -10,16 +10,15 @@ const MINUTE = 60 * SECOND;
 let attemptCounter = 0;
 async function attemptToCreateCommand(log, server, driverApi) {
   const attemptId = ++attemptCounter;
-  var capabilities = {};
+  let capabilities = {};
 
   switch(driverApi.getBrowserName()) {
-    case 'firefox':
+    default:
       capabilities = { browserName: 'firefox' };
   }
 
   log.debug('[leadfoot:command] Creating session');
-  debugger;
-  const session = await server.createSession(capabilities);
+  const session = await server.createSession({}, capabilities);
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Registerying session for teardown');
@@ -62,6 +61,9 @@ export async function initLeadfootCommand({ log, driverApi }) {
       // `server._fillCapabilities()` ourselves to do the fixing once we have a reference
       // to the session and have registered it for teardown before stopping the
       // chromedriverApi.
+      server.fixSessionCapabilities = false;
+
+      server.fixSessionCapabilities = false;
 
       while (true) {
         const command = await Promise.race([
