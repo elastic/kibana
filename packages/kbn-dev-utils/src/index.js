@@ -1,2 +1,2 @@
-export { withProcRunner } from './proc-runner';
-export { createToolingLog, pickLevelFromFlags } from './tooling-log';
+export { withProcRunner } from './proc_runner';
+export { createToolingLog, pickLevelFromFlags } from './tooling_log';

@@ -1,6 +1,6 @@
 import { withProcRunner } from '../with_proc_runner';
 
-describe('proc-runner', () => {
+describe('proc runner', () => {
   function runProc({ thing = '', procs }) {
     return new Promise(resolve => {
       setTimeout(() => {
