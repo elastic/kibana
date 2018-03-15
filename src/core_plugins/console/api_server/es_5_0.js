@@ -13,7 +13,6 @@ let parts = [
   require('./es_5_0/percolator'),
   require('./es_5_0/query'),
   require('./es_5_0/reindex'),
-  require('./es_5_0/snapshot_restore'),
   require('./es_5_0/search'),
 ];
 
