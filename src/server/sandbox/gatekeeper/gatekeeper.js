@@ -36,6 +36,7 @@ process.on('message', async ({ processId, message: { id, type, payload } }) => {
       case 'kill': {
         const gatedProcess = processes.get(processId);
         gatedProcess.kill();
+        processes.delete(processId);
         break;
       }
       default:
