@@ -1,0 +1,15 @@
+{
+  "{index}/_alias/{name}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "{indices}/_alias/{name}",
+      "{indices}/_aliases/{name}"
+    ]
+  }
+}

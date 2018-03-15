@@ -8,7 +8,6 @@ let parts = [
   require('./es_5_0/filter'),
   require('./es_5_0/nodes'),
   require('./es_5_0/globals'),
-  require('./es_5_0/indices'),
   require('./es_5_0/ingest'),
   require('./es_5_0/mappings'),
   require('./es_5_0/percolator'),
@@ -16,8 +15,6 @@ let parts = [
   require('./es_5_0/reindex'),
   require('./es_5_0/snapshot_restore'),
   require('./es_5_0/search'),
-  require('./es_5_0/settings'),
-  require('./es_5_0/templates')
 ];
 
 function ES_5_0() {
