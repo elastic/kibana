@@ -1,16 +1,8 @@
 import chrome from 'ui/chrome';
 import { escapeQuotes } from './escape_kql';
-import { escape } from 'lodash';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
-
-function getDescription({ fieldName, value }) {
-  return `
-    <p>Find results where <span class="suggestionItem__callout">${escape(fieldName)}</span>
-    is <span class="suggestionItem__callout">${escape(value)}</span></p>
-  `;
-}
 
 export function getSuggestionsProvider({ $http, config, indexPattern }) {
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
@@ -40,7 +32,8 @@ export function getSuggestionsProvider({ $http, config, indexPattern }) {
         .filter(value => value.toLowerCase().includes(query.toLowerCase()))
         .map(value => {
           const text = `${value} `;
-          const description = getDescription({ fieldName, value });
+          // Values can get long, and they don't really need a description.
+          const description = '';
           return { type, text, description, start, end };
         });
     }
