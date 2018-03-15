@@ -13,6 +13,7 @@ export class SyntheticProcess {
 
   _callbacks = {};
 
+  killed = false;
   stdout = new SyntheticStream();
   stderr = new SyntheticStream();
 
@@ -60,6 +61,7 @@ export class SyntheticProcess {
   }
 
   kill(signal) {
+    this.killed = true;
     this._channel.send('kill', signal);
   }
 }
