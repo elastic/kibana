@@ -25,20 +25,8 @@ exports.installSnapshot = async function installSnapshot({
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
 
-  const hoursOld = fileAgeInHours(dest);
-  if (hoursOld && hoursOld < 12) {
-    log.info(
-      'using cache from %s hours ago',
-      chalk.bold(hoursOld.toPrecision(2))
-    );
-  } else {
-    log.info('downloading %s', chalk.bold(url));
-    await downloadFile(url, dest);
-  }
-
-  await installArchive(dest, { installPath, basePath });
-
-  return { installPath };
+  await downloadFile(url, dest);
+  return await installArchive(dest, { installPath, basePath });
 };
 
 /**
@@ -59,11 +47,18 @@ function downloadFile(url, dest) {
     mkdirp(path.dirname(dest));
   }
 
-  return fetch(url).then(
+  log.info('downloading from %s', chalk.bold(url));
+
+  return fetch(url, { headers: { 'If-None-Match': cachedEtag(dest) } }).then(
     res =>
       new Promise((resolve, reject) => {
+        if (res.status === 304) {
+          log.info('etags match, using cache');
+          return resolve();
+        }
+
         if (!res.ok) {
-          reject(new Error(res.statusText));
+          return reject(new Error(res.statusText));
         }
 
         const stream = fs.createWriteStream(downloadPath);
@@ -74,7 +69,10 @@ function downloadFile(url, dest) {
           })
           .on('finish', () => {
             if (res.ok) {
+              const etag = res.headers.get('etag');
+
               fs.renameSync(downloadPath, dest);
+              fs.writeFileSync(`${dest}.etag`, etag);
               resolve();
             } else {
               reject(new Error(res.statusText));
@@ -84,16 +82,14 @@ function downloadFile(url, dest) {
   );
 }
 
-/**
- * Determines the age of a file
- *
- * @param {String} path - path to file
- */
-function fileAgeInHours(path) {
+function cachedEtag(dest) {
   try {
-    const cache = fs.statSync(path);
-    return (Date.now() - Date.parse(cache.ctime)) * 2.77778e-7;
+    return fs.readFileSync(`${dest}.etag`, {
+      encoding: 'utf8',
+    });
   } catch (e) {
-    return;
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
   }
 }
