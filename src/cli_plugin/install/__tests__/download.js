@@ -264,6 +264,7 @@ describe('kibana cli', function () {
       const proxyUrl = `http://localhost:${proxyPort}`;
 
       let proxyHit = false;
+      let proxyConnectHit = false;
 
       const proxy = http.createServer(function (req, res) {
         proxyHit = true;
@@ -273,12 +274,26 @@ describe('kibana cli', function () {
         res.end();
       });
 
+      proxy.on('connect', (req, socket) => {
+        // When the proxy is hit with a HTTPS request instead of a HTTP request,
+        // the above call handler will never be triggered. Instead the client
+        // sends a CONNECT request to the proxy, so that the proxy can setup
+        // a HTTPS connection between the client and the upstream server.
+        // We just intercept this CONNECT call here, write it an empty response
+        // and close the socket, which will fail the actual request, but we know
+        // that it tried to use the proxy.
+        proxyConnectHit = true;
+        socket.write('\r\n\r\n');
+        socket.end();
+      });
+
       function expectProxyHit() {
         expect(proxyHit).to.be(true);
       }
 
       function expectNoProxyHit() {
         expect(proxyHit).to.be(false);
+        expect(proxyConnectHit).to.be(false);
       }
 
       function nockPluginForUrl(url) {
@@ -293,6 +308,7 @@ describe('kibana cli', function () {
 
       beforeEach(function () {
         proxyHit = false;
+        proxyConnectHit = false;
       });
 
       afterEach(function () {
@@ -314,7 +330,14 @@ describe('kibana cli', function () {
         settings.urls = ['https://example.com/plugin.zip'];
 
         return download(settings, logger)
-          .then(expectProxyHit);
+          .then(() => {
+            // If the proxy is hit, the request should fail, since our test proxy
+            // doesn't actually forward HTTPS requests.
+            expect().fail('Should not succeed a HTTPS proxy request.');
+          }, () => {
+            // Check if the proxy was actually hit before the failure.
+            expect(proxyConnectHit).to.be(true);
+          });
       });
 
       it('should not use http_proxy for HTTPS urls', function () {

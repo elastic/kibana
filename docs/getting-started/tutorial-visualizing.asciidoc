@@ -115,7 +115,7 @@ plays makes the greatest demands on an individual actor by showing the maximum n
 
 . Click *Add metrics* to add a Y-axis aggregation.
 . Choose the *Max* aggregation and select the *speech_number* field.
-. Click *Options* and change the *Bar Mode* to *grouped*.
+. Click *Options* and change the *Bar Mode* from *stacked* to *normal*.
 . Click  *Apply changes* image:images/apply-changes-button.png[]. Your chart should now look like this:
 
 image::images/tutorial-visualize-bar-3.png[]

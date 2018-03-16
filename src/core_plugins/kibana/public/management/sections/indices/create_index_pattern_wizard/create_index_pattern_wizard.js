@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { ensureMinimumTime } from './lib';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -35,8 +36,13 @@ export class CreateIndexPatternWizard extends Component {
   }
 
   async componentWillMount() {
+    this.fetchIndices();
+  }
+
+  fetchIndices = async () => {
+    this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
     const { services } = this.props;
-    const allIndices = await getIndices(services.es, `*`, MAX_SEARCH_SIZE);
+    const allIndices = await ensureMinimumTime(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
     this.setState({ allIndices, isInitiallyLoadingIndices: false });
   }
 
@@ -55,7 +61,7 @@ export class CreateIndexPatternWizard extends Component {
     const createdId = await emptyPattern.create();
 
     if (!services.config.get('defaultIndex')) {
-      services.config.set('defaultIndex', createdId);
+      await services.config.set('defaultIndex', createdId);
     }
 
     services.indexPatterns.cache.clear(createdId);
@@ -87,32 +93,7 @@ export class CreateIndexPatternWizard extends Component {
     );
   }
 
-  renderInitialLoadingState() {
-    const { isInitiallyLoadingIndices } = this.state;
-
-    if (!isInitiallyLoadingIndices) {
-      return null;
-    }
-
-    return (
-      <LoadingState/>
-    );
-  }
-
-  renderInitialEmptyState() {
-    const { allIndices, isInitiallyLoadingIndices } = this.state;
-    const { loadingDataDocUrl } = this.props;
-
-    if (allIndices.length > 0 || isInitiallyLoadingIndices) {
-      return null;
-    }
-
-    return (
-      <EmptyState loadingDataDocUrl={loadingDataDocUrl}/>
-    );
-  }
-
-  renderStepOne() {
+  renderContent() {
     const {
       allIndices,
       isInitiallyLoadingIndices,
@@ -121,50 +102,52 @@ export class CreateIndexPatternWizard extends Component {
       indexPattern,
     } = this.state;
 
-    if (isInitiallyLoadingIndices || step !== 1) {
-      return null;
+    if (isInitiallyLoadingIndices) {
+      return <LoadingState />;
     }
 
-    const { services, initialQuery } = this.props;
-
-    return (
-      <StepIndexPattern
-        allIndices={allIndices}
-        initialQuery={indexPattern || initialQuery}
-        isIncludingSystemIndices={isIncludingSystemIndices}
-        esService={services.es}
-        savedObjectsClient={services.savedObjectsClient}
-        goToNextStep={this.goToTimeFieldStep}
-      />
-    );
-  }
-
-  renderStepTwo() {
-    const { step, indexPattern } = this.state;
-    const { services } = this.props;
-
-    if (step !== 2) {
-      return null;
+    if (allIndices.length === 0) {
+      const { loadingDataDocUrl } = this.props;
+      return <EmptyState loadingDataDocUrl={loadingDataDocUrl} onRefresh={this.fetchIndices} />;
     }
 
-    return (
-      <StepTimeField
-        indexPattern={indexPattern}
-        indexPatternsService={services.indexPatterns}
-        goToPreviousStep={this.goToIndexPatternStep}
-        createIndexPattern={this.createIndexPattern}
-      />
-    );
+    if (step === 1) {
+      const { services, initialQuery } = this.props;
+      return (
+        <StepIndexPattern
+          allIndices={allIndices}
+          initialQuery={indexPattern || initialQuery}
+          isIncludingSystemIndices={isIncludingSystemIndices}
+          esService={services.es}
+          savedObjectsClient={services.savedObjectsClient}
+          goToNextStep={this.goToTimeFieldStep}
+        />
+      );
+    }
+
+    if (step === 2) {
+      const { services } = this.props;
+      return (
+        <StepTimeField
+          indexPattern={indexPattern}
+          indexPatternsService={services.indexPatterns}
+          goToPreviousStep={this.goToIndexPatternStep}
+          createIndexPattern={this.createIndexPattern}
+        />
+      );
+    }
+
+    return null;
   }
 
   render() {
+    const header = this.renderHeader();
+    const content = this.renderContent();
+
     return (
       <div>
-        {this.renderHeader()}
-        {this.renderInitialLoadingState()}
-        {this.renderInitialEmptyState()}
-        {this.renderStepOne()}
-        {this.renderStepTwo()}
+        {header}
+        {content}
       </div>
     );
   }

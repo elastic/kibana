@@ -1,7 +1,7 @@
 const theme = require('../theme');
 
 // Kibana UI Framework
-require('../../../../ui_framework/dist/ui_framework.css');
+require('@kbn/ui-framework/dist/ui_framework.css');
 
 // Elastic UI Framework, light theme
 const euiThemeLight = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css');

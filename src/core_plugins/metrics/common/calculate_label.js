@@ -12,7 +12,7 @@ const paths = [
   'variance_bucket',
   'sum_of_squares_bucket',
   'serial_diff',
-  'positive_only'
+  'positive_only',
 ];
 export default function calculateLabel(metric, metrics) {
   if (!metric) return 'Unknown';
@@ -27,7 +27,6 @@ export default function calculateLabel(metric, metrics) {
   if (metric.type === 'percentile_rank') {
     return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;
   }
-
 
   if (includes(paths, metric.type)) {
     let additionalLabel = '';
@@ -48,4 +47,3 @@ export default function calculateLabel(metric, metrics) {
 
   return `${lookup[metric.type]} of ${metric.field}`;
 }
-

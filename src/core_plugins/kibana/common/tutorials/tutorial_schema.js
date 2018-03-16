@@ -18,7 +18,11 @@ const artifactsSchema = Joi.object({
     documentationUrl: Joi.string().required()
   }),
   // Kibana dashboards created by this product.
-  dashboards: Joi.array().items(dashboardSchema).required()
+  dashboards: Joi.array().items(dashboardSchema).required(),
+  application: Joi.object({
+    path: Joi.string().required(),
+    label: Joi.string().required()
+  }),
 });
 
 const instructionSchema = Joi.object({

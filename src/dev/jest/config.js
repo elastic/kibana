@@ -3,21 +3,17 @@ export default {
   roots: [
     '<rootDir>/src/ui',
     '<rootDir>/src/core_plugins',
-    '<rootDir>/ui_framework/',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [
-    'ui_framework/src/components/**/*.js',
-    '!ui_framework/src/components/index.js',
-    '!ui_framework/src/components/**/*/index.js',
-    'ui_framework/src/services/**/*.js',
-    '!ui_framework/src/services/index.js',
-    '!ui_framework/src/services/**/*/index.js',
+    'packages/kbn-ui-framework/src/components/**/*.js',
+    '!packages/kbn-ui-framework/src/components/index.js',
+    '!packages/kbn-ui-framework/src/components/**/*/index.js',
+    'packages/kbn-ui-framework/src/services/**/*.js',
+    '!packages/kbn-ui-framework/src/services/index.js',
+    '!packages/kbn-ui-framework/src/services/**/*/index.js',
   ],
   moduleNameMapper: {
-    '^ui_framework/components': '<rootDir>/ui_framework/components',
-    '^ui_framework/services': '<rootDir>/ui_framework/services',
-    '^ui_framework/test': '<rootDir>/ui_framework/test',
     '^ui/(.*)': '<rootDir>/src/ui/public/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
@@ -44,15 +40,14 @@ export default {
   ],
   modulePathIgnorePatterns: [
     '__fixtures__/',
+    'target/',
   ],
   testMatch: [
     '**/*.test.js',
     '**/*.test.ts',
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/ui_framework/dist/',
-    '<rootDir>/ui_framework/doc_site/',
-    '<rootDir>/ui_framework/generator-kui/',
+    '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/(dist|vendor)/',
     'integration_tests/'
   ],

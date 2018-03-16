@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'context']);
 
-  describe('context filters', function contextSize() {
+  // Flaky: https://github.com/elastic/kibana/issues/16002
+  describe.skip('context filters', function contextSize() {
     before(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,
@@ -42,22 +43,21 @@ export default function ({ getService, getPageObjects }) {
       expect(hasOnlyFilteredRows).to.be(true);
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/16002
-    // it('should be toggleable via the filter bar', async function () {
-    //   const table = await docTable.getTable();
-    //
-    //   await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
-    //   await PageObjects.context.waitUntilContextLoadingHasFinished();
-    //
-    //   expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
-    //
-    //   const rows = await docTable.getBodyRows(table);
-    //   const hasOnlyFilteredRows = (
-    //     await Promise.all(rows.map(
-    //       async (row) => await (await docTable.getFields(row))[2].getVisibleText()
-    //     ))
-    //   ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-    //   expect(hasOnlyFilteredRows).to.be(false);
-    // });
+    it('should be toggleable via the filter bar', async function () {
+      const table = await docTable.getTable();
+
+      await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
+
+      const rows = await docTable.getBodyRows(table);
+      const hasOnlyFilteredRows = (
+        await Promise.all(rows.map(
+          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
+        ))
+      ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+      expect(hasOnlyFilteredRows).to.be(false);
+    });
   });
 }

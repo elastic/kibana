@@ -2,53 +2,46 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  KuiLinkButton,
-} from 'ui_framework/components';
-
-import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiText,
+  EuiButton,
 } from '@elastic/eui';
 
-export function Footer({ overviewDashboard }) {
-  if (overviewDashboard) {
-    return (
-      <div>
-        <EuiHorizontalRule />
+export function Footer({ url, label }) {
+  return (
+    <div>
+      <EuiHorizontalRule />
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
 
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>
-                {`When all steps are complete, you're ready to explore your data.`}
-              </p>
-            </EuiText>
-          </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              {`When all steps are complete, you're ready to explore your data.`}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
 
-          <EuiFlexItem
-            grow={false}
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            fill
+            href={url}
           >
-            <KuiLinkButton
-              buttonType="primary"
-              href={`#/dashboard/${overviewDashboard.id}`}
-            >
-              {overviewDashboard.linkLabel}
-            </KuiLinkButton>
-          </EuiFlexItem>
+            {label}
+          </EuiButton>
+        </EuiFlexItem>
 
-        </EuiFlexGroup>
+      </EuiFlexGroup>
 
-      </div>
-    );
-  }
+    </div>
+  );
 }
 
 Footer.propTypes = {
-  overviewDashboard: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    linkLabel: PropTypes.string.isRequired,
-  })
+  url: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
 };

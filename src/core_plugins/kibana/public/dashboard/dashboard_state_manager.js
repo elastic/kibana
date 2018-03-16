@@ -97,6 +97,7 @@ export class DashboardStateManager {
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
 
+    this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
 
     this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
@@ -104,6 +105,14 @@ export class DashboardStateManager {
       this.changeListeners.forEach(listener => listener(status));
       this._pushAppStateChangesToStore();
     });
+  }
+
+  registerEmbeddableConfigChangeListener(panelIndex, callback) {
+    let panelListeners = this.embeddableConfigChangeListeners[panelIndex];
+    if (!panelListeners) {
+      panelListeners = this.embeddableConfigChangeListeners[panelIndex] = [];
+    }
+    panelListeners.push(callback);
   }
 
   registerChangeListener(callback) {
@@ -127,6 +136,29 @@ export class DashboardStateManager {
   }
 
   /**
+   * For each embeddable config in appState that differs from that in the redux store, trigger the change listeners
+   * using the appState version as the "source of truth". This is because currently the only way to update an embeddable
+   * config from the dashboard side is via the url. Eventually we want to let users modify it via a "reset link" in
+   * the panel config, or even a way to modify it in the panel config. When this is introduced it would go through
+   * redux and we'd have to update appState. At that point, we'll need to handle changes coming from both directions.
+   * Ideally we can introduce react-redux-router for a more seamless way to keep url changes and ui changes in sync.
+   * ... until then... we are stuck with this manual crap. :(
+   * Fixes https://github.com/elastic/kibana/issues/15720
+   */
+  triggerEmbeddableConfigUpdateListeners() {
+    const state = store.getState();
+    for(const appStatePanel of this.appState.panels) {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      if (storePanel && !_.isEqual(appStatePanel.embeddableConfig, storePanel.embeddableConfig)) {
+        const panelListeners = this.embeddableConfigChangeListeners[appStatePanel.panelIndex];
+        if (panelListeners) {
+          panelListeners.forEach(listener => listener(appStatePanel.embeddableConfig));
+        }
+      }
+    }
+  }
+
+  /**
    * Changes made to app state outside of direct calls to this class will need to be propagated to the store.
    * @private
    */
@@ -134,6 +166,7 @@ export class DashboardStateManager {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
+      this.triggerEmbeddableConfigUpdateListeners();
       store.dispatch(setPanels(this.getPanels()));
     }
 

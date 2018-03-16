@@ -1,0 +1,14 @@
+{
+  "_aliases": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_aliases"
+    ]
+  }
+}

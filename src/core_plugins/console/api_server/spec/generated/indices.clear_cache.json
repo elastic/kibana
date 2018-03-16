@@ -1,0 +1,30 @@
+{
+  "_cache/clear": {
+    "url_params": {
+      "field_data": "__flag__",
+      "fielddata": "__flag__",
+      "fields": [],
+      "query": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "index": [],
+      "recycler": "__flag__",
+      "request_cache": "__flag__",
+      "request": "__flag__"
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_cache/clear",
+      "{indices}/_cache/clear"
+    ]
+  }
+}
