@@ -30,8 +30,6 @@ module.factory('SavedDashboard', function (courier, config) {
         uiStateJSON: '{}',
         version: 1,
         timeRestore: false,
-        dateIntervalRestore: false,
-        dateInterval: undefined,
         timeTo: undefined,
         timeFrom: undefined,
         refreshInterval: undefined
@@ -56,14 +54,6 @@ module.factory('SavedDashboard', function (courier, config) {
     uiStateJSON: 'string',
     version: 'integer',
     timeRestore: 'boolean',
-    dateIntervalRestore: 'boolean',
-    dateInterval: {
-      type: 'object',
-      properties: {
-        display: { type: 'string' },
-        value: { type: 'string' }
-      }
-    },
     timeTo: 'string',
     timeFrom: 'string',
     refreshInterval: {

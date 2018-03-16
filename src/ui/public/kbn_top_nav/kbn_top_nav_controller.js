@@ -3,7 +3,6 @@ import { capitalize, isArray, isFunction } from 'lodash';
 import chrome from 'ui/chrome';
 import filterTemplate from 'ui/chrome/config/filter.html';
 import intervalTemplate from 'ui/chrome/config/interval.html';
-import dateIntervalTemplate from 'ui/chrome/config/dateinterval.html';
 
 export function KbnTopNavControllerProvider($compile) {
   return class KbnTopNavController {
@@ -18,7 +17,6 @@ export function KbnTopNavControllerProvider($compile) {
       this.templates = {
         interval: intervalTemplate,
         filter: filterTemplate,
-        'date-interval': dateIntervalTemplate
       };
       this.locals = new Map();
 

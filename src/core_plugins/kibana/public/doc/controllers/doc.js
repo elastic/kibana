@@ -30,11 +30,9 @@ uiRoutes
   resolve: resolveIndexPattern
 });
 
-app.controller('doc', function ($scope, $route, es, timefilter, intervalfilter) {
+app.controller('doc', function ($scope, $route, es, timefilter) {
 
   timefilter.enabled = false;
-  intervalfilter.enabled = false;
-
 
   // Pretty much only need this for formatting, not actually using it for fetching anything.
   $scope.indexPattern = $route.current.locals.indexPattern;
