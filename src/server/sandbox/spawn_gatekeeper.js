@@ -1,5 +1,4 @@
 import { fork } from 'child_process';
-import { safeChildProcess } from './safe_child_process';
 import { serializeArgument } from './valid_processes';
 
 
@@ -29,10 +28,7 @@ const getExecArgv = () => {
 };
 
 export function spawnGatekeeper(validProcesses) {
-  const childProcess = fork(require.resolve('./gatekeeper'), [serializeArgument(validProcesses)], {
+  return fork(require.resolve('./gatekeeper'), [serializeArgument(validProcesses)], {
     execArgv: getExecArgv()
   });
-
-  safeChildProcess(childProcess);
-  return childProcess;
 }

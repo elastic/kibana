@@ -1,15 +1,22 @@
+import { ReplaySubject } from 'rxjs';
 import sandbox from 'sandbox';
 import uuid from 'uuid';
 import { spawnGatekeeper } from './spawn_gatekeeper';
 import { SyntheticProcess } from './synthetic_process';
 import { GatekeeperChannel } from './gatekeeper_channel';
 import { getValidProcesses } from './valid_processes';
+import { safeChildProcess } from './safe_child_process';
 
 let spawnChildProcess;
 
 export async function initializeSandbox(kbnServer) {
   const validProcesses = await getValidProcesses(kbnServer.settings);
+
   const gatekeeperProcess = spawnGatekeeper(validProcesses);
+
+  const childProcessSignal = new ReplaySubject(1);
+  childProcessSignal.next('SIGKILL');
+  safeChildProcess(gatekeeperProcess, childProcessSignal);
   gatekeeperProcess.on('exit', (code, signal) => {
     throw new Error(`The gatekeeper exited with code ${code} after receiving signal ${signal || ''}, terminating parent process`);
   });
@@ -21,6 +28,7 @@ export async function initializeSandbox(kbnServer) {
   }
 
   spawnChildProcess = async (command, args) => {
+    childProcessSignal.next('SIGTERM');
     const channel = new GatekeeperChannel(gatekeeperProcess, uuid.v4());
     return await SyntheticProcess.spawn(channel, command, args);
   };
