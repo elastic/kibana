@@ -5,7 +5,7 @@ const chalk = require('chalk');
 const path = require('path');
 const { BASE_PATH, DL_PATH } = require('../paths');
 const { installArchive } = require('./archive');
-const { log } = require('../utils');
+const { log, cache } = require('../utils');
 
 /**
  * @param {Object} options
@@ -38,6 +38,7 @@ exports.installSnapshot = async function installSnapshot({
  */
 function downloadFile(url, dest) {
   const downloadPath = path.resolve(DL_PATH, path.basename(dest));
+  const cacheMeta = cache.readMeta(dest);
 
   if (!fs.existsSync(DL_PATH)) {
     mkdirp(DL_PATH);
@@ -49,11 +50,14 @@ function downloadFile(url, dest) {
 
   log.info('downloading from %s', chalk.bold(url));
 
-  return fetch(url, { headers: { 'If-None-Match': cachedEtag(dest) } }).then(
+  return fetch(url, { headers: { 'If-None-Match': cacheMeta.etag } }).then(
     res =>
       new Promise((resolve, reject) => {
         if (res.status === 304) {
-          log.info('etags match, using cache');
+          log.info(
+            'etags match, using cache from %s',
+            chalk.bold(cacheMeta.ts)
+          );
           return resolve();
         }
 
@@ -72,7 +76,7 @@ function downloadFile(url, dest) {
               const etag = res.headers.get('etag');
 
               fs.renameSync(downloadPath, dest);
-              fs.writeFileSync(`${dest}.etag`, etag);
+              cache.writeMeta(dest, { etag });
               resolve();
             } else {
               reject(new Error(res.statusText));
@@ -80,16 +84,4 @@ function downloadFile(url, dest) {
           });
       })
   );
-}
-
-function cachedEtag(dest) {
-  try {
-    return fs.readFileSync(`${dest}.etag`, {
-      encoding: 'utf8',
-    });
-  } catch (e) {
-    if (e.code !== 'ENOENT') {
-      throw e;
-    }
-  }
 }

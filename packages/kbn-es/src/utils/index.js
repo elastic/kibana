@@ -1,3 +1,4 @@
+exports.cache = require('./cache');
 exports.log = require('./log').log;
 exports.parseEsLog = require('./parse_es_log').parseEsLog;
 exports.extractTarball = require('./tarball').extractTarball;

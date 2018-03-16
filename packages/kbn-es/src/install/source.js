@@ -3,9 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const crypto = require('crypto');
-const simpleGit = require('simple-git');
+const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
-const { findMostRecentlyChanged, log } = require('../utils');
+const { findMostRecentlyChanged, log, cache } = require('../utils');
 const { GRADLE_BIN, ES_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
 
 /**
@@ -23,64 +23,51 @@ exports.installSource = async function installSource({
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
 
-  const hash = await sourceHash(sourcePath);
-  const cacheDest = path.resolve(basePath, 'cache', 'source.tar.gz');
+  const { filename, etag } = await sourceInfo(sourcePath);
+  const cacheDest = path.resolve(basePath, 'cache', filename);
 
-  const isCached = isValidCache(cacheDest, hash);
+  const cacheMeta = cache.readMeta(cacheDest);
+  const isCached = cacheMeta.exists && cacheMeta.etag === etag;
   const archive = isCached ? cacheDest : await createSnapshot({ sourcePath });
 
   if (isCached) {
-    log.info('source path unchanged, using cache');
+    log.info(
+      'source path unchanged since %s, using cache',
+      chalk.bold(cacheMeta.ts)
+    );
   } else {
-    fs.writeFileSync(`${cacheDest}.hash`, hash);
+    cache.writeMeta(cacheDest, { etag });
     fs.copyFileSync(archive, cacheDest);
   }
 
-  return await installArchive(archive, { basePath, installPath });
+  return await installArchive(cacheDest, { basePath, installPath });
 };
 
-function isValidCache(cachedArchive, hash) {
-  try {
-    const cachedHash = fs.readFileSync(`${cachedArchive}.hash`, {
-      encoding: 'utf8',
-    });
-
-    return cachedHash === hash;
-  } catch (e) {
-    if (e.code !== 'ENOENT') {
-      throw e;
-    }
-  }
-}
-
-function sourceHash(cwd) {
+async function sourceInfo(cwd) {
   const git = simpleGit(cwd);
 
-  return new Promise((resolve, reject) => {
-    git.status((error, status) => {
-      if (error) {
-        return reject(error);
-      }
+  const status = await git.status();
+  const branch = status.current;
+  const sha = (await git.revparse(['HEAD'])).trim();
 
-      log.info(
-        'on %s tracking %s',
-        chalk.bold(status.current),
-        chalk.bold(status.tracking)
-      );
+  log.info('on %s at %s', chalk.bold(branch), chalk.bold(sha));
+  log.info('%s locally modified file(s)', chalk.bold(status.modified.length));
 
-      log.info(
-        '%s locally modified file(s)',
-        chalk.bold(status.modified.length)
-      );
+  const etag = crypto
+    .createHash('md5')
+    .update(sha + JSON.stringify(status))
+    .digest('hex');
 
-      const hash = crypto
-        .createHash('md5')
-        .update(JSON.stringify(status))
-        .digest('hex');
+  const filename = crypto
+    .createHash('md5')
+    .update(`${status.current}${cwd}`)
+    .digest('hex');
 
-      resolve(hash);
-    });
-  });
+  return {
+    etag,
+    filename: `${filename}.tar.gz`,
+    branch,
+  };
 }
 
 /**
