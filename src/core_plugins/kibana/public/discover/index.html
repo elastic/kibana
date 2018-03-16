@@ -42,7 +42,7 @@
         index-patterns="[indexPattern]"
       ></filter-bar>
     </div>
-    <div class="row">
+    <div class="discover_container row">
       <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar">
         <disc-field-chooser
           columns="state.columns"
@@ -58,7 +58,8 @@
         </disc-field-chooser>
       </div>
 
-      <div class="discover-wrapper col-md-10">
+      <div id="discover_resizer">&#xFE19;</div>
+      <div id="discover_content" class="discover-wrapper col-md-10">
         <div class="discover-content">
           <discover-no-results
             ng-show="resultState === 'none'"
