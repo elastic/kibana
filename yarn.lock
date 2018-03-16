@@ -4322,15 +4322,9 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-focus-trap-react@^3.0.4:
+focus-trap-react@^3.0.4, focus-trap-react@^3.1.1:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-3.1.2.tgz#4dd021ccd028bbd3321147d132cdf7585d6d1394"
-  dependencies:
-    focus-trap "^2.0.1"
-
-focus-trap-react@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-3.1.1.tgz#d8cad66e01de2ae05686eae8942f4008fdd19e53"
   dependencies:
     focus-trap "^2.0.1"
 
@@ -9018,9 +9012,9 @@ react-addons-shallow-compare@15.6.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-react-anything-sortable@^1.7.3:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/react-anything-sortable/-/react-anything-sortable-1.7.3.tgz#974985e80afffb1c2ccb450b82dca3784db4f427"
+react-anything-sortable@^1.7.4:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/react-anything-sortable/-/react-anything-sortable-1.7.4.tgz#c760cf67d7db226bb3943a7bda21c13614dce0cb"
   dependencies:
     create-react-class "^15.5.2"
     prop-types "^15.5.8"

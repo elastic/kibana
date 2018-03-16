@@ -167,7 +167,7 @@
     "raw-loader": "0.5.1",
     "react": "^16.2.0",
     "react-addons-shallow-compare": "15.6.2",
-    "react-anything-sortable": "^1.7.3",
+    "react-anything-sortable": "^1.7.4",
     "react-color": "^2.13.8",
     "react-dom": "^16.2.0",
     "react-grid-layout": "^0.16.2",
