@@ -15,11 +15,11 @@ exports.Cluster = class Cluster {
    */
   async installSource(options = {}) {
     log.info(chalk.bold('Installing from source'));
-    log.indent(2);
+    log.indent(4);
 
     const install = await installSource(options);
 
-    log.indent(-2);
+    log.indent(-4);
 
     return install;
   }
@@ -34,11 +34,11 @@ exports.Cluster = class Cluster {
    */
   async installSnapshot(options = {}) {
     log.info(chalk.bold('Installing from snapshot'));
-    log.indent(2);
+    log.indent(4);
 
     const install = await installSnapshot(options);
 
-    log.indent(-2);
+    log.indent(-4);
 
     return install;
   }
@@ -53,11 +53,11 @@ exports.Cluster = class Cluster {
    */
   async installArchive(path, options = {}) {
     log.info(chalk.bold('Installing from an archive'));
-    log.indent(2);
+    log.indent(4);
 
     const install = await installArchive(path, options);
 
-    log.indent(-2);
+    log.indent(-4);
 
     return install;
   }
@@ -92,7 +92,7 @@ exports.Cluster = class Cluster {
    */
   run(installPath, { esArgs = [] }) {
     log.info(chalk.bold('Starting'));
-    log.indent(2);
+    log.indent(4);
 
     const args = extractConfigFiles(esArgs, this._installPath).reduce(
       (acc, cur) => acc.concat(['-E', cur]),
@@ -115,7 +115,7 @@ exports.Cluster = class Cluster {
       log.error(chalk.red(data.toString()))
     );
 
-    log.indent(-2);
+    log.indent(-4);
 
     return process;
   }
