@@ -61,7 +61,7 @@ function applyConfig(config) {
 
   const banner = config.get('notifications:banner');
 
-  if (banner && banner.trim().length) {
+  if (banner) {
     notify.banner(banner);
   }
 }
