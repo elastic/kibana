@@ -48,6 +48,17 @@ test('renders table in loading state', () => {
   expect(component).toMatchSnapshot();
 });
 
+test('initialFilter', () => {
+  const component = shallow(<DashboardListing
+    find={find.bind(null, 2)}
+    delete={() => {}}
+    listingLimit={1000}
+    hideWriteControls={false}
+    initialFilter="my dashboard"
+  />);
+  expect(component).toMatchSnapshot();
+});
+
 describe('after fetch', () => {
   test('renders table rows', async () => {
     const component = shallow(<DashboardListing

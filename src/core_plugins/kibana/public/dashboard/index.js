@@ -14,6 +14,7 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { EMPTY_FILTER } from './listing/dashboard_listing';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -21,7 +22,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $scope, Private, config) {
+    controller($injector, $location, $scope, Private, config) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -33,6 +34,7 @@ uiRoutes
         return services.dashboards.delete(ids);
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
+      $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
     },
     resolve: {
       dash: function ($route, Private, courier, kbnUrl) {

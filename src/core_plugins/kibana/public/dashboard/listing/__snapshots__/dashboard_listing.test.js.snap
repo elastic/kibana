@@ -65,6 +65,7 @@ exports[`after fetch hideWriteControls 1`] = `
           "data-test-subj": "searchFilter",
           "incremental": true,
         },
+        "defaultQuery": "",
         "onChange": [Function],
         "toolsLeft": undefined,
       }
@@ -173,6 +174,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           "data-test-subj": "searchFilter",
           "incremental": true,
         },
+        "defaultQuery": "",
         "onChange": [Function],
         "toolsLeft": undefined,
       }
@@ -271,6 +273,7 @@ exports[`after fetch renders table rows 1`] = `
           "data-test-subj": "searchFilter",
           "incremental": true,
         },
+        "defaultQuery": "",
         "onChange": [Function],
         "toolsLeft": undefined,
       }
@@ -400,6 +403,93 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           "data-test-subj": "searchFilter",
           "incremental": true,
         },
+        "defaultQuery": "",
+        "onChange": [Function],
+        "toolsLeft": undefined,
+      }
+    }
+    selection={
+      Object {
+        "itemId": "id",
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={true}
+  />
+</EuiPage>
+`;
+
+exports[`initialFilter 1`] = `
+<EuiPage
+  data-test-subj="dashboardLandingPage"
+>
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiTitle
+        size="l"
+      >
+        <h1>
+          Dashboard
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="newDashboardLink"
+        fill={false}
+        href="#/dashboard"
+        iconSide="left"
+        type="button"
+      >
+        Create new dashboard
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "title",
+          "name": "Title",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "string",
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+      ]
+    }
+    items={Array []}
+    loading={true}
+    message="No dashboards matched your search."
+    pagination={true}
+    search={
+      Object {
+        "box": Object {
+          "data-test-subj": "searchFilter",
+          "incremental": true,
+        },
+        "defaultQuery": "my dashboard",
         "onChange": [Function],
         "toolsLeft": undefined,
       }
@@ -485,6 +575,7 @@ exports[`renders table in loading state 1`] = `
           "data-test-subj": "searchFilter",
           "incremental": true,
         },
+        "defaultQuery": "",
         "onChange": [Function],
         "toolsLeft": undefined,
       }

@@ -39,7 +39,7 @@ const tableColumns = [
   }
 ];
 
-const EMPTY_FILTER = '';
+export const EMPTY_FILTER = '';
 
 export class DashboardListing extends React.Component {
 
@@ -50,7 +50,7 @@ export class DashboardListing extends React.Component {
       isFetchingItems: false,
       showDeleteModal: false,
       showLimitError: false,
-      filter: EMPTY_FILTER,
+      filter: this.props.initialFilter,
       dashboards: [],
       selectedIds: [],
     };
@@ -127,6 +127,7 @@ export class DashboardListing extends React.Component {
           onConfirm={this.deleteSelectedItems}
           cancelButtonText="Cancel"
           confirmButtonText="Delete"
+          defaultFocusedButton="cancel"
         >
           <p>{`You can't recover deleted dashboards.`}</p>
         </EuiConfirmModal>
@@ -143,6 +144,7 @@ export class DashboardListing extends React.Component {
       <EuiButton
         color="danger"
         onClick={this.openDeleteModal}
+        data-test-subj="deleteSelectedDashboards"
       >
         Delete selected
       </EuiButton>
@@ -214,6 +216,7 @@ export class DashboardListing extends React.Component {
 
   renderTable() {
     const search = {
+      defaultQuery: this.props.initialFilter,
       toolsLeft: this.renderDeleteButton(),
       box: {
         incremental: true,
@@ -297,4 +300,9 @@ DashboardListing.propTypes = {
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
+  initialFilter: PropTypes.string,
+};
+
+DashboardListing.defaultProps = {
+  initialFilter: EMPTY_FILTER,
 };

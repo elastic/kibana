@@ -198,8 +198,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
-    async clickListItemCheckbox() {
-      await testSubjects.click('dashboardListItemCheckbox');
+    async checkDashboardListingSelectAllCheckbox() {
+      const element = await testSubjects.find('checkboxSelectAll');
+      const isSelected = await element.isSelected();
+      if(!isSelected) {
+        log.debug(`checking checkbox "checkboxSelectAll"`);
+        await testSubjects.click('checkboxSelectAll');
+      }
     }
 
     async clickDeleteSelectedDashboards() {
@@ -385,14 +390,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
+        await PageObjects.common.pressEnterKey();
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
-      return dashboardTitles.length;
     }
 
     async getDashboardCountWithName(dashName) {
