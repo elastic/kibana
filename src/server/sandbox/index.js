@@ -31,5 +31,46 @@ export function sandboxMixin(kbnServer, server) {
     throw new Error('initializeSandbox must be called before the sandboxMixin');
   }
 
-  server.decorate('server', 'spawnChildProcess', spawnChildProcess);
+  server.decorate('server', 'sandbox', {
+    spawnChildProcess,
+    $createSpawnChildProcess: (Observable) => {
+      return (cmd, args, cleanup) => {
+        return Observable.create(observer => {
+
+          let cancelled = false;
+          let proc;
+
+          const killAndCleanup = () => {
+            if (proc && !proc.killed) {
+              proc.kill();
+            }
+
+            cleanup();
+            return;
+          };
+
+          (async () => {
+            try {
+              proc = await spawnChildProcess(cmd, args);
+
+              if (cancelled) {
+                killAndCleanup();
+                return;
+              }
+
+              observer.next(proc);
+            } catch (err) {
+              observer.error(new Error(`Caught error spawning Chromium ${err}`));
+            }
+          })();
+
+          return () => {
+            cancelled = true;
+            killAndCleanup();
+          };
+        });
+      };
+    }
+  });
+
 }
