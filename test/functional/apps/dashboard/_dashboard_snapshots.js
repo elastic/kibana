@@ -8,6 +8,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
+  const testSubjects = getService('testSubjects');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
@@ -49,7 +50,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
+      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
+
       await PageObjects.dashboard.saveDashboard('area');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
