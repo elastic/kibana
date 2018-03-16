@@ -21,7 +21,7 @@ export function createTestCluster(options) {
     .substring(2);
   config.installPath = resolve(config.basePath, hash);
 
-  const cluster = new Cluster();
+  const cluster = new Cluster(options.log);
   const from = esTestConfig.getBuildFrom();
 
   return new class EsTestCluster {

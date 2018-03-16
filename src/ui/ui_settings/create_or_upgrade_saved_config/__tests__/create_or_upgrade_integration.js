@@ -17,12 +17,12 @@ describe('createOrUpgradeSavedConfig()', () => {
     log.indent(6);
 
     log.info('starting elasticsearch');
-    log.indent(2);
+    log.indent(4);
 
-    const es = createTestCluster();
+    const es = createTestCluster({ log });
     this.timeout(es.getStartTimeout());
 
-    log.indent(-2);
+    log.indent(-4);
     cleanup.push(() => es.stop());
 
     await es.start();

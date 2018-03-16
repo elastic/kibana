@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
-const { log } = require('./log');
 
 /**
  * Copies config references to an absolute path to
@@ -11,7 +10,11 @@ const { log } = require('./log');
  * @param {Array} config
  * @param {String} dest
  */
-exports.extractConfigFiles = function extractConfigFiles(config, dest) {
+exports.extractConfigFiles = function extractConfigFiles(
+  config,
+  dest,
+  options = {}
+) {
   const originalConfig = typeof config === 'string' ? [config] : config;
   const localConfig = [];
 
@@ -23,7 +26,9 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest) {
       const destPath = path.resolve(dest, 'config', filename);
       copyFileSync(value, destPath);
 
-      log.info('moved %s in config to %s', value, destPath);
+      if (options.log) {
+        options.log.info('moved %s in config to %s', value, destPath);
+      }
 
       localConfig.push(`${key}=${filename}`);
     } else {

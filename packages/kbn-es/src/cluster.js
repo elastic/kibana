@@ -2,9 +2,13 @@ const execa = require('execa');
 const chalk = require('chalk');
 const { installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
-const { log, parseEsLog, extractConfigFiles } = require('./utils');
+const { log: defaultLog, parseEsLog, extractConfigFiles } = require('./utils');
 
 exports.Cluster = class Cluster {
+  constructor(log = defaultLog) {
+    this._log = log;
+  }
+
   /**
    * Builds and installs ES from source
    *
@@ -14,10 +18,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installSource(options = {}) {
+    const { log = this._log } = options;
+
     log.info(chalk.bold('Installing from source'));
     log.indent(4);
 
-    const install = await installSource(options);
+    const install = await installSource({ log, ...options });
 
     log.indent(-4);
 
@@ -33,10 +39,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installSnapshot(options = {}) {
+    const { log = this._log } = options;
+
     log.info(chalk.bold('Installing from snapshot'));
     log.indent(4);
 
-    const install = await installSnapshot(options);
+    const install = await installSnapshot({ log, ...options });
 
     log.indent(-4);
 
@@ -52,10 +60,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installArchive(path, options = {}) {
+    const { log = this._log } = options;
+
     log.info(chalk.bold('Installing from an archive'));
     log.indent(4);
 
-    const install = await installArchive(path, options);
+    const install = await installArchive(path, { log, ...options });
 
     log.indent(-4);
 
@@ -90,7 +100,7 @@ exports.Cluster = class Cluster {
    * @property {Array} options.esArgs
    * @returns {Process}
    */
-  run(installPath, { esArgs = [] }) {
+  run(installPath, { log = this._log, esArgs = [] }) {
     log.info(chalk.bold('Starting'));
     log.indent(4);
 
@@ -108,14 +118,12 @@ exports.Cluster = class Cluster {
 
     this._process.stdout.on('data', data => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => log.info(line.formattedMessage));
+      lines.forEach(line => this._log.info(line.formattedMessage));
     });
 
     this._process.stderr.on('data', data =>
-      log.error(chalk.red(data.toString()))
+      this._log.error(chalk.red(data.toString()))
     );
-
-    log.indent(-4);
 
     return process;
   }

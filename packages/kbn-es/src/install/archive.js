@@ -1,20 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { log, extractTarball } = require('../utils');
+const { log: defaultLog, extractTarball } = require('../utils');
 const { BASE_PATH } = require('../paths');
 
 /**
  * Extracts an ES archive and optionally installs plugins
  *
- * @param {String} installPath - path to extract to
- * @param {String} path - local path to tar
+ * @param {String} archive - path to tar
+ * @param {Object} options
+ * @property {String} options.basePath
+ * @property {String} options.installPath
+ * @property {ToolingLog} options.log
  */
 exports.installArchive = async function installArchive(
   archive,
   {
     basePath = BASE_PATH,
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
+    log = defaultLog,
   }
 ) {
   if (fs.existsSync(installPath)) {

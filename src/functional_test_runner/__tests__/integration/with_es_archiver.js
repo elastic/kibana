@@ -32,6 +32,7 @@ describe('single test that uses esArchiver', () => {
     const es = createTestCluster({
       name: 'ftr',
       port: config.get('servers.elasticsearch.port'),
+      log,
     });
     this.timeout(es.getStartTimeout());
 

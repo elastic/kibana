@@ -5,18 +5,20 @@ const chalk = require('chalk');
 const path = require('path');
 const { BASE_PATH, DL_PATH } = require('../paths');
 const { installArchive } = require('./archive');
-const { log, cache } = require('../utils');
+const { log: defaultLog, cache } = require('../utils');
 
 /**
  * @param {Object} options
  * @property {String} options.version
  * @property {String} options.basePath
  * @property {String} options.installPath
+ * @property {ToolingLog} options.log
  */
 exports.installSnapshot = async function installSnapshot({
   version,
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, version),
+  log = defaultLog,
 }) {
   const fileName = `elasticsearch-${version}-SNAPSHOT.tar.gz`;
   const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
@@ -25,8 +27,8 @@ exports.installSnapshot = async function installSnapshot({
   log.info('version: %s', chalk.bold(version));
   log.info('install path: %s', chalk.bold(installPath));
 
-  await downloadFile(url, dest);
-  return await installArchive(dest, { installPath, basePath });
+  await downloadFile(url, dest, log);
+  return await installArchive(dest, { installPath, basePath, log });
 };
 
 /**
@@ -34,9 +36,10 @@ exports.installSnapshot = async function installSnapshot({
  *
  * @param {String} url
  * @param {String} dest
+ * @param {ToolingLog} log
  * @returns {Promose}
  */
-function downloadFile(url, dest) {
+function downloadFile(url, dest, log) {
   const downloadPath = path.resolve(DL_PATH, path.basename(dest));
   const cacheMeta = cache.readMeta(dest);
 

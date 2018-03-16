@@ -5,30 +5,35 @@ const chalk = require('chalk');
 const crypto = require('crypto');
 const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
-const { findMostRecentlyChanged, log, cache } = require('../utils');
+const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
 const { GRADLE_BIN, ES_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
 
 /**
  * Installs ES from source
  *
  * @param {Object} options
- * @property {String} options.installPath
  * @property {String} options.sourcePath
+ * @property {String} options.basePath
+ * @property {String} options.installPath
+ * @property {ToolingLog} options.log
  */
 exports.installSource = async function installSource({
   sourcePath,
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, 'source'),
+  log = defaultLog,
 }) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
 
-  const { filename, etag } = await sourceInfo(sourcePath);
+  const { filename, etag } = await sourceInfo(sourcePath, log);
   const cacheDest = path.resolve(basePath, 'cache', filename);
 
   const cacheMeta = cache.readMeta(cacheDest);
   const isCached = cacheMeta.exists && cacheMeta.etag === etag;
-  const archive = isCached ? cacheDest : await createSnapshot({ sourcePath });
+  const archive = isCached
+    ? cacheDest
+    : await createSnapshot({ sourcePath, log });
 
   if (isCached) {
     log.info(
@@ -40,10 +45,15 @@ exports.installSource = async function installSource({
     fs.copyFileSync(archive, cacheDest);
   }
 
-  return await installArchive(cacheDest, { basePath, installPath });
+  return await installArchive(cacheDest, { basePath, installPath, log });
 };
 
-async function sourceInfo(cwd) {
+/**
+ *
+ * @param {String} cwd
+ * @param {ToolingLog} log
+ */
+async function sourceInfo(cwd, log = defaultLog) {
   const git = simpleGit(cwd);
 
   const status = await git.status();
@@ -75,12 +85,13 @@ async function sourceInfo(cwd) {
  *
  * @param {Object} options
  * @property {String} options.sourcePath
+ * @property {ToolingLog} options.log
  * @returns {Object} containing archive and optional plugins
  */
-async function createSnapshot({ sourcePath }) {
+async function createSnapshot({ sourcePath, log = defaultLog }) {
   const buildArgs = [':distribution:archives:tar:assemble'];
 
-  log.debug('%s %s', GRADLE_BIN, buildArgs.join(' '));
+  log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
   await execa(GRADLE_BIN, buildArgs, {
     cwd: sourcePath,
   });
