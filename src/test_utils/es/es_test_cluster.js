@@ -16,7 +16,9 @@ export function createTestCluster(options) {
     ...options,
   };
 
-  const hash = Math.random().toString(36).substring(2);
+  const hash = Math.random()
+    .toString(36)
+    .substring(2);
   config.installPath = resolve(config.basePath, hash);
 
   const cluster = new Cluster();
@@ -32,12 +34,16 @@ export function createTestCluster(options) {
 
     async start() {
       const { installPath } =
-      from === 'source'
-        ? await cluster.installSource(config)
-        : await cluster.installSnapshot(config);
+        from === 'source'
+          ? await cluster.installSource(config)
+          : await cluster.installSnapshot(config);
 
       await cluster.start(installPath, {
-        esArgs: [`http.port=${config.port}`],
+        esArgs: [
+          'cluster.name=kbn-test',
+          `http.port=${config.port}`,
+          `discovery.zen.ping.unicast.hosts=localhost:${config.port}`,
+        ],
       });
     }
 
