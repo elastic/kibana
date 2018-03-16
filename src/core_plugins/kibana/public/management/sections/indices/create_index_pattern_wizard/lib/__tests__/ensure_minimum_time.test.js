@@ -20,11 +20,7 @@ describe('ensureMinimumTime', () => {
   it('resolves in the amount of time provided, at minimum', async (done) => {
     const startTime = new Date().getTime();
     const promise = new Promise(resolve => resolve());
-    // https://kibana-ci.elastic.co/job/elastic+kibana+6.x+multijob-intake/128/console
-    // We're having periodic failures around the timing here. I'm not exactly sure
-    // why it's not consistent but I'm going to add some buffer space here to
-    // prevent these random failures
-    await ensureMinimumTime(promise, 105);
+    await ensureMinimumTime(promise, 100);
     const endTime = new Date().getTime();
     expect(endTime - startTime).toBeGreaterThanOrEqual(100);
     done();
