@@ -174,7 +174,7 @@ Start elasticsearch from a nightly snapshot.
 yarn es snapshot
 ```
 
-Additional options are available, pass `-help` for more information.
+Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
