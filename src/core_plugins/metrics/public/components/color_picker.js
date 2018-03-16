@@ -3,7 +3,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Tooltip from './tooltip';
+import { EuiToolTip, } from '@elastic/eui';
 import Picker from './custom_color_picker';
 
 class ColorPicker extends Component {
@@ -69,9 +69,9 @@ class ColorPicker extends Component {
     if (!this.props.disableTrash) {
       clear = (
         <div className="vis_editor__color_picker-clear" onClick={this.handleClear}>
-          <Tooltip text="Clear">
+          <EuiToolTip content="Clear">
             <i className="fa fa-ban"/>
-          </Tooltip>
+          </EuiToolTip>
         </div>
       );
     }
