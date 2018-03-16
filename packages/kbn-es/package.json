@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
-  "devDependencies": {
+  "dependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",
     "chalk": "^2.3.1",
     "dedent": "^0.7.0",
