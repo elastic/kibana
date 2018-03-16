@@ -19,10 +19,6 @@ export const esTestConfig = new class EsTestConfig {
     return process.env.TEST_ES_FROM || 'snapshot';
   }
 
-  getBranch() {
-    return process.env.TEST_ES_BRANCH || pkg.branch;
-  }
-
   getUrlParts() {
     return {
       protocol: process.env.TEST_ES_PROTOCOL || 'http',
