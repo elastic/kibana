@@ -60,8 +60,8 @@ export class SyntheticProcess {
     this._callbacks[event].splice(index, 1);
   }
 
-  kill(signal) {
+  async kill(signal) {
     this.killed = true;
-    this._channel.send('kill', signal);
+    await this._channel.send('kill', signal);
   }
 }

@@ -40,9 +40,9 @@ export function sandboxMixin(kbnServer, server) {
           let cancelled = false;
           let proc;
 
-          const killAndCleanup = () => {
+          const killAndCleanup = async () => {
             if (proc && !proc.killed) {
-              proc.kill();
+              await proc.kill();
             }
 
             cleanup();
@@ -60,7 +60,7 @@ export function sandboxMixin(kbnServer, server) {
 
               observer.next(proc);
             } catch (err) {
-              observer.error(new Error(`Caught error spawning Chromium ${err}`));
+              observer.error(new Error(`Caught error spawning ${cmd}: ${err}`));
             }
           })();
 
