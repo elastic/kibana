@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import { createSelector } from 'reselect';
+import { Tools } from './tools';
 
 function getQueryText(query) {
   return query && query.ast.getTermClauses().length
@@ -16,6 +17,7 @@ function getQueryText(query) {
 export class InMemoryTable extends Component {
   static propTypes = {
     columns: PropTypes.array.isRequired,
+    selectedSavedObjectIds: PropTypes.array.isRequired,
     items: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
       itemId: PropTypes.string.isRequired,
@@ -58,7 +60,13 @@ export class InMemoryTable extends Component {
   );
 
   render() {
-    const { selectionConfig: selection, filterOptions, columns } = this.props;
+    const {
+      selectionConfig: selection,
+      filterOptions,
+      columns,
+      selectedSavedObjectIds,
+    } = this.props;
+
     const pagination = {
       pageSizeOptions: [5, 10, 25, 50],
     };
@@ -66,24 +74,7 @@ export class InMemoryTable extends Component {
     const items = this.getFilteredSavedObjects(this.state, this.props);
 
     const search = {
-      // TODO: Verify which version of EUI supports this
-      // toolsRight: [
-      //   <EuiButton
-      //     key="deleteSavedObject"
-      //     iconType="trash"
-      //     // onClick={this.loadUsers.bind(this)}
-      //     // isDisabled={this.state.loading}
-      //   >
-      //     Delete
-      //   </EuiButton>,
-      //   <EuiButton
-      //     key="exportSavedObject"
-      //     // onClick={this.loadUsersWithError.bind(this)}
-      //     // isDisabled={this.state.loading}
-      //   >
-      //     Export
-      //   </EuiButton>,
-      // ],
+      toolsRight: <Tools isDisabled={selectedSavedObjectIds.length === 0} />,
       box: {
         incremental: true,
       },

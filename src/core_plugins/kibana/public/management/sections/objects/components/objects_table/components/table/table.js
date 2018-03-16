@@ -1,15 +1,14 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { InMemoryTable } from './in_memory_table';
 import { OnServerTable } from './on_server_table';
 
 export class Table extends Component {
   static propTypes = {
     items: PropTypes.array.isRequired,
+    selectedSavedObjectIds: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
       itemId: PropTypes.string.isRequired,
       selectable: PropTypes.func,
@@ -43,36 +42,29 @@ export class Table extends Component {
           );
         },
       },
-      // },
-      // {
-      //   name: '',
-      //   actions: [
-      //     {
-      //       name: 'Edit',
-      //       description: 'Edit this field',
-      //       icon: 'pencil',
-      //       onClick: editField,
-      //     },
-      //     {
-      //       name: 'Delete',
-      //       description: 'Delete this field',
-      //       icon: 'trash',
-      //       color: 'danger',
-      //       onClick: deleteField,
-      //     },
-      //   ]
-      // }
     ];
   }
 
   render() {
-    if (this.props.clientSideSearchingEnabled || this.props.isPerformingInitialFetch) {
+    const {
+      clientSideSearchingEnabled,
+      isPerformingInitialFetch,
+      items,
+      selectionConfig,
+      filterOptions,
+      fetchData,
+      onSearchChanged,
+      selectedSavedObjectIds,
+    } = this.props;
+
+    if (clientSideSearchingEnabled || isPerformingInitialFetch) {
       return (
         <InMemoryTable
           columns={this.getColumns()}
-          items={this.props.items}
-          selectionConfig={this.props.selectionConfig}
-          filterOptions={this.props.filterOptions}
+          items={items}
+          selectedSavedObjectIds={selectedSavedObjectIds}
+          selectionConfig={selectionConfig}
+          filterOptions={filterOptions}
         />
       );
     }
@@ -80,10 +72,11 @@ export class Table extends Component {
     return (
       <OnServerTable
         columns={this.getColumns()}
-        selectionConfig={this.props.selectionConfig}
-        filterOptions={this.props.filterOptions}
-        fetchData={this.props.fetchData}
-        onSearchChanged={this.props.onSearchChanged}
+        selectedSavedObjectIds={selectedSavedObjectIds}
+        selectionConfig={selectionConfig}
+        filterOptions={filterOptions}
+        fetchData={fetchData}
+        onSearchChanged={onSearchChanged}
       />
     );
   }

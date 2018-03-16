@@ -151,6 +151,7 @@ export class ObjectsTable extends Component {
     };
   };
 
+  // I NEED THIS HERE
   onSelectionChanged = selection => {
     const selectedSavedObjectIds = selection.map(item => item.id);
     this.setState({ selectedSavedObjectIds });
@@ -180,7 +181,7 @@ export class ObjectsTable extends Component {
   );
 
   render() {
-    const { savedObjects, clientSideSearchingEnabled, isPerformingInitialFetch } = this.state;
+    const { savedObjects, clientSideSearchingEnabled, isPerformingInitialFetch, selectedSavedObjectIds } = this.state;
 
     const selectionConfig = {
       itemId: 'id',
@@ -195,6 +196,7 @@ export class ObjectsTable extends Component {
         <Table
           items={savedObjects}
           selectionConfig={selectionConfig}
+          selectedSavedObjectIds={selectedSavedObjectIds}
           onSearchChanged={this.onSearchChanged}
           clientSideSearchingEnabled={clientSideSearchingEnabled}
           isPerformingInitialFetch={isPerformingInitialFetch}
