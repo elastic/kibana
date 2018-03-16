@@ -16,12 +16,9 @@ describe('getFields', function () {
 
   describe('field names without a wildcard', function () {
 
-    it('should return a simple field object if the field does not exist in the index pattern', function () {
+    it('should return an empty array if the field does not exist in the index pattern', function () {
       const fieldNameNode = nodeTypes.literal.buildNode('nonExistentField');
-      const expected = [{
-        name: 'nonExistentField',
-        scripted: false,
-      }];
+      const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
       expectDeepEqual(actual, expected);
     });
@@ -53,10 +50,7 @@ describe('getFields', function () {
       expect(results[0].name).to.be('foo*');
 
       // ensure the wildcard is not actually being parsed
-      const expected = [{
-        name: 'fo*',
-        scripted: false,
-      }];
+      const expected = [];
       const actual = getFields(nodeTypes.literal.buildNode('fo*'), indexPatternWithWildField);
       expectDeepEqual(actual, expected);
     });
@@ -64,12 +58,9 @@ describe('getFields', function () {
 
   describe('field name patterns with a wildcard', function () {
 
-    it('should use the exact pattern if it does not match any fields in the index pattern', function () {
+    it('should return an empty array if it does not match any fields in the index pattern', function () {
       const fieldNameNode = nodeTypes.wildcard.buildNode('nonExistent*');
-      const expected = [{
-        name: 'nonExistent*',
-        scripted: false,
-      }];
+      const expected = [];
       const actual = getFields(fieldNameNode, indexPattern);
       expectDeepEqual(actual, expected);
     });

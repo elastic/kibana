@@ -6,20 +6,11 @@ export function getFields(node, indexPattern) {
     const fieldName = literal.toElasticsearchQuery(node);
     const field = indexPattern.fields.byName[fieldName];
     if (!field) {
-      return [{
-        name: fieldName,
-        scripted: false,
-      }];
+      return [];
     }
     return [field];
   } else if (node.type === 'wildcard') {
     const fields = indexPattern.fields.filter(field => wildcard.test(node, field.name));
-    if (fields.length === 0) {
-      return [{
-        name: wildcard.toElasticsearchQuery(node),
-        scripted: false,
-      }];
-    }
     return fields;
   }
 }
