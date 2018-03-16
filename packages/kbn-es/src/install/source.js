@@ -1,6 +1,8 @@
 const childProcess = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const chalk = require('chalk');
+const crypto = require('crypto');
 const simpleGit = require('simple-git');
 const { installArchive } = require('./archive');
 const { findMostRecentlyChanged, log } = require('../utils');
@@ -18,18 +20,68 @@ exports.installSource = async function installSource({
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, 'source'),
 }) {
-  const branchName = await getBranchName(sourcePath);
-
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
-  log.info('on branch %s', chalk.bold(branchName));
 
-  const archive = await createSnapshot({ sourcePath });
+  const hash = await sourceHash(sourcePath);
+  const cacheDest = path.resolve(basePath, 'cache', 'source.tar.gz');
 
-  await installArchive(archive, { basePath, installPath });
+  const isCached = isValidCache(cacheDest, hash);
+  const archive = isCached ? cacheDest : await createSnapshot({ sourcePath });
 
-  return { installPath };
+  if (isCached) {
+    log.info('source path unchanged, using cache');
+  } else {
+    fs.writeFileSync(`${cacheDest}.hash`, hash);
+    fs.copyFileSync(archive, cacheDest);
+  }
+
+  return await installArchive(archive, { basePath, installPath });
 };
+
+function isValidCache(cachedArchive, hash) {
+  try {
+    const cachedHash = fs.readFileSync(`${cachedArchive}.hash`, {
+      encoding: 'utf8',
+    });
+
+    return cachedHash === hash;
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      throw e;
+    }
+  }
+}
+
+function sourceHash(cwd) {
+  const git = simpleGit(cwd);
+
+  return new Promise((resolve, reject) => {
+    git.status((error, status) => {
+      if (error) {
+        return reject(error);
+      }
+
+      log.info(
+        'on %s tracking %s',
+        chalk.bold(status.current),
+        chalk.bold(status.tracking)
+      );
+
+      log.info(
+        '%s locally modified file(s)',
+        chalk.bold(status.modified.length)
+      );
+
+      const hash = crypto
+        .createHash('md5')
+        .update(JSON.stringify(status))
+        .digest('hex');
+
+      resolve(hash);
+    });
+  });
+}
 
 /**
  * Creates archive from source
@@ -41,6 +93,7 @@ exports.installSource = async function installSource({
 async function createSnapshot({ sourcePath }) {
   const buildArgs = [':distribution:archives:tar:assemble'];
 
+  log.debug('%s %s', GRADLE_BIN, buildArgs.join(' '));
   childProcess.execFileSync(GRADLE_BIN, buildArgs, {
     cwd: sourcePath,
   });
@@ -50,18 +103,4 @@ async function createSnapshot({ sourcePath }) {
   );
 
   return esTarballPath;
-}
-
-async function getBranchName(cwd) {
-  const git = simpleGit(cwd);
-
-  return new Promise((resolve, reject) => {
-    git.branchLocal((error, branches) => {
-      if (error) {
-        reject(error);
-      }
-
-      resolve(branches.current);
-    });
-  });
 }
