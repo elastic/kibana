@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { writeFile } from 'fs';
 import mkdirp from 'mkdirp';
 import del from 'del';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 const writeFileAsync = promisify(writeFile);
 const mkdirAsync = promisify(mkdirp);

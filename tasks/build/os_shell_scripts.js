@@ -1,5 +1,5 @@
 import { join, extname } from 'path';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { ncp } from 'ncp';
 import rimraf from 'rimraf';
 const pncp = promisify(ncp);

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 
-import Promise from 'bluebird';
+import { promisify } from 'util';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
@@ -20,7 +20,7 @@ import { getUiSettingDefaults } from './ui_setting_defaults';
 
 import { injectVars } from './inject_vars';
 
-const mkdirp = Promise.promisify(mkdirpNode);
+const mkdirp = promisify(mkdirpNode);
 
 export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';

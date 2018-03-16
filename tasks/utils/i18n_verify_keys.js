@@ -1,11 +1,12 @@
 import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
-import Promise from 'bluebird';
+import { map as promiseMap } from 'bluebird';
+import { promisify } from 'util';
 import _ from 'lodash';
 
-const readFile = Promise.promisify(fs.readFile);
-const globProm = Promise.promisify(glob);
+const readFile = promisify(fs.readFile);
+const globProm = promisify(glob);
 
 /**
  * Return all the translation keys found for the file pattern
@@ -42,7 +43,7 @@ export function getNonTranslatedKeys(translationKeys, localeTranslations) {
 function getFilesToVerify(verifyFilesPatterns) {
   const filesToVerify = [];
 
-  return Promise.map(verifyFilesPatterns, (verifyFilesPattern) => {
+  return promiseMap(verifyFilesPatterns, (verifyFilesPattern) => {
     const baseSearchDir = path.dirname(verifyFilesPattern);
     const pattern = path.join('**', path.basename(verifyFilesPattern));
     return globProm(pattern, { cwd: baseSearchDir, matchBase: true })

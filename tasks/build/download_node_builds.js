@@ -1,4 +1,5 @@
-import { Promise, map, promisify } from 'bluebird';
+import { map } from 'bluebird';
+import { promisify } from 'util';
 import { resolve, basename, dirname, join } from 'path';
 import { createReadStream, writeFile } from 'fs';
 import { createGunzip } from 'zlib';

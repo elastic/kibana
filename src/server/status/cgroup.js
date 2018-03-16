@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { join as joinPath } from 'path';
 
 // Logic from elasticsearch/core/src/main/java/org/elasticsearch/monitor/os/OsProbe.java

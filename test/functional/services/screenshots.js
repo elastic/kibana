@@ -1,6 +1,7 @@
 import { resolve, dirname } from 'path';
 import { writeFile, readFileSync } from 'fs';
-import { fromNode as fcb, promisify } from 'bluebird';
+import { fromNode as fcb } from 'bluebird';
+import { promisify } from 'util';
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';

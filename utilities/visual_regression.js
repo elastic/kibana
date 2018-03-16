@@ -1,7 +1,7 @@
 import bluebird, {
   fromNode,
-  promisify,
 } from 'bluebird';
+import { promisify } from 'util';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';

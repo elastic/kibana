@@ -1,5 +1,5 @@
 import { download } from './download';
-import Promise from 'bluebird';
+import { promisify } from 'util';
 import path from 'path';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
@@ -9,7 +9,7 @@ import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
 import mkdirp from 'mkdirp';
 
-const mkdir = Promise.promisify(mkdirp);
+const mkdir = promisify(mkdirp);
 
 export default async function install(settings, logger) {
   try {

@@ -1,9 +1,9 @@
 import path from 'path';
-import Promise from 'bluebird';
+import { promisify } from 'util';
 import { readFile } from 'fs';
 import _ from 'lodash';
 
-const asyncReadFile = Promise.promisify(readFile);
+const asyncReadFile = promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
