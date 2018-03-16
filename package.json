@@ -44,6 +44,7 @@
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "es": "node scripts/es",
+    "elasticsearch": "echo 'use `yarn es snapshot -E path.data=../data/`'",
     "test": "grunt test",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
