@@ -9,6 +9,7 @@
     "chalk": "^2.3.1",
     "dedent": "^0.7.0",
     "elasticsearch": "^14.1.0",
+    "execa": "^0.10.0",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.0.0",
     "simple-git": "^1.91.0",

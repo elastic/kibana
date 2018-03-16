@@ -1,4 +1,4 @@
-const childProcess = require('child_process');
+const execa = require('execa');
 const chalk = require('chalk');
 const { installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
@@ -101,7 +101,7 @@ exports.Cluster = class Cluster {
 
     log.debug('%s %s', ES_BIN, args.join(' '));
 
-    this._process = childProcess.spawn(ES_BIN, args, {
+    this._process = execa(ES_BIN, args, {
       cwd: installPath,
       stdio: ['ignore', 'pipe', 'pipe'],
     });

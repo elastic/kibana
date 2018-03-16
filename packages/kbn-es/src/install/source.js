@@ -1,4 +1,4 @@
-const childProcess = require('child_process');
+const execa = require('execa');
 const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
@@ -81,7 +81,7 @@ async function createSnapshot({ sourcePath }) {
   const buildArgs = [':distribution:archives:tar:assemble'];
 
   log.debug('%s %s', GRADLE_BIN, buildArgs.join(' '));
-  childProcess.execFileSync(GRADLE_BIN, buildArgs, {
+  await execa(GRADLE_BIN, buildArgs, {
     cwd: sourcePath,
   });
 
