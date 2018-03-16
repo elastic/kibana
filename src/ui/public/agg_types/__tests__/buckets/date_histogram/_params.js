@@ -36,10 +36,12 @@ describe('params', function () {
     setTimeBounds = function (n, units) {
       timefilter.enableAutoRefreshSelector();
       timefilter.enableTimeRangeSelector();
-      timefilter.getBounds = _.constant({
-        min: now.clone().subtract(n, units),
-        max: now.clone()
-      });
+      paramWriter.vis.filters = {
+        timeRange: {
+          from: now.clone().subtract(n, units),
+          to: now.clone()
+        }
+      };
     };
   }));
 
