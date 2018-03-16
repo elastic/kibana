@@ -8,24 +8,15 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log, server, driverApi) {
+async function attemptToCreateCommand(log, server, chromedriverApi) {
   const attemptId = ++attemptCounter;
-  let capabilities = {};
-
-  switch(driverApi.getBrowserName()) {
-    case 'firefox':
-      capabilities = { browserName: 'firefox' };
-      break;
-    default:
-      capabilities = { browserName: 'chrome' };
-  }
 
   log.debug('[leadfoot:command] Creating session');
-  const session = await server.createSession({}, capabilities);
+  const session = await server.createSession({ browserName: 'chrome' });
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Registerying session for teardown');
-  driverApi.beforeStop(async () => session.quit());
+  chromedriverApi.beforeStop(async () => session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Completing session capabilities');
@@ -38,7 +29,7 @@ async function attemptToCreateCommand(log, server, driverApi) {
   return { command: new Command(session) };
 }
 
-export async function initLeadfootCommand({ log, driverApi }) {
+export async function initLeadfootCommand({ log, chromedriverApi }) {
   return await Promise.race([
     (async () => {
       await delay(2 * MINUTE);
@@ -50,7 +41,7 @@ export async function initLeadfootCommand({ log, driverApi }) {
       // backend (chromedriver in this case). it helps with session management
       // and all communication to the remote browser go through it, so we shim
       // some of it's methods to enable very verbose logging.
-      const server = initVerboseRemoteLogging(log, new Server(driverApi.getUrl()));
+      const server = initVerboseRemoteLogging(log, new Server(chromedriverApi.getUrl()));
 
       // by default, calling server.createSession() automatically fixes the webdriver
       // "capabilities" hash so that leadfoot knows the hoops it has to jump through
@@ -68,7 +59,7 @@ export async function initLeadfootCommand({ log, driverApi }) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, server, driverApi)
+          attemptToCreateCommand(log, server, chromedriverApi)
         ]);
 
         if (!command) {

@@ -1,24 +1,18 @@
 import { initLeadfootCommand } from './leadfoot_command';
 import { createRemoteInterceptors } from './interceptors';
-import { BrowserdriverApi } from './browserdriver_api';
+import { ChromedriverApi } from './chromedriver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
-  const possibleBrowsers = ['chrome', 'firefox'];
-  let browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
-  if (!possibleBrowsers.includes(browserType)) {
-    browserType = 'chrome';
-  }
+  const chromedriverApi = await ChromedriverApi.factory(log, config.get('chromedriver.url'));
+  lifecycle.on('cleanup', async () => await chromedriverApi.stop());
 
-  const browserdriverApi = await BrowserdriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
-  lifecycle.on('cleanup', async () => await browserdriverApi.stop());
+  await chromedriverApi.start();
 
-  await browserdriverApi.start();
-
-  const { command } = await initLeadfootCommand({ log, driverApi: browserdriverApi });
+  const { command } = await initLeadfootCommand({ log, chromedriverApi });
   const interceptors = createRemoteInterceptors(command);
 
   log.info('Remote initialized');
