@@ -7499,9 +7499,9 @@ lcid@^1.0.0:
   dependencies:
     invert-kv "^1.0.0"
 
-leadfoot@1.7.4:
+leadfoot@silne30/leadfoot#validation_for_response_in_ff58:
   version "1.7.4"
-  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.4.tgz#a23a6ecea3d1c7fcab124fa3c290f0473f141ad5"
+  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/460c8ed67c08177adc9c79243ff045880f4cad09"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"

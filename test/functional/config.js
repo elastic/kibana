@@ -113,9 +113,6 @@ export default async function ({ readConfigFile }) {
     },
     junit: {
       reportName: 'UI Functional Tests'
-    },
-    env: {
-      'browserName': 'firefox'
     }
   };
 }

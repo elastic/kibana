@@ -6,7 +6,12 @@ export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
-  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+  const possibleBrowsers = ['chrome', 'firefox'];
+  let browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+
+  if (!possibleBrowsers.includes(browserType)) {
+    browserType = 'chrome';
+  }
 
   const browserdriverApi = await BrowserdriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
   lifecycle.on('cleanup', async () => await browserdriverApi.stop());
