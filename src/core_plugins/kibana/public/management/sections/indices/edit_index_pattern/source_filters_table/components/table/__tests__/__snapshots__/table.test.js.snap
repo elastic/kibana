@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table editing should show a save button 1`] = `
+<div>
+  <React.Fragment>
+    <EuiButtonIcon
+      aria-label="Save"
+      color="primary"
+      iconType="checkInCircleFilled"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+    <EuiButtonIcon
+      aria-label="Cancel"
+      color="primary"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </React.Fragment>
+</div>
+`;
+
+exports[`Table editing should show an input field 1`] = `
+<EuiFormControlLayout
+  fullWidth={false}
+  iconSide="left"
+  isLoading={false}
+>
+  <EuiValidatableControl>
+    <input
+      autoFocus={true}
+      className="euiFieldText"
+      onChange={[Function]}
+      onKeyDown={[Function]}
+      type="text"
+      value="tim*"
+    />
+  </EuiValidatableControl>
+</EuiFormControlLayout>
+`;
+
+exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
+<div>
+  <span>
+    time, value
+  </span>
+</div>
+`;
+
+exports[`Table should render filter matches 1`] = `
+<span>
+  time
+</span>
+`;
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "description": "Filter name",
+        "field": "value",
+        "name": "Filter",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "description": "Language used for the field",
+        "field": "value",
+        "name": "Matches",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "align": "right",
+        "name": "",
+        "render": [Function],
+        "width": "100",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "value": "tim*",
+      },
+    ]
+  }
+  loading={true}
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  sorting={true}
+/>
+`;

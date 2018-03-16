@@ -6,7 +6,7 @@ import {
   containsInvalidCharacters,
   getMatchedIndices,
   canAppendWildcard,
-  createReasonableWait
+  ensureMinimumTime
 } from '../../lib';
 import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
@@ -45,11 +45,14 @@ export class StepIndexPattern extends Component {
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
     };
+
+    this.lastQuery = null;
   }
 
   async componentWillMount() {
     this.fetchExistingIndexPatterns();
     if (this.state.query) {
+      this.lastQuery = this.state.query;
       this.fetchIndices(this.state.query);
     }
   }
@@ -74,19 +77,35 @@ export class StepIndexPattern extends Component {
     }
 
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
+
     if (query.endsWith('*')) {
-      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({ exactMatchedIndices, isLoadingIndices: false }));
+      const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, query, MAX_SEARCH_SIZE));
+      // If the search changed, discard this state
+      if (query !== this.lastQuery) {
+        return;
+      }
+      this.setState({ exactMatchedIndices, isLoadingIndices: false });
+      return;
     }
-    else {
-      const partialMatchedIndices = await getIndices(esService, `${query}*`, MAX_SEARCH_SIZE);
-      const exactMatchedIndices = await getIndices(esService, query, MAX_SEARCH_SIZE);
-      createReasonableWait(() => this.setState({
-        partialMatchedIndices,
-        exactMatchedIndices,
-        isLoadingIndices: false
-      }));
+
+    const [
+      partialMatchedIndices,
+      exactMatchedIndices,
+    ] = await ensureMinimumTime([
+      getIndices(esService, `${query}*`, MAX_SEARCH_SIZE),
+      getIndices(esService, query, MAX_SEARCH_SIZE),
+    ]);
+
+    // If the search changed, discard this state
+    if (query !== this.lastQuery) {
+      return;
     }
+
+    this.setState({
+      partialMatchedIndices,
+      exactMatchedIndices,
+      isLoadingIndices: false
+    });
   }
 
   onQueryChanged = e => {
@@ -98,14 +117,14 @@ export class StepIndexPattern extends Component {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
-    }
-    else {
+    } else {
       if (query === '*' && appendedWildcard) {
         query = '';
         this.setState({ appendedWildcard: false });
       }
     }
 
+    this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
   }
@@ -118,7 +137,7 @@ export class StepIndexPattern extends Component {
     }
 
     return (
-      <LoadingIndices/>
+      <LoadingIndices data-test-subj="createIndexPatternStep1Loading" />
     );
   }
 
@@ -151,6 +170,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <IndicesList
+        data-test-subj="createIndexPatternStep1IndicesList"
         query={query}
         indices={indicesToList}
       />
@@ -188,7 +208,7 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
     else if (!containsInvalidCharacters(query, ILLEGAL_CHARACTERS)) {
-      errors.push(`Your input contains invalid characters or spaces. Please omit: ${characterList}`);
+      errors.push(`An index pattern cannot contain spaces or the characters: ${characterList}`);
       containsErrors = true;
     }
 
@@ -197,6 +217,7 @@ export class StepIndexPattern extends Component {
 
     return (
       <Header
+        data-test-subj="createIndexPatternStep1Header"
         isInputInvalid={isInputInvalid}
         errors={errors}
         characterList={characterList}

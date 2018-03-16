@@ -12,6 +12,7 @@ target
 .idea
 *.iml
 *.log
+/test/*/failure_debug
 /test/*/screenshots/diff
 /test/*/screenshots/failure
 /test/*/screenshots/session
@@ -33,8 +34,8 @@ selenium
 *.swp
 *.swo
 *.out
-ui_framework/doc_site/build
-!ui_framework/doc_site/build/index.html
+/packages/kbn-ui-framework/doc_site/build/*
+!/packages/kbn-ui-framework/doc_site/build/index.html
 package-lock.json
 .yo-rc.json
 /.vscode

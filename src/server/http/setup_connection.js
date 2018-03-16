@@ -1,11 +1,7 @@
 import { readFileSync } from 'fs';
-import { map } from 'lodash';
 import secureOptions from './secure_options';
 
-export default function (kbnServer, server, config) {
-  // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
-  kbnServer = null;
-
+export function setupConnection(server, config) {
   const host = config.get('server.host');
   const port = config.get('server.port');
 
@@ -41,7 +37,7 @@ export default function (kbnServer, server, config) {
     tls: {
       key: readFileSync(config.get('server.ssl.key')),
       cert: readFileSync(config.get('server.ssl.certificate')),
-      ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+      ca: config.get('server.ssl.certificateAuthorities').map(ca => readFileSync(ca, 'utf8')),
       passphrase: config.get('server.ssl.keyPassphrase'),
 
       ciphers: config.get('server.ssl.cipherSuites').join(':'),
