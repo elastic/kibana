@@ -13,8 +13,11 @@ async function attemptToCreateCommand(log, server, driverApi) {
   let capabilities = {};
 
   switch(driverApi.getBrowserName()) {
-    default:
+    case 'firefox':
       capabilities = { browserName: 'firefox' };
+      break;
+    default:
+      capabilities = { browserName: 'chrome' };
   }
 
   log.debug('[leadfoot:command] Creating session');
@@ -26,7 +29,6 @@ async function attemptToCreateCommand(log, server, driverApi) {
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Completing session capabilities');
-  log.debug(session);
   await server._fillCapabilities(session);
   if (attemptId !== attemptCounter) return; // abort
 
@@ -61,8 +63,6 @@ export async function initLeadfootCommand({ log, driverApi }) {
       // `server._fillCapabilities()` ourselves to do the fixing once we have a reference
       // to the session and have registered it for teardown before stopping the
       // chromedriverApi.
-      server.fixSessionCapabilities = false;
-
       server.fixSessionCapabilities = false;
 
       while (true) {

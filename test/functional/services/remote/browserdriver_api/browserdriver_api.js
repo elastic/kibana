@@ -12,10 +12,10 @@ const noop = () => {};
  *  @type {Object}
  */
 export class BrowserdriverApi extends EventEmitter {
-  static async factory(log, url, browser) {
+  static async factory(log, url, browserName) {
     return (await ping(url))
       ? createRemoteBrowserdriverApi(log, url)
-      : createLocalBrowserdriverApi(log, url, browser);
+      : createLocalBrowserdriverApi(log, url, browserName);
   }
 
   constructor(options = {}) {
