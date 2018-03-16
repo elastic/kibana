@@ -7,6 +7,7 @@ exports[`after fetch hideWriteControls 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -88,6 +89,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -197,6 +199,7 @@ exports[`after fetch renders table rows 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -296,6 +299,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -426,6 +430,7 @@ exports[`initialFilter 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -512,6 +517,7 @@ exports[`renders table in loading state 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    data-test-subj="top-nav"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}

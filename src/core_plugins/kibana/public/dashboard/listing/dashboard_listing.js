@@ -26,7 +26,10 @@ const tableColumns = [
     sortable: true,
     sortable: true,
     render: (field, record) => (
-      <EuiLink href={`#${createDashboardEditUrl(record.id)}`}>
+      <EuiLink
+        href={`#${createDashboardEditUrl(record.id)}`}
+        data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+      >
         {field}
       </EuiLink>
     )
@@ -272,7 +275,7 @@ export class DashboardListing extends React.Component {
 
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
