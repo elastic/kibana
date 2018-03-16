@@ -15,7 +15,12 @@
             tabindex="0"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
-            <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
+
+            <icon-tip
+              ng-if="col.info"
+              content="'{{ col.info }}'"
+            ></icon-tip>
+
             <i
               ng-if="col.sortable !== false"
               class="fa"

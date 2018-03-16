@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<div class="vis-option-item indented">
+<div class="vis-option-item">
   <label>
     <input type="checkbox"
     name="autoPrecision"
@@ -28,7 +28,7 @@
   </label>
 </div>
 
-<div class="vis-option-item indented">
+<div class="vis-option-item">
   <label>
     <input type="checkbox"
            name="useGeocentroid"
@@ -37,12 +37,20 @@
   </label>
 </div>
 
-<div class="vis-option-item indented">
+<div class="vis-option-item">
   <label>
-    <input type="checkbox"
-           data-test-subj="isFilteredByCollarCheckbox"
-           name="isFilteredByCollar"
-           ng-model="agg.params.isFilteredByCollar">
-    Only request data around extent of map <kbn-info info="Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar."></kbn-info>
+    <input
+      type="checkbox"
+      data-test-subj="isFilteredByCollarCheckbox"
+      name="isFilteredByCollar"
+      ng-model="agg.params.isFilteredByCollar"
+    >
+
+    Only request data around map extent
+
+    <icon-tip
+      position="'right'"
+      content="'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar'"
+    ></icon-tip>
   </label>
 </div>

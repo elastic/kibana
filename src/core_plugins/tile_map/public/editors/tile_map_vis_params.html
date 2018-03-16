@@ -39,17 +39,25 @@
 
   <vislib-basic-options></vislib-basic-options>
 
-  <div class="vis-option-item form-group">
-    <label>
-      <input type="checkbox"
-      name="isDesaturated"
-      ng-disabled="!vis.type.visConfig.canDesaturate"
-      ng-model="vis.params.isDesaturated">
-
-      Desaturate map tiles
-
-      <kbn-info info="Reduce the vibrancy of tile colors, this does not work in any version of Internet Explorer"></kbn-info>
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="desaturateMapTiles">
+      Desaturate tiles
     </label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input
+        type="checkbox"
+        id="desaturateMapTiles"
+        name="isDesaturated"
+        ng-disabled="!vis.type.visConfig.canDesaturate"
+        ng-model="vis.params.isDesaturated"
+      >
+      &nbsp;
+      <icon-tip
+        content="'Reduce the vibrancy of tile colors. This does not work in any version of Internet Explorer.'"
+        position="'right'"
+      ></icon-tip>
+    </div>
   </div>
 </div>
 
