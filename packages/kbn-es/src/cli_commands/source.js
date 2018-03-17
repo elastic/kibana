@@ -5,17 +5,22 @@ const { Cluster } = require('../cluster');
 
 exports.description = 'Build and run from source';
 
-exports.help = dedent`
-  Options:
+exports.help = (defaults = {}) => {
+  return dedent`
+    Options:
 
-    --source-path   Absolute path to Elasticsearch source
-    --install-path  Directory to install to
-    -E              Additional key=value settings to pass to Elasticsearch
+      --source-path   Path to ES source [default: ${defaults['source-path']}]
+      --base-path     Path containing cache/installations [default: ${
+        defaults['base-path']
+      }]
+      --install-path  Installation path, defaults to 'source' within base-path
+      -E              Additional key=value settings to pass to Elasticsearch
 
-  Example:
+    Example:
 
-    es snapshot --source-path=../elasticsearch -E cluster.name=test -E path.data=/tmp/es-data
-`;
+      es snapshot --source-path=../elasticsearch -E cluster.name=test -E path.data=/tmp/es-data
+  `;
+};
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);

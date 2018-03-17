@@ -7,17 +7,21 @@ exports.description = 'Install and run from an Elasticsearch tar';
 
 exports.usage = 'es archive <path> [<args>]';
 
-const help = dedent`
-  Options:
+exports.help = (defaults = {}) => {
+  return dedent`
+    Options:
 
-    --install-path  Directory to install to
-    -E              Additional key=value settings to pass to Elasticsearch
+      --base-path     Path containing cache/installations [default: ${
+        defaults['base-path']
+      }]
+      --install-path  Installation path, defaults to 'source' within base-path
+      -E              Additional key=value settings to pass to Elasticsearch
 
-  Example:
+    Example:
 
-    es archive ../elasticsearch.tar.gz -E cluster.name=test -E path.data=/tmp/es-data
-`;
-exports.help = help;
+      es archive ../elasticsearch.tar.gz -E cluster.name=test -E path.data=/tmp/es-data
+  `;
+};
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);

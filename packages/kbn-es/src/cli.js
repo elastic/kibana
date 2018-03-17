@@ -55,7 +55,7 @@ exports.run = async (defaults = {}) => {
 
       ${command.description}
 
-      ${command.help.replace(/\n/g, '\n       ')}
+      ${command.help(defaults).replace(/\n/g, '\n       ')}
     `);
     return;
   }
