@@ -23,56 +23,67 @@ import { parse as parseUrl } from 'url';
 import treeKill from 'tree-kill';
 import { delay, fromNode as fcb } from 'bluebird';
 import { path as CHROMEDRIVER_EXEC } from 'chromedriver';
+import { path as FIREFOXDRIVER_EXEC } from 'geckodriver';
 
 import { ping } from './ping';
-import { ChromedriverApi } from './chromedriver_api';
+import { BrowserDriverApi } from './browser_driver_api';
 const START_TIMEOUT = 15000;
 const PING_INTERVAL = 500;
 
-export function createLocalChromedriverApi(log, url) {
+export function createLocalBrowserDriverApi(log, url, browser) {
+  let runningDriver = null;
+  const driverName = browser + 'driver';
+  switch (browser) {
+    case 'firefox':
+      runningDriver = FIREFOXDRIVER_EXEC;
+      break;
+    default:
+      runningDriver = CHROMEDRIVER_EXEC;
+  }
   let proc = null;
 
-  return new ChromedriverApi({
+  return new BrowserDriverApi({
     url,
+    requiredCapabilities: Object.create({ browserType: browser }),
 
     async start(api) {
       const { port } = parseUrl(url);
-      log.info('Starting local chromedriver at port %d', port);
+      log.debug('Starting local ' + driverName + ' at port %d', port);
 
-      proc = spawn(CHROMEDRIVER_EXEC, [`--port=${port}`], {
+      proc = spawn(runningDriver, [`--port=${port}`], {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
 
       proc.stdout.on('data', chunk => {
-        log.debug('[chromedriver:stdout]', chunk.toString('utf8').trim());
+        log.debug('[' + driverName + ':stdout]', chunk.toString('utf8').trim());
       });
       proc.stderr.on('data', chunk => {
-        log.debug('[chromedriver:stderr]', chunk.toString('utf8').trim());
+        log.debug('[' + driverName + ':stderr]', chunk.toString('utf8').trim());
       });
 
       proc.on('exit', (code) => {
         if (!api.isStopped() || code > 0) {
-          api.emit('error', new Error(`Chromedriver exited with code ${code}`));
+          api.emit('error', new Error(driverName + ` exited with code ${code}`));
         }
       });
 
       const pingsStartedAt = Date.now();
       while (true) {
-        log.debug('[chromedriver:ping] attempting to reach chromedriver at %j', url);
+        log.debug('[' + driverName + ':ping] attempting to reach at %j', url);
         if (await ping(url)) {
-          log.debug('[chromedriver:ping] success');
+          log.debug('[' + driverName + ':ping] success');
           break;
         } else {
-          log.debug('[chromedriver:ping] failure');
+          log.debug('[' + driverName + ':ping] failure');
         }
 
         if ((Date.now() - pingsStartedAt) < START_TIMEOUT) {
-          log.debug('[chromedriver:ping] waiting for %d before next ping', PING_INTERVAL);
+          log.debug('[' + driverName + ':ping] waiting for %d before next ping', PING_INTERVAL);
           await delay(PING_INTERVAL);
           continue;
         }
 
-        throw new Error(`Chromedriver did not start within the ${START_TIMEOUT}ms timeout`);
+        throw new Error(driverName + ` did not start within the ${START_TIMEOUT}ms timeout`);
       }
     },
 
