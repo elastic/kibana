@@ -46,16 +46,14 @@ const DiscoverFetchError = ({ fetchError }) => {
           >
             {body}
 
-            <p>
-              Error message:
-            </p>
-
             <EuiCodeBlock>
               {fetchError.error}
             </EuiCodeBlock>
           </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="xl" />
     </Fragment>
   );
 };

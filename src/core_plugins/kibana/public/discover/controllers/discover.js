@@ -58,14 +58,14 @@ uiRoutes
         })
           .then(({ savedObjects }) => {
             /**
-         *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-         *  the load order of AppState conflicts with the load order of many other things
-         *  so in order to get the name of the index we should use, and to switch to the
-         *  default if necessary, we parse the appState with a temporary State object and
-         *  then destroy it immediatly after we're done
-         *
-         *  @type {State}
-         */
+             *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+             *  the load order of AppState conflicts with the load order of many other things
+             *  so in order to get the name of the index we should use, and to switch to the
+             *  default if necessary, we parse the appState with a temporary State object and
+             *  then destroy it immediatly after we're done
+             *
+             *  @type {State}
+             */
             const state = new State('_a', {});
 
             const specified = !!state.index;
@@ -289,15 +289,6 @@ function discoverController(
   };
 
   const init = _.once(function () {
-    const showTotal = 5;
-    $scope.failuresShown = showTotal;
-    $scope.showAllFailures = function () {
-      $scope.failuresShown = $scope.failures.length;
-    };
-    $scope.showLessFailures = function () {
-      $scope.failuresShown = showTotal;
-    };
-
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
       $appStatus.dirty = status.dirty || !savedSearch.id;
