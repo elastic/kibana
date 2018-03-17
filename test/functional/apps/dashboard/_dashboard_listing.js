@@ -46,9 +46,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
-        // EUI defaultFocusedButton prop not working at the moment
-        //await PageObjects.common.pressEnterKey();
-        await PageObjects.common.clickCancelOnModal();
+        await PageObjects.common.pressEnterKey();
 
         const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
         expect(isConfirmOpen).to.be(false);
