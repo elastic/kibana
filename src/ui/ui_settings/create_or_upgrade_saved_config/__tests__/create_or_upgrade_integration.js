@@ -23,7 +23,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     this.timeout(es.getStartTimeout());
 
     log.indent(-4);
-    cleanup.push(() => es.stop());
+    cleanup.push(async () => await es.cleanup());
 
     await es.start();
 

@@ -29,15 +29,11 @@ describe('single test that uses esArchiver', () => {
     log.info('starting elasticsearch');
     log.indent(2);
 
-    const es = createTestCluster({
-      name: 'ftr',
-      port: config.get('servers.elasticsearch.port'),
-      log,
-    });
+    const es = createTestCluster({ port: config.get('servers.elasticsearch.port'), log });
     this.timeout(es.getStartTimeout());
 
     await es.start();
-    cleanupWork.unshift(() => es.stop());
+    cleanupWork.unshift(async () => await es.cleanup());
 
     log.indent(-2);
 

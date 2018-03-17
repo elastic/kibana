@@ -127,7 +127,7 @@ exports.Cluster = class Cluster {
    */
   async stop() {
     if (this._process) {
-      this._process.kill();
+      await this._process.kill();
     }
   }
 };

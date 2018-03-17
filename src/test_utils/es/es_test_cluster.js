@@ -7,21 +7,18 @@ import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 
-export function createTestCluster(options = {}) {
+export function createTestCluster({ port = esTestConfig.getPort(), log }) {
+  const randomHash = Math.random().toString(36).substring(2);
+  const clusterName = `test-${randomHash}`;
+  const basePath = resolve(__dirname, '../../../.es');
   const config = {
     version: esTestConfig.getVersion(),
+    installPath: resolve(basePath, clusterName),
     sourcePath: resolve(__dirname, '../../../../elasticsearch'),
-    port: esTestConfig.getPort(),
-    basePath: resolve(__dirname, '../../../.es'),
-    ...options,
+    basePath,
   };
 
-  const hash = Math.random()
-    .toString(36)
-    .substring(2);
-  config.installPath = resolve(config.basePath, hash);
-
-  const cluster = new Cluster(options.log);
+  const cluster = new Cluster(log);
   const from = esTestConfig.getBuildFrom();
 
   return new class EsTestCluster {
@@ -40,15 +37,19 @@ export function createTestCluster(options = {}) {
 
       await cluster.start(installPath, {
         esArgs: [
-          'cluster.name=kbn-test',
-          `http.port=${config.port}`,
-          `discovery.zen.ping.unicast.hosts=localhost:${config.port}`,
+          `cluster.name=${clusterName}`,
+          `http.port=${port}`,
+          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
         ],
       });
     }
 
-    stop() {
-      cluster.stop();
+    async stop() {
+      await cluster.stop();
+    }
+
+    async cleanup() {
+      await this.stop();
       rmrfSync(config.installPath);
     }
 
@@ -67,7 +68,7 @@ export function createTestCluster(options = {}) {
 
     getUrl() {
       const parts = esTestConfig.getUrlParts();
-      parts.port = config.port;
+      parts.port = port;
 
       return format(parts);
     }

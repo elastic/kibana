@@ -50,7 +50,7 @@ export async function stopServers() {
   }
 
   if (es) {
-    await es.stop();
+    await es.cleanup();
     es = null;
   }
 }
