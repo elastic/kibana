@@ -7,11 +7,11 @@ import { path as CHROMEDRIVER_EXEC } from 'chromedriver';
 import { path as FIREFOXDRIVER_EXEC } from 'geckodriver';
 
 import { ping } from './ping';
-import { BrowserdriverApi } from './browserdriver_api';
+import { BrowserDriverApi } from './browser_driver_api';
 const START_TIMEOUT = 15000;
 const PING_INTERVAL = 500;
 
-export function createLocalBrowserdriverApi(log, url, browser) {
+export function createLocalBrowserDriverApi(log, url, browser) {
   let runningDriver = null;
   const driverName = browser + 'driver';
   switch (browser) {
@@ -23,9 +23,9 @@ export function createLocalBrowserdriverApi(log, url, browser) {
   }
   let proc = null;
 
-  return new BrowserdriverApi({
+  return new BrowserDriverApi({
     url,
-    browser,
+    requiredCapabilities: Object.create({ browserType: browser }),
 
     async start(api) {
       const { port } = parseUrl(url);

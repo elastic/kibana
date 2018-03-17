@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
-import { createLocalBrowserdriverApi } from './browserdriver_local_api';
-import { createRemoteBrowserdriverApi } from './browserdriver_remote_api';
+import { createLocalBrowserDriverApi } from './browser_driver_local_api';
+import { createRemoteBrowserDriverApi } from './browser_driver_remote_api';
 import { ping } from './ping';
 
 const noop = () => {};
@@ -11,11 +11,11 @@ const noop = () => {};
  *
  *  @type {Object}
  */
-export class BrowserdriverApi extends EventEmitter {
-  static async factory(log, url, browserName) {
+export class BrowserDriverApi extends EventEmitter {
+  static async factory(log, url, browserType) {
     return (await ping(url))
-      ? createRemoteBrowserdriverApi(log, url)
-      : createLocalBrowserdriverApi(log, url, browserName);
+      ? createRemoteBrowserDriverApi(log, url)
+      : createLocalBrowserDriverApi(log, url, browserType);
   }
 
   constructor(options = {}) {
@@ -25,21 +25,21 @@ export class BrowserdriverApi extends EventEmitter {
       url,
       start = noop,
       stop = noop,
-      browser,
+      requiredCapabilities,
     } = options;
 
     if (!url) {
       throw new TypeError('url is a required parameter');
     }
-    this._browser = browser;
+    this._requiredCapabilities = requiredCapabilities;
     this._url = url;
     this._state = undefined;
     this._callCustomStart = () => start(this);
     this._callCustomStop = () => stop(this);
     this._beforeStopFns = [];
   }
-  getBrowserName() {
-    return this._browser;
+  getRequiredCapabilities() {
+    return this._requiredCapabilities;
   }
   getUrl() {
     return this._url;

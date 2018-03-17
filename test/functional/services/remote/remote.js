@@ -1,24 +1,24 @@
 import { initLeadfootCommand } from './leadfoot_command';
 import { createRemoteInterceptors } from './interceptors';
-import { BrowserdriverApi } from './browserdriver_api';
+import { BrowserDriverApi } from './browser_driver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
   const possibleBrowsers = ['chrome', 'firefox'];
-  let browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
-    browserType = 'chrome';
+    throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
-  const browserdriverApi = await BrowserdriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
-  lifecycle.on('cleanup', async () => await browserdriverApi.stop());
+  const browserDriverApi = await BrowserDriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
+  lifecycle.on('cleanup', async () => await browserDriverApi.stop());
 
-  await browserdriverApi.start();
+  await browserDriverApi.start();
 
-  const { command } = await initLeadfootCommand({ log, driverApi: browserdriverApi });
+  const { command } = await initLeadfootCommand({ log, browserDriverApi: browserDriverApi });
   const interceptors = createRemoteInterceptors(command);
 
   log.info('Remote initialized');
