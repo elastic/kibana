@@ -23,13 +23,15 @@ function help() {
   `);
 }
 
-exports.run = async function run(argv) {
+exports.run = async (defaults = {}) => {
+  const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
       h: 'help',
     },
-  });
 
+    default: defaults,
+  });
   const args = options._;
   const commandName = args[0];
 
@@ -58,5 +60,5 @@ exports.run = async function run(argv) {
     return;
   }
 
-  await command.run(argv);
+  await command.run(defaults);
 };

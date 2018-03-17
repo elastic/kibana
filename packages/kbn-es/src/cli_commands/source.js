@@ -11,9 +11,14 @@ exports.help = dedent`
     --source-path   Absolute path to Elasticsearch source
     --install-path  Directory to install to
     -E              Additional key=value settings to pass to Elasticsearch
+
+  Example:
+
+    es snapshot --source-path=../elasticsearch -E cluster.name=test -E path.data=/tmp/es-data
 `;
 
-exports.run = async argv => {
+exports.run = async (defaults = {}) => {
+  const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
       basePath: 'base-path',
@@ -21,6 +26,8 @@ exports.run = async argv => {
       sourcePath: 'source-path',
       esArgs: 'E',
     },
+
+    default: defaults,
   });
 
   const cluster = new Cluster();

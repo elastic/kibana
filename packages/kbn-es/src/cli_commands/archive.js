@@ -19,13 +19,16 @@ const help = dedent`
 `;
 exports.help = help;
 
-exports.run = async argv => {
+exports.run = async (defaults = {}) => {
+  const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
       esArgs: 'E',
     },
+
+    default: defaults,
   });
 
   const cluster = new Cluster();
