@@ -8,15 +8,14 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log, server, chromedriverApi) {
+async function attemptToCreateCommand(log, server, driverApi) {
   const attemptId = ++attemptCounter;
-
   log.debug('[leadfoot:command] Creating session');
-  const session = await server.createSession({ browserName: 'chrome' });
+  const session = await server.createSession({}, driverApi.getRequiredCapabilities());
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Registerying session for teardown');
-  chromedriverApi.beforeStop(async () => session.quit());
+  driverApi.beforeStop(async () => session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
   log.debug('[leadfoot:command] Completing session capabilities');
@@ -29,7 +28,7 @@ async function attemptToCreateCommand(log, server, chromedriverApi) {
   return { command: new Command(session) };
 }
 
-export async function initLeadfootCommand({ log, chromedriverApi }) {
+export async function initLeadfootCommand({ log, browserDriverApi }) {
   return await Promise.race([
     (async () => {
       await delay(2 * MINUTE);
@@ -41,7 +40,7 @@ export async function initLeadfootCommand({ log, chromedriverApi }) {
       // backend (chromedriver in this case). it helps with session management
       // and all communication to the remote browser go through it, so we shim
       // some of it's methods to enable very verbose logging.
-      const server = initVerboseRemoteLogging(log, new Server(chromedriverApi.getUrl()));
+      const server = initVerboseRemoteLogging(log, new Server(browserDriverApi.getUrl()));
 
       // by default, calling server.createSession() automatically fixes the webdriver
       // "capabilities" hash so that leadfoot knows the hoops it has to jump through
@@ -59,7 +58,7 @@ export async function initLeadfootCommand({ log, chromedriverApi }) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, server, chromedriverApi)
+          attemptToCreateCommand(log, server, browserDriverApi)
         ]);
 
         if (!command) {
