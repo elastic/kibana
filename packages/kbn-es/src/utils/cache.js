@@ -1,4 +1,6 @@
 const fs = require('fs');
+const mkdirp = require('mkdirp');
+const path = require('path');
 
 exports.readMeta = function readMeta(file) {
   try {
@@ -27,5 +29,6 @@ exports.writeMeta = function readMeta(file, details = {}) {
     ...details,
   };
 
+  mkdirp.sync(path.dirname(file));
   fs.writeFileSync(`${file}.meta`, JSON.stringify(meta, null, 2));
 };

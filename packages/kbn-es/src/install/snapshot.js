@@ -43,13 +43,7 @@ function downloadFile(url, dest, log) {
   const downloadPath = path.resolve(DL_PATH, path.basename(dest));
   const cacheMeta = cache.readMeta(dest);
 
-  if (!fs.existsSync(DL_PATH)) {
-    mkdirp(DL_PATH);
-  }
-
-  if (!fs.existsSync(path.dirname(dest))) {
-    mkdirp(path.dirname(dest));
-  }
+  mkdirp.sync(DL_PATH);
 
   log.info('downloading from %s', chalk.bold(url));
 
@@ -78,8 +72,8 @@ function downloadFile(url, dest, log) {
             if (res.ok) {
               const etag = res.headers.get('etag');
 
-              fs.renameSync(downloadPath, dest);
               cache.writeMeta(dest, { etag });
+              fs.renameSync(downloadPath, dest);
               resolve();
             } else {
               reject(new Error(res.statusText));
