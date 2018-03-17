@@ -7,7 +7,7 @@ import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 
-export function createTestCluster(options) {
+export function createTestCluster(options = {}) {
   const config = {
     version: esTestConfig.getVersion(),
     sourcePath: resolve(__dirname, '../../../../elasticsearch'),

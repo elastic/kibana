@@ -49,5 +49,8 @@ export async function stopServers() {
     kbnServer = null;
   }
 
-  await es.stop();
+  if (es) {
+    await es.stop();
+    es = null;
+  }
 }
