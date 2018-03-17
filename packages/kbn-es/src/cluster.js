@@ -18,14 +18,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installSource(options = {}) {
-    const { log = this._log } = options;
+    this._log.info(chalk.bold('Installing from source'));
+    this._log.indent(4);
 
-    log.info(chalk.bold('Installing from source'));
-    log.indent(4);
+    const install = await installSource({ log: this._log, ...options });
 
-    const install = await installSource({ log, ...options });
-
-    log.indent(-4);
+    this._log.indent(-4);
 
     return install;
   }
@@ -39,14 +37,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installSnapshot(options = {}) {
-    const { log = this._log } = options;
+    this._log.info(chalk.bold('Installing from snapshot'));
+    this._log.indent(4);
 
-    log.info(chalk.bold('Installing from snapshot'));
-    log.indent(4);
+    const install = await installSnapshot({ log: this._log, ...options });
 
-    const install = await installSnapshot({ log, ...options });
-
-    log.indent(-4);
+    this._log.indent(-4);
 
     return install;
   }
@@ -60,14 +56,12 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async installArchive(path, options = {}) {
-    const { log = this._log } = options;
+    this._log.info(chalk.bold('Installing from an archive'));
+    this._log.indent(4);
 
-    log.info(chalk.bold('Installing from an archive'));
-    log.indent(4);
+    const install = await installArchive(path, { log: this._log, ...options });
 
-    const install = await installArchive(path, { log, ...options });
-
-    log.indent(-4);
+    this._log.indent(-4);
 
     return install;
   }
@@ -100,16 +94,16 @@ exports.Cluster = class Cluster {
    * @property {Array} options.esArgs
    * @returns {Process}
    */
-  run(installPath, { log = this._log, esArgs = [] }) {
-    log.info(chalk.bold('Starting'));
-    log.indent(4);
+  run(installPath, { esArgs = [] }) {
+    this._log.info(chalk.bold('Starting'));
+    this._log.indent(4);
 
     const args = extractConfigFiles(esArgs, this._installPath).reduce(
       (acc, cur) => acc.concat(['-E', cur]),
       []
     );
 
-    log.debug('%s %s', ES_BIN, args.join(' '));
+    this._log.debug('%s %s', ES_BIN, args.join(' '));
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
