@@ -26,13 +26,21 @@ export default class BasePathProxy {
 
     const sslEnabled = config.get('server.ssl.enabled');
     if (sslEnabled) {
-      this.proxyAgent = new HttpsAgent({
-        key: readFileSync(config.get('server.ssl.key')),
+      const agentOptions = {
         passphrase: config.get('server.ssl.keyPassphrase'),
-        cert: readFileSync(config.get('server.ssl.certificate')),
-        ca: map(config.get('server.ssl.certificateAuthorities'), readFileSync),
+        ca: map(config.get('server.ssl.certificateAuthorities'), (certAuthority) => readFileSync(certAuthority)),
         rejectUnauthorized: false
-      });
+      };
+
+      const pfx = config.get('server.ssl.pfx');
+      if (pfx) {
+        agentOptions.pfx = readFileSync(pfx);
+      } else {
+        agentOptions.key = readFileSync(config.get('server.ssl.key'));
+        agentOptions.cert = readFileSync(config.get('server.ssl.certificate'));
+      }
+
+      this.proxyAgent = new HttpsAgent(agentOptions);
     }
 
     if (!this.basePath) {

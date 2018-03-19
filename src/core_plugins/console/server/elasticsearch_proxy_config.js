@@ -37,7 +37,10 @@ const createAgent = (server) => {
   }
 
   // Add client certificate and key if required by elasticsearch
-  if (config.get('elasticsearch.ssl.certificate') && config.get('elasticsearch.ssl.key')) {
+  if (config.get('elasticsearch.ssl.pfx')) {
+    agentOptions.pfx = readFile(config.get('elasticsearch.ssl.pfx'));
+    agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
+  } else if (config.get('elasticsearch.ssl.certificate') && config.get('elasticsearch.ssl.key')) {
     agentOptions.cert = readFile(config.get('elasticsearch.ssl.certificate'));
     agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
     agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');

@@ -86,6 +86,14 @@ describe('plugins/elasticsearch', function () {
         const config = parseConfig(serverConfig);
         expect(config.ssl.passphrase).to.be('secret');
       });
+
+      it(`sets pfx when a PKCS#12 certificate bundle is specified`, function () {
+        serverConfig.ssl.pfx = __dirname + '/fixtures/cert.pfx';
+
+        const config = parseConfig(serverConfig);
+        expect(Buffer.isBuffer(config.ssl.pfx)).to.be(true);
+        expect(config.ssl.pfx.toString('utf-8')).to.be('test pfx\n');
+      });
     });
   });
 });

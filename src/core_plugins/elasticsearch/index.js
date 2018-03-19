@@ -23,6 +23,7 @@ export default function (kibana) {
         certificateAuthorities: array().single().items(string()),
         certificate: string(),
         key: string(),
+        pfx: string(),
         keyPassphrase: string()
       }).default();
 

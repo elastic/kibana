@@ -32,14 +32,20 @@ export function setupConnection(server, config) {
     return;
   }
 
+  const tlsOptions = {};
+  if (config.get('server.ssl.pfx')) {
+    tlsOptions.pfx = readFileSync(config.get('server.ssl.pfx'));
+  } else {
+    tlsOptions.key = readFileSync(config.get('server.ssl.key'));
+    tlsOptions.cert = readFileSync(config.get('server.ssl.certificate'));
+  }
+
   const connection = server.connection({
     ...connectionOptions,
     tls: {
-      key: readFileSync(config.get('server.ssl.key')),
-      cert: readFileSync(config.get('server.ssl.certificate')),
+      ...tlsOptions,
       ca: config.get('server.ssl.certificateAuthorities').map(ca => readFileSync(ca, 'utf8')),
       passphrase: config.get('server.ssl.keyPassphrase'),
-
       ciphers: config.get('server.ssl.cipherSuites').join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
       honorCipherOrder: true,

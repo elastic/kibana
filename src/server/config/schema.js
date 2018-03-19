@@ -62,13 +62,25 @@ export default () => Joi.object({
     ssl: Joi.object({
       enabled: Joi.boolean().default(false),
       redirectHttpFromPort: Joi.number(),
-      certificate: Joi.string().when('enabled', {
+      pfx: Joi.when('enabled', {
         is: true,
-        then: Joi.required(),
+        then: Joi.string().optional()
       }),
-      key: Joi.string().when('enabled', {
+      certificate: Joi.when('enabled', {
         is: true,
-        then: Joi.required()
+        then: Joi.when('pfx', {
+          is: Joi.exist(),
+          then: Joi.string().forbidden(),
+          otherwise: Joi.string().required()
+        })
+      }),
+      key: Joi.when('enabled', {
+        is: true,
+        then: Joi.when('pfx', {
+          is: Joi.exist(),
+          then: Joi.string().forbidden(),
+          otherwise: Joi.string().required()
+        })
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
