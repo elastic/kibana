@@ -69,11 +69,11 @@ typeahead.directive('kbnTypeahead', function () {
         if ([TAB, ENTER].includes(keyCode) && !this.hidden && this.selectedIndex !== null) {
           event.preventDefault();
           this.submit();
-        } else if (keyCode === UP) {
+        } else if (keyCode === UP && this.items.length > 0) {
           event.preventDefault();
           this.isHidden = false;
           this.selectPrevious();
-        } else if (keyCode === DOWN) {
+        } else if (keyCode === DOWN && this.items.length > 0) {
           event.preventDefault();
           this.isHidden = false;
           this.selectNext();
