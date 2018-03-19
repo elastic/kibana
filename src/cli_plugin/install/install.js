@@ -8,6 +8,7 @@ import { sync as rimrafSync } from 'rimraf';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
 import mkdirp from 'mkdirp';
+import { sandboxProcessesPrompt } from './sandbox_processes_prompt';
 
 const mkdir = Promise.promisify(mkdirp);
 
@@ -20,6 +21,11 @@ export default async function install(settings, logger) {
     await download(settings, logger);
 
     await getPackData(settings, logger);
+
+    const shouldContinue = await sandboxProcessesPrompt(settings, logger);
+    if (!shouldContinue) {
+      return;
+    }
 
     await extract(settings, logger);
 
