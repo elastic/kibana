@@ -54,6 +54,15 @@ server.ssl.key: /path/to/your/server.key
 server.ssl.certificate: /path/to/your/server.crt
 ----
 
+Alternatively, you can specify a PKCS#12 encoded certificate with the `server.ssl.pfx` property in `kibana.yml`:
+
+[source,text]
+----
+# SSL for outgoing requests from the Kibana Server (PKCS#12 formatted)
+server.ssl.enabled: true
+server.ssl.pfx: /path/to/your/server.pfx
+----
+
 If you are using X-Pack Security or a proxy that provides an HTTPS endpoint for Elasticsearch,
 you can configure Kibana to access Elasticsearch via HTTPS so communications between
 the Kibana server and Elasticsearch are encrypted.
