@@ -1,9 +1,7 @@
 import chalk from 'chalk';
-import { Observable, Subject } from 'rxjs';
-
-import { Project } from '../utils/project';
-import { topologicallyBatchProjects } from '../utils/projects';
+import { topologicallyBatchProjects, ProjectMap } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
+import { waitUntilWatchIsReady } from '../utils/watch';
 import { Command } from './';
 
 /**
@@ -12,66 +10,9 @@ import { Command } from './';
 const watchScriptName = 'kbn:watch';
 
 /**
- * Number of milliseconds we wait before we fall back to the default watch handler.
+ * Name of the Kibana project.
  */
-const defaultHandlerDelay = 3000;
-
-/**
- * If default watch handler is used, then it's the number of milliseconds we wait for
- * any build output before we consider watch task ready.
- */
-const defaultHandlerReadinessTimeout = 2000;
-
-function getWatchHandlers(buildOutput$: Observable<string>) {
-  const typescriptHandler = buildOutput$
-    .first(data => data.includes('$ tsc'))
-    .map(() =>
-      buildOutput$
-        .first(data => data.includes('Compilation complete.'))
-        .mapTo('tsc')
-    );
-
-  const webpackHandler = buildOutput$
-    .first(data => data.includes('$ webpack'))
-    .map(() =>
-      buildOutput$.first(data => data.includes('Chunk Names')).mapTo('webpack')
-    );
-
-  const defaultHandler = Observable.of(void 0)
-    .delay(defaultHandlerReadinessTimeout)
-    .map(() =>
-      buildOutput$
-        .timeout(defaultHandlerDelay)
-        .catch(() => Observable.of(void 0))
-        .mapTo('timeout')
-    );
-
-  return [typescriptHandler, webpackHandler, defaultHandler];
-}
-
-function runScriptUntilWatchIsReady(project: Project) {
-  const buildOutput$ = new Subject<string>();
-  const onDataListener = (data: Buffer) =>
-    buildOutput$.next(data.toString('utf-8'));
-  const onEndListener = () => buildOutput$.complete();
-  const onErrorListener = (e: Error) => buildOutput$.error(e);
-
-  const stream = project.runScriptStreaming(watchScriptName);
-  stream.stdout.once('end', onEndListener);
-  stream.stdout.once('error', onErrorListener);
-  stream.stdout.on('data', onDataListener);
-
-  return Observable.race(getWatchHandlers(buildOutput$))
-    .mergeMap(whenReady => whenReady)
-    .finally(() => {
-      stream.stdout.removeListener('data', onDataListener);
-      stream.stdout.removeListener('end', onEndListener);
-      stream.stdout.removeListener('error', onErrorListener);
-
-      buildOutput$.complete();
-    })
-    .toPromise();
-}
+const kibanaProjectName = 'kibana';
 
 /**
  * Command that traverses through list of available projects/packages that have `kbn:watch` script in their
@@ -88,21 +29,46 @@ export const WatchCommand: Command = {
   description: 'Runs `kbn:watch` script for every project.',
 
   async run(projects, projectGraph) {
-    const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
+    const projectsWithWatchScript: ProjectMap = new Map();
+    for (const project of projects.values()) {
+      if (project.hasScript(watchScriptName)) {
+        projectsWithWatchScript.set(project.name, project);
+      }
+    }
+
+    console.log(
+      chalk.bold(
+        chalk.green(
+          `Running ${watchScriptName} scripts for [${Array.from(
+            projectsWithWatchScript.keys()
+          ).join(', ')}].`
+        )
+      )
+    );
+
+    // Kibana should always be run the last, so we don't rely on automatic
+    // topological batching and push it to the last one-entry batch manually.
+    projectsWithWatchScript.delete(kibanaProjectName);
+
+    const batchedProjects = topologicallyBatchProjects(
+      projectsWithWatchScript,
+      projectGraph
+    );
+
+    if (projects.has(kibanaProjectName)) {
+      batchedProjects.push([projects.get(kibanaProjectName)!]);
+    }
 
     await parallelizeBatches(batchedProjects, async pkg => {
-      if (!pkg.hasScript(watchScriptName)) {
-        return;
-      }
-
-      console.log(
-        chalk.bold(`\n[${chalk.green(pkg.name)}] Running watch script.\n`)
+      const completionHint = await waitUntilWatchIsReady(
+        pkg.runScriptStreaming(watchScriptName).stdout
       );
 
-      const completionMarker = await runScriptUntilWatchIsReady(pkg);
       console.log(
         chalk.bold(
-          `\n[${chalk.green(pkg.name)}] Watch is ready (${completionMarker}).\n`
+          `[${chalk.green(
+            pkg.name
+          )}] Initial build completed (${completionHint}).`
         )
       );
     });
