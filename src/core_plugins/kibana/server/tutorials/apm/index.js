@@ -44,6 +44,6 @@ export function apmSpecProvider(server) {
     artifacts: artifacts,
     onPrem: ON_PREM_INSTRUCTIONS,
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm_dashboard_transactions.jpg',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
   };
 }
