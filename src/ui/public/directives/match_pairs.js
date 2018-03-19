@@ -31,18 +31,20 @@ module.directive('matchPairs', () => ({
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
       } else if (shouldInsertMatchingCloser(key, value, selectionStart, selectionEnd)) {
         e.preventDefault();
-        ngModel.$setViewValue(
-          value.substr(0, selectionStart) + key +
+        const newValue = value.substr(0, selectionStart) + key +
           value.substring(selectionStart, selectionEnd) + closers[openers.indexOf(key)] +
-          value.substr(selectionEnd)
-        );
-        ngModel.$render();
+          value.substr(selectionEnd);
+        target.value = newValue;
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
+        ngModel.$setViewValue(newValue);
+        ngModel.$render();
       } else if (shouldRemovePair(key, metaKey, value, selectionStart, selectionEnd)) {
         e.preventDefault();
-        ngModel.$setViewValue(value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1));
-        ngModel.$render();
+        const newValue = value.substr(0, selectionEnd - 1) + value.substr(selectionEnd + 1);
+        target.value = newValue;
         target.setSelectionRange(selectionStart - 1, selectionEnd - 1);
+        ngModel.$setViewValue(newValue);
+        ngModel.$render();
       }
     });
   }

@@ -1,6 +1,6 @@
 // Initialization block
 {
-  const { parseCursor, helpers: { nodeTypes } } = options;
+  const { parseCursor, cursorSymbol, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
@@ -260,4 +260,4 @@ Space
   = [\ \t\r\n]
 
 Cursor
-  = &{ return parseCursor; } cursor:'\0' { return cursor; }
+  = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }

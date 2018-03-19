@@ -5,7 +5,7 @@ import { getSuggestionsProvider as value } from './value';
 import { getSuggestionsProvider as operator } from './operator';
 import { getSuggestionsProvider as conjunction } from './conjunction';
 
-const cursor = '\0';
+const cursorSymbol = '@kuery-cursor@';
 
 export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
@@ -13,11 +13,11 @@ export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   });
 
   return function getSuggestions({ query, selectionStart, selectionEnd }) {
-    const cursoredQuery = `${query.substr(0, selectionStart)}${cursor}${query.substr(selectionEnd)}`;
+    const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(selectionEnd)}`;
 
     let cursorNode;
     try {
-      cursorNode = fromKueryExpression(cursoredQuery, { parseCursor: true });
+      cursorNode = fromKueryExpression(cursoredQuery, { cursorSymbol, parseCursor: true });
     } catch (e) {
       cursorNode = {};
     }

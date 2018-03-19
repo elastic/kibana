@@ -216,9 +216,9 @@ module.exports = (function() {
         peg$c57 = /^[ \t\r\n]/,
         peg$c58 = { type: "class", value: "[\\ \\t\\r\\n]", description: "[\\ \\t\\r\\n]" },
         peg$c59 = function() { return parseCursor; },
-        peg$c60 = "\x00",
-        peg$c61 = { type: "literal", value: "\x00", description: "\"\\x00\"" },
-        peg$c62 = function(cursor) { return cursor; },
+        peg$c60 = "@kuery-cursor@",
+        peg$c61 = { type: "literal", value: "@kuery-cursor@", description: "\"@kuery-cursor@\"" },
+        peg$c62 = function() { return cursorSymbol; },
 
         peg$currPos          = 0,
         peg$savedPos         = 0,
@@ -1629,16 +1629,16 @@ module.exports = (function() {
         s1 = peg$FAILED;
       }
       if (s1 !== peg$FAILED) {
-        if (input.charCodeAt(peg$currPos) === 0) {
+        if (input.substr(peg$currPos, 14) === peg$c60) {
           s2 = peg$c60;
-          peg$currPos++;
+          peg$currPos += 14;
         } else {
           s2 = peg$FAILED;
           if (peg$silentFails === 0) { peg$fail(peg$c61); }
         }
         if (s2 !== peg$FAILED) {
           peg$savedPos = s0;
-          s1 = peg$c62(s2);
+          s1 = peg$c62();
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -1653,7 +1653,7 @@ module.exports = (function() {
     }
 
 
-      const { parseCursor, helpers: { nodeTypes } } = options;
+      const { parseCursor, cursorSymbol, helpers: { nodeTypes } } = options;
       const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
       const buildLiteralNode = nodeTypes.literal.buildNode;
       const buildWildcardNode = nodeTypes.wildcard.buildNode;
