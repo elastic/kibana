@@ -62,6 +62,9 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      // The need for this should have been removed with https://github.com/elastic/kibana/pull/15574 but the
+      // test failed when removed because the visualization hadn't settled.
+      await PageObjects.common.sleep(1000);
 
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
