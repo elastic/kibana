@@ -54,6 +54,10 @@ exports.installSource = async function installSource({
  * @param {ToolingLog} log
  */
 async function sourceInfo(cwd, log = defaultLog) {
+  if (!fs.existsSync(cwd)) {
+    throw new Error(`${cwd} does not exist`);
+  }
+
   const git = simpleGit(cwd);
 
   const status = await git.status();
