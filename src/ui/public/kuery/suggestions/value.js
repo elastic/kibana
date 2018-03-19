@@ -1,4 +1,4 @@
-import { flatten } from 'lodash';
+import { flatten, memoize } from 'lodash';
 import chrome from 'ui/chrome';
 import { escapeQuotes } from './escape_kuery';
 
@@ -8,7 +8,7 @@ const type = 'value';
 export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
-  return shouldSuggestValues ? getValueSuggestions : () => Promise.resolve([]);
+  return shouldSuggestValues ? memoize(getValueSuggestions, getFieldQueryHash) : () => Promise.resolve([]);
 
   function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
     const fields = allFields.filter(field => field.name === fieldName);
@@ -41,4 +41,8 @@ function getSuggestions(start, end, query, values) {
       const text = `${value} `;
       return { type, text, start, end };
     });
+}
+
+function getFieldQueryHash({ prefix, suffix, fieldName }) {
+  return `${prefix}${suffix}/${fieldName}`;
 }
