@@ -1,11 +1,18 @@
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { AggConfig } from 'ui/vis/agg_config';
+
+// import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+// import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import './styles/_tilemap.less';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+  // const basicResponseHandler = Private(BasicResponseHandlerProvider).handler;
+  // const geojsonConverter = Private(AggResponseGeoJsonProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
 
@@ -15,10 +22,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._notify = new Notifier({ location: 'Coordinate Map' });
     }
 
-    isDataUsable(esResponse) {
-      return !(esResponse && typeof esResponse.geohashGridAgg === 'undefined');
-    }
-
 
     async _makeKibanaMap() {
 
@@ -26,65 +29,75 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
-      let previousPrecision = this._kibanaMap.getAutoPrecision();
-      let precisionChange = false;
+      // let previousPrecision = this._kibanaMap.getAutoPrecision();
+      // let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
-        precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
-        previousPrecision = this._kibanaMap.getAutoPrecision();
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
-        if (agg && isAutoPrecision) {
-          agg.params.precision = previousPrecision;
-        }
+        // precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
+        // previousPrecision = this._kibanaMap.getAutoPrecision();
+        // const agg = this._getGeoHashAgg();
+        //todo
+        // const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
+        // if (agg && isAutoPrecision) {
+        //   agg.params.precision = previousPrecision;
+        // }
       });
       this._kibanaMap.on('zoomend', () => {
-        const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
-        if (!isAutoPrecision) {
-          return;
-        }
-        if (precisionChange) {
-          this.vis.updateState();
-        } else {
-          this._updateData(this._chartData);
-        }
+        // const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
+        // if (!isAutoPrecision) {
+        //   return;
+        // }
+        // if (precisionChange) {
+        //   this.vis.updateState();
+        // } else {
+        //   this._updateData(this._rawEsResponse);
+        // }
       });
 
       this._kibanaMap.addDrawControl();
-      this._kibanaMap.on('drawCreated:rectangle', event => {
-        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
-      });
-      this._kibanaMap.on('drawCreated:polygon', event => {
-        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
-      });
+      // this._kibanaMap.on('drawCreated:rectangle', event => {
+      // this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
+      // });
+      // this._kibanaMap.on('drawCreated:polygon', event => {
+      //   this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
+      // });
     }
 
     async _updateData(esResponse) {
+
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
-      if (this._getMapsParams().mapType !== 'Heatmap' && esResponse === this._chartData) {
+      if (
+        this._getMapsParams().mapType !== 'Heatmap' &&
+        esResponse === this._rawEsResponse) {
         return;
       }
 
-      this._chartData = esResponse;
-
+      //only now should we apply any transformations to the data.
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
-      if (!this._chartData || !this._chartData.geoJson) {
+
+      if (!esResponse) {
+        this._geoJson = null;
+        this._rawEsResponse = null;
+        //should fix redrawing of map here.
         return;
       }
 
-      this._recreateGeohashLayer(this._chartData.geoJson);
+      this._rawEsResponse = esResponse;
+      this._geoJson = convertToGeoJson(esResponse);
+
+      this._recreateGeohashLayer(this._geoJson);
     }
 
-    _recreateGeohashLayer(geojsonData) {
+    _recreateGeohashLayer(geoJson) {
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(geojsonData, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer = new GeohashLayer(geojson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
@@ -98,18 +111,18 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        if (this._chartData && this._chartData.geoJson) {
-          this._recreateGeohashLayer(this._chartData.geoJson);
+        if (this._geoJson) {
+          this._recreateGeohashLayer(this._geoJson);
         }
+        this._updateData(this._rawEsResponse);
       }
     }
-
 
     _getGeohashOptions() {
       const newParams = this._getMapsParams();
       return {
-        valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
-        tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
+        // valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
+        // tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
@@ -166,7 +179,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
     _isFilteredByCollar() {
       const DEFAULT = false;
-
       const agg = this._getGeoHashAgg();
       if (agg) {
         return _.get(agg, 'params.isFilteredByCollar', DEFAULT);

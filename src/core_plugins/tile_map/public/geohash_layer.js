@@ -9,15 +9,14 @@ import { GeohashGridMarkers } from './markers/geohash_grid';
 
 export class GeohashLayer extends KibanaMapLayer {
 
-  constructor(featureCollection, options, zoom, kibanaMap) {
+  constructor(featureCollectionAndMeta, options, zoom, kibanaMap) {
 
     super();
-
-    this._geohashGeoJson = featureCollection;
+    this._geohashGeoJsonAndMeta = featureCollectionAndMeta;
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
-    const geojson = L.geoJson(this._geohashGeoJson);
+    const geojson = L.geoJson(this._geohashGeoJsonAndMeta.featureCollection);
     this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
     this._lastBounds = null;
@@ -31,23 +30,26 @@ export class GeohashLayer extends KibanaMapLayer {
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
-        this._geohashMarkers = new ScaledCirclesMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ScaledCirclesMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Circle Markers':
-        this._geohashMarkers = new ShadedCirclesMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ShadedCirclesMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Geohash Grid':
-        this._geohashMarkers = new GeohashGridMarkers(this._geohashGeoJson, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new GeohashGridMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Heatmap':
+
+        throw new Error('Not implemented');
+
         let radius = 15;
-        if (this._geohashGeoJson.properties.geohashGridDimensionsAtEquator) {
-          const minGridLength = _.min(this._geohashGeoJson.properties.geohashGridDimensionsAtEquator);
+        if (this._geohashGeoJsonAndMeta.properties.geohashGridDimensionsAtEquator) {
+          const minGridLength = _.min(this._geohashGeoJsonAndMeta.properties.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
           radius = (minGridLength / metersPerPixel) / 2;
         }
         radius = radius * parseFloat(this._geohashOptions.heatmap.heatClusterSize);
-        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJson, {
+        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJsonAndMeta, {
           radius: radius,
           blur: radius,
           maxZoom: this._kibanaMap.getZoomLevel(),

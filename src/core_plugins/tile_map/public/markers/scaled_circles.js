@@ -8,7 +8,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
   constructor(featureCollection, options, targetZoom, kibanaMap) {
     super();
-    this._geohashGeoJson = featureCollection;
+    this._geohashGeoJsonAndMeta = featureCollection;
     this._zoom = targetZoom;
 
     this._valueFormatter = options.valueFormatter || ((x) => {x;});
@@ -35,7 +35,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     }
     this._leafletLayer = L.geoJson(null, layerOptions);
 
-    this._leafletLayer.addData(this._geohashGeoJson);
+    this._leafletLayer.addData(this._geohashGeoJsonAndMeta.featureCollection);
   }
 
   getLeafletLayer() {
@@ -44,8 +44,8 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
   getStyleFunction() {
-    const min = _.get(this._geohashGeoJson, 'properties.min', 0);
-    const max = _.get(this._geohashGeoJson, 'properties.max', 1);
+    const min = _.get(this._geohashGeoJsonAndMeta, 'meta.min', 0);
+    const max = _.get(this._geohashGeoJsonAndMeta, 'meta.max', 1);
 
     const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
     this._legendColors = makeCircleMarkerLegendColors(min, max);
@@ -60,11 +60,12 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
   getLabel() {
     if (this._popups.length) {
-      return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+      // throw new Error('Not implemented');
+      return 'foobar';
+      // return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
     }
     return '';
   }
-
 
   appendLegendContents(jqueryDiv) {
 
@@ -79,7 +80,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._legendColors.forEach((color) => {
       const labelText = this._legendQuantizer
         .invertExtent(color)
-        .map(this._valueFormatter)
+        // .map(this._valueFormatter)
         .join(' – ');
 
       const label = $('<div>');
@@ -135,9 +136,13 @@ export class ScaledCirclesMarkers extends EventEmitter {
    */
   _showTooltip(feature, latLng) {
 
-    const lat = _.get(feature, 'geometry.coordinates.1');
-    const lng = _.get(feature, 'geometry.coordinates.0');
-    latLng = latLng || L.latLng(lat, lng);
+    // const lat = _.get(feature, 'geometry.coordinates.1');
+    // const lng = _.get(feature, 'geometry.coordinates.0');
+    // latLng = latLng || L.latLng(lat, lng);
+    latLng = latLng || L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+
+    //todo
+    return;
 
     const content = this._tooltipFormatter(feature);
     if (!content) {
@@ -173,11 +178,11 @@ export class ScaledCirclesMarkers extends EventEmitter {
     const precisionBiasBase = 5;
     const precisionBiasNumerator = 200;
 
-    const precision = _.max(this._geohashGeoJson.features.map((feature) => {
+    const precision = _.max(this._geohashGeoJsonAndMeta.featureCollection.features.map((feature) => {
       return String(feature.properties.geohash).length;
     }));
 
-    const pct = Math.abs(value) / Math.abs(this._geohashGeoJson.properties.max);
+    const pct = Math.abs(value) / Math.abs(this._geohashGeoJsonAndMeta.meta.max);
     const zoomRadius = 0.5 * Math.pow(2, this._zoom);
     const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 

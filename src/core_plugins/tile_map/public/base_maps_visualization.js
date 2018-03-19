@@ -5,7 +5,7 @@ import 'ui/vis/map/service_settings';
 
 
 const MINZOOM = 0;
-const MAXZOOM = 18;
+const MAXZOOM = 22;
 
 export function BaseMapsVisualizationProvider(serviceSettings) {
 
@@ -20,6 +20,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this.vis = vis;
       this._container = element;
       this._kibanaMap = null;
+      this._chartData = null; //reference to data currently on the map.
       this._baseLayerDirty = true;
       this._mapIsLoaded = this._makeKibanaMap();
     }
@@ -47,7 +48,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @return {Promise}
      */
     async render(esResponse, status) {
-
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
@@ -66,7 +66,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         return;
       }
 
-      if (status.data) {
+      if (this._hasESResponseChanged(esResponse)) {
         await this._updateData(esResponse);
       }
       if (status.uiState) {
@@ -114,11 +114,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     async _updateBaseLayer() {
 
-
       if (!this._kibanaMap) {
         return;
       }
-
 
       const mapParams = this._getMapsParams();
       if (!this._baseLayerConfigured()) {
@@ -141,6 +139,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       try {
 
         if (mapParams.wms.enabled) {
+
           if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
             this._kibanaMap.setMinZoom(MINZOOM);
             this._kibanaMap.setMaxZoom(MAXZOOM);
@@ -187,6 +186,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     async _updateData() {
       throw new Error('Child should implement this method to respond to data-update');
+    }
+
+    _hasESResponseChanged(data) {
+      return this._chartData !== data;
     }
 
     /**
