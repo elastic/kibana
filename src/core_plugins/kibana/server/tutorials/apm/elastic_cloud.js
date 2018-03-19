@@ -10,9 +10,8 @@ import {
 } from './apm_client_instructions';
 
 const SERVER_URL_INSTRUCTION = {
-  title: 'APM Server url',
-  textPre:
-    'Find APM Server url and optional secret token in Cloud dashboard. <<INSERT INSTRUCTIONS ON HOW TO IMPORT DASHBOARDS>>',
+  title: 'APM Server endpoint',
+  textPre: 'Retrieve the APM Server URL from your Elastic Cloud dashboard',
 };
 
 export const ELASTIC_CLOUD_INSTRUCTIONS = {
