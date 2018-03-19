@@ -2,7 +2,7 @@ import Boom from 'boom';
 
 import { modifyUrl } from '../../utils';
 
-export function setupBasePathRewrite(kbnServer, server, config) {
+export function setupBasePathRewrite(server, config) {
   const basePath = config.get('server.basePath');
   const rewriteBasePath = config.get('server.rewriteBasePath');
 

@@ -1,9 +1,16 @@
+import React from 'react';
 import _ from 'lodash';
 import angular from 'angular';
 import { metadata } from 'ui/metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
+import { banners } from './banners';
 import 'ui/render_directive';
+
+import {
+  EuiCallOut,
+  EuiButton,
+} from '@elastic/eui';
 
 const notifs = [];
 
@@ -164,21 +171,7 @@ function add(notif, cb) {
   return notif;
 }
 
-function set(opts, cb) {
-  if (!opts.content) {
-    return null;
-  }
-
-  if (this._sovereignNotif) {
-    this._sovereignNotif.clear();
-  }
-
-  this._sovereignNotif = add(opts, cb);
-  return this._sovereignNotif;
-}
-
 Notifier.prototype.add = add;
-Notifier.prototype.set = set;
 
 /**
  * Functionality to check that
@@ -342,14 +335,41 @@ Notifier.prototype.warning = function (msg, opts, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.banner = function (msg, cb) {
-  return this.set({
-    type: 'banner',
-    title: 'Attention',
-    content: formatMsg(msg, this.from),
-    lifetime: Notifier.config.bannerLifetime,
-    actions: ['accept']
-  }, cb);
+let bannerId;
+let bannerTimeoutId;
+Notifier.prototype.banner = function (content) {
+  const BANNER_PRIORITY = 100;
+
+  const dismissBanner = () => {
+    banners.remove(bannerId);
+    clearTimeout(bannerTimeoutId);
+  };
+
+  const banner = (
+    <EuiCallOut
+      title="Attention"
+      iconType="help"
+    >
+      <p>
+        {content}
+      </p>
+
+      <EuiButton type="primary" size="s" onClick={dismissBanner}>
+        Dismiss
+      </EuiButton>
+    </EuiCallOut>
+  );
+
+  bannerId = banners.set({
+    component: banner,
+    id: bannerId,
+    priority: BANNER_PRIORITY,
+  });
+
+  clearTimeout(bannerTimeoutId);
+  bannerTimeoutId = setTimeout(() => {
+    dismissBanner();
+  }, Notifier.config.bannerLifetime);
 };
 
 /**
