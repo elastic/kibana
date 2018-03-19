@@ -12,15 +12,6 @@ export function fromLiteralExpression(expression, parseOptions) {
   return fromExpression(expression, parseOptions, parseKuery);
 }
 
-export function fromWildcardExpression(expression, parseOptions) {
-  parseOptions = {
-    ...parseOptions,
-    startRule: 'WildcardString',
-  };
-
-  return fromExpression(expression, parseOptions, parseKuery);
-}
-
 export function fromLegacyKueryExpression(expression, parseOptions) {
   return fromExpression(expression, parseOptions, parseLegacyKuery);
 }

@@ -5,14 +5,7 @@
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
   const buildNamedArgNode = nodeTypes.namedArg.buildNode;
-
-  function trimLeft(string) {
-    return string.replace(/^[\s\uFEFF\xA0]+/g, '');
-  }
-
-  function trimRight(string) {
-    return string.replace(/[\s\uFEFF\xA0]+$/g, '');
-  }
+  const { wildcardSymbol } = nodeTypes.wildcard;
 }
 
 start
@@ -161,10 +154,6 @@ Value
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
-  / value:WildcardString {
-    const isPhrase = buildLiteralNode(false);
-    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
-  }
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(false);
@@ -181,7 +170,7 @@ Not
   = 'not'i Space+
 
 Literal
-  = QuotedString / WildcardString / UnquotedLiteral
+  = QuotedString / UnquotedLiteral
 
 QuotedString
   = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
@@ -203,27 +192,6 @@ QuotedCharacter
   = '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
-WildcardString
-  = sequences:WildcardSequence+ {
-    const compactedSequences = sequences.reduce((acc, arr, i) => {
-      const compacted = arr.filter(value => value !== '');
-      return [...acc, ...compacted];
-    }, []);
-    if (typeof compactedSequences[0] === 'string') {
-      compactedSequences[0] = trimLeft(compactedSequences[0]);
-    }
-    const lastIndex = compactedSequences.length - 1;
-    if (typeof compactedSequences[lastIndex] === 'string') {
-      compactedSequences[lastIndex] = trimRight(compactedSequences[lastIndex]);
-    }
-    return buildWildcardNode(compactedSequences);
-  }
-
-WildcardSequence
-  = left:UnquotedCharacter* '*' right:UnquotedCharacter* {
-    return [left.join(''), nodeTypes.wildcard.wildcardSymbol, right.join('')];
-  }
-
 UnquotedLiteral
   = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
@@ -241,6 +209,7 @@ UnquotedLiteral
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
+    if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
     const number = Number(sequence);
     const value = isNaN(number) ? sequence : number;
     return buildLiteralNode(value);
@@ -249,7 +218,11 @@ UnquotedLiteral
 UnquotedCharacter
   = EscapedSpecialCharacter
   / EscapedKeyword
+  / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
+
+Wildcard
+  = '*' { return wildcardSymbol; }
 
 OptionalSpace
   = prefix:Space* cursor:Cursor suffix:Space* {
