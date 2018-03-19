@@ -72,8 +72,8 @@ async function sourceInfo(cwd, log = defaultLog) {
   etag.update(sha);
 
   // for changed files, use last modified times in hash calculation
-  status.files.forEach(({ path }) => {
-    etag.update(fs.statSync(path.resolve(cwd, path)).mtime.toString());
+  status.files.forEach(file => {
+    etag.update(fs.statSync(path.join(cwd, file.path)).mtime.toString());
   });
 
   const cwdHash = crypto
