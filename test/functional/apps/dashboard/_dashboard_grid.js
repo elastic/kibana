@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
         remote
           .moveMouseTo(panelTitleBeforeMove)
           .pressMouseButton()
-          .moveMouseTo(null, -20, -400)
+          .moveMouseTo(null, -20, -450)
           .releaseMouseButton();
 
         const panelTitleAfterMove = await getPanelTitleElement(lastVisTitle);
