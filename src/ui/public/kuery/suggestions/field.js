@@ -1,5 +1,5 @@
 import { escape, flatten } from 'lodash';
-import { escapeKql } from './escape_kql';
+import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from '../../utils/sort_prefix_first';
 
 const type = 'field';
@@ -17,7 +17,7 @@ export function getSuggestionsProvider({ indexPatterns }) {
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames, search);
     const suggestions = sortedFieldNames.map(fieldName => {
-      const text = `${escapeKql(fieldName)} `;
+      const text = `${escapeKuery(fieldName)} `;
       const description = getDescription(fieldName);
       return { type, text, description, start, end };
     });

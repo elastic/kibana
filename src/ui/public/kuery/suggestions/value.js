@@ -1,6 +1,6 @@
 import { flatten } from 'lodash';
 import chrome from 'ui/chrome';
-import { escapeQuotes } from './escape_kql';
+import { escapeQuotes } from './escape_kuery';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
