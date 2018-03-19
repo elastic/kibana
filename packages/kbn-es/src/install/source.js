@@ -1,6 +1,7 @@
 const execa = require('execa');
 const path = require('path');
 const fs = require('fs');
+const readline = require('readline');
 const chalk = require('chalk');
 const crypto = require('crypto');
 const simpleGit = require('simple-git/promise');
@@ -92,17 +93,33 @@ async function sourceInfo(cwd, log = defaultLog) {
  * @property {ToolingLog} options.log
  * @returns {Object} containing archive and optional plugins
  */
-async function createSnapshot({ sourcePath, log = defaultLog }) {
+function createSnapshot({ sourcePath, log = defaultLog }) {
   const buildArgs = [':distribution:archives:tar:assemble'];
 
-  log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
-  await execa(GRADLE_BIN, buildArgs, {
-    cwd: sourcePath,
+  return new Promise((resolve, reject) => {
+    log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
+
+    const build = execa(GRADLE_BIN, buildArgs, {
+      cwd: sourcePath,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    const stdout = readline.createInterface({ input: build.stdout });
+    const stderr = readline.createInterface({ input: build.stderr });
+
+    stdout.on('line', line => log.debug(line));
+    stderr.on('line', line => log.error(line));
+
+    build.stdout.on('end', () => {
+      if (build.exitCode > 0) {
+        reject(new Error('unable to build ES'));
+      } else {
+        const esTarballPath = findMostRecentlyChanged(
+          path.resolve(sourcePath, ES_ARCHIVE_PATTERN)
+        );
+
+        resolve(esTarballPath);
+      }
+    });
   });
-
-  const esTarballPath = findMostRecentlyChanged(
-    path.resolve(sourcePath, ES_ARCHIVE_PATTERN)
-  );
-
-  return esTarballPath;
 }
