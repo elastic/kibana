@@ -10,6 +10,12 @@ export const DEFAULT_MINIMUM_TIME_MS = 300;
 export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = DEFAULT_MINIMUM_TIME_MS) {
   let returnValue;
 
+  // https://kibana-ci.elastic.co/job/elastic+kibana+6.x+multijob-intake/128/console
+  // We're having periodic failures around the timing here. I'm not exactly sure
+  // why it's not consistent but I'm going to add some buffer space here to
+  // prevent these random failures
+  const bufferedMinimumTimeMs = minimumTimeMs + 5;
+
   // Block on the async action and start the clock.
   const asyncActionStartTime = new Date().getTime();
   if (Array.isArray(promiseOrPromises)) {
@@ -23,8 +29,8 @@ export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = DEFAU
   const asyncActionDuration = asyncActionCompletionTime - asyncActionStartTime;
 
   // Wait longer if the async action completed too quickly.
-  if (asyncActionDuration < minimumTimeMs) {
-    const additionalWaitingTime = minimumTimeMs - (asyncActionCompletionTime - asyncActionStartTime);
+  if (asyncActionDuration < bufferedMinimumTimeMs) {
+    const additionalWaitingTime = bufferedMinimumTimeMs - (asyncActionCompletionTime - asyncActionStartTime);
     await new Promise(resolve => setTimeout(resolve, additionalWaitingTime));
   }
 
