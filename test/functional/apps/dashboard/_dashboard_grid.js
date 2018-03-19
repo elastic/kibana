@@ -5,6 +5,26 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
+  const VIS_TITLES = [
+    PageObjects.dashboard.getTestVisualizationNames()[0],
+    PageObjects.dashboard.getTestVisualizationNames()[1],
+    PageObjects.dashboard.getTestVisualizationNames()[2],
+  ];
+
+  // Order returned by find.allByCssSelector is not guaranteed and can change based on timing
+  // Use this function to avoid looking for elements by hard-coded array index.
+  const getPanelTitleElement = async (title) => {
+    const panelTitleElements = await find.allByCssSelector('.panel-title');
+    for (let i = 0; i < panelTitleElements.length; i++) {
+      const panelText = await panelTitleElements[i].getVisibleText();
+      if (panelText === title) {
+        return panelTitleElements[i];
+      }
+    }
+
+    throw new Error(`Unable to find panel with title: "${title}"`);
+  };
+
   describe('dashboard grid', () => {
 
     before(async () => {
@@ -21,25 +41,21 @@ export default function ({ getService, getPageObjects }) {
       // Specific test after https://github.com/elastic/kibana/issues/14764 fix
       it('Can move panel from bottom to top row', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.addVisualizations([
-          PageObjects.dashboard.getTestVisualizationNames()[0],
-          PageObjects.dashboard.getTestVisualizationNames()[1],
-          PageObjects.dashboard.getTestVisualizationNames()[2],
-        ]);
+        await PageObjects.dashboard.addVisualizations(VIS_TITLES);
 
-        const panels = await find.allByCssSelector('.panel-title');
+        const lastPanelTitle = VIS_TITLES[VIS_TITLES.length - 1];
 
-        const thirdPanel = panels[2];
-        const position1 = await thirdPanel.getPosition();
+        const lastPanelBeforeMove = await getPanelTitleElement(lastPanelTitle);
+        const position1 = await lastPanelBeforeMove.getPosition();
 
         remote
-          .moveMouseTo(thirdPanel)
+          .moveMouseTo(lastPanelBeforeMove)
           .pressMouseButton()
           .moveMouseTo(null, -20, -400)
           .releaseMouseButton();
 
-        const panelsMoved = await find.allByCssSelector('.panel-title');
-        const position2 = await panelsMoved[2].getPosition();
+        const lastPanelAfterMove = await getPanelTitleElement(lastPanelTitle);
+        const position2 = await lastPanelAfterMove.getPosition();
 
         expect(position1.y).to.be.greaterThan(position2.y);
       });
