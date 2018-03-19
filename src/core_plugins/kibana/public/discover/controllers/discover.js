@@ -589,6 +589,9 @@ function discoverController(
         } else {
           notify.error(error);
         }
+
+        // Restart.
+        beginSegmentedFetch();
       });
   }
   beginSegmentedFetch();
