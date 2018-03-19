@@ -28,7 +28,7 @@ class DiscoverNoResults extends Component {
 
   static propTypes = {
     shardFailures: PropTypes.array,
-    isUsingTimeField: PropTypes.bool,
+    timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
     topNavToggle: PropTypes.func.isRequired,
   };
@@ -43,7 +43,7 @@ class DiscoverNoResults extends Component {
   render() {
     const {
       shardFailures,
-      isUsingTimeField,
+      timeFieldName,
       queryLanguage,
     } = this.props;
 
@@ -87,7 +87,7 @@ class DiscoverNoResults extends Component {
 
     let timeFieldMessage;
 
-    if (isUsingTimeField) {
+    if (timeFieldName) {
       timeFieldMessage = (
         <Fragment>
           <EuiSpacer size="xl" />
