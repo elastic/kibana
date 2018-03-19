@@ -10,7 +10,7 @@ import "./less/main.less";
 import template from "./templates/index.html";
 import { Main } from "./components/main";
 
-const app = uiModules.get("apps/<%= kebabCase(name) %>");
+const app = uiModules.get("apps/<%= camelCase(name) %>");
 
 app.config($locationProvider => {
   $locationProvider.html5Mode({
@@ -32,4 +32,4 @@ function RootController($scope, $element, $http) {
   });
 }
 
-chrome.setRootController("<%= kebabCase(name) %>", RootController);
+chrome.setRootController("<%= camelCase(name) %>", RootController);
