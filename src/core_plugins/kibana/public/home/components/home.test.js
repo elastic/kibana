@@ -16,7 +16,7 @@ test('should render home component', () => {
   const component = shallow(<Home
     addBasePath={addBasePath}
     directories={[]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
     recentlyAccessed={recentlyAccessed}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -26,7 +26,7 @@ test('should not contain RecentlyAccessed panel when there is no recentlyAccesse
   const component = shallow(<Home
     addBasePath={addBasePath}
     directories={[]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
     recentlyAccessed={[]}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -47,7 +47,7 @@ describe('directories', () => {
     const component = shallow(<Home
       addBasePath={addBasePath}
       directories={[directoryEntry]}
-      isCloudEnabled={true}
+      apmUiEnabled={true}
       recentlyAccessed={[]}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -67,7 +67,7 @@ describe('directories', () => {
     const component = shallow(<Home
       addBasePath={addBasePath}
       directories={[directoryEntry]}
-      isCloudEnabled={true}
+      apmUiEnabled={true}
       recentlyAccessed={[]}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -87,7 +87,7 @@ describe('directories', () => {
     const component = shallow(<Home
       addBasePath={addBasePath}
       directories={[directoryEntry]}
-      isCloudEnabled={true}
+      apmUiEnabled={true}
       recentlyAccessed={[]}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
