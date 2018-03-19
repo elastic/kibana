@@ -7,7 +7,8 @@ import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 
-export function createTestCluster({ port = esTestConfig.getPort(), log }) {
+export function createTestCluster(options = {}) {
+  const { port = esTestConfig.getPort(), log } = options;
   const randomHash = Math.random().toString(36).substring(2);
   const clusterName = `test-${randomHash}`;
   const basePath = resolve(__dirname, '../../../.es');
