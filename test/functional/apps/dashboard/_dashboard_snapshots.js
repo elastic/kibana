@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await testSubjects.click('toastCloseButton');
 
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await testSubjects.click('toastCloseButton');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
@@ -53,16 +53,15 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
-      await testSubjects.click('toastCloseButton');
+      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.saveDashboard('area');
-      await testSubjects.click('toastCloseButton');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.common.sleep(1000);
 
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
