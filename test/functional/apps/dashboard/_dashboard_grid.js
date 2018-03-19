@@ -43,19 +43,19 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations(VIS_TITLES);
 
-        const lastPanelTitle = VIS_TITLES[VIS_TITLES.length - 1];
+        const lastVisTitle = VIS_TITLES[VIS_TITLES.length - 1];
 
-        const lastPanelBeforeMove = await getPanelTitleElement(lastPanelTitle);
-        const position1 = await lastPanelBeforeMove.getPosition();
+        const panelTitleBeforeMove = await getPanelTitleElement(lastVisTitle);
+        const position1 = await panelTitleBeforeMove.getPosition();
 
         remote
-          .moveMouseTo(lastPanelBeforeMove)
+          .moveMouseTo(panelTitleBeforeMove)
           .pressMouseButton()
           .moveMouseTo(null, -20, -400)
           .releaseMouseButton();
 
-        const lastPanelAfterMove = await getPanelTitleElement(lastPanelTitle);
-        const position2 = await lastPanelAfterMove.getPosition();
+        const panelTitleAfterMove = await getPanelTitleElement(lastVisTitle);
+        const position2 = await panelTitleAfterMove.getPosition();
 
         expect(position1.y).to.be.greaterThan(position2.y);
       });
