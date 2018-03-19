@@ -324,10 +324,6 @@ angular-aria@1.6.6:
   version "1.6.6"
   resolved "https://registry.yarnpkg.com/angular-aria/-/angular-aria-1.6.6.tgz#58dd748e09564bc8409f739bde57b35fbee5b6a5"
 
-angular-bootstrap-colorpicker@3.0.19:
-  version "3.0.19"
-  resolved "https://registry.yarnpkg.com/angular-bootstrap-colorpicker/-/angular-bootstrap-colorpicker-3.0.19.tgz#557609636b33e1b5c83e2742cbfd0e4ea14c042c"
-
 angular-elastic@2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/angular-elastic/-/angular-elastic-2.5.0.tgz#07736ac290ea955b9fe511aac84020df623c87ec"
