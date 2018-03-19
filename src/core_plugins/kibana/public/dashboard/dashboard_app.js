@@ -25,7 +25,6 @@ import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-import { DashboardListing } from './listing/dashboard_listing';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -36,10 +35,6 @@ const app = uiModules.get('app/dashboard', [
   'kibana/notify',
   'kibana/typeahead',
 ]);
-
-app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(DashboardListing);
-});
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
   return reactDirective(DashboardViewportProvider);

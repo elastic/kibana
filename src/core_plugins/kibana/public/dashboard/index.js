@@ -14,7 +14,17 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { EMPTY_FILTER } from './listing/dashboard_listing';
+import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
+import { uiModules } from 'ui/modules';
+
+const app = uiModules.get('app/dashboard', [
+  'ngRoute',
+  'react',
+]);
+
+app.directive('dashboardListing', function (reactDirective) {
+  return reactDirective(DashboardListing);
+});
 
 uiRoutes
   .defaults(/dashboard/, {
