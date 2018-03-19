@@ -201,7 +201,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async checkDashboardListingSelectAllCheckbox() {
       const element = await testSubjects.find('checkboxSelectAll');
       const isSelected = await element.isSelected();
-      if(!isSelected) {
+      if (!isSelected) {
         log.debug(`checking checkbox "checkboxSelectAll"`);
         await testSubjects.click('checkboxSelectAll');
       }
