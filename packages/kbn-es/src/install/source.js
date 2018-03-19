@@ -68,19 +68,22 @@ async function sourceInfo(cwd, log = defaultLog) {
   log.info('on %s at %s', chalk.bold(branch), chalk.bold(sha));
   log.info('%s locally modified file(s)', chalk.bold(status.modified.length));
 
-  const etag = crypto
-    .createHash('md5')
-    .update(sha + JSON.stringify(status))
-    .digest('hex');
+  const etag = crypto.createHash('md5').update(branch);
+  etag.update(sha);
 
-  const filename = crypto
+  // for changed files, use last modified times in hash calculation
+  status.files.forEach(({ path }) => {
+    etag.update(fs.statSync(path.resolve(cwd, path)).mtime.toString());
+  });
+
+  const cwdHash = crypto
     .createHash('md5')
-    .update(`${status.current}${cwd}`)
+    .update(cwd)
     .digest('hex');
 
   return {
-    etag,
-    filename: `${filename}.tar.gz`,
+    etag: etag.digest('hex'),
+    filename: `${branch}-${cwdHash.substr(0, 8)}.tar.gz`,
     branch,
   };
 }
