@@ -1,5 +1,3 @@
-import repl from 'repl';
-import util from 'util';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { isWorker } from 'cluster';
@@ -9,6 +7,7 @@ import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
+import { startRepl } from './repl';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
@@ -183,11 +182,16 @@ export default function (program) {
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
       });
 
-      if (opts.repl) {
+      if (shouldStartRepl(opts)) {
         startRepl(kbnServer.server);
       }
+
       return kbnServer;
     });
+}
+
+function shouldStartRepl(opts) {
+  return opts.repl && process.env.kbnWorkerType === 'server';
 }
 
 function logFatal(message, server) {
@@ -197,37 +201,4 @@ function logFatal(message, server) {
 
   // It's possible for the Hapi logger to not be setup
   console.error('FATAL', message);
-}
-
-/**
- * Starts an interactive REPL with a global `server` object.
- *
- * @param {KibanaServer} server
- */
-function startRepl(server) {
-  const colorize = (o) => util.inspect(o, { colors: true, depth: null });
-  const prettyPrint = (text, o) => console.log(text, colorize(o));
-  const replServer = repl.start({
-    prompt: 'Kibana> ',
-    useColors: true,
-    writer,
-  });
-
-  replServer.context.server = server;
-
-  // This lets us handle promises more gracefully than the default REPL,
-  // which doesn't show the results.
-  function writer(result) {
-    if (result && typeof result.then === 'function') {
-      result
-        .then((o) => prettyPrint('Promise Resolved: \n', o))
-        .catch((err) => prettyPrint('Promise Rejected: \n', err))
-        .then(() => replServer.displayPrompt());
-      // Bit of a hack to encourage the user to wait for the result of a promise
-      // by printing text out beside the current prompt.
-      setTimeout(() => console.log('Waiting for promise...'), 1);
-      return '';
-    }
-    return colorize(result);
-  }
 }
