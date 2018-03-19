@@ -27,7 +27,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   }
 
   function getBounds(vis) {
-    if (timefilter.isTimeRangeSelectorEnabled) {
+    if (timefilter.isTimeRangeSelectorEnabled && vis.filters) {
       return timefilter.calculateBounds(vis.filters.timeRange);
     }
   }
