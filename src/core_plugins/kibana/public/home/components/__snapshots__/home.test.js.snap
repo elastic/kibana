@@ -6,7 +6,7 @@ exports[`directories should not render directory entry when showOnHomePage is fa
 >
   <AddData
     addBasePath={[Function]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
   />
   <EuiSpacer
     size="l"
@@ -109,7 +109,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
 >
   <AddData
     addBasePath={[Function]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
   />
   <EuiSpacer
     size="l"
@@ -230,7 +230,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
 >
   <AddData
     addBasePath={[Function]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
   />
   <EuiSpacer
     size="l"
@@ -351,7 +351,7 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
 >
   <AddData
     addBasePath={[Function]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
   />
   <EuiSpacer
     size="l"
@@ -470,7 +470,7 @@ exports[`should render home component 1`] = `
   </React.Fragment>
   <AddData
     addBasePath={[Function]}
-    isCloudEnabled={true}
+    apmUiEnabled={true}
   />
   <EuiSpacer
     size="l"
