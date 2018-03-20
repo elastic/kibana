@@ -91,9 +91,13 @@ describe('StepTimeField', () => {
       ],
     });
 
+    // If the value is undefined, that means the user selected the
+    // `I don't want to use a Time filter` option
     component.instance().onTimeFieldChanged({ target: { value: undefined } });
     expect(component.state('timeFieldSet')).toBe(true);
 
+    // If the value is an empty string, that means the user selected
+    // an invalid selection (like the empty selection or the `-----`)
     component.instance().onTimeFieldChanged({ target: { value: '' } });
     expect(component.state('timeFieldSet')).toBe(false);
   });
