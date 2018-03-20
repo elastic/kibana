@@ -1,5 +1,6 @@
 import typeDetect from 'type-detect';
-import { difference, isPlainObject } from 'lodash';
+import isPlainObject from 'lodash.isplainobject';
+import difference from 'lodash.difference';
 import { Any, TypeOf, TypeOptions, Type } from './type';
 import { TypeError } from './utils/errors';
 import { toContext } from './utils/to_context';

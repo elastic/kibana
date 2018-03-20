@@ -1,5 +1,5 @@
 import typeDetect from 'type-detect';
-import { isPlainObject } from 'lodash';
+import isPlainObject from 'lodash.isplainobject';
 
 import { TypeOptions, Type } from './type';
 import { TypeError } from './utils/errors';
