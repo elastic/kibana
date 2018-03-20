@@ -1,37 +1,78 @@
-import React, { Component, Fragment } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiBadge } from '@elastic/eui';
-import { InMemoryTable } from './in_memory_table';
-import { OnServerTable } from './on_server_table';
+import { EuiBadge, EuiSearchBar, EuiBasicTable, EuiButton } from '@elastic/eui';
 
-export class Table extends Component {
+export class Table extends PureComponent {
   static propTypes = {
-    items: PropTypes.array.isRequired,
-    selectedSavedObjectIds: PropTypes.array.isRequired,
+    selectedSavedObjects: PropTypes.array.isRequired,
     selectionConfig: PropTypes.shape({
       itemId: PropTypes.string.isRequired,
       selectable: PropTypes.func,
       selectableMessage: PropTypes.func,
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
-    clientSideSearchingEnabled: PropTypes.bool.isRequired,
-    isPerformingInitialFetch: PropTypes.bool.isRequired,
     filterOptions: PropTypes.array.isRequired,
-    fetchData: PropTypes.func,
-    onSearchChanged: PropTypes.func,
+    fetchData: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
+
+    pageIndex: PropTypes.number.isRequired,
+    pageSize: PropTypes.number.isRequired,
+    items: PropTypes.array.isRequired,
+    totalItemCount: PropTypes.number.isRequired,
+    onQueryChange: PropTypes.func.isRequired,
+    onTableChange: PropTypes.func.isRequired,
+    isSearching: PropTypes.bool.isRequired,
   };
 
-  getColumns() {
-    return [
+  render() {
+    const {
+      pageIndex,
+      pageSize,
+      items,
+      totalItemCount,
+      isSearching,
+      filterOptions,
+      selectionConfig: selection,
+      onDelete,
+      onExport,
+      selectedSavedObjects,
+      onQueryChange,
+      onTableChange,
+    } = this.props;
+
+    const pagination = {
+      pageIndex: pageIndex,
+      pageSize: pageSize,
+      totalItemCount: totalItemCount,
+      pageSizeOptions: [5, 10, 20, 50],
+    };
+
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: 'Type',
+        multiSelect: 'or',
+        options: filterOptions,
+      },
+      {
+        type: 'field_value_selection',
+        field: 'tag',
+        name: 'Tags',
+        multiSelect: 'or',
+        options: [],
+      },
+    ];
+
+    const columns = [
       {
         field: 'title',
         name: 'Title',
         description: `Title of the saved object`,
         dataType: 'string',
-        sortable: true,
+        sortable: false,
         render: (title, savedObject) => {
           return (
             <Fragment>
@@ -45,37 +86,43 @@ export class Table extends Component {
         },
       },
     ];
-  }
-
-  render() {
-    const {
-      clientSideSearchingEnabled,
-      isPerformingInitialFetch,
-      ...rest
-      // items,
-      // selectionConfig,
-      // filterOptions,
-      // fetchData,
-      // onSearchChanged,
-      // selectedSavedObjectIds,
-      // onExport,
-      // onDelete,
-    } = this.props;
-
-    if (clientSideSearchingEnabled || isPerformingInitialFetch) {
-      return (
-        <InMemoryTable
-          columns={this.getColumns()}
-          {...rest}
-        />
-      );
-    }
 
     return (
-      <OnServerTable
-        columns={this.getColumns()}
-        {...rest}
-      />
+      <Fragment>
+        <EuiSearchBar
+          filters={filters}
+          onChange={onQueryChange}
+          toolsRight={[
+            <EuiButton
+              key="deleteSO"
+              iconType="trash"
+              color="danger"
+              size="s"
+              onClick={() => onDelete(pageIndex, pageSize)}
+              isDisabled={selectedSavedObjects.length === 0}
+            >
+              Delete
+            </EuiButton>,
+            <EuiButton
+              key="exportSO"
+              iconType="exportAction"
+              size="s"
+              onClick={onExport}
+              isDisabled={selectedSavedObjects.length === 0}
+            >
+              Export
+            </EuiButton>,
+          ]}
+        />
+        <EuiBasicTable
+          loading={isSearching}
+          items={items}
+          columns={columns}
+          pagination={pagination}
+          selection={selection}
+          onChange={onTableChange}
+        />
+      </Fragment>
     );
   }
 }

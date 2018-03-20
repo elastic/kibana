@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { flattenDeep } from 'lodash';
-import { createSelector } from 'reselect';
 import { Header } from './components/header';
 import { Table } from './components/table';
 
@@ -53,6 +52,7 @@ function getSavedObjectIcon(type) {
 }
 
 export const EXCLUDED_TYPES = ['config'];
+export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
 export class ObjectsTable extends Component {
   static propTypes = {
@@ -60,127 +60,102 @@ export class ObjectsTable extends Component {
     $http: PropTypes.func.isRequired,
     notify: PropTypes.object.isRequired,
     kbnIndex: PropTypes.string.isRequired,
-    clientSideSearchThreshold: PropTypes.number,
     services: PropTypes.array.isRequired,
-  };
-
-  static defaultProps = {
-    clientSideSearchThreshold: 500,
   };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      savedObjects: [],
       totalCount: 0,
-      activeType: 'dashboard',
-      activeQuery: '',
-      selectedSavedObjectIds: [],
-      clientSideSearchingEnabled: false,
-      isPerformingInitialFetch: false,
+      page: 0,
+      perPage: 10,
+      savedObjects: [],
+      activeQuery: Query.parse(''),
+      selectedSavedObjects: [],
       isShowingImportFlyout: false,
+      isSearching: false,
+      totalItemCount: 0,
     };
   }
 
   componentWillMount() {
-    this.fetchAllData();
+    this.fetchSavedObjects();
   }
 
-  fetchAllData = async () => {
-    const { clientSideSearchThreshold } = this.props;
+  fetchSavedObjects = async () => {
+    const { savedObjectsClient } = this.props;
+    const { activeQuery, page, perPage } = this.state;
 
-    this.setState({ isPerformingInitialFetch: true });
-
-    const { pageOfItems, totalItemCount } = await this.fetchSavedObjects(
-      Query.parse('')
-    );
-    const clientSideSearchingEnabled =
-      totalItemCount < clientSideSearchThreshold;
-
-    this.setState({
-      savedObjects: pageOfItems,
-      clientSideSearchingEnabled,
-      isPerformingInitialFetch: false,
-    });
-  };
-
-  fetchSavedObjects = async (query, pageIndex, pageSize) => {
-    const {
-      savedObjectsClient,
-      clientSideSearchThreshold,
-    } = this.props;
-
-    if (!query) {
+    if (!activeQuery) {
       return {
         pageOfItems: [],
         totalItemCount: 0,
       };
     }
 
-    const queryText = getQueryText(query);
+    this.setState({ isSearching: true });
+
+    const queryText = getQueryText(activeQuery);
     const visibleTypes =
-      query && query.ast.getFieldClauses('type')
-        ? query.ast.getFieldClauses('type')[0].value
+      activeQuery && activeQuery.ast.getFieldClauses('type')
+        ? activeQuery.ast.getFieldClauses('type')[0].value
         : undefined;
 
     let savedObjects = [];
     let totalItemCount = 0;
 
-    const page = isNaN(pageIndex) ? 1 : (pageIndex || 0) + 1;
-    const perPage = isNaN(pageSize)
-      ? clientSideSearchThreshold + 1
-      : pageSize;
+    const excludeTypes = [
+      ...EXCLUDED_TYPES,
+      ...INCLUDED_TYPES.filter(type => visibleTypes && !visibleTypes.includes(type)),
+    ];
 
     // TODO: is there a good way to stop existing calls if the input changes?
     await smoothServerInteraction(async () => {
       const data = await savedObjectsClient.find({
         search: queryText ? `${queryText}*` : undefined,
         perPage,
-        page,
+        page: page + 1,
         fields: ['title', 'id'],
+        excludeTypes,
       });
 
-      savedObjects = data.savedObjects.reduce((accum, savedObject) => {
-        if (!EXCLUDED_TYPES.includes(savedObject.type)) {
-          accum.push({
-            title: savedObject.attributes.title,
-            type: savedObject.type,
-            id: savedObject.id,
-            icon: getSavedObjectIcon(savedObject.type),
-          });
-        }
-        return accum;
-      }, []);
-
-      if (visibleTypes) {
-        savedObjects = savedObjects.filter(savedObject =>
-          visibleTypes.includes(savedObject.type)
-        );
-      }
+      savedObjects = data.savedObjects.map(savedObject => ({
+        title: savedObject.attributes.title,
+        type: savedObject.type,
+        id: savedObject.id,
+        icon: getSavedObjectIcon(savedObject.type),
+      }));
 
       totalItemCount = data.total;
     });
 
-    return {
-      pageOfItems: savedObjects,
-      totalItemCount,
-    };
+    this.setState({ savedObjects, totalItemCount, isSearching: false });
   };
 
   onSelectionChanged = selection => {
-    const selectedSavedObjectIds = selection.map(item => item.id);
-    this.setState({ selectedSavedObjectIds });
+    const selectedSavedObjects = selection.map(item => ({
+      id: item.id,
+      type: item.type,
+    }));
+    this.setState({ selectedSavedObjects });
   };
 
-  onSearchChanged = query => {
-    this.setState({ activeQuery: query });
+  onQueryChange = query => {
+    this.setState({ activeQuery: query }, this.fetchSavedObjects);
+  };
+
+  onTableChange = async (table) => {
+    const { index: page, size: perPage } = table.page || {};
+
+    this.setState({ page, perPage }, this.fetchSavedObjects);
   };
 
   onExport = async () => {
-    const { savedObjects, selectedSavedObjectIds } = this.state;
-    const objects = savedObjects.filter(({ id }) => selectedSavedObjectIds.includes(id));
-    await retrieveAndExportDocs(objects, this.props.savedObjectsClient);
+    const { savedObjectsClient } = this.props;
+    const { selectedSavedObjects } = this.state;
+    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
+    await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
   }
 
   onExportAll = async () => {
@@ -201,38 +176,19 @@ export class ObjectsTable extends Component {
     this.setState({ isShowingImportFlyout: false });
   }
 
-  onDelete = async () => {
+  onDelete = async (page, perPage) => {
     const { savedObjectsClient } = this.props;
-    const { savedObjects, selectedSavedObjectIds } = this.state;
-    const objects = savedObjects.filter(({ id }) => selectedSavedObjectIds.includes(id));
-    const deletes = objects.map(object => savedObjectsClient.delete(object.type, object.id));
+    const { selectedSavedObjects } = this.state;
+    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
+    const deletes = objects.savedObjects.map(object => savedObjectsClient.delete(object.type, object.id));
     await Promise.all(deletes);
 
     // Unset this
-    this.setState({ selectedSavedObjectIds: [] });
+    this.setState({ selectedSavedObjects: [] });
 
     // Fetching all data
-    await this.fetchAllData();
+    await this.fetchSavedObjects(Query.parse(''), page, perPage);
   }
-
-  getFilterOptions = createSelector(
-    savedObjects => savedObjects,
-    savedObjects => {
-      // Build a unique list of saved object types
-      return Object.values(
-        savedObjects.reduce((options, { type }) => {
-          if (!options[type]) {
-            options[type] = {
-              value: type,
-              name: type,
-              view: type[0].toUpperCase() + type.slice(1),
-            };
-          }
-          return options;
-        }, {})
-      );
-    }
-  );
 
   renderFlyout() {
     if (!this.state.isShowingImportFlyout) {
@@ -250,12 +206,25 @@ export class ObjectsTable extends Component {
   }
 
   render() {
-    const { savedObjects, clientSideSearchingEnabled, isPerformingInitialFetch, selectedSavedObjectIds } = this.state;
+    const {
+      selectedSavedObjects,
+      page,
+      perPage,
+      savedObjects,
+      totalItemCount,
+      isSearching,
+    } = this.state;
 
     const selectionConfig = {
       itemId: 'id',
       onSelectionChange: this.onSelectionChanged,
     };
+
+    const filterOptions = INCLUDED_TYPES.map(type => ({
+      value: type,
+      name: type,
+      view: type[0].toUpperCase() + type.slice(1),
+    }));
 
     return (
       <Fragment>
@@ -267,16 +236,19 @@ export class ObjectsTable extends Component {
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
         <Table
-          items={savedObjects}
           selectionConfig={selectionConfig}
-          selectedSavedObjectIds={selectedSavedObjectIds}
-          onSearchChanged={this.onSearchChanged}
-          clientSideSearchingEnabled={clientSideSearchingEnabled}
-          isPerformingInitialFetch={isPerformingInitialFetch}
-          filterOptions={this.getFilterOptions(savedObjects)}
+          selectedSavedObjects={selectedSavedObjects}
+          onQueryChange={this.onQueryChange}
+          onTableChange={this.onTableChange}
+          filterOptions={filterOptions}
           fetchData={this.fetchSavedObjects}
           onExport={this.onExport}
           onDelete={this.onDelete}
+          pageIndex={page}
+          pageSize={perPage}
+          items={savedObjects}
+          totalItemCount={totalItemCount}
+          isSearching={isSearching}
         />
         <EuiSpacer size="xxl" />
       </Fragment>
