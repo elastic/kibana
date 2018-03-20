@@ -120,9 +120,10 @@ export function getUiSettingDefaults() {
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">Request Preference</a> ' +
         ' controls the shard copies used for search execution.' +
         ' Set to true to execute all search requests on the same shards. ' +
+        ' This has the benefit of reusing shard caches across requests. ' +
         ' Set to false to have search request execution randomized among all available shard copies. ' +
         ' Setting to false will provide better performance since requests can be spread across all shard copies but ' +
-        ' may result in inconsisent results as different shards may be in different refresh states.'
+        ' may result in inconsistent results as different shards may be in different refresh states.'
     },
     'fields:popularLimit': {
       value: 10,
