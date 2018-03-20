@@ -8,7 +8,7 @@ import { sync as rimrafSync } from 'rimraf';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
 import mkdirp from 'mkdirp';
-import { sandboxProcessesPrompt } from './sandbox_processes_prompt';
+import { nativeControllersPrompt } from './native_controllers_prompt';
 
 const mkdir = Promise.promisify(mkdirp);
 
@@ -22,7 +22,7 @@ export default async function install(settings, logger) {
 
     await getPackData(settings, logger);
 
-    const shouldContinue = await sandboxProcessesPrompt(settings, logger);
+    const shouldContinue = await nativeControllersPrompt(settings);
     if (!shouldContinue) {
       return;
     }

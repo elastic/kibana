@@ -1,8 +1,8 @@
 import readline from 'readline';
 import { get } from 'lodash';
 
-export async function sandboxProcessesPrompt(settings) {
-  if (settings.plugins.some(plugin => get(plugin, 'kibana.sandbox.processes'))) {
+export async function nativeControllersPrompt(settings) {
+  if (settings.plugins.some(plugin => get(plugin, 'kibana.nativeControllers'))) {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
@@ -11,10 +11,10 @@ export async function sandboxProcessesPrompt(settings) {
 
     const question = `
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@        WARNING: plugin permits native processes         @
+@        WARNING: plugin forks a native controller        @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-This plugin permits native processes to be spawned that are
-not subject to the system call filters.
+This plugin launches a native controller that is not subject
+to the system call filters.
 
 Continue with installation? [y/N]`;
 
