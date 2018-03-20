@@ -1,8 +1,30 @@
 import { Observable } from '../observable';
 
-// Overloads for `$bindNodeCallback` to enable stricter typing. See
-// https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
-// details about overloading.
+/**
+ * Converts a Node.js-style callback API to a function that returns an
+ * Observable.
+ *
+ * NB! Does NOT handle functions whose callbacks have more than two parameters.
+ * Only the first value after the error argument will be returned.
+ *
+ * Example: Read a file from the filesystem and get the data as an Observable:
+ *
+ * ```
+ * import fs from 'fs';
+ * var readFileAsObservable = $bindNodeCallback(fs.readFile);
+ * var result = readFileAsObservable('./roadNames.txt', 'utf8');
+ * result.subscribe(
+ *   x => console.log(x),
+ *   e => console.error(e)
+ * );
+ * ```
+ *
+ * Implementation detail:
+ * This contains multiple overloads for `$bindNodeCallback` to enable stricter
+ * typing by matching each argument of the passed in `callbackFunc`. See
+ * https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
+ * details about overloading.
+ */
 export function $bindNodeCallback<R>(
   callbackFunc: (callback: (err: any, result: R) => any) => any
 ): () => Observable<R>;
@@ -50,26 +72,6 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
     callback: (err: any, result: R) => any
   ) => any
 ): (v1: T, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6) => Observable<R>;
-
-/**
- * Converts a Node.js-style callback API to a function that returns an
- * Observable.
- *
- * NB! Does NOT handle functions whose callbacks have more than two parameters.
- * Only the first value after the error argument will be returned.
- *
- * Example: Read a file from the filesystem and get the data as an Observable:
- *
- * ```
- * import fs from 'fs';
- * var readFileAsObservable = $bindNodeCallback(fs.readFile);
- * var result = readFileAsObservable('./roadNames.txt', 'utf8');
- * result.subscribe(
- *   x => console.log(x),
- *   e => console.error(e)
- * );
- * ```
- */
 export function $bindNodeCallback<T>(callbackFunc: Function) {
   return function(this: any, ...args: any[]): Observable<T> {
     const context = this;

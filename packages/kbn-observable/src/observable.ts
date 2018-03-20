@@ -177,15 +177,6 @@ export class Observable<T> implements Subscribable<T> {
     }
   }
 
-  // Overloads for `subscribe` to exclude the `...rest: never[]` from editors
-  // when displaying the type for `subscribe`. The `...rest` arguments are only
-  // there to fail when more than one arg is passed, as that is one of the apis
-  // for subscribe in RxJS, but we decided it wasn't necessary in Kibana. See
-  // https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
-  // details about overloading.
-  subscribe(
-    observerOrNext?: PartialObserver<T> | ((value: T) => void)
-  ): Subscription;
   /**
    * Invokes an execution of an Observable and registers Observer handlers for
    * notifications it will emit.
@@ -202,7 +193,18 @@ export class Observable<T> implements Subscribable<T> {
    * completes or errors. You can achieve this in two following ways:
    * 
    * TODO add details
+   *
+   * Implementation detail:
+   * The overload for `subscribe` below excludes the `...rest: never[]` from
+   * editors when displaying the type for `subscribe`. The `...rest` arguments
+   * are only there to fail when more than one arg is passed, as that is one of
+   * the apis for subscribe in RxJS, but we decided it wasn't necessary in
+   * Kibana. See https://www.typescriptlang.org/docs/handbook/functions.html#overloads
+   * for details about overloading.
    */
+  subscribe(
+    observerOrNext?: PartialObserver<T> | ((value: T) => void)
+  ): Subscription;
   subscribe(
     observerOrNext: PartialObserver<T> | ((value: T) => void) = {},
     ...rest: never[]
@@ -223,10 +225,30 @@ export class Observable<T> implements Subscribable<T> {
     return new Subscription(observer, this._onSubscribe);
   }
 
-  // Overloads for `pipe` to enable a variable number of arguments, but still a
-  // clear gradual progressions from arg to arg when transforming the input. See
-  // https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
-  // details about overloading.
+  /**
+   * Used to stitch together functional operators into a chain.
+   *
+   * @return {Observable} the Observable result of all of the operators having
+   * been called in the order they were passed in.
+   *
+   * ```
+   * import { $from, map, filter, scan } from '@kbn/observable';
+   *
+   * $from([1, 2, 3])
+   *   .pipe(
+   *     filter(x => x % 2 === 0),
+   *     map(x => x + x),
+   *     scan((acc, x) => acc + x)
+   *   )
+   *   .subscribe(x => console.log(x))
+   * ```
+   *
+   * Implmenentation detail:
+   * Overloads for `pipe` to enable a variable number of arguments, but still a
+   * clear gradual progressions from arg to arg when transforming the input. See
+   * https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
+   * details about overloading.
+   */
   pipe(): Observable<T>;
   pipe<A>(op1: OperatorFunction<T, A>): Observable<A>;
   pipe<A, B>(
@@ -290,24 +312,6 @@ export class Observable<T> implements Subscribable<T> {
     op9: OperatorFunction<H, I>
   ): Observable<I>;
   pipe<R>(...operations: OperatorFunction<T, R>[]): Observable<R>;
-  /**
-   * Used to stitch together functional operators into a chain.
-   *
-   * @return {Observable} the Observable result of all of the operators having
-   * been called in the order they were passed in.
-   *
-   * ```
-   * import { $from, map, filter, scan } from '@kbn/observable';
-   *
-   * $from([1, 2, 3])
-   *   .pipe(
-   *     filter(x => x % 2 === 0),
-   *     map(x => x + x),
-   *     scan((acc, x) => acc + x)
-   *   )
-   *   .subscribe(x => console.log(x))
-   * ```
-   */
   pipe<R>(...operations: OperatorFunction<T, R>[]): Observable<R> {
     if (operations.length === 0) {
       return this as any;
