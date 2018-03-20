@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
-export function safeChildProcess(childProcess, childProcessSignal$) {
+export function safeChildProcess(childProcess, childProcessSignal$ = Observable.of('SIGTERM')) {
   const ownTerminateSignal$ = Observable.merge(
     Observable.fromEvent(process, 'SIGTERM').mapTo('SIGTERM'),
     Observable.fromEvent(process, 'SIGINT').mapTo('SIGINT'),

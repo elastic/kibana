@@ -1,12 +1,11 @@
 import { fork } from 'child_process';
-import { serializeArgument } from './valid_processes';
 
 
-let debugPortOffset = 1;
+let debugPortOffset = 100;
 
 // When we fork the child_process we need to use a different debug port
 // if we're using `--inspect` et al. The following code is heavily borrowed
-// from the cluster module in NodeJS 6.12.x and when we upgrade to 8.x it
+// from the cluster module in NodeJS 8.x and when we upgrade it
 // will likely need to be updated, as they changed the arguments...
 const getExecArgv = () => {
   if (!process.version.match(/^v8./)) {
@@ -27,8 +26,8 @@ const getExecArgv = () => {
   return execArgv;
 };
 
-export function spawnGatekeeper(validProcesses) {
-  return fork(require.resolve('./gatekeeper'), [serializeArgument(validProcesses)], {
+export function spawnNativeController(nativeControllerPath) {
+  return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath], {
     execArgv: getExecArgv()
   });
 }

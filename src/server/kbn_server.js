@@ -13,7 +13,8 @@ import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
-import { initializeSandbox, sandboxMixin } from './sandbox';
+import { spawnNativeControllers, nativeControllersMixin } from './native_controllers';
+import { activateSandbox } from './sandbox';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
@@ -31,7 +32,8 @@ export default class KbnServer {
     this.settings = settings || {};
 
     this.ready = constant(this.mixin(
-      initializeSandbox,
+      spawnNativeControllers,
+      activateSandbox,
       Plugins.waitForInitSetupMixin,
 
       // sets this.config, reads this.settings
@@ -40,7 +42,7 @@ export default class KbnServer {
       httpMixin,
 
       // adds methods for extending this.server
-      sandboxMixin,
+      nativeControllersMixin,
       serverExtensionsMixin,
       loggingMixin,
       warningsMixin,
