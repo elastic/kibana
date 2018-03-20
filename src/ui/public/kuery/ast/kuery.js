@@ -152,6 +152,11 @@ module.exports = (function() {
           },
         peg$c19 = function(value) {
             if (value.type === 'cursor') return value;
+
+            if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+              throw new errors.NoLeadingWildcardsError();
+            }
+
             const isPhrase = buildLiteralNode(false);
             return (field) => buildFunctionNode('is', [field, value, isPhrase]);
           },
@@ -1653,7 +1658,7 @@ module.exports = (function() {
     }
 
 
-      const { parseCursor, cursorSymbol, helpers: { nodeTypes } } = options;
+      const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes, errors } } = options;
       const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
       const buildLiteralNode = nodeTypes.literal.buildNode;
       const buildWildcardNode = nodeTypes.wildcard.buildNode;
