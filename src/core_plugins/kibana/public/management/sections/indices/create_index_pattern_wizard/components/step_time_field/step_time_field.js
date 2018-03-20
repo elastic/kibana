@@ -62,7 +62,6 @@ export class StepTimeField extends Component {
     // If the value is an empty string, it's not a valid selection
     const invalidSelection = value === '';
 
-    // console.log('foundByFieldName', foundByFieldName, value, value === '', value === undefined);
     if (!foundByFieldName) {
       this.setState({ selectedTimeField: undefined, timeFieldSet: !invalidSelection });
     } else {
