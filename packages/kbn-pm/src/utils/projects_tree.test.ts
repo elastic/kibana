@@ -30,7 +30,7 @@ test('handles projects outside root folder', async () => {
 test('handles projects within projects outside root folder', async () => {
   const projectPaths = getProjectPaths(rootPath, {
     'skip-kibana': false,
-    'skip-kibana-extra': false
+    'skip-kibana-extra': false,
   });
   const projects = await getProjects(rootPath, projectPaths);
 

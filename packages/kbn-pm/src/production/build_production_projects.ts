@@ -50,7 +50,7 @@ export async function buildProductionProjects({
 async function getProductionProjects(rootPath: string) {
   const projectPaths = getProjectPaths(rootPath, {
     'skip-kibana': false,
-    'skip-kibana-extra': true
+    'skip-kibana-extra': true,
   });
   const projects = await getProjects(rootPath, projectPaths);
 

@@ -77,7 +77,9 @@ test('handles dependencies of dependencies', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await BootstrapCommand.run({ projects, projectGraph,
+  await BootstrapCommand.run({
+    projects,
+    projectGraph,
     extraArgs: [],
     options: {
       'skip-kibana': false,
@@ -112,7 +114,9 @@ test('does not run installer if no deps in package', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await BootstrapCommand.run({ projects, projectGraph,
+  await BootstrapCommand.run({
+    projects,
+    projectGraph,
     extraArgs: [],
     options: {
       'skip-kibana': false,
@@ -140,7 +144,9 @@ test('handles "frozen-lockfile"', async () => {
 
   const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
 
-  await BootstrapCommand.run({ projects, projectGraph,
+  await BootstrapCommand.run({
+    projects,
+    projectGraph,
     extraArgs: [],
     options: {
       'skip-kibana': false,
