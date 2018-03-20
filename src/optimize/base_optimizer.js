@@ -153,6 +153,9 @@ export default class BaseOptimizer {
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
+
+        ...this.uiBundles.getWebpackPluginProviders()
+          .map(provider => provider(webpack)),
       ],
 
       module: {
