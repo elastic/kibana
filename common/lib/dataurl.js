@@ -1,4 +1,5 @@
 import { fromByteArray } from 'base64-js';
+import mime from 'mime/lite';
 
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
@@ -14,6 +15,7 @@ export function parse(str, withData = false) {
     charset: matches[2] && matches[2].split('=')[1],
     data: !withData ? null : str.split(',')[1],
     isImage: imageTypes.indexOf(matches[1]) >= 0,
+    extension: mime.getExtension(matches[1]),
   };
 }
 

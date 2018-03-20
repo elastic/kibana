@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap';
 import './asset_manager.less';
 import { RemoveIcon } from '../remove_icon';
 import { Clipboard } from '../clipboard';
+import { Download } from '../download';
 
 export const AssetManager = ({ assets, removeAsset }) => {
   return (
@@ -37,12 +38,19 @@ export const AssetManager = ({ assets, removeAsset }) => {
             onClick={() => removeAsset(asset.id)}
           />
           <div className="canvas__asset-manager--asset-identifier">
-            <div className="asset-copy">
+            <div className="asset-copy" title="Copy to Clipboard">
               <Clipboard content={asset.id}>
                 <Button bsSize="xsmall">
                   <span className="fa fa-clipboard" />
                 </Button>
               </Clipboard>
+            </div>
+            <div className="asset-download">
+              <Download fileName={asset.id} content={asset.value}>
+                <Button bsSize="xsmall" title="Download">
+                  <span className="fa fa-download" />
+                </Button>
+              </Download>
             </div>
             <div className="asset-id">{asset.id}</div>
           </div>

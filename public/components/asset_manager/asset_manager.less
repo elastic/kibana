@@ -1,4 +1,4 @@
-@import (reference) "../../style/main";
+@import (reference) '../../style/main';
 
 .canvas__asset-manager {
   .canvas__asset-manager--thumb {
@@ -14,7 +14,6 @@
     background-size: cover;
     background-position: left;
     background-repeat: no-repeat;
-
   }
 
   .canvas__asset-manager--asset-identifier {
@@ -23,9 +22,25 @@
     background-color: fade(@darkestGrey, 80%);
     border-radius: 0 0 @borderRadius @borderRadius;
     padding: @spacingXS;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
 
-    .asset-copy {
+    .asset-copy,
+    .asset-download {
       float: right;
+      margin-right: @spacingXS;
+
+      &:first-child {
+        margin-right: 0px;
+      }
+    }
+
+    .asset-id {
+      font-size: @textXSmall;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

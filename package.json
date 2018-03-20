@@ -59,6 +59,7 @@
     "lz-string": "^1.4.4",
     "markdown-it": "^8.3.2",
     "metalsmith-snippet": "^2.0.0",
+    "mime": "^2.2.0",
     "moment": "^2.18.1",
     "object-path-immutable": "^0.5.1",
     "prop-types": "^15.5.8",
