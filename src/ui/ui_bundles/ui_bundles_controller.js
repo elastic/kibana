@@ -48,6 +48,7 @@ export class UiBundlesController {
       ...getWebpackAliases(pluginSpecs),
       ...uiExports.webpackAliases
     };
+    this._webpackPluginProviders = uiExports.webpackPluginProviders;
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
@@ -76,6 +77,10 @@ export class UiBundlesController {
         controller: this,
       }));
     }
+  }
+
+  getWebpackPluginProviders() {
+    return this._webpackPluginProviders || [];
   }
 
   getWebpackNoParseRules() {
