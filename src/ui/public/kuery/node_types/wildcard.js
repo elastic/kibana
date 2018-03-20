@@ -33,3 +33,8 @@ export function toQueryStringQuery(node) {
   const { value } = node;
   return value.split(wildcardSymbol).map(escapeQueryString).join('*');
 }
+
+export function hasLeadingWildcard(node) {
+  const { value } = node;
+  return value.startsWith(wildcardSymbol);
+}
