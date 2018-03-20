@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import template from './filter_pill.html';
 import { uiModules } from 'ui/modules';
 
@@ -25,6 +26,10 @@ module.directive('filterPill', function () {
 
       this.deactivateActions = () => {
         this.areActionsActivated = false;
+      };
+
+      this.isControlledByPanel = () => {
+        return _.has(this.filter, 'meta.controlledBy');
       };
 
     }
