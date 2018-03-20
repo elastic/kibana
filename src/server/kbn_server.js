@@ -14,7 +14,7 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { spawnNativeControllers, nativeControllersMixin } from './native_controllers';
-import { activateSandbox } from './sandbox';
+import { activateSystemCallFilters } from './system_call_filters';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
@@ -33,7 +33,7 @@ export default class KbnServer {
 
     this.ready = constant(this.mixin(
       spawnNativeControllers,
-      activateSandbox,
+      activateSystemCallFilters,
       Plugins.waitForInitSetupMixin,
 
       // sets this.config, reads this.settings

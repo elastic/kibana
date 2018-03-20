@@ -1,6 +1,6 @@
 import sandbox from 'sandbox';
 
-export async function activateSandbox() {
+export async function activateSystemCallFilters() {
   // Darwin doesn't support system call filtering/sandboxing so we don't do anything here
   if (process.platform === 'darwin') {
     return;
