@@ -1,6 +1,8 @@
 import { requestFetchParamsToBody } from './request_fetch_params_to_body';
 import _ from 'lodash';
 
+const DEFAULT_SESSION_ID = '1';
+
 function requestFetchParamsToBodyWithDefaults(paramOverrides) {
   const paramDefaults = {
     requestFetchParams: [],
@@ -9,7 +11,12 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
       getActiveBounds: () => undefined,
     },
     kbnIndex: '.kibana',
-    sessionId: '1',
+    sessionId: DEFAULT_SESSION_ID,
+    config: {
+      get: () => {
+        return true;
+      }
+    }
   };
   const params = { ...paramDefaults, ...paramOverrides };
 
@@ -19,6 +26,7 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
     params.timeFilter,
     params.kbnIndex,
     params.sessionId,
+    params.config,
   );
 }
 
@@ -73,10 +81,48 @@ describe('when indexList is empty', () => {
     }
   ];
 
-  it('queries the kibana index (.kibana) with a must_not match_all boolean', () => {
+  test('queries the kibana index (.kibana) with a must_not match_all boolean', () => {
     return requestFetchParamsToBodyWithDefaults({ requestFetchParams }).then(value => {
       expect(_.includes(value, '"index":[".kibana"]')).toBe(true);
       expect(_.includes(value, emptyMustNotQuery)).toBe(true);
+    });
+  });
+});
+
+describe('headers', () => {
+
+  const requestFetchParams = [
+    {
+      index: ['logstash-123'],
+      type: 'blah',
+      search_type: 'blah2',
+      body: { foo: 'bar' }
+    }
+  ];
+
+  const getHeader = async (paramOverrides) => {
+    const request = await requestFetchParamsToBodyWithDefaults(paramOverrides);
+    const requestParts = request.split('\n');
+    if (requestParts.length < 2) {
+      throw new Error('fetch Body does not contain expected format header newline body.');
+    }
+    return JSON.parse(requestParts[0]);
+  };
+
+  describe('preference', async () => {
+    test('should be set to sessionId when courier:setRequestPreference is true', async () => {
+      const header = await getHeader({ requestFetchParams });
+      expect(header.preference).toBe(DEFAULT_SESSION_ID);
+    });
+
+    test('should not be set when courier:setRequestPreference is false', async () => {
+      const config = {
+        get: () => {
+          return false;
+        }
+      };
+      const header = await getHeader({ requestFetchParams, config });
+      expect(header.preference).toBe(undefined);
     });
   });
 });
