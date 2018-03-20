@@ -8,7 +8,7 @@ export default grunt => {
   grunt.registerTask('rejectRejFiles', 'Reject any git-apply .rej files', () => {
     const files = grunt.file.expand([
       '**/*.rej',
-      '!esvm/**/*.rej',
+      '!.es/**/*.rej',
       '!plugins/**/*.rej',
       '!optimize/**/*.rej',
       '!**/node_modules/**/*.rej',
