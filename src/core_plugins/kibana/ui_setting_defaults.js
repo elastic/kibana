@@ -115,6 +115,15 @@ export function getUiSettingDefaults() {
         'When set to true, filter(s) will be ignored for a visualization ' +
         'when the visualization\'s index does not contain the filtering field.'
     },
+    'courier:setRequestPreference': {
+      value: true,
+      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">Request Preference</a> ' +
+        ' controls the shard copies used for search execution.' +
+        ' Set to true to execute all search requests on the same shards. ' +
+        ' Set to false to have search request execution randomized among all available shard copies. ' +
+        ' Setting to false will provide better performance since requests can be spread across all shard copies but ' +
+        ' may result in inconsisent results as different shards may be in different refresh states.'
+    },
     'fields:popularLimit': {
       value: 10,
       description: 'The top N most popular fields to show',
