@@ -30,6 +30,7 @@ export class StepTimeField extends Component {
     this.state = {
       timeFields: [],
       selectedTimeField: undefined,
+      timeFieldSet: false,
       isAdvancedOptionsVisible: false,
       isFetchingTimeFields: false,
       isCreating: false,
@@ -52,7 +53,21 @@ export class StepTimeField extends Component {
   }
 
   onTimeFieldChanged = (e) => {
-    this.setState({ selectedTimeField: e.target.value });
+    const value = e.target.value;
+
+    // Ensure it exists in the options, if not, make this undefined
+    // This supports the `I do not want to use a time filter` option
+    const foundByFieldName = this.state.timeFields.find(timeField => timeField.fieldName === value);
+
+    // If the value is an empty string, it's not a valid selection
+    const invalidSelection = value === '';
+
+    // console.log('foundByFieldName', foundByFieldName, value, value === '', value === undefined);
+    if (!foundByFieldName) {
+      this.setState({ selectedTimeField: undefined, timeFieldSet: !invalidSelection });
+    } else {
+      this.setState({ selectedTimeField: value, timeFieldSet: !invalidSelection });
+    }
   }
 
   onChangeIndexPatternId = (e) => {
@@ -75,6 +90,7 @@ export class StepTimeField extends Component {
     const {
       timeFields,
       selectedTimeField,
+      timeFieldSet,
       isAdvancedOptionsVisible,
       indexPatternId,
       isCreating,
@@ -106,14 +122,14 @@ export class StepTimeField extends Component {
         { text: '', value: '' },
         ...timeFields.map(timeField => ({
           text: timeField.display,
-          value: timeField.fieldName || '',
+          value: timeField.fieldName,
           disabled: timeFields.isDisabled,
         }))
       ]
       : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;
-    const submittable = !showTimeField || selectedTimeField;
+    const submittable = !showTimeField || timeFieldSet;
 
     return (
       <EuiPanel paddingSize="l">
