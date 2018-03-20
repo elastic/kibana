@@ -1,4 +1,4 @@
-import { flatten, mapValues } from 'lodash';
+import { flatten, mapValues, uniq } from 'lodash';
 import { fromKueryExpression } from '../ast';
 import { getSuggestionsProvider as field } from './field';
 import { getSuggestionsProvider as value } from './value';
@@ -27,6 +27,10 @@ export function getSuggestionsProvider({ $http, config, indexPatterns }) {
       return getSuggestionsByType[type](cursorNode);
     });
     return Promise.all(suggestionsByType)
-      .then(suggestionsByType => flatten(suggestionsByType));
+      .then(suggestionsByType => dedup(flatten(suggestionsByType)));
   };
+}
+
+function dedup(suggestions) {
+  return uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
 }

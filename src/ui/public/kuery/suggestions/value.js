@@ -1,4 +1,4 @@
-import { flatten, memoize, uniq } from 'lodash';
+import { flatten, memoize } from 'lodash';
 import chrome from 'ui/chrome';
 import { escapeQuotes } from './escape_kuery';
 
@@ -35,7 +35,7 @@ export function getSuggestionsProvider({ $http, config, indexPatterns }) {
 }
 
 function getSuggestions(start, end, query, values) {
-  return uniq(values)
+  return values
     .filter(value => value.toLowerCase().includes(query.toLowerCase()))
     .map(value => {
       const text = `${value} `;
