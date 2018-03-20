@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { RangeFilterManager } from '../range_filter_manager';
+import { RangeFilterManager } from './range_filter_manager';
 
 describe('RangeFilterManager', function () {
 
@@ -24,13 +24,13 @@ describe('RangeFilterManager', function () {
       filterManager = new RangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
-    it('should create range filter from slider value', function () {
+    test('should create range filter from slider value', function () {
       const newFilter = filterManager.createFilter({ min: 1, max: 3 });
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter).to.have.property('range');
-      expect(JSON.stringify(newFilter.range, null, '')).to.be('{"field1":{"gte":1,"lt":3}}');
+      expect(JSON.stringify(newFilter.range, null, '')).to.be('{"field1":{"gte":1,"lte":3}}');
     });
   });
 
@@ -54,13 +54,13 @@ describe('RangeFilterManager', function () {
       filterManager = new MockFindFiltersRangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
-    it('should extract value from range filter', function () {
+    test('should extract value from range filter', function () {
       filterManager.setMockFilters([
         {
           range: {
             field1: {
               gte: 1,
-              lt: 3
+              lte: 3
             }
           }
         }
