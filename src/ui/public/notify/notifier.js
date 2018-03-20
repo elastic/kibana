@@ -89,7 +89,6 @@ const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
   warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
-  banner: 'kuiButton--basic'
 };
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
@@ -103,7 +102,6 @@ const typeToAlertClassMap = {
   danger: `alert-danger`,
   warning: `alert-warning`,
   info: `alert-info`,
-  banner: `alert-banner`,
 };
 
 function add(notif, cb) {
@@ -140,14 +138,10 @@ function add(notif, cb) {
   // decorate the notification with helper functions for the template
   notif.getButtonClass = () => typeToButtonClassMap[notif.type];
   notif.getAlertClassStack = () => `toast-stack alert ${typeToAlertClassMap[notif.type]}`;
-  notif.getIconClass = () => (notif.type === 'banner') ?  '' : `fa fa-${notif.icon}`;
-  notif.getToastMessageClass = ()  => (notif.type === 'banner') ?  'toast-message-banner' : 'toast-message';
-  notif.getAlertClass = () => (notif.type === 'banner') ?
-    `alert ${typeToAlertClassMap[notif.type]}` : // not including `.toast` class leaves out the flex properties for banner
-    `toast alert ${typeToAlertClassMap[notif.type]}`;
-  notif.getButtonGroupClass = () => (notif.type === 'banner') ?
-    'toast-controls-banner' :
-    'toast-controls';
+  notif.getIconClass = () => `fa fa-${notif.icon}`;
+  notif.getToastMessageClass = ()  => 'toast-message';
+  notif.getAlertClass = () => `toast alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getButtonGroupClass = () => 'toast-controls';
 
   let dup = null;
   if (notif.content) {
@@ -190,7 +184,6 @@ export function Notifier(opts) {
     'timed',
     'error',
     'warning',
-    'banner',
   ];
 
   notificationLevels.forEach(function (m) {
@@ -395,8 +388,6 @@ function getDecoratedCustomConfig(config) {
 
   const getLifetime = (type) => {
     switch (type) {
-      case 'banner':
-        return Notifier.config.bannerLifetime;
       case 'warning':
         return Notifier.config.warningLifetime;
       case 'danger':
