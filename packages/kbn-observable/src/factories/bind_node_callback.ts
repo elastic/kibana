@@ -1,5 +1,8 @@
 import { Observable } from '../observable';
 
+// Overloads for `$bindNodeCallback` to enable stricter typing. See
+// https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
+// details about overloading.
 export function $bindNodeCallback<R>(
   callbackFunc: (callback: (err: any, result: R) => any) => any
 ): () => Observable<R>;

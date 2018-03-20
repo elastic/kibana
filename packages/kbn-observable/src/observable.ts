@@ -177,6 +177,12 @@ export class Observable<T> implements Subscribable<T> {
     }
   }
 
+  // Overloads for `subscribe` to exclude the `...rest: never[]` from editors
+  // when displaying the type for `subscribe`. The `...rest` arguments are only
+  // there to fail when more than one arg is passed, as that is one of the apis
+  // for subscribe in RxJS, but we decided it wasn't necessary in Kibana. See
+  // https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
+  // details about overloading.
   subscribe(
     observerOrNext?: PartialObserver<T> | ((value: T) => void)
   ): Subscription;
@@ -217,6 +223,10 @@ export class Observable<T> implements Subscribable<T> {
     return new Subscription(observer, this._onSubscribe);
   }
 
+  // Overloads for `pipe` to enable a variable number of arguments, but still a
+  // clear gradual progressions from arg to arg when transforming the input. See
+  // https://www.typescriptlang.org/docs/handbook/functions.html#overloads for
+  // details about overloading.
   pipe(): Observable<T>;
   pipe<A>(op1: OperatorFunction<T, A>): Observable<A>;
   pipe<A, B>(
