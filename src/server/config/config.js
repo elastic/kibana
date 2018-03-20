@@ -99,7 +99,8 @@ export class Config {
 
     const results = Joi.validate(newVals, this.getSchema(), {
       context,
-      abortEarly: false
+      abortEarly: false,
+      escapeHtml: true
     });
 
     if (results.error) {
@@ -123,6 +124,17 @@ export class Config {
     return clone(value);
   }
 
+  /**
+   * Determines if the provided configuration key exists in any permutation of the schema.
+   * The schema has different permutations because some settings may change the validity of others.
+   * Ex:
+   *   Setting `server.ssl.enabled: true` will require setting either `server.ssl.certificate` or `server.ssl.pfx`,
+   *   but both cannot be set at the same time.
+   *   Asking if this.has('server.ssl.pfx') will return true, because it is specified in the schama,
+   *   despite the fact that the user's current configuration may not allow for the property to be defined.
+   *
+   * @param {string} key
+   */
   has(key) {
     function has(key, schema, path) {
       path = path || [];
@@ -134,9 +146,27 @@ export class Config {
           const child = schema._inner.children[i];
           // If the child is an object recurse through it's children and return
           // true if there's a match
+
           if (child.schema._type === 'object') {
             if (has(key, child.schema, path.concat([child.key]))) return true;
           // if the child matches, return true
+          } else if (child.schema._type === 'alternatives') {
+            const { matches = [] } = child.schema._inner;
+            // branches of a match belong to child.key, and should not be treated as a distinct subtree of child.
+            const foundInMatch = matches.some(match => {
+              const { then, otherwise } = match;
+              if (then && has(key, then, path.concat([child.key]))) {
+                return true;
+              }
+              if (otherwise && has(key, otherwise, path.concat([child.key]))) {
+                return true;
+              }
+              return false;
+            });
+
+            if (foundInMatch) {
+              return true;
+            }
           } else if (path.concat([child.key]).join('.') === key) {
             return true;
           }

@@ -19,6 +19,19 @@ describe('server/config', function () {
         expect(result.server.ssl.enabled).to.be(true);
       });
 
+      it('sets enabled to true when pfx is set', function () {
+        const settings = {
+          server: {
+            ssl: {
+              pfx: '/server.pfx'
+            }
+          }
+        };
+
+        const result = transformDeprecations(settings);
+        expect(result.server.ssl.enabled).to.be(true);
+      });
+
       it('logs a message when automatically setting enabled to true', function () {
         const settings = {
           server: {

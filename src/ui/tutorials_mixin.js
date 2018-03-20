@@ -10,7 +10,9 @@ export function tutorialsMixin(kbnServer, server) {
   });
 
   server.decorate('server', 'registerTutorial', (specProvider) => {
-    const { error, value } = Joi.validate(specProvider(server), tutorialSchema);
+    const { error, value } = Joi.validate(specProvider(server), tutorialSchema, {
+      escapeHtml: true
+    });
 
     if (error) {
       throw new Error(`Unable to register tutorial spec because its invalid. ${error}`);

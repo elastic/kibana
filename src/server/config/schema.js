@@ -5,6 +5,22 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
+const sslSchema = Joi.object({
+  enabled: Joi.boolean().optional().default(false),
+  redirectHttpFromPort: Joi.number().default(),
+  pfx: Joi.string(),
+  certificate: Joi.string(),
+  key: Joi.when('certificate', {
+    is: Joi.exist(),
+    then: Joi.string().required(),
+    otherwise: Joi.string().forbidden()
+  }),
+  keyPassphrase: Joi.string(),
+  certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
+  supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default([]),
+  cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
+}).default();
+
 export default () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
@@ -59,34 +75,11 @@ export default () => Joi.object({
       otherwise: Joi.default(false),
     }),
     customResponseHeaders: Joi.object().unknown(true).default({}),
-    ssl: Joi.object({
-      enabled: Joi.boolean().default(false),
-      redirectHttpFromPort: Joi.number(),
-      pfx: Joi.when('enabled', {
-        is: true,
-        then: Joi.string().optional()
-      }),
-      certificate: Joi.when('enabled', {
-        is: true,
-        then: Joi.when('pfx', {
-          is: Joi.exist(),
-          then: Joi.string().forbidden(),
-          otherwise: Joi.string().required()
-        })
-      }),
-      key: Joi.when('enabled', {
-        is: true,
-        then: Joi.when('pfx', {
-          is: Joi.exist(),
-          then: Joi.string().forbidden(),
-          otherwise: Joi.string().required()
-        })
-      }),
-      keyPassphrase: Joi.string(),
-      certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
-      cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
-    }).default(),
+    ssl: sslSchema
+      .when(Joi.object({ enabled: true }).unknown(), {
+        then: sslSchema.xor('certificate', 'pfx'),
+        otherwise: sslSchema
+      }).default(),
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({

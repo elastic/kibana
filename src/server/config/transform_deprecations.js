@@ -7,9 +7,13 @@ const serverSslEnabled = (settings, log) => {
   const has = partial(_.has, settings);
   const set = partial(_.set, settings);
 
-  if (!has('server.ssl.enabled') && has('server.ssl.certificate') && has('server.ssl.key')) {
+  const hasPkcs12Cert = has('server.ssl.pfx');
+  const hasPemCert = has('server.ssl.certificate') && has('server.ssl.key');
+
+  if (!has('server.ssl.enabled') && (hasPkcs12Cert || hasPemCert)) {
     set('server.ssl.enabled', true);
-    log('Enabling ssl by only specifying server.ssl.certificate and server.ssl.key is deprecated. Please set server.ssl.enabled to true');
+    log('Enabling ssl by only specifying server.ssl.pfx or server.ssl.certificate/key is deprecated. '
+      + 'Please set server.ssl.enabled to true');
   }
 };
 
