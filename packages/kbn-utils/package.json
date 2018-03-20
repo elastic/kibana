@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "license": "Apache-2.0",
   "private": true,
-  "main": "./target/tsc/index.js",
-  "types": "./target/tsc-types/index.d.ts",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "yarn build",

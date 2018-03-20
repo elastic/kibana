@@ -4,8 +4,7 @@
     "target": "es2015",
     "module": "commonjs",
     "declaration": true,
-    "declarationDir": "./target/tsc-types",
-    "outDir": "./target/tsc"
+    "outDir": "./target"
   },
   "include": [
     "./src/**/*.ts"
