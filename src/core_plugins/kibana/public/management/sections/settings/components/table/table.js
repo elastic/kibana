@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -170,6 +170,8 @@ export class Table extends PureComponent {
     this.setState({
       editingSettingName: null,
       editingSetting: null,
+      sortField: 'name',
+      sortDirection: 'asc',
     });
   }
 
@@ -182,6 +184,7 @@ export class Table extends PureComponent {
         name: 'Name',
         dataType: 'string',
         render: (value, item) => this.renderNameAndDescription(item),
+        sortable: true,
       },
       {
         field: 'value',
@@ -197,11 +200,20 @@ export class Table extends PureComponent {
       },
     ];
 
+    const search = {
+      box: {
+        incremental: true
+      }
+    };
+
     return (
-      <EuiBasicTable
+      <EuiInMemoryTable
         className="advancedSettings__table"
+        search={search}
         items={items}
         columns={columns}
+        pagination={false}
+        sorting={true}
       />
     );
   }

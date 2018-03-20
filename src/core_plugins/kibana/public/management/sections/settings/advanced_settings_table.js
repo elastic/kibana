@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSearchBar,
   EuiSpacer,
   EuiPage,
   EuiPageBody,
@@ -54,14 +53,6 @@ export class AdvancedSettingsTable extends Component {
             <EuiPageContentBody>
               <CallOuts/>
               <EuiSpacer size="s" />
-              <EuiSearchBar
-                onChange={() => {}}
-                box={{
-                  placeholder: 'Search...',
-                  incremental: true,
-                }}
-              />
-              <EuiSpacer size="m" />
               <Table
                 items={settings}
               />
