@@ -168,11 +168,13 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch.
+Start elasticsearch from a nightly snapshot.
 
 ```bash
-yarn elasticsearch
+yarn es snapshot
 ```
+
+Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
