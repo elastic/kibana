@@ -19,7 +19,7 @@ const sslSchema = Joi.object({
   certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
   supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default([]),
   cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
-}).default();
+});
 
 export default () => Joi.object({
   pkg: Joi.object({
