@@ -52,6 +52,7 @@ The available factories:
 - `$fromIterable`
 - `$fromObservable`
 - `$fromPromise`
+- `$race`
 - `$of`
 
 ## Operators
