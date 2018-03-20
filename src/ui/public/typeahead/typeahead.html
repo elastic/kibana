@@ -15,7 +15,7 @@
         class="typeahead-item"
         ng-repeat="item in typeahead.items"
         ng-class="{active: $index === typeahead.selectedIndex}"
-        ng-click="typeahead.submit()"
+        ng-click="typeahead.onItemClick()"
         ng-mouseenter="typeahead.selectedIndex = $index"
       >
         <kbn-typeahead-item

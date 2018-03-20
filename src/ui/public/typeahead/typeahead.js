@@ -20,7 +20,7 @@ typeahead.directive('kbnTypeahead', function () {
     },
     bindToController: true,
     controllerAs: 'typeahead',
-    controller: function ($element) {
+    controller: function ($scope, $element) {
       this.isHidden = true;
       this.selectedIndex = null;
 
@@ -84,6 +84,12 @@ typeahead.directive('kbnTypeahead', function () {
 
       this.onKeyPress = () => {
         this.isHidden = false;
+      };
+
+      this.onItemClick = () => {
+        this.submit();
+        $scope.$broadcast('focus');
+        $scope.$evalAsync(() => this.isHidden = false);
       };
 
       this.onFocus = () => {

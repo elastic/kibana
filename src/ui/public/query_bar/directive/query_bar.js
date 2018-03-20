@@ -80,7 +80,6 @@ module.directive('queryBar', function () {
 
         this.localQuery.query = inputEl.value = value.substr(0, start) + text + value.substr(end);
         inputEl.setSelectionRange(start + text.length, start + text.length);
-        inputEl.focus();
 
         if (type === 'recentSearch') {
           this.submit();
