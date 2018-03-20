@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { PhraseFilterManager } from '../phrase_filter_manager';
+import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {
 
@@ -27,7 +27,7 @@ describe('PhraseFilterManager', function () {
       filterManager = new PhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock, '|');
     });
 
-    it('should create match phrase filter from single value', function () {
+    test('should create match phrase filter from single value', function () {
       const newFilter = filterManager.createFilter('ios');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -36,7 +36,7 @@ describe('PhraseFilterManager', function () {
       expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
     });
 
-    it('should create bool filter from multiple values', function () {
+    test('should create bool filter from multiple values', function () {
       const newFilter = filterManager.createFilter('ios|win xp');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -70,7 +70,7 @@ describe('PhraseFilterManager', function () {
       filterManager = new MockFindFiltersPhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock, '|');
     });
 
-    it('should extract value from match phrase filter', function () {
+    test('should extract value from match phrase filter', function () {
       filterManager.setMockFilters([
         {
           query: {
@@ -86,7 +86,7 @@ describe('PhraseFilterManager', function () {
       expect(filterManager.getValueFromFilterBar()).to.be('ios');
     });
 
-    it('should extract value from bool filter', function () {
+    test('should extract value from bool filter', function () {
       filterManager.setMockFilters([
         {
           query: {
