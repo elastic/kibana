@@ -2,7 +2,7 @@ export function escapeQuotes(string) {
   return string.replace(/"/g, '\\"');
 }
 
-export const escapeKuery = (string) => escapeKeywords(escapeSpecialCharacters(string));
+export const escapeKuery = (string) => escapeNot(escapeAndOr(escapeSpecialCharacters(string)));
 
 // See the SpecialCharacter rule in kuery.peg
 function escapeSpecialCharacters(string) {
@@ -10,6 +10,10 @@ function escapeSpecialCharacters(string) {
 }
 
 // See the Keyword rule in kuery.peg
-function escapeKeywords(string) {
-  return string.replace(/(\s+)(and|or|not)(\s+)/ig, '$1\\$2$3');
+function escapeAndOr(string) {
+  return string.replace(/(\s+)(and|or)(\s+)/ig, '$1\\$2$3');
+}
+
+function escapeNot(string) {
+  return string.replace(/not(\s+)/ig, '\\$&');
 }

@@ -8,7 +8,7 @@ const type = 'value';
 export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
-  return shouldSuggestValues ? memoize(getValueSuggestions, getFieldQueryHash) : () => Promise.resolve([]);
+  return shouldSuggestValues ? memoize(getValueSuggestions, getFieldQueryHash) : () => [];
 
   function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
     const fields = allFields.filter(field => field.name === fieldName);
