@@ -14,7 +14,7 @@ export default function (kibana) {
       <% } %>
       <% if (generateHack) { %>
       hacks: [
-        'plugins/<%= name %>/hack'
+        'plugins/<%= kebabCase(name) %>/hack'
       ]
       <% } %>
     },
