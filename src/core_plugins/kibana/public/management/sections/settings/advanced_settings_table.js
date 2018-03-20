@@ -1,10 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import {
+  EuiSearchBar,
+  EuiSpacer,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+} from '@elastic/eui';
+
 import { CallOuts } from './components/call_outs';
 import { Table } from './components/table';
 
 import { toEditableConfig } from './lib';
+
+import './advanced_settings_table.less';
 
 export class AdvancedSettingsTable extends Component {
   static propTypes = {
@@ -37,12 +48,27 @@ export class AdvancedSettingsTable extends Component {
   render() {
     const { settings } = this.state;
     return (
-      <div>
-        <CallOuts/>
-        <Table
-          items={settings}
-        />
-      </div>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent horizontalPosition="center">
+            <EuiPageContentBody>
+              <CallOuts/>
+              <EuiSpacer size="s" />
+              <EuiSearchBar
+                onChange={() => {}}
+                box={{
+                  placeholder: 'Search...',
+                  incremental: true,
+                }}
+              />
+              <EuiSpacer size="m" />
+              <Table
+                items={settings}
+              />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }
