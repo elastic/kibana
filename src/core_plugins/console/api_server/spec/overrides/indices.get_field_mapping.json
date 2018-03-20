@@ -1,0 +1,5 @@
+{
+  "_mapping/field/{fields}": {
+    "priority": 10
+  }
+}

@@ -8,7 +8,8 @@
       ng-hide="schema.deprecate"
       ng-repeat="schema in availableSchema"
       ng-click="add.submit(schema)"
-      class="list-group-item list-group-menu-item">
+      class="list-group-item list-group-menu-item"
+      data-test-subj="{{schema.title}}">
       <i ng-show="schema.icon" ng-class="schema.icon"></i>
       {{schema.title}}
     </li>

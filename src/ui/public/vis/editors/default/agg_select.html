@@ -31,7 +31,7 @@
         | sortPrefixFirst:$select.search:'title'"
       group-by="'subtype'"
     >
-      <div ng-bind-html="agg.title | highlight: $select.search"></div>
+      <div data-test-subj="{{agg.title}}" ng-bind-html="agg.title | highlight: $select.search"></div>
     </ui-select-choices>
   </ui-select>
 </div>

@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Tooltip } from 'pivotal-ui/react/tooltip';
-import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiToolTip,
+} from '@elastic/eui';
 import { copyToClipboard } from '../../copy_to_clipboard';
 
 const UNCOPIED_MSG = 'Copy to clipboard';
@@ -35,13 +36,8 @@ export class CopyButton extends React.Component {
 
   render() {
     return (
-      <OverlayTrigger
-        placement="top"
-        overlay={
-          <Tooltip>
-            {this.state.tooltipText}
-          </Tooltip>
-        }
+      <EuiToolTip
+        content={this.state.tooltipText}
       >
         <EuiButton
           size="s"
@@ -50,7 +46,7 @@ export class CopyButton extends React.Component {
         >
           Copy snippet
         </EuiButton>
-      </OverlayTrigger>
+      </EuiToolTip>
     );
   }
 }

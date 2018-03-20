@@ -1,0 +1,13 @@
+{
+  "snapshot.delete": {
+    "url_params": {
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}"
+    ]
+  }
+}

@@ -21,7 +21,7 @@
       kbn-scroll-bottom="limit = limit + 100"
       repeat="field in indexedFields | filter: { displayName: $select.search } | sortPrefixFirst:$select.search:'name' | limitTo: limit"
     >
-      <div ng-bind-html="field.displayName | highlight: $select.search"></div>
+      <div data-test-subj="{{field.displayName}}" ng-bind-html="field.displayName | highlight: $select.search"></div>
     </ui-select-choices>
   </ui-select>
 
