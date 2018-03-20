@@ -349,8 +349,10 @@ function discoverController(
         });
 
         $scope.$watch('vis.aggs', function () {
-        // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield) return;
+          if (!$scope.opts.timefield || $scope.opts.timefield === '-1') {
+            // no timefield, no vis, nothing to update
+            return;
+          }
 
           const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
 
