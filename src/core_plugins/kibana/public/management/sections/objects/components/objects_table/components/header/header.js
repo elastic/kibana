@@ -11,6 +11,8 @@ import {
 } from '@elastic/eui';
 
 export const Header = ({
+  onExportAll,
+  onImport
 }) => (
   <div>
     <EuiSpacer size="m"/>
@@ -26,6 +28,7 @@ export const Header = ({
             <EuiButton
               size="s"
               iconType="exportAction"
+              onClick={onExportAll}
             >
               Export Everything
             </EuiButton>
@@ -34,6 +37,7 @@ export const Header = ({
             <EuiButton
               size="s"
               iconType="importAction"
+              onClick={onImport}
             >
               Import
             </EuiButton>

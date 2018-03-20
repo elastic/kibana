@@ -1,10 +1,15 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { flattenDeep } from 'lodash';
 import { createSelector } from 'reselect';
 import { Header } from './components/header';
 import { Table } from './components/table';
 
 import { EuiSpacer, EuiHorizontalRule, Query } from '@elastic/eui';
+import { retrieveAndExportDocs } from '../../lib/retrieve_and_export_docs';
+import { scanAllTypes } from '../../lib/scan_all_types';
+import { saveToFile } from '../../lib/save_to_file';
+import { Flyout } from './components/flyout';
 
 async function smoothServerInteraction(block, minimumTimeMs = 300) {
   return await ensureMinimumTime(block, minimumTimeMs);
@@ -47,10 +52,16 @@ function getSavedObjectIcon(type) {
   }
 }
 
+export const EXCLUDED_TYPES = ['config'];
+
 export class ObjectsTable extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
+    $http: PropTypes.func.isRequired,
+    notify: PropTypes.object.isRequired,
+    kbnIndex: PropTypes.string.isRequired,
     clientSideSearchThreshold: PropTypes.number,
+    services: PropTypes.array.isRequired,
   };
 
   static defaultProps = {
@@ -68,6 +79,7 @@ export class ObjectsTable extends Component {
       selectedSavedObjectIds: [],
       clientSideSearchingEnabled: false,
       isPerformingInitialFetch: false,
+      isShowingImportFlyout: false,
     };
   }
 
@@ -129,12 +141,17 @@ export class ObjectsTable extends Component {
         fields: ['title', 'id'],
       });
 
-      savedObjects = data.savedObjects.map(savedObject => ({
-        title: savedObject.attributes.title,
-        type: savedObject.type,
-        id: savedObject.id,
-        icon: getSavedObjectIcon(savedObject.type),
-      }));
+      savedObjects = data.savedObjects.reduce((accum, savedObject) => {
+        if (!EXCLUDED_TYPES.includes(savedObject.type)) {
+          accum.push({
+            title: savedObject.attributes.title,
+            type: savedObject.type,
+            id: savedObject.id,
+            icon: getSavedObjectIcon(savedObject.type),
+          });
+        }
+        return accum;
+      }, []);
 
       if (visibleTypes) {
         savedObjects = savedObjects.filter(savedObject =>
@@ -151,7 +168,6 @@ export class ObjectsTable extends Component {
     };
   };
 
-  // I NEED THIS HERE
   onSelectionChanged = selection => {
     const selectedSavedObjectIds = selection.map(item => item.id);
     this.setState({ selectedSavedObjectIds });
@@ -160,6 +176,44 @@ export class ObjectsTable extends Component {
   onSearchChanged = query => {
     this.setState({ activeQuery: query });
   };
+
+  onExport = async () => {
+    const { savedObjects, selectedSavedObjectIds } = this.state;
+    const objects = savedObjects.filter(({ id }) => selectedSavedObjectIds.includes(id));
+    await retrieveAndExportDocs(objects, this.props.savedObjectsClient);
+  }
+
+  onExportAll = async () => {
+    const { kbnIndex, $http } = this.props;
+    const results = await scanAllTypes($http, kbnIndex, EXCLUDED_TYPES);
+    saveToFile(JSON.stringify(flattenDeep(results.hits), null, 2));
+  }
+
+  finishImport = () => {
+    this.hideImportFlyout();
+  }
+
+  showImportFlyout = () => {
+    this.setState({ isShowingImportFlyout: true });
+  }
+
+  hideImportFlyout = () => {
+    this.setState({ isShowingImportFlyout: false });
+  }
+
+  onDelete = async () => {
+    const { savedObjectsClient } = this.props;
+    const { savedObjects, selectedSavedObjectIds } = this.state;
+    const objects = savedObjects.filter(({ id }) => selectedSavedObjectIds.includes(id));
+    const deletes = objects.map(object => savedObjectsClient.delete(object.type, object.id));
+    await Promise.all(deletes);
+
+    // Unset this
+    this.setState({ selectedSavedObjectIds: [] });
+
+    // Fetching all data
+    await this.fetchAllData();
+  }
 
   getFilterOptions = createSelector(
     savedObjects => savedObjects,
@@ -180,6 +234,21 @@ export class ObjectsTable extends Component {
     }
   );
 
+  renderFlyout() {
+    if (!this.state.isShowingImportFlyout) {
+      return null;
+    }
+
+    return (
+      <Flyout
+        close={this.hideImportFlyout}
+        done={this.finishImport}
+        services={this.props.services}
+        savedObjectsClient={this.props.savedObjectsClient}
+      />
+    );
+  }
+
   render() {
     const { savedObjects, clientSideSearchingEnabled, isPerformingInitialFetch, selectedSavedObjectIds } = this.state;
 
@@ -190,7 +259,11 @@ export class ObjectsTable extends Component {
 
     return (
       <Fragment>
-        <Header />
+        {this.renderFlyout()}
+        <Header
+          onExportAll={this.onExportAll}
+          onImport={this.showImportFlyout}
+        />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
         <Table
@@ -202,6 +275,8 @@ export class ObjectsTable extends Component {
           isPerformingInitialFetch={isPerformingInitialFetch}
           filterOptions={this.getFilterOptions(savedObjects)}
           fetchData={this.fetchSavedObjects}
+          onExport={this.onExport}
+          onDelete={this.onDelete}
         />
         <EuiSpacer size="xxl" />
       </Fragment>

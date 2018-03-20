@@ -20,6 +20,8 @@ export class Table extends Component {
     filterOptions: PropTypes.array.isRequired,
     fetchData: PropTypes.func,
     onSearchChanged: PropTypes.func,
+    onDelete: PropTypes.func.isRequired,
+    onExport: PropTypes.func.isRequired,
   };
 
   getColumns() {
@@ -49,22 +51,22 @@ export class Table extends Component {
     const {
       clientSideSearchingEnabled,
       isPerformingInitialFetch,
-      items,
-      selectionConfig,
-      filterOptions,
-      fetchData,
-      onSearchChanged,
-      selectedSavedObjectIds,
+      ...rest
+      // items,
+      // selectionConfig,
+      // filterOptions,
+      // fetchData,
+      // onSearchChanged,
+      // selectedSavedObjectIds,
+      // onExport,
+      // onDelete,
     } = this.props;
 
     if (clientSideSearchingEnabled || isPerformingInitialFetch) {
       return (
         <InMemoryTable
           columns={this.getColumns()}
-          items={items}
-          selectedSavedObjectIds={selectedSavedObjectIds}
-          selectionConfig={selectionConfig}
-          filterOptions={filterOptions}
+          {...rest}
         />
       );
     }
@@ -72,11 +74,7 @@ export class Table extends Component {
     return (
       <OnServerTable
         columns={this.getColumns()}
-        selectedSavedObjectIds={selectedSavedObjectIds}
-        selectionConfig={selectionConfig}
-        filterOptions={filterOptions}
-        fetchData={fetchData}
-        onSearchChanged={onSearchChanged}
+        {...rest}
       />
     );
   }

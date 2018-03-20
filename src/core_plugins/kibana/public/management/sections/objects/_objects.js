@@ -16,7 +16,7 @@ import { ObjectsTable } from './components/objects_table';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, savedObjectsClient) {
+function updateObjectsTable($scope, savedObjectsClient, services, notify, $http, kbnIndex) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_OBJECTS_TABLE_DOM_ELEMENT_ID);
     if (!node) {
@@ -26,6 +26,10 @@ function updateObjectsTable($scope, savedObjectsClient) {
     render(
       <ObjectsTable
         savedObjectsClient={savedObjectsClient}
+        services={services}
+        $http={$http}
+        notify={notify}
+        kbnIndex={kbnIndex}
       />,
       node,
     );
@@ -62,7 +66,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjects', function ($route, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+  .directive('kbnManagementObjects', function ($route, $http, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     return {
@@ -71,7 +75,8 @@ uiModules.get('apps/management')
       controller: function ($scope, $injector, $q, AppState) {
         const notify = new Notifier({ location: 'Saved Objects' });
 
-        updateObjectsTable($scope, savedObjectsClient);
+        const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
+        updateObjectsTable($scope, savedObjectsClient, services, notify, $http, kbnIndex);
         $scope.$on('$destroy', destroyObjectsTable);
 
         // TODO: Migrate all scope variables to the controller.

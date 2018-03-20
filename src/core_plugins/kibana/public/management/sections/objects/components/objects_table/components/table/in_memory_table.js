@@ -26,6 +26,8 @@ export class InMemoryTable extends Component {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
+    onDelete: PropTypes.func.isRequired,
+    onExport: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -64,6 +66,8 @@ export class InMemoryTable extends Component {
       selectionConfig: selection,
       filterOptions,
       columns,
+      onDelete,
+      onExport,
       selectedSavedObjectIds,
     } = this.props;
 
@@ -74,7 +78,13 @@ export class InMemoryTable extends Component {
     const items = this.getFilteredSavedObjects(this.state, this.props);
 
     const search = {
-      toolsRight: <Tools isDisabled={selectedSavedObjectIds.length === 0} />,
+      toolsRight: (
+        <Tools
+          isDisabled={selectedSavedObjectIds.length === 0}
+          onDelete={onDelete}
+          onExport={onExport}
+        />
+      ),
       box: {
         incremental: true,
       },

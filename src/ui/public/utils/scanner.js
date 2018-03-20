@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 
-export const Scanner = function ($http, { index, type } = {}) {
+export const Scanner = function ($http, { index, type, typesToExclude } = {}) {
   if (!index) throw new Error('Expected index');
-  if (!type) throw new Error('Expected type');
+  // if (!type) throw new Error('Expected type');
   if (!$http) throw new Error('Expected $http');
 
   this.$http = $http;
   this.index = index;
   this.type = type;
+  this.typesToExclude = typesToExclude;
 };
 
 Scanner.prototype.start = function (searchBody) {
@@ -55,6 +56,18 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
     });
   }
 
+  if (this.typesToExclude) {
+    bool.filter.push({
+      bool: {
+        must_not: this.typesToExclude.map(type => ({
+          term: {
+            _type: type,
+          }
+        })),
+      }
+    });
+  }
+
   if (searchString) {
     bool.must.push({
       simple_query_string: {
@@ -83,11 +96,13 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         .slice(0, allResults.total - allResults.hits.length);
 
       hits = hits.map(hit => {
+        const inferredType = hit._source.type;
+        const type = this.type || inferredType;
         if (hit._type === 'doc') {
           return {
-            _id: hit._id.replace(`${this.type}:`, ''),
-            _type: this.type,
-            _source: hit._source[this.type],
+            _id: hit._id.replace(`${type}:`, ''),
+            _type: type,
+            _source: hit._source[type],
             _meta: {
               savedObjectVersion: 2
             }
