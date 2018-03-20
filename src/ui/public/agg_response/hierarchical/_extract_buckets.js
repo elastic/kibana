@@ -1,14 +1,22 @@
 import _ from 'lodash';
 
-export function extractBuckets(bucket, agg) {
-  if (bucket && _.isPlainObject(bucket.buckets)) {
-    return _.map(bucket.buckets, function (value, key) {
-      const item = _.cloneDeep(value);
-      item.key = agg ? agg.getKey(value, key) : key;
-      return item;
-    });
+function decorateWithKey(agg, bucket, key) {
+  const decorated = _.cloneDeep(bucket);
+  decorated.key = agg ? agg.getKey(bucket, key) : key;
+  return decorated;
+}
 
-  } else {
-    return bucket && bucket.buckets || [];
+export function extractBuckets(bucket, agg) {
+  if (bucket) {
+    if (_.isPlainObject(bucket.buckets)) {
+      return _.map(bucket.buckets, function (value, key) {
+        return decorateWithKey(agg, value, key);
+      });
+    } else if(_.isArray(bucket.buckets)) {
+      return bucket.buckets.map(value => {
+        return decorateWithKey(agg, value, value.key);
+      });
+    }
   }
+  return bucket && bucket.buckets || [];
 }

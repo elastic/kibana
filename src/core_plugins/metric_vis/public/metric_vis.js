@@ -67,7 +67,7 @@ function MetricVisProvider(Private) {
           title: 'Metric',
           min: 1,
           aggFilter: [
-            '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
+            '!std_dev', '!geo_centroid',
             '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
           defaults: [
             { type: 'count', schema: 'metric' }

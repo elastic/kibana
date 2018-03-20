@@ -1,0 +1,14 @@
+{
+  "snapshot.verify_repository": {
+    "url_params": {
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/_verify"
+    ]
+  }
+}

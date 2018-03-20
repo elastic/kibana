@@ -1,34 +1,35 @@
-import moment from 'moment';
+import React from 'react';
 import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
+import { render, unmountComponentAtNode } from 'react-dom';
 
 import 'ui/autoload/styles';
 import './less/main.less';
-import template from './templates/index.html';
+import { Main } from './components/main';
 
-uiRoutes.enable();
-uiRoutes
-  .when('/', {
-    template,
-    resolve: {
-      currentTime($http) {
-        return $http.get('../api/<%= name %>/example').then(function (resp) {
-          return resp.data.time;
-        });
-      }
-    }
+const app = uiModules.get("apps/<%= camelCase(name) %>");
+
+app.config($locationProvider => {
+  $locationProvider.html5Mode({
+    enabled: false,
+    requireBase: false,
+    rewriteLinks: false,
   });
+});
+app.config(stateManagementConfigProvider =>
+  stateManagementConfigProvider.disable()
+);
 
-uiModules
-  .get('app/<%= name %>', [])
-  .controller('<%= camelCase(name) %>HelloWorld', function ($scope, $route, $interval) {
-    $scope.title = '<%= startCase(name) %>';
-    $scope.description = '<%= description %>';
+function RootController($scope, $element, $http) {
+  const domNode = $element[0];
 
-    const currentTime = moment($route.current.locals.currentTime);
-    $scope.currentTime = currentTime.format('HH:mm:ss');
-    const unsubscribe = $interval(function () {
-      $scope.currentTime = currentTime.add(1, 'second').format('HH:mm:ss');
-    }, 1000);
-    $scope.$watch('$destroy', unsubscribe);
+  // render react to DOM
+  render(<Main title="<%= name %>" httpClient={$http} />, domNode);
+
+  // unmount react on controller destroy
+  $scope.$on('$destroy', () => {
+    unmountComponentAtNode(domNode);
   });
+}
+
+chrome.setRootController("<%= camelCase(name) %>", RootController);

@@ -4,6 +4,7 @@ import {
   getProjects,
   buildProjectGraph,
   topologicallyBatchProjects,
+  includeTransitiveProjects,
 } from './projects';
 import { Project } from './project';
 import { getProjectPaths } from '../config';
@@ -50,7 +51,10 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths(rootPath, {
+      'skip-kibana': false,
+      'skip-kibana-extra': false
+  });
     const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [
@@ -103,5 +107,48 @@ describe('#topologicallyBatchProjects', () => {
     );
 
     expect(expectedBatches).toMatchSnapshot();
+  });
+});
+
+describe('#includeTransitiveProjects', () => {
+  test('includes transitive dependencies for Kibana package', async () => {
+    const projects = await getProjects(rootPath, ['.', 'packages/*']);
+
+    const kibana = projects.get('kibana')!;
+    const withTransitive = includeTransitiveProjects([kibana], projects);
+
+    expect([...withTransitive.keys()]).toEqual(['kibana', 'foo']);
+  });
+
+  test('handles multiple projects with same transitive dep', async () => {
+    const projects = await getProjects(rootPath, ['.', 'packages/*']);
+
+    const kibana = projects.get('kibana')!;
+    const bar = projects.get('bar')!;
+    const withTransitive = includeTransitiveProjects([kibana, bar], projects);
+
+    expect([...withTransitive.keys()]).toEqual(['kibana', 'bar', 'foo']);
+  });
+
+  test('handles projects with no deps', async () => {
+    const projects = await getProjects(rootPath, ['.', 'packages/*']);
+
+    const foo = projects.get('foo')!;
+    const withTransitive = includeTransitiveProjects([foo], projects);
+
+    expect([...withTransitive.keys()]).toEqual(['foo']);
+  });
+
+  test('includes dependencies of dependencies', async () => {
+    const projects = await getProjects(rootPath, [
+      '.',
+      'packages/*',
+      '../plugins/*',
+    ]);
+
+    const quux = projects.get('quux')!;
+    const withTransitive = includeTransitiveProjects([quux], projects);
+
+    expect([...withTransitive.keys()]).toEqual(['quux', 'bar', 'baz', 'foo']);
   });
 });

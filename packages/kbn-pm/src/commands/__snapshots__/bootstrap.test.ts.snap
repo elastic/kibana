@@ -8,6 +8,7 @@ Array [
         "allDependencies": Object {
           "bar": "link:packages/bar",
         },
+        "devDependencies": Object {},
         "json": Object {
           "dependencies": Object {
             "bar": "link:packages/bar",
@@ -18,11 +19,15 @@ Array [
         "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/node_modules",
         "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/package.json",
         "path": "<repoRoot>/packages/kbn-pm/src/commands",
+        "productionDependencies": Object {
+          "bar": "link:packages/bar",
+        },
         "scripts": Object {},
         "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/target",
       },
       "bar" => Project {
         "allDependencies": Object {},
+        "devDependencies": Object {},
         "json": Object {
           "name": "bar",
           "scripts": Object {
@@ -33,6 +38,7 @@ Array [
         "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
         "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
         "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
+        "productionDependencies": Object {},
         "scripts": Object {
           "kbn:bootstrap": "node ./bar.js",
         },
@@ -43,6 +49,7 @@ Array [
       "kibana" => Array [
         Project {
           "allDependencies": Object {},
+          "devDependencies": Object {},
           "json": Object {
             "name": "bar",
             "scripts": Object {
@@ -53,6 +60,7 @@ Array [
           "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
           "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
           "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
+          "productionDependencies": Object {},
           "scripts": Object {
             "kbn:bootstrap": "node ./bar.js",
           },
@@ -72,6 +80,7 @@ Array [
     Array [],
     Project {
       "allDependencies": Object {},
+      "devDependencies": Object {},
       "json": Object {
         "name": "bar",
         "scripts": Object {
@@ -82,6 +91,7 @@ Array [
       "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
       "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
       "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
+      "productionDependencies": Object {},
       "scripts": Object {
         "kbn:bootstrap": "node ./bar.js",
       },

@@ -1,11 +1,7 @@
 import chalk from 'chalk';
 import { schema } from '@kbn/utils';
 
-import {
-  ProjectGraph,
-  ProjectMap,
-  topologicallyBatchProjects,
-} from '../utils/projects';
+import { topologicallyBatchProjects } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
 import { createCommand } from './command';

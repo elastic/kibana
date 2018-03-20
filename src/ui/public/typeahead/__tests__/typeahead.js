@@ -1,230 +1,199 @@
-import angular from 'angular';
-import sinon from 'sinon';
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import 'ui/typeahead';
-import 'plugins/kibana/discover/index';
+import '../typeahead';
+import { comboBoxKeyCodes } from '@elastic/eui';
+const { UP, DOWN, ENTER, TAB, ESCAPE } = comboBoxKeyCodes;
 
-// TODO: This should not be needed, timefilter is only included here, it should move
+describe('Typeahead directive', function () {
+  let $compile;
+  let scope;
+  let element;
 
-const typeaheadHistoryCount = 10;
-const typeaheadName = 'unittest';
-let $parentScope;
-let $typeaheadScope;
-let $elem;
-let typeaheadCtrl;
-let onSelectStub;
+  beforeEach(ngMock.module('kibana'));
 
-let markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}" on-select="selectItem()">
-                <input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>
-                <kbn-typeahead-items></kbn-typeahead-items>
-              </div>`;
-const typeaheadItems = ['abc', 'def', 'ghi'];
+  beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
+    $compile = _$compile_;
+    scope = _$rootScope_.$new();
+    const html = `
+      <kbn-typeahead
+        items="items"
+        item-template="itemTemplate"
+        on-select="onSelect(item)"
+      >
+        <input
+          kbn-typeahead-input
+          ng-model="value"
+          type="text"
+        />
+      </kbn-typeahead>
+    `;
+    element = $compile(html)(scope);
+    scope.items = ['foo', 'bar', 'baz'];
+    scope.onSelect = sinon.spy();
+    scope.$digest();
+  }));
 
-const init = function () {
-  // Load the application
-  ngMock.module('kibana');
-
-  ngMock.module('kibana/typeahead', function ($provide) {
-    $provide.factory('PersistedLog', function () {
-      function PersistedLogMock(name, options) {
-        this.name = name;
-        this.options = options;
-      }
-
-      PersistedLogMock.prototype.add = sinon.stub().returns(typeaheadItems);
-      PersistedLogMock.prototype.get = sinon.stub().returns(typeaheadItems);
-
-      return PersistedLogMock;
-    });
-
-    $provide.service('config', function () {
-      this.get = sinon.stub().returns(typeaheadHistoryCount);
-    });
-  });
-
-
-  // Create the scope
-  ngMock.inject(function ($injector, $controller, $rootScope, $compile) {
-    // Give us a scope
-    $parentScope = $rootScope;
-
-    $parentScope.selectItem = onSelectStub = sinon.stub();
-    $elem = angular.element(markup);
-
-    $compile($elem)($parentScope);
-    $elem.scope().$digest();
-    $typeaheadScope = $elem.isolateScope();
-    typeaheadCtrl = $elem.controller('kbnTypeahead');
-  });
-};
-
-describe('typeahead directive', function () {
-  describe('typeahead requirements', function () {
-    describe('missing on-select attribute', function () {
-      const goodMarkup = markup;
-
-      before(function () {
-        markup = `<div class="typeahead" kbn-typeahead="${typeaheadName}">
-                    <input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input />
-                    <kbn-typeahead-items></kbn-typeahead-items>
-                  </div>`;
-      });
-
-      after(function () {
-        markup = goodMarkup;
-      });
-
-      it('should throw with message', function () {
-        expect(init).to.throwException(/on-select must be defined/);
-      });
+  describe('before focus', function () {
+    it('should be hidden', function () {
+      scope.$digest();
+      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
     });
   });
 
-  describe('internal functionality', function () {
+  describe('after focus', function () {
     beforeEach(function () {
-      init();
+      element.find('input').triggerHandler('focus');
     });
 
-    describe('PersistedLog', function () {
-      it('should instantiate PersistedLog', function () {
-        expect(typeaheadCtrl.history.name).to.equal('typeahead:' + typeaheadName);
-        expect(typeaheadCtrl.history.options.maxLength).to.equal(typeaheadHistoryCount);
-        expect(typeaheadCtrl.history.options.filterDuplicates).to.equal(true);
-      });
-
-      it('should read data when directive is instantiated', function () {
-        expect(typeaheadCtrl.history.get.callCount).to.be(1);
-      });
-
-      it('should not save empty entries', function () {
-        const entries = typeaheadItems.slice(0);
-        entries.push('', 'jkl');
-        for (let i = 0; i < entries.length; i++) {
-          $typeaheadScope.inputModel.$setViewValue(entries[i]);
-          typeaheadCtrl.persistEntry();
-        }
-        expect(typeaheadCtrl.history.add.callCount).to.be(4);
-      });
-
+    it('should still be hidden', function () {
+      scope.$digest();
+      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
     });
 
-    describe('controller scope', function () {
-      it('should contain the input model', function () {
-        expect($typeaheadScope.inputModel).to.be.an('object');
-        expect($typeaheadScope.inputModel)
-          .to.have.property('$viewValue')
-          .and.have.property('$modelValue')
-          .and.have.property('$setViewValue').a('function');
+    it('should show when a key other than escape is pressed unless there are no items', function () {
+      element.find('.typeahead').triggerHandler({
+        type: 'keydown',
+        keyCode: 'A'.charCodeAt(0)
       });
 
-      it('should save data to the scope', function () {
-        // $scope.items is set via history.add, so mock the output
-        typeaheadCtrl.history.add.returns(typeaheadItems);
+      scope.$digest();
 
-        // a single call will call history.add, which will respond with the mocked data
-        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
+      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(false);
 
-        expect($typeaheadScope.items).to.be.an('array');
-        expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
+      scope.items = [];
+      scope.$digest();
+
+      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+    });
+
+    it('should hide when escape is pressed', function () {
+      element.find('.typeahead').triggerHandler({
+        type: 'keydown',
+        keyCode: ESCAPE
       });
 
-      it('should order filtered results', function () {
-        const entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
-        const allEntries = typeaheadItems.concat(entries);
-        const startMatches = allEntries.filter(function (item) {
-          return /^a/.test(item);
-        });
-        typeaheadCtrl.history.add.returns(allEntries);
+      scope.$digest();
 
-        for (let i = 0; i < entries.length; i++) {
-          $typeaheadScope.inputModel.$setViewValue(entries[i]);
-          typeaheadCtrl.persistEntry();
-        }
+      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+    });
 
-        typeaheadCtrl.filterItemsByQuery('a');
+    it('should select the next option on arrow down', function () {
+      let expectedActiveIndex = -1;
+      for (let i = 0; i < scope.items.length + 1; i++) {
+        expectedActiveIndex++;
+        if (expectedActiveIndex > scope.items.length - 1) expectedActiveIndex = 0;
 
-        expect($typeaheadScope.filteredItems).to.contain('phantogram');
-        const nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
-
-        startMatches.forEach(function (item) {
-          expect($typeaheadScope.filteredItems).to.contain(item);
-          expect($typeaheadScope.filteredItems.indexOf(item)).to.be.below(nonStarterIndex);
+        element.find('.typeahead').triggerHandler({
+          type: 'keydown',
+          keyCode: DOWN
         });
 
-        expect($typeaheadScope.filteredItems).not.to.contain('skrillex');
+        scope.$digest();
+
+        expect(element.find('.typeahead-item.active').length).to.be(1);
+        expect(element.find('.typeahead-item').eq(expectedActiveIndex).hasClass('active')).to.be(true);
+      }
+    });
+
+    it('should select the previous option on arrow up', function () {
+      let expectedActiveIndex = scope.items.length;
+      for (let i = 0; i < scope.items.length + 1; i++) {
+        expectedActiveIndex--;
+        if (expectedActiveIndex < 0) expectedActiveIndex = scope.items.length - 1;
+
+        element.find('.typeahead').triggerHandler({
+          type: 'keydown',
+          keyCode: UP
+        });
+
+        scope.$digest();
+
+        expect(element.find('.typeahead-item.active').length).to.be(1);
+        expect(element.find('.typeahead-item').eq(expectedActiveIndex).hasClass('active')).to.be(true);
+      }
+    });
+
+    it('should fire the onSelect handler with the selected item on enter', function () {
+      const typeaheadEl = element.find('.typeahead');
+
+      typeaheadEl.triggerHandler({
+        type: 'keydown',
+        keyCode: DOWN
       });
 
-      it('should call the on-select method on mouse click of an item', function () {
-        // $scope.items is set via history.add, so mock the output
-        typeaheadCtrl.history.add.returns(typeaheadItems);
+      typeaheadEl.triggerHandler({
+        type: 'keydown',
+        keyCode: ENTER
+      });
 
-        // a single call will call history.add, which will respond with the mocked data
-        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
+      scope.$digest();
 
-        $parentScope.$digest();
+      sinon.assert.calledOnce(scope.onSelect);
+      sinon.assert.calledWith(scope.onSelect, scope.items[0]);
+    });
 
-        $elem.find('.typeahead-item').click();
-        sinon.assert.called(onSelectStub);
+    it('should fire the onSelect handler with the selected item on tab', function () {
+      const typeaheadEl = element.find('.typeahead');
+
+      typeaheadEl.triggerHandler({
+        type: 'keydown',
+        keyCode: DOWN
+      });
+
+      typeaheadEl.triggerHandler({
+        type: 'keydown',
+        keyCode: TAB
+      });
+
+      scope.$digest();
+
+      sinon.assert.calledOnce(scope.onSelect);
+      sinon.assert.calledWith(scope.onSelect, scope.items[0]);
+    });
+
+    it('should select the option on hover', function () {
+      const hoverIndex = 0;
+      element.find('.typeahead-item').eq(hoverIndex).triggerHandler('mouseenter');
+
+      scope.$digest();
+
+      expect(element.find('.typeahead-item.active').length).to.be(1);
+      expect(element.find('.typeahead-item').eq(hoverIndex).hasClass('active')).to.be(true);
+    });
+
+    it('should fire the onSelect handler with the selected item on click', function () {
+      const clickIndex = 1;
+      const clickEl = element.find('.typeahead-item').eq(clickIndex);
+      clickEl.triggerHandler('mouseenter');
+      clickEl.triggerHandler('click');
+
+      scope.$digest();
+
+      sinon.assert.calledOnce(scope.onSelect);
+      sinon.assert.calledWith(scope.onSelect, scope.items[clickIndex]);
+    });
+
+    it('should update the list when the items change', function () {
+      scope.items = ['qux'];
+      scope.$digest();
+      expect(expect(element.find('.typeahead-item').length).to.be(scope.items.length));
+    });
+
+    it('should default to showing the item itself in the list', function () {
+      scope.items.forEach((item, i) => {
+        expect(element.find('kbn-typeahead-item').eq(i).html()).to.be(item);
       });
     });
 
-    describe('list appearance', function () {
-      beforeEach(function () {
-        typeaheadCtrl.history.add.returns(typeaheadItems);
-        $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
-        typeaheadCtrl.persistEntry();
-
-        // make sure the data looks how we expect
-        expect($typeaheadScope.items.length).to.be(3);
-      });
-
-      it('should default to hidden', function () {
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-      });
-
-      it('should appear when not hidden, has matches input and focused', function () {
-        typeaheadCtrl.setHidden(false);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-
-        typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-
-        // only visible when all conditions match
-        typeaheadCtrl.setFocused(true);
-        expect(typeaheadCtrl.isVisible()).to.be(true);
-
-        typeaheadCtrl.setFocused(false);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-      });
-
-      it('should appear when not hidden, has matches input and moused over', function () {
-        typeaheadCtrl.setHidden(false);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-
-        typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-
-        // only visible when all conditions match
-        typeaheadCtrl.setMouseover(true);
-        expect(typeaheadCtrl.isVisible()).to.be(true);
-
-        typeaheadCtrl.setMouseover(false);
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-      });
-
-      it('should hide when no matches', function () {
-        typeaheadCtrl.setHidden(false);
-        typeaheadCtrl.setFocused(true);
-
-        typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
-        expect(typeaheadCtrl.isVisible()).to.be(true);
-
-        typeaheadCtrl.filterItemsByQuery('a8h4o8ah48thal4i7rlia4ujru4glia47gf');
-        expect(typeaheadCtrl.isVisible()).to.be(false);
-      });
+    it('should use a custom template if specified to show the item in the list', function () {
+      scope.items = [{
+        label: 'foo',
+        value: 1
+      }];
+      scope.itemTemplate = '<div class="label">{{item.label}}</div>';
+      scope.$digest();
+      expect(element.find('.label').html()).to.be(scope.items[0].label);
     });
   });
 });

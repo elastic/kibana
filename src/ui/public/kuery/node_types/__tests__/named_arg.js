@@ -39,15 +39,6 @@ describe('kuery node types', function () {
 
     });
 
-    describe('toKueryExpression', function () {
-
-      it('should return the argument name and value represented by the given node', function () {
-        const node = namedArg.buildNode('fieldName', 'foo');
-        expect(namedArg.toKueryExpression(node)).to.be('fieldName="foo"');
-      });
-
-    });
-
   });
 
 });

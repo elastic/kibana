@@ -1,22 +1,18 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Tooltip } from 'pivotal-ui/react/tooltip';
-import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
 
 import {
   EuiFormRow,
+  EuiToolTip,
 } from '@elastic/eui';
 
 export function FormRow(props) {
   let control = props.children;
   if (!props.control.isEnabled()) {
-    const tooltip = (
-      <Tooltip className="inputControlDisabledTooltip" >{props.control.disabledReason}</Tooltip>
-    );
     control = (
-      <OverlayTrigger placement="top" overlay={tooltip}>
+      <EuiToolTip placement="top" content={props.control.disabledReason}>
         {control}
-      </OverlayTrigger>
+      </EuiToolTip>
     );
   }
 
