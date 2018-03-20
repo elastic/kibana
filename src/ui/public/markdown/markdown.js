@@ -1,6 +1,6 @@
 import './github_markdown.less';
 import classNames from 'classnames';
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 
@@ -10,7 +10,7 @@ import MarkdownIt from 'markdown-it';
  * @param {Boolean} openLinksInNewTab
  * @return {MarkdownIt}
  */
-function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
+export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
   let markdownIt;
   if (whiteListedRules && whiteListedRules.length > 0) {
     markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
@@ -37,33 +37,63 @@ function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
   return markdownIt;
 }
 
-export const Markdown = ({
-  className,
-  markdown,
-  openLinksInNewTab,
-  whiteListedRules,
-  ...rest
-}) => {
+export class Markdown extends Component {
+  constructor(props) {
+    super(props);
 
-  const classes = classNames(
-    'markdown-body',
-    className
-  );
+    this.markdownIt = markdownFactory(this.props.whiteListedRules, this.props.openLinksInNewTab);
 
-  let transformedMarkdown = '';
-  if (markdown) {
-    const markdownIt = markdownFactory(whiteListedRules, openLinksInNewTab);
-    transformedMarkdown = markdownIt.render(markdown);
+    this.state = {
+      renderedMarkdown: this.transformMarkdown(this.props)
+    };
+
+
   }
 
-  return (
-    <div
-      className={classes}
-      {...rest}
-      dangerouslySetInnerHTML={{ __html: transformedMarkdown }}
-    />
-  );
-};
+  /**
+   * This method is used to actually render markdown from the passed parameter
+   * into HTML. It will just return an empty string when the markdown is empty.
+   * Since we want to use this with dangerouslySetInnerHTML, this method returns
+   * the required object format with an __html key in it.
+   */
+  transformMarkdown(params) {
+    if (!params.markdown) {
+      return { __html: '' };
+    }
+    return { __html: this.markdownIt.render(params.markdown) };
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.markdown !== this.props.markdown) {
+      this.setState({
+        renderedMarkdown: this.transformMarkdown(props)
+      });
+    }
+  }
+
+  render() {
+    const {
+      className,
+      markdown, //eslint-disable-line no-unused-vars
+      openLinksInNewTab, //eslint-disable-line no-unused-vars
+      whiteListedRules, //eslint-disable-line no-unused-vars
+      ...rest
+    } = this.props;
+
+    const classes = classNames(
+      'markdown-body',
+      className
+    );
+
+    return (
+      <div
+        className={classes}
+        {...rest}
+        dangerouslySetInnerHTML={this.state.renderedMarkdown}
+      />
+    );
+  }
+}
 
 Markdown.propTypes = {
   className: PropTypes.string,
