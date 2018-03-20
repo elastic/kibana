@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`StepTimeField should disable the action button if an invalid time field is selected 1`] = `
+<ActionButtons
+  createIndexPattern={[Function]}
+  goToPreviousStep={[Function]}
+  submittable={false}
+/>
+`;
+
+exports[`StepTimeField should enable the action button if the user decides to not select a time field 1`] = `
+<ActionButtons
+  createIndexPattern={[Function]}
+  goToPreviousStep={[Function]}
+  submittable={true}
+/>
+`;
+
 exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
 <EuiPanel
   grow={true}
@@ -84,7 +100,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   <ActionButtons
     createIndexPattern={[Function]}
     goToPreviousStep={[Function]}
-    submittable="@timestamp"
+    submittable={true}
   />
 </EuiPanel>
 `;
@@ -278,6 +294,7 @@ exports[`StepTimeField should render timeFields 1`] = `
   <ActionButtons
     createIndexPattern={[Function]}
     goToPreviousStep={[Function]}
+    submittable={false}
   />
 </EuiPanel>
 `;
