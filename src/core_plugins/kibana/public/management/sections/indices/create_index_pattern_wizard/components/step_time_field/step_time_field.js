@@ -55,18 +55,16 @@ export class StepTimeField extends Component {
   onTimeFieldChanged = (e) => {
     const value = e.target.value;
 
-    // Ensure it exists in the options, if not, make this undefined
-    // This supports the `I do not want to use a time filter` option
-    const foundByFieldName = this.state.timeFields.find(timeField => timeField.fieldName === value);
+    // Find the time field based on the selected value
+    const timeField = this.state.timeFields.find(timeField => timeField.fieldName === value);
 
     // If the value is an empty string, it's not a valid selection
-    const invalidSelection = value === '';
+    const validSelection = value !== '';
 
-    if (!foundByFieldName) {
-      this.setState({ selectedTimeField: undefined, timeFieldSet: !invalidSelection });
-    } else {
-      this.setState({ selectedTimeField: value, timeFieldSet: !invalidSelection });
-    }
+    this.setState({
+      selectedTimeField: timeField ? timeField.fieldName : undefined,
+      timeFieldSet: validSelection,
+    });
   }
 
   onChangeIndexPatternId = (e) => {
