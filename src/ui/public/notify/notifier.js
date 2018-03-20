@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import angular from 'angular';
+import MarkdownIt from 'markdown-it';
 import { metadata } from 'ui/metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
@@ -337,7 +338,7 @@ Notifier.prototype.warning = function (msg, opts, cb) {
  */
 let bannerId;
 let bannerTimeoutId;
-Notifier.prototype.banner = function (content) {
+Notifier.prototype.banner = function (content = '') {
   const BANNER_PRIORITY = 100;
 
   const dismissBanner = () => {
@@ -345,14 +346,17 @@ Notifier.prototype.banner = function (content) {
     clearTimeout(bannerTimeoutId);
   };
 
+  const markdownIt = new MarkdownIt({
+    html: false,
+    linkify: true
+  });
+
   const banner = (
     <EuiCallOut
       title="Attention"
       iconType="help"
     >
-      <p>
-        {content}
-      </p>
+      <div dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} />
 
       <EuiButton type="primary" size="s" onClick={dismissBanner}>
         Dismiss
