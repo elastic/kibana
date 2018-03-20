@@ -19,8 +19,15 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return true;
       }
 
-      const timeFieldName = searchSource.index().timeFieldName;
+      const index = searchSource.index() || searchSource.getParent().index();
+      const timeFieldName = index.timeFieldName;
       if (!timeFieldName) {
+        return true;
+      }
+
+      // Only check if we need to filter out this filter if it's actual a range filter
+      // on our time field and not any other field.
+      if (!filter.range[timeFieldName]) {
         return true;
       }
 
