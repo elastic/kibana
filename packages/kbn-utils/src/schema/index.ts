@@ -10,6 +10,5 @@ export { maybe } from './maybe_type';
 export { oneOf } from './one_of_type';
 
 export { byteSize } from './byte_size_type';
-export { duration } from './duration_type';
 
 export { Any, TypeOf, TypeOptions, Type } from './type';
