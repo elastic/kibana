@@ -6,7 +6,7 @@ import { Datatable } from '../components/datatable';
 export const table = () => ({
   name: 'table',
   displayName: 'Data Table',
-  help: 'Render tabluar data as HTML',
+  help: 'Render tabular data as HTML',
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font } = config;

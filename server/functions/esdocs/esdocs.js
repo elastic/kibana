@@ -16,6 +16,7 @@ export const esdocs = () => ({
     index: {
       types: ['string', 'null'],
       default: '_all',
+      help: 'Specify an index pattern. Eg "logstash-*"',
     },
     q: {
       types: ['string'],

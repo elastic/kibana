@@ -6,12 +6,12 @@ export const asFn = () => ({
   context: {
     types: ['string', 'boolean', 'number', 'null'],
   },
-  help: 'Perform conditional logic',
+  help: 'Creates a datatable with a single value',
   args: {
     _: {
       types: ['string'],
       aliases: ['name'],
-      help: 'A the name to give the column',
+      help: 'A name to give the column',
     },
   },
   fn: (context, args) => {
