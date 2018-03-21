@@ -14,7 +14,7 @@ export function Footer({ url, label }) {
     <div>
       <EuiHorizontalRule />
 
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
 
         <EuiFlexItem grow={false}>
           <EuiText>

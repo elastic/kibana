@@ -1,14 +1,14 @@
-import { createEsTestCluster } from '../../../../../test_utils/es';
+import { createTestCluster } from '../../../../../test_utils/es';
 import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
 let services;
-const es = createEsTestCluster({
-  name: 'ui_settings/routes'
-});
+let es;
 
 export async function startServers() {
+  es = createTestCluster();
   this.timeout(es.getStartTimeout());
+
   await es.start();
 
   kbnServer = kbnTestServer.createServerWithCorePlugins();
@@ -49,5 +49,8 @@ export async function stopServers() {
     kbnServer = null;
   }
 
-  await es.stop();
+  if (es) {
+    await es.cleanup();
+    es = null;
+  }
 }

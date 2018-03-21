@@ -94,6 +94,11 @@ export const schema = Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
 
+  firefoxdriver: Joi.object().keys({
+    url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:2828')
+  }).default(),
+
+
   // definition of apps that work with `common.navigateToApp()`
   apps: Joi.object().pattern(
     ID_PATTERN,
@@ -108,5 +113,10 @@ export const schema = Joi.object().keys({
   // settings for the screenshots module
   screenshots: Joi.object().keys({
     directory: Joi.string().default(defaultRelativeToConfigPath('screenshots'))
+  }).default(),
+
+  // settings for the failureDebugging module
+  failureDebugging: Joi.object().keys({
+    htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
   }).default(),
 }).default();

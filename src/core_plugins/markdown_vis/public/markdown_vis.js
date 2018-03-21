@@ -28,7 +28,8 @@ function MarkdownVisProvider(Private) {
     visConfig: {
       component: MarkdownVisWrapper,
       defaults: {
-        fontSize: 12
+        fontSize: 12,
+        openLinksInNewTab: false
       }
     },
     editorConfig: {

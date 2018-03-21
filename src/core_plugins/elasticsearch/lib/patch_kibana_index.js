@@ -63,9 +63,8 @@ export async function patchKibanaIndex(options) {
  *  @return {EsMappingsDsl|undefined}
  */
 async function getCurrentMappings(callCluster, indexName, rootEsType) {
-  const response = await callCluster('indices.get', {
+  const response = await callCluster('indices.getMapping', {
     index: indexName,
-    feature: '_mappings',
     ignore: [404],
   });
 

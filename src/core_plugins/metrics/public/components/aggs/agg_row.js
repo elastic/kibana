@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import Tooltip from '../tooltip';
+import { EuiToolTip } from '@elastic/eui';
 
 function AggRow(props) {
   let iconClassName = 'fa fa-eye-slash';
@@ -17,11 +17,11 @@ function AggRow(props) {
   if (!props.disableDelete) {
     dragHandle = (
       <div>
-        <Tooltip text="Sort">
+        <EuiToolTip content="Sort">
           <div className="vis_editor__agg_sort thor__button-outlined-default sm">
             <i className="fa fa-sort" />
           </div>
-        </Tooltip>
+        </EuiToolTip>
       </div>
     );
   }
