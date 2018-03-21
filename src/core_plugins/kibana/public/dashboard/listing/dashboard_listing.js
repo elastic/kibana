@@ -42,6 +42,11 @@ const tableColumns = [
 
 export const EMPTY_FILTER = '';
 
+// saved objects do not support sorting by title because title is only mapped as analyzed
+// the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
+// and not supporting server-side paging.
+// This component does not try to tackle these problems (yet) and is just feature matching the legacy component
+// TODO support server side sorting/paging once title and description are sortable on the server.
 export class DashboardListing extends React.Component {
 
   constructor(props) {
@@ -54,6 +59,8 @@ export class DashboardListing extends React.Component {
       filter: this.props.initialFilter,
       dashboards: [],
       selectedIds: [],
+      page: 0,
+      perPage: 20,
     };
   }
 
@@ -119,6 +126,25 @@ export class DashboardListing extends React.Component {
     return this.state.filter !== EMPTY_FILTER;
   }
 
+  onTableChange = ({ page }) => {
+    this.setState({
+      page: page.index,
+      perPage: page.size,
+    });
+  }
+
+  getPageOfItems = () => {
+    const startIndex = this.state.page * this.state.perPage;
+    const lastIndex = startIndex + this.state.perPage;
+    if (this.state.dashboards.length < startIndex) {
+      // server-side paging not supported - see component comment for details
+      throw new Error(`Requested page that does not exist. page index: ${this.state.page},
+        per page: ${this.state.perPage}, total: ${this.state.dashboards.length}`);
+    }
+    // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
+    return this.state.dashboards.slice(startIndex, lastIndex);
+  }
+
   renderConfirmDeleteModal() {
     return (
       <EuiOverlayMask>
@@ -155,10 +181,6 @@ export class DashboardListing extends React.Component {
         </React.Fragment>
       );
     }
-  }
-
-  shouldFetch(newFilter, oldFilter) {
-    return !newFilter.includes(oldFilter);
   }
 
   renderNoItemsMessage() {
@@ -233,6 +255,12 @@ export class DashboardListing extends React.Component {
   }
 
   renderTable() {
+    const pagination = {
+      pageIndex: this.state.page,
+      pageSize: this.state.perPage,
+      totalItemCount: this.state.dashboards.length,
+      pageSizeOptions: [10, 20, 50],
+    };
     const selection = {
       itemId: 'id',
       onSelectionChange: (selection) => {
@@ -241,13 +269,16 @@ export class DashboardListing extends React.Component {
         });
       }
     };
+    const items = this.state.dashboards.length === 0 ? [] : this.getPageOfItems();
     return (
       <EuiBasicTable
-        items={this.state.dashboards}
+        items={items}
         loading={this.state.isFetchingItems}
         columns={tableColumns}
         selection={selection}
         noItemsMessage={this.renderNoItemsMessage()}
+        pagination={pagination}
+        onChange={this.onTableChange}
       />
     );
   }
