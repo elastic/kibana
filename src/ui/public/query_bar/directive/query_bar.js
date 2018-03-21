@@ -31,8 +31,6 @@ module.directive('queryBar', function () {
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
 
-      let persistedLog;
-
       this.getIndexPatterns = () => {
         if (compact(this.indexPatterns).length) return Promise.resolve(this.indexPatterns);
         return Promise.all([indexPatterns.getDefault()]);
@@ -40,7 +38,7 @@ module.directive('queryBar', function () {
 
       this.submit = () => {
         if (this.localQuery.query) {
-          persistedLog.add(this.localQuery.query);
+          this.persistedLog.add(this.localQuery.query);
         }
         this.onSubmit({ $query: this.localQuery });
         this.suggestions = [];
@@ -63,7 +61,7 @@ module.directive('queryBar', function () {
         const query = get(this, 'localQuery.query');
         if (typeof query === 'undefined') return;
 
-        this.suggestions = getRecentSearchSuggestions(query);
+        this.suggestions = this.getRecentSearchSuggestions(query);
         if (this.localQuery.language !== 'kuery' || !this.getKuerySuggestions) return;
 
         const { selectionStart, selectionEnd } = $element.find('input')[0];
@@ -90,9 +88,20 @@ module.directive('queryBar', function () {
         }
       };
 
+      this.getRecentSearchSuggestions = (query) => {
+        const recentSearches = this.persistedLog.get();
+        const matchingRecentSearches = recentSearches.filter(search => search.includes(query));
+        return matchingRecentSearches.map(recentSearch => {
+          const text = recentSearch;
+          const start = 0;
+          const end = query.length;
+          return { type: 'recentSearch', text, start, end };
+        });
+      };
+
       $scope.$watch('queryBar.localQuery.language', (language) => {
         if (!language) return;
-        persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
+        this.persistedLog = new PersistedLog(`typeahead:${this.appName}-${language}`, {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
@@ -111,17 +120,6 @@ module.directive('queryBar', function () {
           this.updateSuggestions();
         });
       });
-
-      function getRecentSearchSuggestions(query) {
-        const recentSearches = persistedLog.get();
-        const matchingRecentSearches = recentSearches.filter(search => search.includes(query));
-        return matchingRecentSearches.map(recentSearch => {
-          const text = recentSearch;
-          const start = 0;
-          const end = query.length;
-          return { type: 'recentSearch', text, start, end };
-        });
-      }
     })
   };
 });

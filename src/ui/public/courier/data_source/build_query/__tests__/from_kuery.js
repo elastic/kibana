@@ -8,6 +8,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
 let indexPattern;
 
 describe('build query', function () {
+  const configStub = { get: () => true };
 
   describe('buildQueryFromKuery', function () {
 
@@ -39,7 +40,7 @@ describe('build query', function () {
         }
       );
 
-      const result = buildQueryFromKuery(indexPattern, queries);
+      const result = buildQueryFromKuery(indexPattern, queries, configStub);
 
       expectDeepEqual(result.filter, expectedESQueries);
     });
