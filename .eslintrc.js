@@ -43,18 +43,6 @@ module.exports = {
       },
     },
 
-    {
-      files: ['src/server/**/__tests__/**/*.js'],
-      plugins: ['jest'],
-      env: {
-        'jest/globals': true,
-      },
-      rules: {
-        'jest/no-focused-tests': 'error',
-        'jest/no-identical-title': 'error',
-      },
-    },
-
     // files that are not allowed to use devDepenedncies
     {
       files: ['packages/kbn-ui-framework/**/*'],

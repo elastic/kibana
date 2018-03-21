@@ -48,10 +48,8 @@ export default {
     '**/*.test.ts',
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/src/core_plugins/(.*)/public',
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/(dist|vendor)/',
-    '<rootDir>/packages/(.*)/target/',
     'integration_tests/'
   ],
   transform: {
