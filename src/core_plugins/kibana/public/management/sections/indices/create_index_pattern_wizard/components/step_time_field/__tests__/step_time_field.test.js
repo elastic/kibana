@@ -68,9 +68,84 @@ describe('StepTimeField', () => {
         { display: 'name', fieldName: 'name' },
       ],
       selectedTimeField: '@timestamp',
+      timeFieldSet: true,
     });
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should ensure disabled time field options work properly', () => {
+    const component = shallow(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={noop}
+      />
+    );
+
+    component.setState({
+      timeFields: [
+        { display: '@timestamp', fieldName: '@timestamp' },
+        { display: 'name', fieldName: 'name' },
+      ],
+    });
+
+    // If the value is undefined, that means the user selected the
+    // `I don't want to use a Time filter` option
+    component.instance().onTimeFieldChanged({ target: { value: undefined } });
+    expect(component.state('timeFieldSet')).toBe(true);
+
+    // If the value is an empty string, that means the user selected
+    // an invalid selection (like the empty selection or the `-----`)
+    component.instance().onTimeFieldChanged({ target: { value: '' } });
+    expect(component.state('timeFieldSet')).toBe(false);
+  });
+
+  it('should disable the action button if an invalid time field is selected', () => {
+    const component = shallow(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={noop}
+      />
+    );
+
+    component.setState({
+      timeFields: [
+        { display: '@timestamp', fieldName: '@timestamp' },
+        { display: 'name', fieldName: 'name' },
+      ],
+    });
+
+    component.instance().onTimeFieldChanged({ target: { value: '' } });
+    component.update();
+
+    expect(component.find('ActionButtons')).toMatchSnapshot();
+  });
+
+  it('should enable the action button if the user decides to not select a time field', () => {
+    const component = shallow(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={noop}
+      />
+    );
+
+    component.setState({
+      timeFields: [
+        { display: '@timestamp', fieldName: '@timestamp' },
+        { display: 'name', fieldName: 'name' },
+      ],
+    });
+
+    component.instance().onTimeFieldChanged({ target: { value: undefined } });
+    component.update();
+
+    expect(component.find('ActionButtons')).toMatchSnapshot();
   });
 
   it('should render advanced options', () => {
