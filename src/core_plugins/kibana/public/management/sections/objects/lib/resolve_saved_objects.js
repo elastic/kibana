@@ -1,17 +1,34 @@
 import { SavedObjectNotFound } from 'ui/errors';
 
-async function getSavedObject(doc, services) {
+async function getSavedObject(doc, services, indexPatterns) {
+  if (isIndexPattern(doc)) {
+    let indexPattern;
+
+    try {
+      indexPattern = await indexPatterns.get(doc._id);
+    }
+    catch (err) {
+      // Maybe it's store as the title?
+      try {
+        indexPattern = await indexPatterns.get(doc._source.title);
+      }
+      catch (err2) {
+        // Do nothing...
+      }
+    }
+
+    return indexPattern;
+  }
+
   const service = services.find(service => service.type === doc._type);
 
   if (!service) {
-    // console.warn('Unable to find service for doc', doc);
     // const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
     // const reason = `Invalid type: "${doc._type}"`;
 
     // console.warn(`${msg}, ${reason}`, {
     // lifetime: 0,
     // });
-
     return;
   }
 
@@ -20,7 +37,30 @@ async function getSavedObject(doc, services) {
   return obj;
 }
 
-async function importDocument(obj, doc, overwriteAll) {
+function isIndexPattern(doc) {
+  return doc._type === 'index-pattern';
+}
+
+async function importDocument(obj, doc, overwriteAll, indexPatterns) {
+  if (isIndexPattern(doc)) {
+    if (obj) {
+      // This is an index pattern and it already exists so do nothing
+      return;
+    }
+
+    // TODO: consolidate this is the code in create_index_pattern_wizard.js
+    const emptyPattern = await indexPatterns.get();
+    Object.assign(emptyPattern, {
+      id: doc._id,
+      title: doc._source.title,
+      timeFieldName: doc._source.timeFieldName,
+    });
+    const newId = await emptyPattern.create();
+    indexPatterns.cache.clear(newId);
+    return newId;
+  }
+
+  doc.found = true;
   await obj.applyESResp(doc);
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
@@ -28,6 +68,7 @@ async function importDocument(obj, doc, overwriteAll) {
 function groupByType(docs) {
   const defaultDocTypes = {
     searches: [],
+    indexPatterns: [],
     other: [],
   };
 
@@ -35,6 +76,9 @@ function groupByType(docs) {
     switch (doc._type) {
       case 'search':
         types.searches.push(doc);
+        break;
+      case 'index-pattern':
+        types.indexPatterns.push(doc);
         break;
       default:
         types.other.push(doc);
@@ -83,7 +127,8 @@ export async function saveObject(obj, overwriteAll) {
 export async function resolveSavedSearches(
   savedSearches,
   services,
-  overwriteAll
+  indexPatterns,
+  overwriteAll,
 ) {
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
@@ -91,26 +136,33 @@ export async function resolveSavedSearches(
       // Just ignore?
       return;
     }
-    await importDocument(obj, searchDoc, overwriteAll);
+    await importDocument(obj, searchDoc, overwriteAll, indexPatterns);
   });
 }
 
 export async function resolveSavedObjects(
   savedObjects,
   overwriteAll,
-  services
+  services,
+  indexPatterns
 ) {
   const docTypes = groupByType(savedObjects);
+
+  // Start with the index patterns since everything is dependent on them
+  await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
+    const obj = await getSavedObject(indexPatternDoc, services, indexPatterns);
+    await importDocument(obj, indexPatternDoc, overwriteAll, indexPatterns);
+  });
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be depedent on those saved searches existing
   const conflictedSearchDocs = [];
 
   await awaitEachItemInParallel(docTypes.searches, async searchDoc => {
-    const obj = await getSavedObject(searchDoc, services);
+    const obj = await getSavedObject(searchDoc, services, indexPatterns);
 
     try {
-      await importDocument(obj, searchDoc, overwriteAll);
+      await importDocument(obj, searchDoc, overwriteAll, indexPatterns);
     } catch (err) {
       if (err instanceof SavedObjectNotFound) {
         conflictedSearchDocs.push(searchDoc);
@@ -129,10 +181,10 @@ export async function resolveSavedObjects(
   const conflictedSavedObjectsLinkedToSavedSearches = [];
 
   await awaitEachItemInParallel(docTypes.other, async otherDoc => {
-    const obj = await getSavedObject(otherDoc, services);
+    const obj = await getSavedObject(otherDoc, services, indexPatterns);
 
     try {
-      await importDocument(obj, otherDoc, overwriteAll);
+      await importDocument(obj, otherDoc, overwriteAll, indexPatterns);
     } catch (err) {
       if (err instanceof SavedObjectNotFound) {
         if (err.savedObjectType === 'index-pattern') {

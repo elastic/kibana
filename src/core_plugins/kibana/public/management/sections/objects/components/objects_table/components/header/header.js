@@ -12,7 +12,8 @@ import {
 
 export const Header = ({
   onExportAll,
-  onImport
+  onImport,
+  onRefresh,
 }) => (
   <div>
     <EuiSpacer size="m"/>
@@ -40,6 +41,15 @@ export const Header = ({
               onClick={onImport}
             >
               Import
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="refresh"
+              onClick={onRefresh}
+            >
+              Refresh
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

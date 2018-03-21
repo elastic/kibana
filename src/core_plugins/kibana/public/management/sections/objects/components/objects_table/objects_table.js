@@ -9,23 +9,7 @@ import { retrieveAndExportDocs } from '../../lib/retrieve_and_export_docs';
 import { scanAllTypes } from '../../lib/scan_all_types';
 import { saveToFile } from '../../lib/save_to_file';
 import { Flyout } from './components/flyout';
-
-async function smoothServerInteraction(block, minimumTimeMs = 300) {
-  return await ensureMinimumTime(block, minimumTimeMs);
-}
-
-// TODO: maybe use this in the other tables too
-async function ensureMinimumTime(block, minimumTimeMs = 300) {
-  const start = +new Date();
-  await block();
-  const end = +new Date();
-  const duration = end - start;
-
-  if (duration < minimumTimeMs) {
-    const timeToAdd = minimumTimeMs - (end - start);
-    await new Promise(resolve => setTimeout(resolve, timeToAdd));
-  }
-}
+import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
 
 function getQueryText(query) {
   return query && query.ast.getTermClauses().length
@@ -57,8 +41,9 @@ export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 's
 export class ObjectsTable extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
+    indexPatterns: PropTypes.object.isRequired,
     $http: PropTypes.func.isRequired,
-    notify: PropTypes.object.isRequired,
+    newIndexPatternUrl: PropTypes.string.isRequired,
     kbnIndex: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
   };
@@ -111,11 +96,12 @@ export class ObjectsTable extends Component {
     ];
 
     // TODO: is there a good way to stop existing calls if the input changes?
-    await smoothServerInteraction(async () => {
+    await ensureMinimumTime((async () => {
       const data = await savedObjectsClient.find({
         search: queryText ? `${queryText}*` : undefined,
         perPage,
         page: page + 1,
+        sortField: 'type',
         fields: ['title', 'id'],
         excludeTypes,
       });
@@ -128,7 +114,7 @@ export class ObjectsTable extends Component {
       }));
 
       totalItemCount = data.total;
-    });
+    })());
 
     this.setState({ savedObjects, totalItemCount, isSearching: false });
   };
@@ -166,6 +152,7 @@ export class ObjectsTable extends Component {
 
   finishImport = () => {
     this.hideImportFlyout();
+    this.fetchSavedObjects();
   }
 
   showImportFlyout = () => {
@@ -200,7 +187,8 @@ export class ObjectsTable extends Component {
         close={this.hideImportFlyout}
         done={this.finishImport}
         services={this.props.services}
-        savedObjectsClient={this.props.savedObjectsClient}
+        indexPatterns={this.props.indexPatterns}
+        newIndexPatternUrl={this.props.newIndexPatternUrl}
       />
     );
   }
@@ -232,6 +220,7 @@ export class ObjectsTable extends Component {
         <Header
           onExportAll={this.onExportAll}
           onImport={this.showImportFlyout}
+          onRefresh={this.fetchSavedObjects}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
@@ -250,7 +239,6 @@ export class ObjectsTable extends Component {
           totalItemCount={totalItemCount}
           isSearching={isSearching}
         />
-        <EuiSpacer size="xxl" />
       </Fragment>
     );
   }

@@ -34,7 +34,7 @@ export function IndexPatternsGetProvider(Private) {
     });
   };
 
-  return (field) => {
+  function retFunction(field) {
     const getter = get.bind(get, field);
     if (field === 'id') {
       getter.clearCache = function () {
@@ -42,5 +42,11 @@ export function IndexPatternsGetProvider(Private) {
       };
     }
     return getter;
+  }
+
+  retFunction.multiple = async fields => {
+    return (await savedObjectsClient.find({ type: 'index-pattern', fields, perPage: 10000 })).savedObjects;
   };
+
+  return retFunction;
 }
