@@ -79,25 +79,29 @@ export class DashboardListing extends React.Component {
     this.fetchItems();
   }
 
-  debouncedFetch = _.debounce(async () => {
-    const response = await this.props.find(this.state.filter);
+  debouncedFetch = _.debounce(async (filter) => {
+    const response = await this.props.find(filter);
 
     if (!this._isMounted) {
       return;
     }
 
-    this.setState({
-      isFetchingItems: false,
-      dashboards: response.hits,
-      totalDashboards: response.total,
-      showLimitError: response.total > this.props.listingLimit,
-    });
+    // We need this check to handle the case where search results come back in a different
+    // order than they were sent out. Only load results for the most recent search.
+    if (filter === this.state.filter) {
+      this.setState({
+        isFetchingItems: false,
+        dashboards: response.hits,
+        totalDashboards: response.total,
+        showLimitError: response.total > this.props.listingLimit,
+      });
+    }
   }, 300);
 
   fetchItems = () => {
     this.setState({
       isFetchingItems: true,
-    }, this.debouncedFetch);
+    }, this.debouncedFetch.bind(null, this.state.filter));
   }
 
   deleteSelectedItems = async () => {
