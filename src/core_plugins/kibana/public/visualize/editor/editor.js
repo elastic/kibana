@@ -217,6 +217,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       }
     });
 
+    const updateTimeRange = () => {
+      $scope.timeRange = timefilter.time;
+    };
+
+    timefilter.on('update', updateTimeRange);
+
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
       $state.save();
@@ -231,6 +237,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
+      timefilter.off('update', updateTimeRange);
     });
   }
 
