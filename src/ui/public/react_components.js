@@ -2,11 +2,12 @@ import 'ngreact';
 
 import {
   KuiToolBarSearchBox,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   EuiConfirmModal,
   EuiIcon,
+  EuiColorPicker,
 } from '@elastic/eui';
 
 import { uiModules } from 'ui/modules';
@@ -18,3 +19,5 @@ app.directive('toolBarSearchBox', reactDirective => reactDirective(KuiToolBarSea
 app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 
 app.directive('icon', reactDirective => reactDirective(EuiIcon));
+
+app.directive('colorPicker', reactDirective => reactDirective(EuiColorPicker));

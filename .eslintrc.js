@@ -19,6 +19,7 @@ module.exports = {
       files: [
         '.eslintrc.js',
         'packages/kbn-pm/**/*',
+        'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-plugin-generator/**/*',
       ],
@@ -51,6 +52,45 @@ module.exports = {
       rules: {
         'jest/no-focused-tests': 'error',
         'jest/no-identical-title': 'error',
+      },
+    },
+
+    // files that are not allowed to use devDepenedncies
+    {
+      files: ['packages/kbn-ui-framework/**/*'],
+      excludedFiles: [
+        'packages/kbn-ui-framework/**/*.test.js',
+        'packages/kbn-ui-framework/doc_site/**/*',
+        'packages/kbn-ui-framework/generator-kui/**/*',
+        'packages/kbn-ui-framework/Gruntfile.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: false,
+            peerDependencies: true,
+          },
+        ],
+      },
+    },
+
+    // files that are allowed to use devDepenedncies
+    {
+      files: [
+        'packages/kbn-ui-framework/**/*.test.js',
+        'packages/kbn-ui-framework/doc_site/**/*',
+        'packages/kbn-ui-framework/generator-kui/**/*',
+        'packages/kbn-ui-framework/Gruntfile.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: true,
+            peerDependencies: true,
+          },
+        ],
       },
     },
   ],

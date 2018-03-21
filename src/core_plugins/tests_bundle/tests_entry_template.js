@@ -1,4 +1,4 @@
-import { esTestConfig } from '../../test_utils/es';
+import pkg from '../../../package.json';
 
 export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
 /**
@@ -16,7 +16,7 @@ window.__KBN__ = {
   vars: {
     kbnIndex: '.kibana',
     esShardTimeout: 1500,
-    esApiVersion: ${JSON.stringify(esTestConfig.getBranch())},
+    esApiVersion: ${JSON.stringify(pkg.branch)},
     esRequestTimeout: '300000',
     tilemapsConfig: {
       deprecated: {

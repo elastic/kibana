@@ -1,0 +1,37 @@
+{
+  "{index}/{type}": {
+    "url_params": {
+      "wait_for_active_shards": "",
+      "op_type": [
+        "index",
+        "create"
+      ],
+      "parent": "",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "routing": "",
+      "timeout": "",
+      "timestamp": "",
+      "ttl": "",
+      "version": "",
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte",
+        "force"
+      ],
+      "pipeline": ""
+    },
+    "methods": [
+      "POST",
+      "PUT"
+    ],
+    "patterns": [
+      "{indices}/{type}",
+      "{indices}/{type}/{id}"
+    ]
+  }
+}

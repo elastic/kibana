@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import shortUrlLookupProvider from '../short_url_lookup';
+import { shortUrlLookupProvider } from '../short_url_lookup';
 import { SavedObjectsClient } from '../../saved_objects/client';
 
 describe('shortUrlLookupProvider', () => {

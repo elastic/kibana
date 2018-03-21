@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { extractTimeFields } from '../../lib/extract_time_fields';
+import { ensureMinimumTime, extractTimeFields } from '../../lib';
 
 import { Header } from './components/header';
 import { TimeField } from './components/time_field';
@@ -16,7 +16,6 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-
 export class StepTimeField extends Component {
   static propTypes = {
     indexPattern: PropTypes.string.isRequired,
@@ -31,6 +30,7 @@ export class StepTimeField extends Component {
     this.state = {
       timeFields: [],
       selectedTimeField: undefined,
+      timeFieldSet: false,
       isAdvancedOptionsVisible: false,
       isFetchingTimeFields: false,
       isCreating: false,
@@ -46,14 +46,25 @@ export class StepTimeField extends Component {
     const { indexPatternsService, indexPattern } = this.props;
 
     this.setState({ isFetchingTimeFields: true });
-    const fields = await indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern);
+    const fields = await ensureMinimumTime(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });
   }
 
   onTimeFieldChanged = (e) => {
-    this.setState({ selectedTimeField: e.target.value });
+    const value = e.target.value;
+
+    // Find the time field based on the selected value
+    const timeField = this.state.timeFields.find(timeField => timeField.fieldName === value);
+
+    // If the value is an empty string, it's not a valid selection
+    const validSelection = value !== '';
+
+    this.setState({
+      selectedTimeField: timeField ? timeField.fieldName : undefined,
+      timeFieldSet: validSelection,
+    });
   }
 
   onChangeIndexPatternId = (e) => {
@@ -76,6 +87,7 @@ export class StepTimeField extends Component {
     const {
       timeFields,
       selectedTimeField,
+      timeFieldSet,
       isAdvancedOptionsVisible,
       indexPatternId,
       isCreating,
@@ -107,14 +119,14 @@ export class StepTimeField extends Component {
         { text: '', value: '' },
         ...timeFields.map(timeField => ({
           text: timeField.display,
-          value: timeField.fieldName || '',
-          isDisabled: timeFields.isDisabled,
+          value: timeField.fieldName,
+          disabled: timeFields.isDisabled,
         }))
       ]
       : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;
-    const submittable = !showTimeField || selectedTimeField;
+    const submittable = !showTimeField || timeFieldSet;
 
     return (
       <EuiPanel paddingSize="l">

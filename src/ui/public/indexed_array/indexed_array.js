@@ -35,9 +35,12 @@ export class IndexedArray {
       this._setupIndex(config.index, inflectIndex, _.indexBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
-          const a = String(pluckValue(itemA));
-          const b = String(pluckValue(itemB));
-          return a.toLowerCase().localeCompare(b.toLowerCase());
+          const a = pluckValue(itemA);
+          const b = pluckValue(itemB);
+          if (typeof a === 'number' && typeof b === 'number') {
+            return a - b;
+          }
+          return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
         });
       })
     );

@@ -261,16 +261,6 @@ describe('Notifier', function () {
       expect(customNotification.lifetime).to.be(5000);
     });
 
-    it('dynamic lifetime for "banner" config', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      customNotification.clear();
-
-      const errorTypeParams = _.defaults({ type: 'banner' }, customParams);
-      customNotification = notifier.custom(customText, errorTypeParams);
-      expect(customNotification.type).to.be('banner');
-      expect(customNotification.lifetime).to.be(3000000);
-    });
-
     it('dynamic lifetime for "warning" config', function () {
       // destroy the default custom notification, avoid duplicate handling
       customNotification.clear();
@@ -309,57 +299,6 @@ describe('Notifier', function () {
       customParams.actions.forEach(action => {
         expect(action.callback.called).to.true;
       });
-    });
-  });
-
-  describe('#banner', function () {
-    testVersionInfo('banner');
-
-    it('has no content', function () {
-      expect(notify('banner').content).not.to.be.defined;
-    });
-
-    it('prepends location to message for markdown', function () {
-      expect(notify('banner').content).to.equal(`${params.location}: ${message}`);
-    });
-
-    it('sets type to "banner"', function () {
-      expect(notify('banner').type).to.equal('banner');
-    });
-
-    it('sets icon to undefined', function () {
-      expect(notify('banner').icon).to.equal(undefined);
-    });
-
-    it('sets title to "Attention"', function () {
-      expect(notify('banner').title).to.equal('Attention');
-    });
-
-    it('sets lifetime to 3000000 by default', function () {
-      expect(notify('banner').lifetime).to.equal(3000000);
-    });
-
-    it('does not allow reporting', function () {
-      const includesReport = _.includes(notify('banner').actions, 'report');
-      expect(includesReport).to.false;
-    });
-
-    it('allows accepting', function () {
-      const includesAccept = _.includes(notify('banner').actions, 'accept');
-      expect(includesAccept).to.true;
-    });
-
-    it('does not include stack', function () {
-      expect(notify('banner').stack).not.to.be.defined;
-    });
-
-    it('has css class helper functions', function () {
-      expect(notify('banner').getIconClass()).to.equal('');
-      expect(notify('banner').getButtonClass()).to.equal('kuiButton--basic');
-      expect(notify('banner').getAlertClassStack()).to.equal('toast-stack alert alert-banner');
-      expect(notify('banner').getAlertClass()).to.equal('alert alert-banner');
-      expect(notify('banner').getButtonGroupClass()).to.equal('toast-controls-banner');
-      expect(notify('banner').getToastMessageClass()).to.equal('toast-message-banner');
     });
   });
 

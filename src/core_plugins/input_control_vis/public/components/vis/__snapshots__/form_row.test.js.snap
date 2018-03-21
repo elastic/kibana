@@ -8,26 +8,15 @@ exports[`renders disabled control with tooltip 1`] = `
   id="controlId"
   label="test control"
 >
-  <OverlayTrigger
-    display={false}
-    isSticky={false}
-    overlay={
-      <Tooltip
-        className="inputControlDisabledTooltip"
-        isSticky={false}
-        size="auto"
-        visible={true}
-      />
-    }
-    pin={true}
+  <EuiToolTip
+    content="I am disabled for testing purposes"
     placement="top"
-    theme="dark"
-    trigger="hover"
+    position="top"
   >
     <div>
       My Control
     </div>
-  </OverlayTrigger>
+  </EuiToolTip>
 </EuiFormRow>
 `;
 
