@@ -1,6 +1,7 @@
 import template from './typeahead.html';
 import { uiModules } from 'ui/modules';
 import { comboBoxKeyCodes } from '@elastic/eui';
+import '../directives/scroll_bottom';
 import './typeahead.less';
 import './typeahead_input';
 import './typeahead_item';
@@ -61,6 +62,14 @@ typeahead.directive('kbnTypeahead', function () {
         return !this.isHidden && this.items && this.items.length > 0 && isFocusedOrMousedOver;
       };
 
+      this.resetLimit = () => {
+        this.limit = 50;
+      };
+
+      this.increaseLimit = () => {
+        this.limit += 50;
+      };
+
       this.onKeyDown = (event) => {
         const { keyCode } = event;
 
@@ -95,6 +104,7 @@ typeahead.directive('kbnTypeahead', function () {
       this.onFocus = () => {
         this.isFocused = true;
         this.isHidden = true;
+        this.resetLimit();
       };
 
       this.onBlur = () => {
