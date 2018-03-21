@@ -94,6 +94,15 @@ describe('plugins/elasticsearch', function () {
         expect(Buffer.isBuffer(config.ssl.pfx)).to.be(true);
         expect(config.ssl.pfx.toString('utf-8')).to.be('test pfx\n');
       });
+
+      it('throws an error when both pfx and certificate are specified', function () {
+        serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
+        serverConfig.ssl.pfx = __dirname + '/fixtures/cert.pfx';
+
+        expect(() => parseConfig(serverConfig)).to.throwError(
+          `Invalid Configuration: please specify either "elasticsearch.ssl.pfx" or "elasticsearch.ssl.certificate", not both.`
+        );
+      });
     });
   });
 });

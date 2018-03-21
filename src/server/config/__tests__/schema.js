@@ -120,27 +120,6 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).to.be(null);
         });
-
-        it('is required when ssl is enabled', function () {
-          const config = {};
-          set(config, 'server.ssl.enabled', true);
-          set(config, 'server.ssl.key', '/path.key');
-          const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.certificate');
-        });
-
-        it('is forbidden when server.ssl.pfx is set', function () {
-          const config = {};
-          set(config, 'server.ssl.enabled', true);
-          set(config, 'server.ssl.pfx', '/path.pfx');
-          set(config, 'server.ssl.certificate', '/path.crt');
-          const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.certificate');
-        });
       });
 
       describe('key', function () {
@@ -155,17 +134,6 @@ describe('Config schema', function () {
           const config = {};
           set(config, 'server.ssl.enabled', true);
           set(config, 'server.ssl.certificate', '/path.cert');
-          const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.key');
-        });
-
-        it('is forbidden when server.ssl.pfx is set', function () {
-          const config = {};
-          set(config, 'server.ssl.enabled', true);
-          set(config, 'server.ssl.pfx', '/path.pfx');
-          set(config, 'server.ssl.key', '/path.key');
           const { error } = validate(config);
           expect(error).to.be.an(Object);
           expect(error).to.have.property('details');

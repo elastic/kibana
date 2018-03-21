@@ -27,7 +27,7 @@ export default function (kibana) {
         }),
         pfx: Joi.string(),
         keyPassphrase: Joi.string()
-      }).xor('certificate', 'pfx').default();
+      }).default();
 
       return Joi.object({
         enabled: Joi.boolean().default(true),

@@ -34,15 +34,7 @@ const schema = Joi.object({
       host: Joi.string(),
       port: Joi.number()
     }).default(),
-    undefValue: Joi.string(),
-    alternative: Joi.when(Joi.object({ enable: true }), {
-      then: Joi.object({
-        positivePath: Joi.boolean().required()
-      }),
-      otherwise: Joi.object({
-        negativePath: Joi.boolean()
-      })
-    })
+    undefValue: Joi.string()
   }).default()
 }).default();
 
@@ -125,15 +117,6 @@ describe('lib/config/config', function () {
 
       it('should return false for fields that do not exist in the schema', function () {
         expect(config.has('test.client.pool')).to.be(false);
-      });
-
-      it('should return true for fields that exist within an "alternative" type', function () {
-        expect(config.has('alternative.positivePath')).to.be(true);
-        expect(config.has('alternative.negativePath')).to.be(true);
-      });
-
-      it('should return false for fields that do not exist within an "alternative" type', function () {
-        expect(config.has('alternatice.nonexistantPath')).to.be(false);
       });
 
     });

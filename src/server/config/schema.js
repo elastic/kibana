@@ -75,11 +75,7 @@ export default () => Joi.object({
       otherwise: Joi.default(false),
     }),
     customResponseHeaders: Joi.object().unknown(true).default({}),
-    ssl: sslSchema
-      .when(Joi.object({ enabled: true }).unknown(), {
-        then: sslSchema.xor('certificate', 'pfx'),
-        otherwise: sslSchema
-      }).default(),
+    ssl: sslSchema.default(),
     cors: Joi.when('$dev', {
       is: true,
       then: Joi.object().default({

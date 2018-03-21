@@ -33,11 +33,18 @@ export function setupConnection(server, config) {
   }
 
   const tlsOptions = {};
-  if (config.get('server.ssl.pfx')) {
-    tlsOptions.pfx = readFileSync(config.get('server.ssl.pfx'));
+  const pfxConfig = config.get('server.ssl.pfx');
+  const pemConfig = config.get('server.ssl.certificate');
+
+  if (pfxConfig && pemConfig) {
+    throw new Error(`Invalid Configuration: please specify either "server.ssl.pfx" or "server.ssl.certificate", not both.`);
+  }
+
+  if (pfxConfig) {
+    tlsOptions.pfx = readFileSync(pfxConfig);
   } else {
     tlsOptions.key = readFileSync(config.get('server.ssl.key'));
-    tlsOptions.cert = readFileSync(config.get('server.ssl.certificate'));
+    tlsOptions.cert = readFileSync(pemConfig);
   }
 
   const connection = server.connection({

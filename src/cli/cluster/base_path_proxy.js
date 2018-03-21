@@ -32,12 +32,18 @@ export default class BasePathProxy {
         rejectUnauthorized: false
       };
 
-      const pfx = config.get('server.ssl.pfx');
-      if (pfx) {
-        agentOptions.pfx = readFileSync(pfx);
+      const pfxConfig = config.get('server.ssl.pfx');
+      const pemConfig = config.get('server.ssl.certificate');
+
+      if (pfxConfig && pemConfig) {
+        throw new Error(`Invalid Configuration: please specify either "server.ssl.pfx" or "server.ssl.certificate", not both.`);
+      }
+
+      if (pfxConfig) {
+        agentOptions.pfx = readFileSync(pfxConfig);
       } else {
         agentOptions.key = readFileSync(config.get('server.ssl.key'));
-        agentOptions.cert = readFileSync(config.get('server.ssl.certificate'));
+        agentOptions.cert = readFileSync(pemConfig);
       }
 
       this.proxyAgent = new HttpsAgent(agentOptions);
