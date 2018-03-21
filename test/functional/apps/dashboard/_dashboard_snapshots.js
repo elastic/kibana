@@ -8,6 +8,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
+  const testSubjects = getService('testSubjects');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
@@ -31,7 +32,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
+      await testSubjects.click('toastCloseButton');
+
       await PageObjects.dashboard.saveDashboard('tsvb');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
@@ -49,12 +53,17 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
+      await testSubjects.click('addVisualizationToDashboardSuccess toastCloseButton');
+
       await PageObjects.dashboard.saveDashboard('area');
+      await testSubjects.click('saveDashboardSuccess toastCloseButton');
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderComplete();
+      // The need for this should have been removed with https://github.com/elastic/kibana/pull/15574 but the
+      // test failed when removed because the visualization hadn't settled.
       await PageObjects.common.sleep(1000);
 
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
