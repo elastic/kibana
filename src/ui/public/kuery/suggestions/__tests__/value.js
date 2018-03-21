@@ -26,8 +26,13 @@ describe('Kuery value suggestions', function () {
       expect(typeof getSuggestions).to.be('function');
     });
 
-    it('should not return suggestions', () => {
-      expect(getSuggestions()).to.eql([]);
+    it('should not make a request for suggestions', async () => {
+      const fieldName = 'machine.os.raw';
+      const prefix = '';
+      const suffix = '';
+      const suggestions = await getSuggestions({ fieldName, prefix, suffix });
+      sinon.assert.notCalled($http.post);
+      expect(suggestions).to.eql([]);
     });
   });
 
