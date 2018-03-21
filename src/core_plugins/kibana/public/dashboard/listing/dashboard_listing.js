@@ -4,7 +4,8 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,
-  EuiInMemoryTable,
+  EuiSearchBar,
+  EuiBasicTable,
   EuiPage,
   EuiLink,
   EuiFlexGroup,
@@ -23,8 +24,6 @@ const tableColumns = [
   {
     field: 'title',
     name: 'Title',
-    sortable: true,
-    sortable: true,
     render: (field, record) => (
       <EuiLink
         href={`#${createDashboardEditUrl(record.id)}`}
@@ -38,7 +37,6 @@ const tableColumns = [
     field: 'description',
     name: 'Description',
     dataType: 'string',
-    sortable: true
   }
 ];
 
@@ -138,22 +136,6 @@ export class DashboardListing extends React.Component {
     );
   }
 
-  renderDeleteButton() {
-    if (this.state.selectedIds.length === 0) {
-      return;
-    }
-
-    return (
-      <EuiButton
-        color="danger"
-        onClick={this.openDeleteModal}
-        data-test-subj="deleteSelectedDashboards"
-      >
-        Delete selected
-      </EuiButton>
-    );
-  }
-
   renderListingLimitWarning() {
     if (this.state.showLimitError) {
       return (
@@ -179,7 +161,11 @@ export class DashboardListing extends React.Component {
     return !newFilter.includes(oldFilter);
   }
 
-  renderMessage() {
+  renderNoItemsMessage() {
+    if (this.state.isFetchingItems) {
+      return '';
+    }
+
     if (!this.state.isFetchingItems && this.state.dashboards.length === 0 && !this.state.filter) {
       if (this.props.hideWriteControls) {
         return (
@@ -217,23 +203,36 @@ export class DashboardListing extends React.Component {
     return 'No dashboards matched your search.';
   }
 
-  renderTable() {
-    const search = {
-      defaultQuery: this.props.initialFilter,
-      toolsLeft: this.renderDeleteButton(),
-      box: {
-        incremental: true,
-        ['data-test-subj']: 'searchFilter'
-      },
-      onChange: (query) => {
-        if (this.state.showLimitError || this.shouldFetch(query.text, this.state.filter)) {
+  renderSearchBar() {
+    const toolsLeft = [];
+    if (this.state.selectedIds.length > 0) {
+      toolsLeft.push(
+        <EuiButton
+          color="danger"
+          onClick={this.openDeleteModal}
+          data-test-subj="deleteSelectedDashboards"
+          key="delete"
+        >
+          Delete selected
+        </EuiButton>
+      );
+    }
+
+    return (
+      <EuiSearchBar
+        defaultQuery={this.props.initialFilter}
+        onChange={(query) => {
           this.setState({
             filter: query.text
           }, this.fetchItems);
-        }
-        return true;
-      }
-    };
+        }}
+        box={{ incremental: true, ['data-test-subj']: 'searchFilter' }}
+        toolsLeft={toolsLeft}
+      />
+    );
+  }
+
+  renderTable() {
     const selection = {
       itemId: 'id',
       onSelectionChange: (selection) => {
@@ -243,15 +242,12 @@ export class DashboardListing extends React.Component {
       }
     };
     return (
-      <EuiInMemoryTable
+      <EuiBasicTable
         items={this.state.dashboards}
         loading={this.state.isFetchingItems}
         columns={tableColumns}
-        sorting={true}
-        pagination={true}
         selection={selection}
-        search={search}
-        message={this.renderMessage()}
+        noItemsMessage={this.renderNoItemsMessage()}
       />
     );
   }
@@ -291,6 +287,7 @@ export class DashboardListing extends React.Component {
 
         {this.renderListingLimitWarning()}
 
+        {this.renderSearchBar()}
         {this.renderTable()}
 
       </EuiPage>
