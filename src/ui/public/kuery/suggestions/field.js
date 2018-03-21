@@ -15,7 +15,7 @@ export function getSuggestionsProvider({ indexPatterns }) {
     const filterableFields = allFields.filter(field => field.filterable);
     const fieldNames = filterableFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
-    const sortedFieldNames = sortPrefixFirst(matchingFieldNames, search);
+    const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {
       const text = `${escapeKuery(fieldName)} `;
       const description = getDescription(fieldName);
@@ -23,4 +23,14 @@ export function getSuggestionsProvider({ indexPatterns }) {
     });
     return suggestions;
   };
+}
+
+function keywordComparator(first, second) {
+  const extensions = ['raw', 'keyword'];
+  if (extensions.map(ext => `${first}.${ext}`).includes(second)) {
+    return 1;
+  } else if (extensions.map(ext => `${second}.${ext}`).includes(first)) {
+    return -1;
+  }
+  return first.localeCompare(second);
 }

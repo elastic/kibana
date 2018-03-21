@@ -57,6 +57,15 @@ describe('Kuery field suggestions', function () {
     expect(extensionIndex).to.be.lessThan(bytesIndex);
   });
 
+  it('should sort keyword fields before analyzed versions', () => {
+    const prefix = '';
+    const suffix = '';
+    const suggestions = getSuggestions({ prefix, suffix });
+    const analyzedIndex = suggestions.findIndex(({ text }) => text === 'machine.os ');
+    const keywordIndex = suggestions.findIndex(({ text }) => text === 'machine.os.raw ');
+    expect(keywordIndex).to.be.lessThan(analyzedIndex);
+  });
+
   it('should have descriptions', function () {
     const prefix = '';
     const suffix = '';
