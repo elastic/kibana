@@ -37,34 +37,34 @@ describe('Typeahead directive', function () {
   describe('before focus', function () {
     it('should be hidden', function () {
       scope.$digest();
-      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+      expect(element.find('.typeahead-popover').hasClass('ng-hide')).to.be(true);
     });
   });
 
   describe('after focus', function () {
     beforeEach(function () {
       element.find('input').triggerHandler('focus');
+      scope.$digest();
     });
 
     it('should still be hidden', function () {
-      scope.$digest();
-      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+      expect(element.find('.typeahead-popover').hasClass('ng-hide')).to.be(true);
     });
 
-    it('should show when a key other than escape is pressed unless there are no items', function () {
+    it('should show when a key is pressed unless there are no items', function () {
       element.find('.typeahead').triggerHandler({
-        type: 'keydown',
+        type: 'keypress',
         keyCode: 'A'.charCodeAt(0)
       });
 
       scope.$digest();
 
-      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(false);
+      expect(element.find('.typeahead-popover').hasClass('ng-hide')).to.be(false);
 
       scope.items = [];
       scope.$digest();
 
-      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+      expect(element.find('.typeahead-popover').hasClass('ng-hide')).to.be(true);
     });
 
     it('should hide when escape is pressed', function () {
@@ -75,7 +75,7 @@ describe('Typeahead directive', function () {
 
       scope.$digest();
 
-      expect(element.find('.typeahead-items').hasClass('ng-hide')).to.be(true);
+      expect(element.find('.typeahead-popover').hasClass('ng-hide')).to.be(true);
     });
 
     it('should select the next option on arrow down', function () {
