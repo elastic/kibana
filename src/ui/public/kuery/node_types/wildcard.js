@@ -1,3 +1,5 @@
+import { fromLiteralExpression } from '../ast/ast';
+
 export const wildcardSymbol = '@kuery-wildcard@';
 
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
@@ -11,6 +13,10 @@ function escapeQueryString(string) {
 }
 
 export function buildNode(value) {
+  if (!value.includes(wildcardSymbol)) {
+    return fromLiteralExpression(value);
+  }
+
   return {
     type: 'wildcard',
     value,
