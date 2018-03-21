@@ -124,10 +124,6 @@ export class DashboardListing extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  hasFilter = () => {
-    return this.state.filter !== EMPTY_FILTER;
-  }
-
   onTableChange = ({ page, sort }) => {
     const {
       index: pageIndex,

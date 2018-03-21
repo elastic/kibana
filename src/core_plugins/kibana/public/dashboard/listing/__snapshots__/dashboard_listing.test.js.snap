@@ -29,7 +29,18 @@ exports[`after fetch hideWriteControls 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery=""
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -48,7 +59,7 @@ exports[`after fetch hideWriteControls 1`] = `
     }
     items={Array []}
     loading={false}
-    message={
+    noItemsMessage={
       <EuiText>
         <h2>
           <EuiTextColor
@@ -59,16 +70,17 @@ exports[`after fetch hideWriteControls 1`] = `
         </h2>
       </EuiText>
     }
-    pagination={true}
-    search={
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 0,
       }
     }
     selection={
@@ -77,7 +89,7 @@ exports[`after fetch hideWriteControls 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
@@ -126,7 +138,18 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery=""
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -145,7 +168,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     }
     items={Array []}
     loading={false}
-    message={
+    noItemsMessage={
       <UNDEFINED>
         <EuiText>
           <h2>
@@ -169,16 +192,17 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         </EuiButton>
       </UNDEFINED>
     }
-    pagination={true}
-    search={
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 0,
       }
     }
     selection={
@@ -187,7 +211,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
@@ -236,7 +260,18 @@ exports[`after fetch renders table rows 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery=""
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -268,17 +303,18 @@ exports[`after fetch renders table rows 1`] = `
       ]
     }
     loading={false}
-    message="No dashboards matched your search."
-    pagination={true}
-    search={
+    noItemsMessage="No dashboards matched your search."
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 2,
       }
     }
     selection={
@@ -287,7 +323,7 @@ exports[`after fetch renders table rows 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
@@ -367,7 +403,18 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       size="m"
     />
   </React.Fragment>
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery=""
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -399,17 +446,18 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       ]
     }
     loading={false}
-    message="No dashboards matched your search."
-    pagination={true}
-    search={
+    noItemsMessage="No dashboards matched your search."
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 2,
       }
     }
     selection={
@@ -418,7 +466,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
@@ -467,7 +515,18 @@ exports[`initialFilter 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery="my dashboard"
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -486,17 +545,18 @@ exports[`initialFilter 1`] = `
     }
     items={Array []}
     loading={true}
-    message="No dashboards matched your search."
-    pagination={true}
-    search={
+    noItemsMessage=""
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "my dashboard",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 0,
       }
     }
     selection={
@@ -505,7 +565,7 @@ exports[`initialFilter 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
@@ -554,7 +614,18 @@ exports[`renders table in loading state 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiInMemoryTable
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "searchFilter",
+        "incremental": true,
+      }
+    }
+    defaultQuery=""
+    onChange={[Function]}
+    toolsLeft={Array []}
+  />
+  <EuiBasicTable
     columns={
       Array [
         Object {
@@ -573,17 +644,18 @@ exports[`renders table in loading state 1`] = `
     }
     items={Array []}
     loading={true}
-    message="No dashboards matched your search."
-    pagination={true}
-    search={
+    noItemsMessage=""
+    onChange={[Function]}
+    pagination={
       Object {
-        "box": Object {
-          "data-test-subj": "searchFilter",
-          "incremental": true,
-        },
-        "defaultQuery": "",
-        "onChange": [Function],
-        "toolsLeft": undefined,
+        "pageIndex": 0,
+        "pageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+          50,
+        ],
+        "totalItemCount": 0,
       }
     }
     selection={
@@ -592,7 +664,7 @@ exports[`renders table in loading state 1`] = `
         "onSelectionChange": [Function],
       }
     }
-    sorting={true}
+    sorting={Object {}}
   />
 </EuiPage>
 `;
