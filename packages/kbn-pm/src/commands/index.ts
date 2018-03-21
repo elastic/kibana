@@ -1,28 +1,16 @@
-import { ProjectGraph, ProjectMap } from '../utils/projects';
-
-export interface CommandConfig {
-  extraArgs: string[];
-  options: { [key: string]: any };
-  rootPath: string;
-}
-
-export interface Command {
-  name: string;
-  description: string;
-
-  run: (
-    projects: ProjectMap,
-    projectGraph: ProjectGraph,
-    config: CommandConfig
-  ) => Promise<void>;
-}
-
+import { Command } from './command';
 import { BootstrapCommand } from './bootstrap';
 import { CleanCommand } from './clean';
 import { RunCommand } from './run';
 
-export const commands: { [key: string]: Command } = {
+export const commands = {
   bootstrap: BootstrapCommand,
   clean: CleanCommand,
   run: RunCommand,
 };
+
+type Commands = typeof commands;
+
+export function getCommand(name: keyof Commands) {
+  return commands[name];
+}

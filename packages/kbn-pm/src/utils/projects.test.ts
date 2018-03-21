@@ -51,7 +51,10 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths(rootPath, {
+      'skip-kibana': false,
+      'skip-kibana-extra': false,
+    });
     const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [

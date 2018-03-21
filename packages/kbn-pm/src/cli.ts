@@ -3,13 +3,14 @@ import dedent from 'dedent';
 import chalk from 'chalk';
 import { resolve } from 'path';
 
-import { commands } from './commands';
+import { entries } from './utils/entries';
+import { commands, getCommand } from './commands';
 import { runCommand } from './run';
 
 function help() {
-  const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName])
-    .map(command => `${command.name} - ${command.description}`);
+  const availableCommands = entries(commands).map(
+    ([name, description]) => `${name} - ${description}`
+  );
 
   console.log(dedent`
     usage: kbn <command> [<args>]
@@ -42,12 +43,16 @@ export async function run(argv: string[]) {
   }
 
   const options = getopts(argv, {
+    boolean: ['skip-kibana', 'skip-kibana-extra'],
     alias: {
       h: 'help',
     },
   });
 
   const args = options._;
+
+  // We should no longer rely on `_` here, but rather on `args`.
+  delete options._;
 
   if (options.help || args.length === 0) {
     help();
@@ -63,13 +68,14 @@ export async function run(argv: string[]) {
 
   const commandOptions = { options, extraArgs, rootPath };
 
-  const command = commands[commandName];
-  if (command === undefined) {
+  if (!(commandName in commands)) {
     console.log(
       chalk.red(`[${commandName}] is not a valid command, see 'kbn --help'`)
     );
     process.exit(1);
   }
 
-  await runCommand(command, commandOptions);
+  const command = getCommand(commandName as any);
+
+  await runCommand(command as any, commandOptions);
 }

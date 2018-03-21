@@ -1,16 +1,21 @@
 import { resolve } from 'path';
+import { schema } from '@kbn/utils';
 
-export type ProjectPathOptions = {
-  'skip-kibana-extra'?: boolean;
-  'skip-kibana'?: boolean;
+export const projectPathsFields = {
+  'skip-kibana': schema.boolean({ defaultValue: false }),
+  'skip-kibana-extra': schema.boolean({ defaultValue: false }),
 };
+
+export type ProjectPathOptions = schema.ObjectResultType<
+  typeof projectPathsFields
+>;
 
 /**
  * Returns all the paths where plugins are located
  */
 export function getProjectPaths(rootPath: string, options: ProjectPathOptions) {
-  const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
-  const skipKibana = Boolean(options['skip-kibana']);
+  const skipKibanaExtra = options['skip-kibana-extra'];
+  const skipKibana = options['skip-kibana'];
 
   const projectPaths = [resolve(rootPath, 'packages/*')];
 

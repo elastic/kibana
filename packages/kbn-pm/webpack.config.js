@@ -30,6 +30,18 @@ module.exports = {
         ],
         exclude: /node_modules/,
       },
+      // {
+      //   test: /\.js$/,
+      //   use: [
+      //     {
+      //       loader: 'babel-loader',
+      //       options: {
+      //         presets: [require.resolve('@kbn/babel-preset/node')],
+      //       },
+      //     },
+      //   ],
+      //   exclude: /node_modules/,
+      // },
       // Removing an unnecessary require from
       // https://github.com/ForbesLindesay/spawn-sync/blob/8ba6d1bd032917ff5f0cf68508b91bb628d16336/index.js#L3
       //

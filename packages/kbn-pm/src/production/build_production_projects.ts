@@ -48,7 +48,10 @@ export async function buildProductionProjects({
  * we only include Kibana's transitive _production_ dependencies.
  */
 async function getProductionProjects(rootPath: string) {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths(rootPath, {
+    'skip-kibana': false,
+    'skip-kibana-extra': true,
+  });
   const projects = await getProjects(rootPath, projectPaths);
 
   const productionProjects = includeTransitiveProjects(

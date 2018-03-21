@@ -1,14 +1,34 @@
 import chalk from 'chalk';
 import wrapAnsi from 'wrap-ansi';
 import indentString from 'indent-string';
+import { schema } from '@kbn/utils';
 
 import { CliError } from './utils/errors';
 import { getProjects, buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
-import { getProjectPaths, ProjectPathOptions } from './config';
-import { Command, CommandConfig } from './commands';
+import {
+  getProjectPaths,
+  projectPathsFields,
+  ProjectPathOptions,
+} from './config';
+import {
+  Command,
+  CommandSchema,
+  AdditionalOptionsSchemas,
+  ValidatedOptions,
+} from './commands/command';
+import { entries } from './utils/entries';
 
-export async function runCommand(command: Command, config: CommandConfig) {
+type RunCommandConfig = {
+  options: { [key: string]: any };
+  extraArgs: string[];
+  rootPath: string;
+};
+
+export async function runCommand<T extends CommandSchema>(
+  command: Command<T>,
+  config: RunCommandConfig
+) {
   try {
     console.log(
       chalk.bold(
@@ -18,11 +38,24 @@ export async function runCommand(command: Command, config: CommandConfig) {
       )
     );
 
-    const projectPaths = getProjectPaths(
-      config.rootPath,
-      config.options as ProjectPathOptions
+    const commandOptions = command.options;
+
+    let additionalFields = {} as AdditionalOptionsSchemas<T>;
+
+    if (commandOptions !== undefined) {
+      for (const [name, options] of entries(commandOptions)) {
+        additionalFields[name] = options.schema;
+      }
+    }
+
+    const finalSchema = schema.object(
+      Object.assign({}, projectPathsFields, additionalFields)
     );
 
+    const options = finalSchema.validate(config.options) as ProjectPathOptions &
+      ValidatedOptions<T>;
+
+    const projectPaths = getProjectPaths(config.rootPath, options);
     const projects = await getProjects(config.rootPath, projectPaths);
     const projectGraph = buildProjectGraph(projects);
 
@@ -31,7 +64,13 @@ export async function runCommand(command: Command, config: CommandConfig) {
     );
     console.log(renderProjectsTree(config.rootPath, projects));
 
-    await command.run(projects, projectGraph, config);
+    await command.run({
+      projects,
+      projectGraph,
+      rootPath: config.rootPath,
+      extraArgs: config.extraArgs,
+      options,
+    });
   } catch (e) {
     console.log(chalk.bold.red(`\n[${command.name}] failed:\n`));
 

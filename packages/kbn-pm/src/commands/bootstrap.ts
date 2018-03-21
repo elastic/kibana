@@ -1,18 +1,26 @@
 import chalk from 'chalk';
+import { schema } from '@kbn/utils';
 
 import { topologicallyBatchProjects } from '../utils/projects';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { parallelizeBatches } from '../utils/parallelize';
-import { Command } from './';
+import { createCommand } from './command';
 
-export const BootstrapCommand: Command = {
-  name: 'bootstrap',
-  description: 'Install dependencies and crosslink projects',
-
-  async run(projects, projectGraph, { options }) {
+export const BootstrapCommand = createCommand(
+  {
+    name: 'bootstrap',
+    description: 'Install dependencies and crosslink projects',
+    options: {
+      'frozen-lockfile': {
+        description: 'freeze',
+        schema: schema.boolean({ defaultValue: false }),
+      },
+    },
+  },
+  async function({ projects, projectGraph, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-    const frozenLockfile = options['frozen-lockfile'] === true;
+    const frozenLockfile = options['frozen-lockfile'];
     const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
 
     console.log(chalk.bold('\nRunning installs in topological order:'));
@@ -48,5 +56,5 @@ export const BootstrapCommand: Command = {
     });
 
     console.log(chalk.green.bold('\nBootstrapping completed!\n'));
-  },
-};
+  }
+);
