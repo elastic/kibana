@@ -45,5 +45,5 @@ function wrapAsSuggestions(start, end, query, values) {
 }
 
 function resolver(query, field) {
-  return `${query}/${field.name}`;
+  return [query, field.indexPattern.title, field.name].join('|');
 }
