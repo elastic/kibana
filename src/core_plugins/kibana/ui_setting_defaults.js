@@ -20,7 +20,8 @@ export function getUiSettingDefaults() {
     },
     'query:allowLeadingWildcards': {
       value: true,
-      description: 'When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options',
+      description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
+        features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
     },
     'search:queryLanguage': {
       value: 'lucene',
