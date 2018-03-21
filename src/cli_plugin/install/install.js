@@ -24,6 +24,7 @@ export default async function install(settings, logger) {
 
     const shouldContinue = await nativeControllersPrompt(settings);
     if (!shouldContinue) {
+      cleanArtifacts(settings);
       return;
     }
 
