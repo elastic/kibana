@@ -1,5 +1,6 @@
 import {
-  SupertestProvider,
+  KibanaSupertestProvider,
+  ElasticSearchSupertestProvider,
   ChanceProvider,
 } from './services';
 
@@ -14,7 +15,8 @@ export default async function ({ readConfigFile }) {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       retry: commonConfig.get('services.retry'),
-      supertest: SupertestProvider,
+      supertest: KibanaSupertestProvider,
+      esSupertest: ElasticSearchSupertestProvider,
       chance: ChanceProvider,
     },
     servers: commonConfig.get('servers'),

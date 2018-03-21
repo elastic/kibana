@@ -1,2 +1,2 @@
-export { SupertestProvider } from './supertest';
+export { KibanaSupertestProvider, ElasticSearchSupertestProvider } from './supertest';
 export { ChanceProvider } from './chance';
