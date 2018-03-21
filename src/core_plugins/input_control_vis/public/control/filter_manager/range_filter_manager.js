@@ -6,7 +6,7 @@ import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 function toRange(sliderValue) {
   return {
     gte: sliderValue.min,
-    lt: sliderValue.max
+    lte: sliderValue.max
   };
 }
 

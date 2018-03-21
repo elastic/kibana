@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { FilterManager } from '../filter_manager';
+import { FilterManager } from './filter_manager';
 
 describe('FilterManager', function () {
 
@@ -18,13 +18,13 @@ describe('FilterManager', function () {
       filterManager = new FilterManager(controlId, 'field1', indexPatternMock, queryFilterMock, '');
     });
 
-    it('should not find filters that are not controlled by any visualization', function () {
+    test('should not find filters that are not controlled by any visualization', function () {
       kbnFilters.push({});
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
 
-    it('should not find filters that are controlled by other Visualizations', function () {
+    test('should not find filters that are controlled by other Visualizations', function () {
       kbnFilters.push({
         meta: {
           controlledBy: 'anotherControl'
@@ -34,7 +34,7 @@ describe('FilterManager', function () {
       expect(foundFilters.length).to.be(0);
     });
 
-    it('should find filter that is controlled by target Visualization', function () {
+    test('should find filter that is controlled by target Visualization', function () {
       kbnFilters.push({
         meta: {
           controlledBy: controlId
