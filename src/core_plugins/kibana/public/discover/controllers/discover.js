@@ -31,6 +31,7 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
 
 const app = uiModules.get('apps/discover', [
@@ -135,6 +136,7 @@ function discoverController(
     location: 'Discover'
   });
 
+  $scope.getDocLink = getDocLink;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;

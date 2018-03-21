@@ -1,6 +1,5 @@
 import 'plugins/kibana/discover/saved_searches/saved_searches';
-import 'plugins/kibana/discover/directives/no_results';
-import 'plugins/kibana/discover/directives/timechart';
+import 'plugins/kibana/discover/directives';
 import 'ui/collapsible_sidebar';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import 'plugins/kibana/discover/controllers/discover';

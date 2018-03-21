@@ -1,8 +1,5 @@
-import 'ngreact';
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { uiModules } from 'ui/modules';
-import { getDocLink } from 'ui/documentation_links';
 
 import {
   EuiCallOut,
@@ -16,9 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import './no_results.less';
-
-class DiscoverNoResults extends Component {
+export class DiscoverNoResults extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,6 +25,7 @@ class DiscoverNoResults extends Component {
     shardFailures: PropTypes.array,
     timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
+    getDocLink: PropTypes.func.isRequired,
     topNavToggle: PropTypes.func.isRequired,
   };
 
@@ -45,6 +41,7 @@ class DiscoverNoResults extends Component {
       shardFailures,
       timeFieldName,
       queryLanguage,
+      getDocLink,
     } = this.props;
 
     let shardFailuresMessage;
@@ -196,7 +193,3 @@ class DiscoverNoResults extends Component {
     );
   }
 }
-
-const app = uiModules.get('apps/discover', ['react']);
-
-app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
