@@ -13,7 +13,7 @@ import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
-import { spawnNativeControllers, nativeControllersMixin } from './native_controllers';
+import { spawnNativeControllers } from './native_controllers';
 import { activateSystemCallFilters } from './system_call_filters';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
@@ -42,7 +42,6 @@ export default class KbnServer {
       httpMixin,
 
       // adds methods for extending this.server
-      nativeControllersMixin,
       serverExtensionsMixin,
       loggingMixin,
       warningsMixin,

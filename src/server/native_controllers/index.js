@@ -44,16 +44,10 @@ const getNativeControllers = async (settings) => {
     .toPromise();
 };
 
-let nativeControllersMap;
-
 export async function spawnNativeControllers(kbnServer) {
   const nativeControllers = await getNativeControllers(kbnServer.settings);
-  nativeControllersMap = nativeControllers.reduce((acc, nativeController) => {
+  kbnServer.nativeControllers = nativeControllers.reduce((acc, nativeController) => {
     acc[nativeController.pluginId] = nativeController.process;
     return acc;
   }, {});
-}
-
-export async function nativeControllersMixin(kbnServer, server) {
-  server.decorate('server', 'nativeControllers', nativeControllersMap);
 }
