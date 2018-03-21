@@ -1,0 +1,14 @@
+// tsconfig for packages
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    // We always want to include declaration files together with the source
+    // files.
+    "declaration": true,
+
+    // Target must match the Kibana environment, as packages will not be run
+    // through Babel or other transpilers when consumed.
+    "target": "es2015",
+    "module": "commonjs"
+  }
+}
