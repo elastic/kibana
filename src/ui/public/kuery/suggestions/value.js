@@ -45,5 +45,7 @@ function wrapAsSuggestions(start, end, query, values) {
 }
 
 function resolver(query, field) {
-  return [query, field.indexPattern.title, field.name].join('|');
+  // Only cache results for a minute
+  const ttl = Math.floor(Date.now() / 1000 / 60);
+  return [ttl, query, field.indexPattern.title, field.name].join('|');
 }
