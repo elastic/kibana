@@ -1,5 +1,8 @@
 /*
  * Kuery parser
+ *
+ * To generate the parsing module (legacy_kuery.js), run `grunt peg`
+ * To watch changes and generate on file change, run `grunt watch:peg`
  */
 
 /*
