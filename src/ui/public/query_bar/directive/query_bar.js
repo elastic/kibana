@@ -1,4 +1,4 @@
-import { compact } from 'lodash';
+import { compact, get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
@@ -60,7 +60,9 @@ module.directive('queryBar', function () {
       };
 
       this.updateSuggestions = () => {
-        const { query } = this.localQuery;
+        const query = get(this, 'localQuery.query');
+        if (typeof query === 'undefined') return;
+
         this.suggestions = getRecentSearchSuggestions(query);
         if (this.localQuery.language !== 'kuery' || !this.getKuerySuggestions) return;
 
