@@ -59,7 +59,7 @@ function ResponsiveGrid({
       className={classes}
       isDraggable={true}
       isResizable={true}
-      // There is a bug with d3 + firefiox + elements using transforms.
+      // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
       useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
