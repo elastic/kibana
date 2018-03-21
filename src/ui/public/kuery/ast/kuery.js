@@ -629,7 +629,10 @@ module.exports = (function() {
               s5 = peg$parseSpace();
             }
             if (s4 !== peg$FAILED) {
-              s5 = peg$parseValue();
+              s5 = peg$parseQuotedString();
+              if (s5 === peg$FAILED) {
+                s5 = peg$parseUnquotedLiteral();
+              }
               if (s5 !== peg$FAILED) {
                 peg$savedPos = s0;
                 s1 = peg$c9(s1, s3, s5);

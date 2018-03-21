@@ -61,7 +61,7 @@ Expression
   / ValueExpression
 
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:Value {
+  = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
     if (value.type === 'cursor') {
       return {
         ...value,
