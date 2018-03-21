@@ -1,7 +1,7 @@
 import sinon from 'sinon';
-import { getSearchDsl } from '../search_dsl';
-import * as queryParamsNS from '../query_params';
-import * as sortParamsNS from '../sorting_params';
+import { getSearchDsl } from './search_dsl';
+import * as queryParamsNS from './query_params';
+import * as sortParamsNS from './sorting_params';
 
 describe('getSearchDsl', () => {
   const sandbox = sinon.sandbox.create();

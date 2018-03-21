@@ -1,4 +1,4 @@
-import { includedFields } from '../included_fields';
+import { includedFields } from './included_fields';
 
 describe('includedFields', () => {
   it('returns undefined if fields are not provided', () => {

@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createCreateRoute } from '../create';
+import { createCreateRoute } from './create';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/{type}', () => {

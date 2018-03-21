@@ -1,6 +1,6 @@
 import { errors as esErrors } from 'elasticsearch';
 
-import { decorateEsError } from '../decorate_es_error';
+import { decorateEsError } from './decorate_es_error';
 import {
   isEsUnavailableError,
   isConflictError,
@@ -8,7 +8,7 @@ import {
   isForbiddenError,
   isNotFoundError,
   isBadRequestError,
-} from '../errors';
+} from './errors';
 
 describe('savedObjectsClient/decorateEsError', () => {
   it('always returns the same error it receives', () => {

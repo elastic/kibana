@@ -46,10 +46,8 @@ export default {
   testMatch: [
     '**/*.test.js',
     '**/*.test.ts',
-    '**/src/server/**/__tests__/**/*.js',
   ],
   testPathIgnorePatterns: [
-    '(.*)/__tests__/_(.*)',
     '<rootDir>/src/core_plugins/(.*)/public',
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/(dist|vendor)/',

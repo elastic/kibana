@@ -1,4 +1,4 @@
-import applyFiltersToKeys from '../apply_filters_to_keys';
+import applyFiltersToKeys from './apply_filters_to_keys';
 
 describe('applyFiltersToKeys(obj, actionsByKey)', function () {
   it('applies for each key+prop in actionsByKey', function () {

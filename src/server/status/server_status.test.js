@@ -1,9 +1,9 @@
 import { find } from 'lodash';
 import sinon from 'sinon';
 
-import * as states from '../states';
-import Status from '../status';
-import ServerStatus from '../server_status';
+import * as states from './states';
+import Status from './status';
+import ServerStatus from './server_status';
 
 describe('ServerStatus class', function () {
   const plugin = { id: 'name', version: '1.2.3' };

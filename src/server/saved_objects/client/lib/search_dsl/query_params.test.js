@@ -1,4 +1,4 @@
-import { getQueryParams } from '../query_params';
+import { getQueryParams } from './query_params';
 
 const MAPPINGS = {
   rootType: {

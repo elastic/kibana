@@ -1,4 +1,4 @@
-import { shortUrlAssertValid } from '../short_url_assert_valid';
+import { shortUrlAssertValid } from './short_url_assert_valid';
 
 
 describe('shortUrlAssertValid()', () => {

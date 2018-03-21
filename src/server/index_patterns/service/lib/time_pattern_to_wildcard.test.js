@@ -1,4 +1,4 @@
-import { timePatternToWildcard } from '../time_pattern_to_wildcard';
+import { timePatternToWildcard } from './time_pattern_to_wildcard';
 
 describe('server/index_patterns/service/lib/time_pattern_to_wildcard', () => {
   const tests = [

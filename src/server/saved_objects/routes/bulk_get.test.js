@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createBulkGetRoute } from '../bulk_get';
+import { createBulkGetRoute } from './bulk_get';
 import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/bulk_get', () => {

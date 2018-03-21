@@ -1,4 +1,4 @@
-import { getConfig, getData } from '../';
+import { getConfig, getData } from './';
 import { accessSync, R_OK } from 'fs';
 
 describe('Default path finder', function () {

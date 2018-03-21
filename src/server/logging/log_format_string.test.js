@@ -3,9 +3,9 @@ import moment from 'moment';
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../../utils';
+} from '../../utils';
 
-import KbnLoggerStringFormat from '../log_format_string';
+import KbnLoggerStringFormat from './log_format_string';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 

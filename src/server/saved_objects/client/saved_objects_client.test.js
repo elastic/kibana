@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import { delay } from 'bluebird';
-import { SavedObjectsClient } from '../saved_objects_client';
-import * as getSearchDslNS from '../lib/search_dsl/search_dsl';
-import { getSearchDsl } from '../lib';
+import { SavedObjectsClient } from './saved_objects_client';
+import * as getSearchDslNS from './lib/search_dsl/search_dsl';
+import { getSearchDsl } from './lib';
 import elasticsearch from 'elasticsearch';
 
 describe('SavedObjectsClient', () => {

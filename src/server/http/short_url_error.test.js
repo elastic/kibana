@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { handleShortUrlError } from '../short_url_error';
+import { handleShortUrlError } from './short_url_error';
 
 function createErrorWithStatus(status) {
   const error = new Error();

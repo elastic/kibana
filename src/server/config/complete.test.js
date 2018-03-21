@@ -1,9 +1,9 @@
-import completeMixin from '../complete';
+import completeMixin from './complete';
 import sinon from 'sinon';
 
 /* eslint-disable import/no-duplicates */
-import * as transformDeprecationsNS from '../transform_deprecations';
-import { transformDeprecations } from '../transform_deprecations';
+import * as transformDeprecationsNS from './transform_deprecations';
+import { transformDeprecations } from './transform_deprecations';
 /* eslint-enable import/no-duplicates */
 
 describe('server/config completeMixin()', function () {

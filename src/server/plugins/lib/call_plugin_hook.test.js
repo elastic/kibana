@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { callPluginHook } from '../call_plugin_hook';
+import { callPluginHook } from './call_plugin_hook';
 
 describe('server/plugins/callPluginHook', () => {
   it('should call in correct order based on requirements', async () => {

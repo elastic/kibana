@@ -2,12 +2,12 @@
 import sinon from 'sinon';
 import { noop } from 'lodash';
 
-import { callIndexAliasApi } from '../es_api';
-import * as callIndexAliasApiNS from '../es_api';
-import { timePatternToWildcard } from '../time_pattern_to_wildcard';
-import * as timePatternToWildcardNS from '../time_pattern_to_wildcard';
+import { callIndexAliasApi } from './es_api';
+import * as callIndexAliasApiNS from './es_api';
+import { timePatternToWildcard } from './time_pattern_to_wildcard';
+import * as timePatternToWildcardNS from './time_pattern_to_wildcard';
 
-import { resolveTimePattern } from '../resolve_time_pattern';
+import { resolveTimePattern } from './resolve_time_pattern';
 
 const TIME_PATTERN = '[logs-]dddd-YYYY.w';
 

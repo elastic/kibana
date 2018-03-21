@@ -1,7 +1,7 @@
 import Chance from 'chance';
 
-import { IndexMappings } from '../index_mappings';
-import { getRootType } from '../lib';
+import { IndexMappings } from './index_mappings';
+import { getRootType } from './lib';
 
 const chance = new Chance();
 

@@ -1,4 +1,4 @@
-import * as kbnTestServer from '../../test_utils/kbn_server';
+import * as kbnTestServer from '../test_utils/kbn_server';
 const basePath = '/kibana';
 
 describe('Server basePath config', function () {

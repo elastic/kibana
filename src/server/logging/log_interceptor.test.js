@@ -1,4 +1,4 @@
-import { LogInterceptor } from '../log_interceptor';
+import { LogInterceptor } from './log_interceptor';
 
 function stubClientErrorEvent(errorMeta) {
   const error = new Error();

@@ -1,4 +1,4 @@
-import { getSortingParams } from '../sorting_params';
+import { getSortingParams } from './sorting_params';
 
 const MAPPINGS = {
   rootType: {

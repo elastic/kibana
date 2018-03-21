@@ -1,4 +1,4 @@
-import secureOptions from '../secure_options';
+import secureOptions from './secure_options';
 import crypto from 'crypto';
 
 const constants = crypto.constants;

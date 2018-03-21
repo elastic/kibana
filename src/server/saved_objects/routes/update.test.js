@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createUpdateRoute } from '../update';
+import { createUpdateRoute } from './update';
 import { MockServer } from './_mock_server';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {

@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createGetRoute } from '../get';
+import { createGetRoute } from './get';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type}/{id}', () => {

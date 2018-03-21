@@ -1,7 +1,7 @@
 import { Server } from 'hapi';
 import sinon from 'sinon';
 
-import { setupBasePathRewrite } from '../setup_base_path_rewrite';
+import { setupBasePathRewrite } from './setup_base_path_rewrite';
 
 describe('server / setup_base_path_rewrite', () => {
   function createServer({ basePath, rewriteBasePath }) {

@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createFindRoute } from '../find';
+import { createFindRoute } from './find';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type?}', () => {

@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { createDeleteRoute } from '../delete';
+import { createDeleteRoute } from './delete';
 import { MockServer } from './_mock_server';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {

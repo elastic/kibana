@@ -16,7 +16,7 @@ import {
   decorateGeneralError,
   isEsAutoCreateIndexError,
   createEsAutoCreateIndexError,
-} from '../errors';
+} from './errors';
 
 describe('savedObjectsClient/errorTypes', () => {
   describe('BadRequest error', () => {

@@ -2,7 +2,7 @@ import mockFs from 'mock-fs';
 import sinon from 'sinon';
 import { readFileSync } from 'fs';
 
-import { Keystore } from '../keystore';
+import { Keystore } from './keystore';
 
 describe('Keystore', () => {
   const sandbox = sinon.sandbox.create();

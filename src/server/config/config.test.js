@@ -1,4 +1,4 @@
-import { Config } from '../config';
+import { Config } from './config';
 import _ from 'lodash';
 import Joi from 'joi';
 

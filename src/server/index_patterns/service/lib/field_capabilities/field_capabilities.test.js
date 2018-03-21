@@ -4,14 +4,14 @@ import { identity, shuffle, sortBy } from 'lodash';
 
 import { getFieldCapabilities } from '../field_capabilities';
 
-import { callFieldCapsApi } from '../../es_api';
-import * as callFieldCapsApiNS from '../../es_api';
+import { callFieldCapsApi } from '../es_api';
+import * as callFieldCapsApiNS from '../es_api';
 
-import { readFieldCapsResponse } from '../field_caps_response';
-import * as readFieldCapsResponseNS from '../field_caps_response';
+import { readFieldCapsResponse } from './field_caps_response';
+import * as readFieldCapsResponseNS from './field_caps_response';
 
-import { mergeOverrides } from '../overrides';
-import * as mergeOverridesNS from '../overrides';
+import { mergeOverrides } from './overrides';
+import * as mergeOverridesNS from './overrides';
 
 describe('index_patterns/field_capabilities/field_capabilities', () => {
   let sandbox;

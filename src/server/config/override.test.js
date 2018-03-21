@@ -1,4 +1,4 @@
-import override from '../override';
+import override from './override';
 
 describe('override(target, source)', function () {
 

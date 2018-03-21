@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 
-import { serverExtensionsMixin } from '../server_extensions_mixin';
+import { serverExtensionsMixin } from './server_extensions_mixin';
 
 describe('server.addMemoizedFactoryToRequest()', () => {
   const setup = () => {

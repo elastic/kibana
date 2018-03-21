@@ -1,4 +1,4 @@
-import explodeBy from '../explode_by';
+import explodeBy from './explode_by';
 
 describe('explode_by(dot, flatObject)', function () {
 

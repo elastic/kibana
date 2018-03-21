@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { transformDeprecations } from '../transform_deprecations';
+import { transformDeprecations } from './transform_deprecations';
 
 describe('server/config', function () {
   describe('transformDeprecations', function () {
