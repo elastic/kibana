@@ -24,6 +24,7 @@ const tableColumns = [
   {
     field: 'title',
     name: 'Title',
+    sortable: true,
     render: (field, record) => (
       <EuiLink
         href={`#${createDashboardEditUrl(record.id)}`}
@@ -37,12 +38,13 @@ const tableColumns = [
     field: 'description',
     name: 'Description',
     dataType: 'string',
+    sortable: true,
   }
 ];
 
 export const EMPTY_FILTER = '';
 
-// saved objects do not support sorting by title because title is only mapped as analyzed
+// saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
@@ -126,23 +128,56 @@ export class DashboardListing extends React.Component {
     return this.state.filter !== EMPTY_FILTER;
   }
 
-  onTableChange = ({ page }) => {
+  onTableChange = ({ page, sort }) => {
+    const {
+      index: pageIndex,
+      size: pageSize,
+    } = page;
+
+    let {
+      field: sortField,
+      direction: sortDirection,
+    } = sort;
+
+    // 3rd sorting state that is not captured by sort - native order (no sort)
+    // when switching from desc to asc for the same field - use native order
+    if (this.state.sortField === sortField
+      && this.state.sortDirection === 'desc'
+      && sortDirection === 'asc') {
+      sortField = null;
+      sortDirection = null;
+    }
+
     this.setState({
-      page: page.index,
-      perPage: page.size,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
     });
   }
 
+  // server-side paging not supported - see component comment for details
   getPageOfItems = () => {
-    const startIndex = this.state.page * this.state.perPage;
-    const lastIndex = startIndex + this.state.perPage;
-    if (this.state.dashboards.length < startIndex) {
-      // server-side paging not supported - see component comment for details
-      throw new Error(`Requested page that does not exist. page index: ${this.state.page},
-        per page: ${this.state.perPage}, total: ${this.state.dashboards.length}`);
+    // do not sort original list to preserve elasticsearch ranking order
+    const dashboardsCopy = this.state.dashboards.slice();
+
+    if (this.state.sortField) {
+      dashboardsCopy.sort((a, b) => {
+        const fieldA = _.get(a, this.state.sortField, '');
+        const fieldB = _.get(b, this.state.sortField, '');
+        let order = 1;
+        if (this.state.sortDirection === 'desc') {
+          order = -1;
+        }
+        return order * fieldA.toLowerCase().localeCompare(fieldB.toLowerCase());
+      });
     }
+
+    // If begin is greater than the length of the sequence, an empty array is returned.
+    const startIndex = this.state.page * this.state.perPage;
     // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
-    return this.state.dashboards.slice(startIndex, lastIndex);
+    const lastIndex = startIndex + this.state.perPage;
+    return dashboardsCopy.slice(startIndex, lastIndex);
   }
 
   renderConfirmDeleteModal() {
@@ -269,6 +304,13 @@ export class DashboardListing extends React.Component {
         });
       }
     };
+    const sorting = {};
+    if (this.state.sortField) {
+      sorting.sort = {
+        field: this.state.sortField,
+        direction: this.state.sortDirection,
+      };
+    }
     const items = this.state.dashboards.length === 0 ? [] : this.getPageOfItems();
     return (
       <EuiBasicTable
@@ -278,6 +320,7 @@ export class DashboardListing extends React.Component {
         selection={selection}
         noItemsMessage={this.renderNoItemsMessage()}
         pagination={pagination}
+        sorting={sorting}
         onChange={this.onTableChange}
       />
     );
