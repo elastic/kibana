@@ -7,7 +7,7 @@ exports[`render 1`] = `
     size="full"
   />
   <EuiFlexGroup
-    alignItems="flexEnd"
+    alignItems="center"
     component="div"
     gutterSize="l"
     justifyContent="spaceBetween"
