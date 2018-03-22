@@ -24,6 +24,7 @@ describe('DiscoverNoResults', () => {
         const component = render(
           <DiscoverNoResults
             shardFailures={shardFailures}
+            isTimePickerOpen={false}
             topNavToggle={() => {}}
             getDocLink={() => ''}
           />
@@ -33,11 +34,44 @@ describe('DiscoverNoResults', () => {
       });
     });
 
+    describe('isTimePickerOpen', () => {
+      test('false is reflected in the aria-expanded state of the button', () => {
+        const component = render(
+          <DiscoverNoResults
+            timeFieldName="awesome_time_field"
+            isTimePickerOpen={false}
+            topNavToggle={() => {}}
+            getDocLink={() => ''}
+          />
+        );
+
+        expect(
+          component.find('[data-test-subj="discoverNoResultsTimefilter"]')[0].attribs['aria-expanded']
+        ).toBe('false');
+      });
+
+      test('true is reflected in the aria-expanded state of the button', () => {
+        const component = render(
+          <DiscoverNoResults
+            timeFieldName="awesome_time_field"
+            isTimePickerOpen={true}
+            topNavToggle={() => {}}
+            getDocLink={() => ''}
+          />
+        );
+
+        expect(
+          component.find('[data-test-subj="discoverNoResultsTimefilter"]')[0].attribs['aria-expanded']
+        ).toBe('true');
+      });
+    });
+
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
         const component = render(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
+            isTimePickerOpen={false}
             topNavToggle={() => {}}
             getDocLink={() => ''}
           />
@@ -52,6 +86,7 @@ describe('DiscoverNoResults', () => {
         const component = render(
           <DiscoverNoResults
             queryLanguage="lucene"
+            isTimePickerOpen={false}
             topNavToggle={() => {}}
             getDocLink={() => 'documentation-link'}
           />
@@ -67,6 +102,7 @@ describe('DiscoverNoResults', () => {
         const component = mount(
           <DiscoverNoResults
             timeFieldName="awesome_time_field"
+            isTimePickerOpen={false}
             topNavToggle={topNavToggleSpy}
             getDocLink={() => ''}
           />
