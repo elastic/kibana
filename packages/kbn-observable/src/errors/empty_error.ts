@@ -1,14 +1,11 @@
-export class EmptyError extends Error {
-  code = 'KBN$_EMPTY_ERROR';
+import { ObservableError } from './observable_error';
 
+export class EmptyError extends ObservableError {
   constructor(producer: string) {
     super(
-      `EmptyError: ${producer} requires source stream to emit at least one value.`
+      'KBN$_EMPTY_ERROR',
+      `EmptyError: ${producer} requires source observable to emit at least one value.`,
+      EmptyError
     );
-
-    // We're forching this to `any` as `captureStackTrace` is not a standard
-    // property, but a v8 specific one. There are node typings that we might
-    // want to use, see https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/index.d.ts#L47
-    (Error as any).captureStackTrace(this, EmptyError);
   }
 }
