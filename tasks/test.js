@@ -43,6 +43,7 @@ module.exports = function (grunt) {
     'test:ui',
     'test:jest',
     'test:jest_integration',
+    'test:projects',
     'test:browser',
     'test:api'
   ]);
@@ -55,38 +56,38 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIReleaseServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:testUIReleaseServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIDevServer:keepalive'
   ]);
 
   grunt.registerTask('test:api', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:apiTestServer',
     'functional_test_runner:apiIntegration',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:apiTestServer'
   ]);
 
   grunt.registerTask('test:api:server', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:devApiTestServer:keepalive'
   ]);
 
@@ -106,4 +107,31 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
+
+  grunt.registerTask('test:projects', function () {
+    const done = this.async();
+    runProjectsTests().then(done, done);
+  });
+
+  function runProjectsTests() {
+    const serverCmd = {
+      cmd: 'yarn',
+      args: ['kbn', 'run', 'test', '--skip-kibana', '--skip-kibana-extra'],
+      opts: { stdio: 'inherit' }
+    };
+
+    return new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const error = new Error(`projects tests exited with code ${code}`);
+          grunt.fail.fatal(error);
+          reject(error);
+          return;
+        }
+
+        grunt.log.writeln(result);
+        resolve();
+      });
+    });
+  }
 };

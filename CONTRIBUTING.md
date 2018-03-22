@@ -152,10 +152,10 @@ git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
-Install the version of node.js listed in the `.node-version` file _(this can be easily automated with tools such as [nvm](https://github.com/creationix/nvm) and [avn](https://github.com/wbyoung/avn))_
+Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm), [nvm-windows](https://github.com/coreybutler/nvm-windows) or [avn](https://github.com/wbyoung/avn). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
 
 ```bash
-nvm install "$(cat .node-version)"
+nvm use
 ```
 
 Install the latest version of [yarn](https://yarnpkg.com).
@@ -168,11 +168,13 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch.
+Start elasticsearch from a nightly snapshot.
 
 ```bash
-yarn elasticsearch
+yarn es snapshot
 ```
+
+Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 

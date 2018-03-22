@@ -4,6 +4,7 @@
   "private": true,
   "main": "./code.js",
   "dependencies": {
+    "@elastic/quux": "link:../quux",
     "noop3": "999.999.999"
   },
   "devDependencies": {

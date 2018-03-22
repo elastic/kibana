@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<div>
+  <EuiHorizontalRule
+    margin="l"
+    size="full"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText>
+        <p>
+          When all steps are complete, you're ready to explore your data.
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        href="/app/myapp"
+        iconSide="left"
+        type="button"
+      >
+        launch myapp
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

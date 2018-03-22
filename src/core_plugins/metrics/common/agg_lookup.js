@@ -1,34 +1,35 @@
 import _ from 'lodash';
 const lookup = {
-  'count': 'Count',
-  'calculation': 'Bucket Script',
-  'std_deviation': 'Std. Deviation',
-  'variance': 'Variance',
-  'sum_of_squares': 'Sum of Sq.',
-  'avg': 'Average',
-  'max': 'Max',
-  'min': 'Min',
-  'sum': 'Sum',
-  'percentile': 'Percentile',
-  'percentile_rank': 'Percentile Rank',
-  'cardinality': 'Cardinality',
-  'value_count': 'Value Count',
-  'derivative': 'Derivative',
-  'cumulative_sum': 'Cumulative Sum',
-  'moving_average': 'Moving Average',
-  'avg_bucket': 'Overall Average',
-  'min_bucket': 'Overall Min',
-  'max_bucket': 'Overall Max',
-  'sum_bucket': 'Overall Sum',
-  'variance_bucket': 'Overall Variance',
-  'sum_of_squares_bucket': 'Overall Sum of Sq.',
-  'std_deviation_bucket': 'Overall Std. Deviation',
-  'series_agg': 'Series Agg',
-  'math': 'Math',
-  'serial_diff': 'Serial Difference',
-  'filter_ratio': 'Filter Ratio',
-  'positive_only': 'Positive Only',
-  'static': 'Static Value'
+  count: 'Count',
+  calculation: 'Calculation',
+  std_deviation: 'Std. Deviation',
+  variance: 'Variance',
+  sum_of_squares: 'Sum of Sq.',
+  avg: 'Average',
+  max: 'Max',
+  min: 'Min',
+  sum: 'Sum',
+  percentile: 'Percentile',
+  percentile_rank: 'Percentile Rank',
+  cardinality: 'Cardinality',
+  value_count: 'Value Count',
+  derivative: 'Derivative',
+  cumulative_sum: 'Cumulative Sum',
+  moving_average: 'Moving Average',
+  avg_bucket: 'Overall Average',
+  min_bucket: 'Overall Min',
+  max_bucket: 'Overall Max',
+  sum_bucket: 'Overall Sum',
+  variance_bucket: 'Overall Variance',
+  sum_of_squares_bucket: 'Overall Sum of Sq.',
+  std_deviation_bucket: 'Overall Std. Deviation',
+  series_agg: 'Series Agg',
+  math: 'Math',
+  serial_diff: 'Serial Difference',
+  filter_ratio: 'Filter Ratio',
+  positive_only: 'Positive Only',
+  static: 'Static Value',
+  top_hit: 'Top Hit',
 };
 
 const pipeline = [
@@ -46,7 +47,7 @@ const pipeline = [
   'series_agg',
   'math',
   'serial_diff',
-  'positive_only'
+  'positive_only',
 ];
 
 const byType = {
@@ -60,8 +61,8 @@ const byType = {
     'max',
     'sum',
     'cardinality',
-    'value_count'
-  ])
+    'value_count',
+  ]),
 };
 
 export function isBasicAgg(item) {
@@ -70,16 +71,18 @@ export function isBasicAgg(item) {
 
 export function createOptions(type = '_all', siblings = []) {
   let aggs = byType[type];
-  if (!aggs)  aggs = byType._all;
+  if (!aggs) aggs = byType._all;
   let enablePipelines = siblings.some(isBasicAgg);
   if (siblings.length <= 1) enablePipelines = false;
   return _(aggs)
     .map((label, value) => {
       const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
       return {
-        label: disabled ? `${label} (use the "+" button to add this pipeline agg)` : label,
+        label: disabled
+          ? `${label} (use the "+" button to add this pipeline agg)`
+          : label,
         value,
-        disabled
+        disabled,
       };
     })
     .value();

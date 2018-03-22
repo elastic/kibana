@@ -15,8 +15,9 @@ const metricAggs = [
   { label: 'Std. Deviation', value: 'std_deviation' },
   { label: 'Sum', value: 'sum' },
   { label: 'Sum of Squares', value: 'sum_of_squares' },
+  { label: 'Top Hit', value: 'top_hit' },
   { label: 'Value Count', value: 'value_count' },
-  { label: 'Variance', value: 'variance' }
+  { label: 'Variance', value: 'variance' },
 ];
 
 const pipelineAggs = [
@@ -35,16 +36,15 @@ const siblingAggs = [
   { label: 'Overall Std. Deviation', value: 'std_deviation_bucket' },
   { label: 'Overall Sum', value: 'sum_bucket' },
   { label: 'Overall Sum of Squares', value: 'sum_of_squares_bucket' },
-  { label: 'Overall Variance', value: 'variance_bucket' }
+  { label: 'Overall Variance', value: 'variance_bucket' },
 ];
 
 const specialAggs = [
   { label: 'Series Agg', value: 'series_agg' },
-  { label: 'Math', value: 'math' }
+  { label: 'Math', value: 'math' },
 ];
 
 class AggSelectOption extends Component {
-
   constructor(props) {
     super(props);
     this.handleMouseMove = this.handleMouseMove.bind(this);
@@ -70,7 +70,7 @@ class AggSelectOption extends Component {
   render() {
     const { label, heading, pipeline } = this.props.option;
     const style = {
-      paddingLeft: heading ? 0 : 10
+      paddingLeft: heading ? 0 : 10,
     };
     // We can ignore that the <div> does not have keyboard handlers even though
     // it has mouse handlers, since react-select still takes care, that this works
@@ -79,7 +79,11 @@ class AggSelectOption extends Component {
     if (heading) {
       let note;
       if (pipeline) {
-        note = (<span className="vis_editor__agg_select-note">(requires child aggregation)</span>);
+        note = (
+          <span className="vis_editor__agg_select-note">
+            (requires child aggregation)
+          </span>
+        );
       }
       return (
         <div
@@ -105,13 +109,12 @@ class AggSelectOption extends Component {
         aria-label={label}
       >
         <span className="Select-value-label" style={style}>
-          { this.props.children }
+          {this.props.children}
         </span>
       </div>
     );
     /* eslint-enable jsx-a11y/no-static-element-interactions */
   }
-
 }
 
 AggSelectOption.props = {
@@ -135,7 +138,9 @@ function filterByPanelType(panelType) {
 function AggSelect(props) {
   const { siblings, panelType } = props;
 
-  let enablePipelines = siblings.some(s => !!metricAggs.find(m => m.value === s.type));
+  let enablePipelines = siblings.some(
+    s => !!metricAggs.find(m => m.value === s.type)
+  );
   if (siblings.length <= 1) enablePipelines = false;
 
   let options;
@@ -143,18 +148,44 @@ function AggSelect(props) {
     options = metricAggs;
   } else {
     options = [
-      { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
+      {
+        label: 'Metric Aggregations',
+        value: null,
+        heading: true,
+        disabled: true,
+      },
       ...metricAggs,
-      { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...pipelineAggs.filter(filterByPanelType(panelType)).map(agg => ({ ...agg, disabled: !enablePipelines })),
-      { label: 'Sibling Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
+      {
+        label: 'Parent Pipeline Aggregations',
+        value: null,
+        pipeline: true,
+        heading: true,
+        disabled: true,
+      },
+      ...pipelineAggs
+        .filter(filterByPanelType(panelType))
+        .map(agg => ({ ...agg, disabled: !enablePipelines })),
+      {
+        label: 'Sibling Pipeline Aggregations',
+        value: null,
+        pipeline: true,
+        heading: true,
+        disabled: true,
+      },
       ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
-      { label: 'Special Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
+      {
+        label: 'Special Aggregations',
+        value: null,
+        pipeline: true,
+        heading: true,
+        disabled: true,
+      },
+      ...specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
     ];
   }
 
-  const handleChange = (value) => {
+  const handleChange = value => {
+    if (!value) return;
     if (value.disabled) return;
     if (value.value) props.onChange(value);
   };
@@ -177,7 +208,7 @@ AggSelect.propTypes = {
   onChange: PropTypes.func,
   panelType: PropTypes.string,
   siblings: PropTypes.array,
-  value: PropTypes.string
+  value: PropTypes.string,
 };
 
 export default AggSelect;

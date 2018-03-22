@@ -17,7 +17,7 @@ describe('server / setup_base_path_rewrite', () => {
 
     const server = new Server();
     server.connection({ port: 0 });
-    setupBasePathRewrite({}, server, config);
+    setupBasePathRewrite(server, config);
 
     server.route({
       method: 'GET',

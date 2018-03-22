@@ -7,7 +7,10 @@ import classNames from 'classnames';
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
+import {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DASHBOARD_GRID_HEIGHT,
+} from '../dashboard_constants';
 import sizeMe from 'react-sizeme';
 
 const config = { monitorWidth: true };
@@ -56,9 +59,12 @@ function ResponsiveGrid({
       className={classes}
       isDraggable={true}
       isResizable={true}
+      // There is a bug with d3 + firefox + elements using transforms.
+      // See https://github.com/elastic/kibana/issues/16870 for more context.
+      useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
-      rowHeight={100}
+      rowHeight={DASHBOARD_GRID_HEIGHT}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
@@ -95,9 +101,17 @@ export class DashboardGrid extends React.Component {
 
   buildLayoutFromPanels() {
     return _.map(this.props.panels, panel => {
-      if (!panel.version) {
-        PanelUtils.convertOldPanelData(panel);
+      // panel version numbers added in 6.1. Any panel without version number is assumed to be 6.0.0
+      const panelVersion = panel.version ? PanelUtils.parseVersion(panel.version) : PanelUtils.parseVersion('6.0.0');
+
+      if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 1)) {
+        PanelUtils.convertPanelDataPre_6_1(panel);
       }
+
+      if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
+        PanelUtils.convertPanelDataPre_6_3(panel);
+      }
+
       return panel.gridData;
     });
   }

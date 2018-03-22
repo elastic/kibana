@@ -12,10 +12,12 @@ import {
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import chrome from 'ui/chrome';
+import { recentlyAccessedShape } from './recently_accessed';
 
-export function HomeApp({ addBasePath, directories }) {
+export function HomeApp({ addBasePath, directories, recentlyAccessed }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
+  const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -64,7 +66,8 @@ export function HomeApp({ addBasePath, directories }) {
           <Home
             addBasePath={addBasePath}
             directories={directories}
-            isCloudEnabled={isCloudEnabled}
+            apmUiEnabled={apmUiEnabled}
+            recentlyAccessed={recentlyAccessed}
           />
         </Route>
       </Switch>
@@ -82,5 +85,6 @@ HomeApp.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  }))
+  })),
+  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };

@@ -21,7 +21,7 @@ describe('kuery node types', function () {
     describe('buildNode', function () {
 
       it('should return a node representing the given kuery function', function () {
-        const result = functionType.buildNode('is', 'response', 200);
+        const result = functionType.buildNode('is', 'extension', 'jpg');
         expect(result).to.have.property('type', 'function');
         expect(result).to.have.property('function', 'is');
         expect(result).to.have.property('arguments');
@@ -32,8 +32,8 @@ describe('kuery node types', function () {
     describe('buildNodeWithArgumentNodes', function () {
 
       it('should return a function node with the given argument list untouched', function () {
-        const fieldNameLiteral = nodeTypes.literal.buildNode('response');
-        const valueLiteral = nodeTypes.literal.buildNode(200);
+        const fieldNameLiteral = nodeTypes.literal.buildNode('extension');
+        const valueLiteral = nodeTypes.literal.buildNode('jpg');
         const argumentNodes = [fieldNameLiteral, valueLiteral];
         const result = functionType.buildNodeWithArgumentNodes('is', argumentNodes);
 
@@ -49,7 +49,7 @@ describe('kuery node types', function () {
     describe('toElasticsearchQuery', function () {
 
       it('should return the given function type\'s ES query representation', function () {
-        const node = functionType.buildNode('is', 'response', 200);
+        const node = functionType.buildNode('is', 'extension', 'jpg');
         const expected = isFunction.toElasticsearchQuery(node, indexPattern);
         const result = functionType.toElasticsearchQuery(node, indexPattern);
         expect(_.isEqual(expected, result)).to.be(true);
@@ -57,32 +57,6 @@ describe('kuery node types', function () {
 
     });
 
-    describe('toKueryExpression', function () {
-
-      it('should return the function syntax representation of the given node by default', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        expect(functionType.toKueryExpression(node)).to.be('exists("foo")');
-      });
-
-      it('should return the function syntax representation of the given node if serializeStyle is "function"', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        node.serializeStyle = 'function';
-        expect(functionType.toKueryExpression(node)).to.be('exists("foo")');
-      });
-
-      it('should defer to the function\'s serializer if another serializeStyle is specified', function () {
-        const node = functionType.buildNode('is', 'response', 200);
-        expect(node.serializeStyle).to.be('operator');
-        expect(functionType.toKueryExpression(node)).to.be('"response":200');
-      });
-
-      it('should simply return the node\'s "text" property if one exists', function () {
-        const node = functionType.buildNode('exists', 'foo');
-        node.text = 'bar';
-        expect(functionType.toKueryExpression(node)).to.be('bar');
-      });
-
-    });
 
   });
 

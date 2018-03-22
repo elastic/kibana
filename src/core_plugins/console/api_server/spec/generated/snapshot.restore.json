@@ -1,0 +1,14 @@
+{
+  "snapshot.restore": {
+    "url_params": {
+      "master_timeout": "",
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}/_restore"
+    ]
+  }
+}

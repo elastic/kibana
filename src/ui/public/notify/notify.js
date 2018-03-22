@@ -58,7 +58,12 @@ function applyConfig(config) {
     warningLifetime: config.get('notifications:lifetime:warning'),
     infoLifetime: config.get('notifications:lifetime:info')
   });
-  notify.banner(config.get('notifications:banner'));
+
+  const banner = config.get('notifications:banner');
+
+  if (typeof banner === 'string' && banner.trim()) {
+    notify.banner(banner);
+  }
 }
 
 window.onerror = function (err, url, line) {

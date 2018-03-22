@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { relative, dirname } from 'path';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import cmdShimCb from 'cmd-shim';
 import mkdirpCb from 'mkdirp';
 
@@ -9,9 +9,10 @@ const readFile = promisify(fs.readFile);
 const unlink = promisify(fs.unlink);
 const symlink = promisify(fs.symlink);
 const chmod = promisify(fs.chmod);
-const cmdShim = promisify(cmdShimCb);
+const cmdShim = promisify<string, string>(cmdShimCb);
+const mkdirp = promisify(mkdirpCb);
 
-export { chmod, readFile };
+export { chmod, readFile, mkdirp };
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
@@ -22,29 +23,6 @@ async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
     }
     throw e;
   }
-}
-
-/**
- * Creates the specified directory including any necessary parent directories that don't yet exist.
- * @param dir Directory to create.
- * @param mode The mode that will be set for directories that need to be created.
- * @return Path to he first directory that had to be created, if any.
- */
-export function mkdirp(dir: string, mode?: string | number) {
-  // Custom wrapper around `mkdirp` to provide Promise-based interface. We don't use `promisify`
-  // function here since it can't automatically infer the right overload and we don't want to expose
-  // options format used by `mkdirp` directly.
-  return new Promise<string | null>((resolve, reject) => {
-    // If mode is provided we can pass it directly, otherwise we should specify empty `options` object.
-    const options = mode === undefined ? {} : mode;
-    mkdirpCb(dir, options, (err, args) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(args);
-      }
-    });
-  });
 }
 
 /**

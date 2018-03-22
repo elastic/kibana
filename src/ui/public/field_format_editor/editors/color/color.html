@@ -30,23 +30,21 @@
       </div>
       <div class="form-group">
         <label for="scriptFieldColorFont">Font Color</label>
-        <input
+        <color-picker
           id="scriptFieldColorFont"
-          ng-model="color.text"
-          colorpicker
-          type="text"
+          on-change="getSetTextColor($index)"
+          color="color.text"
           class="form-control"
-        >
+        />
       </div>
       <div class="form-group">
         <label for="scriptFieldColorBackground">Background Color</label>
-        <input
+        <color-picker
           id="scriptFieldColorBackground"
-          ng-model="color.background"
-          colorpicker
-          type="text"
+          on-change="getSetBackgroundColor($index)"
+          color="color.background"
           class="form-control"
-        >
+        />
       </div>
       <div class="form-group">
         <label for="scriptFieldColorExample">Example</label>
