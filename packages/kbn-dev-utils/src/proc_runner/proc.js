@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import execa from 'execa';
 import { statSync } from 'fs';
 
 import Rx from 'rxjs/Rx';
@@ -50,14 +50,16 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
     }
   }
 
-  const childProcess = spawn(cmd, args, {
+  const childProcess = execa(cmd, args, {
     cwd,
     env,
-    stdio: [stdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
 
   if (stdin) {
     childProcess.stdin.end(stdin, 'utf8');
+  } else {
+    childProcess.stdin.end();
   }
 
   return new class Proc {

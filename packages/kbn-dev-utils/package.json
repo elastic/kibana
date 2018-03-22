@@ -10,15 +10,14 @@
   },
   "dependencies": {
     "chalk": "^2.3.0",
+    "execa": "^0.10.0",
     "moment": "^2.20.1",
-    "tree-kill": "1.1.0"
+    "tree-kill": "^1.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
     "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "babel-cli": "^6.26.0",
     "chance": "1.0.6",
     "expect.js": "0.3.1"
   }
 }
-
-
