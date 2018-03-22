@@ -62,6 +62,7 @@
           <discover-no-results
             ng-show="resultState === 'none'"
             top-nav-toggle="kbnTopNav.toggle"
+            is-time-picker-open="kbnTopNav.isCurrent('filter')"
             shard-failures="failures"
             time-field-name="opts.timefield"
             query-language="state.query.language"

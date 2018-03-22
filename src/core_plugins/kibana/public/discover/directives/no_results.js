@@ -14,26 +14,17 @@ import {
 } from '@elastic/eui';
 
 export class DiscoverNoResults extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isTimePickerOpen: false,
-    };
-  }
-
   static propTypes = {
     shardFailures: PropTypes.array,
     timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
+    isTimePickerOpen: PropTypes.bool.isRequired,
     getDocLink: PropTypes.func.isRequired,
     topNavToggle: PropTypes.func.isRequired,
   };
 
   onClickTimePickerButton = () => {
     this.props.topNavToggle('filter');
-    this.setState(prevState => ({
-      isTimePickerOpen: !prevState.isTimePickerOpen,
-    }));
   };
 
   render() {
@@ -42,6 +33,7 @@ export class DiscoverNoResults extends Component {
       timeFieldName,
       queryLanguage,
       getDocLink,
+      isTimePickerOpen,
     } = this.props;
 
     let shardFailuresMessage;
@@ -101,7 +93,7 @@ export class DiscoverNoResults extends Component {
                 <EuiLink
                   data-test-subj="discoverNoResultsTimefilter"
                   onClick={this.onClickTimePickerButton}
-                  aria-expanded={this.state.isTimePickerOpen}
+                  aria-expanded={isTimePickerOpen}
                 >
                   opening the time picker
                 </EuiLink>
