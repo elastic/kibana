@@ -3,7 +3,7 @@ import { uniq } from 'lodash';
 import sinon from 'sinon';
 
 import { createStats } from '../';
-import { createToolingLog } from '../../../dev';
+import { createToolingLog } from '@kbn/dev-utils';
 import {
   createConcatStream,
   createPromiseFromStreams

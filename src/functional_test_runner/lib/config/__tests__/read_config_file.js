@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import { createToolingLog } from '../../../../dev';
+import { createToolingLog } from '@kbn/dev-utils';
 import { readConfigFile } from '../read_config_file';
 import { Config } from '../config';
 
