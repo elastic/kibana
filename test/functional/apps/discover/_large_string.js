@@ -15,12 +15,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern('testlargestring', null);
     });
 
-    it('should load the book', async () => {
-      log.debug('Load shakespeare book');
-      //const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
-      expect(true).to.be(true);
-    });
-
     it('verify the large string book present', async function () {
       const ExpectedDoc =
            'mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare'
@@ -44,23 +38,24 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('test large data', function () {
-      it('search hamlet should show the correct hit count', async function () {
+      it('search Newsletter should show the correct hit count', async function () {
         const expectedHitCount = '1';
-        await PageObjects.discover.query('Hamlet');
+        await PageObjects.discover.query('Newsletter');
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
-          log.debug('test large data test pass');
+          log.debug('test Newsletter keyword is searched');
         });
       });
-      it('the search term should be highlighted in the field data', async function () {
+      it('the search term Newsletter should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(466);
+        expect(marks.length).to.be(1);
+        log.debug('Newsletter appears only once');
       });
     });
     after(async () => {
-      await esArchiver.unload('hamlet');
+      //await esArchiver.unload('hamlet');
     });
 
   });
