@@ -11,6 +11,10 @@
   border-color: $kuiColorLightGray;
   border-radius: $kuiBorderRadius 0 0 $kuiBorderRadius;
 
+  &:focus {
+    box-shadow: none;
+  }
+
   &.kuiLocalSearchInput-isInvalid {
     border-color: $localSearchBorderColor-isInvalid;
   }

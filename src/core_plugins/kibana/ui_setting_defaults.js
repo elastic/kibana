@@ -18,6 +18,11 @@ export function getUiSettingDefaults() {
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">Options</a> for the lucene query string parser',
       type: 'json'
     },
+    'query:allowLeadingWildcards': {
+      value: true,
+      description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
+        features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
+    },
     'search:queryLanguage': {
       value: 'lucene',
       description: 'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
