@@ -60,12 +60,28 @@
 
       <div class="discover-wrapper col-md-10">
         <div class="discover-content">
-          <discover-no-results ng-show="resultState === 'none'"></discover-no-results>
+          <discover-no-results
+            ng-show="resultState === 'none'"
+            top-nav-toggle="kbnTopNav.toggle"
+            is-time-picker-open="kbnTopNav.isCurrent('filter')"
+            shard-failures="failures"
+            time-field-name="opts.timefield"
+            query-language="state.query.language"
+            get-doc-link="getDocLink"
+          ></discover-no-results>
 
           <!-- loading -->
           <div ng-show="resultState === 'loading'">
-            <div class="discover-overlay">
-              <div class="euiTitle">
+            <discover-fetch-error
+              ng-show="fetchError"
+              fetch-error="fetchError"
+            ></discover-fetch-error>
+
+            <div
+              ng-hide="fetchError"
+              class="discover-overlay"
+            >
+              <div class="euiTitle" >
                 <h2>Searching</h2>
               </div>
               <div class="euiSpacer euiSpacer--m"></div>
