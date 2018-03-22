@@ -75,14 +75,16 @@ module.directive('queryPopover', function (localStorage) {
               <EuiText>
                 <p>
                   Our experimental autocomplete and simple syntax features can help you create your queries. Just start
-                  typing and you’ll see matches related to your data. {(
+                  typing and you’ll see matches related to your data.
+
+                  See docs {(
                     <EuiLink
                       href={kueryQuerySyntaxDocs}
                       target="_blank"
                     >
-                    See docs
+                    here
                     </EuiLink>
-                  )}
+                  )}.
                 </p>
               </EuiText>
 
