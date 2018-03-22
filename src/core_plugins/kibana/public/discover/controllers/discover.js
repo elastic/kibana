@@ -468,6 +468,7 @@ function discoverController(
 
   function initSegmentedFetch(segmented) {
     function flushResponseData() {
+      $scope.fetchError = undefined;
       $scope.hits = 0;
       $scope.faliures = [];
       $scope.rows = [];
@@ -580,8 +581,6 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
-    $scope.fetchError = undefined;
-
     $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
       .catch((error) => {
         const fetchError = getPainlessError(error);
