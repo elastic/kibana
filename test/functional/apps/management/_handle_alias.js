@@ -3,16 +3,13 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
 
-  describe('add index patterns for alias1 - contains no time field', function () {
+  describe('Index patterns on aliases', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('alias');
-      //await PageObjects.settings.navigateTo();
-      //await PageObjects.settings.clickKibanaIndices();
-      log.debug('index patterns are loaded');
+      await esArchiver.load('empty_kibana');
       await es.indices.updateAliases({
         body: {
           actions: [
@@ -30,8 +27,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should be able to create index pattern alias1: without time field', async function () {
-      log.debug('create alias1 index pattern');
+    it('should be able to create index pattern without time field', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias1', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
@@ -48,8 +44,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    it('should be able to create index pattern alias2: with timefield', async function () {
-      log.debug('create alias2 index pattern');
+    it('should be able to create index pattern with timefield', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias2', 'date');
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
@@ -72,7 +67,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
+    after(async () => {
+      await esArchiver.unload('alias');
+    });
 
 
 
