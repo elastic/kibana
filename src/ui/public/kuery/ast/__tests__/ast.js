@@ -364,6 +364,12 @@ describe('kuery AST API', function () {
       expectDeepEqual(actual, expected);
     });
 
+    it('should support escaped backslashes inside quoted strings', function () {
+      const expected = nodeTypes.literal.buildNode('\\');
+      const actual = ast.fromLiteralExpression('"\\\\"');
+      expectDeepEqual(actual, expected);
+    });
+
     it('should detect wildcards and build wildcard AST nodes', function () {
       const expected = nodeTypes.wildcard.buildNode('foo*bar');
       const actual = ast.fromLiteralExpression('foo*bar');

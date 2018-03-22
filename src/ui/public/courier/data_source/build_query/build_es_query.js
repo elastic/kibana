@@ -4,7 +4,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 
-export function BuildESQueryProvider(Private) {
+export function BuildESQueryProvider(Private, config) {
   const decorateQuery = Private(DecorateQueryProvider);
 
   /**
@@ -16,7 +16,7 @@ export function BuildESQueryProvider(Private) {
     const validQueries = queries.filter((query) => has(query, 'query'));
     const queriesByLanguage = groupBy(validQueries, 'language');
 
-    const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery);
+    const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery, config);
     const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, decorateQuery);
     const filterQuery = buildQueryFromFilters(filters, decorateQuery, indexPattern);
 

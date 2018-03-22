@@ -7,13 +7,8 @@ describe('kuery node types', function () {
 
     describe('buildNode', function () {
 
-      it('should accept an array argument representing a wildcard string', function () {
-        const wildcardValue = [
-          'foo',
-          Symbol('*'),
-          'bar',
-        ];
-
+      it('should accept a string argument representing a wildcard string', function () {
+        const wildcardValue = `foo${wildcard.wildcardSymbol}bar`;
         const result = wildcard.buildNode(wildcardValue);
         expect(result).to.have.property('type', 'wildcard');
         expect(result).to.have.property('value', wildcardValue);
@@ -22,13 +17,7 @@ describe('kuery node types', function () {
       it('should accept and parse a wildcard string', function () {
         const result = wildcard.buildNode('foo*bar');
         expect(result).to.have.property('type', 'wildcard');
-
-        expect(result.value[0]).to.be('foo');
-
-        expect(result.value[1]).to.be.a('symbol');
-        expect(result.value[1].toString()).to.be('Symbol(*)');
-
-        expect(result.value[2]).to.be('bar');
+        expect(result.value).to.be(`foo${wildcard.wildcardSymbol}bar`);
       });
 
     });
