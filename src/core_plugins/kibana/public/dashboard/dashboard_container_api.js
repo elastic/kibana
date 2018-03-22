@@ -11,10 +11,6 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.updatePanel(panelIndex, panelAttributes);
   }
 
-  getAppState() {
-    return this.dashboardState.appState;
-  }
-
   registerPanelIndexPattern(panelIndex, pattern) {
     this.dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
     this.dashboardState.saveState();
