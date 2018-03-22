@@ -6,6 +6,14 @@
 @import "./react-select";
 @import "./pui_react";
 
+/**
+ * 1. Prevent flickering of gauge visualization when tooltip is opened.
+ *    https://github.com/elastic/kibana/pull/17227
+ */
+.euiBody-hasToolTip {
+  position: static !important; /* 1 */
+}
+
 .small {
   font-size: 0.9em !important;
 }
@@ -160,10 +168,6 @@ notifications {
   .navbar-timepicker-time-desc > .fa-clock-o {
     padding-right: 5px;
   }
-
-kbn-info i {
-  cursor: help;
-}
 
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
