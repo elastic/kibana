@@ -10,7 +10,7 @@ include::{asciidoc-dir}/../../shared/versions61.asciidoc[]
 :blob:           {repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
-include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+include::{asciidoc-dir}/../../shared/attributes62.asciidoc[]
 
 include::introduction.asciidoc[]
 
