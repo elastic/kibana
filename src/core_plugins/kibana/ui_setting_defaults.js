@@ -29,10 +29,6 @@ export function getUiSettingDefaults() {
       type: 'select',
       options: ['lucene', 'kuery']
     },
-    'search:queryLanguage:switcher:enable': {
-      value: false,
-      description: 'Show or hide the query language switcher in the query bar'
-    },
     'sort:options': {
       value: '{ "unmapped_type": "boolean" }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">Options</a> for the Elasticsearch sort parameter',
