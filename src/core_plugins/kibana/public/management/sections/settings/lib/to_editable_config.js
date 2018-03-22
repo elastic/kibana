@@ -21,18 +21,20 @@ export function toEditableConfig({ def, name, value, isCustom }) {
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    options: def.options
+    options: def.options,
   };
 
-  const editor = getEditorType(conf);
-  conf.json = editor === 'json';
-  conf.select = editor === 'select';
-  conf.bool = editor === 'boolean';
-  conf.array = editor === 'array';
-  conf.markdown = editor === 'markdown';
-  conf.image = editor === 'image';
-  conf.normal = editor === 'normal';
-  conf.tooComplex = !editor;
+  conf.editor = getEditorType(conf);
+
+  // const editor = getEditorType(conf);
+  // conf.json = editor === 'json';
+  // conf.select = editor === 'select';
+  // conf.bool = editor === 'boolean';
+  // conf.array = editor === 'array';
+  // conf.markdown = editor === 'markdown';
+  // conf.image = editor === 'image';
+  // conf.normal = editor === 'normal';
+  // conf.tooComplex = !editor;
 
   return conf;
 }

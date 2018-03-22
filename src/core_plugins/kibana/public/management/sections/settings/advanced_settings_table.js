@@ -44,6 +44,25 @@ export class AdvancedSettingsTable extends Component {
     }).filter((c) => !c.readonly);
   }
 
+
+  // setup loading flag, run async op, then clear loading and editing flag (just in case)
+  // const loading = loadingfunction (conf, fn) {
+  //   conf.loading = true;
+  //   fn()
+  //     .then(function () {
+  //       conf.loading = conf.editing = false;
+  //     })
+  //     .catch(fatalError);
+  // };
+
+  saveConfig(name, value) {
+    this.config.set(name, value);
+  }
+
+  clearConfig(name) {
+    this.config.remove(name);
+  }
+
   render() {
     const { settings } = this.state;
     return (
@@ -55,6 +74,8 @@ export class AdvancedSettingsTable extends Component {
               <EuiSpacer size="s" />
               <Table
                 items={settings}
+                save={this.saveConfig}
+                clear={this.clearConfig}
               />
             </EuiPageContentBody>
           </EuiPageContent>

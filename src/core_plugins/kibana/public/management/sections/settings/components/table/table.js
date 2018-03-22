@@ -1,14 +1,20 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
+import MarkdownIt from 'markdown-it';
 
 import {
   EuiInMemoryTable,
+  EuiFieldText,
+  EuiTextArea,
+  EuiSwitch,
+  EuiSelect,
+  EuiFilePicker,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiImage,
   EuiButtonIcon,
+  keyCodes,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
@@ -16,9 +22,16 @@ import {
   isDefaultValue
 } from '../../lib';
 
+const markdownIt = new MarkdownIt({
+  html: false,
+  linkify: true
+});
+
 export class Table extends PureComponent {
   static propTypes = {
     items: PropTypes.array.isRequired,
+    save: PropTypes.func.isRequired,
+    clear: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -69,7 +82,7 @@ export class Table extends PureComponent {
           <EuiButtonIcon
             size="s"
             onClick={() => {
-              //some save action here
+              this.saveSetting(this.state.editingSettingName, this.state.editingSetting.unsavedValue);
               this.stopEditingSetting();
             }}
             iconType="checkInCircleFilled"
@@ -110,7 +123,7 @@ export class Table extends PureComponent {
           aria-label="Edit"
         />
       </Fragment>
-    )
+    );
   }
 
   renderValue(item) {
@@ -124,45 +137,94 @@ export class Table extends PureComponent {
   }
 
   getValue(item) {
-    if(item.normal || item.json || item.select) {
-      return item.value || item.defVal;
+    switch(item.editor) {
+      case 'array':
+        return (item.value || item.defVal).join(', ');
+      case 'boolean':
+        return item.value === undefined ? item.defVal : item.value.toString();
+      case 'markdown':
+        return (
+          <div dangerouslySetInnerHTML={{ __html: markdownIt.render(item.value) }} />
+        );
+      case 'image':
+        return item.value ? (
+          <EuiImage
+            size="s"
+            url={item.value}
+            alt={item.name}
+          />
+        ) : '';
+      default:
+        return item.value || item.defVal;
     }
-
-    if(item.array) {
-      return (item.value || item.defVal).join(', ');
-    }
-
-    if(item.bool) {
-      return item.value === undefined ? item.defVal : item.value.toString();
-    }
-
-    if(item.markdown) {
-      return (
-        <ReactMarkdown source={item.value} />
-      );
-    }
-
-    if(item.image && item.value) {
-      return (
-        <EuiImage url={item.value} />
-      );
-    }
-
-    return item.value;
   }
 
   renderEditValue(item) {
-    return (
-      <div>
-        `edit field` for {item.name}
-      </div>
-    );
+    switch(item.editor) {
+      case 'array':
+        return (
+          <EuiFieldText
+            autoFocus
+            defaultValue={item.unsavedValue}
+            onChange={this.onEditingSettingChange}
+            onKeyDown={this.onEditingSettingKeyDown}
+          />
+        );
+      case 'boolean':
+        return (
+          <EuiSwitch
+            checked={item.unsavedValue}
+            onChange={this.onEditingSettingChange}
+          />
+        );
+      case 'markdown':
+      case 'json':
+        return (
+          <EuiTextArea
+            defaultValue={item.unsavedValue}
+            onChange={this.onEditingSettingChange}
+            onKeyDown={this.onEditingSettingTextareaKeyDown}
+          />
+        );
+      case 'image':
+        return (
+          <EuiFilePicker />
+        );
+      case 'select':
+        return (
+          <EuiSelect
+            defaultValue={item.unsavedValue}
+            options={item.options.map((text) => {
+              return { text, value: text };
+            })}
+            onChange={this.onEditingSettingChange}
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            autoFocus
+            defaultValue={item.unsavedValue}
+            onChange={this.onEditingSettingChange}
+            onKeyDown={this.onEditingSettingKeyDown}
+          />
+        );
+    };
   }
 
   startEditingSetting(name, item) {
+    let unsavedValue = item.value == null ? item.defVal : item.value;
+
+    if(item.array) {
+      unsavedValue = unsavedValue.join(', ');
+    }
+
     this.setState({
       editingSettingName: name,
-      editingSetting: { ...item },
+      editingSetting: {
+        ...item,
+        unsavedValue,
+      },
     });
   }
 
@@ -170,9 +232,54 @@ export class Table extends PureComponent {
     this.setState({
       editingSettingName: null,
       editingSetting: null,
-      sortField: 'name',
-      sortDirection: 'asc',
     });
+  }
+
+  onEditingSettingChange = (e) => {
+    this.setState({
+      editingSetting: {
+        ...this.state.editingSetting,
+        unsavedValue: e.target.value,
+      }
+    });
+  };
+
+  onEditingSettingKeyDown = ({ keyCode }) => {
+    if (keyCodes.ENTER === keyCode) {
+      this.saveSetting(this.state.editingSettingName, this.state.editingSetting.unsavedValue);
+      this.stopEditingSetting();
+    }
+    if (keyCodes.ESCAPE === keyCode) {
+      this.stopEditingSetting();
+    }
+  };
+
+  onEditingSettingTextareaKeyDown = ({ keyCode }) => {
+    if (keyCodes.ESCAPE === keyCode) {
+      this.stopEditingSetting();
+    }
+  };
+
+  saveSetting(name, value) {
+
+    // if (conf.type === 'json' && conf.unsavedValue === '') {
+    //   conf.unsavedValue = '{}';
+    // }
+    //
+    // loading(conf, function () {
+    //   if (conf.unsavedValue === conf.defVal) {
+    //     return config.remove(conf.name);
+    //   }
+    //
+    //   return config.set(conf.name, conf.unsavedValue);
+    // });
+    console.log('jen will save: ', name, value);
+    this.props.save(name, value);
+  }
+
+  clearSetting(name) {
+    console.log('jen will clear: ', name);
+    this.props.clear(name);
   }
 
   render() {
@@ -190,7 +297,9 @@ export class Table extends PureComponent {
         field: 'value',
         name: 'Value',
         dataType: 'string',
-        render: (value, item) => this.state.editingSettingName === item.name ? this.renderEditValue(item) : this.renderValue(item),
+        render: (value, item) => {
+          return this.state.editingSettingName === item.name ? this.renderEditValue(this.state.editingSetting) : this.renderValue(item);
+        }
       },
       {
         name: '',
@@ -206,14 +315,21 @@ export class Table extends PureComponent {
       }
     };
 
+    const sorting = {
+      sort: {
+        field: 'name',
+        direction: 'asc',
+      }
+    };
+
     return (
       <EuiInMemoryTable
         className="advancedSettings__table"
         search={search}
         items={items}
         columns={columns}
+        sorting={sorting}
         pagination={false}
-        sorting={true}
       />
     );
   }
