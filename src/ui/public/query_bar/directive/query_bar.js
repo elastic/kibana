@@ -3,10 +3,8 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import suggestionTemplate from './suggestion.html';
-import { queryLanguages } from '../lib/queryLanguages';
 import { getSuggestionsProvider } from '../../kuery';
 import './suggestion.less';
-import '../../directives/documentation_href';
 import '../../directives/match_pairs';
 import './query_popover';
 
