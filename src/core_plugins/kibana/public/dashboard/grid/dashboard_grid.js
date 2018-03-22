@@ -134,7 +134,7 @@ export class DashboardGrid extends React.Component {
 
   onLayoutChange = (layout) => {
     const { onPanelsUpdated } = this.props;
-    const updatedPanels = [];
+    const updatedPanels = {};
     layout.forEach(panelLayout => {
       const updatedPanel = {
         panelIndex: panelLayout.i,
@@ -146,7 +146,7 @@ export class DashboardGrid extends React.Component {
           i: panelLayout.i,
         }
       };
-      updatedPanels.push(updatedPanel);
+      updatedPanels[panelLayout.i] = updatedPanel;
     });
     onPanelsUpdated(updatedPanels);
   };

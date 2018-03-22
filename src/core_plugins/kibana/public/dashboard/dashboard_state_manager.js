@@ -89,13 +89,7 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(setPanels(this.getPanels()));
-    store.dispatch(updateViewMode(this.getViewMode()));
-    store.dispatch(updateUseMargins(this.getUseMargins()));
-    store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
-    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
-    store.dispatch(updateTitle(this.getTitle()));
-    store.dispatch(updateDescription(this.getDescription()));
+    this._pushAppStateChangesToStore();
 
     this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
@@ -123,6 +117,12 @@ export class DashboardStateManager {
     const state = store.getState();
     // We need to run this comparison check or we can enter an infinite loop.
     let differencesFound = false;
+
+    const panels = getPanels(store.getState());
+    if (Object.values(panels).length !== this.appState.panels.length) {
+      return false;
+    }
+
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
       const storePanel = getPanel(state, appStatePanel.panelIndex);
@@ -167,7 +167,13 @@ export class DashboardStateManager {
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
       this.triggerEmbeddableConfigUpdateListeners();
-      store.dispatch(setPanels(this.getPanels()));
+
+      const panelsMap = {};
+      this.getPanels().forEach(panel => {
+        panelsMap[panel.panelIndex] = { ...panel };
+      });
+
+      store.dispatch(setPanels(panelsMap));
     }
 
     const state = store.getState();
@@ -202,7 +208,7 @@ export class DashboardStateManager {
       const panels = getPanels(store.getState());
       this.appState.panels = [];
       Object.values(panels).map(panel => {
-        this.appState.panels.push(panel);
+        this.appState.panels.push({ ...panel });
       });
       dirty = true;
     }
