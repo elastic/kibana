@@ -18,7 +18,7 @@ describe('build query', function () {
     }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
-      const result = buildQueryFromKuery();
+      const result = buildQueryFromKuery(null, [], configStub);
       const expected = {
         must: [],
         filter: [],
@@ -48,7 +48,7 @@ describe('build query', function () {
     it('should throw a useful error if it looks like query is using an old, unsupported syntax', function () {
       const oldQuery = { query: 'is(foo, bar)', language: 'kuery' };
 
-      expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery]).to.throwError(
+      expect(buildQueryFromKuery).withArgs(indexPattern, [oldQuery], configStub).to.throwError(
         /It looks like you're using an outdated Kuery syntax./
       );
     });
