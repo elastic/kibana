@@ -37,9 +37,7 @@ certificate and key files. These files are used to verify the identity of Kibana
 
 `elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 
-`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`.
-
-`full` performs hostname verification, and `certificate` does not.
+`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`. `full` performs hostname verification, and `certificate` does not.
 
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
