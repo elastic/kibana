@@ -169,9 +169,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('when removing a panel', async function () {
         const currentUrl = await remote.getCurrentUrl();
-        console.log('currentUrl is ', currentUrl);
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
-        console.log('new url is ', newUrl);
         await remote.get(newUrl.toString(), false);
 
         await retry.try(async () => {
