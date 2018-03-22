@@ -119,7 +119,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
                 />
                 <p>
-                  Security analytics
+                  Security Analytics
                 </p>
               </KuiCardDescriptionTitle>
 
