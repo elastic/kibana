@@ -41,15 +41,8 @@ Array [
           <span
             class="euiCallOutHeader__title"
           >
-            No results found
+            No results match your search criteria
           </span>
-        </div>
-        <div
-          class="euiText euiText--small"
-        >
-          <p>
-            Coudn’t find any results matching your search
-          </p>
         </div>
       </div>
       <div
@@ -250,15 +243,8 @@ Array [
           <span
             class="euiCallOutHeader__title"
           >
-            No results found
+            No results match your search criteria
           </span>
-        </div>
-        <div
-          class="euiText euiText--small"
-        >
-          <p>
-            Coudn’t find any results matching your search
-          </p>
         </div>
       </div>
       <div
@@ -375,15 +361,8 @@ Array [
           <span
             class="euiCallOutHeader__title"
           >
-            No results found
+            No results match your search criteria
           </span>
-        </div>
-        <div
-          class="euiText euiText--small"
-        >
-          <p>
-            Coudn’t find any results matching your search
-          </p>
         </div>
       </div>
       <div
