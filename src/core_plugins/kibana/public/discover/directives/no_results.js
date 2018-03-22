@@ -166,15 +166,11 @@ export class DiscoverNoResults extends Component {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false} className="discoverNoResults">
             <EuiCallOut
-              title="No results found"
+              title="No results match your search criteria"
               color="warning"
               iconType="help"
               data-test-subj="discoverNoResults"
-            >
-              <p>
-                Coudn&rsquo;t find any results matching your search
-              </p>
-            </EuiCallOut>
+            />
 
             {shardFailuresMessage}
             {timeFieldMessage}
