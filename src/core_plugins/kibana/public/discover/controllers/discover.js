@@ -466,7 +466,7 @@ function discoverController(
   };
 
 
-  function initSegmentedFetch(segmented) {
+  function handleSegmentedFetch(segmented) {
     function flushResponseData() {
       $scope.fetchError = undefined;
       $scope.hits = 0;
@@ -581,7 +581,7 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
       .catch((error) => {
         const fetchError = getPainlessError(error);
 
@@ -591,7 +591,7 @@ function discoverController(
           notify.error(error);
         }
 
-        // Restart.
+        // Restart. This enables auto-refresh functionality.
         beginSegmentedFetch();
       });
   }
