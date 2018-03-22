@@ -39,17 +39,17 @@ const DOWNLOAD_SERVER_TITLE = 'Download and unpack APM Server';
 export const DOWNLOAD_SERVER_OSX = {
   title: DOWNLOAD_SERVER_TITLE,
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-darwin-x86_64.tar.gz',
-    'tar xzvf apm-server-6.2.0-darwin-x86_64.tar.gz',
-    'cd apm-server-6.2.0-darwin-x86_64/',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
+    'tar xzvf apm-server-{config.kibana.version}-darwin-x86_64.tar.gz',
+    'cd apm-server-{config.kibana.version}-darwin-x86_64/',
   ],
 };
 
 export const DOWNLOAD_SERVER_DEB = {
   title: DOWNLOAD_SERVER_TITLE,
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-amd64.deb',
-    'sudo dpkg -i apm-server-6.2.0-amd64.deb',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-amd64.deb',
+    'sudo dpkg -i apm-server-{config.kibana.version}-amd64.deb',
   ],
   textPost:
     'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
@@ -58,8 +58,8 @@ export const DOWNLOAD_SERVER_DEB = {
 export const DOWNLOAD_SERVER_RPM = {
   title: DOWNLOAD_SERVER_TITLE,
   commands: [
-    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-x86_64.rpm',
-    'sudo rpm -vi apm-server-6.2.0-x86_64.rpm',
+    'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-{config.kibana.version}-x86_64.rpm',
+    'sudo rpm -vi apm-server-{config.kibana.version}-x86_64.rpm',
   ],
   textPost:
     'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).',
@@ -71,7 +71,7 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
     textPre:
       '1. Download the APM Server Windows zip file from the [Download page](https://www.elastic.co/downloads/apm/apm-server).\n' +
       '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
-      '3. Rename the `apm-server-6.2-windows` directory to `APM-Server`.\n' +
+      '3. Rename the `apm-server-{config.kibana.version}-windows` directory to `APM-Server`.\n' +
       '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
       ' **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n' +
       '5. From the PowerShell prompt, run the following commands to install APM Server as a Windows service:',

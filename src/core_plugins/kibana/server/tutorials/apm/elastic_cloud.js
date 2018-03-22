@@ -11,7 +11,9 @@ import {
 
 const SERVER_URL_INSTRUCTION = {
   title: 'APM Server endpoint',
-  textPre: 'Retrieve the APM Server URL from your Elastic Cloud dashboard',
+  textPre:
+    `Retrieve the APM Server URL from the Deployments section on the Elastic Cloud dashboard.
+    You will also need the APM Server secret token, which was generated on deployment.`,
 };
 
 export const ELASTIC_CLOUD_INSTRUCTIONS = {
