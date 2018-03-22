@@ -91,6 +91,7 @@ exports[`Table should render normally 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
+        "width": "38%",
       },
       Object {
         "dataType": "string",
@@ -140,6 +141,7 @@ exports[`Table should render normally 1`] = `
           },
         ],
         "name": "",
+        "width": "40px",
       },
     ]
   }

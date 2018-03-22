@@ -38,6 +38,7 @@ export class Table extends PureComponent {
       description: `Name of the field`,
       dataType: 'string',
       sortable: true,
+      width: '38%',
     }, {
       field: 'lang',
       name: 'Lang',
@@ -77,6 +78,7 @@ export class Table extends PureComponent {
         color: 'danger',
         onClick: deleteField,
       }],
+      width: '40px',
     }];
 
     const pagination = {

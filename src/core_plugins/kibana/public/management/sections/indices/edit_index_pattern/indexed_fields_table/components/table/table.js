@@ -75,6 +75,7 @@ export class Table extends PureComponent {
         render: (value) => {
           return this.renderFieldName(value, indexPattern.timeFieldName === value);
         },
+        width: '38%',
       },
       {
         field: 'type',
@@ -126,6 +127,7 @@ export class Table extends PureComponent {
             type: 'icon',
           },
         ],
+        width: '40px',
       }
     ];
 
