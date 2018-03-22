@@ -102,11 +102,10 @@
                       >
                     </select>
                     <span ng-show="bucketInterval.scaled">
-                      <kbn-info
-                        placement="right"
-                        class="kuiIcon--info"
-                        info="This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}">
-                      </kbn-info>
+                      <icon-tip
+                        content="'This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}'"
+                        position="'top'"
+                      ></icon-tip>
                       Scaled to {{ bucketInterval.description }}
                     </span>
                   </span>
