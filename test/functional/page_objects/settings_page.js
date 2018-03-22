@@ -331,11 +331,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
 
-    async clickOptionalAddNewButton(){
+    async clickOptionalAddNewButton() {
       const buttonParent = await testSubjects.find('createIndexPatternParent');
       const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes('createIndexPatternButton');
       log.debug('found the button ' + buttonVisible);
-      if(buttonVisible){
+      if(buttonVisible) {
         await testSubjects.click('createIndexPatternButton');
       }
     }

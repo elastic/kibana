@@ -15,16 +15,16 @@ export default function ({ getService, getPageObjects }) {
       log.debug('index patterns are loaded');
       await es.indices.updateAliases({
         body: {
-          actions : [
-            { "add" : { "index" : "test1", "alias" : "alias1" } },
-            { "add" : { "index" : "test2", "alias" : "alias1" } },
-            { "add" : { "index" : "test3", "alias" : "alias1" } },
-            { "add" : { "index" : "test4", "alias" : "alias1" } },
-            { "add" : { "index" : "test5", "alias" : "alias2" } },
-            { "add" : { "index" : "test6", "alias" : "alias2" } },
-            { "add" : { "index" : "test7", "alias" : "alias2" } },
-            { "add" : { "index" : "test8", "alias" : "alias2" } },
-            { "add" : { "index" : "test9", "alias" : "alias2" } }
+          actions: [
+            { 'add': { 'index': 'test1', 'alias': 'alias1' } },
+            { 'add': { 'index': 'test2', 'alias': 'alias1' } },
+            { 'add': { 'index': 'test3', 'alias': 'alias1' } },
+            { 'add': { 'index': 'test4', 'alias': 'alias1' } },
+            { 'add': { 'index': 'test5', 'alias': 'alias2' } },
+            { 'add': { 'index': 'test6', 'alias': 'alias2' } },
+            { 'add': { 'index': 'test7', 'alias': 'alias2' } },
+            { 'add': { 'index': 'test8', 'alias': 'alias2' } },
+            { 'add': { 'index': 'test9', 'alias': 'alias2' } }
           ]
         }
       });
@@ -40,12 +40,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to discover and verify no of hits for alias1', async function () {
-        const expectedHitCount = '4';
-        await PageObjects.common.navigateToApp('discover');
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
-        });
+      const expectedHitCount = '4';
+      await PageObjects.common.navigateToApp('discover');
+      await retry.try(async function () {
+        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
+    });
 
 
     it('should be able to create index pattern alias2: with timefield', async function () {
@@ -59,17 +59,17 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should be able to discover and verify no of hits for alias2', async function () {
-          const expectedHitCount = '5';
-          const fromTime = '2016-11-12 05:00:00.000';
-          const toTime = '2016-11-19 05:00:00.000';
+      const expectedHitCount = '5';
+      const fromTime = '2016-11-12 05:00:00.000';
+      const toTime = '2016-11-19 05:00:00.000';
 
-         await PageObjects.common.navigateToApp('discover');
-         await PageObjects.discover.selectIndexPattern('alias2')
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('alias2');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
-          await retry.try(async function () {
-                expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
-              });
+      await retry.try(async function () {
+        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+      });
     });
 
 
