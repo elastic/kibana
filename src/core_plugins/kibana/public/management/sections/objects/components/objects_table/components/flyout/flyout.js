@@ -400,8 +400,7 @@ export class Flyout extends Component {
           <p>
               The following saved objects use index patterns that do not exist.
               Please select the index patterns you&apos;d like re-associated with them.
-              You can <EuiLink href={this.props.newIndexPatternUrl}>create a new index pattern</EuiLink>
-              if necessary.
+              You can <EuiLink href={this.props.newIndexPatternUrl}>create a new index pattern</EuiLink> if necessary.
           </p>
         </EuiCallOut>
       </Fragment>

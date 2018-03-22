@@ -8,32 +8,10 @@ import { EuiSpacer, EuiHorizontalRule, Query } from '@elastic/eui';
 import { retrieveAndExportDocs } from '../../lib/retrieve_and_export_docs';
 import { scanAllTypes } from '../../lib/scan_all_types';
 import { saveToFile } from '../../lib/save_to_file';
+import { getQueryText } from '../../lib/get_query_text';
+import { getSavedObjectIcon } from '../../lib/get_saved_object_icon';
 import { Flyout } from './components/flyout';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
-
-function getQueryText(query) {
-  return query && query.ast.getTermClauses().length
-    ? query.ast
-      .getTermClauses()
-      .map(clause => clause.value)
-      .join(' ')
-    : '';
-}
-
-function getSavedObjectIcon(type) {
-  switch (type) {
-    case 'search':
-      return 'search';
-    case 'visualization':
-      return 'visualizeApp';
-    case 'dashboard':
-      return 'dashboardApp';
-    case 'index-pattern':
-      return 'indexPatternApp';
-    case 'tag':
-      return 'apps';
-  }
-}
 
 export const EXCLUDED_TYPES = ['config'];
 export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 'search'];
