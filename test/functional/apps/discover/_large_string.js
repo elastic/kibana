@@ -10,8 +10,6 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern('testlargestring', null);
     });
 
@@ -54,8 +52,9 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Newsletter appears only once');
       });
     });
+
     after(async () => {
-      //await esArchiver.unload('hamlet');
+      await esArchiver.unload('hamlet');
     });
 
   });
