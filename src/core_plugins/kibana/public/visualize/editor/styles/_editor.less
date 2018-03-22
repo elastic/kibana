@@ -318,6 +318,13 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
       }
     }
 
+      /**
+       * 1. Hack to split child elements evenly.
+       */
+      .vis-editor-agg-form-row__even-split {
+        flex: 1 1 0 !important; /* 1 */
+      }
+
     .vis-editor-agg-form-value {
       align-self: center;
       margin: 0 0 0 @vis-editor-agg-editor-spacing;
