@@ -281,6 +281,13 @@ function discoverController(
   $state.index = $scope.indexPattern.id;
   $state.sort = getSort.array($state.sort, $scope.indexPattern);
 
+  $scope.getBucketIntervalToolTipText = () => {
+    return (
+      `This interval creates ${$scope.bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets'}
+      to show in the selected time range, so it has been scaled to ${$scope.bucketInterval.description }`
+    );
+  };
+
   $scope.$watchCollection('state.columns', function () {
     $state.save();
   });
