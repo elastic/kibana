@@ -66,13 +66,45 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('search by title', function () {
+    describe('search', function () {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard('Two Words');
       });
 
+      it('matches on the first word', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('Two');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(1);
+      });
+
+      it('matches the second word', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('Words');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(1);
+      });
+
+      it('matches the second word prefix', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('Wor');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(1);
+      });
+
+      it('does not match mid word', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('ords');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(0);
+      });
+
+      it('is case insensitive', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('two words');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(1);
+      });
+    });
+
+    describe('search by title', function () {
       it('loads a dashboard if title matches', async function () {
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl + '&title=Two%20Words';

@@ -27,6 +27,7 @@ const tableColumns = [
     sortable: true,
     render: (field, record) => (
       <EuiLink
+        className="dashboardLink"
         href={`#${createDashboardEditUrl(record.id)}`}
         data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
       >

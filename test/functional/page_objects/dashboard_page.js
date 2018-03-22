@@ -371,6 +371,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
+        await PageObjects.common.pressEnterKey();
       });
     }
 
@@ -394,6 +395,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getCountOfDashboardsInListingTable() {
+      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
+      return dashboardTitles.length;
     }
 
     async getDashboardCountWithName(dashName) {
