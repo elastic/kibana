@@ -1,11 +1,12 @@
 <div class="col-md-2 sidebar-container" role="region" aria-label="Index patterns">
   <div class="sidebar-list">
     <div class="sidebar-item-title full-title">
-      <h5>
+      <h5 data-test-subj="createIndexPatternParent">
         <a
           ng-if="editingId"
           href="#/management/kibana/index"
           class="kuiButton kuiButton--primary kuiButton--small"
+          data-test-subj="createIndexPatternButton"
         >
           <span aria-hidden="true" class="kuiIcon fa-plus"></span>
           <span>Create Index Pattern</span>

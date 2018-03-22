@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_scripted_fields_filter'));
     loadTestFile(require.resolve('./_import_objects'));
     loadTestFile(require.resolve('./_test_huge_fields'));
+    loadTestFile(require.resolve('./_handle_alias'));
   });
 
 }
