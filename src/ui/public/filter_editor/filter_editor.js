@@ -35,7 +35,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, $element) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $timeout) {
       this.init = async () => {
         if (!areIndexPatternsProvided(this.indexPatterns)) {
           const defaultIndexPattern = await indexPatterns.getDefault();
@@ -88,6 +88,10 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
 
       this.setParams = (params) => {
         this.params = params;
+      };
+
+      this.onParamsSelect = () => {
+        $timeout(() => $element.find('.saveButton').focus());
       };
 
       this.setFocus = (name) => {

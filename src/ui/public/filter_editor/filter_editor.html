@@ -66,6 +66,7 @@
             field="filterEditor.field"
             operator="filterEditor.operator"
             params="filterEditor.params"
+            on-select="filterEditor.onParamsSelect()"
           ></filter-params-editor>
         </div>
       </div>
@@ -132,7 +133,7 @@
         Cancel
       </button>
       <button
-        class="kuiButton kuiButton--primary"
+        class="kuiButton kuiButton--primary saveButton"
         ng-disabled="!filterEditor.isValid()"
         ng-click="filterEditor.save()"
         data-test-subj="saveFilter"

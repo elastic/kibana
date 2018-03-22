@@ -2,6 +2,7 @@
   ng-if="filterParamsPhraseEditor.shouldSuggestValues && field.aggregatable && field.type === 'string'"
   ng-model="params.phrase"
   ui-select-focus-on="focus-params"
+  on-select="onSelect({ params: params })"
   spinner-enabled="true"
   spinner-class="kuiIcon kuiIcon--basic fa-spinner fa-spin"
 >
@@ -30,6 +31,7 @@
   value="params.phrase"
   on-change="params.phrase = value"
   focus-on="focus-params"
+  on-select="onSelect()"
 ></filter-params-input-type>
 
 <small>

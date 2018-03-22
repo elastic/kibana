@@ -13,7 +13,8 @@ module.directive('filterParamsInputType', function () {
       type: '=',
       placeholder: '@',
       value: '=',
-      onChange: '&'
+      onChange: '&',
+      onSelect: '&'
     },
     link: function (scope) {
       scope.boolOptions = [true, false];
