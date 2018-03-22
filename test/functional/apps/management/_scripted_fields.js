@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         const data = await PageObjects.visualize.getDataTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         const data = await PageObjects.visualize.getDataTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         const data = await PageObjects.visualize.getDataTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         const data = await PageObjects.visualize.getDataTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -355,7 +355,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.setSpyPanelPageSize('All');
         const data = await PageObjects.visualize.getDataTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);

@@ -124,6 +124,7 @@ function discoverController(
   courier,
   kbnUrl,
   timefilter,
+  localStorage,
 ) {
 
   const Vis = Private(VisProvider);
@@ -265,7 +266,10 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || { query: '', language: config.get('search:queryLanguage') },
+      query: $scope.searchSource.get('query') || {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -457,10 +461,6 @@ function discoverController(
   };
 
   $scope.updateQueryAndFetch = function (query) {
-    // reset state if language changes
-    if ($state.query.language && $state.query.language !== query.language) {
-      $state.filters = [];
-    }
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
