@@ -15,7 +15,7 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -31,6 +31,8 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { getDocLink } from 'ui/documentation_links';
+import '../components/fetch_error';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -57,14 +59,14 @@ uiRoutes
         })
           .then(({ savedObjects }) => {
             /**
-         *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-         *  the load order of AppState conflicts with the load order of many other things
-         *  so in order to get the name of the index we should use, and to switch to the
-         *  default if necessary, we parse the appState with a temporary State object and
-         *  then destroy it immediatly after we're done
-         *
-         *  @type {State}
-         */
+             *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+             *  the load order of AppState conflicts with the load order of many other things
+             *  so in order to get the name of the index we should use, and to switch to the
+             *  default if necessary, we parse the appState with a temporary State object and
+             *  then destroy it immediatly after we're done
+             *
+             *  @type {State}
+             */
             const state = new State('_a', {});
 
             const specified = !!state.index;
@@ -135,6 +137,7 @@ function discoverController(
     location: 'Discover'
   });
 
+  $scope.getDocLink = getDocLink;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
@@ -292,15 +295,6 @@ function discoverController(
   };
 
   const init = _.once(function () {
-    const showTotal = 5;
-    $scope.failuresShown = showTotal;
-    $scope.showAllFailures = function () {
-      $scope.failuresShown = $scope.failures.length;
-    };
-    $scope.showLessFailures = function () {
-      $scope.failuresShown = showTotal;
-    };
-
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
       $appStatus.dirty = status.dirty || !savedSearch.id;
@@ -453,6 +447,8 @@ function discoverController(
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
+    $scope.fetchError = undefined;
+
     $scope.updateTime();
 
     $scope.updateDataSource()
@@ -470,8 +466,9 @@ function discoverController(
   };
 
 
-  function initSegmentedFetch(segmented) {
+  function handleSegmentedFetch(segmented) {
     function flushResponseData() {
+      $scope.fetchError = undefined;
       $scope.hits = 0;
       $scope.faliures = [];
       $scope.rows = [];
@@ -584,10 +581,17 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
       .catch((error) => {
-        notify.error(error);
-        // Restart.
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          notify.error(error);
+        }
+
+        // Restart. This enables auto-refresh functionality.
         beginSegmentedFetch();
       });
   }
