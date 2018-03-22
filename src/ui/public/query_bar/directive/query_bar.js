@@ -3,11 +3,10 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import suggestionTemplate from './suggestion.html';
-import { queryLanguages } from '../lib/queryLanguages';
 import { getSuggestionsProvider } from '../../kuery';
 import './suggestion.less';
-import '../../directives/documentation_href';
 import '../../directives/match_pairs';
+import './query_popover';
 
 const module = uiModules.get('kibana');
 
@@ -28,8 +27,6 @@ module.directive('queryBar', function () {
 
     controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, indexPatterns) {
       this.appName = this.appName || 'global';
-      this.availableQueryLanguages = queryLanguages;
-      this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
 
       this.getIndexPatterns = () => {
         if (compact(this.indexPatterns).length) return Promise.resolve(this.indexPatterns);
@@ -44,7 +41,8 @@ module.directive('queryBar', function () {
         this.suggestions = [];
       };
 
-      this.selectLanguage = () => {
+      this.selectLanguage = (language) => {
+        this.localQuery.language = language;
         this.localQuery.query = '';
         this.submit();
       };

@@ -14,12 +14,10 @@
       role="search"
     >
 
-      <!-- Lucene input -->
-      <div
-        class="kuiLocalSearchAssistedInput"
-        ng-if="queryBar.localQuery.language === 'lucene'"
-      >
+      <div class="kuiLocalSearchAssistedInput">
+        <!-- Lucene input -->
         <input
+          ng-if="queryBar.localQuery.language === 'lucene'"
           parse-query
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
@@ -30,31 +28,14 @@
           aria-label="Search input"
           aria-describedby="discoverLuceneSyntaxHint"
           type="text"
-          class="kuiLocalSearchInput kuiLocalSearchInput--lucene"
+          class="kuiLocalSearchInput"
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
         >
-        <div class="kuiLocalSearchAssistedInput__assistance">
-          <p class="kuiText">
-            <a
-              id="discoverLuceneSyntaxHint"
-              class="kuiLink"
-              documentation-href="query.luceneQuerySyntax"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Uses lucene query syntax
-            </a>
-          </p>
-        </div>
-      </div>
 
-      <!-- kuery input -->
-      <div
-        class="kuiLocalSearchAssistedInput"
-        ng-if="queryBar.localQuery.language === 'kuery'"
-      >
+        <!-- kuery input -->
         <input
+          ng-if="queryBar.localQuery.language === 'kuery'"
           ng-model="queryBar.localQuery.query"
           ng-model-options="{ debounce: 100 }"
           ng-trim="false"
@@ -69,34 +50,17 @@
           aria-label="Search input"
           aria-describedby="discoverKuerySyntaxHint"
           type="text"
-          class="kuiLocalSearchInput kuiLocalSearchInput--kuery"
+          class="kuiLocalSearchInput"
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
         />
         <div class="kuiLocalSearchAssistedInput__assistance">
-          <p class="kuiText">
-            <a
-              id="discoverKuerySyntaxHint"
-              class="kuiLink"
-              documentation-href="query.kueryQuerySyntax"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Uses kuery syntax
-            </a>
-          </p>
+            <query-popover
+              language="queryBar.localQuery.language"
+              on-select-language="queryBar.selectLanguage($language)"
+            ></query-popover>
         </div>
       </div>
-
-      <select
-        class="kuiLocalSearchSelect"
-        ng-options="option for option in queryBar.availableQueryLanguages"
-        ng-model="queryBar.localQuery.language"
-        ng-change="queryBar.selectLanguage()"
-        ng-if="queryBar.showLanguageSwitcher"
-        data-test-subj="queryBarLanguageSwitcher"
-      >
-      </select>
 
       <button
         type="submit"
