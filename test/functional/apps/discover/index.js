@@ -12,6 +12,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./_discover'));
+    loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
     loadTestFile(require.resolve('./_shared_links'));
     loadTestFile(require.resolve('./_collapse_expand'));

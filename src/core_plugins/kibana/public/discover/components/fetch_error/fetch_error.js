@@ -37,7 +37,7 @@ const DiscoverFetchError = ({ fetchError }) => {
     <Fragment>
       <EuiSpacer size="xl" />
 
-      <EuiFlexGroup justifyContent="center">
+      <EuiFlexGroup justifyContent="center" data-test-subj="discoverFetchError">
         <EuiFlexItem grow={false} className="discoverFetchError">
           <EuiCallOut
             title={fetchError.message}
