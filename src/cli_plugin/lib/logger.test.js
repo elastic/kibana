@@ -11,7 +11,7 @@ describe('kibana cli', function () {
       describe('logger.log', function () {
 
         beforeEach(function () {
-          sinon.spy(process.stdout, 'write');
+          sinon.stub(process.stdout, 'write');
         });
 
         afterEach(function () {
@@ -85,7 +85,7 @@ describe('kibana cli', function () {
       describe('logger.error', function () {
 
         beforeEach(function () {
-          sinon.spy(process.stderr, 'write');
+          sinon.stub(process.stderr, 'write');
         });
 
         afterEach(function () {
