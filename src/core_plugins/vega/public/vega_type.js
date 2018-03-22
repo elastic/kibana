@@ -3,6 +3,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { Status } from 'ui/vis/update_status';
+import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';
@@ -40,5 +41,6 @@ VisTypesRegistryProvider.register((Private) => {
     responseHandler: 'none',
     options: { showIndexSelection: false },
     stage: 'lab',
+    feedbackMessage: defaultFeedbackMessage,
   });
 });
