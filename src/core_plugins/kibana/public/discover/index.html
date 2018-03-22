@@ -119,7 +119,7 @@
                     </select>
                     <span ng-show="bucketInterval.scaled">
                       <icon-tip
-                        content="'This interval creates {{ bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets' }} to show in the selected time range, so it has been scaled to {{ bucketInterval.description }}'"
+                        content="getBucketIntervalToolTipText()"
                         position="'top'"
                       ></icon-tip>
                       Scaled to {{ bucketInterval.description }}
