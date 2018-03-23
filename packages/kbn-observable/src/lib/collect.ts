@@ -6,7 +6,7 @@ import { Observable } from '../observable';
  * triggered.
  */
 export function collect<T>(source: Observable<T>) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const values: any[] = [];
 
     source.subscribe({
