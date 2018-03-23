@@ -189,7 +189,7 @@ export class DashboardGrid extends React.Component {
       });
       return (
         <div
-          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? '5' : 'auto' }}
+          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? '2' : 'auto' }}
           className={classes}
           key={panel.panelIndex}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
