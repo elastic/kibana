@@ -2,11 +2,19 @@ import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+let isOpen = false;
+
 export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
   const container = document.createElement('div');
   const onClose = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    isOpen = false;
   };
   const find = (type, search, page, perPage) => {
     return savedObjectsClient.find({

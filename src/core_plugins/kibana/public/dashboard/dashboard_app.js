@@ -290,7 +290,7 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.showAddPanel = () => {
         dashboardStateManager.setFullScreenMode(false);
-        $scope.kbnTopNav.open('add');
+        $scope.kbnTopNav.click(TopNavIds.ADD);
       };
       $scope.enterEditMode = () => {
         dashboardStateManager.setFullScreenMode(false);

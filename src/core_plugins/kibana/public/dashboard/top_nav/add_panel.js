@@ -1,3 +1,4 @@
+import './add_panel.less';
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -189,6 +190,7 @@ export class DashboardAddPanel extends React.Component {
   render() {
     return (
       <EuiFlyout
+        className="addPanelFlyout"
         onClose={this.props.onClose}
         size="s"
       >
