@@ -21,12 +21,13 @@ function createTypeFilter(restrict, exclude) {
 // This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
 export function filterRows(includeSiblings) {
   return row => {
-    if (includeSiblings)
+    if (includeSiblings) {
       return (
         !/^series/.test(row.type) &&
         !/^percentile/.test(row.type) &&
         row.type !== 'math'
       );
+    }
     return (
       !/_bucket$/.test(row.type) &&
       !/^series/.test(row.type) &&
