@@ -10,6 +10,9 @@
     "kbn:bootstrap": "yarn build",
     "prettier": "prettier --write './src/**/*.ts'"
   },
+  "dependencies": {
+    "symbol-observable": "^1.2.0"
+  },
   "devDependencies": {
     "@types/jest": "^22.1.4",
     "prettier": "^1.11.1",

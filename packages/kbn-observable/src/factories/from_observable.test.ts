@@ -1,4 +1,3 @@
-import symbolObservable from 'symbol-observable';
 import { Observable as RxObservable } from 'rxjs';
 
 import { Observable } from '../observable';
@@ -9,13 +8,17 @@ const noop = () => {};
 test('handles object with Symbol.observable method', () => {
   let called = 0;
   $fromObservable({
-    [symbolObservable]() {
+    [Symbol.observable]() {
       called++;
       return {
-        subscribe() {},
+        subscribe() {
+          return {
+            unsubscribe: noop,
+          };
+        },
       };
     },
-  } as any).subscribe();
+  }).subscribe();
 
   expect(called).toBe(1);
 });
@@ -23,47 +26,47 @@ test('handles object with Symbol.observable method', () => {
 test('throws if the return value of Symbol.observable method is not an object', () => {
   expect(() => {
     $fromObservable({
-      [symbolObservable]() {
+      [Symbol.observable]() {
         return 0;
       },
     } as any);
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 
   expect(() => {
     $fromObservable({
-      [symbolObservable]() {
+      [Symbol.observable]() {
         return null;
       },
     } as any);
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 
   expect(() => {
     $fromObservable({
-      [symbolObservable]() {},
+      [Symbol.observable]() {},
     } as any);
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 });
 
 test('throws if return value of Symbol.observable method is an object with no subscribe', () => {
   expect(() => {
     $fromObservable({
-      [symbolObservable]() {
-        return {};
+      [Symbol.observable]() {
+        return {} as any;
       },
-    } as any);
-  }).toThrow(TypeError);
+    });
+  }).toThrowErrorMatchingSnapshot();
 });
 
 test('does not call subscribe on result of calling the Symbol.observable method', () => {
   const spy = jest.fn();
 
   $fromObservable({
-    [symbolObservable]() {
+    [Symbol.observable]() {
       return {
         subscribe: spy,
       };
     },
-  } as any);
+  });
 
   expect(spy).not.toHaveBeenCalled();
 });
@@ -77,25 +80,25 @@ test('returns observable itself', () => {
 test('throws for "null"', () => {
   expect(() => {
     $fromObservable(null as any);
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 });
 
 test('throws for "undefined"', () => {
   expect(() => {
     $fromObservable(undefined as any);
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 });
 
 test('throws if no argument specified', () => {
   expect(() => {
     ($fromObservable as any)();
-  }).toThrow(TypeError);
+  }).toThrowErrorMatchingSnapshot();
 });
 
 describe('from rxjs observable', () => {
   test('passes through all values', () => {
     const observable = RxObservable.from([1, 2, 3]);
-    const kbnObservable = $fromObservable<number>(observable as any);
+    const kbnObservable = $fromObservable<number>(observable);
 
     const arr: number[] = [];
     kbnObservable.subscribe(val => {
@@ -107,37 +110,32 @@ describe('from rxjs observable', () => {
 
   test('handles completed', () => {
     const observable = RxObservable.empty();
-    const kbnObservable = $fromObservable(observable as any);
+    const kbnObservable = $fromObservable(observable);
 
-    let completed = false;
-    kbnObservable.subscribe({
-      complete: () => {
-        completed = true;
-      },
-    });
+    const complete = jest.fn();
 
-    expect(completed).toBe(true);
+    kbnObservable.subscribe({ complete });
+
+    expect(complete).toHaveBeenCalledTimes(1);
   });
 
   test('handles error', () => {
     const err = new Error('err');
     const observable = RxObservable.throw(err);
 
-    const kbnObservable = $fromObservable(observable as any);
+    const kbnObservable = $fromObservable(observable);
 
-    let receivedError = undefined;
-    kbnObservable.subscribe({
-      error: err => {
-        receivedError = err;
-      },
-    });
+    const error = jest.fn();
 
-    expect(receivedError).toBe(err);
+    kbnObservable.subscribe({ error });
+
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenLastCalledWith(err);
   });
 
   test('can transform to new rxjs observable', async () => {
     const observable = RxObservable.from([1, 2, 3]);
-    const rxObservable = RxObservable.from($fromObservable(observable as any));
+    const rxObservable = RxObservable.from($fromObservable(observable));
 
     const arr = await rxObservable.toArray().toPromise();
 

@@ -1,16 +1,20 @@
+/**
+ * NB! This file should ideally _only_ export the `Observable` class and
+ * relevant types and interfaces. Try to stay away from exporting other classes
+ * or objects.
+ *
+ * An important reason for this is improving our interop with other observable
+ * libraries, as our exposed types won't be limited to our implementations. For
+ * example, if you expose a class that contains private fields, TypeScript won't
+ * treat that as the same as another implementation that doesn't contain these
+ * same private fields.
+ */
+
 import symbolObservable from 'symbol-observable';
 
 import { OperatorFunction, UnaryFunction } from './interfaces';
 
 const noop: () => any = () => {};
-
-// This adds a symbol type for `Symbol.observable`, which doesn't exist globally
-// in TypeScript yet.
-declare global {
-  export interface SymbolConstructor {
-    readonly observable: symbol;
-  }
-}
 
 /**
  * An Observer is used to receive data from an Observable, and is supplied as an
@@ -31,9 +35,21 @@ export type PartialObserver<T> = Partial<Observer<T>>;
 
 export type UnsubscribeFunction = () => void;
 
-export type SubscriptionTeardown = Subscription | UnsubscribeFunction | void;
+export type SubscriptionTeardown =
+  | AnonymousSubscription
+  | UnsubscribeFunction
+  | void;
 
-export class Subscription {
+export interface AnonymousSubscription {
+  unsubscribe(): void;
+}
+
+export interface Subscription extends AnonymousSubscription {
+  closed: boolean;
+  unsubscribe(): void;
+}
+
+class SubscriptionImpl implements Subscription {
   private _observer?: PartialObserver<any>;
   private readonly _cancelSubscription: UnsubscribeFunction = noop;
 
@@ -41,7 +57,7 @@ export class Subscription {
     observer: PartialObserver<any>,
     onSubscribe: SubscriberFunction<any>
   ) {
-    const subscriptionObserver = new SubscriptionObserver(observer, this);
+    const subscriptionObserver = new SubscriptionObserverImpl(observer, this);
     let cleanup: SubscriptionTeardown;
 
     this._observer = observer;
@@ -98,11 +114,18 @@ export class Subscription {
   }
 }
 
+export interface SubscriptionObserver<T> {
+  closed: boolean;
+  next(value: T): void;
+  error(errorValue: Error): void;
+  complete(): void;
+}
+
 /**
  * A `SubscriptionObserver` is a normalized Observer which wraps an observer and
  * a subscription.
  */
-export class SubscriptionObserver<T> {
+class SubscriptionObserverImpl<T> implements SubscriptionObserver<T> {
   /**
    * A boolean value indicating whether the subscription is closed
    */
@@ -112,7 +135,7 @@ export class SubscriptionObserver<T> {
 
   constructor(
     private readonly _observer: PartialObserver<T>,
-    private readonly _subscription: Subscription
+    private readonly _subscription: SubscriptionImpl
   ) {}
   /**
    * Sends the next value in the sequence
@@ -163,7 +186,7 @@ export type SubscriberFunction<T> = (
 export interface Subscribable<T> {
   subscribe(
     observerOrNext?: SubscriptionObserver<T> | ((value: T) => void)
-  ): Subscription;
+  ): AnonymousSubscription;
 }
 
 export class Observable<T> implements Subscribable<T> {
@@ -219,7 +242,7 @@ export class Observable<T> implements Subscribable<T> {
         ? { next: observerOrNext }
         : observerOrNext;
 
-    return new Subscription(observer, this._onSubscribe);
+    return new SubscriptionImpl(observer, this._onSubscribe);
   }
 
   /**
@@ -338,7 +361,7 @@ export class Observable<T> implements Subscribable<T> {
     });
   }
 
-  [symbolObservable]() {
+  [symbolObservable](): Observable<T> {
     return this;
   }
 }
