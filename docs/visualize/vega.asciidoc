@@ -10,7 +10,7 @@ ________________________________________________________________________________
 [[vega-introduction-video]]
 === Watch a short introduction video
 
-https://www.youtube.com/watch?v=lQGCipY3th8[image:https://i.ytimg.com/vi_webp/lQGCipY3th8/maxresdefault.webp[Kibana Vega Visualization Video]]
+https://www.youtube.com/watch?v=lQGCipY3th8[Kibana Vega Visualization Video]
 
 [[vega-quick-demo]]
 === Quick Demo
