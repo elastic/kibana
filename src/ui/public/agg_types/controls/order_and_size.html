@@ -27,12 +27,17 @@
   <div class="vis-editor-agg-form-row">
     <div class="form-group">
       <label>
-        <input type="checkbox"
-               class="kuiCheckBox"
-               name="showOther"
-               ng-model="agg.params.otherBucket">
+        <input
+          type="checkbox"
+          class="kuiCheckBox"
+          name="showOther"
+          ng-model="agg.params.otherBucket"
+        >
         Group other values in separate bucket
-        <kbn-info info="Values not in the top N are grouped in this bucket.  To include documents with missing values, enable 'Show missing values'."></kbn-info>
+        <icon-tip
+          position="'right'"
+          content="'Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.'"
+        ></icon-tip>
       </label>
     </div>
   </div>
@@ -53,12 +58,17 @@
   <div class="vis-editor-agg-form-row">
     <div class="form-group">
       <label>
-        <input type="checkbox"
-               class="kuiCheckBox"
-               name="showMissing"
-               ng-model="agg.params.missingBucket">
+        <input
+          type="checkbox"
+          class="kuiCheckBox"
+          name="showMissing"
+          ng-model="agg.params.missingBucket"
+        >
         Show missing values
-        <kbn-info info="When enabled, include documents with missing values in the search.  If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable 'Group other values in separate bucket', Elasticsearch adds the missing values to the 'other' bucket."></kbn-info>
+        <icon-tip
+          position="'right'"
+          content="'When enabled, include documents with missing values in the search.  If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.'"
+        ></icon-tip>
       </label>
     </div>
   </div>

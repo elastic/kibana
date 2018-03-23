@@ -308,6 +308,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('spyToggleButton');
     }
 
+    async setSpyPanelPageSize(size) {
+      await remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+        .click();
+    }
+
     async getMetric() {
       const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
       return await metricElement.getVisibleText();
