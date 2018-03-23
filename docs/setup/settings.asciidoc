@@ -5,7 +5,7 @@ The Kibana server reads properties from the `kibana.yml` file on startup. The de
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
 you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
 
-.Kibana Configuration Settings
+Kibana Configuration Settings
 `console.enabled:`:: *Default: true* Set to false to disable Console.  Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.
 
 `cpu.cgroup.path.override:`:: Override for cgroup cpu path when mounted in manner that is inconsistent with `/proc/self/cgroup`
@@ -33,8 +33,7 @@ Elasticsearch. This value must be a positive integer.
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Optional settings that provide the paths to the PEM-format SSL
 certificate and key files. These files are used to verify the identity of Kibana to Elasticsearch and are required when `xpack.ssl.verification_mode` in Elasticsearch is set to either `certificate` or `full`.
 
-`elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you to specify a list of paths to the PEM file for the certificate
-authority for your Elasticsearch instance.
+`elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you to specify a list of paths to the PEM file for the certificate authority for your Elasticsearch instance.
 
 `elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
 
@@ -74,8 +73,8 @@ error messages.
 `ops.interval:`:: *Default: 5000* Set the interval in milliseconds to sample system and process performance metrics.
 The minimum value is 100.
 
-[[regionmap-settings]] `regionmap:`:: Specifies additional vector layers for use in <<regionmap, Region Map>> visualizations.
-Each layer object points to an external vector file that contains a geojson FeatureCollection. Supported on Elastic Cloud Enterprise.
+[[regionmap-settings]] `regionmap:`:: Specifies additional vector layers for use in <<regionmap, Region Map>> visualizations. Supported on Elastic Cloud Enterprise.
+Each layer object points to an external vector file that contains a geojson FeatureCollection. 
 The file must use the https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system] and only include polygons.
 If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file.
 The following example shows a valid regionmap configuration.
