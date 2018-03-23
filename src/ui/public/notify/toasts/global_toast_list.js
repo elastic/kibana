@@ -32,15 +32,13 @@ export class GlobalToastList extends Component {
     } = this.props;
 
     return (
-      <div>
-        <EuiPortal>
-          <EuiGlobalToastList
-            toasts={toasts}
-            dismissToast={dismissToast}
-            toastLifeTimeMs={toastLifeTimeMs}
-          />
-        </EuiPortal>
-      </div>
+      <EuiPortal>
+        <EuiGlobalToastList
+          toasts={toasts}
+          dismissToast={dismissToast}
+          toastLifeTimeMs={toastLifeTimeMs}
+        />
+      </EuiPortal>
     );
   }
 }
