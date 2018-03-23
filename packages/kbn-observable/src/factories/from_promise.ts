@@ -8,7 +8,7 @@ import { Observable } from '../observable';
  * @param {Promise<T>}
  * @return {Observable<T>}
  */
-export function $fromPromise<T>(promise: Promise<T>): Observable<T> {
+export function $fromPromise<T>(promise: PromiseLike<T>): Observable<T> {
   return new Observable(observer => {
     promise.then(
       value => {
