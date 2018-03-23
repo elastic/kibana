@@ -124,7 +124,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       if (!this._baseLayerConfigured()) {
         try {
           const tmsServices = await serviceSettings.getTMSServices();
-          console.log('tms services', tmsServices);
           const firstRoadMapLayer = tmsServices.find((s) => {
             return s.id === 'road_map';//first road map layer
           });
