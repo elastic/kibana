@@ -1,9 +1,8 @@
 import symbolObservable from 'symbol-observable';
 
-import { OperatorFunction } from './interfaces';
-import { pipeFromArray } from './lib';
+import { OperatorFunction, UnaryFunction } from './interfaces';
 
-const noop = () => {};
+const noop: () => any = () => {};
 
 // This adds a symbol type for `Symbol.observable`, which doesn't exist globally
 // in TypeScript yet.
@@ -191,7 +190,7 @@ export class Observable<T> implements Subscribable<T> {
    * Apart from starting the execution of an Observable, this method allows you
    * to listen for values that an Observable emits, as well as for when it
    * completes or errors. You can achieve this in two following ways:
-   * 
+   *
    * TODO add details
    *
    * Implementation detail:
@@ -344,4 +343,14 @@ export class Observable<T> implements Subscribable<T> {
   [symbolObservable]() {
     return this;
   }
+}
+
+function pipeFromArray<T, R>(fns: UnaryFunction<T, R>[]): UnaryFunction<T, R> {
+  if (fns.length === 0) {
+    return noop as UnaryFunction<T, R>;
+  }
+
+  return function piped(input: T): R {
+    return fns.reduce((prev: any, fn) => fn(prev), input);
+  };
 }
