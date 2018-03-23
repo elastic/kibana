@@ -13,6 +13,15 @@ test('callback with error', async () => {
   expect(await res).toEqual([error]);
 });
 
+test('should emit undefined from a callback without arguments', async () => {
+  const func = (cb: NodeCallback) => cb(undefined);
+
+  const boundCallback = $bindNodeCallback(func);
+  const res = collect(boundCallback());
+
+  expect(await res).toEqual([undefined, 'C']);
+});
+
 test('callback with value', async () => {
   const read = (cb: NodeCallback) => cb(undefined, 'test');
 

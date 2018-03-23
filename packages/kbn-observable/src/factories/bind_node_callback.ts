@@ -62,6 +62,9 @@ import { Observable } from '../observable';
  * @return A function which returns the Observable that delivers the same values
  * the callback would deliver.
  */
+export function $bindNodeCallback(
+  callbackFunc: (callback: (err: any) => void) => void
+): () => Observable<void>;
 export function $bindNodeCallback<R>(
   callbackFunc: (callback: (err: any, result: R) => void) => void
 ): () => Observable<R>;
