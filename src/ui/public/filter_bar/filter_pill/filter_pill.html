@@ -54,8 +54,8 @@
       data-test-subj="invertFilter-{{ pill.filter.meta.key }}"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
-      aria-label="Invert filter"
-      tooltip="Invert filter"
+      aria-label="{{pill.filter.meta.negate ? 'Include matches' : 'Exclude matches'}}"
+      tooltip="{{pill.filter.meta.negate ? 'Include matches' : 'Exclude matches'}}"
       tooltip-append-to-body="true"
     >
       <span ng-show="pill.filter.meta.negate" class="fa fa-fw fa-search-plus negative"></span>
