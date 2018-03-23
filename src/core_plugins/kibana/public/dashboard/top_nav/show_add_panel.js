@@ -2,7 +2,7 @@ import { DashboardAddPanel } from './add_panel';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showAddPanel(savedObjectsClient) {
+export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
   const container = document.createElement('div');
   const onClose = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -24,6 +24,8 @@ export function showAddPanel(savedObjectsClient) {
     <DashboardAddPanel
       onClose={onClose}
       find={find}
+      addNewPanel={addNewPanel}
+      addNewVis={addNewVis}
     />
   );
   ReactDOM.render(element, container);

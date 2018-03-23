@@ -181,25 +181,6 @@ app.directive('dashboardApp', function ($injector) {
         $scope.refresh();
       };
 
-      // called by the saved-object-finder when a user clicks a vis
-      $scope.addVis = function (hit, showToast = true) {
-        dashboardStateManager.addNewPanel(hit.id, 'visualization');
-        if (showToast) {
-          toastNotifications.addSuccess({
-            title: 'Visualization was added to your dashboard',
-            'data-test-subj': 'addVisualizationToDashboardSuccess',
-          });
-        }
-      };
-
-      $scope.addSearch = function (hit) {
-        dashboardStateManager.addNewPanel(hit.id, 'search');
-        toastNotifications.addSuccess({
-          title: 'Saved search was added to your dashboard',
-          'data-test-subj': 'addSavedSearchToDashboardSuccess',
-        });
-      };
-
       $scope.$watch('model.hidePanelTitles', () => {
         dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
       });
@@ -345,7 +326,12 @@ app.directive('dashboardApp', function ($injector) {
         showCloneModal(onClone, currentTitle);
       };
       navActions[TopNavIds.ADD] = () => {
-        showAddPanel(savedObjectsClient);
+        const addNewVis = function addNewVis() {
+          kbnUrl.change(
+            `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
+        };
+
+        showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 
@@ -381,27 +367,16 @@ app.directive('dashboardApp', function ($injector) {
       }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-        // Hide the toast message since they will already see a notification from saving the visualization,
-        // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
-        const showToast = false;
-        $scope.addVis({ id: $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM] }, showToast);
+        dashboardStateManager.addNewPanel($route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM], 'visualization');
 
         kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
         kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
       }
 
-      const addNewVis = function addNewVis() {
-        kbnUrl.change(
-          `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
-      };
-
       $scope.opts = {
         displayName: dash.getDisplayName(),
         dashboard: dash,
         save: $scope.save,
-        addVis: $scope.addVis,
-        addNewVis,
-        addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
     }

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiFlyout,
@@ -11,6 +12,7 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 const VIS_TAB_ID = 'vis';
@@ -23,9 +25,13 @@ export class DashboardAddPanel extends React.Component {
     this.tabs = [{
       id: VIS_TAB_ID,
       name: 'Visualization',
+      dataTestSubj: 'addVisualizationTab',
+      toastDataTestSubj: 'addVisualizationToDashboardSuccess',
     }, {
       id: SAVED_SEARCH_TAB_ID,
       name: 'Saved Search',
+      dataTestSubj: 'addSavedSearchTab',
+      toastDataTestSubj: 'addSavedSearchToDashboardSuccess',
     }];
 
     this.state = {
@@ -84,7 +90,8 @@ export class DashboardAddPanel extends React.Component {
         items: response.savedObjects.map(savedObject => {
           return {
             title: savedObject.attributes.title,
-            id: savedObject.id
+            id: savedObject.id,
+            type: savedObject.type,
           };
         }),
         totalItems: response.total,
@@ -107,15 +114,30 @@ export class DashboardAddPanel extends React.Component {
   }
 
   renderTabs() {
-    return this.tabs.map((tab) => (
-      <EuiTab
-        onClick={() => this.onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === this.state.selectedTabId}
-        key={tab.id}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+    return this.tabs.map((tab) => {
+      return (
+        <EuiTab
+          onClick={() => this.onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === this.state.selectedTabId}
+          key={tab.id}
+          data-test-subj={tab.dataTestSubj}
+        >
+          {tab.name}
+        </EuiTab>
+      );
+    });
+  }
+
+  onAddPanel = (id, type) => {
+    this.props.addNewPanel(id, type);
+
+    const selectedTab = this.tabs.find((tab) => {
+      return tab.id === this.state.selectedTabId;
+    });
+    toastNotifications.addSuccess({
+      title: `${selectedTab.name} was added to your dashboard`,
+      'data-test-subj': selectedTab.toastDataTestSubj,
+    });
   }
 
   renderSearchBar() {
@@ -136,12 +158,21 @@ export class DashboardAddPanel extends React.Component {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,
       totalItemCount: this.state.items.length,
-      pageSizeOptions: [20],
+      pageSizeOptions: [10, 20, 50],
     };
     const tableColumns = [
       {
         field: 'title',
         name: 'Title',
+        render: (field, record) => (
+          <EuiLink
+            onClick={() => {
+              this.onAddPanel(record.id, record.type);
+            }}
+          >
+            {field}
+          </EuiLink>
+        )
       }
     ];
     return (
@@ -188,4 +219,6 @@ export class DashboardAddPanel extends React.Component {
 DashboardAddPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   find: PropTypes.func.isRequired,
+  addNewPanel: PropTypes.func.isRequired,
+  addNewVis: PropTypes.func.isRequired,
 };
