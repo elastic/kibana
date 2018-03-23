@@ -28,15 +28,17 @@ export class DashboardAddPanel extends React.Component {
       name: 'Visualization',
       dataTestSubj: 'addVisualizationTab',
       toastDataTestSubj: 'addVisualizationToDashboardSuccess',
+      noItemsMsg: 'No matching visualizations found.',
     }, {
       id: SAVED_SEARCH_TAB_ID,
       name: 'Saved Search',
       dataTestSubj: 'addSavedSearchTab',
       toastDataTestSubj: 'addSavedSearchToDashboardSuccess',
+      noItemsMsg: 'No matching saved searches found.',
     }];
 
     this.state = {
-      selectedTabId: VIS_TAB_ID,
+      selectedTab: this.tabs[0],
       items: [],
       isFetchingItems: false,
       page: 1,
@@ -65,7 +67,7 @@ export class DashboardAddPanel extends React.Component {
   }
 
   getSavedObjectType = () => {
-    if (this.state.selectedTabId === VIS_TAB_ID) {
+    if (this.state.selectedTab.id === VIS_TAB_ID) {
       return 'visualization';
     }
 
@@ -107,9 +109,9 @@ export class DashboardAddPanel extends React.Component {
   }
 
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = tab => {
     this.setState({
-      selectedTabId: id,
+      selectedTab: tab,
       filter: undefined,
     }, this.fetchItems);
   }
@@ -118,8 +120,8 @@ export class DashboardAddPanel extends React.Component {
     return this.tabs.map((tab) => {
       return (
         <EuiTab
-          onClick={() => this.onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === this.state.selectedTabId}
+          onClick={() => this.onSelectedTabChanged(tab)}
+          isSelected={tab.id === this.state.selectedTab.id}
           key={tab.id}
           data-test-subj={tab.dataTestSubj}
         >
@@ -132,12 +134,9 @@ export class DashboardAddPanel extends React.Component {
   onAddPanel = (id, type) => {
     this.props.addNewPanel(id, type);
 
-    const selectedTab = this.tabs.find((tab) => {
-      return tab.id === this.state.selectedTabId;
-    });
     toastNotifications.addSuccess({
-      title: `${selectedTab.name} was added to your dashboard`,
-      'data-test-subj': selectedTab.toastDataTestSubj,
+      title: `${this.state.selectedTab.name} was added to your dashboard`,
+      'data-test-subj': this.state.selectedTab.toastDataTestSubj,
     });
   }
 
@@ -183,6 +182,7 @@ export class DashboardAddPanel extends React.Component {
         columns={tableColumns}
         pagination={pagination}
         onChange={this.onTableChange}
+        noItemsMessage={this.state.selectedTab.noItemsMsg}
       />
     );
   }
