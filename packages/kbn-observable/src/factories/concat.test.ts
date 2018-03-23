@@ -2,7 +2,7 @@ import { $concat } from './concat';
 import { Subject } from '../subjects';
 import { collect } from '../lib/collect';
 
-test('continous on next observable when previous completes', async () => {
+test('continue on next observable when previous completes', async () => {
   const a = new Subject();
   const b = new Subject();
 
