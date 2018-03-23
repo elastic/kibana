@@ -1,11 +1,6 @@
 import { Observable } from '../observable';
+import { $fromIterable } from './from_iterable';
 
 export function $of<T>(...items: T[]): Observable<T> {
-  return new Observable(observer => {
-    for (const item of items) {
-      observer.next(item);
-    }
-
-    observer.complete();
-  });
+  return $fromIterable(items);
 }
