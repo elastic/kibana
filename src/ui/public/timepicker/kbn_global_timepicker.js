@@ -46,15 +46,16 @@ uiModules
           kbnTopNav.close('interval');
         };
 
-        $scope.getSharedTimeFilter = function () {
-          if (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled) {
-            const from = timefilter.getBounds().min.clone().utc().format();
-            const to = timefilter.getBounds().max.clone().utc().format();
-            return { from, to };
-          }
-          else {
-            return { from: null, to: null };
-          }
+        $scope.getSharedTimeFilterFromDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().min.clone().utc().format()
+            : null;
+        };
+
+        $scope.getSharedTimeFilterToDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().max.clone().utc().format()
+            : null;
         };
       },
     };
