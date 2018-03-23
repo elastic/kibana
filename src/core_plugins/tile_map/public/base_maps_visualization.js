@@ -124,10 +124,14 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       if (!this._baseLayerConfigured()) {
         try {
           const tmsServices = await serviceSettings.getTMSServices();
+          console.log('tms services', tmsServices);
           const firstRoadMapLayer = tmsServices.find((s) => {
             return s.id === 'road_map';//first road map layer
           });
-          this._setTmsLayer(firstRoadMapLayer);
+          const fallback = firstRoadMapLayer ? firstRoadMapLayer : tmsServices[0];
+          if (fallback) {
+            this._setTmsLayer(firstRoadMapLayer);
+          }
         } catch (e) {
           this._notify.warning(e.message);
           return;
@@ -167,12 +171,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _setTmsLayer(tmsLayer) {
-      if (tmsLayer.maxZoom < this._kibanaMap.getMaxZoomLevel()) {
-        this._kibanaMap.setMinZoom(tmsLayer.minZoom);
-        this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
-        if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
-          this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
-        }
+      this._kibanaMap.setMinZoom(tmsLayer.minZoom);
+      this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
+      if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
+        this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
       const url = tmsLayer.url;
       const options = _.cloneDeep(tmsLayer);

@@ -13,6 +13,9 @@ export function injectVars(server) {
 
   regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 
+  console.log('isoverridden', isOverridden);
+  console.log('onfig', tilemapConfig);
+
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     regionmapsConfig: regionmapsConfig,
