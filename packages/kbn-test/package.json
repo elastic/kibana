@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/test",
+  "main": "./src/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "babel-cli": "^6.26.0"
+  }
+}

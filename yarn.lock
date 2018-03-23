@@ -162,6 +162,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test@link:packages/kbn-test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-framework@link:packages/kbn-ui-framework":
   version "0.0.0"
   uid ""

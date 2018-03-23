@@ -1,3 +1,5 @@
+import { format as formatUrl } from 'url';
+import { OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
 import {
   KibanaServerProvider,
   EsProvider,
@@ -14,6 +16,22 @@ export default function () {
       kibana: kibanaTestServerUrlParts,
       elasticsearch: esTestConfig.getUrlParts(),
     },
+
+    kibanaServerArgs: [
+      '--env=development',
+      '--logging.json=false',
+      '--no-base-path',
+      `--server.port=${kibanaTestServerUrlParts.port}`,
+      `--optimize.watchPort=${kibanaTestServerUrlParts.port}`,
+      '--optimize.watchPrebuild=true',
+      '--status.allowAnonymous=true',
+      '--optimize.enabled=true',
+      `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
+      `--elasticsearch.url=${formatUrl(esTestConfig.getUrlParts())}`,
+      `--elasticsearch.username=${esTestConfig.getUrlParts().username}`,
+      `--elasticsearch.password=${esTestConfig.getUrlParts().password}`,
+    ],
+
     services: {
       kibanaServer: KibanaServerProvider,
       retry: RetryProvider,

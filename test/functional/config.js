@@ -82,6 +82,11 @@ export default async function ({ readConfigFile }) {
       dashboardAddPanel: DashboardAddPanelProvider,
     },
     servers: commonConfig.get('servers'),
+
+    kibanaServerArgs: [
+      ...commonConfig.get('kibanaServerArgs'),
+    ],
+
     apps: {
       status_page: {
         pathname: '/status',

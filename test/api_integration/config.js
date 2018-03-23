@@ -22,6 +22,12 @@ export default async function ({ readConfigFile }) {
     servers: commonConfig.get('servers'),
     junit: {
       reportName: 'API Integration Tests'
-    }
+    },
+    kibanaServerArgs: [
+      ...commonConfig.get('kibanaServerArgs'),
+      '--optimize.enabled=false',
+      '--elasticsearch.healthCheck.delay=3600000',
+      '--server.xsrf.disableProtection=true',
+    ],
   };
 }
