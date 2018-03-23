@@ -1,8 +1,8 @@
 import './add_panel.less';
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
+import { SavedObjectFinder } from './saved_object_finder';
 
 import {
   EuiFlexGroup,
@@ -13,10 +13,7 @@ import {
   EuiButtonIcon,
   EuiTabs,
   EuiTab,
-  EuiSearchBar,
-  EuiBasicTable,
   EuiSpacer,
-  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -27,105 +24,55 @@ export class DashboardAddPanel extends React.Component {
   constructor(props) {
     super(props);
 
+    const addNewVisBtn = (
+      <EuiButton
+        onClick={this.props.addNewVis}
+        data-test-subj="addNewSavedObjectLink"
+      >
+        Add new Visualization
+      </EuiButton>
+    );
+
     this.tabs = [{
       id: VIS_TAB_ID,
       name: 'Visualization',
       dataTestSubj: 'addVisualizationTab',
       toastDataTestSubj: 'addVisualizationToDashboardSuccess',
-      noItemsMsg: 'No matching visualizations found.',
-      addNew: (
-        <EuiButton
-          onClick={this.props.addNewVis}
-          data-test-subj="addNewSavedObjectLink"
-        >
-          Add new Visualization
-        </EuiButton>
+      savedObjectFinder: (
+        <SavedObjectFinder
+          key="visSavedObjectFinder"
+          addNewButton={addNewVisBtn}
+          onChoose={this.onAddPanel}
+          find={this.props.find}
+          noItemsMessage="No matching visualizations found."
+          savedObjectType="visualization"
+        />
       )
     }, {
       id: SAVED_SEARCH_TAB_ID,
       name: 'Saved Search',
       dataTestSubj: 'addSavedSearchTab',
       toastDataTestSubj: 'addSavedSearchToDashboardSuccess',
-      noItemsMsg: 'No matching saved searches found.',
+      savedObjectFinder: (
+        <SavedObjectFinder
+          key="searchSavedObjectFinder"
+          onChoose={this.onAddPanel}
+          find={this.props.find}
+          noItemsMessage="No matching saved searches found."
+          savedObjectType="search"
+        />
+      )
     }];
 
     this.state = {
       selectedTab: this.tabs[0],
-      items: [],
-      isFetchingItems: false,
-      page: 1,
-      perPage: 20,
     };
   }
-
-  componentWillMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this.debouncedFetch.cancel();
-  }
-
-  componentDidMount() {
-    this.fetchItems();
-  }
-
-  onTableChange = ({ page }) => {
-    this.setState({
-      page: page.index,
-      perPage: page.pageSize,
-    });
-  }
-
-  getSavedObjectType = () => {
-    if (this.state.selectedTab.id === VIS_TAB_ID) {
-      return 'visualization';
-    }
-
-    return 'search';
-  }
-
-  debouncedFetch = _.debounce(async (filter) => {
-    const response = await this.props.find(
-      this.getSavedObjectType(),
-      filter,
-      this.state.page,
-      this.state.perPage);
-
-    if (!this._isMounted) {
-      return;
-    }
-
-    // We need this check to handle the case where search results come back in a different
-    // order than they were sent out. Only load results for the most recent search.
-    if (filter === this.state.filter) {
-      this.setState({
-        isFetchingItems: false,
-        items: response.savedObjects.map(savedObject => {
-          return {
-            title: savedObject.attributes.title,
-            id: savedObject.id,
-            type: savedObject.type,
-          };
-        }),
-        totalItems: response.total,
-      });
-    }
-  }, 300);
-
-  fetchItems = () => {
-    this.setState({
-      isFetchingItems: true,
-    }, this.debouncedFetch.bind(null, this.state.filter));
-  }
-
 
   onSelectedTabChanged = tab => {
     this.setState({
       selectedTab: tab,
-      filter: undefined,
-    }, this.fetchItems);
+    });
   }
 
   renderTabs() {
@@ -150,58 +97,6 @@ export class DashboardAddPanel extends React.Component {
       title: `${this.state.selectedTab.name} was added to your dashboard`,
       'data-test-subj': this.state.selectedTab.toastDataTestSubj,
     });
-  }
-
-  renderSearchBar() {
-    const toolsRight = [];
-    if (this.state.selectedTab.addNew) {
-      toolsRight.push(this.state.selectedTab.addNew);
-    }
-    return (
-      <EuiSearchBar
-        onChange={(query) => {
-          this.setState({
-            filter: query.text
-          }, this.fetchItems);
-        }}
-        box={{ incremental: true, ['data-test-subj']: 'savedObjectFinderSearchInput' }}
-        toolsRight={toolsRight}
-      />
-    );
-  }
-
-  renderTable() {
-    const pagination = {
-      pageIndex: this.state.page,
-      pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
-      pageSizeOptions: [10, 20, 50],
-    };
-    const tableColumns = [
-      {
-        field: 'title',
-        name: 'Title',
-        render: (field, record) => (
-          <EuiLink
-            onClick={() => {
-              this.onAddPanel(record.id, record.type);
-            }}
-          >
-            {field}
-          </EuiLink>
-        )
-      }
-    ];
-    return (
-      <EuiBasicTable
-        items={this.state.items}
-        loading={this.state.isFetchingItems}
-        columns={tableColumns}
-        pagination={pagination}
-        onChange={this.onTableChange}
-        noItemsMessage={this.state.selectedTab.noItemsMsg}
-      />
-    );
   }
 
   render() {
@@ -234,8 +129,7 @@ export class DashboardAddPanel extends React.Component {
 
           <EuiSpacer size="s" />
 
-          {this.renderSearchBar()}
-          {this.renderTable()}
+          {this.state.selectedTab.savedObjectFinder}
 
         </EuiFlyoutBody>
       </EuiFlyout>
