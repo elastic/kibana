@@ -12,8 +12,10 @@ import { Observable } from '../observable';
  * as `func`, except the last one (the callback). When the output function
  * is called with arguments it will return an Observable. If function `func`
  * calls its callback with one argument the Observable will emit that value.
- * If on the other hand the callback is called with multiple values the
- * resulting Observable will emit an error.
+ *
+ * NB! Does NOT handle functions whose callbacks have more than two parameters.
+ * If more than one argument is passed to the callback, the observable will emit
+ * an error instead of the values.
  *
  * It is very important to remember that input function `func` is not called
  * when the output function is, but rather when the Observable returned by the
@@ -22,7 +24,16 @@ import { Observable } from '../observable';
  * someone subscribes to the resulting Observable, but not before.
  *
  * Results passed to the callback are emitted immediately after `func` invokes
- * the callback.
+ * the callback. After the Observable emits a value, it will complete
+ * immediately. This means even if `func` calls callback again, values from
+ * second and consecutive calls will never appear on the stream.
+ *
+ * If the input function calls its callback in the "Node.js style" (i.e. first
+ * argument to callback is optional error parameter signaling whether the call
+ * failed or not), {@link $bindNodeCallback} provides convenient error handling
+ * and probably is a better choice. `$bindCallback` will treat such functions
+ * the same as any other and error parameters (whether passed or not) will
+ * always be interpreted as regular callback argument.
  *
  * Implementation detail:
  * This contains multiple overloads for `$bindCallback` to enable stricter
