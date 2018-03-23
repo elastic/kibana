@@ -17,5 +17,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_shared_links'));
     loadTestFile(require.resolve('./_collapse_expand'));
     loadTestFile(require.resolve('./_source_filters'));
+    loadTestFile(require.resolve('./_large_string'));
   });
 }
