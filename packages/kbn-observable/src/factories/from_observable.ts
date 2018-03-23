@@ -12,7 +12,6 @@ export type ObservableInput<T> = Observablelike<T> | Subscribable<T>;
  * If you need to handle:
  *
  * - promises, use `$fromPromise`
- * - functions, use `$fromCallback`
  * - iterables, use `$fromIterable`
  */
 export function $fromObservable<T>(x: ObservableInput<T>): Observable<T> {
