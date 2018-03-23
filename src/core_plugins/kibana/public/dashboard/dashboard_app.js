@@ -19,10 +19,12 @@ import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
+import { showAddPanel } from './top_nav/show_add_panel';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -53,12 +55,13 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, localStorage) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
       $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
@@ -340,6 +343,9 @@ app.directive('dashboardApp', function ($injector) {
         };
 
         showCloneModal(onClone, currentTitle);
+      };
+      navActions[TopNavIds.ADD] = () => {
+        showAddPanel(savedObjectsClient);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 
