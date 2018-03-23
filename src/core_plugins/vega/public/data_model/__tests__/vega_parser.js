@@ -62,6 +62,11 @@ describe('VegaParser._resolveEsQueries', () => {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }]
       });
       await vp._resolveDataUrls();
+
+      if (vp.spec.data && typeof vp.spec.data.url === 'function') {
+        vp.spec.data.url = vp.spec.data.url();
+      }
+
       expect(vp.spec).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount || 0);
     };
