@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws for "null" 1`] = `"null is not iterable"`;
+
+exports[`throws for "undefined" 1`] = `"undefined is not iterable"`;
