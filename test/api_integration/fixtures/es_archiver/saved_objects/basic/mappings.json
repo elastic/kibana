@@ -147,6 +147,19 @@
               }
             }
           },
+          "tag": {
+            "properties": {
+              "color": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "text"
+              }
+            }
+          },
+          "tags": {
+            "type": "keyword"
+          },
           "timelion-sheet": {
             "properties": {
               "description": {

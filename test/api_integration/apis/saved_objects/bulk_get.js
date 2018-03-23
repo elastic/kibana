@@ -45,7 +45,10 @@ export default function ({ getService }) {
                     // cheat for some of the more complex attributes
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
-                    kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
+                    kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
+                    tags: [
+                      'f16f0200-1804-11e8-9684-d7923ac6f695'
+                    ]
                   }
                 },
                 {
@@ -70,6 +73,54 @@ export default function ({ getService }) {
             });
           })
       ));
+
+      describe('join', () => {
+        it('should join tags', async () => (
+          await supertest
+            .post(`/api/saved_objects/bulk_get?join=tags`)
+            .send([
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              },
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+              }
+            ])
+            .expect(200)
+            .then(resp => {
+              expect(resp.body.saved_objects[0].attributes.tags).to.eql([
+                'f16f0200-1804-11e8-9684-d7923ac6f695'
+              ]);
+              expect(resp.body.saved_objects[0].join).to.eql({
+                tags: {
+                  'f16f0200-1804-11e8-9684-d7923ac6f695': {
+                    color: 'blue',
+                    title: 'tag2'
+                  }
+                }
+              });
+
+              expect(resp.body.saved_objects[1].attributes.tags).to.eql([
+                'f16f0200-1804-11e8-9684-d7923ac6f695',
+                'ee93a770-1804-11e8-9684-d7923ac6f695'
+              ]);
+              expect(resp.body.saved_objects[1].join).to.eql({
+                tags: {
+                  'ee93a770-1804-11e8-9684-d7923ac6f695': {
+                    color: 'red',
+                    title: 'tag1'
+                  },
+                  'f16f0200-1804-11e8-9684-d7923ac6f695': {
+                    color: 'blue',
+                    title: 'tag2'
+                  }
+                }
+              });
+            })
+        ));
+      });
     });
 
     describe('without kibana index', () => {

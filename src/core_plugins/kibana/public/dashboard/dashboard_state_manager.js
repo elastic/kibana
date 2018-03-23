@@ -14,6 +14,7 @@ import {
   updateTitle,
   updateDescription,
   updateHidePanelTitles,
+  updateTags,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -27,6 +28,7 @@ import {
   getDescription,
   getUseMargins,
   getHidePanelTitles,
+  getTags,
 } from '../selectors';
 
 /**
@@ -44,6 +46,7 @@ import {
  * State that is only stored in the Store:
  *  - embeddables
  *  - maximizedPanelId
+ *  - tags
  *
  * State that is shared and needs to be synced:
  * - fullScreenMode - changes propagate from AppState -> Store and from Store -> AppState.
@@ -87,6 +90,15 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
 
+    const joinedTags = _.get(savedDashboard, 'join.tags', {});
+    const initialTags =  Object.keys(joinedTags).map(id => {
+      return {
+        id: id,
+        title: joinedTags[id].title,
+        color: joinedTags[id].color,
+      };
+    });
+
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
     store.dispatch(setPanels(this.getPanels()));
@@ -96,6 +108,7 @@ export class DashboardStateManager {
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
+    store.dispatch(updateTags(initialTags));
 
     this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
@@ -451,6 +464,24 @@ export class DashboardStateManager {
     return panel;
   }
 
+  getTags() {
+    return getTags(store.getState());
+  }
+
+  addTag(tag) {
+    const tags = this.getTags();
+    store.dispatch(updateTags([...tags, tag]));
+    this.isDirty = true;
+  }
+
+  deleteTag(tagId) {
+    const tags = this.getTags().filter(tag => {
+      return tag.id !== tagId;
+    });
+    store.dispatch(updateTags([...tags]));
+    this.isDirty = true;
+  }
+
   /**
    * Creates and initializes a basic panel, adding it to the state.
    * @param {number} id
@@ -531,9 +562,13 @@ export class DashboardStateManager {
 
   /**
    * Saves the current application state to the URL.
+   * Saves current store state to dashboard saved object.
    */
   saveState() {
     this.appState.save();
+    this.savedDashboard.tags = this.getTags().map(tag => {
+      return tag.id;
+    });
   }
 
   /**

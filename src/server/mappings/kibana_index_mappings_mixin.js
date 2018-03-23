@@ -24,6 +24,9 @@ const BASE_SAVED_OBJECT_MAPPINGS = {
           }
         }
       },
+      tags: {
+        type: 'keyword'
+      }
     }
   }
 };

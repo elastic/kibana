@@ -173,11 +173,12 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           return savedObjectsClient.get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
-
               return {
                 _id: resp.id,
                 _type: resp.type,
                 _source: _.cloneDeep(resp.attributes),
+                _updatedAt: resp.updatedAt,
+                _join: resp.join,
                 found: resp._version ? true : false
               };
             })
@@ -190,6 +191,8 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
 
     this.applyESResp = (resp) => {
+      this.join = resp._join;
+      this.updatedAt = resp._updatedAt;
       this._source = _.cloneDeep(resp._source);
 
       if (resp.found != null && !resp.found) throw new SavedObjectNotFound(esType, this.id);
@@ -244,6 +247,10 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         body.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(_.omit(this.searchSource.toJSON(), ['sort', 'size']))
         };
+      }
+
+      if (this.tags) {
+        body.tags = this.tags;
       }
 
       return body;

@@ -24,6 +24,10 @@ import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import {
+  SavedObjectsClientProvider,
+  TagsClient,
+} from 'ui/saved_objects';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -97,9 +101,30 @@ app.directive('dashboardApp', function ($injector) {
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
+          tags: dashboardStateManager.getTags(),
         };
         $scope.panels = dashboardStateManager.getPanels();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
+      };
+
+      const savedObjectsClient = Private(SavedObjectsClientProvider);
+      const tagsClient = new TagsClient(savedObjectsClient);
+      $scope.findTags = async (search, size) => {
+        const tags = await tagsClient.find(search, size);
+        return tags.map(savedObject => {
+          return {
+            id: savedObject.id,
+            title: savedObject.attributes.title,
+            color: savedObject.attributes.color,
+          };
+        });
+      };
+      $scope.addTag = (tag) => {
+        dashboardStateManager.addTag(tag);
+        updateState();
+      };
+      $scope.deleteTag = (id) => {
+        dashboardStateManager.deleteTag(id);
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.

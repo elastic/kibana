@@ -121,7 +121,7 @@ export class SavedObjectsClient {
    * ])
    */
   bulkGet(objects = []) {
-    const url = this._getUrl(['bulk_get']);
+    const url = this._getUrl(['bulk_get'], { join: 'tags' });
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
     return this._request('POST', url, filteredObjects).then(resp => {

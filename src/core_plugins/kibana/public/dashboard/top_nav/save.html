@@ -47,6 +47,24 @@
     >
   </div>
 
+  <div class="kuiLocalDropdownSection">
+    <div class="kuiLocalDropdownHeader">
+      <label
+        class="kuiLocalDropdownHeader__label"
+        for="saveDashboardTags"
+      >
+        Tags
+      </label>
+    </div>
+
+    <tags-input
+      find="findTags"
+      on-add="addTag"
+      on-delete="deleteTag"
+      tags="model.tags"
+    />
+  </div>
+
   <saved-object-save-as-check-box
     class="kuiVerticalRhythmSmall"
     saved-object="opts.dashboard"
