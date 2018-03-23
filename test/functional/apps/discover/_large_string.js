@@ -27,8 +27,8 @@ export default function ({ getService, getPageObjects }) {
          + ' Last Updated: December 30, 2017 Language: English Character set encoding:';
 
       let rowData;
+      await PageObjects.common.navigateToApp('discover');
       await retry.try(async function tryingForTime() {
-        await PageObjects.common.navigateToApp('discover');
         rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('rowData.length=' + rowData.length);
         expect(rowData.substring(0, 200)).to.be(ExpectedDoc.substring(0, 200));
@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }) {
           log.debug('test Newsletter keyword is searched');
         });
       });
+
       it('the search term Newsletter should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
