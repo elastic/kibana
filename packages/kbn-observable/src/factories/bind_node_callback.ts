@@ -63,21 +63,21 @@ import { Observable } from '../observable';
  * the callback would deliver.
  */
 export function $bindNodeCallback<R>(
-  callbackFunc: (callback: (err: any, result: R) => any) => any
+  callbackFunc: (callback: (err: any, result: R) => void) => void
 ): () => Observable<R>;
 export function $bindNodeCallback<T, R>(
-  callbackFunc: (v1: T, callback: (err: any, result: R) => any) => any
+  callbackFunc: (v1: T, callback: (err: any, result: R) => void) => void
 ): (v1: T) => Observable<R>;
 export function $bindNodeCallback<T, T2, R>(
-  callbackFunc: (v1: T, v2: T2, callback: (err: any, result: R) => any) => any
+  callbackFunc: (v1: T, v2: T2, callback: (err: any, result: R) => void) => void
 ): (v1: T, v2: T2) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, R>(
   callbackFunc: (
     v1: T,
     v2: T2,
     v3: T3,
-    callback: (err: any, result: R) => any
-  ) => any
+    callback: (err: any, result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, T4, R>(
   callbackFunc: (
@@ -85,8 +85,8 @@ export function $bindNodeCallback<T, T2, T3, T4, R>(
     v2: T2,
     v3: T3,
     v4: T4,
-    callback: (err: any, result: R) => any
-  ) => any
+    callback: (err: any, result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, T4, T5, R>(
   callbackFunc: (
@@ -95,8 +95,8 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, R>(
     v3: T3,
     v4: T4,
     v5: T5,
-    callback: (err: any, result: R) => any
-  ) => any
+    callback: (err: any, result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4, v5: T5) => Observable<R>;
 export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
   callbackFunc: (
@@ -106,8 +106,8 @@ export function $bindNodeCallback<T, T2, T3, T4, T5, T6, R>(
     v4: T4,
     v5: T5,
     v6: T6,
-    callback: (err: any, result: R) => any
-  ) => any
+    callback: (err: any, result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6) => Observable<R>;
 export function $bindNodeCallback<T>(callbackFunc: Function) {
   return function(this: any, ...args: any[]): Observable<T> {

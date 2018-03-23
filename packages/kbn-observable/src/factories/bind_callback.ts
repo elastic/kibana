@@ -46,19 +46,19 @@ import { Observable } from '../observable';
  * the callback would deliver.
  */
 export function $bindCallback(
-  callbackFunc: (callback: () => any) => any
+  callbackFunc: (callback: () => void) => void
 ): () => Observable<void>;
 export function $bindCallback<R>(
-  callbackFunc: (callback: (result: R) => any) => any
+  callbackFunc: (callback: (result: R) => void) => void
 ): () => Observable<R>;
 export function $bindCallback<T, R>(
-  callbackFunc: (v1: T, callback: (result: R) => any) => any
+  callbackFunc: (v1: T, callback: (result: R) => void) => void
 ): (v1: T) => Observable<R>;
 export function $bindCallback<T, T2, R>(
-  callbackFunc: (v1: T, v2: T2, callback: (result: R) => any) => any
+  callbackFunc: (v1: T, v2: T2, callback: (result: R) => void) => void
 ): (v1: T, v2: T2) => Observable<R>;
 export function $bindCallback<T, T2, T3, R>(
-  callbackFunc: (v1: T, v2: T2, v3: T3, callback: (result: R) => any) => any
+  callbackFunc: (v1: T, v2: T2, v3: T3, callback: (result: R) => void) => void
 ): (v1: T, v2: T2, v3: T3) => Observable<R>;
 export function $bindCallback<T, T2, T3, T4, R>(
   callbackFunc: (
@@ -66,8 +66,8 @@ export function $bindCallback<T, T2, T3, T4, R>(
     v2: T2,
     v3: T3,
     v4: T4,
-    callback: (result: R) => any
-  ) => any
+    callback: (result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4) => Observable<R>;
 export function $bindCallback<T, T2, T3, T4, T5, R>(
   callbackFunc: (
@@ -76,8 +76,8 @@ export function $bindCallback<T, T2, T3, T4, T5, R>(
     v3: T3,
     v4: T4,
     v5: T5,
-    callback: (result: R) => any
-  ) => any
+    callback: (result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4, v5: T5) => Observable<R>;
 export function $bindCallback<T, T2, T3, T4, T5, T6, R>(
   callbackFunc: (
@@ -87,8 +87,8 @@ export function $bindCallback<T, T2, T3, T4, T5, T6, R>(
     v4: T4,
     v5: T5,
     v6: T6,
-    callback: (result: R) => any
-  ) => any
+    callback: (result: R) => void
+  ) => void
 ): (v1: T, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6) => Observable<R>;
 export function $bindCallback<T>(
   callbackFunc: Function
