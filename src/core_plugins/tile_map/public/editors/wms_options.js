@@ -18,7 +18,6 @@ module.directive('wmsOptions', function (serviceSettings) {
           .getTMSServices()
           .then((allTMSServices) => {
 
-            console.log('all tms services', allTMSServices);
             if (!$scope.options.tmsLayers) {
               $scope.options.tmsLayers = [];
             }
