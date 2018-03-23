@@ -1,4 +1,3 @@
-export { ifEmpty } from './if_empty';
 export { last } from './last';
 export { first } from './first';
 export { map } from './map';

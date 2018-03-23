@@ -1,8 +1,7 @@
+import { Observable } from '../observable';
 import { last } from './last';
 import { scan } from './scan';
-import { ifEmpty } from './if_empty';
-import { pipe } from '../lib';
-import { OperatorFunction } from '../interfaces';
+import { OperatorFunction, MonoTypeOperatorFunction } from '../interfaces';
 
 /**
  * Applies the accumulator function to every value in the source observable and
@@ -23,10 +22,35 @@ export function reduce<T, R>(
   initialValue: R
 ): OperatorFunction<T, R> {
   return function reduceOperation(source) {
-    return pipe(
+    return source.pipe(
       scan(accumulator, initialValue),
-      ifEmpty(() => initialValue),
+      ifEmpty(initialValue),
       last()
-    )(source);
+    );
+  };
+}
+
+function ifEmpty<T>(defaultValue: T): MonoTypeOperatorFunction<T> {
+  return function ifEmptyOperation(source) {
+    return new Observable(observer => {
+      let hasReceivedValue = false;
+
+      return source.subscribe({
+        next(value) {
+          hasReceivedValue = true;
+          observer.next(value);
+        },
+        error(error) {
+          observer.error(error);
+        },
+        complete() {
+          if (!hasReceivedValue) {
+            observer.next(defaultValue);
+          }
+
+          observer.complete();
+        },
+      });
+    });
   };
 }
