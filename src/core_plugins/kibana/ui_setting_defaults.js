@@ -76,6 +76,7 @@ export function getUiSettingDefaults() {
     'defaultColumns': {
       value: ['_source'],
       description: 'Columns displayed by default in the Discovery tab',
+      category: 'discover',
     },
     'metaFields': {
       value: ['_source', '_id', '_type', '_index', '_score'],
@@ -84,36 +85,42 @@ export function getUiSettingDefaults() {
     'discover:sampleSize': {
       value: 500,
       description: 'The number of rows to show in the table',
+      category: 'discover',
     },
     'discover:aggs:terms:size': {
       value: 20,
       type: 'number',
       description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
-      'button, in the field drop downs, in the discover sidebar.'
+      'button, in the field drop downs, in the discover sidebar.',
+      category: 'discover',
     },
     'discover:sort:defaultOrder': {
       value: 'desc',
       options: ['desc', 'asc'],
       type: 'select',
       description: 'Controls the default sort direction for time based index patterns in the Discover app.',
+      category: 'discover',
     },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
+      category: 'discover',
     },
     'courier:maxSegmentCount': {
       value: 30,
       description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
         'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
-        'cause requests to take much longer to process'
+        'cause requests to take much longer to process.',
+      category: 'discover',
     },
     'courier:ignoreFilterIfFieldNotInIndex': {
       value: false,
       description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
         'When set to false, all filters are applied to all visualizations. ' +
         'When set to true, filter(s) will be ignored for a visualization ' +
-        'when the visualization\'s index does not contain the filtering field.'
+        'when the visualization\'s index does not contain the filtering field.',
+      category: 'visualization',
     },
     'courier:setRequestPreference': {
       value: 'sessionId',
@@ -150,7 +157,8 @@ export function getUiSettingDefaults() {
     },
     'visualize:enableLabs': {
       value: true,
-      description: 'Enable lab visualizations in Visualize.'
+      description: 'Enable lab visualizations in Visualize.',
+      category: 'visualization',
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,
@@ -160,6 +168,7 @@ export function getUiSettingDefaults() {
       'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" ' +
       'target="_blank" rel="noopener noreferrer">' +
       'Explanation of cell dimensions</a>',
+      category: 'visualization',
     },
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
@@ -175,29 +184,34 @@ export function getUiSettingDefaults() {
         }
       }, null, 2),
       type: 'json',
-      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank" rel="noopener noreferrer">properties</a> for the WMS map server support in the coordinate map'
+      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank" rel="noopener noreferrer">properties</a> for the WMS map server support in the coordinate map',
+      category: 'visualization',
     },
     'visualization:regionmap:showWarnings': {
       value: true,
-      description: 'Whether the region map show a warning when terms cannot be joined to a shape on the map.'
+      description: 'Whether the region map show a warning when terms cannot be joined to a shape on the map.',
+      category: 'visualization',
     },
     'visualization:colorMapping': {
       type: 'json',
       value: JSON.stringify({
         Count: '#00A69B'
       }),
-      description: 'Maps values to specified colors within visualizations'
+      description: 'Maps values to specified colors within visualizations',
+      category: 'visualization',
     },
     'visualization:loadingDelay': {
       value: '2s',
-      description: 'Time to wait before dimming visualizations during query'
+      description: 'Time to wait before dimming visualizations during query',
+      category: 'visualization',
     },
     'visualization:dimmingOpacity': {
       type: 'number',
       value: 0.5,
       description: 'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
       'The lower this number, the more the highlighted element will stand out.' +
-      'This must be a number between 0 and 1.'
+      'This must be a number between 0 and 1.',
+      category: 'visualization',
     },
     'csv:separator': {
       value: ',',
@@ -335,7 +349,8 @@ export function getUiSettingDefaults() {
     },
     'dashboard:defaultDarkTheme': {
       value: false,
-      description: 'New dashboards use dark theme by default'
+      description: 'New dashboards use dark theme by default',
+      category: 'dashboard',
     },
     'filters:pinnedByDefault': {
       value: false,
@@ -348,31 +363,36 @@ export function getUiSettingDefaults() {
     'notifications:banner': {
       type: 'markdown',
       description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank" rel="noopener noreferrer">Markdown supported</a>.',
-      value: ''
+      value: '',
+      category: 'notifications',
     },
     'notifications:lifetime:banner': {
       value: 3000000,
       description: 'The time in milliseconds which a banner notification ' +
       'will be displayed on-screen for. Setting to Infinity will disable the countdown.',
       type: 'number',
+      category: 'notifications',
     },
     'notifications:lifetime:error': {
       value: 300000,
       description: 'The time in milliseconds which an error notification ' +
       'will be displayed on-screen for. Setting to Infinity will disable.',
       type: 'number',
+      category: 'notifications',
     },
     'notifications:lifetime:warning': {
       value: 10000,
       description: 'The time in milliseconds which a warning notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.',
       type: 'number',
+      category: 'notifications',
     },
     'notifications:lifetime:info': {
       value: 5000,
       description: 'The time in milliseconds which an information notification ' +
         'will be displayed on-screen for. Setting to Infinity will disable.',
       type: 'number',
+      category: 'notifications',
     },
     'metrics:max_buckets': {
       value: 2000,

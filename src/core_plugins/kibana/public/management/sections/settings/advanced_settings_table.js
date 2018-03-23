@@ -6,11 +6,13 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentBody,
+  Comparators,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
-import { Table } from './components/table';
+import { Form } from './components/form';
 
 import { toEditableConfig } from './lib';
 
@@ -29,19 +31,23 @@ export class AdvancedSettingsTable extends Component {
     };
 
     console.log('jen', this.state);
+    console.log(Comparators);
   }
 
   mapConfig(config) {
     const all = config.getAll();
 
-    return Object.entries(all).map((setting) => {
-      return toEditableConfig({
-        def: setting[1],
-        name: setting[0],
-        value: setting[1].userValue,
-        isCustom: config.isCustom(setting[0]),
-      });
-    }).filter((c) => !c.readonly);
+    return  Object.entries(all)
+      .map((setting) => {
+        return toEditableConfig({
+          def: setting[1],
+          name: setting[0],
+          value: setting[1].userValue,
+          isCustom: config.isCustom(setting[0]),
+        });
+      })
+      .filter((c) => !c.readonly)
+      .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
 
@@ -66,21 +72,23 @@ export class AdvancedSettingsTable extends Component {
   render() {
     const { settings } = this.state;
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">
-            <EuiPageContentBody>
-              <CallOuts/>
-              <EuiSpacer size="s" />
-              <Table
-                items={settings}
-                save={this.saveConfig}
-                clear={this.clearConfig}
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <div className="advancedSettings">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <CallOuts/>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <Form
+              settings={settings}
+              save={this.saveConfig}
+              clear={this.clearConfig}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 }

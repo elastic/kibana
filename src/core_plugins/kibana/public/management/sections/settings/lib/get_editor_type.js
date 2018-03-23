@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown', 'image'];
-const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
+const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown', 'image', 'number'];
+const NORMAL_EDITOR = ['string', 'null', 'undefined'];
 
 /**
  * @param {object} advanced setting configuration object
