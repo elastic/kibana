@@ -58,26 +58,39 @@ export class VegaBaseView {
         }
       });
 
-      this._vegaViewConfig = {
-        logLevel: vega.Warn,
-        renderer: this._parser.renderer,
-      };
-      if (!this._vegaConfig.enableExternalUrls) {
-        // Override URL loader and sanitizer to disable all URL-based requests
-        const errorFunc = () => {
-          throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
-        };
-        const loader = vega.loader();
-        loader.load = errorFunc;
-        loader.sanitize = errorFunc;
-        this._vegaViewConfig.loader = loader;
-      }
+      this._vegaViewConfig = this.createViewConfig();
 
       // The derived class should create this method
       await this._initViewCustomizations();
     } catch (err) {
       this.onError(err);
     }
+  }
+
+  createViewConfig() {
+    const config = {
+      logLevel: vega.Warn,
+      renderer: this._parser.renderer,
+    };
+
+    if (!this._vegaConfig.enableExternalUrls) {
+      // Override URL loader and sanitizer to disable all URL-based requests
+      const loader = vega.loader();
+
+      const originalSanitize = loader.sanitize.bind(loader);
+      loader.sanitize = (uri, options) => {
+        // If uri is a function, it must have come from this integration layer,
+        // because user can only supply pure JSON data structure.
+        // A function means that the value can be trusted (e.g. emsfile service)
+        if (typeof uri !== 'function') {
+          throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
+        }
+        return originalSanitize(uri(), options);
+      };
+      config.loader = loader;
+    }
+
+    return config;
   }
 
   onError() {

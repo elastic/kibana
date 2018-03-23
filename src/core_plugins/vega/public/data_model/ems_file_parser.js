@@ -38,7 +38,9 @@ export class EmsFileParser {
       if (!foundLayer) {
         throw new Error(`emsfile ${JSON.stringify(name)} does not exist`);
       }
-      obj.url = foundLayer.url;
+
+      // This URL can bypass loader sanitization at the later stage
+      obj.url = () => foundLayer.url;
     }
   }
 
