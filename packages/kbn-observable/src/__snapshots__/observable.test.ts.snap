@@ -50,6 +50,18 @@ Array [
 ]
 `;
 
+exports[`constructor cannot be called as a function 1`] = `"Class constructor Observable cannot be invoked without 'new'"`;
+
+exports[`constructor the first argument cannot be a non-callable object 1`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primative value 1`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primative value 2`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primative value 3`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primative value 4`] = `"\`_onSubscribe\` must be a function"`;
+
 exports[`observable#toPromise rejects if error received 1`] = `
 Array [
   Array [
@@ -57,3 +69,11 @@ Array [
   ],
 ]
 `;
+
+exports[`subscriber function throws if returning "null" 1`] = `"Cannot read property 'unsubscribe' of null"`;
+
+exports[`subscriber function throws if returning a boolean 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [boolean]"`;
+
+exports[`subscriber function throws if returning a primitive 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [number]"`;
+
+exports[`subscriber function throws if returning an object 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [object]"`;

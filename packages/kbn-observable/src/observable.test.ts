@@ -11,24 +11,24 @@ describe('constructor', () => {
     // to avoid TypeScript error below when used incorrectly
     const O = Observable as any;
 
-    expect(() => O(noop)).toThrowError(TypeError);
+    expect(() => O(noop)).toThrowErrorMatchingSnapshot();
   });
 
   test('the first argument cannot be a non-callable object', () => {
     // to avoid TypeScript error below when used incorrectly
     const O = Observable as any;
 
-    expect(() => new O({})).toThrowError(TypeError);
+    expect(() => new O({})).toThrowErrorMatchingSnapshot();
   });
 
   test('the first argument cannot be a primative value', () => {
     // to avoid TypeScript error below when used incorrectly
     const O = Observable as any;
 
-    expect(() => new O(true)).toThrowError(TypeError);
-    expect(() => new O(null)).toThrowError(TypeError);
-    expect(() => new O(undefined)).toThrowError(TypeError);
-    expect(() => new O(1)).toThrowError(TypeError);
+    expect(() => new O(true)).toThrowErrorMatchingSnapshot();
+    expect(() => new O(null)).toThrowErrorMatchingSnapshot();
+    expect(() => new O(undefined)).toThrowErrorMatchingSnapshot();
+    expect(() => new O(1)).toThrowErrorMatchingSnapshot();
   });
 
   test('the first argument can be a function', () => {
@@ -70,28 +70,28 @@ describe('subscriber function', () => {
     const source = new Observable(() => null as any);
     expect(() => {
       source.subscribe();
-    }).toThrowError();
+    }).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if returning a primitive', () => {
     const source = new Observable(() => 0 as any);
     expect(() => {
       source.subscribe();
-    }).toThrowError();
+    }).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if returning a boolean', () => {
     const source = new Observable(() => false as any);
     expect(() => {
       source.subscribe();
-    }).toThrowError();
+    }).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if returning an object', () => {
     const source = new Observable(() => ({} as any));
     expect(() => {
       source.subscribe();
-    }).toThrowError();
+    }).toThrowErrorMatchingSnapshot();
   });
 });
 

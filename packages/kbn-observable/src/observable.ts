@@ -56,15 +56,13 @@ export class Subscription {
 
     if (cleanup === undefined) {
       cleanup = noop;
-    }
-
-    if (typeof cleanup !== 'function') {
+    } else if (typeof cleanup !== 'function') {
       if (
         typeof cleanup !== 'object' ||
         typeof cleanup.unsubscribe !== 'function'
       ) {
         throw new TypeError(
-          `cleanup must be a function or a subscription, found ${cleanup}`
+          `The result of calling "onSubscribe" must be a function, found [${typeof cleanup}]`
         );
       }
 
