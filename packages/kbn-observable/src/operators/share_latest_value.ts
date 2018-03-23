@@ -1,5 +1,3 @@
-import { Observable as RxObservable } from 'rxjs';
-
 import { MonoTypeOperatorFunction } from '../interfaces';
 import { SubjectWithCurrentValue } from '../subjects';
 import { Subscription, Observable } from '../observable';
