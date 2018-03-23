@@ -54,13 +54,13 @@ exports[`constructor cannot be called as a function 1`] = `"Class constructor Ob
 
 exports[`constructor the first argument cannot be a non-callable object 1`] = `"\`_onSubscribe\` must be a function"`;
 
-exports[`constructor the first argument cannot be a primative value 1`] = `"\`_onSubscribe\` must be a function"`;
+exports[`constructor the first argument cannot be a primitive value 1`] = `"\`_onSubscribe\` must be a function"`;
 
-exports[`constructor the first argument cannot be a primative value 2`] = `"\`_onSubscribe\` must be a function"`;
+exports[`constructor the first argument cannot be a primitive value 2`] = `"\`_onSubscribe\` must be a function"`;
 
-exports[`constructor the first argument cannot be a primative value 3`] = `"\`_onSubscribe\` must be a function"`;
+exports[`constructor the first argument cannot be a primitive value 3`] = `"\`_onSubscribe\` must be a function"`;
 
-exports[`constructor the first argument cannot be a primative value 4`] = `"\`_onSubscribe\` must be a function"`;
+exports[`constructor the first argument cannot be a primitive value 4`] = `"\`_onSubscribe\` must be a function"`;
 
 exports[`observable#toPromise rejects if error received 1`] = `
 Array [

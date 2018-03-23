@@ -21,7 +21,7 @@ describe('constructor', () => {
     expect(() => new O({})).toThrowErrorMatchingSnapshot();
   });
 
-  test('the first argument cannot be a primative value', () => {
+  test('the first argument cannot be a primitive value', () => {
     // to avoid TypeScript error below when used incorrectly
     const O = Observable as any;
 
@@ -108,10 +108,13 @@ describe('#subscribe', () => {
     const args = subscriberFn.mock.calls[0];
     const subscriptionObserver = args[0];
 
-    expect(typeof subscriptionObserver).toBe('object');
-    expect(typeof subscriptionObserver.next).toBe('function');
-    expect(typeof subscriptionObserver.error).toBe('function');
-    expect(typeof subscriptionObserver.complete).toBe('function');
+    expect(subscriptionObserver).toEqual(
+      expect.objectContaining({
+        next: expect.any(Function),
+        error: expect.any(Function),
+        complete: expect.any(Function),
+      })
+    );
   });
 
   test('returns a subscription object', () => {
@@ -163,14 +166,16 @@ describe('#subscribe', () => {
       observer = _observer;
     });
 
+    const next = jest.fn();
+    const error = jest.fn();
     const complete = jest.fn();
 
-    source.subscribe({
-      complete,
-    });
+    source.subscribe({ next, error, complete });
 
     observer.complete();
 
+    expect(next).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
     expect(complete).toHaveBeenCalledTimes(1);
   });
 
@@ -404,23 +409,6 @@ describe('SubscriptionObserver#error', () => {
     expect(observer.error(new Error('foo'))).toBe(undefined);
   });
 
-  test('returns undefined when closed', () => {
-    let observer!: SubscriptionObserver<string>;
-
-    const source = new Observable<string>(_observer => {
-      observer = _observer;
-    });
-
-    source.subscribe({
-      error(...args: any[]) {
-        return 'bar';
-      },
-    });
-
-    observer.error(new Error('foo'));
-    expect(observer.error(new Error('bar'))).toBe(undefined);
-  });
-
   test('catches errors thrown from the observer', () => {
     let observer!: SubscriptionObserver<string>;
 
@@ -480,6 +468,24 @@ describe('SubscriptionObserver#error', () => {
     observer.error(new Error('bar'));
 
     expect(values).toEqual(['complete']);
+  });
+
+  test('does not call "error" multiple times', () => {
+    let observer!: SubscriptionObserver<string>;
+
+    const source = new Observable<string>(_observer => {
+      observer = _observer;
+    });
+
+    const error = jest.fn();
+
+    source.subscribe({ error });
+
+    const err = new Error('foo');
+    observer.error(err);
+    observer.error(new Error('bar'));
+
+    expect(error).toHaveBeenCalledTimes(1);
   });
 
   test('cleanup function is called when method throws', () => {
@@ -545,23 +551,6 @@ describe('SubscriptionObserver#complete', () => {
     expect(observer.complete()).toBe(undefined);
   });
 
-  test('returns undefined when closed', () => {
-    let observer!: SubscriptionObserver<string>;
-
-    const source = new Observable<string>(_observer => {
-      observer = _observer;
-    });
-
-    source.subscribe({
-      complete(...args: any[]) {
-        return 'bar';
-      },
-    });
-
-    observer.complete();
-    expect(observer.complete()).toBe(undefined);
-  });
-
   test('catches errors thrown from the observer', () => {
     let observer!: SubscriptionObserver<string>;
 
@@ -606,18 +595,14 @@ describe('SubscriptionObserver#complete', () => {
       observer = _observer;
     });
 
-    const values: any[] = [];
+    const complete = jest.fn();
 
-    source.subscribe({
-      complete() {
-        values.push('complete');
-      },
-    });
+    source.subscribe({ complete });
 
     observer.complete();
     observer.complete();
 
-    expect(values).toEqual(['complete']);
+    expect(complete).toHaveBeenCalledTimes(1);
   });
 
   test('cleanup function is called when method throws', () => {
@@ -647,7 +632,7 @@ describe('SubscriptionObserver#complete', () => {
   });
 
   test('does not call "complete" on unsubscribe', () => {
-    let complete = jest.fn();
+    const complete = jest.fn();
 
     const source = new Observable(() => {});
 
@@ -707,26 +692,22 @@ describe('SubscriptionObserver#closed', () => {
 
 describe('subscriptions', () => {
   test('calls the cleanup function on unsubscribe', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
 
     const source = new Observable(() => {
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     source.subscribe().unsubscribe();
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('does not call the cleanup multiple times', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
 
     const source = new Observable(() => {
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     const sub = source.subscribe();
@@ -734,77 +715,69 @@ describe('subscriptions', () => {
     sub.unsubscribe();
     sub.unsubscribe();
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('calls the cleanup function on "error"', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
     let observer!: SubscriptionObserver<any>;
 
     const source = new Observable(_observer => {
       observer = _observer;
 
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     source.subscribe();
 
     observer.error(new Error('foo'));
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('calls the cleanup function on "complete"', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
     let observer!: SubscriptionObserver<any>;
 
     const source = new Observable(_observer => {
       observer = _observer;
 
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     source.subscribe();
 
     observer.complete();
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('calls the cleanup function on "error" during create', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
 
     const source = new Observable(observer => {
       observer.error(new Error('foo'));
 
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     source.subscribe();
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('calls the cleanup function on "complete" during create', () => {
-    let callCount = 0;
+    const cleanup = jest.fn();
 
     const source = new Observable(observer => {
       observer.complete();
 
-      return () => {
-        callCount++;
-      };
+      return cleanup;
     });
 
     source.subscribe();
 
-    expect(callCount).toBe(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   test('handles multiple subscriptions and unsubscriptions', () => {
