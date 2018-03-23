@@ -5,15 +5,19 @@ import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiButton,
+  EuiButtonIcon,
   EuiTabs,
   EuiTab,
   EuiSearchBar,
   EuiBasicTable,
   EuiSpacer,
   EuiLink,
+  EuiTitle,
 } from '@elastic/eui';
 
 const VIS_TAB_ID = 'vis';
@@ -29,6 +33,14 @@ export class DashboardAddPanel extends React.Component {
       dataTestSubj: 'addVisualizationTab',
       toastDataTestSubj: 'addVisualizationToDashboardSuccess',
       noItemsMsg: 'No matching visualizations found.',
+      addNew: (
+        <EuiButton
+          onClick={this.props.addNewVis}
+          data-test-subj="addNewSavedObjectLink"
+        >
+          Add new Visualization
+        </EuiButton>
+      )
     }, {
       id: SAVED_SEARCH_TAB_ID,
       name: 'Saved Search',
@@ -141,6 +153,10 @@ export class DashboardAddPanel extends React.Component {
   }
 
   renderSearchBar() {
+    const toolsRight = [];
+    if (this.state.selectedTab.addNew) {
+      toolsRight.push(this.state.selectedTab.addNew);
+    }
     return (
       <EuiSearchBar
         onChange={(query) => {
@@ -149,6 +165,7 @@ export class DashboardAddPanel extends React.Component {
           }, this.fetchItems);
         }}
         box={{ incremental: true, ['data-test-subj']: 'savedObjectFinderSearchInput' }}
+        toolsRight={toolsRight}
       />
     );
   }
@@ -196,12 +213,20 @@ export class DashboardAddPanel extends React.Component {
       >
         <EuiFlyoutBody>
 
-          <EuiButton
-            iconType="cross"
-            onClick={this.props.onClose}
-          >
-            Close
-          </EuiButton>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2>Add Panels</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                onClick={this.props.onClose}
+                aria-label="close add panel"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiTabs>
             {this.renderTabs()}

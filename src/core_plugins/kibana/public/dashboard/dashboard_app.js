@@ -326,9 +326,11 @@ app.directive('dashboardApp', function ($injector) {
         showCloneModal(onClone, currentTitle);
       };
       navActions[TopNavIds.ADD] = () => {
-        const addNewVis = function addNewVis() {
+        const addNewVis = () => {
           kbnUrl.change(
             `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
+          // Function is called outside of angular. Must apply digest cycle to trigger URL update
+          $scope.$apply();
         };
 
         showAddPanel(savedObjectsClient, dashboardStateManager.addNewPanel, addNewVis);

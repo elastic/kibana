@@ -26,6 +26,10 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
       searchFields: ['title^3', 'description']
     });
   };
+  const addNewVisWithCleanup = () => {
+    onClose();
+    addNewVis();
+  };
 
   document.body.appendChild(container);
   const element = (
@@ -33,7 +37,7 @@ export function showAddPanel(savedObjectsClient, addNewPanel, addNewVis) {
       onClose={onClose}
       find={find}
       addNewPanel={addNewPanel}
-      addNewVis={addNewVis}
+      addNewVis={addNewVisWithCleanup}
     />
   );
   ReactDOM.render(element, container);
