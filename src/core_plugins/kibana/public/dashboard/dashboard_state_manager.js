@@ -177,6 +177,15 @@ export class DashboardStateManager {
     }
 
     const state = store.getState();
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
+    }
+
     if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
