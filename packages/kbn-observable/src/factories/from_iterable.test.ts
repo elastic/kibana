@@ -1,9 +1,4 @@
-import symbolObservable from 'symbol-observable';
-
-import { Observable } from '../observable';
 import { $fromIterable } from './from_iterable';
-
-const noop = () => {};
 
 test('handles array', () => {
   const values: number[] = [];

@@ -1,4 +1,3 @@
-import { Observable } from '../observable';
 import { $of } from './of';
 
 test('arguments are delivered to next, then observable is completed', () => {
