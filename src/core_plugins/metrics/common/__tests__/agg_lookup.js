@@ -14,7 +14,7 @@ describe('aggLookup', () => {
   describe('createOptions(type, siblings)', () => {
     it('returns options for all aggs', () => {
       const options = createOptions();
-      expect(options).to.have.length(29);
+      expect(options).to.have.length(30);
       options.forEach(option => {
         expect(option).to.have.property('label');
         expect(option).to.have.property('value');
@@ -40,7 +40,7 @@ describe('aggLookup', () => {
 
     it('returns options for all if given unknown key', () => {
       const options = createOptions('foo');
-      expect(options).to.have.length(29);
+      expect(options).to.have.length(30);
     });
   });
 });
