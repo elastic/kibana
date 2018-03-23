@@ -73,22 +73,21 @@ export class VegaBaseView {
       renderer: this._parser.renderer,
     };
 
-    if (!this._vegaConfig.enableExternalUrls) {
-      // Override URL loader and sanitizer to disable all URL-based requests
-      const loader = vega.loader();
-
-      const originalSanitize = loader.sanitize.bind(loader);
-      loader.sanitize = (uri, options) => {
+    // Override URL sanitizer to prevent external data loading (if disabled)
+    const loader = vega.loader();
+    const originalSanitize = loader.sanitize.bind(loader);
+    loader.sanitize = (uri, options) => {
+      if (typeof uri === 'function') {
         // If uri is a function, it must have come from this integration layer,
         // because user can only supply pure JSON data structure.
         // A function means that the value can be trusted (e.g. emsfile service)
-        if (typeof uri !== 'function') {
-          throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
-        }
-        return originalSanitize(uri(), options);
-      };
-      config.loader = loader;
-    }
+        uri = uri();
+      } else if (!this._vegaConfig.enableExternalUrls) {
+        throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
+      }
+      return originalSanitize(uri, options);
+    };
+    config.loader = loader;
 
     return config;
   }
