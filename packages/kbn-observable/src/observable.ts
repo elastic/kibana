@@ -93,10 +93,10 @@ export class Subscription {
    * Cancel the subscription
    */
   unsubscribe() {
-    if (!this.closed) {
-      this._cancelSubscription();
-      this._observer = undefined;
-    }
+    if (this.closed) return;
+
+    this._cancelSubscription();
+    this._observer = undefined;
   }
 }
 
@@ -120,12 +120,12 @@ export class SubscriptionObserver<T> {
    * Sends the next value in the sequence
    */
   next(value: T) {
-    if (!this.closed) {
-      try {
-        this._observer.next && this._observer.next(value);
-      } catch (e) {
-        console.error(e);
-      }
+    if (this.closed) return;
+
+    try {
+      this._observer.next && this._observer.next(value);
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -133,28 +133,28 @@ export class SubscriptionObserver<T> {
    * Sends the sequence error
    */
   error(errorValue: Error) {
-    if (!this.closed) {
-      try {
-        this._observer.error && this._observer.error(errorValue);
-      } catch (e) {
-        console.error(e);
-      }
-      this._subscription.unsubscribe();
+    if (this.closed) return;
+
+    try {
+      this._observer.error && this._observer.error(errorValue);
+    } catch (e) {
+      console.error(e);
     }
+    this._subscription.unsubscribe();
   }
 
   /**
    * Sends the completion notification
    */
   complete() {
-    if (!this.closed) {
-      try {
-        this._observer.complete && this._observer.complete();
-      } catch (e) {
-        console.error(e);
-      }
-      this._subscription.unsubscribe();
+    if (this.closed) return;
+
+    try {
+      this._observer.complete && this._observer.complete();
+    } catch (e) {
+      console.error(e);
     }
+    this._subscription.unsubscribe();
   }
 }
 
