@@ -67,7 +67,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       const isOpen = await this.isAddPanelOpen();
       if (isOpen) {
         await retry.try(async () => {
-          await this.clickOpenAddPanel();
+          await testSubjects.click('closeAddPanelBtn');
           const isOpen = await this.isAddPanelOpen();
           if (isOpen) {
             throw new Error('Add panel still open, trying again.');
@@ -110,7 +110,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.clickSavedSearchTab();
       await this.filterEmbeddableNames(searchName);
 
-      await find.clickByPartialLinkText(searchName);
+      await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
       await testSubjects.exists('addSavedSearchToDashboardSuccess');
       await this.closeAddPanel();
     }
@@ -132,7 +132,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await find.clickByPartialLinkText(vizName);
+      await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 

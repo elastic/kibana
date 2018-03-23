@@ -105,6 +105,7 @@ export class DashboardAddPanel extends React.Component {
         className="addPanelFlyout"
         onClose={this.props.onClose}
         size="s"
+        data-test-subj="dashboardAddPanel"
       >
         <EuiFlyoutBody>
 
@@ -119,6 +120,7 @@ export class DashboardAddPanel extends React.Component {
                 iconType="cross"
                 onClick={this.props.onClose}
                 aria-label="close add panel"
+                data-test-subj="closeAddPanelBtn"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

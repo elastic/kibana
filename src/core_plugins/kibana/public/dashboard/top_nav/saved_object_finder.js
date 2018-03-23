@@ -108,6 +108,7 @@ export class SavedObjectFinder extends React.Component {
             onClick={() => {
               this.props.onChoose(record.id, record.type);
             }}
+            data-test-subj={`addPanel${field.split(' ').join('-')}`}
           >
             {field}
           </EuiLink>
