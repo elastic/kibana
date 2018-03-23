@@ -9,14 +9,20 @@ import { Observable } from '../observable';
  *
  * Example: Read a file from the filesystem and get the data as an Observable:
  *
- * ```
+ * ```js
  * import fs from 'fs';
- * var readFileAsObservable = $bindNodeCallback(fs.readFile);
- * var result = readFileAsObservable('./roadNames.txt', 'utf8');
- * result.subscribe(
- *   x => console.log(x),
- *   e => console.error(e)
- * );
+ *
+ * const readFileAsObservable = $bindNodeCallback(fs.readFile);
+ * const result = readFileAsObservable('./roadNames.txt', 'utf8');
+ *
+ * result.subscribe({
+ *   next(x) {
+ *     console.log(x)
+ *   },
+ *   error(e) {
+ *     console.error(e)
+ *   }
+ * });
  * ```
  *
  * Implementation detail:
