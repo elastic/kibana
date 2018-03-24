@@ -1,7 +1,8 @@
-import { Observable } from '../observable';
+import { Observable, PartialObserver } from '../observable';
 import { Subject } from './subject';
 import { first } from '../operators';
 import { $of } from '../factories';
+import { createCollectObserver } from '../lib/collect';
 
 const noop = () => {};
 
@@ -32,7 +33,6 @@ test('should pump values to multiple subscribers', () => {
     actual.push(`2-${x}`);
   });
 
-  expect((subject as any)._observers.size).toEqual(2);
   subject.next('foo');
   subject.next('bar');
   subject.complete();
@@ -51,31 +51,11 @@ test('should handle subscribers that arrive and leave at different times, subjec
   subject.next(3);
   subject.next(4);
 
-  const subscription1 = subject.subscribe({
-    next(x) {
-      results1.push(x);
-    },
-    error(e) {
-      results1.push('E');
-    },
-    complete() {
-      results1.push('C');
-    },
-  });
+  const subscription1 = subject.subscribe(createCollectObserver(results1));
 
   subject.next(5);
 
-  const subscription2 = subject.subscribe({
-    next(x) {
-      results2.push(x);
-    },
-    error(e) {
-      results2.push('E');
-    },
-    complete() {
-      results2.push('C');
-    },
-  });
+  const subscription2 = subject.subscribe(createCollectObserver(results2));
 
   subject.next(6);
   subject.next(7);
@@ -89,17 +69,7 @@ test('should handle subscribers that arrive and leave at different times, subjec
   subject.next(9);
   subject.next(10);
 
-  const subscription3 = subject.subscribe({
-    next(x) {
-      results3.push(x);
-    },
-    error(e) {
-      results3.push('E');
-    },
-    complete() {
-      results3.push('C');
-    },
-  });
+  const subscription3 = subject.subscribe(createCollectObserver(results3));
 
   subject.next(11);
 
@@ -121,31 +91,11 @@ test('should handle subscribers that arrive and leave at different times, subjec
   subject.next(3);
   subject.next(4);
 
-  const subscription1 = subject.subscribe({
-    next(x) {
-      results1.push(x);
-    },
-    error(e) {
-      results1.push('E');
-    },
-    complete() {
-      results1.push('C');
-    },
-  });
+  const subscription1 = subject.subscribe(createCollectObserver(results1));
 
   subject.next(5);
 
-  const subscription2 = subject.subscribe({
-    next(x) {
-      results2.push(x);
-    },
-    error(e) {
-      results2.push('E');
-    },
-    complete() {
-      results2.push('C');
-    },
-  });
+  const subscription2 = subject.subscribe(createCollectObserver(results2));
 
   subject.next(6);
   subject.next(7);
@@ -156,17 +106,7 @@ test('should handle subscribers that arrive and leave at different times, subjec
 
   subscription2.unsubscribe();
 
-  const subscription3 = subject.subscribe({
-    next(x) {
-      results3.push(x);
-    },
-    error(e) {
-      results3.push('E');
-    },
-    complete() {
-      results3.push('C');
-    },
-  });
+  const subscription3 = subject.subscribe(createCollectObserver(results3));
 
   subscription3.unsubscribe();
 
@@ -186,58 +126,29 @@ test('should handle subscribers that arrive and leave at different times, subjec
   subject.next(3);
   subject.next(4);
 
-  const subscription1 = subject.subscribe({
-    next(x) {
-      results1.push(x);
-    },
-    error(e) {
-      results1.push('E');
-    },
-    complete() {
-      results1.push('C');
-    },
-  });
+  const subscription1 = subject.subscribe(createCollectObserver(results1));
 
   subject.next(5);
 
-  const subscription2 = subject.subscribe({
-    next(x) {
-      results2.push(x);
-    },
-    error(e) {
-      results2.push('E');
-    },
-    complete() {
-      results2.push('C');
-    },
-  });
+  const subscription2 = subject.subscribe(createCollectObserver(results2));
 
   subject.next(6);
   subject.next(7);
 
   subscription1.unsubscribe();
 
-  subject.error(new Error('err'));
+  const error = new Error('err');
+  subject.error(error);
 
   subscription2.unsubscribe();
 
-  const subscription3 = subject.subscribe({
-    next(x) {
-      results3.push(x);
-    },
-    error(e) {
-      results3.push('E');
-    },
-    complete() {
-      results3.push('C');
-    },
-  });
+  const subscription3 = subject.subscribe(createCollectObserver(results3));
 
   subscription3.unsubscribe();
 
   expect(results1).toEqual([5, 6, 7]);
-  expect(results2).toEqual([6, 7, 'E']);
-  expect(results3).toEqual(['E']);
+  expect(results2).toEqual([6, 7, error]);
+  expect(results3).toEqual([error]);
 });
 
 test('should handle subscribers that arrive and leave at different times, subject completes before nexting any value', () => {
@@ -246,29 +157,9 @@ test('should handle subscribers that arrive and leave at different times, subjec
   const results2: any[] = [];
   const results3: any[] = [];
 
-  const subscription1 = subject.subscribe({
-    next(x) {
-      results1.push(x);
-    },
-    error(e) {
-      results1.push('E');
-    },
-    complete() {
-      results1.push('C');
-    },
-  });
+  const subscription1 = subject.subscribe(createCollectObserver(results1));
 
-  const subscription2 = subject.subscribe({
-    next(x) {
-      results2.push(x);
-    },
-    error(e) {
-      results2.push('E');
-    },
-    complete() {
-      results2.push('C');
-    },
-  });
+  const subscription2 = subject.subscribe(createCollectObserver(results2));
 
   subscription1.unsubscribe();
 
@@ -276,17 +167,7 @@ test('should handle subscribers that arrive and leave at different times, subjec
 
   subscription2.unsubscribe();
 
-  const subscription3 = subject.subscribe({
-    next(x) {
-      results3.push(x);
-    },
-    error(e) {
-      results3.push('E');
-    },
-    complete() {
-      results3.push('C');
-    },
-  });
+  const subscription3 = subject.subscribe(createCollectObserver(results3));
 
   subscription3.unsubscribe();
 
@@ -358,14 +239,7 @@ test('should not next after completed', () => {
   const subject = new Subject<string>();
   const results: any[] = [];
 
-  subject.subscribe({
-    next(x) {
-      results.push(x);
-    },
-    complete() {
-      results.push('C');
-    },
-  });
+  subject.subscribe(createCollectObserver(results));
 
   subject.next('a');
   subject.complete();
@@ -379,14 +253,7 @@ test('should not next after error', () => {
   const subject = new Subject();
   const results: any[] = [];
 
-  subject.subscribe({
-    next(x) {
-      results.push(x);
-    },
-    error(err) {
-      results.push(err);
-    },
-  });
+  subject.subscribe(createCollectObserver(results));
 
   subject.next('a');
   subject.error(error);

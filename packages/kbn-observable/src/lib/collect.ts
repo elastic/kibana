@@ -1,4 +1,4 @@
-import { Observable } from '../observable';
+import { Observable, PartialObserver } from '../observable';
 
 /**
  * Test helper that collects all actions, and returns an array with all
@@ -23,4 +23,18 @@ export function collect<T>(source: Observable<T>) {
       },
     });
   });
+}
+
+export function createCollectObserver<T>(results: any[]): PartialObserver<T> {
+  return {
+    next(x) {
+      results.push(x);
+    },
+    error(err) {
+      results.push(err);
+    },
+    complete() {
+      results.push('C');
+    },
+  };
 }
