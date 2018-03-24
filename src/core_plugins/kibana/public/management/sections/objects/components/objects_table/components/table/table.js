@@ -1,7 +1,8 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiBadge, EuiSearchBar, EuiBasicTable, EuiButton } from '@elastic/eui';
+import { EuiSearchBar, EuiBasicTable, EuiButton, EuiIcon } from '@elastic/eui';
+import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
 
 export class Table extends PureComponent {
   static propTypes = {
@@ -24,6 +25,8 @@ export class Table extends PureComponent {
     onQueryChange: PropTypes.func.isRequired,
     onTableChange: PropTypes.func.isRequired,
     isSearching: PropTypes.bool.isRequired,
+
+    onShowRelationships: PropTypes.func.isRequired,
   };
 
   render() {
@@ -68,22 +71,28 @@ export class Table extends PureComponent {
 
     const columns = [
       {
+        field: 'type',
+        name: 'Type',
+        width: '35px',
+        description: `Type of the saved object`,
+        sortable: false,
+        render: (type) => {
+          return (
+            <EuiIcon type={getSavedObjectIcon(type)} size="s"/>
+          );
+        },
+      },
+      {
         field: 'title',
         name: 'Title',
         description: `Title of the saved object`,
         dataType: 'string',
         sortable: false,
-        render: (title, savedObject) => {
-          return (
-            <Fragment>
-              <EuiBadge iconType={savedObject.icon}>
-                {savedObject.type}
-              </EuiBadge>
-              &nbsp;
-              <span>{title}</span>
-            </Fragment>
-          );
-        },
+        render: (title, object) => (
+          <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => this.props.onShowRelationships(object.id, object.type, title)}>
+            {title}
+          </div>
+        ),
       },
     ];
 

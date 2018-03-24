@@ -63,8 +63,7 @@ export const Header = ({
           You can also edit the raw data of saved objects.
           Typically objects are only modified via their associated application,
           which is probably what you should use instead of this screen.
-          Each tab is limited to 100 results.
-          You can use the filter to find objects not in the default list.
+          Click each object to view the relationships to other saved objects.
         </EuiTextColor>
       </p>
     </EuiText>

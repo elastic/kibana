@@ -1,6 +1,7 @@
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
@@ -22,8 +23,11 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
         services={services}
         indexPatterns={indexPatterns}
         $http={$http}
+        basePath={chrome.getBasePath()}
         kbnIndex={kbnIndex}
         newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
+        getDashboardUrl={id => kbnUrl.eval('#/dashboard/{{id}}', { id: id })}
+        getVisualizationUrl={id => kbnUrl.eval('#/visualize/edit/{{id}}', { id: id })}
       />,
       node,
     );

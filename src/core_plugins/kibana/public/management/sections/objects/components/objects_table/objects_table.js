@@ -2,6 +2,8 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { flattenDeep } from 'lodash';
 import { Header } from './components/header';
+import { Flyout } from './components/flyout';
+import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
 import { EuiSpacer, EuiHorizontalRule, Query } from '@elastic/eui';
@@ -10,8 +12,8 @@ import { scanAllTypes } from '../../lib/scan_all_types';
 import { saveToFile } from '../../lib/save_to_file';
 import { getQueryText } from '../../lib/get_query_text';
 import { getSavedObjectIcon } from '../../lib/get_saved_object_icon';
-import { Flyout } from './components/flyout';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
+import { getRelationships } from '../../lib/get_relationships';
 
 export const EXCLUDED_TYPES = ['config'];
 export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -21,9 +23,12 @@ export class ObjectsTable extends Component {
     savedObjectsClient: PropTypes.object.isRequired,
     indexPatterns: PropTypes.object.isRequired,
     $http: PropTypes.func.isRequired,
+    basePath: PropTypes.string.isRequired,
     newIndexPatternUrl: PropTypes.string.isRequired,
     kbnIndex: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
+    getDashboardUrl: PropTypes.func.isRequired,
+    getVisualizationUrl: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -39,6 +44,10 @@ export class ObjectsTable extends Component {
       isShowingImportFlyout: false,
       isSearching: false,
       totalItemCount: 0,
+      isShowingRelationships: false,
+      relationshipId: undefined,
+      relationshipType: undefined,
+      relationshipTitle: undefined,
     };
   }
 
@@ -115,6 +124,24 @@ export class ObjectsTable extends Component {
     this.setState({ page, perPage }, this.fetchSavedObjects);
   };
 
+  onShowRelationships = (id, type, title) => {
+    this.setState({
+      isShowingRelationships: true,
+      relationshipId: id,
+      relationshipType: type,
+      relationshipTitle: title,
+    });
+  }
+
+  onHideRelationships = () => {
+    this.setState({
+      isShowingRelationships: false,
+      relationshipId: undefined,
+      relationshipType: undefined,
+      relationshipTitle: undefined,
+    });
+  }
+
   onExport = async () => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
@@ -155,6 +182,10 @@ export class ObjectsTable extends Component {
     await this.fetchSavedObjects(Query.parse(''), page, perPage);
   }
 
+  getRelationships = async (type, id) => {
+    return await getRelationships(type, id, this.props.$http, this.props.basePath);
+  }
+
   renderFlyout() {
     if (!this.state.isShowingImportFlyout) {
       return null;
@@ -167,6 +198,24 @@ export class ObjectsTable extends Component {
         services={this.props.services}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
+      />
+    );
+  }
+
+  renderRelationships() {
+    if (!this.state.isShowingRelationships) {
+      return null;
+    }
+
+    return (
+      <Relationships
+        id={this.state.relationshipId}
+        type={this.state.relationshipType}
+        title={this.state.relationshipTitle}
+        getRelationships={this.getRelationships}
+        close={this.onHideRelationships}
+        getDashboardUrl={this.props.getDashboardUrl}
+        getVisualizationUrl={this.props.getVisualizationUrl}
       />
     );
   }
@@ -195,6 +244,7 @@ export class ObjectsTable extends Component {
     return (
       <Fragment>
         {this.renderFlyout()}
+        {this.renderRelationships()}
         <Header
           onExportAll={this.onExportAll}
           onImport={this.showImportFlyout}
@@ -216,6 +266,7 @@ export class ObjectsTable extends Component {
           items={savedObjects}
           totalItemCount={totalItemCount}
           isSearching={isSearching}
+          onShowRelationships={this.onShowRelationships}
         />
       </Fragment>
     );
