@@ -68,9 +68,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         };
         uiState.on('change', uiStateChangeHandler);
 
-        savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
-        savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
-
         container.registerPanelIndexPattern(panel.panelIndex, savedObject.vis.indexPattern);
 
         const handler = loader.embedVisualizationWithSavedObject(domNode, savedObject, {
