@@ -1,6 +1,7 @@
 import { $concat } from './concat';
 import { Subject } from '../subjects';
 import { collect } from '../lib/collect';
+import { trackSubscriptions } from '../lib/track_subscriptions';
 
 test('continue on next observable when previous completes', async () => {
   const a = new Subject();
@@ -51,4 +52,35 @@ test('handles early unsubscribe', () => {
   expect(next).toHaveBeenCalledTimes(1);
   expect(next).toHaveBeenCalledWith('a1');
   expect(complete).toHaveBeenCalledTimes(0);
+});
+
+test('closes all subscriptions when unsubscribed', async () => {
+  const foo$ = new Subject();
+  const bar$ = new Subject();
+
+  const subscriptions = trackSubscriptions(foo$, bar$);
+
+  const sub = $concat(foo$, bar$).subscribe();
+  sub.unsubscribe();
+
+  // We only expect `foo$` to have been subscribed at this point
+  const expectedNumberOfSubscriptions = 1;
+
+  await subscriptions.ensureSubscriptionsAreClosed(
+    expectedNumberOfSubscriptions
+  );
+});
+
+test('closes all subscriptions when all observables complete', async () => {
+  const foo$ = new Subject();
+  const bar$ = new Subject();
+
+  const subscriptions = trackSubscriptions(foo$, bar$);
+
+  $concat(foo$, bar$).subscribe();
+
+  foo$.complete();
+  bar$.complete();
+
+  await subscriptions.ensureSubscriptionsAreClosed();
 });

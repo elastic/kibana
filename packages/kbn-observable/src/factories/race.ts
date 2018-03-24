@@ -23,35 +23,27 @@ export function $race<T>(...observables: Observable<T>[]): Observable<T> {
 
           if (observable === chosenObs) {
             observer.next(x);
-          } else {
-            subscription.unsubscribe();
           }
         },
         error(e) {
-          if (chosenObs === undefined) {
-            chosenObs = observable;
-          }
-
-          if (observable === chosenObs) {
+          if (chosenObs === undefined || observable === chosenObs) {
             observer.error(e);
-          } else {
-            subscription.unsubscribe();
           }
         },
         complete() {
-          if (chosenObs === undefined) {
-            chosenObs = observable;
-          }
-
-          if (observable === chosenObs) {
+          if (chosenObs === undefined || observable === chosenObs) {
             observer.complete();
-          } else {
-            subscription.unsubscribe();
           }
         },
       });
 
       subscriptions.push(subscription);
     }
+
+    return () => {
+      subscriptions.forEach(sub => {
+        sub.unsubscribe();
+      });
+    };
   });
 }

@@ -2,6 +2,7 @@ import { Observable } from '../observable';
 import { $race } from './race';
 import { $of } from './of';
 import { collect } from '../lib/collect';
+import { trackSubscriptions } from '../lib/track_subscriptions';
 import { Subject } from '../subjects';
 import { mergeMap } from '../operators/merge_map';
 
@@ -323,4 +324,29 @@ test('should throw when error occurs before a winner is found', done => {
   }, 100);
 
   jest.advanceTimersByTime(100);
+});
+
+test('closes all subscriptions when unsubscribed', async () => {
+  const obs1 = new Subject<string>();
+  const obs2 = new Subject<string>();
+
+  const subscriptions = trackSubscriptions(obs1, obs2);
+
+  const sub = $race(obs1, obs2).subscribe();
+  sub.unsubscribe();
+
+  await subscriptions.ensureSubscriptionsAreClosed();
+});
+
+test('closes all subscriptions when any input observable completes', async () => {
+  const obs1 = new Subject<string>();
+  const obs2 = new Subject<string>();
+
+  const subscriptions = trackSubscriptions(obs1, obs2);
+
+  $race(obs1, obs2).subscribe();
+
+  obs2.complete();
+
+  await subscriptions.ensureSubscriptionsAreClosed();
 });

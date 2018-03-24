@@ -1,6 +1,7 @@
 import { $of } from './of';
 import { $combineLatest } from './combine_latest';
 import { collect } from '../lib/collect';
+import { trackSubscriptions } from '../lib/track_subscriptions';
 import { Subject } from '../subjects';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -49,4 +50,30 @@ test('only emits if every stream emits at least once', async () => {
   const res = collect(observable);
 
   expect(await res).toEqual(['C']);
+});
+
+test('closes all subscriptions when unsubscribed', async () => {
+  const foo$ = new Subject();
+  const bar$ = new Subject();
+
+  const subscriptions = trackSubscriptions(foo$, bar$);
+
+  const sub = $combineLatest(foo$, bar$).subscribe();
+  sub.unsubscribe();
+
+  await subscriptions.ensureSubscriptionsAreClosed();
+});
+
+test('closes all subscriptions when all observables complete', async () => {
+  const foo$ = new Subject();
+  const bar$ = new Subject();
+
+  const subscriptions = trackSubscriptions(foo$, bar$);
+
+  $combineLatest(foo$, bar$).subscribe();
+
+  foo$.complete();
+  bar$.complete();
+
+  await subscriptions.ensureSubscriptionsAreClosed();
 });
