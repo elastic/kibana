@@ -115,8 +115,6 @@ The available operators:
   sequentially, and emit the final value
 * `scan` - apply a function to each item emitted by an Observable, sequentially,
   and emit each successive value
-* `shareLatestValue` - ensure that all observers share the latest emitted item,
-  even if they subscribe after the Observable has begun emitting items
 * `skipRepeats` - suppress duplicate items emitted by an Observable
 * `switchMap` - convert an Observable that emits Observables into a single
   Observable that emits the items emitted by the most-recently-emitted of those
@@ -160,9 +158,10 @@ general-purpose observable library.
   different types of input (iterable, promises, etc).
 * Don't add any operators on the Observable prototype, but instead rely on
   `pipe` for operators.
-* Solve the 80% use-case instead of creating very generic helpers. An example of
-  this is our `shareLatestValue` implementation. It's not as generic as `share`
-  or `shareReplay` in RxJS, but it solves most of the use-cases we have.
+* Solve the main use-cases required for Kibana instead of adding every possible
+  factory or operator. Some times that means plugins will have to use other
+  observable libraries or other solutions, but that's okey. This is primarily
+  intended for the Kibana internals.
 
 ## Inspiration
 
