@@ -1,4 +1,3 @@
-import { Observable } from '../observable';
 import { Subject } from './subject';
 import { SubjectWithCurrentValue } from './subject_with_current_value';
 import { $of } from '../factories';

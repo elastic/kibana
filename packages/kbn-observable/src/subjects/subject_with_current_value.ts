@@ -1,10 +1,6 @@
 import { SubscriptionObserver } from '../observable';
 import { Subject } from './subject';
 
-export interface SubjectWithCurrentValueOptions {
-  shouldSendCurrentValueWhenStopped?: boolean;
-}
-
 /**
  * A SubjectWithCurrentValue is a Subject that has a _current_ value.
  *
@@ -14,18 +10,12 @@ export interface SubjectWithCurrentValueOptions {
  * any other items emitted later by the source Observable(s).
  */
 export class SubjectWithCurrentValue<T> extends Subject<T> {
-  private _shouldSendCurrentValueWhenStopped = false;
-
-  constructor(private _value: T, _opts: SubjectWithCurrentValueOptions = {}) {
+  constructor(private _value: T) {
     super();
-
-    if (_opts.shouldSendCurrentValueWhenStopped === true) {
-      this._shouldSendCurrentValueWhenStopped = true;
-    }
   }
 
   protected _registerObserver(observer: SubscriptionObserver<T>) {
-    if (this._shouldSendCurrentValueWhenStopped || !this._isStopped) {
+    if (!this._isStopped) {
       observer.next(this._value);
     }
     return super._registerObserver(observer);

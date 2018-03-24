@@ -1,6 +1,7 @@
 import { MonoTypeOperatorFunction } from '../interfaces';
 import { SubjectWithCurrentValue } from '../subjects';
 import { Subscription, Observable } from '../observable';
+import { filter } from '../operators';
 
 const pendingValue = Symbol('awaiting first value');
 
@@ -10,11 +11,16 @@ const pendingValue = Symbol('awaiting first value');
  * use-cases we want to share the underlying observable execution by only
  * subscribing once to the source observable.
  *
- * `shareLatestValue` only subscribes once to the underlying source observable, and
- * remembers the last value emitted by the source. Therefore, if a second
+ * `shareLatestValue` only subscribes once to the underlying source observable,
+ * and remembers the last value emitted by the source. Therefore, if a second
  * observer subscribes it will immediately receive the latest value from the
  * source, similarly to how a SubjectWithCurrentValue immediately sends the
  * current value on subscribe.
+ *
+ * If the `source` observable completes, then `shareLatestValue` will `complete`
+ * all subscribed obsersers. However, if the `source` observable errors, a new
+ * `subscribe` to `shareLatestValue` will create a new subscription to the
+ * `source` observable.
  *
  * TODO: Mention it doesn't restart if subscriptions === 0.
  *
@@ -66,52 +72,48 @@ const pendingValue = Symbol('awaiting first value');
  */
 export function shareLatestValue<T>(): MonoTypeOperatorFunction<T> {
   let subject: SubjectWithCurrentValue<T | typeof pendingValue>;
+
+  // The number of observable currently subscribed and sharing the same
+  // active subscription.
   let refCount = 0;
+
+  // There is always either 0 or 1 active subscription. If that subscription
+  // errors or completes, we need to create a new subscription the next time the
+  // observable is subscribed to.
   let subscription: Subscription | undefined;
-  let hasError = false;
-  let isComplete = false;
+  let didSourceError = false;
+  let didSourceComplete = false;
 
   return function shareLatestValueOperation(source) {
     return new Observable(observer => {
       refCount++;
 
-      const hadError = hasError;
+      const shouldSubscribeToSource =
+        subscription === undefined || didSourceError;
 
-      if (subject === undefined || hasError) {
-        hasError = false;
+      if (subject === undefined || didSourceError) {
+        didSourceError = false;
+
         subject = new SubjectWithCurrentValue<T | typeof pendingValue>(
-          pendingValue,
-          {
-            shouldSendCurrentValueWhenStopped: true,
-          }
+          pendingValue
         );
       }
 
-      const innerSub = subject.subscribe({
-        next(value) {
-          if (value !== pendingValue) {
-            observer.next(value);
-          }
-        },
-        error(err) {
-          observer.error(err);
-        },
-        complete() {
-          observer.complete();
-        },
-      });
+      const innerSub = subject
+        .pipe(filter(value => value !== pendingValue))
+        .subscribe(observer);
 
-      if (subscription === undefined || hadError) {
+      if (shouldSubscribeToSource) {
         subscription = source.subscribe({
           next(value) {
             subject.next(value);
           },
           error(err) {
-            hasError = true;
+            didSourceError = true;
             subject.error(err);
           },
           complete() {
-            isComplete = true;
+            didSourceComplete = true;
             subject.complete();
           },
         });
@@ -119,8 +121,10 @@ export function shareLatestValue<T>(): MonoTypeOperatorFunction<T> {
 
       return () => {
         refCount--;
+
         innerSub.unsubscribe();
-        if (subscription !== undefined && refCount === 0 && isComplete) {
+
+        if (subscription !== undefined && refCount === 0 && didSourceComplete) {
           subscription.unsubscribe();
         }
       };
