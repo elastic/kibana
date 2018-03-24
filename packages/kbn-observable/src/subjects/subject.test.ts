@@ -262,6 +262,56 @@ test('should not next after error', () => {
   expect(results).toEqual(['a', error]);
 });
 
+test('does not allow "error" or "next" when already completed', () => {
+  const error = new Error('wut?');
+  const subject = new Subject();
+  const results1: any[] = [];
+  const results2: any[] = [];
+
+  subject.subscribe(createCollectObserver(results1));
+
+  subject.next('foo');
+  subject.complete();
+  subject.error(error);
+  subject.next('bar');
+
+  subject.subscribe(createCollectObserver(results2));
+
+  // subject.subscribe()
+
+  // subject.next('a');
+  // subject.error(error);
+  // subject.next('b');
+
+  expect(results1).toEqual(['foo', 'C']);
+  expect(results2).toEqual(['C']);
+});
+
+test('does not allow "complete" or "next" when already errored', () => {
+  const error = new Error('wut?');
+  const subject = new Subject();
+  const results1: any[] = [];
+  const results2: any[] = [];
+
+  subject.subscribe(createCollectObserver(results1));
+
+  subject.next('foo');
+  subject.error(error);
+  subject.complete();
+  subject.next('bar');
+
+  subject.subscribe(createCollectObserver(results2));
+
+  // subject.subscribe()
+
+  // subject.next('a');
+  // subject.error(error);
+  // subject.next('b');
+
+  expect(results1).toEqual(['foo', error]);
+  expect(results2).toEqual([error]);
+});
+
 describe('asObservable', () => {
   test('should hide subject', () => {
     const subject = new Subject();

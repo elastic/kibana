@@ -53,6 +53,8 @@ export class Subject<T> extends Observable<T> {
    * to this subject.
    */
   next(value: T) {
+    if (this._isStopped) return;
+
     for (const observer of this._observers) {
       observer.next(value);
     }
@@ -63,6 +65,8 @@ export class Subject<T> extends Observable<T> {
    * to this subject.
    */
   error(error: Error) {
+    if (this._isStopped) return;
+
     this._thrownError = error;
     this._isStopped = true;
 
@@ -77,6 +81,8 @@ export class Subject<T> extends Observable<T> {
    * Completes all the subscribed observers, then clears the list of observers.
    */
   complete() {
+    if (this._isStopped) return;
+
     this._isStopped = true;
 
     for (const observer of this._observers) {
