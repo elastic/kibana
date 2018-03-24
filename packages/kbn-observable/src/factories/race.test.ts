@@ -5,6 +5,10 @@ import { collect } from '../lib/collect';
 import { Subject } from '../subjects';
 import { mergeMap } from '../operators/merge_map';
 
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
 test('should race a single observable', async () => {
   const res = await collect($race($of(1, 2, 3)));
   expect(res).toEqual([1, 2, 3, 'C']);
@@ -44,6 +48,8 @@ test('should race cold and cold', done => {
     expect(values).toEqual(['foo', 'C']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should race hot and hot', done => {
@@ -75,6 +81,8 @@ test('should race hot and hot', done => {
     expect(values).toEqual(['bar', 'C']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should race hot and cold', done => {
@@ -108,6 +116,8 @@ test('should race hot and cold', done => {
     expect(values).toEqual(['bar', 'C']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should race 2nd and 1st', done => {
@@ -139,6 +149,8 @@ test('should race 2nd and 1st', done => {
     expect(values).toEqual(['bar', 'C']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should race emit and complete', done => {
@@ -167,6 +179,8 @@ test('should race emit and complete', done => {
     expect(values).toEqual(['C']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should allow unsubscribing early and explicitly', done => {
@@ -197,6 +211,8 @@ test('should allow unsubscribing early and explicitly', done => {
     expect(values).toEqual([]);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should not break unsubscription chains when unsubscribed explicitly', done => {
@@ -233,6 +249,8 @@ test('should not break unsubscription chains when unsubscribed explicitly', done
     expect(values).toEqual(['foo']);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should throw when error occurs mid stream', done => {
@@ -267,6 +285,8 @@ test('should throw when error occurs mid stream', done => {
     expect(values).toEqual(['bar', error]);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
 
 test('should throw when error occurs before a winner is found', done => {
@@ -301,4 +321,6 @@ test('should throw when error occurs before a winner is found', done => {
     expect(values).toEqual([error]);
     done();
   }, 100);
+
+  jest.advanceTimersByTime(100);
 });
