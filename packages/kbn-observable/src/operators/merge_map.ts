@@ -52,13 +52,15 @@ export function mergeMap<T, R>(
     return new Observable(destination => {
       let completed = false;
       let active = 0;
-      let i = 0;
+      let i = -1;
 
       source.subscribe({
         next(value) {
+          i += 1;
+
           let result;
           try {
-            result = project(value, i++);
+            result = project(value, i);
           } catch (error) {
             destination.error(error);
             return;
