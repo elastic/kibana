@@ -2,19 +2,36 @@ import { Observable } from '../observable';
 import { $of } from '../factories';
 import { map } from './map';
 import { toArray } from './to_array';
+import { collect } from '../lib/collect';
 
 const number$ = $of(1, 2, 3);
-const collect = <T>(source: Observable<T>) =>
-  source.pipe(toArray()).toPromise();
 
 test('returns the modified value', async () => {
-  const numbers = await collect(number$.pipe(map(n => n * 1000)));
+  const observable = number$.pipe(map(n => n * 1000));
+  const numbers = await collect(observable);
 
-  expect(numbers).toEqual([1000, 2000, 3000]);
+  expect(numbers).toEqual([1000, 2000, 3000, 'C']);
 });
 
 test('sends the index as arg 2', async () => {
-  const numbers = await collect(number$.pipe(map((n, i) => i)));
+  const observable = number$.pipe(map((n, i) => i));
+  const numbers = await collect(observable);
 
-  expect(numbers).toEqual([0, 1, 2]);
+  expect(numbers).toEqual([0, 1, 2, 'C']);
+});
+
+test('errors if projection errors', async () => {
+  const error = new Error('foo');
+
+  const observable = number$.pipe(
+    map(value => {
+      if (value > 1) {
+        throw error;
+      }
+      return value;
+    })
+  );
+  const numbers = await collect(observable);
+
+  expect(numbers).toEqual([1, error]);
 });
