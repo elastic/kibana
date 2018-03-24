@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
 
         return PageObjects.visualize.toggleSpyPanel()
           .then(function () {
-            return PageObjects.settings.setPageSize('All');
+            return PageObjects.visualize.setSpyPanelPageSize('All');
           })
           .then(function getDataTableData() {
             return PageObjects.visualize.getDataTableData();

@@ -11,7 +11,6 @@ describe('Settings', function () {
 
       it('should return a space delimited lower-case string with no special characters', function () {
         expect(getAriaName('xPack:defaultAdminEmail')).to.be('x pack default admin email');
-        expect(getAriaName('search:queryLanguage:switcher:enable')).to.be('search query language switcher enable');
         expect(getAriaName('doc_table:highlight')).to.be('doc table highlight');
         expect(getAriaName('foo')).to.be('foo');
       });

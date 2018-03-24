@@ -1,7 +1,7 @@
 <div
   ng-show="timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled"
-  data-shared-timefilter-from="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled ? timefilter.getBounds().min.utc().format() : null }}"
-  data-shared-timefilter-to="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled ? timefilter.getBounds().max.utc().format() : null }}"
+  data-shared-timefilter-from="{{ getSharedTimeFilterFromDate() }}"
+  data-shared-timefilter-to="{{ getSharedTimeFilterToDate() }}"
   class="kuiLocalMenu"
   data-test-subj="globalTimepicker"
 >

@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 import {
   EuiGlobalToastList,
+  EuiPortal,
 } from '@elastic/eui';
 
 export class GlobalToastList extends Component {
@@ -31,11 +32,13 @@ export class GlobalToastList extends Component {
     } = this.props;
 
     return (
-      <EuiGlobalToastList
-        toasts={toasts}
-        dismissToast={dismissToast}
-        toastLifeTimeMs={toastLifeTimeMs}
-      />
+      <EuiPortal>
+        <EuiGlobalToastList
+          toasts={toasts}
+          dismissToast={dismissToast}
+          toastLifeTimeMs={toastLifeTimeMs}
+        />
+      </EuiPortal>
     );
   }
 }
