@@ -29,7 +29,7 @@ const pendingValue = Symbol('awaiting first value');
  *   observer.next(someValue);
  * });
  *
- * const obs = source.pipe(shareLatestValue(1));
+ * const obs = source.pipe(shareLatestValue());
  *
  * // This `subscribe` will make `obs` subscribe to the `source` observable
  * const sub1 = obs.subscribe({

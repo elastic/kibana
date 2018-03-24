@@ -32,7 +32,7 @@ test('should unsubscribe inner observable when source observable emits new value
     .pipe(
       switchMap(
         x =>
-          new Observable(observer => {
+          new Observable(() => {
             return () => {
               unsubbed.push(x);
             };
@@ -62,7 +62,7 @@ test('should unsubscribe inner observable when source observable errors', async 
     .pipe(
       switchMap(
         x =>
-          new Observable(observer => {
+          new Observable(() => {
             return () => {
               unsubbed.push(x);
             };
@@ -208,7 +208,7 @@ test('should switch inner never and throw', async () => {
 
 test('should handle outer throw', async () => {
   const error = new Error('foo');
-  const outer$ = new Observable<string>(observer => {
+  const outer$ = new Observable<string>(() => {
     throw error;
   });
 

@@ -263,7 +263,7 @@ export class Observable<T> implements Subscribable<T> {
    *   .subscribe(x => console.log(x))
    * ```
    *
-   * Implenentation detail:
+   * Implementation detail:
    * Overloads for `pipe` to enable a variable number of arguments, but still a
    * clear gradual progressions from arg to arg when transforming the input. See
    * https://www.typescriptlang.org/docs/handbook/functions.html#overloads for

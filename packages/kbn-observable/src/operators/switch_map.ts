@@ -57,6 +57,13 @@ export function switchMap<T, R>(
       let i = 0;
       let innerSubscription: Subscription | undefined = undefined;
 
+      function resetInnerSubscription() {
+        if (innerSubscription !== undefined) {
+          innerSubscription.unsubscribe();
+          innerSubscription = undefined;
+        }
+      }
+
       return source.subscribe({
         next(value) {
           let result;
@@ -67,9 +74,7 @@ export function switchMap<T, R>(
             return;
           }
 
-          if (innerSubscription !== undefined) {
-            innerSubscription.unsubscribe();
-          }
+          resetInnerSubscription();
 
           innerSubscription = result.subscribe({
             next(innerVal) {
@@ -81,19 +86,11 @@ export function switchMap<T, R>(
           });
         },
         error(err) {
-          if (innerSubscription !== undefined) {
-            innerSubscription.unsubscribe();
-            innerSubscription = undefined;
-          }
-
+          resetInnerSubscription();
           observer.error(err);
         },
         complete() {
-          if (innerSubscription !== undefined) {
-            innerSubscription.unsubscribe();
-            innerSubscription = undefined;
-          }
-
+          resetInnerSubscription();
           observer.complete();
         },
       });
