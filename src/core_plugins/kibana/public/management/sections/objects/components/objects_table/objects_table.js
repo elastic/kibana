@@ -15,7 +15,6 @@ import { getSavedObjectIcon } from '../../lib/get_saved_object_icon';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
 import { getRelationships } from '../../lib/get_relationships';
 
-export const EXCLUDED_TYPES = ['config'];
 export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
 export class ObjectsTable extends Component {
@@ -29,6 +28,8 @@ export class ObjectsTable extends Component {
     services: PropTypes.array.isRequired,
     getDashboardUrl: PropTypes.func.isRequired,
     getVisualizationUrl: PropTypes.func.isRequired,
+    getEditUrl: PropTypes.func.isRequired,
+    getInAppUrl: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -77,10 +78,7 @@ export class ObjectsTable extends Component {
     let savedObjects = [];
     let totalItemCount = 0;
 
-    const excludeTypes = [
-      ...EXCLUDED_TYPES,
-      ...INCLUDED_TYPES.filter(type => visibleTypes && !visibleTypes.includes(type)),
-    ];
+    const includeTypes = INCLUDED_TYPES.filter(type => !visibleTypes || visibleTypes.includes(type));
 
     // TODO: is there a good way to stop existing calls if the input changes?
     await ensureMinimumTime((async () => {
@@ -90,7 +88,7 @@ export class ObjectsTable extends Component {
         page: page + 1,
         sortField: 'type',
         fields: ['title', 'id'],
-        excludeTypes,
+        includeTypes,
       });
 
       savedObjects = data.savedObjects.map(savedObject => ({
@@ -151,7 +149,7 @@ export class ObjectsTable extends Component {
 
   onExportAll = async () => {
     const { kbnIndex, $http } = this.props;
-    const results = await scanAllTypes($http, kbnIndex, EXCLUDED_TYPES);
+    const results = await scanAllTypes($http, kbnIndex, INCLUDED_TYPES);
     saveToFile(JSON.stringify(flattenDeep(results.hits), null, 2));
   }
 
@@ -261,6 +259,8 @@ export class ObjectsTable extends Component {
           fetchData={this.fetchSavedObjects}
           onExport={this.onExport}
           onDelete={this.onDelete}
+          getEditUrl={this.props.getEditUrl}
+          getInAppUrl={this.props.getInAppUrl}
           pageIndex={page}
           pageSize={perPage}
           items={savedObjects}

@@ -11,6 +11,7 @@ export function getSavedObjectIcon(type) {
       return 'dashboardApp';
     case 'index-pattern':
     case 'index-patterns':
+    case 'indexPatterns':
       return 'indexPatternApp';
     case 'tag':
     case 'tags':

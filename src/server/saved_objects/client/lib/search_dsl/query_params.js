@@ -29,15 +29,15 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, excludeTypes, search, searchFields) {
+export function getQueryParams(mappings, type, includeTypes, search, searchFields) {
   if (!type && !search) {
-    if (excludeTypes) {
+    if (includeTypes) {
       return {
         query: {
           bool: {
-            must_not: excludeTypes.map(excludeType => ({
+            should: includeTypes.map(includeType => ({
               term: {
-                type: excludeType,
+                type: includeType,
               }
             }))
           }
@@ -56,10 +56,10 @@ export function getQueryParams(mappings, type, excludeTypes, search, searchField
     ];
   }
 
-  if (excludeTypes) {
-    bool.must_not = excludeTypes.map(excludeType => ({
+  if (includeTypes) {
+    bool.should = includeTypes.map(includeType => ({
       term: {
-        type: excludeType,
+        type: includeType,
       }
     }));
   }

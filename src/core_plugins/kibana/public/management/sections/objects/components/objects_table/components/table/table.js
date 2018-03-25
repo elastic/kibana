@@ -1,7 +1,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSearchBar, EuiBasicTable, EuiButton, EuiIcon } from '@elastic/eui';
+import { EuiSearchBar, EuiBasicTable, EuiButton, EuiIcon, EuiLink } from '@elastic/eui';
 import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
 
 export class Table extends PureComponent {
@@ -17,6 +17,8 @@ export class Table extends PureComponent {
     fetchData: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
+    getEditUrl: PropTypes.func.isRequired,
+    getInAppUrl: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -43,6 +45,9 @@ export class Table extends PureComponent {
       selectedSavedObjects,
       onQueryChange,
       onTableChange,
+      getInAppUrl,
+      getEditUrl,
+      onShowRelationships,
     } = this.props;
 
     const pagination = {
@@ -89,9 +94,24 @@ export class Table extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
-          <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => this.props.onShowRelationships(object.id, object.type, title)}>
+          <Fragment>
             {title}
-          </div>
+            &nbsp;
+            <EuiLink href={getEditUrl(object.type, object.id)}>
+              Edit
+            </EuiLink>
+            &nbsp;
+            <EuiLink href={getInAppUrl(object.type, object.id)}>
+              View in app
+            </EuiLink>
+            &nbsp;
+            <EuiLink onClick={() => onShowRelationships(object.id, object.type, title)}>
+              View relationships
+            </EuiLink>
+          </Fragment>
+          // <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => this.props.onShowRelationships(object.id, object.type, title)}>
+          //   {title}
+          // </div>
         ),
       },
     ];

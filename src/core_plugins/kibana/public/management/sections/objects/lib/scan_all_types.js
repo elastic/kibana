@@ -1,9 +1,9 @@
 import { Scanner } from 'ui/utils/scanner';
 
-export async function scanAllTypes($http, kbnIndex, typesToExclude) {
+export async function scanAllTypes($http, kbnIndex, typesToInclude) {
   const scanner = new Scanner($http, {
     index: kbnIndex,
-    typesToExclude,
+    typesToInclude,
   });
   const results = await scanner.scanAndMap('', {
     pageSize: 1000,

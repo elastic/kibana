@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 
-export const Scanner = function ($http, { index, type, typesToExclude } = {}) {
+export const Scanner = function ($http, { index, type, typesToInclude } = {}) {
   if (!index) throw new Error('Expected index');
   // if (!type) throw new Error('Expected type');
   if (!$http) throw new Error('Expected $http');
@@ -9,7 +9,7 @@ export const Scanner = function ($http, { index, type, typesToExclude } = {}) {
   this.$http = $http;
   this.index = index;
   this.type = type;
-  this.typesToExclude = typesToExclude;
+  this.typesToInclude = typesToInclude;
 };
 
 Scanner.prototype.start = function (searchBody) {
@@ -56,10 +56,10 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
     });
   }
 
-  if (this.typesToExclude) {
+  if (this.typesToInclude) {
     bool.filter.push({
       bool: {
-        must_not: this.typesToExclude.map(type => ({
+        should: this.typesToInclude.map(type => ({
           term: {
             _type: type,
           }
