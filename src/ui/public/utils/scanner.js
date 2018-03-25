@@ -61,7 +61,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       bool: {
         should: this.typesToInclude.map(type => ({
           term: {
-            _type: type,
+            type,
           }
         })),
       }
