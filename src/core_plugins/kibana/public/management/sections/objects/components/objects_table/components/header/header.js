@@ -29,6 +29,7 @@ export const Header = ({
             <EuiButton
               size="s"
               iconType="exportAction"
+              data-test-subj="exportAllObjects"
               onClick={onExportAll}
             >
               Export Everything
@@ -38,6 +39,7 @@ export const Header = ({
             <EuiButton
               size="s"
               iconType="importAction"
+              data-test-subj="importObjects"
               onClick={onImport}
             >
               Import
@@ -63,7 +65,6 @@ export const Header = ({
           You can also edit the raw data of saved objects.
           Typically objects are only modified via their associated application,
           which is probably what you should use instead of this screen.
-          Click each object to view the relationships to other saved objects.
         </EuiTextColor>
       </p>
     </EuiText>

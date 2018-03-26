@@ -29,7 +29,7 @@ export class ObjectsTable extends Component {
     getDashboardUrl: PropTypes.func.isRequired,
     getVisualizationUrl: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
-    getInAppUrl: PropTypes.func.isRequired,
+    goInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -40,6 +40,10 @@ export class ObjectsTable extends Component {
       page: 0,
       perPage: 10,
       savedObjects: [],
+      savedObjectCounts: INCLUDED_TYPES.reduce((accum, type) => {
+        accum[type] = 0;
+        return accum;
+      }, {}),
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,
@@ -54,6 +58,26 @@ export class ObjectsTable extends Component {
 
   componentWillMount() {
     this.fetchSavedObjects();
+    this.fetchCounts();
+  }
+
+  fetchCounts = async () => {
+    const fetches = INCLUDED_TYPES.map(type => this.props.savedObjectsClient.find({
+      perPage: 1,
+      type,
+      page: 1,
+      fields: [],
+    }));
+    const result = await Promise.all(fetches);
+
+    const savedObjectCounts = result.reduce((accum, { total, savedObjects }) => {
+      if (savedObjects && savedObjects.length) {
+        accum[savedObjects[0].type] = total;
+      }
+      return accum;
+    }, this.state.savedObjectCounts);
+
+    this.setState({ savedObjectCounts });
   }
 
   fetchSavedObjects = async () => {
@@ -103,6 +127,13 @@ export class ObjectsTable extends Component {
 
     this.setState({ savedObjects, totalItemCount, isSearching: false });
   };
+
+  refreshData = async () => {
+    await Promise.all([
+      this.fetchSavedObjects(),
+      this.fetchCounts(),
+    ]);
+  }
 
   onSelectionChanged = selection => {
     const selectedSavedObjects = selection.map(item => ({
@@ -156,6 +187,7 @@ export class ObjectsTable extends Component {
   finishImport = () => {
     this.hideImportFlyout();
     this.fetchSavedObjects();
+    this.fetchCounts();
   }
 
   showImportFlyout = () => {
@@ -178,6 +210,7 @@ export class ObjectsTable extends Component {
 
     // Fetching all data
     await this.fetchSavedObjects(Query.parse(''), page, perPage);
+    await this.fetchCounts();
   }
 
   getRelationships = async (type, id) => {
@@ -226,6 +259,7 @@ export class ObjectsTable extends Component {
       savedObjects,
       totalItemCount,
       isSearching,
+      savedObjectCounts,
     } = this.state;
 
     const selectionConfig = {
@@ -236,7 +270,7 @@ export class ObjectsTable extends Component {
     const filterOptions = INCLUDED_TYPES.map(type => ({
       value: type,
       name: type,
-      view: type[0].toUpperCase() + type.slice(1),
+      view: `${type} (${savedObjectCounts[type]})`,
     }));
 
     return (
@@ -246,7 +280,7 @@ export class ObjectsTable extends Component {
         <Header
           onExportAll={this.onExportAll}
           onImport={this.showImportFlyout}
-          onRefresh={this.fetchSavedObjects}
+          onRefresh={this.refreshData}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
@@ -260,7 +294,7 @@ export class ObjectsTable extends Component {
           onExport={this.onExport}
           onDelete={this.onDelete}
           getEditUrl={this.props.getEditUrl}
-          getInAppUrl={this.props.getInAppUrl}
+          goInApp={this.props.goInApp}
           pageIndex={page}
           pageSize={perPage}
           items={savedObjects}

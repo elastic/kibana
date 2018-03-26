@@ -158,11 +158,7 @@
 
 "@types/node@*":
   version "9.4.7"
-<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.7.tgz#57d81cd98719df2c9de118f2d5f3b1120dcd7275"
-=======
-  resolved "http://registry.npmjs.org/@types/node/-/node-9.4.7.tgz#57d81cd98719df2c9de118f2d5f3b1120dcd7275"
->>>>>>> Flyout mostly working
 
 "@zeit/check-updates@1.1.0":
   version "1.1.0"
@@ -418,39 +414,11 @@ ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 ansi-styles@^3.1.0, ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
   dependencies:
     color-convert "^1.9.0"
-=======
-ansi-styles@^3.0.0, ansi-styles@^3.1.0, ansi-styles@^3.2.0:
-=======
-ansi-styles@^3.1.0, ansi-styles@^3.2.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.0.tgz#c159b8d5be0f9e5a6f346dab94f16ce022161b88"
-  dependencies:
-    color-convert "^1.9.0"
-
-<<<<<<< HEAD
-ansi@^0.3.0, ansi@~0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/ansi/-/ansi-0.3.1.tgz#0c42d4fb17160d5a9af1e484bace1c66922c1b21"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-ansi-styles@^3.2.1:
-=======
-ansi-styles@^3.1.0, ansi-styles@^3.2.0, ansi-styles@^3.2.1:
->>>>>>> Flyout mostly working
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
-  dependencies:
-    color-convert "^1.9.0"
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 
 anymatch@^1.3.0:
   version "1.3.2"
@@ -660,26 +628,10 @@ async-each@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-async-limiter@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
-=======
-async-foreach@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/async-foreach/-/async-foreach-0.1.3.tgz#36121f845c0578172de419a97dbeb1d16ec34542"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
 async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
 
->>>>>>> Flyout mostly working
 async@0.9.x:
   version "0.9.2"
   resolved "https://registry.yarnpkg.com/async/-/async-0.9.2.tgz#aea74d5e61c1f899613bf64bda66d4c78f2fd17d"
@@ -1609,8 +1561,6 @@ body-parser@^1.16.1:
     raw-body "2.3.2"
     type-is "~1.6.15"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 body-parser@~1.14.0:
   version "1.14.2"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.14.2.tgz#1015cb1fe2c443858259581db53332f8d0cf50f9"
@@ -1625,21 +1575,7 @@ body-parser@~1.14.0:
     qs "5.2.0"
     raw-body "~2.1.5"
     type-is "~1.6.10"
-=======
-bonjour@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/bonjour/-/bonjour-3.5.0.tgz#8e890a183d8ee9a2393b3844c691a42bcf7bc9f5"
-  dependencies:
-    array-flatten "^2.1.0"
-    deep-equal "^1.0.1"
-    dns-equal "^1.0.0"
-    dns-txt "^2.0.2"
-    multicast-dns "^6.0.1"
-    multicast-dns-service-types "^1.1.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
@@ -2073,16 +2009,7 @@ chalk@2.3.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 chalk@2.3.2, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.1, chalk@^2.3.2:
-=======
-chalk@2.3.2:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-chalk@2.3.2, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.2:
->>>>>>> Flyout mostly working
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.3.2.tgz#250dc96b07491bfd601e648d66ddf5f60c7a5c65"
   dependencies:
@@ -2090,11 +2017,6 @@ chalk@2.3.2, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-<<<<<<< HEAD
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 chalk@^1.0.0, chalk@^1.1.1, chalk@^1.1.3, chalk@~1.1.1:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-1.1.3.tgz#a8115c55e4a702fe4d150abd3872822a7e09fc98"
@@ -2258,34 +2180,9 @@ clap@^1.0.9:
   dependencies:
     chalk "^1.1.3"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
-  dependencies:
-    arr-union "^3.1.0"
-    define-property "^0.2.5"
-    isobject "^3.0.0"
-    static-extend "^0.1.1"
-
-=======
-<<<<<<< HEAD
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-classnames@2.2.5, classnames@2.x, classnames@^2.2.4, classnames@^2.2.5:
-=======
-class-extend@^0.1.0:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/class-extend/-/class-extend-0.1.2.tgz#8057a82b00f53f82a5d62c50ef8cffdec6fabc34"
-=======
-class-utils@^0.3.5:
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
->>>>>>> Flyout mostly working
   dependencies:
     arr-union "^3.1.0"
     define-property "^0.2.5"
@@ -2319,34 +2216,10 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 cli-spinners@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-1.1.0.tgz#f1847b168844d917a671eb9d147e3df497c90d06"
 
-=======
-cli-list@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/cli-list/-/cli-list-0.2.0.tgz#7e673ee0dd39a611a486476e53f3c6b3941cb582"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-cli-spinners@^1.0.0:
-=======
-cli-spinners@^1.0.1:
->>>>>>> Flyout mostly working
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-1.1.0.tgz#f1847b168844d917a671eb9d147e3df497c90d06"
-
-cli-table@~0.3.0:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/cli-table/-/cli-table-0.3.1.tgz#f53b05266a8b1a0b934b3d0821e6e2dc5914ae23"
-  dependencies:
-    colors "1.0.3"
-
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 cli-width@^1.0.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-1.1.1.tgz#a4d293ef67ebb7b88d4a4d42c0ccf00c4d1e366d"
@@ -2489,13 +2362,6 @@ colors@^1.1.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.1.tgz#f4a3d302976aaf042356ba1ade3b1a2c62d9d794"
 
-<<<<<<< HEAD
-=======
-colors@^1.1.0:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/colors/-/colors-1.2.1.tgz#f4a3d302976aaf042356ba1ade3b1a2c62d9d794"
-
->>>>>>> Flyout mostly working
 colors@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
@@ -2512,24 +2378,9 @@ combined-stream@1.0.6, combined-stream@^1.0.5, combined-stream@~1.0.1, combined-
   dependencies:
     delayed-stream "~1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 commander@2, commander@^2.8.1:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.0.tgz#ad2a23a1c3b036e392469b8012cec6b33b4c1322"
-=======
-commander@2, commander@2.12.x, commander@^2.8.1, commander@~2.12.1:
-=======
-commander@2, commander@^2.8.1:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "2.12.2"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.12.2.tgz#0f5946c427ed9ec0d91a46bb9def53e54650e555"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.0.tgz#ad2a23a1c3b036e392469b8012cec6b33b4c1322"
->>>>>>> Flyout mostly working
 
 commander@2.11.0:
   version "2.11.0"
@@ -2581,25 +2432,9 @@ compressible@~2.0.13:
   dependencies:
     mime-db ">= 1.33.0 < 2"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 compression@^1.6.2:
   version "1.7.2"
   resolved "http://registry.npmjs.org/compression/-/compression-1.7.2.tgz#aaffbcd6aaf854b44ebb280353d5ad1651f59a69"
-=======
-compression@^1.5.2, compression@^1.6.2:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/compression/-/compression-1.7.1.tgz#eff2603efc2e22cf86f35d2eb93589f9875373db"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-compression@^1.6.2:
-  version "1.7.2"
-<<<<<<< HEAD
-  resolved "https://registry.yarnpkg.com/compression/-/compression-1.7.2.tgz#aaffbcd6aaf854b44ebb280353d5ad1651f59a69"
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-  resolved "http://registry.npmjs.org/compression/-/compression-1.7.2.tgz#aaffbcd6aaf854b44ebb280353d5ad1651f59a69"
->>>>>>> Flyout mostly working
   dependencies:
     accepts "~1.3.4"
     bytes "3.0.0"
@@ -2613,19 +2448,7 @@ concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 concat-stream@1.6.0:
-=======
-concat-stream@1.6.0, concat-stream@^1.4.7, concat-stream@^1.5.2, concat-stream@^1.6.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-concat-stream@1.6.0, concat-stream@^1.5.2, concat-stream@^1.6.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-concat-stream@1.6.0:
->>>>>>> Flyout mostly working
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.0.tgz#0aac662fd52be78964d5532f694784e70110acf7"
   dependencies:
@@ -2633,16 +2456,7 @@ concat-stream@1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 concat-stream@^1.4.7, concat-stream@^1.5.2, concat-stream@^1.6.0:
-=======
-concat-stream@^1.4.7:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-concat-stream@^1.4.7, concat-stream@^1.5.2, concat-stream@^1.6.0:
->>>>>>> Flyout mostly working
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.1.tgz#261b8f518301f1d834e36342b9fea095d2620a26"
   dependencies:
@@ -2650,11 +2464,6 @@ concat-stream@^1.4.7, concat-stream@^1.5.2, concat-stream@^1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-<<<<<<< HEAD
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 conf@^1.1.2:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/conf/-/conf-1.4.0.tgz#1ea66c9d7a9b601674a5bb9d2b8dc3c726625e67"
@@ -2729,22 +2538,7 @@ contains-path@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/contains-path/-/contains-path-0.1.0.tgz#fe8cf184ff6670b6baef01a9d4861a5cbec4120a"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 content-type-parser@^1.0.1, content-type-parser@^1.0.2:
-=======
-content-disposition@0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/content-disposition/-/content-disposition-0.5.2.tgz#0cf68bb9ddf5f2be7961c3a85178cb85dba78cb4"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-content-type-parser@^1.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-content-type-parser@^1.0.1, content-type-parser@^1.0.2:
->>>>>>> Flyout mostly working
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/content-type-parser/-/content-type-parser-1.0.2.tgz#caabe80623e63638b2502fd4c7f12ff4ce2352e7"
 
@@ -2854,24 +2648,9 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 create-react-class@^15.5.2:
   version "15.6.3"
   resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.3.tgz#2d73237fb3f970ae6ebe011a9e66f46dbca80036"
-=======
-create-react-class@^15.5.1, create-react-class@^15.5.2:
-=======
-create-react-class@^15.5.2:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.2.tgz#cf1ed15f12aad7f14ef5f2dfe05e6c42f91ef02a"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "15.6.3"
-  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.3.tgz#2d73237fb3f970ae6ebe011a9e66f46dbca80036"
->>>>>>> Flyout mostly working
   dependencies:
     fbjs "^0.8.9"
     loose-envify "^1.3.1"
@@ -3249,21 +3028,7 @@ d@1:
   dependencies:
     es5-ext "^0.10.9"
 
-<<<<<<< HEAD
 dargs@5.1.0:
-=======
-d@~0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/d/-/d-0.1.1.tgz#da184c535d18d8ee7ba2aa229b914009fae11309"
-  dependencies:
-    es5-ext "~0.10.2"
-
-<<<<<<< HEAD
-dargs@5.1.0, dargs@^5.1.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-dargs@5.1.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-5.1.0.tgz#ec7ea50c78564cd36c9d5ec18f66329fade27829"
 
@@ -3292,19 +3057,7 @@ debug-fabulous@0.0.X:
     lazy-debug-legacy "0.0.X"
     object-assign "4.1.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 debug@2, debug@2.6.9, debug@2.X, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
-=======
-debug@2, debug@2.6.9, debug@2.X, debug@^2.0.0, debug@^2.1.0, debug@^2.1.1, debug@^2.2.0, debug@^2.6.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-debug@2, debug@2.6.9, debug@2.X, debug@^2.1.1, debug@^2.2.0, debug@^2.6.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-debug@2, debug@2.6.9, debug@2.X, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
->>>>>>> Flyout mostly working
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   dependencies:
@@ -3497,24 +3250,10 @@ depd@~1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.0.1.tgz#80aec64c9d6d97e65cc2a9caa93c0aa6abf73aaa"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 depd@~1.1.0, depd@~1.1.1, depd@~1.1.2:
-=======
-depd@~1.1.1, depd@~1.1.2:
->>>>>>> Flyout mostly working
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
 
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-depd@~1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
-
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 des.js@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/des.js/-/des.js-1.0.0.tgz#c074d2e2aa6a8a9a07dbd61f9a15c2cd83ec8ecc"
@@ -3562,25 +3301,9 @@ diff@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.2.0.tgz#c9ce393a4b7cbd0b058a725c93df299027868ff9"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 diff@3.5.0, diff@^3.2.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
-=======
-diff@3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-3.3.1.tgz#aa8567a6eed03c531fc89d3f711cd0e5259dec75"
-
-diff@^3.2.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-3.4.0.tgz#b1d85507daf3964828de54b37d0d73ba67dda56c"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-diff@3.5.0, diff@^3.2.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
->>>>>>> Flyout mostly working
 
 diffie-hellman@^5.0.0:
   version "5.0.2"
@@ -3760,19 +3483,11 @@ ejs@^2.2.4:
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.7.tgz#cc872c168880ae3c7189762fd5ffc00896c9518a"
 
-<<<<<<< HEAD
 elasticsearch-browser@^14.2.1:
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-14.2.1.tgz#5d1a75339ec6caf2a56c7c912639ab9e83b29755"
 
 elasticsearch@^14.1.0, elasticsearch@^14.2.0, elasticsearch@^14.2.1:
-=======
-elasticsearch-browser@^14.2.0:
-  version "14.2.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-14.2.1.tgz#5d1a75339ec6caf2a56c7c912639ab9e83b29755"
-
-elasticsearch@^14.2.0:
->>>>>>> Flyout mostly working
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-14.2.1.tgz#d10cb0b9562ca6614d178c30a112b93f6e8570d1"
   dependencies:
@@ -3813,21 +3528,7 @@ encode-uri-query@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/encode-uri-query/-/encode-uri-query-1.0.0.tgz#d632be4aafe8316c6145007ffb2844c5312b194c"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 encodeurl@~1.0.1, encodeurl@~1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
-=======
-encodeurl@~1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.1.tgz#79e3d58655346909fe6f0f45a5de68103b294d20"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-encodeurl@~1.0.2:
-=======
-encodeurl@~1.0.1, encodeurl@~1.0.2:
->>>>>>> Flyout mostly working
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
 
@@ -3837,11 +3538,7 @@ encoding@^0.1.11:
   dependencies:
     iconv-lite "~0.4.13"
 
-<<<<<<< HEAD
 end-of-stream@^1.0.0, end-of-stream@^1.1.0:
-=======
-end-of-stream@^1.0.0:
->>>>>>> Flyout mostly working
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.1.tgz#ed29634d19baba463b6ce6b80a37213eab71ec43"
   dependencies:
@@ -3991,11 +3688,7 @@ es-to-primitive@^1.1.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.1"
 
-<<<<<<< HEAD
 es5-ext@^0.10.14, es5-ext@^0.10.35, es5-ext@^0.10.9, es5-ext@~0.10.14:
-=======
-es5-ext@^0.10.14, es5-ext@^0.10.35, es5-ext@^0.10.9, es5-ext@~0.10.11, es5-ext@~0.10.14, es5-ext@~0.10.2, es5-ext@~0.10.5, es5-ext@~0.10.6:
->>>>>>> Flyout mostly working
   version "0.10.41"
   resolved "https://registry.yarnpkg.com/es5-ext/-/es5-ext-0.10.41.tgz#bab3e982d750f0112f0cb9e6abed72c59eb33eb2"
   dependencies:
@@ -4053,26 +3746,6 @@ es6-symbol@3.1.1, es6-symbol@^3.1.1, es6-symbol@~3.1.1:
     d "1"
     es5-ext "~0.10.14"
 
-<<<<<<< HEAD
-=======
-es6-symbol@~2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/es6-symbol/-/es6-symbol-2.0.1.tgz#761b5c67cfd4f1d18afb234f691d678682cb3bf3"
-  dependencies:
-    d "~0.1.1"
-    es5-ext "~0.10.5"
-
-<<<<<<< HEAD
-es6-templates@^0.2.2:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/es6-templates/-/es6-templates-0.2.3.tgz#5cb9ac9fb1ded6eb1239342b81d792bbb4078ee4"
-  dependencies:
-    recast "~0.11.12"
-    through "~2.3.6"
-
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 es6-weak-map@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/es6-weak-map/-/es6-weak-map-2.0.2.tgz#5e3ab32251ffd1538a1f8e5ffa1357772f92d96f"
@@ -4410,31 +4083,11 @@ exec-sh@^0.2.0:
   dependencies:
     merge "^1.1.3"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 execa@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-0.10.0.tgz#ff456a8f53f90f8eccc71a96d11bdfc7f082cb50"
   dependencies:
     cross-spawn "^6.0.0"
-=======
-execa@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/execa/-/execa-0.4.0.tgz#4eb6467a36a095fabb2970ff9d5e3fb7bce6ebc3"
-  dependencies:
-    cross-spawn-async "^2.1.1"
-    is-stream "^1.1.0"
-    npm-run-path "^1.0.0"
-    object-assign "^4.0.1"
-    path-key "^1.0.0"
-    strip-eof "^1.0.0"
-
-execa@^0.6.0:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/execa/-/execa-0.6.3.tgz#57b69a594f081759c69e5370f0d17b9cb11658fe"
-  dependencies:
-    cross-spawn "^5.0.1"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
     get-stream "^3.0.0"
     is-stream "^1.1.0"
     npm-run-path "^2.0.0"
@@ -4442,8 +4095,6 @@ execa@^0.6.0:
     signal-exit "^3.0.0"
     strip-eof "^1.0.0"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 execa@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-0.7.0.tgz#944becd34cc41ee32a63a9faf27ad5a65fc59777"
@@ -4652,28 +4303,12 @@ fastparse@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 faye-websocket@~0.10.0:
-=======
-faye-websocket@^0.10.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.10.0.tgz#4e492f8d04dfb6f89003507f6edbf2d501e7c6f4"
   dependencies:
     websocket-driver ">=0.5.1"
 
-<<<<<<< HEAD
-=======
-faye-websocket@~0.11.0:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.11.1.tgz#f0efe18c4f56e4f40afc7e06c719fd5ee6188f38"
-  dependencies:
-    websocket-driver ">=0.5.1"
-
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 fb-watchman@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/fb-watchman/-/fb-watchman-2.0.0.tgz#54e9abf7dfa2f26cd9b1636c588c1afc05de5d58"
@@ -4785,11 +4420,6 @@ fill-range@^2.1.0:
     repeat-element "^1.1.2"
     repeat-string "^1.5.2"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 fill-range@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/fill-range/-/fill-range-4.0.0.tgz#d544811d428f98eb06a63dc402d2403c328c38f7"
@@ -4802,20 +4432,6 @@ fill-range@^4.0.0:
 finalhandler@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/finalhandler/-/finalhandler-1.1.0.tgz#ce0b6855b45853e791b2fcc680046d88253dd7f5"
-<<<<<<< HEAD
-=======
-filter-obj@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/filter-obj/-/filter-obj-1.1.0.tgz#9b311112bc6c6127a16e016c6c5d7f19e0805c5b"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-finalhandler@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/finalhandler/-/finalhandler-1.0.6.tgz#007aea33d1a4d3e42017f624848ad58d212f814f"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Flyout mostly working
   dependencies:
     debug "2.6.9"
     encodeurl "~1.0.1"
@@ -4880,34 +4496,12 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 focus-trap-react@^3.0.4, focus-trap-react@^3.1.1:
-<<<<<<< HEAD
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-3.1.2.tgz#4dd021ccd028bbd3321147d132cdf7585d6d1394"
-=======
-=======
-focus-trap-react@^3.0.4:
-=======
-focus-trap-react@^3.0.4, focus-trap-react@^3.1.1:
->>>>>>> Flyout mostly working
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-3.1.2.tgz#4dd021ccd028bbd3321147d132cdf7585d6d1394"
   dependencies:
     focus-trap "^2.0.1"
 
-<<<<<<< HEAD
-focus-trap-react@^3.1.1:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-3.1.1.tgz#d8cad66e01de2ae05686eae8942f4008fdd19e53"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-  dependencies:
-    focus-trap "^2.0.1"
-
-=======
->>>>>>> Flyout mostly working
 focus-trap@^2.0.1:
   version "2.4.3"
   resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-2.4.3.tgz#95edc23e77829b7772cb2486d61fd6371ce112f9"
@@ -4930,22 +4524,7 @@ for-each@^0.3.2:
   dependencies:
     is-function "~1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 for-in@^1.0.1, for-in@^1.0.2:
-=======
-for-in@^0.1.3:
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/for-in/-/for-in-0.1.8.tgz#d8773908e31256109952b1fdb9b3fa867d2775e1"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-for-in@^1.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-for-in@^1.0.1, for-in@^1.0.2:
->>>>>>> Flyout mostly working
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
 
@@ -5102,23 +4681,12 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 gaze@^1.0.0:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/gaze/-/gaze-1.1.2.tgz#847224677adb8870d679257ed3388fdb61e40105"
   dependencies:
     globule "^1.0.0"
 
-=======
-<<<<<<< HEAD
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
 geckodriver@1.10.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.10.0.tgz#73e2f785666521d0d3a9ddc9fd5a0a5e3bf47845"
@@ -5261,7 +4829,7 @@ glob@7.1.1:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@7.1.2, glob@^7.0.0, glob@^7.0.3, glob@^7.0.5, glob@^7.1.1, glob@^7.1.2:
+glob@7.1.2, glob@^7.0.0, glob@^7.0.3, glob@^7.0.5, glob@^7.1.1, glob@^7.1.2, glob@~7.1.1:
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.2.tgz#c19c9df9a028702d678612384a6552404c636d15"
   dependencies:
@@ -5364,6 +4932,14 @@ globby@^6.1.0:
     object-assign "^4.0.1"
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
+
+globule@^1.0.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/globule/-/globule-1.2.0.tgz#1dc49c6822dd9e8a2fa00ba2a295006e8664bd09"
+  dependencies:
+    glob "~7.1.1"
+    lodash "~4.17.4"
+    minimatch "~3.0.2"
 
 gm@~1.21.1:
   version "1.21.1"
@@ -5862,30 +5438,10 @@ hoek@3.x.x:
 hoek@4.X.X, hoek@4.x.x:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-4.2.1.tgz#9634502aa12c445dd5a7c5734b572bb8738aacbb"
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-hoist-non-react-statics@^2.3.0, hoist-non-react-statics@^2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.0.tgz#d2ca2dfc19c5a91c5a6615ce8e564ef0347e2a40"
-=======
-hoist-non-react-statics@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-1.2.0.tgz#aa448cf0986d55cc40773b17174b7dd066cb7cfb"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-hoist-non-react-statics@^2.2.1, hoist-non-react-statics@^2.3.0:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.3.1.tgz#343db84c6018c650778898240135a1420ee22ce0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
 
 hoist-non-react-statics@^2.3.0, hoist-non-react-statics@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.0.tgz#d2ca2dfc19c5a91c5a6615ce8e564ef0347e2a40"
->>>>>>> Flyout mostly working
 
 home-or-tmp@^2.0.0:
   version "2.0.0"
@@ -5944,8 +5500,6 @@ http-errors@1.6.2, http-errors@~1.6.2:
     setprototypeof "1.0.3"
     statuses ">= 1.3.1 < 2"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 http-errors@~1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/http-errors/-/http-errors-1.3.1.tgz#197e22cdebd4198585e8694ef6786197b91ed942"
@@ -5953,14 +5507,10 @@ http-errors@~1.3.1:
     inherits "~2.0.1"
     statuses "1"
 
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 http-parser-js@>=0.4.0:
   version "0.4.9"
   resolved "https://registry.yarnpkg.com/http-parser-js/-/http-parser-js-0.4.9.tgz#ea1a04fb64adff0242e9974f297dd4c3cad271e1"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 http-proxy-agent@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/http-proxy-agent/-/http-proxy-agent-1.0.0.tgz#cc1ce38e453bf984a0f7702d2dd59c73d081284a"
@@ -6070,32 +5620,13 @@ import-lazy@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/import-lazy/-/import-lazy-2.1.0.tgz#05698e3d45c88e8d7e9d92cb0584e77f096f3e43"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 import-local@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/import-local/-/import-local-1.0.0.tgz#5e4ffdc03f4fe6c009c6729beb29631c2f8227bc"
   dependencies:
     pkg-dir "^2.0.0"
     resolve-cwd "^2.0.0"
-<<<<<<< HEAD
-=======
-imports-loader@0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/imports-loader/-/imports-loader-0.7.1.tgz#f204b5f34702a32c1db7d48d89d5e867a0441253"
-  dependencies:
-    loader-utils "^1.0.2"
-    source-map "^0.5.6"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-
->>>>>>> Flyout mostly working
 imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
@@ -6405,24 +5936,10 @@ is-extglob@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-extglob/-/is-extglob-1.0.0.tgz#ac468177c4943405a092fc8f29760c6ffc6206c0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-is-extglob@^2.1.0, is-extglob@^2.1.1:
-=======
-is-extglob@^2.1.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/is-extglob/-/is-extglob-2.1.1.tgz#a88c02535791f02ed37c76a1b9ea9773c833f8c2"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
 is-extglob@^2.1.0, is-extglob@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/is-extglob/-/is-extglob-2.1.1.tgz#a88c02535791f02ed37c76a1b9ea9773c833f8c2"
 
->>>>>>> Flyout mostly working
 is-finite@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-finite/-/is-finite-1.0.2.tgz#cc6677695602be550ef11e8b4aa6305342b6d0aa"
@@ -6453,33 +5970,18 @@ is-glob@^2.0.0, is-glob@^2.0.1:
   dependencies:
     is-extglob "^1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 is-glob@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/is-glob/-/is-glob-3.1.0.tgz#7ba5ae24217804ac70707b96922567486cc3e84a"
   dependencies:
     is-extglob "^2.1.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 is-glob@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/is-glob/-/is-glob-4.0.0.tgz#9521c76845cc2610a85203ddf080a958c2ffabc0"
   dependencies:
     is-extglob "^2.1.1"
 
-<<<<<<< HEAD
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
 is-hexadecimal@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/is-hexadecimal/-/is-hexadecimal-1.0.1.tgz#6e084bbc92061fbb0971ec58b6ce6d404e24da69"
@@ -6567,26 +6069,12 @@ is-plain-obj@^1.0.0, is-plain-obj@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-1.1.0.tgz#71a50c8429dfca773c92a390a4a03b39fcd51d3e"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-object@^2.0.4:
-=======
-is-plain-object@^2.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-object@^2.0.4:
->>>>>>> Flyout mostly working
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-2.0.4.tgz#2c163b3fafb1b606d9d17928f05c2a1c38e07677"
   dependencies:
     isobject "^3.0.1"
 
-<<<<<<< HEAD
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
 is-posix-bracket@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/is-posix-bracket/-/is-posix-bracket-0.1.1.tgz#3334dc79774368e92f016e6fbc0a88f5cd6e6bc4"
@@ -6719,24 +6207,10 @@ isobject@^2.0.0:
   dependencies:
     isarray "1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-isobject@^3.0.0, isobject@^3.0.1:
-=======
-isobject@^3.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
 isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
 
->>>>>>> Flyout mostly working
 isomorphic-fetch@^2.1.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
@@ -7000,7 +6474,6 @@ jest-haste-map@^22.4.2:
 jest-jasmine2@^22.4.2:
   version "22.4.2"
   resolved "https://registry.yarnpkg.com/jest-jasmine2/-/jest-jasmine2-22.4.2.tgz#dfd3d259579ed6f52510d8f1ab692808f0d40691"
-<<<<<<< HEAD
   dependencies:
     chalk "^2.0.1"
     co "^4.6.0"
@@ -7018,25 +6491,6 @@ jest-leak-detector@^22.4.0:
   version "22.4.0"
   resolved "https://registry.yarnpkg.com/jest-leak-detector/-/jest-leak-detector-22.4.0.tgz#64da77f05b001c96d2062226e079f89989c4aa2f"
   dependencies:
-=======
-  dependencies:
-    chalk "^2.0.1"
-    co "^4.6.0"
-    expect "^22.4.0"
-    graceful-fs "^4.1.11"
-    is-generator-fn "^1.0.0"
-    jest-diff "^22.4.0"
-    jest-matcher-utils "^22.4.0"
-    jest-message-util "^22.4.0"
-    jest-snapshot "^22.4.0"
-    jest-util "^22.4.1"
-    source-map-support "^0.5.0"
-
-jest-leak-detector@^22.4.0:
-  version "22.4.0"
-  resolved "https://registry.yarnpkg.com/jest-leak-detector/-/jest-leak-detector-22.4.0.tgz#64da77f05b001c96d2062226e079f89989c4aa2f"
-  dependencies:
->>>>>>> Flyout mostly working
     pretty-format "^22.4.0"
 
 jest-matcher-utils@^22.4.0:
@@ -7046,7 +6500,6 @@ jest-matcher-utils@^22.4.0:
     chalk "^2.0.1"
     jest-get-type "^22.1.0"
     pretty-format "^22.4.0"
-<<<<<<< HEAD
 
 jest-message-util@^22.4.0:
   version "22.4.0"
@@ -7058,19 +6511,6 @@ jest-message-util@^22.4.0:
     slash "^1.0.0"
     stack-utils "^1.0.1"
 
-=======
-
-jest-message-util@^22.4.0:
-  version "22.4.0"
-  resolved "https://registry.yarnpkg.com/jest-message-util/-/jest-message-util-22.4.0.tgz#e3d861df16d2fee60cb2bc8feac2188a42579642"
-  dependencies:
-    "@babel/code-frame" "^7.0.0-beta.35"
-    chalk "^2.0.1"
-    micromatch "^2.3.11"
-    slash "^1.0.0"
-    stack-utils "^1.0.1"
-
->>>>>>> Flyout mostly working
 jest-mock@^22.2.0:
   version "22.2.0"
   resolved "https://registry.yarnpkg.com/jest-mock/-/jest-mock-22.2.0.tgz#444b3f9488a7473adae09bc8a77294afded397a7"
@@ -7147,7 +6587,6 @@ jest-snapshot@^22.4.0:
     mkdirp "^0.5.1"
     natural-compare "^1.4.0"
     pretty-format "^22.4.0"
-<<<<<<< HEAD
 
 jest-util@^22.4.1:
   version "22.4.1"
@@ -7161,21 +6600,6 @@ jest-util@^22.4.1:
     mkdirp "^0.5.1"
     source-map "^0.6.0"
 
-=======
-
-jest-util@^22.4.1:
-  version "22.4.1"
-  resolved "https://registry.yarnpkg.com/jest-util/-/jest-util-22.4.1.tgz#dd17c3bdb067f8e90591563ec0c42bf847dc249f"
-  dependencies:
-    callsites "^2.0.0"
-    chalk "^2.0.1"
-    graceful-fs "^4.1.11"
-    is-ci "^1.0.10"
-    jest-message-util "^22.4.0"
-    mkdirp "^0.5.1"
-    source-map "^0.6.0"
-
->>>>>>> Flyout mostly working
 jest-validate@^22.4.2:
   version "22.4.2"
   resolved "https://registry.yarnpkg.com/jest-validate/-/jest-validate-22.4.2.tgz#e789a4e056173bf97fe797a2df2d52105c57d4f4"
@@ -7286,22 +6710,9 @@ jquery@^3.2.1, jquery@^3.3.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 js-base64@^2.1.9:
   version "2.4.3"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.3.tgz#2e545ec2b0f2957f41356510205214e98fad6582"
-<<<<<<< HEAD
-=======
-js-base64@^2.1.8, js-base64@^2.1.9:
-=======
-js-base64@^2.1.9:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.0.tgz#9e566fee624751a1d720c966cd6226d29d4025aa"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Flyout mostly working
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"
@@ -7314,11 +6725,7 @@ js-yaml@3.4.1:
     argparse "~1.0.2"
     esprima "~2.2.0"
 
-<<<<<<< HEAD
 js-yaml@3.x, js-yaml@^3.4.3, js-yaml@^3.5.1, js-yaml@^3.7.0, js-yaml@^3.9.1:
-=======
-js-yaml@3.x, js-yaml@^3.4.3, js-yaml@^3.5.1, js-yaml@^3.5.2, js-yaml@^3.7.0, js-yaml@^3.9.1:
->>>>>>> Flyout mostly working
   version "3.11.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.11.0.tgz#597c1a8bd57152f26d622ce4117851a51f5ebaef"
   dependencies:
@@ -7622,25 +7029,7 @@ kilt@2.x.x:
   dependencies:
     hoek "4.x.x"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
-=======
-kind-of@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-2.0.1.tgz#018ec7a4ce7e3a86cb9141be519d24c8faa981b5"
-  dependencies:
-    is-buffer "^1.0.2"
-
-kind-of@^3.0.2, kind-of@^3.2.2:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-kind-of@^3.0.2:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
->>>>>>> Flyout mostly working
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-3.2.2.tgz#31ea21a734bab9bbb0f32466d893aea51e4a3c64"
   dependencies:
@@ -7989,28 +7378,6 @@ lodash.memoize@^4.1.2:
   resolved "https://registry.yarnpkg.com/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
 
 lodash.merge@^4.4.0:
-<<<<<<< HEAD
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.1.tgz#adc25d9cb99b9391c59624f379fbba60d7111d54"
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-lodash.mergewith@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/lodash.mergewith/-/lodash.mergewith-4.6.0.tgz#150cf0a16791f5903b8891eab154609274bdea55"
-
-lodash.pad@^4.1.0:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/lodash.pad/-/lodash.pad-4.5.1.tgz#4330949a833a7c8da22cc20f6a26c4d59debba70"
-
-lodash.padend@^4.1.0:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/lodash.padend/-/lodash.padend-4.6.1.tgz#53ccba047d06e158d311f45da625f4e49e6f166e"
-
-lodash.padstart@^4.1.0:
-=======
->>>>>>> Flyout mostly working
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.1.tgz#adc25d9cb99b9391c59624f379fbba60d7111d54"
 
@@ -8058,27 +7425,11 @@ lodash@3.10.1, lodash@^3.10.0, lodash@^3.10.1, lodash@^3.3.1, lodash@^3.8.0, lod
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 lodash@4.17.4:
-=======
-lodash@4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.4:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-lodash@4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
 lodash@^4.0.0, lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.4, lodash@~4.17.5:
-=======
-lodash@4.17.4:
-  version "4.17.4"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
-
-lodash@^4.0.0, lodash@^4.0.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@^4.8.2, lodash@~4.17.5:
->>>>>>> Flyout mostly working
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
@@ -8086,25 +7437,9 @@ lodash@~4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.3.0.tgz#efd9c4a6ec53f3b05412429915c3e4824e4d25a4"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 log-symbols@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-2.2.0.tgz#5740e1c5d6f0dfda4ad9323b5332107ef6b4c40a"
-=======
-log-symbols@^1.0.1, log-symbols@^1.0.2:
-=======
-log-symbols@^1.0.2:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-1.0.2.tgz#376ff7b58ea3086a0f09facc74617eca501e1a18"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-log-symbols@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/log-symbols/-/log-symbols-2.2.0.tgz#5740e1c5d6f0dfda4ad9323b5332107ef6b4c40a"
->>>>>>> Flyout mostly working
   dependencies:
     chalk "^2.0.1"
 
@@ -8151,19 +7486,7 @@ lru-cache@4.0.x:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 lru-cache@4.1.1:
-=======
-lru-cache@4.1.1, lru-cache@^4.0.0, lru-cache@^4.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-lru-cache@4.1.1, lru-cache@^4.0.1:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-lru-cache@4.1.1:
->>>>>>> Flyout mostly working
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.1.tgz#622e32e82488b49279114a4f9ecf45e7cd6bba55"
   dependencies:
@@ -8173,16 +7496,6 @@ lru-cache@4.1.1:
 lru-cache@4.1.x, lru-cache@^4.0.1:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.2.tgz#45234b2e6e2f2b33da125624c4664929a0224c3f"
-<<<<<<< HEAD
-=======
-  dependencies:
-    pseudomap "^1.0.2"
-    yallist "^2.1.2"
-
-lru-queue@0.1:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/lru-queue/-/lru-queue-0.1.0.tgz#2738bd9f0d3cf4f84490c5736c48699ac632cda3"
->>>>>>> Flyout mostly working
   dependencies:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
@@ -8393,25 +7706,7 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 mime-db@1.x.x, "mime-db@>= 1.33.0 < 2", mime-db@~1.33.0:
-  version "1.33.0"
-  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.33.0.tgz#a3492050a5cb9b63450541e39d9788d2272783db"
-=======
-mime-db@1.x.x, "mime-db@>= 1.30.0 < 2":
-=======
-mime-db@1.x.x:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "1.32.0"
-  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.32.0.tgz#485b3848b01a3cda5f968b4882c0771e58e09414"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-"mime-db@>= 1.33.0 < 2", mime-db@~1.33.0:
-=======
-mime-db@1.x.x, "mime-db@>= 1.33.0 < 2", mime-db@~1.33.0:
->>>>>>> Flyout mostly working
   version "1.33.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.33.0.tgz#a3492050a5cb9b63450541e39d9788d2272783db"
 
@@ -8425,36 +7720,12 @@ mime-types@2.0.x:
   dependencies:
     mime-db "~1.12.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 mime-types@2.1.18, mime-types@^2.1.11, mime-types@^2.1.12, mime-types@~2.1.11, mime-types@~2.1.17, mime-types@~2.1.18, mime-types@~2.1.2, mime-types@~2.1.7:
-=======
-mime-types@2.1.18, mime-types@~2.1.18:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-mime-types@2.1.18, mime-types@^2.1.11, mime-types@^2.1.12, mime-types@~2.1.11, mime-types@~2.1.17, mime-types@~2.1.18, mime-types@~2.1.2, mime-types@~2.1.7:
->>>>>>> Flyout mostly working
   version "2.1.18"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.18.tgz#6f323f60a83d11146f831ff11fd66e2fe5503bb8"
   dependencies:
     mime-db "~1.33.0"
-<<<<<<< HEAD
-=======
-mime-types@2.1.17, mime-types@^2.1.11, mime-types@^2.1.12, mime-types@~2.1.11, mime-types@~2.1.15, mime-types@~2.1.16, mime-types@~2.1.17, mime-types@~2.1.2, mime-types@~2.1.7:
-=======
 
-<<<<<<< HEAD
-mime-types@^2.1.11, mime-types@^2.1.12, mime-types@~2.1.11, mime-types@~2.1.15, mime-types@~2.1.17, mime-types@~2.1.2, mime-types@~2.1.7:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "2.1.17"
-  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.17.tgz#09d7a393f03e995a79f8af857b70a9e0ab16557a"
-  dependencies:
-    mime-db "~1.30.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-=======
->>>>>>> Flyout mostly working
 mime@1.3.x:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.3.6.tgz#591d84d3653a6b0b4a3b9df8de5aa8108e72e5e0"
@@ -8499,15 +7770,7 @@ minimatch@0.3:
     lru-cache "2"
     sigmund "~1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 "minimatch@2 || 3", minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4, minimatch@~3.0.0, minimatch@~3.0.2:
-=======
-"minimatch@2 || 3", minimatch@3.0.x, minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4, minimatch@~3.0.0, minimatch@~3.0.2:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-"minimatch@2 || 3", minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4, minimatch@~3.0.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   dependencies:
@@ -8560,21 +7823,6 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-mixin-deep@^1.2.0:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/mixin-deep/-/mixin-deep-1.3.1.tgz#a49e7268dce1a0d9698e45326c5626df3543d0fe"
-  dependencies:
-    for-in "^1.0.2"
-    is-extendable "^1.0.1"
-
-=======
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
 mkdirp@0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.0.tgz#1d73076a6df986cd9344e15e71fcc05a4c9abf12"
@@ -8636,11 +7884,7 @@ moment-timezone@^0.5.14:
   dependencies:
     moment ">= 2.9.0"
 
-<<<<<<< HEAD
 moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.13.0, moment@^2.20.1:
-=======
-moment@2.x.x, "moment@>= 2.9.0", moment@^2.10.3, moment@^2.10.6, moment@^2.13.0, moment@^2.20.1, moment@^2.7.0:
->>>>>>> Flyout mostly working
   version "2.21.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
 
@@ -8701,8 +7945,6 @@ mv@~2:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 nan@^2.0.8, nan@^2.3.0:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
@@ -8723,36 +7965,6 @@ nanomatch@^1.2.9:
     regex-not "^1.0.0"
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
-=======
-nan@^2.0.8, nan@^2.3.0, nan@^2.3.2:
-=======
-nan@^2.0.8, nan@^2.3.0:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.8.0.tgz#ed715f3fe9de02b57a5e6252d90a96675e1f085a"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "2.10.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
-
-nanomatch@^1.2.9:
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/nanomatch/-/nanomatch-1.2.9.tgz#879f7150cb2dab7a471259066c104eee6e0fa7c2"
-  dependencies:
-    arr-diff "^4.0.0"
-    array-unique "^0.3.2"
-    define-property "^2.0.2"
-    extend-shallow "^3.0.2"
-    fragment-cache "^0.2.1"
-    is-odd "^2.0.0"
-    is-windows "^1.0.2"
-    kind-of "^6.0.2"
-    object.pick "^1.3.0"
-    regex-not "^1.0.0"
-    snapdragon "^0.8.1"
-    to-regex "^3.0.1"
->>>>>>> Flyout mostly working
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -8834,37 +8046,10 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 node-fetch@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.1.tgz#369ca70b82f50c86496104a6c776d274f4e4a2d4"
-=======
-node-forge@0.6.33:
-  version "0.6.33"
-  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.6.33.tgz#463811879f573d45155ad6a9f43dc296e8e85ebc"
 
-node-gyp@^3.3.1:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-3.6.2.tgz#9bfbe54562286284838e750eac05295853fa1c60"
-  dependencies:
-    fstream "^1.0.0"
-    glob "^7.0.3"
-    graceful-fs "^4.1.2"
-    minimatch "^3.0.2"
-    mkdirp "^0.5.0"
-    nopt "2 || 3"
-    npmlog "0 || 1 || 2 || 3 || 4"
-    osenv "0"
-    request "2"
-    rimraf "2"
-    semver "~5.3.0"
-    tar "^2.0.0"
-    which "1"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -9078,28 +8263,12 @@ object-keys@^1.0.11, object-keys@^1.0.8:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/object-keys/-/object-keys-1.0.11.tgz#c54601778ad560f1142ce0e01bcca8b56d13426d"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 object-visit@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/object-visit/-/object-visit-1.0.1.tgz#f79c4493af0c5377b59fe39d395e41042dd045bb"
   dependencies:
     isobject "^3.0.0"
-<<<<<<< HEAD
-=======
-object-values@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/object-values/-/object-values-1.0.0.tgz#72af839630119e5b98c3b02bb8c27e3237158105"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-
->>>>>>> Flyout mostly working
 object.assign@^4.0.4:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/object.assign/-/object.assign-4.1.0.tgz#968bf1100d7956bb3ca086f006f846b3bc4008da"
@@ -9246,24 +8415,9 @@ os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.1, os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 osenv@^0.1.0, osenv@^0.1.4:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/osenv/-/osenv-0.1.5.tgz#85cdfafaeb28e8677f416e287592b5f3f49ea410"
-=======
-osenv@0, osenv@^0.1.0, osenv@^0.1.4:
-=======
-osenv@^0.1.0, osenv@^0.1.4:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/osenv/-/osenv-0.1.4.tgz#42fe6d5953df06c8064be6f176c3d05aaaa34644"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/osenv/-/osenv-0.1.5.tgz#85cdfafaeb28e8677f416e287592b5f3f49ea410"
->>>>>>> Flyout mostly working
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
@@ -9423,29 +8577,10 @@ parseurl@~1.3.0, parseurl@~1.3.2:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.2.tgz#fc289d4ed8993119460c156253262cdc8de65bf3"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-pascalcase@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/pascalcase/-/pascalcase-0.1.1.tgz#b363e55e8006ca6fe21784d2db22bd15d7917f14"
-=======
-passwd-user@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/passwd-user/-/passwd-user-2.1.0.tgz#fad9db6ae252f8b088e0c5decd20a7da0c5d9f1e"
-  dependencies:
-    execa "^0.4.0"
-    pify "^2.3.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
 pascalcase@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/pascalcase/-/pascalcase-0.1.1.tgz#b363e55e8006ca6fe21784d2db22bd15d7917f14"
 
->>>>>>> Flyout mostly working
 path-browserify@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-0.0.0.tgz#a0b870729aae214005b7d5032ec2cbbb0fb4451a"
@@ -9472,18 +8607,7 @@ path-is-inside@1.0.2, path-is-inside@^1.0.1, path-is-inside@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/path-is-inside/-/path-is-inside-1.0.2.tgz#365417dede44430d1c11af61027facf074bdfc53"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 path-key@^2.0.0, path-key@^2.0.1:
-=======
-path-key@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/path-key/-/path-key-1.0.0.tgz#5d53d578019646c0d68800db4e146e6bdc2ac7af"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-path-key@^2.0.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/path-key/-/path-key-2.0.1.tgz#411cadb574c5a140d3a4b1910d40d80cc9f40b40"
 
@@ -9929,35 +9053,9 @@ prettier@^1.10.2, prettier@^1.11.1:
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 pretty-format@^22.4.0:
   version "22.4.0"
   resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-22.4.0.tgz#237b1f7e1c50ed03bc65c03ccc29d7c8bb7beb94"
-=======
-pretty-bytes@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-4.0.2.tgz#b2bf82e7350d65c6c33aa95aaa5a4f6327f61cd9"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-pretty-format@^22.0.6:
-  version "22.0.6"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-22.0.6.tgz#bbb78e38445f263c2d3b9e281f4b844380990720"
-  dependencies:
-    ansi-regex "^3.0.0"
-    ansi-styles "^3.2.0"
-
-pretty-format@^22.1.0:
-  version "22.1.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-22.1.0.tgz#2277605b40ed4529ae4db51ff62f4be817647914"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-pretty-format@^22.4.0:
-  version "22.4.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-22.4.0.tgz#237b1f7e1c50ed03bc65c03ccc29d7c8bb7beb94"
->>>>>>> Flyout mostly working
   dependencies:
     ansi-regex "^3.0.0"
     ansi-styles "^3.2.0"
@@ -10014,25 +9112,9 @@ prop-types@15.5.8:
   dependencies:
     fbjs "^0.8.9"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
-=======
-prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.8, prop-types@^15.6.0:
-=======
-prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "15.6.0"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-prop-types@15.x, prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
-  version "15.6.1"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
->>>>>>> Flyout mostly working
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.3.1"
@@ -10146,27 +9228,6 @@ querystring@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-querystringify@0.0.x:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-0.0.4.tgz#0cf7f84f9463ff0ae51c4c4b142d95be37724d9c"
-
-querystringify@~1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-1.0.0.tgz#6286242112c5b712fa654e526652bf6a13ff05cb"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-quick-lru@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-1.1.0.tgz#4360b17c61136ad38078397ff11416e186dcfbb8"
-
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Flyout mostly working
 raf@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.0.tgz#a28876881b4bc2ca9117d4138163ddb80f781575"
@@ -10491,30 +9552,9 @@ read-pkg@^2.0.0:
     normalize-package-data "^2.3.2"
     path-type "^2.0.0"
 
-<<<<<<< HEAD
 readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.3.3:
   version "2.3.5"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.5.tgz#b4f85003a938cbb6ecbce2a124fb1012bd1a838d"
-=======
-"readable-stream@>=1.0.33-1 <1.1.0-0", readable-stream@~1.0.2:
-  version "1.0.34"
-  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-1.0.34.tgz#125820e34bc842d2f2aaafafe4c2916ee32c157c"
-  dependencies:
-    core-util-is "~1.0.0"
-    inherits "~2.0.1"
-    isarray "0.0.1"
-    string_decoder "~0.10.x"
-
-<<<<<<< HEAD
-readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.2.6, readable-stream@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.3.tgz#368f2512d79f9d46fdfc71349ae7878bbc1eb95c"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.0.6, readable-stream@^2.1.4, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.3.3:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.5.tgz#b4f85003a938cbb6ecbce2a124fb1012bd1a838d"
->>>>>>> Flyout mostly working
   dependencies:
     core-util-is "~1.0.0"
     inherits "~2.0.3"
@@ -10665,12 +9705,6 @@ regex-cache@^0.4.2:
 regex-not@^1.0.0, regex-not@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/regex-not/-/regex-not-1.0.2.tgz#1f4ece27e00b0b65e0247a6810e6a85d83a5752c"
-<<<<<<< HEAD
-  dependencies:
-    extend-shallow "^3.0.2"
-    safe-regex "^1.1.0"
-=======
->>>>>>> Flyout mostly working
 
 regexpu-core@^1.0.0:
   version "1.0.0"
@@ -10715,28 +9749,9 @@ regression@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/regression/-/regression-2.0.0.tgz#0f23e4012f0a4c2b5ef828b4f4b4e39f72dfb96a"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 remark-parse@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-5.0.0.tgz#4c077f9e499044d1d5c13f80d7a98cf7b9285d95"
-=======
-relateurl@0.2.x:
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/relateurl/-/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-remark-parse@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-4.0.0.tgz#99f1f049afac80382366e2e0d0bd55429dd45d8b"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-remark-parse@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/remark-parse/-/remark-parse-5.0.0.tgz#4c077f9e499044d1d5c13f80d7a98cf7b9285d95"
->>>>>>> Flyout mostly working
   dependencies:
     collapse-white-space "^1.0.2"
     is-alphabetical "^1.0.0"
@@ -10855,21 +9870,9 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 request@^2.55.0, request@^2.65.0, request@^2.83.0:
   version "2.85.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.85.0.tgz#5a03615a47c61420b3eb99b7dba204f83603e1fa"
-=======
-request@^2.55.0, request@^2.65.0, request@^2.83.0:
-<<<<<<< HEAD
-  version "2.83.0"
-  resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-  version "2.85.0"
-  resolved "https://registry.yarnpkg.com/request/-/request-2.85.0.tgz#5a03615a47c61420b3eb99b7dba204f83603e1fa"
->>>>>>> Flyout mostly working
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.6.0"
@@ -10894,11 +9897,6 @@ request@^2.55.0, request@^2.65.0, request@^2.83.0:
     tunnel-agent "^0.6.0"
     uuid "^3.1.0"
 
-<<<<<<< HEAD
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
 require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
@@ -11173,48 +10171,15 @@ semver-diff@^2.0.0:
   dependencies:
     semver "^5.0.3"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 "semver@2 || 3 || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
-=======
-semver-regex@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/semver-regex/-/semver-regex-1.0.0.tgz#92a4969065f9c70c694753d55248fc68f8f652c9"
-
-semver-truncate@^1.0.0:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/semver-truncate/-/semver-truncate-1.1.2.tgz#57f41de69707a62709a7e0104ba2117109ea47e8"
-  dependencies:
-    semver "^5.3.0"
-
-"semver@2 || 3 || 4 || 5", semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1:
-=======
-"semver@2 || 3 || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
->>>>>>> Flyout mostly working
 
 semver@5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.1.0.tgz#85f2cf8550465c4df000cf7d86f6b054106ab9e5"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 semver@~4.3.3:
-=======
-semver@^4.0.3, semver@~4.3.3, semver@~4.3.6:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-semver@~4.3.3, semver@~4.3.6:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/semver/-/semver-4.3.6.tgz#300bc6e0e86374f7ba61068b5b1ecd57fc6532da"
 
@@ -11241,23 +10206,8 @@ send@0.16.2:
     statuses "~1.4.0"
 
 serve@^6.3.1:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   version "6.5.3"
   resolved "https://registry.yarnpkg.com/serve/-/serve-6.5.3.tgz#39ae7b7ff5934a9ca93ba7235344eb34b726cc48"
-=======
-  version "6.4.8"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-6.4.8.tgz#6057b2f04eadf8d8c0cec9a301592e670808672b"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "6.5.2"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-6.5.2.tgz#b6030a82c3f5597813f231f75abc29536bb098f9"
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-  version "6.5.3"
-  resolved "https://registry.yarnpkg.com/serve/-/serve-6.5.3.tgz#39ae7b7ff5934a9ca93ba7235344eb34b726cc48"
->>>>>>> Flyout mostly working
   dependencies:
     "@zeit/check-updates" "1.1.0"
     args "3.0.8"
@@ -11317,13 +10267,8 @@ setprototypeof@1.0.3:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.0.3.tgz#66567e37043eeb4f04d91bd658c0cbefb55b8e04"
 
 sha.js@^2.4.0, sha.js@^2.4.8:
-<<<<<<< HEAD
   version "2.4.11"
   resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
-=======
-  version "2.4.10"
-  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.10.tgz#b1fde5cd7d11a5626638a07c604ab909cfa31f9b"
->>>>>>> Flyout mostly working
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
@@ -11571,28 +10516,9 @@ source-map@0.5.6:
   version "0.5.6"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.6.tgz#75ce38f52bf0733c5a7f0c118d81334a2bb5f412"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 source-map@0.X:
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.2.tgz#115c3e891aaa9a484869fd2b89391a225feba344"
-=======
-source-map@0.5.x, source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.0, source-map@~0.5.1, source-map@~0.5.6:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-source-map@0.X, source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-source-map@0.X:
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.2.tgz#115c3e891aaa9a484869fd2b89391a225feba344"
->>>>>>> Flyout mostly working
 
 source-map@^0.1.38, source-map@~0.1.7:
   version "0.1.43"
@@ -11600,9 +10526,6 @@ source-map@^0.1.38, source-map@~0.1.7:
   dependencies:
     amdefine ">=0.0.4"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7, source-map@~0.5.1:
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
@@ -11611,24 +10534,6 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
 
-=======
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.1, source-map@~0.5.6:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
-
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-source-map@^0.5.0, source-map@^0.5.1, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7, source-map@~0.5.1:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
-
-source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
-
->>>>>>> Flyout mostly working
 source-map@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.2.0.tgz#dab73fbcfc2ba819b4de03bd6f6eaa48164b3f9d"
@@ -11712,49 +10617,13 @@ spdx@^0.5.1:
     spdx-exceptions "^1.0.0"
     spdx-license-ids "^1.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 split-string@^3.0.1, split-string@^3.0.2:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/split-string/-/split-string-3.1.0.tgz#7cb09dda3a86585705c64b39a6466038682e8fe2"
   dependencies:
     extend-shallow "^3.0.0"
 
-<<<<<<< HEAD
 split@0.3:
-=======
-spdy-transport@^2.0.18:
-  version "2.0.20"
-  resolved "https://registry.yarnpkg.com/spdy-transport/-/spdy-transport-2.0.20.tgz#735e72054c486b2354fe89e702256004a39ace4d"
-  dependencies:
-    debug "^2.6.8"
-    detect-node "^2.0.3"
-    hpack.js "^2.1.6"
-    obuf "^1.1.1"
-    readable-stream "^2.2.9"
-    safe-buffer "^5.0.1"
-    wbuf "^1.7.2"
-
-spdy@^3.4.1:
-  version "3.4.7"
-  resolved "https://registry.yarnpkg.com/spdy/-/spdy-3.4.7.tgz#42ff41ece5cc0f99a3a6c28aabb73f5c3b03acbc"
-  dependencies:
-    debug "^2.6.8"
-    handle-thing "^1.2.5"
-    http-deceiver "^1.2.7"
-    safe-buffer "^5.0.1"
-    select-hose "^2.0.0"
-    spdy-transport "^2.0.18"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
-split@0.3, split@~0.3.2:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/split/-/split-0.3.3.tgz#cd0eea5e63a211dfff7eb0f091c4133e2d0dd28f"
   dependencies:
@@ -11801,11 +10670,6 @@ statehood@4.x.x:
     items "2.x.x"
     joi "9.x.x"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 static-extend@^0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/static-extend/-/static-extend-0.1.2.tgz#60809c39cbff55337226fd5e0b520f341f1fb5c6"
@@ -11813,16 +10677,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-<<<<<<< HEAD
 statuses@1, "statuses@>= 1.3.1 < 2", statuses@~1.4.0:
-=======
-"statuses@>= 1.3.1 < 2":
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-=======
->>>>>>> Flyout mostly working
-"statuses@>= 1.3.1 < 2", statuses@~1.4.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.4.0.tgz#bb73d446da2796106efcc1b601a253d6c46bd087"
 
@@ -12075,23 +10930,6 @@ supports-color@^4.0.0, supports-color@^4.2.1:
   dependencies:
     has-flag "^2.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-supports-color@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.3.0.tgz#5b24ac15db80fa927cf5227a4a33fd3c4c7676c0"
-  dependencies:
-    has-flag "^3.0.0"
-=======
-supports-color@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.1.0.tgz#058a021d1b619f7ddf3980d712ea3590ce7de3d5"
-  dependencies:
-    has-flag "^2.0.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-
-=======
->>>>>>> Flyout mostly working
 supports-color@^5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.3.0.tgz#5b24ac15db80fa927cf5227a4a33fd3c4c7676c0"
@@ -12205,23 +11043,7 @@ tar@4.0.2:
     mkdirp "^0.5.0"
     yallist "^3.0.2"
 
-<<<<<<< HEAD
 tar@^2.2.1:
-=======
-tar@^2.2.1, "tar@~2.2.1 ":
-<<<<<<< HEAD
-=======
-tar@^2.0.0, tar@^2.2.1, "tar@~2.2.1 ":
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-<<<<<<< HEAD
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-=======
-tar@^2.2.1, "tar@~2.2.1 ":
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/tar/-/tar-2.2.1.tgz#8e4d2a256c0e2185c6b18ad694aec968b83cb1d1"
   dependencies:
@@ -12260,24 +11082,6 @@ through2@2.X, through2@^2.0.0:
     readable-stream "^2.1.5"
     xtend "~4.0.1"
 
-<<<<<<< HEAD
-=======
-through2@~0.6.3:
-  version "0.6.5"
-  resolved "https://registry.yarnpkg.com/through2/-/through2-0.6.5.tgz#41ab9c67b29d57209071410e1d7a7a968cd3ad48"
-  dependencies:
-    readable-stream ">=1.0.33-1 <1.1.0-0"
-    xtend ">=4.0.0 <4.1.0-0"
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
->>>>>>> Flyout mostly working
 through@2, "through@>=2.2.7 <3", through@^2.3.6, through@~2.3, through@~2.3.1:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
@@ -12306,15 +11110,9 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
-<<<<<<< HEAD
 tiny-lr@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/tiny-lr/-/tiny-lr-0.2.1.tgz#b3fdba802e5d56a33c2f6f10794b32e477ac729d"
-=======
-timers-ext@0.1:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/timers-ext/-/timers-ext-0.1.5.tgz#77147dd4e76b660c2abb8785db96574cbbd12922"
->>>>>>> Flyout mostly working
   dependencies:
     body-parser "~1.14.0"
     debug "~2.2.0"
@@ -12382,12 +11180,9 @@ to-object-path@^0.3.0:
 to-regex-range@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/to-regex-range/-/to-regex-range-2.1.1.tgz#7c80c17b9dfebe599e27367e0d4dd5590141db38"
-<<<<<<< HEAD
-=======
   dependencies:
     is-number "^3.0.0"
     repeat-string "^1.6.1"
->>>>>>> Flyout mostly working
 
 to-regex@^3.0.1:
   version "3.0.2"
@@ -12416,24 +11211,9 @@ topojson-client@3, topojson-client@3.0.0:
   dependencies:
     commander "2"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 tough-cookie@>=0.12.0, tough-cookie@>=2.3.3, tough-cookie@^2.3.1, tough-cookie@^2.3.3, tough-cookie@~2.3.0, tough-cookie@~2.3.3:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
-=======
-tough-cookie@>=0.12.0, tough-cookie@>=2.3.3, tough-cookie@^2.0.0, tough-cookie@^2.3.1, tough-cookie@^2.3.3, tough-cookie@~2.3.0, tough-cookie@~2.3.3:
-=======
-tough-cookie@>=0.12.0, tough-cookie@>=2.3.3, tough-cookie@^2.3.1, tough-cookie@^2.3.3, tough-cookie@~2.3.0, tough-cookie@~2.3.3:
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.3.tgz#0b618a5565b6dea90bf3425d04d55edc475a7561"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-2.3.4.tgz#ec60cee38ac675063ffc97a5c18970578ee83655"
->>>>>>> Flyout mostly working
   dependencies:
     punycode "^1.4.1"
 
@@ -12559,11 +11339,7 @@ type-detect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
 
-<<<<<<< HEAD
 type-is@~1.6.0, type-is@~1.6.10, type-is@~1.6.15:
-=======
-type-is@~1.6.0, type-is@~1.6.15:
->>>>>>> Flyout mostly working
   version "1.6.16"
   resolved "https://registry.yarnpkg.com/type-is/-/type-is-1.6.16.tgz#f89ce341541c672b25ee7ae3c73dee3b2be50194"
   dependencies:
@@ -12734,32 +11510,9 @@ unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 unset-value@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/unset-value/-/unset-value-1.0.0.tgz#8376873f7d2335179ffb1e6fc3a8ed0dfc8ab559"
-  dependencies:
-    has-value "^0.3.1"
-    isobject "^3.0.0"
-
-=======
-<<<<<<< HEAD
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-<<<<<<< HEAD
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-unzip-response@^1.0.0:
-=======
-untildify@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/untildify/-/untildify-2.1.0.tgz#17eb2807987f76952e9c0485fc311d06a826a2e0"
-=======
-unset-value@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/unset-value/-/unset-value-1.0.0.tgz#8376873f7d2335179ffb1e6fc3a8ed0dfc8ab559"
->>>>>>> Flyout mostly working
   dependencies:
     has-value "^0.3.1"
     isobject "^3.0.0"
@@ -12772,37 +11525,11 @@ unzip-response@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/unzip-response/-/unzip-response-2.0.1.tgz#d2f0f737d16b0615e72a6935ed04214572d56f97"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 upath@^1.0.0:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/upath/-/upath-1.0.4.tgz#ee2321ba0a786c50973db043a50b7bcba822361d"
 
-<<<<<<< HEAD
 update-notifier@2.3.0, update-notifier@^2.2.0:
-=======
-update-notifier@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/update-notifier/-/update-notifier-0.5.0.tgz#07b5dc2066b3627ab3b4f530130f7eddda07a4cc"
-  dependencies:
-    chalk "^1.0.0"
-    configstore "^1.0.0"
-    is-npm "^1.0.0"
-    latest-version "^1.0.0"
-    repeating "^1.1.2"
-    semver-diff "^2.0.0"
-    string-length "^1.0.0"
-
-update-notifier@^2.1.0, update-notifier@^2.2.0, update-notifier@^2.3.0:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-=======
->>>>>>> Flyout mostly working
-update-notifier@2.3.0, update-notifier@^2.2.0:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/update-notifier/-/update-notifier-2.3.0.tgz#4e8827a6bb915140ab093559d7014e3ebb837451"
   dependencies:
@@ -13007,11 +11734,7 @@ vega-hierarchy@^2.1:
     vega-dataflow "3"
     vega-util "1"
 
-<<<<<<< HEAD
 vega-lib@^3.2.1:
-=======
-vega-lib@^3.1.0:
->>>>>>> Flyout mostly working
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.2.1.tgz#feca4b054a0db492f92fd555e6c20be3f3c117d0"
   dependencies:
@@ -13037,11 +11760,7 @@ vega-lib@^3.1.0:
     vega-voronoi "2"
     vega-wordcloud "^2.1"
 
-<<<<<<< HEAD
 vega-lite@^2.3.1:
-=======
-vega-lite@^2.1.3:
->>>>>>> Flyout mostly working
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.3.1.tgz#a7abd16ef7d06b3f8ed8c873bca4be5c4a577369"
   dependencies:
@@ -13248,30 +11967,12 @@ w3c-blob@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/w3c-blob/-/w3c-blob-0.0.1.tgz#b0cd352a1a50f515563420ffd5861f950f1d85b8"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Flyout mostly working
 w3c-hr-time@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/w3c-hr-time/-/w3c-hr-time-1.0.1.tgz#82ac2bff63d950ea9e3189a58a65625fedf19045"
   dependencies:
     browser-process-hrtime "^0.1.2"
-<<<<<<< HEAD
-=======
-walk@2.3.x:
-  version "2.3.9"
-  resolved "https://registry.yarnpkg.com/walk/-/walk-2.3.9.tgz#31b4db6678f2ae01c39ea9fb8725a9031e558a7b"
-  dependencies:
-    foreachasync "^3.0.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
 
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-=======
-
->>>>>>> Flyout mostly working
 walker@~1.0.5:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/walker/-/walker-1.0.7.tgz#2f7f9b8fd10d677262b18a884e28d19618e028fb"
@@ -13353,8 +12054,6 @@ webpack@3.6.0:
     webpack-sources "^1.0.1"
     yargs "^8.0.2"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 websocket-driver@>=0.5.1:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/websocket-driver/-/websocket-driver-0.7.0.tgz#0caf9d2d755d93aee049d4bdd0d3fe2cca2a24eb"
@@ -13366,16 +12065,7 @@ websocket-extensions@>=0.1.1:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
 
-<<<<<<< HEAD
 whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
-=======
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-whatwg-encoding@^1.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
->>>>>>> Flyout mostly working
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/whatwg-encoding/-/whatwg-encoding-1.0.3.tgz#57c235bc8657e914d24e1a397d3c82daee0a6ba3"
   dependencies:
@@ -13567,22 +12257,7 @@ xhr@^2.0.1:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 "xml-name-validator@>= 2.0.1 < 3.0.0":
-=======
-xml-char-classes@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/xml-char-classes/-/xml-char-classes-1.0.0.tgz#64657848a20ffc5df583a42ad8a277b4512bbc4d"
-
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
-"xml-name-validator@>= 2.0.1 < 3.0.0", xml-name-validator@^2.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-"xml-name-validator@>= 2.0.1 < 3.0.0":
->>>>>>> Flyout mostly working
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-2.0.1.tgz#4d8b8f1eccd3419aa362061becef515e1e559635"
 
@@ -13631,15 +12306,7 @@ xmlhttprequest@1:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/xmlhttprequest/-/xmlhttprequest-1.8.0.tgz#67fe075c5c24fef39f9d65f5f7b7fe75171968fc"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
-=======
-"xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.0, xtend@~4.0.1:
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
-"xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
@@ -13771,149 +12438,7 @@ yauzl@^2.4.2:
 yeast@0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
-<<<<<<< HEAD
 
-<<<<<<< HEAD
 zlib@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/zlib/-/zlib-1.0.5.tgz#6e7c972fc371c645a6afb03ab14769def114fcc0"
-=======
-yeoman-character@^1.0.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/yeoman-character/-/yeoman-character-1.1.0.tgz#90d4b5beaf92759086177015b2fdfa2e0684d7c7"
-  dependencies:
-    supports-color "^3.1.2"
-
-yeoman-doctor@^2.0.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/yeoman-doctor/-/yeoman-doctor-2.1.0.tgz#94ab784896a64f53a9fac452d5e9133e2750a236"
-  dependencies:
-    bin-version-check "^2.1.0"
-    chalk "^1.0.0"
-    each-async "^1.1.1"
-    log-symbols "^1.0.1"
-    object-values "^1.0.0"
-    semver "^5.0.3"
-    twig "^0.8.2"
-    user-home "^2.0.0"
-
-yeoman-environment@^1.1.0:
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/yeoman-environment/-/yeoman-environment-1.6.6.tgz#cd85fa67d156060e440d7807d7ef7cf0d2d1d671"
-  dependencies:
-    chalk "^1.0.0"
-    debug "^2.0.0"
-    diff "^2.1.2"
-    escape-string-regexp "^1.0.2"
-    globby "^4.0.0"
-    grouped-queue "^0.3.0"
-    inquirer "^1.0.2"
-    lodash "^4.11.1"
-    log-symbols "^1.0.1"
-    mem-fs "^1.1.0"
-    text-table "^0.2.0"
-    untildify "^2.0.0"
-
-yeoman-environment@^2.0.0:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/yeoman-environment/-/yeoman-environment-2.0.5.tgz#84f22bafa84088971fe99ea85f654a3a3dd2b693"
-  dependencies:
-    chalk "^2.1.0"
-    debug "^3.1.0"
-    diff "^3.3.1"
-    escape-string-regexp "^1.0.2"
-    globby "^6.1.0"
-    grouped-queue "^0.3.3"
-    inquirer "^3.3.0"
-    is-scoped "^1.0.0"
-    lodash "^4.17.4"
-    log-symbols "^2.1.0"
-    mem-fs "^1.1.0"
-    text-table "^0.2.0"
-    untildify "^3.0.2"
-
-yeoman-generator@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/yeoman-generator/-/yeoman-generator-1.1.1.tgz#40c2b4f6cdfbe05e1952fdd72933f0d8925dbdf5"
-  dependencies:
-    async "^2.0.0"
-    chalk "^1.0.0"
-    class-extend "^0.1.0"
-    cli-table "^0.3.1"
-    cross-spawn "^5.0.1"
-    dargs "^5.1.0"
-    dateformat "^2.0.0"
-    debug "^2.1.0"
-    detect-conflict "^1.0.0"
-    error "^7.0.2"
-    find-up "^2.1.0"
-    github-username "^3.0.0"
-    glob "^7.0.3"
-    istextorbinary "^2.1.0"
-    lodash "^4.11.1"
-    mem-fs-editor "^3.0.0"
-    minimist "^1.2.0"
-    mkdirp "^0.5.0"
-    path-exists "^3.0.0"
-    path-is-absolute "^1.0.0"
-    pretty-bytes "^4.0.2"
-    read-chunk "^2.0.0"
-    read-pkg-up "^2.0.0"
-    rimraf "^2.2.0"
-    run-async "^2.0.0"
-    shelljs "^0.7.0"
-    text-table "^0.2.0"
-    through2 "^2.0.0"
-    user-home "^2.0.0"
-    yeoman-environment "^1.1.0"
-
-yo@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/yo/-/yo-2.0.0.tgz#0cd75211379ed87105f99510885759062147b517"
-  dependencies:
-    async "^2.1.4"
-    chalk "^1.0.0"
-    cli-list "^0.2.0"
-    configstore "^3.0.0"
-    cross-spawn "^5.0.1"
-    figures "^2.0.0"
-    fullname "^3.2.0"
-    got "^6.7.1"
-    humanize-string "^1.0.0"
-    inquirer "^3.0.1"
-    insight "^0.8.4"
-    lodash "^4.17.4"
-    meow "^3.0.0"
-    npm-keyword "^4.1.0"
-    opn "^4.0.2"
-    package-json "^2.1.0"
-    parse-help "^0.1.1"
-    read-pkg-up "^2.0.0"
-    root-check "^1.0.0"
-    sort-on "^2.0.0"
-    string-length "^1.0.0"
-    tabtab "^1.3.2"
-    titleize "^1.0.0"
-    update-notifier "^2.1.0"
-    user-home "^2.0.0"
-    yeoman-character "^1.0.0"
-    yeoman-doctor "^2.0.0"
-    yeoman-environment "^2.0.0"
-    yosay "^2.0.0"
-
-yosay@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/yosay/-/yosay-2.0.1.tgz#078167f0365732e5c82d3f64633f9cd3a0526d2f"
-  dependencies:
-    ansi-regex "^2.0.0"
-    ansi-styles "^3.0.0"
-    chalk "^1.0.0"
-    cli-boxes "^1.0.0"
-    pad-component "0.0.1"
-    string-width "^2.0.0"
-    strip-ansi "^3.0.0"
-    taketalk "^1.0.0"
-    wrap-ansi "^2.0.0"
->>>>>>> Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)"
-=======
->>>>>>> Revert "Revert "[@kbn/ui-framework] move ui-framework to a package (#17085)""

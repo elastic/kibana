@@ -18,7 +18,7 @@ export class Table extends PureComponent {
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
-    getInAppUrl: PropTypes.func.isRequired,
+    goInApp: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -45,7 +45,7 @@ export class Table extends PureComponent {
       selectedSavedObjects,
       onQueryChange,
       onTableChange,
-      getInAppUrl,
+      goInApp,
       getEditUrl,
       onShowRelationships,
     } = this.props;
@@ -94,26 +94,28 @@ export class Table extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
-          <Fragment>
+          <EuiLink href={getEditUrl(object.id, object.type)}>
             {title}
-            &nbsp;
-            <EuiLink href={getEditUrl(object.type, object.id)}>
-              Edit
-            </EuiLink>
-            &nbsp;
-            <EuiLink href={getInAppUrl(object.type, object.id)}>
-              View in app
-            </EuiLink>
-            &nbsp;
-            <EuiLink onClick={() => onShowRelationships(object.id, object.type, title)}>
-              View relationships
-            </EuiLink>
-          </Fragment>
-          // <div style={{ width: '100%', cursor: 'pointer' }} onClick={() => this.props.onShowRelationships(object.id, object.type, title)}>
-          //   {title}
-          // </div>
+          </EuiLink>
         ),
       },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            name: 'In app',
+            description: 'View the relationships this saved object has to other saved objects',
+            icon: 'eye',
+            onClick: object => goInApp(object.id, object.type)
+          },
+          {
+            name: 'Relationships',
+            description: 'View the relationships this saved object has to other saved objects',
+            icon: 'kqlSelector',
+            onClick: object => onShowRelationships(object.id, object.type, object.title)
+          }
+        ]
+      }
     ];
 
     return (
@@ -143,14 +145,16 @@ export class Table extends PureComponent {
             </EuiButton>,
           ]}
         />
-        <EuiBasicTable
-          loading={isSearching}
-          items={items}
-          columns={columns}
-          pagination={pagination}
-          selection={selection}
-          onChange={onTableChange}
-        />
+        <div data-test-subj="savedObjectsTable">
+          <EuiBasicTable
+            loading={isSearching}
+            items={items}
+            columns={columns}
+            pagination={pagination}
+            selection={selection}
+            onChange={onTableChange}
+          />
+        </div>
       </Fragment>
     );
   }

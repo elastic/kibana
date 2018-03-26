@@ -33,23 +33,32 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
         newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
         getDashboardUrl={id => kbnUrl.eval('#/dashboard/{{id}}', { id: id })}
         getVisualizationUrl={id => kbnUrl.eval('#/visualize/edit/{{id}}', { id: id })}
-        getEditUrl={(type, id) => {
+        getEditUrl={(id, type) => {
           if (type === 'index-pattern') {
             return kbnUrl.eval(`#/management/kibana/indices/${id}`);
           }
           return kbnUrl.eval(`#/management/kibana/objects/${typeToServiceName(type)}/${id}`);
         }}
-        getInAppUrl={(type, id) => {
-          if (type === 'index-pattern') {
-            return kbnUrl.eval(`#/management/kibana/indices/${id}`);
+        goInApp={(id, type) => {
+          let url;
+
+          switch (type) {
+            case 'index-pattern':
+              url = `/management/kibana/indices/${id}`;
+              break;
+            case 'visualization':
+              url = `/visualize/edit/${id}`;
+              break;
+            case 'search':
+              url = `/discover/${id}`;
+              break;
+            default:
+              url = `/${type.toLowerCase()}/${id}`;
+              break;
           }
-          if (type === 'visualization') {
-            return kbnUrl.eval(`#/visualize/edit/${id}`);
-          }
-          if (type === 'search') {
-            return kbnUrl.eval(`#/discover/${id}`);
-          }
-          return kbnUrl.eval(`#/${type.toLowerCase()}/${id}`);
+
+          kbnUrl.change(url);
+          $scope.$apply();
         }}
       />,
       node,

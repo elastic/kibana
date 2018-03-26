@@ -24,8 +24,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { importFile } from '../../../../lib/import_file';
-import { resolveSavedObjects, resolveSavedSearches, resolveConflicts, saveObjects } from '../../../../lib/resolve_saved_objects';
-import { EXCLUDED_TYPES } from '../../objects_table';
+import {
+  resolveSavedObjects,
+  resolveSavedSearches,
+  resolveConflicts,
+  saveObjects,
+} from '../../../../lib/resolve_saved_objects';
+import { INCLUDED_TYPES } from '../../objects_table';
 
 export class Flyout extends Component {
   static propTypes = {
@@ -60,7 +65,10 @@ export class Flyout extends Component {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
+    const indexPatterns = await this.props.indexPatterns.getFields([
+      'id',
+      'title',
+    ]);
     this.setState({ indexPatterns });
   };
 
@@ -85,42 +93,59 @@ export class Flyout extends Component {
     try {
       contents = await importFile(file);
     } catch (e) {
-      this.setState({ isLoading: false, error: 'The file could not be processed.' });
+      this.setState({
+        isLoading: false,
+        error: 'The file could not be processed.',
+      });
       return;
     }
 
     if (!Array.isArray(contents)) {
-      this.setState({ isLoading: false, error: 'Saved objects file format is invalid and cannot be imported.' });
+      this.setState({
+        isLoading: false,
+        error: 'Saved objects file format is invalid and cannot be imported.',
+      });
       return;
     }
 
-    contents = contents.filter(content => !EXCLUDED_TYPES.includes(content._type));
+    contents = contents.filter(content =>
+      INCLUDED_TYPES.includes(content._type)
+    );
 
     const {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
-    } = await resolveSavedObjects(contents, isOverwriteAllChecked, services, indexPatterns);
+    } = await resolveSavedObjects(
+      contents,
+      isOverwriteAllChecked,
+      services,
+      indexPatterns
+    );
 
-    const defaultIndexPatternId = this.state.indexPatterns && this.state.indexPatterns.length
-      ? this.state.indexPatterns[0].id
-      : null;
+    const defaultIndexPatternId =
+      this.state.indexPatterns && this.state.indexPatterns.length
+        ? this.state.indexPatterns[0].id
+        : null;
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
       obj.searchSource.getOwn('index')
     );
-    const conflicts = Object.entries(byId).reduce((accum, [existingIndexPatternId, list]) => {
-      accum.push({
-        existingIndexPatternId,
-        newIndexPatternId: defaultIndexPatternId,
-        list: list.map(({ doc }) => ({
-          id: existingIndexPatternId,
-          type: doc._type,
-          name: doc._source.title,
-        })),
-      });
-      return accum;
-    }, []);
+    const conflicts = Object.entries(byId).reduce(
+      (accum, [existingIndexPatternId, list]) => {
+        accum.push({
+          existingIndexPatternId,
+          newIndexPatternId: defaultIndexPatternId,
+          list: list.map(({ doc }) => ({
+            id: existingIndexPatternId,
+            type: doc._type,
+            name: doc._source.title,
+          })),
+        });
+        return accum;
+      },
+      []
+    );
 
     this.setState({
       conflictedIndexPatterns,
@@ -133,9 +158,14 @@ export class Flyout extends Component {
     });
   };
 
-  get hasConflicts() { return this.state.conflicts && this.state.conflicts.length > 0; }
+  get hasConflicts() {
+    return this.state.conflicts && this.state.conflicts.length > 0;
+  }
   get hasUnresolvedConflicts() {
-    return this.state.conflicts && this.state.conflicts.some(conflict => !conflict.newIndexPatternId);
+    return (
+      this.state.conflicts &&
+      this.state.conflicts.some(conflict => !conflict.newIndexPatternId)
+    );
   }
 
   confirmImport = async () => {
@@ -144,36 +174,59 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
-      conflictedSearchDocs
+      conflictedSearchDocs,
     } = this.state;
 
     const { services, indexPatterns } = this.props;
 
-    this.setState({ error: undefined, isLoading: true, loadingMessage: undefined, });
+    this.setState({
+      error: undefined,
+      isLoading: true,
+      loadingMessage: undefined,
+    });
 
     if (this.hasConflicts) {
       try {
-        const resolutions = conflicts.map(({ existingIndexPatternId, newIndexPatternId }) => ({
-          oldId: existingIndexPatternId,
-          newId: newIndexPatternId,
-        }));
+        const resolutions = conflicts.map(
+          ({ existingIndexPatternId, newIndexPatternId }) => ({
+            oldId: existingIndexPatternId,
+            newId: newIndexPatternId,
+          })
+        );
 
         // Do not Promise.all these calls as the order matters
         this.setState({ loadingMessage: 'Resolving conflicts...' });
-        await resolveConflicts(resolutions, conflictedIndexPatterns, isOverwriteAllChecked);
+        await resolveConflicts(
+          resolutions,
+          conflictedIndexPatterns,
+          isOverwriteAllChecked
+        );
         this.setState({ loadingMessage: 'Saving conflicts...' });
-        await saveObjects(conflictedSavedObjectsLinkedToSavedSearches, isOverwriteAllChecked);
-        this.setState({ loadingMessage: 'Ensure saved searches are linked properly...' });
-        await resolveSavedSearches(conflictedSearchDocs, services, indexPatterns, isOverwriteAllChecked);
-      }
-      catch (e) {
-        this.setState({ error: e.message, isLoading: false, loadingMessage: undefined });
+        await saveObjects(
+          conflictedSavedObjectsLinkedToSavedSearches,
+          isOverwriteAllChecked
+        );
+        this.setState({
+          loadingMessage: 'Ensure saved searches are linked properly...',
+        });
+        await resolveSavedSearches(
+          conflictedSearchDocs,
+          services,
+          indexPatterns,
+          isOverwriteAllChecked
+        );
+      } catch (e) {
+        this.setState({
+          error: e.message,
+          isLoading: false,
+          loadingMessage: undefined,
+        });
         return;
       }
     }
 
     this.setState({ isLoading: false, wasImportSuccessful: true });
-  }
+  };
 
   onIndexChanged = (id, e) => {
     const value = e.target.value;
@@ -197,7 +250,7 @@ export class Flyout extends Component {
         ],
       };
     });
-  }
+  };
 
   renderConflicts() {
     const { conflicts } = this.state;
@@ -238,7 +291,7 @@ export class Flyout extends Component {
       {
         field: 'id',
         name: 'New index pattern',
-        render: (id) => {
+        render: id => {
           const options = this.state.indexPatterns.map(indexPattern => ({
             text: indexPattern.get('title'),
             value: indexPattern.id,
@@ -284,19 +337,25 @@ export class Flyout extends Component {
         >
           <p>{error}</p>
         </EuiCallOut>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
       </Fragment>
     );
   }
 
   renderBody() {
-    const { isLoading, loadingMessage, isOverwriteAllChecked, wasImportSuccessful, importCount } = this.state;
+    const {
+      isLoading,
+      loadingMessage,
+      isOverwriteAllChecked,
+      wasImportSuccessful,
+      importCount,
+    } = this.state;
 
     if (isLoading) {
       return (
         <Fragment>
           <EuiLoadingKibana size="xl" />
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <EuiText>
             <p>{loadingMessage}</p>
           </EuiText>
@@ -306,14 +365,8 @@ export class Flyout extends Component {
 
     if (wasImportSuccessful) {
       return (
-        <EuiCallOut
-          title="Import successful"
-          color="success"
-          iconType="check"
-        >
-          <p>
-            Successfully imported {importCount} objects.
-          </p>
+        <EuiCallOut title="Import successful" color="success" iconType="check">
+          <p>Successfully imported {importCount} objects.</p>
         </EuiCallOut>
       );
     }
@@ -334,6 +387,7 @@ export class Flyout extends Component {
           <EuiSwitch
             name="overwriteAll"
             label="Automatically overwrite all saved objects?"
+            data-test-subj="importSavedObjectsOverwriteToggle"
             checked={isOverwriteAllChecked}
             onChange={this.changeOverwriteAll}
           />
@@ -350,21 +404,31 @@ export class Flyout extends Component {
 
     if (wasImportSuccessful) {
       confirmButton = (
-        <EuiButton onClick={done} size="s" fill>
+        <EuiButton onClick={done} size="s" fill data-test-subj="importSavedObjectsDoneBtn">
           Done
         </EuiButton>
       );
-    }
-    else if (this.hasConflicts) {
+    } else if (this.hasConflicts) {
       confirmButton = (
-        <EuiButton onClick={this.confirmImport} size="s" fill isDisabled={isLoading || this.hasUnresolvedConflicts}>
+        <EuiButton
+          onClick={this.confirmImport}
+          size="s"
+          fill
+          isDisabled={isLoading || this.hasUnresolvedConflicts}
+          data-test-subj="importSavedObjectsConfirmBtn"
+        >
           Confirm all changes
         </EuiButton>
       );
-    }
-    else {
+    } else {
       confirmButton = (
-        <EuiButton onClick={this.import} size="s" fill isDisabled={isLoading}>
+        <EuiButton
+          onClick={this.import}
+          size="s"
+          fill
+          isDisabled={isLoading}
+          data-test-subj="importSavedObjectsImportBtn"
+        >
           Import
         </EuiButton>
       );
@@ -377,30 +441,36 @@ export class Flyout extends Component {
             Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {confirmButton}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{confirmButton}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
   renderSubheader() {
-    if (!this.hasConflicts || this.state.isLoading || this.state.wasImportSuccessful) {
+    if (
+      !this.hasConflicts ||
+      this.state.isLoading ||
+      this.state.wasImportSuccessful
+    ) {
       return null;
     }
 
     return (
       <Fragment>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         <EuiCallOut
           title="Index Pattern Conflicts"
           color="warning"
           iconType="help"
         >
           <p>
-              The following saved objects use index patterns that do not exist.
-              Please select the index patterns you&apos;d like re-associated with them.
-              You can <EuiLink href={this.props.newIndexPatternUrl}>create a new index pattern</EuiLink> if necessary.
+            The following saved objects use index patterns that do not exist.
+            Please select the index patterns you&apos;d like re-associated with
+            them. You can{' '}
+            <EuiLink href={this.props.newIndexPatternUrl}>
+              create a new index pattern
+            </EuiLink>{' '}
+            if necessary.
           </p>
         </EuiCallOut>
       </Fragment>
@@ -424,9 +494,7 @@ export class Flyout extends Component {
           {this.renderBody()}
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          {this.renderFooter()}
-        </EuiFlyoutFooter>
+        <EuiFlyoutFooter>{this.renderFooter()}</EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

@@ -519,9 +519,22 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('editorFieldScript', script);
     }
 
-    async importFile(path) {
+    async importFile(path, overwriteAll = true) {
       log.debug(`importFile(${path})`);
-      await remote.findById('testfile').type(path);
+      await (await testSubjects.find('importObjects')).click();
+      await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.euiFilePicker__input').type(path);
+      if (overwriteAll) {
+        await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
+      }
+      await (await testSubjects.find('importSavedObjectsImportBtn')).click();
+    }
+
+    async clickImportDone() {
+      await (await testSubjects.find('importSavedObjectsDoneBtn')).click();
+    }
+
+    async clickConfirmConflicts() {
+      await (await testSubjects.find('importSavedObjectsConfirmBtn')).click();
     }
 
     async setImportIndexFieldOption(child) {
@@ -544,6 +557,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getVisualizationRows() {
       return await testSubjects.findAll(`objectsTableRow`);
+    }
+
+    async getSavedObjectsInTable() {
+      const table = await testSubjects.findAll('savedObjectsTable');
+      const cells = await table[0].findAll('css selector', 'td:nth-child(3)');
+
+      const objects = [];
+      for (const cell of cells) {
+        objects.push(await cell.getVisibleText());
+      }
+      return objects;
     }
   }
 
