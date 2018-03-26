@@ -106,7 +106,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
           this._recreateGeohashLayer(this._chartData.geoJson);
         }
       }
-
     }
 
 
