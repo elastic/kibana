@@ -1,0 +1,21 @@
+<div class="kbn-intervalpicker">
+  <div class="tab-content kbn-timepicker-content">
+    <div class="kuiLocalDropdownTitle">Date Histogram Interval</div>
+    <div class="kuiLocalMenu">
+      <div ng-repeat="list in dateLists" class="kbn-refresh-section">
+        <ul class="list-unstyled">
+          <li ng-repeat="item in list">
+            <a
+              class="refresh-interval"
+              ng-class="{ 'refresh-interval-active': interval.value === item.value }"
+              ng-click="setInterval(item)"
+              kbn-accessible-click
+            >
+              {{item.display}}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

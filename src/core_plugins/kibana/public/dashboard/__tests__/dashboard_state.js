@@ -9,6 +9,7 @@ describe('DashboardState', function () {
   let savedDashboard;
   let SavedDashboard;
   let timefilter;
+  let intervalfilter;
   let dashboardConfig;
   const mockQuickTimeRanges = [{ from: 'now/w', to: 'now/w', display: 'This week', section: 0 }];
   const mockIndexPattern = { id: 'index1' };
@@ -20,6 +21,7 @@ describe('DashboardState', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
     timefilter = $injector.get('timefilter');
+    intervalfilter = $injector.get('intervalfilter');
     AppState = $injector.get('AppState');
     SavedDashboard = $injector.get('SavedDashboard');
     dashboardConfig = $injector.get('dashboardConfig');
@@ -76,6 +78,18 @@ describe('DashboardState', function () {
       expect(timefilter.time.mode).to.equal('absolute');
       expect(timefilter.time.to).to.equal(savedDashboard.timeTo);
       expect(timefilter.time.from).to.equal(savedDashboard.timeFrom);
+    });
+  });
+
+  describe('syncIntervalfilterWithDashboard', function () {
+    it('syncs relative time', function () {
+      savedDashboard.dateIntervalRestore = true;
+      intervalfilter.value = 'd';
+
+      initDashboardState();
+      dashboardState.syncDateIntervalWithDashboard(intervalfilter);
+
+      expect(intervalfilter.value).equal('d');
     });
   });
 

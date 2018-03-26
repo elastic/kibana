@@ -13,6 +13,7 @@ import 'ui/courier';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import 'ui/timefilter';
+import 'ui/intervalfilter';
 import 'ui/share';
 import 'ui/query_bar';
 import { toastNotifications, getPainlessError } from 'ui/notify';
@@ -125,6 +126,7 @@ function discoverController(
   kbnUrl,
   timefilter,
   localStorage,
+  intervalfilter,
 ) {
 
   const Vis = Private(VisProvider);
@@ -168,6 +170,7 @@ function discoverController(
     testId: 'discoverShareButton',
   }];
   $scope.timefilter = timefilter;
+  $scope.intervalfilter = intervalfilter;
 
 
   // the saved savedSearch
@@ -298,7 +301,8 @@ function discoverController(
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
-    timefilter: $scope.timefilter
+    timefilter: $scope.timefilter,
+    intervalfilter: $scope.intervalfilter
   };
 
   const init = _.once(function () {
@@ -347,6 +351,7 @@ function discoverController(
             timefilter.disableAutoRefreshSelector();
             timefilter.disableTimeRangeSelector();
           }
+          intervalfilter.disableIntervalFilter();
         });
 
         $scope.$watch('state.interval', function () {

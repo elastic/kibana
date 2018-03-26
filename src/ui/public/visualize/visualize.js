@@ -16,7 +16,7 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function ($timeout, Notifier, Private, timefilter, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, timefilter, intervalfilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -44,6 +44,29 @@ uiModules
         if (!$scope.appState) $scope.appState = getAppState();
 
         const resizeChecker = new ResizeChecker($el, { disabled: true });
+
+        function setVisDateInterval(dateInterval) {
+          if(dateInterval && dateInterval.value !== 'auto') {
+            const intervalValue = dateInterval.value;
+            const visStateCopy = _.cloneDeep($scope.savedObj.vis.getState());
+            if(visStateCopy.type && visStateCopy.type === 'timelion') {
+              const params = _.get(visStateCopy, ['params']);
+              params.interval = '1' + intervalValue;
+              visStateCopy.params = params;
+            } else {
+              const aggs = _.get(visStateCopy, ['aggs']);
+              visStateCopy.aggs = aggs.map((agg) => {
+                if(agg.type === 'date_histogram') {
+                  agg.params.interval = intervalValue;
+                }
+                return agg;
+              });
+            }
+
+            $scope.savedObj.vis.setState(visStateCopy);
+          }
+        }
+
         $timeout(() => {
           // We give the visualize one digest cycle time to actually render before
           // we start tracking its size. If we don't do that, we cause a double
@@ -69,6 +92,9 @@ uiModules
           // If destroyed == true the scope has already been destroyed, while this method
           // was still waiting for its debounce, in this case we don't want to start
           // fetching new data and rendering.
+
+          setVisDateInterval(intervalfilter.dateInterval);
+
           if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
 
           // TODO: This should ALWAYS be passed into this component via the loader
@@ -177,6 +203,10 @@ uiModules
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
+
+        $scope.$listen(intervalfilter, 'fetch', (newInterval)=>{
+          setVisDateInterval(newInterval);
+        });
 
         $scope.$on('$destroy', () => {
           destroyed = true;
