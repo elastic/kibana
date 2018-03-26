@@ -56,7 +56,6 @@ export class Flyout extends Component {
       indexPatterns: undefined,
       error: undefined,
       wasImportSuccessful: false,
-      importCount: -1,
     };
   }
 
@@ -123,10 +122,10 @@ export class Flyout extends Component {
       indexPatterns
     );
 
-    const defaultIndexPatternId =
-      this.state.indexPatterns && this.state.indexPatterns.length
-        ? this.state.indexPatterns[0].id
-        : null;
+    // const defaultIndexPatternId =
+    //   this.state.indexPatterns && this.state.indexPatterns.length
+    //     ? this.state.indexPatterns[0].id
+    //     : null;
 
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
       obj.searchSource.getOwn('index')
@@ -135,7 +134,7 @@ export class Flyout extends Component {
       (accum, [existingIndexPatternId, list]) => {
         accum.push({
           existingIndexPatternId,
-          newIndexPatternId: defaultIndexPatternId,
+          newIndexPatternId: undefined,
           list: list.map(({ doc }) => ({
             id: existingIndexPatternId,
             type: doc._type,
@@ -153,7 +152,6 @@ export class Flyout extends Component {
       conflictedSearchDocs,
       conflicts,
       isLoading: false,
-      importCount: contents.length,
       wasImportSuccessful: conflicts.length === 0,
     });
   };
@@ -161,16 +159,24 @@ export class Flyout extends Component {
   get hasConflicts() {
     return this.state.conflicts && this.state.conflicts.length > 0;
   }
-  get hasUnresolvedConflicts() {
-    return (
-      this.state.conflicts &&
-      this.state.conflicts.some(conflict => !conflict.newIndexPatternId)
+
+  get resolutions() {
+    return this.state.conflicts.reduce(
+      (accum, { existingIndexPatternId, newIndexPatternId }) => {
+        if (newIndexPatternId) {
+          accum.push({
+            oldId: existingIndexPatternId,
+            newId: newIndexPatternId,
+          });
+        }
+        return accum;
+      },
+      []
     );
   }
 
   confirmImport = async () => {
     const {
-      conflicts,
       conflictedIndexPatterns,
       isOverwriteAllChecked,
       conflictedSavedObjectsLinkedToSavedSearches,
@@ -187,20 +193,17 @@ export class Flyout extends Component {
 
     if (this.hasConflicts) {
       try {
-        const resolutions = conflicts.map(
-          ({ existingIndexPatternId, newIndexPatternId }) => ({
-            oldId: existingIndexPatternId,
-            newId: newIndexPatternId,
-          })
-        );
+        const resolutions = this.resolutions;
 
         // Do not Promise.all these calls as the order matters
         this.setState({ loadingMessage: 'Resolving conflicts...' });
-        await resolveConflicts(
-          resolutions,
-          conflictedIndexPatterns,
-          isOverwriteAllChecked
-        );
+        if (resolutions.length) {
+          await resolveConflicts(
+            resolutions,
+            conflictedIndexPatterns,
+            isOverwriteAllChecked
+          );
+        }
         this.setState({ loadingMessage: 'Saving conflicts...' });
         await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches,
@@ -297,6 +300,11 @@ export class Flyout extends Component {
             value: indexPattern.id,
           }));
 
+          options.unshift({
+            text: '-- Skip Import --',
+            value: undefined,
+          });
+
           return (
             <EuiSelect
               data-test-subj="managementChangeIndexSelection"
@@ -348,7 +356,6 @@ export class Flyout extends Component {
       loadingMessage,
       isOverwriteAllChecked,
       wasImportSuccessful,
-      importCount,
     } = this.state;
 
     if (isLoading) {
@@ -366,7 +373,7 @@ export class Flyout extends Component {
     if (wasImportSuccessful) {
       return (
         <EuiCallOut title="Import successful" color="success" iconType="check">
-          <p>Successfully imported {importCount} objects.</p>
+          <p>Successfully imported {this.resolutions.length} objects.</p>
         </EuiCallOut>
       );
     }
@@ -404,7 +411,12 @@ export class Flyout extends Component {
 
     if (wasImportSuccessful) {
       confirmButton = (
-        <EuiButton onClick={done} size="s" fill data-test-subj="importSavedObjectsDoneBtn">
+        <EuiButton
+          onClick={done}
+          size="s"
+          fill
+          data-test-subj="importSavedObjectsDoneBtn"
+        >
           Done
         </EuiButton>
       );
@@ -414,7 +426,7 @@ export class Flyout extends Component {
           onClick={this.confirmImport}
           size="s"
           fill
-          isDisabled={isLoading || this.hasUnresolvedConflicts}
+          isDisabled={isLoading}
           data-test-subj="importSavedObjectsConfirmBtn"
         >
           Confirm all changes

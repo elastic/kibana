@@ -199,6 +199,8 @@ export class ObjectsTable extends Component {
   onDelete = async (page, perPage) => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
+
+
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
     const deletes = objects.savedObjects.map(object => savedObjectsClient.delete(object.type, object.id));
     await Promise.all(deletes);
