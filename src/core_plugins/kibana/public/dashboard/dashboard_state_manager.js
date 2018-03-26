@@ -163,8 +163,11 @@ export class DashboardStateManager {
 
       // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
       // because the panels inside appState can be mutated, while redux state should never be mutated directly.
-      const copiedPanels = this.getPanels().map(p => ({ ...p }));
-      store.dispatch(setPanels(copiedPanels));
+      const panelsMap = this.getPanels().reduce((acc, panel) => {
+        acc[panel.panelIndex] = { ...panel };
+        return acc;
+      }, {});
+      store.dispatch(setPanels(panelsMap));
     }
 
     const state = store.getState();
