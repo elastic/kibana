@@ -13,7 +13,8 @@ export function VegaRequestHandlerProvider(Private, es, timefilter, serviceSetti
 
     name: 'vega',
 
-    handler(vis) {
+    handler(vis, { timeRange }) {
+      timeCache.setTimeRange(timeRange);
       const vp = new VegaParser(vis.params.spec, searchCache, timeCache, dashboardContext, serviceSettings);
       return vp.parseAsync();
     }
