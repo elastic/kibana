@@ -50,6 +50,9 @@ error messages.
 information and all requests.
 `logging.useUTC`:: *Default: true* Set the value of this setting to `false` to log events using the timezone of the server, rather than UTC.
 
+`map.includeElasticMapsService:`:: *Default: true* Turns on or off whether layers from the Elastic Maps Service should be included in the vector and tile layer option list.
+By turning this off, only the layers that are configured here will be included.
+
 `path.data:`:: *Default: `data`* The path where Kibana stores persistent data not saved in Elasticsearch.
 
 `pid.file:`:: Specifies the path where Kibana creates the process ID file.
@@ -81,8 +84,8 @@ The following example shows a valid regionmap configuration.
 `regionmap.layers[].fields[]:`:: Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The example above shows how to define multiple properties.
 `regionmap.layers[].fields[].name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. e.g. if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
 `regionmap.layers[].fields[].description:`:: Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
-`regionmap.includeElasticMapsService:`:: turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list.
-By turning this off, only the layers that are configured here will be included. The default is true.
+`regionmap.includeElasticMapsService:`:: *Default: true* Turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list.
+By turning this off, only the layers that are configured here will be included.
 
 `server.basePath:`:: Enables you to specify a path to mount Kibana at if you are running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 `server.rewriteBasePath:`:: *Default: false* Specifies whether Kibana should rewrite requests that are prefixed with `server.basePath` or require that they are rewritten by your reverse proxy. This setting was effectively always `false` before Kibana 6.3 and will default to `true` starting in Kibana 7.0.
