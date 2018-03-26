@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('delete', async function () {
       it('default confirm action is cancel', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('');
+        await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     describe('search', function () {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
-        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('Two Words');
       });
 
