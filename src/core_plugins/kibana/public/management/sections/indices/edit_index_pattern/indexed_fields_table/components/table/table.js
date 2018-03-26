@@ -2,8 +2,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
@@ -22,39 +20,33 @@ export class Table extends PureComponent {
 
   renderFieldName(name, isTimeField) {
     return (
-      <div data-test-subj="indexedFieldName">
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {name}
-          </EuiFlexItem>
-          {isTimeField ? (
-            <EuiFlexItem>
-              <EuiToolTip content="This field represents the time that events occurred.">
-                <EuiIcon type="clock" color="primary" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          ) : ''}
-        </EuiFlexGroup>
-      </div>
+      <span>
+        {name}
+        {isTimeField ? (
+          <span>
+            &nbsp;
+            <EuiToolTip content="This field represents the time that events occurred.">
+              <EuiIcon type="clock" color="primary" />
+            </EuiToolTip>
+          </span>
+        ) : ''}
+      </span>
     );
   }
 
   renderFieldType(type, isConflict) {
     return (
-      <div data-test-subj="indexedFieldType">
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {type}
-          </EuiFlexItem>
-          {isConflict ? (
-            <EuiFlexItem>
-              <EuiToolTip content="The type of this field changes across indices. It is unavailable for many analysis functions.">
-                <EuiIcon type="alert" color="warning" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          ) : ''}
-        </EuiFlexGroup>
-      </div>
+      <span>
+        {type}
+        {isConflict ? (
+          <span>
+            &nbsp;
+            <EuiToolTip content="The type of this field changes across indices. It is unavailable for many analysis functions.">
+              <EuiIcon type="alert" color="warning" />
+            </EuiToolTip>
+          </span>
+        ) : ''}
+      </span>
     );
   }
 
@@ -75,6 +67,8 @@ export class Table extends PureComponent {
         render: (value) => {
           return this.renderFieldName(value, indexPattern.timeFieldName === value);
         },
+        width: '38%',
+        'data-test-subj': 'indexedFieldName',
       },
       {
         field: 'type',
@@ -84,6 +78,7 @@ export class Table extends PureComponent {
         render: (value) => {
           return this.renderFieldType(value, value === 'conflict');
         },
+        'data-test-subj': 'indexedFieldType',
       },
       {
         field: 'format',
@@ -126,6 +121,7 @@ export class Table extends PureComponent {
             type: 'icon',
           },
         ],
+        width: '40px',
       }
     ];
 

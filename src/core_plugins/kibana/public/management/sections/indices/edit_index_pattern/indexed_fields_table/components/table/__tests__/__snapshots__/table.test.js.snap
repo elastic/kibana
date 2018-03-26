@@ -1,84 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table should render conflicting type 1`] = `
-<div
-  data-test-subj="indexedFieldType"
->
-  <EuiFlexGroup
-    alignItems="center"
-    component="div"
-    gutterSize="s"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+<span>
+  conflict
+  <span>
+     
+    <EuiToolTip
+      content="The type of this field changes across indices. It is unavailable for many analysis functions."
+      position="top"
     >
-      conflict
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiToolTip
-        content="The type of this field changes across indices. It is unavailable for many analysis functions."
-        position="top"
-      >
-        <EuiIcon
-          color="warning"
-          size="m"
-          type="alert"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
+      <EuiIcon
+        color="warning"
+        size="m"
+        type="alert"
+      />
+    </EuiToolTip>
+  </span>
+</span>
 `;
 
 exports[`Table should render normal field name 1`] = `
-<div
-  data-test-subj="indexedFieldName"
->
-  <EuiFlexGroup
-    alignItems="center"
-    component="div"
-    gutterSize="s"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      Elastic
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
+<span>
+  Elastic
+</span>
 `;
 
 exports[`Table should render normal type 1`] = `
-<div
-  data-test-subj="indexedFieldType"
->
-  <EuiFlexGroup
-    alignItems="center"
-    component="div"
-    gutterSize="s"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      string
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
+<span>
+  string
+</span>
 `;
 
 exports[`Table should render normally 1`] = `
@@ -86,13 +36,16 @@ exports[`Table should render normally 1`] = `
   columns={
     Array [
       Object {
+        "data-test-subj": "indexedFieldName",
         "dataType": "string",
         "field": "displayName",
         "name": "Name",
         "render": [Function],
         "sortable": true,
+        "width": "38%",
       },
       Object {
+        "data-test-subj": "indexedFieldType",
         "dataType": "string",
         "field": "type",
         "name": "Type",
@@ -140,6 +93,7 @@ exports[`Table should render normally 1`] = `
           },
         ],
         "name": "",
+        "width": "40px",
       },
     ]
   }
@@ -191,38 +145,20 @@ exports[`Table should render the boolean template (true) 1`] = `
 `;
 
 exports[`Table should render timestamp field name 1`] = `
-<div
-  data-test-subj="indexedFieldName"
->
-  <EuiFlexGroup
-    alignItems="center"
-    component="div"
-    gutterSize="s"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+<span>
+  timestamp
+  <span>
+     
+    <EuiToolTip
+      content="This field represents the time that events occurred."
+      position="top"
     >
-      timestamp
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiToolTip
-        content="This field represents the time that events occurred."
-        position="top"
-      >
-        <EuiIcon
-          color="primary"
-          size="m"
-          type="clock"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
+      <EuiIcon
+        color="primary"
+        size="m"
+        type="clock"
+      />
+    </EuiToolTip>
+  </span>
+</span>
 `;
