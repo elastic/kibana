@@ -11,7 +11,7 @@ export class PanelUtils {
   static convertPanelDataPre_6_1(panel) { // eslint-disable-line camelcase
     ['col', 'row', 'size_x', 'size_y'].map(key => {
       if (!_.has(panel, key)) {
-        throw new Error(`Unable migrate panel data, panel does not contain expected field: ${key}, panel: ${panel}`);
+        throw new Error(`Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: ${key}`);
       }
     });
 
@@ -39,7 +39,7 @@ export class PanelUtils {
   static convertPanelDataPre_6_3(panel) { // eslint-disable-line camelcase
     ['w', 'x', 'h', 'y'].map(key => {
       if (!_.has(panel, key)) {
-        throw new Error(`Unable migrate panel data, panel does not contain expected field: ${key}, panel: ${panel}`);
+        throw new Error(`Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`);
       }
     });
 

@@ -7,7 +7,9 @@ import classNames from 'classnames';
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
+import { toastNotifications } from 'ui/notify';
 import {
+  DashboardConstants,
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
 } from '../dashboard_constants';
@@ -87,10 +89,23 @@ export class DashboardGrid extends React.Component {
     // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
     // item.
     this.gridItems = {};
+
+    let isLayoutInvalid = false;
+    let invalidMsg;
+    let layout;
+    try {
+      layout = this.buildLayoutFromPanels();
+    } catch (error) {
+      isLayoutInvalid = true;
+      invalidMsg = error.message;
+    }
     this.state = {
       focusedPanelIndex: undefined,
-      layout: this.buildLayoutFromPanels()
+      layout,
+      isLayoutInvalid,
+      invalidMsg,
     };
+
     // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
     // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
     // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
@@ -200,6 +215,15 @@ export class DashboardGrid extends React.Component {
   }
 
   render() {
+    if (this.state.isLayoutInvalid) {
+      toastNotifications.addDanger({
+        title: 'Unable to load dashboard.',
+        text: `${this.state.invalidMsg}`,
+      });
+      window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
+      return null;
+    }
+
     const { dashboardViewMode, maximizedPanelId, useMargins } = this.props;
     const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
