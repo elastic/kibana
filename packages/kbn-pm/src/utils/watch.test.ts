@@ -1,57 +1,57 @@
 import { EventEmitter } from 'events';
 import { waitUntilWatchIsReady } from './watch';
 
-test('`waitUntilWatchIsReady` correctly handles `webpack` output', async () => {
-  const buildOutputStream = new EventEmitter();
-  const completionHintPromise = waitUntilWatchIsReady(buildOutputStream);
+describe('#waitUntilWatchIsReady', () => {
+  let buildOutputStream: EventEmitter;
+  let completionHintPromise: Promise<string>;
+  beforeEach(() => {
+    jest.useFakeTimers();
 
-  buildOutputStream.emit('data', Buffer.from('$ webpack'));
-  buildOutputStream.emit('data', Buffer.from('Chunk Names'));
+    buildOutputStream = new EventEmitter();
+    completionHintPromise = waitUntilWatchIsReady(buildOutputStream, {
+      handlerDelay: 100,
+      handlerReadinessTimeout: 50,
+    });
+  });
 
-  expect(await completionHintPromise).toBe('webpack');
-});
+  test('`waitUntilWatchIsReady` correctly handles `webpack` output', async () => {
+    buildOutputStream.emit('data', Buffer.from('$ webpack'));
+    buildOutputStream.emit('data', Buffer.from('Chunk Names'));
 
-test('`waitUntilWatchIsReady` correctly handles `tsc` output', async () => {
-  const buildOutputStream = new EventEmitter();
-  const completionHintPromise = waitUntilWatchIsReady(buildOutputStream);
+    jest.runAllTimers();
 
-  buildOutputStream.emit('data', Buffer.from('$ tsc'));
-  buildOutputStream.emit('data', Buffer.from('Compilation complete.'));
+    expect(await completionHintPromise).toBe('webpack');
+  });
 
-  expect(await completionHintPromise).toBe('tsc');
-});
+  test('`waitUntilWatchIsReady` correctly handles `tsc` output', async () => {
+    buildOutputStream.emit('data', Buffer.from('$ tsc'));
+    buildOutputStream.emit('data', Buffer.from('Compilation complete.'));
 
-test(
-  '`waitUntilWatchIsReady` fallbacks to default output handler if output is not recognizable',
-  async () => {
-    const buildOutputStream = new EventEmitter();
-    const completionHintPromise = waitUntilWatchIsReady(buildOutputStream);
+    jest.runAllTimers();
 
+    expect(await completionHintPromise).toBe('tsc');
+  });
+
+  test('`waitUntilWatchIsReady` fallbacks to default output handler if output is not recognizable', async () => {
     buildOutputStream.emit('data', Buffer.from('$ some-cli'));
     buildOutputStream.emit('data', Buffer.from('Compilation complete.'));
     buildOutputStream.emit('data', Buffer.from('Chunk Names.'));
 
-    expect(await completionHintPromise).toBe('timeout');
-  },
-  10000
-);
-
-test(
-  '`waitUntilWatchIsReady` fallbacks to default output handler if none output is detected',
-  async () => {
-    const buildOutputStream = new EventEmitter();
-    const completionHintPromise = waitUntilWatchIsReady(buildOutputStream);
+    jest.runAllTimers();
 
     expect(await completionHintPromise).toBe('timeout');
-  },
-  10000
-);
+  });
 
-test('`waitUntilWatchIsReady` fails if output stream receives error', async () => {
-  const buildOutputStream = new EventEmitter();
-  const completionHintPromise = waitUntilWatchIsReady(buildOutputStream);
+  test('`waitUntilWatchIsReady` fallbacks to default output handler if none output is detected', async () => {
+    jest.runAllTimers();
+    expect(await completionHintPromise).toBe('timeout');
+  });
 
-  buildOutputStream.emit('error', new Error('Uh, oh!'));
+  test('`waitUntilWatchIsReady` fails if output stream receives error', async () => {
+    buildOutputStream.emit('error', new Error('Uh, oh!'));
 
-  await expect(completionHintPromise).rejects.toThrow(/Uh, oh!/);
+    jest.runAllTimers();
+
+    await expect(completionHintPromise).rejects.toThrow(/Uh, oh!/);
+  });
 });

@@ -71,7 +71,7 @@
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
-    "kbn:watch": "node scripts/kibana --dev"
+    "kbn:watch": "node scripts/kibana --dev --logging.json=false"
   },
   "repository": {
     "type": "git",

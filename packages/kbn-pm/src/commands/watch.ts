@@ -36,12 +36,11 @@ export const WatchCommand: Command = {
       }
     }
 
+    const projectNames = Array.from(projectsWithWatchScript.keys());
     console.log(
       chalk.bold(
         chalk.green(
-          `Running ${watchScriptName} scripts for [${Array.from(
-            projectsWithWatchScript.keys()
-          ).join(', ')}].`
+          `Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`
         )
       )
     );

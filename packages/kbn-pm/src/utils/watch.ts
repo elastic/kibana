@@ -11,7 +11,30 @@ const defaultHandlerDelay = 3000;
  */
 const defaultHandlerReadinessTimeout = 2000;
 
-function getWatchHandlers(buildOutput$: Observable<string>) {
+/**
+ * Describes configurable watch options.
+ */
+interface WatchOptions {
+  /**
+   * Number of milliseconds to wait before we fall back to default watch handler.
+   */
+  handlerDelay?: number;
+
+  /**
+   * Number of milliseconds that default watch handler waits for any build output before
+   * it considers initial build completed. If build process outputs anything in a given
+   * time span, the timeout is restarted.
+   */
+  handlerReadinessTimeout?: number;
+}
+
+function getWatchHandlers(
+  buildOutput$: Observable<string>,
+  {
+    handlerDelay = defaultHandlerDelay,
+    handlerReadinessTimeout = defaultHandlerReadinessTimeout,
+  }: WatchOptions
+) {
   const typescriptHandler = buildOutput$
     .first(data => data.includes('$ tsc'))
     .map(() =>
@@ -27,17 +50,18 @@ function getWatchHandlers(buildOutput$: Observable<string>) {
     );
 
   const defaultHandler = Observable.of(undefined)
-    .delay(defaultHandlerReadinessTimeout)
+    .delay(handlerReadinessTimeout)
     .map(() =>
-      buildOutput$
-        .timeout(defaultHandlerDelay)
-        .catch(() => Observable.of('timeout'))
+      buildOutput$.timeout(handlerDelay).catch(() => Observable.of('timeout'))
     );
 
   return [typescriptHandler, webpackHandler, defaultHandler];
 }
 
-export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter) {
+export function waitUntilWatchIsReady(
+  stream: NodeJS.EventEmitter,
+  opts: WatchOptions = {}
+) {
   const buildOutput$ = new Subject<string>();
   const onDataListener = (data: Buffer) =>
     buildOutput$.next(data.toString('utf-8'));
@@ -48,7 +72,7 @@ export function waitUntilWatchIsReady(stream: NodeJS.EventEmitter) {
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
 
-  return Observable.race(getWatchHandlers(buildOutput$))
+  return Observable.race(getWatchHandlers(buildOutput$, opts))
     .mergeMap(whenReady => whenReady)
     .finally(() => {
       stream.removeListener('data', onDataListener);

@@ -48771,7 +48771,8 @@ const WatchCommand = exports.WatchCommand = {
                     projectsWithWatchScript.set(project.name, project);
                 }
             }
-            console.log(_chalk2.default.bold(_chalk2.default.green(`Running ${watchScriptName} scripts for [${Array.from(projectsWithWatchScript.keys()).join(', ')}].`)));
+            const projectNames = Array.from(projectsWithWatchScript.keys());
+            console.log(_chalk2.default.bold(_chalk2.default.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)));
             // Kibana should always be run the last, so we don't rely on automatic
             // topological batching and push it to the last one-entry batch manually.
             projectsWithWatchScript.delete(kibanaProjectName);
@@ -48816,13 +48817,13 @@ const defaultHandlerDelay = 3000;
  * any build output before we consider watch task ready.
  */
 const defaultHandlerReadinessTimeout = 2000;
-function getWatchHandlers(buildOutput$) {
+function getWatchHandlers(buildOutput$, { handlerDelay = defaultHandlerDelay, handlerReadinessTimeout = defaultHandlerReadinessTimeout }) {
     const typescriptHandler = buildOutput$.first(data => data.includes('$ tsc')).map(() => buildOutput$.first(data => data.includes('Compilation complete.')).mapTo('tsc'));
     const webpackHandler = buildOutput$.first(data => data.includes('$ webpack')).map(() => buildOutput$.first(data => data.includes('Chunk Names')).mapTo('webpack'));
-    const defaultHandler = _rxjs.Observable.of(undefined).delay(defaultHandlerReadinessTimeout).map(() => buildOutput$.timeout(defaultHandlerDelay).catch(() => _rxjs.Observable.of('timeout')));
+    const defaultHandler = _rxjs.Observable.of(undefined).delay(handlerReadinessTimeout).map(() => buildOutput$.timeout(handlerDelay).catch(() => _rxjs.Observable.of('timeout')));
     return [typescriptHandler, webpackHandler, defaultHandler];
 }
-function waitUntilWatchIsReady(stream) {
+function waitUntilWatchIsReady(stream, opts = {}) {
     const buildOutput$ = new _rxjs.Subject();
     const onDataListener = data => buildOutput$.next(data.toString('utf-8'));
     const onEndListener = () => buildOutput$.complete();
@@ -48830,7 +48831,7 @@ function waitUntilWatchIsReady(stream) {
     stream.once('end', onEndListener);
     stream.once('error', onErrorListener);
     stream.on('data', onDataListener);
-    return _rxjs.Observable.race(getWatchHandlers(buildOutput$)).mergeMap(whenReady => whenReady).finally(() => {
+    return _rxjs.Observable.race(getWatchHandlers(buildOutput$, opts)).mergeMap(whenReady => whenReady).finally(() => {
         stream.removeListener('data', onDataListener);
         stream.removeListener('end', onEndListener);
         stream.removeListener('error', onErrorListener);
