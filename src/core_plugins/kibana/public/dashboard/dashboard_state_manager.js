@@ -115,24 +115,17 @@ export class DashboardStateManager {
 
   _areStoreAndAppStatePanelsEqual() {
     const state = store.getState();
-    // We need to run this comparison check or we can enter an infinite loop.
-    let differencesFound = false;
+    const storePanels = getPanels(store.getState());
+    const appStatePanels = this.getPanels();
 
-    const panels = getPanels(store.getState());
-    if (Object.values(panels).length !== this.appState.panels.length) {
+    if (Object.values(storePanels).length !== appStatePanels.length) {
       return false;
     }
 
-    for (let i = 0; i < this.appState.panels.length; i++) {
-      const appStatePanel = this.appState.panels[i];
+    return appStatePanels.every((appStatePanel) => {
       const storePanel = getPanel(state, appStatePanel.panelIndex);
-      if (!_.isEqual(appStatePanel, storePanel)) {
-        differencesFound = true;
-        break;
-      }
-    }
-
-    return !differencesFound;
+      return _.isEqual(appStatePanel, storePanel);
+    });
   }
 
   /**
@@ -168,12 +161,10 @@ export class DashboardStateManager {
     if (!this._areStoreAndAppStatePanelsEqual()) {
       this.triggerEmbeddableConfigUpdateListeners();
 
-      const panelsMap = {};
-      this.getPanels().forEach(panel => {
-        panelsMap[panel.panelIndex] = { ...panel };
-      });
-
-      store.dispatch(setPanels(panelsMap));
+      // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
+      // because the panels inside appState can be mutated, while redux state should never be mutated directly.
+      const copiedPanels = this.getPanels().map(p => ({ ...p }));
+      store.dispatch(setPanels(copiedPanels));
     }
 
     const state = store.getState();
