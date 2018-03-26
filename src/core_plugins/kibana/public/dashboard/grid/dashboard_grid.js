@@ -218,7 +218,7 @@ export class DashboardGrid extends React.Component {
     if (this.state.isLayoutInvalid) {
       toastNotifications.addDanger({
         title: 'Unable to load dashboard.',
-        text: `${this.state.invalidMsg}`,
+        text: this.state.invalidMsg,
       });
       window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
       return null;
