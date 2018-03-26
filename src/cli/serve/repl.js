@@ -1,27 +1,19 @@
 import repl from 'repl';
 import util from 'util';
 
-// Used to ensure only one REPL instance is created.
-let _replServer;
-
 /**
  * Starts an interactive REPL with a global `server` object.
  *
  * @param {KibanaServer} server
  */
 export function startRepl(server) {
-  if (_replServer) {
-    _replServer.context.server = server;
-    return;
-  }
-
-  _replServer = repl.start({
+  const replServer = repl.start({
     prompt: 'Kibana> ',
     useColors: true,
-    writer: promiseFriendlyWriter(() => _replServer.displayPrompt()),
+    writer: promiseFriendlyWriter(() => replServer.displayPrompt()),
   });
 
-  _replServer.context.server = server;
+  replServer.context.server = server;
 }
 
 function colorize(o) {
@@ -37,13 +29,14 @@ function prettyPrint(text, o) {
 function promiseFriendlyWriter(displayPrompt) {
   return (result) => {
     if (result && typeof result.then === 'function') {
-      result
+      // Bit of a hack to encourage the user to wait for the result of a promise
+      // by printing text out beside the current prompt.
+      Promise.resolve()
+        .then(() => console.log('Waiting for promise...'))
+        .then(() => result)
         .then((o) => prettyPrint('Promise Resolved: \n', o))
         .catch((err) => prettyPrint('Promise Rejected: \n', err))
         .then(displayPrompt);
-      // Bit of a hack to encourage the user to wait for the result of a promise
-      // by printing text out beside the current prompt.
-      setTimeout(() => console.log('Waiting for promise...'), 1);
       return '';
     }
     return colorize(result);
