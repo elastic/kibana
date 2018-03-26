@@ -8,7 +8,7 @@ export function KibanaSupertestProvider({ getService }) {
   return supertestAsPromised(kibanaServerUrl);
 }
 
-export function ElasticSearchSupertestProvider({ getService }) {
+export function ElasticsearchSupertestProvider({ getService }) {
   const config = getService('config');
   const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
   return supertestAsPromised(elasticSearchServerUrl);
