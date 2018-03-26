@@ -798,7 +798,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-response');
       return await testSubjects.getVisibleText('visualizationEsResponseBody');
     }
