@@ -253,7 +253,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .getVisibleText();
 
       await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector(`table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1}) 
+        .findAllByCssSelector(`table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
           td:last-child button`)
         .click();
     }
@@ -290,7 +290,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
           .getVisibleText();
 
         await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel 
+          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel
           button.euiContextMenuItem:nth-child(${sizeButtons.indexOf(size + ' rows') + 1})`)
           .click();
       } catch(e) {
@@ -306,6 +306,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await this.clickOptionalAddNewButton();
         await this.setIndexPatternField(indexPatternName);
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -327,6 +328,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
 
       return await this.getIndexPatternIdFromUrl();
+    }
+
+    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
+
+    async clickOptionalAddNewButton() {
+      const buttonParent = await testSubjects.find('createIndexPatternParent');
+      const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes('createIndexPatternButton');
+      log.debug('found the button ' + buttonVisible);
+      if(buttonVisible) {
+        await testSubjects.click('createIndexPatternButton');
+      }
     }
 
     async getIndexPatternIdFromUrl() {

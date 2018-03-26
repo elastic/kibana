@@ -24,6 +24,11 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_scripted_fields_filter'));
     loadTestFile(require.resolve('./_import_objects'));
+<<<<<<< HEAD
+=======
+    loadTestFile(require.resolve('./_test_huge_fields'));
+    loadTestFile(require.resolve('./_handle_alias'));
+>>>>>>> 64ea452... Functional tests to add index alias reference (#17343)
   });
 
 }
