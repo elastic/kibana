@@ -18,7 +18,8 @@ export function AggTypesMetricsTopHitProvider(Private) {
       if (aggConfig.params.size !== 1) {
         prefix += ` ${aggConfig.params.size}`;
       }
-      return `${prefix} ${aggConfig.params.field.displayName}`;
+      const field = aggConfig.params.field;
+      return `${prefix} ${field ? field.displayName : ''}`;
     },
     params: [
       {

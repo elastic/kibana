@@ -45,6 +45,18 @@ uiModules
           timefilter.refreshInterval = interval;
           kbnTopNav.close('interval');
         };
+
+        $scope.getSharedTimeFilterFromDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().min.clone().utc().format()
+            : null;
+        };
+
+        $scope.getSharedTimeFilterToDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().max.clone().utc().format()
+            : null;
+        };
       },
     };
   });
