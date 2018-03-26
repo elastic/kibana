@@ -59,3 +59,12 @@ test('renders DashboardGrid with no visualizations', () => {
   const component = shallow(<DashboardGrid {...getProps({ panels: {} })} />);
   expect(component).toMatchSnapshot();
 });
+
+test('adjusts z-index of focused panel to be higher than siblings', () => {
+  const component = shallow(<DashboardGrid {...getProps()} />);
+  const panelElements = component.find('Connect(DashboardPanel)');
+  panelElements.first().prop('onPanelFocused')('1');
+  const [gridItem1, gridItem2] = component.update().findWhere(el => el.key() === '1' || el.key() === '2');
+  expect(gridItem1.props.style.zIndex).toEqual('2');
+  expect(gridItem2.props.style.zIndex).toEqual('auto');
+});
