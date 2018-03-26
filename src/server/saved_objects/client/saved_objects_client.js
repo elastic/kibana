@@ -17,12 +17,14 @@ export class SavedObjectsClient {
       mappings,
       callCluster,
       onBeforeWrite = () => {},
+      interceptors = []
     } = options;
 
     this._index = index;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
+    this._interceptors = interceptors;
     this._unwrappedCallCluster = callCluster;
   }
 
@@ -114,6 +116,8 @@ export class SavedObjectsClient {
     const time = this._getCurrentTime();
 
     try {
+      await this._invokeRequestInterceptors(method, type, attributes, options);
+
       const response = await this._writeToCluster(method, {
         id: this._generateEsId(type, id),
         type: this._type,
@@ -156,8 +160,11 @@ export class SavedObjectsClient {
       overwrite = false
     } = options;
     const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
+
+    const objectToBulkRequest = async (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
+
+      await this._invokeRequestInterceptors(method, object.type, object.attributes, options);
 
       return [
         {
@@ -174,13 +181,18 @@ export class SavedObjectsClient {
       ];
     };
 
+    const bulkRequestBody = await objects.reduce(async (acc, object) => {
+      const collection = await acc;
+
+      const objectRequestBody = await objectToBulkRequest(object);
+
+      return [...collection, ...objectRequestBody];
+    }, Promise.resolve([]));
+
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
+      body: bulkRequestBody
     });
 
     return items.map((response, i) => {
@@ -224,6 +236,8 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
+    await this._invokeRequestInterceptors('delete', type, id);
+
     const response = await this._writeToCluster('delete', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -281,6 +295,10 @@ export class SavedObjectsClient {
     if (fields && !Array.isArray(fields)) {
       throw new TypeError('options.searchFields must be an array');
     }
+
+    const method = 'search';
+
+    await this._invokeRequestInterceptors(method, type);
 
     const esOptions = {
       index: this._index,
@@ -347,6 +365,10 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
+    const method = 'mget';
+
+    await this._invokeRequestInterceptors(method, null);
+
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
@@ -389,6 +411,10 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
+    const method = 'get';
+
+    await this._invokeRequestInterceptors(method, type, id);
+
     const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -424,6 +450,8 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    await this._invokeRequestInterceptors('update', type, attributes, options);
+
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
@@ -477,5 +505,20 @@ export class SavedObjectsClient {
 
   _getCurrentTime() {
     return new Date().toISOString();
+  }
+
+  _collectRequestInterceptors(method) {
+    return this._interceptors.filter(interceptor => interceptor.method === method || interceptor.method === 'all');
+  }
+
+  async _invokeRequestInterceptors(method, type, ...args) {
+    const interceptors = this._collectRequestInterceptors(method);
+
+    for (const interceptor of interceptors) {
+      if (typeof interceptor.intercept !== 'function') {
+        throw new Error(`Request interceptor missing 'intercept' function`);
+      }
+      await interceptor.intercept(this, method, type, ...args);
+    }
   }
 }
