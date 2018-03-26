@@ -29,17 +29,29 @@ exports[`after fetch hideWriteControls 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery=""
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [
@@ -138,17 +150,29 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery=""
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [
@@ -260,17 +284,29 @@ exports[`after fetch renders table rows 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery=""
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [
@@ -403,17 +439,29 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       size="m"
     />
   </React.Fragment>
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery=""
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [
@@ -515,17 +563,29 @@ exports[`initialFilter 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery="my dashboard"
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value="my dashboard"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [
@@ -614,17 +674,29 @@ exports[`renders table in loading state 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiSearchBar
-    box={
-      Object {
-        "data-test-subj": "searchFilter",
-        "incremental": true,
-      }
-    }
-    defaultQuery=""
-    onChange={[Function]}
-    toolsLeft={Array []}
-  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiFieldSearch
+        data-test-subj="searchFilter"
+        fullWidth={true}
+        incremental={false}
+        isLoading={false}
+        onChange={[Function]}
+        placeholder="Search..."
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiBasicTable
     columns={
       Array [

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiBasicTable,
   EuiPage,
   EuiLink,
@@ -109,7 +109,7 @@ export class DashboardListing extends React.Component {
     try {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
-      toastNotifications.addWarning({
+      toastNotifications.addDanger({
         title: `Unable to delete dashboard(s)`,
         text: `${error}`,
       });
@@ -129,7 +129,7 @@ export class DashboardListing extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  onTableChange = ({ page, sort }) => {
+  onTableChange = ({ page, sort = {} }) => {
     const {
       index: pageIndex,
       size: pageSize,
@@ -150,8 +150,8 @@ export class DashboardListing extends React.Component {
     }
 
     this.setState({
-      pageIndex,
-      pageSize,
+      page: pageIndex,
+      perPage: pageSize,
       sortField,
       sortDirection,
     });
@@ -262,31 +262,39 @@ export class DashboardListing extends React.Component {
   }
 
   renderSearchBar() {
-    const toolsLeft = [];
+    let deleteBtn;
     if (this.state.selectedIds.length > 0) {
-      toolsLeft.push(
-        <EuiButton
-          color="danger"
-          onClick={this.openDeleteModal}
-          data-test-subj="deleteSelectedDashboards"
-          key="delete"
-        >
-          Delete selected
-        </EuiButton>
+      deleteBtn = (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="danger"
+            onClick={this.openDeleteModal}
+            data-test-subj="deleteSelectedDashboards"
+            key="delete"
+          >
+            Delete selected
+          </EuiButton>
+        </EuiFlexItem>
       );
     }
 
     return (
-      <EuiSearchBar
-        defaultQuery={this.props.initialFilter}
-        onChange={(query) => {
-          this.setState({
-            filter: query.text
-          }, this.fetchItems);
-        }}
-        box={{ incremental: true, ['data-test-subj']: 'searchFilter' }}
-        toolsLeft={toolsLeft}
-      />
+      <EuiFlexGroup>
+        {deleteBtn}
+        <EuiFlexItem grow={true}>
+          <EuiFieldSearch
+            placeholder="Search..."
+            fullWidth
+            value={this.state.filter}
+            onChange={(e) => {
+              this.setState({
+                filter: e.target.value
+              }, this.fetchItems);
+            }}
+            data-test-subj="searchFilter"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -358,11 +366,13 @@ export class DashboardListing extends React.Component {
           {createButton}
 
         </EuiFlexGroup>
+
         <EuiSpacer size="m" />
 
         {this.renderListingLimitWarning()}
 
         {this.renderSearchBar()}
+
         {this.renderTable()}
 
       </EuiPage>
