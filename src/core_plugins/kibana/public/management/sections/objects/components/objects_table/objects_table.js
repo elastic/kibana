@@ -26,8 +26,6 @@ export class ObjectsTable extends Component {
     newIndexPatternUrl: PropTypes.string.isRequired,
     kbnIndex: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
-    getDashboardUrl: PropTypes.func.isRequired,
-    getVisualizationUrl: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
   };
@@ -246,7 +244,6 @@ export class ObjectsTable extends Component {
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
-        getVisualizationUrl={this.props.getVisualizationUrl}
       />
     );
   }
@@ -281,6 +278,7 @@ export class ObjectsTable extends Component {
           onExportAll={this.onExportAll}
           onImport={this.showImportFlyout}
           onRefresh={this.refreshData}
+          totalCount={totalItemCount}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />

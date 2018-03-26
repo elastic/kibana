@@ -19,6 +19,7 @@ import {
   EuiLoadingKibana,
 } from '@elastic/eui';
 import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
+import { getInAppUrl } from '../../../../lib/get_in_app_url';
 
 export class Relationships extends Component {
   static propTypes = {
@@ -27,8 +28,6 @@ export class Relationships extends Component {
     type: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     close: PropTypes.func.isRequired,
-    getDashboardUrl: PropTypes.func.isRequired,
-    getVisualizationUrl: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -97,11 +96,6 @@ export class Relationships extends Component {
           <EuiDescriptionListTitle>No {type} found.</EuiDescriptionListTitle>
         );
       } else {
-        const urlGetter =
-          type === 'dashboards'
-            ? this.props.getDashboardUrl
-            : this.props.getVisualizationUrl;
-
         let node;
 
         switch (this.props.type) {
@@ -175,7 +169,7 @@ export class Relationships extends Component {
             <Fragment>
               {list.map(item => (
                 <EuiDescriptionListDescription key={item.id}>
-                  <EuiLink href={urlGetter(item.id.replace(`${type}:`, ''))}>
+                  <EuiLink href={`#${getInAppUrl(item.id, type)}`}>
                     <EuiIcon size="s" type={getSavedObjectIcon(type)} />
                     &nbsp;
                     {item.title}

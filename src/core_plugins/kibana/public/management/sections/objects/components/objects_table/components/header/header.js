@@ -14,13 +14,14 @@ export const Header = ({
   onExportAll,
   onImport,
   onRefresh,
+  totalCount,
 }) => (
   <div>
     <EuiSpacer size="m"/>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <h1>Edit Saved Objects</h1>
+          <h1>Edit Saved Objects (Found {totalCount})</h1>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

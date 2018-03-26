@@ -7,6 +7,7 @@ import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
+import { getInAppUrl } from './lib/get_in_app_url';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
@@ -31,8 +32,6 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
         basePath={chrome.getBasePath()}
         kbnIndex={kbnIndex}
         newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
-        getDashboardUrl={id => kbnUrl.eval('#/dashboard/{{id}}', { id: id })}
-        getVisualizationUrl={id => kbnUrl.eval('#/visualize/edit/{{id}}', { id: id })}
         getEditUrl={(id, type) => {
           if (type === 'index-pattern') {
             return kbnUrl.eval(`#/management/kibana/indices/${id}`);
@@ -40,24 +39,7 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
           return kbnUrl.eval(`#/management/kibana/objects/${typeToServiceName(type)}/${id}`);
         }}
         goInApp={(id, type) => {
-          let url;
-
-          switch (type) {
-            case 'index-pattern':
-              url = `/management/kibana/indices/${id}`;
-              break;
-            case 'visualization':
-              url = `/visualize/edit/${id}`;
-              break;
-            case 'search':
-              url = `/discover/${id}`;
-              break;
-            default:
-              url = `/${type.toLowerCase()}/${id}`;
-              break;
-          }
-
-          kbnUrl.change(url);
+          kbnUrl.change(getInAppUrl(id, type));
           $scope.$apply();
         }}
       />,
