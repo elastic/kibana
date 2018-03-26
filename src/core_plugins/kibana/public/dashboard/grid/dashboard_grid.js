@@ -135,20 +135,13 @@ export class DashboardGrid extends React.Component {
 
   onLayoutChange = (layout) => {
     const { onPanelsUpdated } = this.props;
-    const updatedPanels = [];
-    layout.forEach(panelLayout => {
-      const updatedPanel = {
+    const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
+      updatedPanelsAcc[panelLayout.i] = {
         panelIndex: panelLayout.i,
-        gridData: {
-          x: panelLayout.x,
-          y: panelLayout.y,
-          w: panelLayout.w,
-          h: panelLayout.h,
-          i: panelLayout.i,
-        }
+        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
       };
-      updatedPanels.push(updatedPanel);
-    });
+      return updatedPanelsAcc;
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
