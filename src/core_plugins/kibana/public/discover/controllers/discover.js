@@ -710,6 +710,10 @@ function discoverController(
         return $scope.vis.getAggConfig().toDsl();
       });
     }
+
+    $scope.vis.filters = {
+      timeRange: timefilter.time
+    };
   }
 
   function resolveIndexPatternLoading() {

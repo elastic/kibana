@@ -27,12 +27,9 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   }
 
   function getBounds(vis) {
-    if (!vis.getTimeRange) {
-      return timefilter.getActiveBounds();
+    if (timefilter.isTimeRangeSelectorEnabled && vis.filters) {
+      return timefilter.calculateBounds(vis.filters.timeRange);
     }
-
-    const timeRange = vis.getTimeRange();
-    return timefilter.calculateBounds(timeRange);
   }
 
   function setBounds(agg, force) {
