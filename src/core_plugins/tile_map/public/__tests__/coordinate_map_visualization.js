@@ -58,8 +58,6 @@ const PIXEL_DIFF = 64;
 
 describe('CoordinateMapsVisualizationTest', function () {
 
-  console.log('more loading');
-
   let domNode;
   let CoordinateMapsVisualization;
   let Vis;
@@ -117,7 +115,6 @@ describe('CoordinateMapsVisualizationTest', function () {
     });
 
     afterEach(function () {
-      // return;
       teardownDOM();
       imageComparator.destroy();
     });
