@@ -48759,25 +48759,35 @@ const kibanaProjectName = 'kibana';
  * will emit special "marker" once build/watch process is ready that we can use as completion condition for
  * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
+ *
+ * Command expects two optional arguments:
+ * - `-i` - projects enumerated with this option are the only ones that should be watched
+ * - `-e` - projects enumerated with this option should NOT be watched at all
  */
 const WatchCommand = exports.WatchCommand = {
     name: 'watch',
     description: 'Runs `kbn:watch` script for every project.',
-    run(projects, projectGraph) {
+    run(projects, projectGraph, { options }) {
         return _asyncToGenerator(function* () {
-            const projectsWithWatchScript = new Map();
+            const exclude = getExcludeIncludeFilter(options.e);
+            const include = getExcludeIncludeFilter(options.i);
+            const projectsToWatch = new Map();
             for (const project of projects.values()) {
-                if (project.hasScript(watchScriptName)) {
-                    projectsWithWatchScript.set(project.name, project);
+                if (shouldWatchProject(project, include, exclude)) {
+                    projectsToWatch.set(project.name, project);
                 }
             }
-            const projectNames = Array.from(projectsWithWatchScript.keys());
+            if (projectsToWatch.size === 0) {
+                console.log(_chalk2.default.red(`There are no projects to watch, double check project name(s) in '-i'/'-e' arguments.`));
+                return;
+            }
+            const projectNames = Array.from(projectsToWatch.keys());
             console.log(_chalk2.default.bold(_chalk2.default.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)));
             // Kibana should always be run the last, so we don't rely on automatic
             // topological batching and push it to the last one-entry batch manually.
-            projectsWithWatchScript.delete(kibanaProjectName);
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsWithWatchScript, projectGraph);
-            if (projects.has(kibanaProjectName)) {
+            const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
+            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsToWatch, projectGraph);
+            if (shouldWatchKibanaProject) {
                 batchedProjects.push([projects.get(kibanaProjectName)]);
             }
             yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
@@ -48793,6 +48803,26 @@ const WatchCommand = exports.WatchCommand = {
         })();
     }
 };
+function getExcludeIncludeFilter(excludeIncludeRawValue) {
+    if (excludeIncludeRawValue == null) {
+        return [];
+    }
+    if (typeof excludeIncludeRawValue === 'string') {
+        return [excludeIncludeRawValue];
+    }
+    return excludeIncludeRawValue;
+}
+function shouldWatchProject(project, include, exclude) {
+    // We can't watch project that doesn't have `kbn:watch` script.
+    if (!project.hasScript(watchScriptName)) {
+        return false;
+    }
+    // We shouldn't watch project if it has been specifically excluded.
+    if (exclude.includes(project.name)) {
+        return false;
+    }
+    return include.length === 0 || include.includes(project.name);
+}
 
 /***/ }),
 /* 439 */
