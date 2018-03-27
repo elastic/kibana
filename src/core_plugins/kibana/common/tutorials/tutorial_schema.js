@@ -28,7 +28,7 @@ const artifactsSchema = Joi.object({
 const instructionSchema = Joi.object({
   title: Joi.string(),
   textPre: Joi.string(),
-  commands: Joi.array().items(Joi.string()),
+  commands: Joi.array().items(Joi.string().allow('')),
   textPost: Joi.string()
 });
 
