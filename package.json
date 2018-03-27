@@ -70,14 +70,15 @@
     "uiFramework:start": "cd packages/kbn-ui-framework && yarn docSiteStart",
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
-    "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent"
+    "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
+    "kbn:watch": "node scripts/kibana --dev --logging.json=false"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.33",
+    "@elastic/eui": "0.0.34",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.1",
     "@elastic/ui-ace": "0.2.3",
@@ -166,7 +167,7 @@
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "react": "^16.2.0",
-    "react-addons-shallow-compare": "^15.6.2",
+    "react-addons-shallow-compare": "15.6.2",
     "react-anything-sortable": "^1.7.3",
     "react-color": "^2.13.8",
     "react-dom": "^16.2.0",
@@ -272,7 +273,7 @@
     "karma-junit-reporter": "1.2.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
-    "leadfoot": "1.7.1",
+    "leadfoot": "silne30/leadfoot#validation_for_response_in_ff58",
     "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.0.4",
