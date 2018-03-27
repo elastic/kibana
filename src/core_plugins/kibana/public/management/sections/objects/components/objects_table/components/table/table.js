@@ -14,7 +14,6 @@ export class Table extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
-    fetchData: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
@@ -129,7 +128,7 @@ export class Table extends PureComponent {
               iconType="trash"
               color="danger"
               size="s"
-              onClick={() => onDelete(pageIndex, pageSize)}
+              onClick={onDelete}
               isDisabled={selectedSavedObjects.length === 0}
             >
               Delete

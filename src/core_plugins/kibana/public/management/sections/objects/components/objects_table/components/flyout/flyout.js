@@ -55,6 +55,7 @@ export class Flyout extends Component {
       conflicts: undefined,
       indexPatterns: undefined,
       error: undefined,
+      importCount: -1,
       wasImportSuccessful: false,
     };
   }
@@ -122,11 +123,6 @@ export class Flyout extends Component {
       indexPatterns
     );
 
-    // const defaultIndexPatternId =
-    //   this.state.indexPatterns && this.state.indexPatterns.length
-    //     ? this.state.indexPatterns[0].id
-    //     : null;
-
     const byId = groupBy(conflictedIndexPatterns, ({ obj }) =>
       obj.searchSource.getOwn('index')
     );
@@ -151,6 +147,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       conflicts,
+      importCount: contents.length,
       isLoading: false,
       wasImportSuccessful: conflicts.length === 0,
     });
@@ -173,6 +170,10 @@ export class Flyout extends Component {
       },
       []
     );
+  }
+
+  get unresolvedConflictsCount() {
+    return this.state.conflicts.filter(({ newIndexPatternId }) => !newIndexPatternId).length;
   }
 
   confirmImport = async () => {
@@ -356,6 +357,7 @@ export class Flyout extends Component {
       loadingMessage,
       isOverwriteAllChecked,
       wasImportSuccessful,
+      importCount,
     } = this.state;
 
     if (isLoading) {
@@ -371,9 +373,10 @@ export class Flyout extends Component {
     }
 
     if (wasImportSuccessful) {
+      const count = importCount - this.unresolvedConflictsCount;
       return (
         <EuiCallOut title="Import successful" color="success" iconType="check">
-          <p>Successfully imported {this.resolutions.length} objects.</p>
+          <p>Successfully imported {count} objects.</p>
         </EuiCallOut>
       );
     }

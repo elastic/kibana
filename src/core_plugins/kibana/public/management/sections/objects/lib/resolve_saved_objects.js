@@ -51,7 +51,6 @@ async function importIndexPattern(doc, indexPatterns) {
 }
 
 async function importDocument(obj, doc, overwriteAll) {
-  // doc.found = true;
   await obj.applyESResp(doc);
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
@@ -145,19 +144,6 @@ export async function resolveSavedObjects(
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be depedent on those saved searches existing
   const conflictedSearchDocs = [];
-
-  await awaitEachItemInParallel(docTypes.searches, async searchDoc => {
-    const obj = await getSavedObject(searchDoc, services);
-
-    try {
-      await importDocument(obj, searchDoc, overwriteAll);
-    } catch (err) {
-      if (err instanceof SavedObjectNotFound) {
-        conflictedSearchDocs.push(searchDoc);
-      }
-    }
-  });
-
   // Keep a record of the index patterns assigned to our imported saved objects that do not
   // exist. We will provide a way for the user to manually select a new index pattern for those
   // saved objects.
@@ -167,6 +153,22 @@ export async function resolveSavedObjects(
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
   // likely that these saved objects will work once resaved so keep them around to resave them.
   const conflictedSavedObjectsLinkedToSavedSearches = [];
+
+  await awaitEachItemInParallel(docTypes.searches, async searchDoc => {
+    const obj = await getSavedObject(searchDoc, services);
+
+    try {
+      await importDocument(obj, searchDoc, overwriteAll);
+    } catch (err) {
+      if (err instanceof SavedObjectNotFound) {
+        if (err.savedObjectType === 'index-pattern') {
+          conflictedIndexPatterns.push({ obj, doc: searchDoc });
+        } else {
+          conflictedSearchDocs.push(searchDoc);
+        }
+      }
+    }
+  });
 
   await awaitEachItemInParallel(docTypes.other, async otherDoc => {
     const obj = await getSavedObject(otherDoc, services);

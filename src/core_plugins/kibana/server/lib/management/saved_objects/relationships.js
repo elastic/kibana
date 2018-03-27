@@ -165,7 +165,6 @@ async function findIndexPatternRelationships(id, size, callCluster, savedObjects
   const visualizations = [];
   for (const visualization of allVisualizationsResponse.hits.hits) {
     const searchSourceJSON = JSON.parse(visualization._source.visualization.kibanaSavedObjectMeta.searchSourceJSON);
-    searchSourceJSON && console.log(searchSourceJSON.index, id);
     if (searchSourceJSON && searchSourceJSON.index === id) {
       visualizations.push({
         id: formatId(visualization._id),

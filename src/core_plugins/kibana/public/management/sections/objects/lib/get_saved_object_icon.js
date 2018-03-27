@@ -13,8 +13,7 @@ export function getSavedObjectIcon(type) {
     case 'index-patterns':
     case 'indexPatterns':
       return 'indexPatternApp';
-    case 'tag':
-    case 'tags':
+    default:
       return 'apps';
   }
 }

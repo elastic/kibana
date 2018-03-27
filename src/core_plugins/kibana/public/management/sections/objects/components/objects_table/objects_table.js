@@ -64,7 +64,7 @@ export class ObjectsTable extends Component {
       perPage: 1,
       type,
       page: 1,
-      fields: [],
+      fields: ['id'],
     }));
     const result = await Promise.all(fetches);
 
@@ -142,7 +142,7 @@ export class ObjectsTable extends Component {
   };
 
   onQueryChange = query => {
-    this.setState({ activeQuery: query }, this.fetchSavedObjects);
+    this.setState({ activeQuery: query }, () => this.fetchSavedObjects(query));
   };
 
   onTableChange = async (table) => {
@@ -196,10 +196,9 @@ export class ObjectsTable extends Component {
     this.setState({ isShowingImportFlyout: false });
   }
 
-  onDelete = async (page, perPage) => {
+  onDelete = async () => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
-
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
     const deletes = objects.savedObjects.map(object => savedObjectsClient.delete(object.type, object.id));
@@ -209,7 +208,7 @@ export class ObjectsTable extends Component {
     this.setState({ selectedSavedObjects: [] });
 
     // Fetching all data
-    await this.fetchSavedObjects(Query.parse(''), page, perPage);
+    await this.fetchSavedObjects();
     await this.fetchCounts();
   }
 
@@ -290,7 +289,6 @@ export class ObjectsTable extends Component {
           onQueryChange={this.onQueryChange}
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
-          fetchData={this.fetchSavedObjects}
           onExport={this.onExport}
           onDelete={this.onDelete}
           getEditUrl={this.props.getEditUrl}
