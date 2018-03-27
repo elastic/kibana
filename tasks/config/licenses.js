@@ -12,6 +12,7 @@ module.exports = function () {
         'AFLv2.1',
         'Apache 2.0',
         'Apache License, v2.0',
+        'Apache License, Version 2.0',
         'Apache',
         'Apache*',
         'Apache, Version 2.0',
