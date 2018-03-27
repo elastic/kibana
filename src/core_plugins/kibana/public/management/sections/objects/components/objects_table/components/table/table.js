@@ -64,13 +64,14 @@ export class Table extends PureComponent {
         multiSelect: 'or',
         options: filterOptions,
       },
-      {
-        type: 'field_value_selection',
-        field: 'tag',
-        name: 'Tags',
-        multiSelect: 'or',
-        options: [],
-      },
+      // Add this back in once we have tag support
+      // {
+      //   type: 'field_value_selection',
+      //   field: 'tag',
+      //   name: 'Tags',
+      //   multiSelect: 'or',
+      //   options: [],
+      // },
     ];
 
     const columns = [
