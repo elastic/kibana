@@ -51,6 +51,10 @@ const getNativeControllers = async (settings) => {
 export async function prepare(kbnServer) {
   const nativeControllers = await getNativeControllers(kbnServer.settings);
   kbnServer.nativeControllers = nativeControllers.reduce((acc, nativeController) => {
+    if (acc[nativeController.pluginId]) {
+      throw new Error(`Multiple native controllers defined for ${nativeController.pluginId}, which is unsupported`);
+    }
+
     acc[nativeController.pluginId] = nativeController;
     return acc;
   }, {});
