@@ -133,6 +133,38 @@
   }
 }
 
+.rhythm_chart__legend-table,
+.rhythm_chart.reversed .rhythm_chart__legend-table {
+  width: auto;
+  display: flex;
+  .rhythm_chart__legend-control {
+    padding: 5px 5px 0 0;
+  }
+  .rhythm_chart__legend-series {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .rhythm_chart__legend_label {
+    flex: 0 1 auto;
+    width: 100%;
+  }
+  .rhythm_chart__legend_item {
+    max-width: inherit;
+    font-size: 12px;
+    display: flex;
+    margin-right: 10px;
+    border-bottom: none;
+    width: 100%;
+    &:first-child { border-top: none; }
+    :hover {
+      background-color: #f0f0f0;
+    }
+  }
+  .rhythm_chart__legend_button {
+    max-width: inherit;
+  }
+}
+
 .rhythm_chart__timeseries-container {
   position: relative;
   display: flex;

@@ -41,7 +41,8 @@ class TimeseriesPanelConfig extends Component {
     const legendPositionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' },
-      { label: 'Bottom', value: 'bottom' }
+      { label: 'Bottom', value: 'bottom' },
+      { label: 'Table', value: 'table' }
     ];
     let view;
     if (selectedTab === 'data') {
