@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }) {
     it('should import conflicts using a confirm modal', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
+      await PageObjects.settings.setImportIndexFieldOption(2);
       await PageObjects.settings.clickConfirmConflicts();
       await PageObjects.settings.clickImportDone();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -43,6 +44,7 @@ export default function ({ getService, getPageObjects }) {
       // Put in data which already exists
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
       // Interact with the conflict modal
+      await PageObjects.settings.setImportIndexFieldOption(2);
       await PageObjects.settings.clickConfirmConflicts();
       // Now confirm we want to override
       await PageObjects.common.clickConfirmOnModal();
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
       // Put in data which already exists
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
       // Interact with the conflict modal
+      await PageObjects.settings.setImportIndexFieldOption(2);
       await PageObjects.settings.clickConfirmConflicts();
       // Now cancel the override
       await PageObjects.common.clickCancelOnModal();
