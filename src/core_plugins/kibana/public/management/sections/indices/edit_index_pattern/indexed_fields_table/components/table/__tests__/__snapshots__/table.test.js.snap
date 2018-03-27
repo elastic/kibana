@@ -5,16 +5,12 @@ exports[`Table should render conflicting type 1`] = `
   conflict
   <span>
      
-    <EuiToolTip
+    <EuiIconTip
+      aria-label="Warning"
+      color="warning"
       content="The type of this field changes across indices. It is unavailable for many analysis functions."
-      position="top"
-    >
-      <EuiIcon
-        color="warning"
-        size="m"
-        type="alert"
-      />
-    </EuiToolTip>
+      type="alert"
+    />
   </span>
 </span>
 `;
@@ -135,6 +131,7 @@ exports[`Table should render the boolean template (false) 1`] = `<span />`;
 
 exports[`Table should render the boolean template (true) 1`] = `
 <dot
+  aria-label="Is searchable"
   className="euiIcon euiIcon--medium euiIcon--secondary"
   height="16"
   viewBox="0 0 16 16"
@@ -149,16 +146,12 @@ exports[`Table should render timestamp field name 1`] = `
   timestamp
   <span>
      
-    <EuiToolTip
+    <EuiIconTip
+      aria-label="Info"
+      color="primary"
       content="This field represents the time that events occurred."
-      position="top"
-    >
-      <EuiIcon
-        color="primary"
-        size="m"
-        type="clock"
-      />
-    </EuiToolTip>
+      type="clock"
+    />
   </span>
 </span>
 `;
