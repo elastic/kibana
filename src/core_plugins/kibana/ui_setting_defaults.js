@@ -126,8 +126,8 @@ export function getUiSettingDefaults() {
         '<li><strong>custom:</strong> allows you to define a your own preference. ' +
         'Use <strong>courier:customRequestPreference</strong> to customize your preference value. ' +
         '<li><strong>none:</strong> means do not set a preference. ' +
-        'This may provide better performance since requests can be spread across all shard copies but ' +
-        'may result in inconsistent results as different shards may be in different refresh states.' +
+        'This might provide better performance because requests can be spread across all shard copies. ' +
+        'However, results might be inconsistent because different shards might be in different refresh states.' +
         '</ul>'
     },
     'courier:customRequestPreference': {
