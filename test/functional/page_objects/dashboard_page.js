@@ -622,6 +622,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
   }
 
+  async unCheckHideTitle(off){
+    log.debug('reset panel titles after testing hide all panel titles checkbox');
+    await this.openOptions();
+    const isHidePanelTitlesOff = await this.isHidePanelTitleOn();
+    if (isHidePanelTitlesOff !== off){
+      return await testSubjects.click('dashboardPanelTitlesCheckbox');
+    }
+  }
+
 
   }
 
