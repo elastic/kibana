@@ -97,6 +97,11 @@ uiModules.get('kibana')
             preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
             preppedService.subdomains = preppedService.subdomains || [];
             preppedService.url = this._extendUrlWithParams(preppedService.url);
+
+            //backfill human readable for now, requires EMS implementation
+            preppedService.human_readable =
+              typeof preppedService.human_readable === 'string' ? preppedService.human_readable : preppedService.id;
+
             return preppedService;
           });
 
