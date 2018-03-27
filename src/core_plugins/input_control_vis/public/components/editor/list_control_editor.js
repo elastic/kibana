@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
@@ -8,92 +8,168 @@ import {
   EuiFieldNumber,
   EuiSwitch,
   EuiSelect,
+  EuiButtonEmpty,
+  EuiIconTip,
+  EuiText,
 } from '@elastic/eui';
 
 function filterField(field) {
   return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
 }
 
-export function ListControlEditor(props) {
-  const multiselectId = `multiselect-${props.controlIndex}`;
-  const sizeId = `size-${props.controlIndex}`;
-  const handleMultiselectChange = (evt) => {
-    props.handleCheckboxOptionChange(props.controlIndex, 'multiselect', evt);
-  };
-  const handleSizeChange = (evt) => {
-    props.handleNumberOptionChange(props.controlIndex, 'size', evt);
-  };
-  const handleParentChange = (evt) => {
-    props.handleParentChange(props.controlIndex, evt);
-  };
+export class ListControlEditor extends Component {
 
-  let parentSelect;
-  if (props.parentCandidates && props.parentCandidates.length > 0) {
-    const options = [
-      { value: '', text: '' },
-      ...props.parentCandidates,
-    ];
-    parentSelect = (
-      <EuiFormRow
-        id={`parentSelect-${props.controlIndex}`}
-        label="Parent control"
-        helpText="Options are based on the value of parent control. Disabled if parent is not set."
-      >
-        <EuiSelect
-          options={options}
-          value={props.controlParams.parent}
-          onChange={handleParentChange}
-        />
-      </EuiFormRow>
-    );
+  state = {
+    showAdvanced: false
   }
 
-  return (
-    <div>
+  renderAdvancedOptions() {
+    if (this.state.showAdvanced) {
+      const timeoutId = `size-${this.props.controlIndex}`;
+      return (
+        <Fragment>
+          <EuiFormRow
+            id={timeoutId}
+            label={(
+              <EuiText>
+                Timeout
+                <EuiIconTip
+                  content={`Terms search timeout (seconds),
+                    bounding the terms request to be executed within the specified time value and
+                    bail with the hits accumulated up to that point when expired.`}
+                  position="right"
+                />
+              </EuiText>
+            )}
+          >
+            <EuiFieldNumber
+              min={1}
+              value={this.props.controlParams.options.timeout}
+              onChange={(evt) => {
+                this.props.handleNumberOptionChange(this.props.controlIndex, 'timeout', evt);
+              }}
+              data-test-subj="listControlTimeoutInput"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            id={timeoutId}
+            label={(
+              <EuiText>
+                Terminate After
+                <EuiIconTip
+                  content={`The maximum number of documents to collect for each shard, upon reaching
+                    which the query execution will terminate early.`}
+                  position="right"
+                />
+              </EuiText>
+            )}
+          >
+            <EuiFieldNumber
+              min={1}
+              value={this.props.controlParams.options.terminateAfter}
+              onChange={(evt) => {
+                this.props.handleNumberOptionChange(this.props.controlIndex, 'terminateAfter', evt);
+              }}
+              data-test-subj="listControlTerminateAfterInput"
+            />
+          </EuiFormRow>
+        </Fragment>
+      );
+    }
+  }
 
-      <IndexPatternSelect
-        value={props.controlParams.indexPattern}
-        onChange={props.handleIndexPatternChange}
-        getIndexPatterns={props.getIndexPatterns}
-        controlIndex={props.controlIndex}
-      />
+  renderParentSelect() {
+    if (this.props.parentCandidates && this.props.parentCandidates.length > 0) {
+      const options = [
+        { value: '', text: '' },
+        ...this.props.parentCandidates,
+      ];
+      return (
+        <EuiFormRow
+          id={`parentSelect-${this.props.controlIndex}`}
+          label="Parent control"
+          helpText="Options are based on the value of parent control. Disabled if parent is not set."
+        >
+          <EuiSelect
+            options={options}
+            value={this.props.controlParams.parent}
+            onChange={(evt) => {
+              this.props.handleParentChange(this.props.controlIndex, evt);
+            }}
+          />
+        </EuiFormRow>
+      );
+    }
+  }
 
-      <FieldSelect
-        value={props.controlParams.fieldName}
-        indexPatternId={props.controlParams.indexPattern}
-        filterField={filterField}
-        onChange={props.handleFieldNameChange}
-        getIndexPattern={props.getIndexPattern}
-        controlIndex={props.controlIndex}
-      />
+  render() {
+    const multiselectId = `multiselect-${this.props.controlIndex}`;
+    const sizeId = `size-${this.props.controlIndex}`;
+    return (
+      <div>
 
-      { parentSelect }
-
-      <EuiFormRow
-        id={multiselectId}
-      >
-        <EuiSwitch
-          label="Multiselect"
-          checked={props.controlParams.options.multiselect}
-          onChange={handleMultiselectChange}
-          data-test-subj="listControlMultiselectInput"
+        <IndexPatternSelect
+          value={this.props.controlParams.indexPattern}
+          onChange={this.props.handleIndexPatternChange}
+          getIndexPatterns={this.props.getIndexPatterns}
+          controlIndex={this.props.controlIndex}
         />
-      </EuiFormRow>
 
-      <EuiFormRow
-        id={sizeId}
-        label="Size"
-      >
-        <EuiFieldNumber
-          min={1}
-          value={props.controlParams.options.size}
-          onChange={handleSizeChange}
-          data-test-subj="listControlSizeInput"
+        <FieldSelect
+          value={this.props.controlParams.fieldName}
+          indexPatternId={this.props.controlParams.indexPattern}
+          filterField={filterField}
+          onChange={this.props.handleFieldNameChange}
+          getIndexPattern={this.props.getIndexPattern}
+          controlIndex={this.props.controlIndex}
         />
-      </EuiFormRow>
 
-    </div>
-  );
+        { this.renderParentSelect() }
+
+        <EuiFormRow
+          id={multiselectId}
+        >
+          <EuiSwitch
+            label="Multiselect"
+            checked={this.props.controlParams.options.multiselect}
+            onChange={(evt) => {
+              this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', evt);
+            }}
+            data-test-subj="listControlMultiselectInput"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          id={sizeId}
+          label="Size"
+        >
+          <EuiFieldNumber
+            min={1}
+            value={this.props.controlParams.options.size}
+            onChange={(evt) => {
+              this.props.handleNumberOptionChange(this.props.controlIndex, 'size', evt);
+            }}
+            data-test-subj="listControlSizeInput"
+          />
+        </EuiFormRow>
+
+        <EuiButtonEmpty
+          onClick={() => {
+            this.setState(prevState => (
+              {  showAdvanced: !prevState.showAdvanced }
+            ));
+          }}
+          iconType={this.state.showAdvanced ? 'arrowDown' : 'arrowRight'}
+          iconSide="left"
+        >
+          Advanced
+        </EuiButtonEmpty>
+
+        { this.renderAdvancedOptions() }
+
+      </div>
+    );
+  }
 }
 
 ListControlEditor.propTypes = {

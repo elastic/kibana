@@ -5,6 +5,11 @@ import {
 } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
+import {
+  DEFAULT_LIST_SIZE,
+  DEFAULT_TIMEOUT,
+  DEFAULT_TERMINATE_AFTER,
+} from '../editor_utils';
 
 const termsAgg = (field, size, direction) => {
   if (size < 1) {
@@ -61,12 +66,12 @@ class ListControl extends Control {
     const indexPattern = this.filterManager.getIndexPattern();
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {
-      timeout: '1s',
-      terminate_after: 100000
+      timeout: `${_.get(this.options, 'timeout', DEFAULT_TIMEOUT)}s`,
+      terminate_after: _.get(this.options, 'terminateAfter', DEFAULT_TERMINATE_AFTER)
     };
     const aggs = termsAgg(
       indexPattern.fields.byName[fieldName],
-      _.get(this.options, 'size', 5),
+      _.get(this.options, 'size', DEFAULT_LIST_SIZE),
       'desc');
     const searchSource = createSearchSource(
       this.kbnApi,

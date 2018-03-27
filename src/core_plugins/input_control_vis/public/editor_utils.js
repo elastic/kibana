@@ -1,3 +1,7 @@
+export const DEFAULT_LIST_SIZE = 5;
+export const DEFAULT_TIMEOUT = 1;
+export const DEFAULT_TERMINATE_AFTER = 100000;
+
 export const CONTROL_TYPES = {
   LIST: 'list',
   RANGE: 'range'
@@ -56,8 +60,10 @@ export const getDefaultOptions = (type) => {
     case CONTROL_TYPES.LIST:
       defaultOptions.type = 'terms';
       defaultOptions.multiselect = true;
-      defaultOptions.size = 5;
+      defaultOptions.size = DEFAULT_LIST_SIZE;
       defaultOptions.order = 'desc';
+      defaultOptions.timeout = DEFAULT_TIMEOUT;
+      defaultOptions.terminateAfter = DEFAULT_TERMINATE_AFTER;
       break;
   }
   return defaultOptions;
