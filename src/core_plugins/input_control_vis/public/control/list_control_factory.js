@@ -46,6 +46,8 @@ class ListControl extends Control {
   }
 
   async fetch() {
+    this.warning = null;
+
     let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
@@ -88,9 +90,13 @@ class ListControl extends Control {
       return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
     });
 
-    if(selectOptions.length === 0) {
+    if (selectOptions.length === 0) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
       return;
+    }
+
+    if (resp.terminated_early || resp.timed_out) {
+      this.warning = 'Incomplete terms list. Adjust "timeout" and "terminateAfter" options to allow more resource intensive searches.';
     }
 
     this.selectOptions = selectOptions;

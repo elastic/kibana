@@ -4,6 +4,8 @@ import React from 'react';
 import {
   EuiFormRow,
   EuiToolTip,
+  EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 
 export function FormRow(props) {
@@ -16,9 +18,24 @@ export function FormRow(props) {
     );
   }
 
+  let label = props.label;
+  if (props.control.warning && props.control.warning.length > 0) {
+    label = (
+      <EuiText>
+        {props.label}
+        <EuiIconTip
+          content={props.control.warning}
+          position="right"
+          type="alert"
+          aria-label="Warning"
+        />
+      </EuiText>
+    );
+  }
+
   return (
     <EuiFormRow
-      label={props.label}
+      label={label}
       id={props.id}
       data-test-subj={'inputControl' + props.controlIndex}
     >

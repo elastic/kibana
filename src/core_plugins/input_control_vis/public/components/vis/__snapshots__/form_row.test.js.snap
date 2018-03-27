@@ -33,3 +33,27 @@ exports[`renders enabled control 1`] = `
   </div>
 </EuiFormRow>
 `;
+
+exports[`renders warning with tooltip 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  fullWidth={false}
+  hasEmptyLabelSpace={false}
+  id="controlId"
+  label={
+    <EuiText>
+      test control
+      <EuiIconTip
+        aria-label="Warning"
+        content="I am showing a warning for testing purposes"
+        position="right"
+        type="alert"
+      />
+    </EuiText>
+  }
+>
+  <div>
+    My Control
+  </div>
+</EuiFormRow>
+`;
