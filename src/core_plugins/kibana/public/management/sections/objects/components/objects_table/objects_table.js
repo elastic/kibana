@@ -204,6 +204,11 @@ export class ObjectsTable extends Component {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
 
+    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
+    if (indexPatterns.length) {
+      await this.props.indexPatterns.cache.clearAll();
+    }
+
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
     const deletes = objects.savedObjects.map(object => savedObjectsClient.delete(object.type, object.id));
     await Promise.all(deletes);
