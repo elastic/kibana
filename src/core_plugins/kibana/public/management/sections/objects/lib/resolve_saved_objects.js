@@ -23,13 +23,11 @@ async function getIndexPattern(doc, indexPatterns) {
 
   try {
     indexPattern = await indexPatterns.get(doc._id);
-  }
-  catch (err) {
+  } catch (err) {
     // Maybe it's store as the title?
     try {
       indexPattern = await indexPatterns.get(doc._source.title);
-    }
-    catch (err2) {
+    } catch (err2) {
       // Do nothing...
     }
   }
@@ -88,7 +86,8 @@ export async function resolveConflicts(
 ) {
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
     const oldIndexId = obj.searchSource.getOwn('index');
-    const newIndexId = resolutions.find(({ oldId }) => oldId === oldIndexId).newId;
+    const newIndexId = resolutions.find(({ oldId }) => oldId === oldIndexId)
+      .newId;
     // If the user did not select a new index pattern in the modal, the id
     // will be same as before, so don't try to update it
     if (newIndexId === oldIndexId) {
@@ -100,7 +99,10 @@ export async function resolveConflicts(
 }
 
 export async function saveObjects(objs, overwriteAll) {
-  await awaitEachItemInParallel(objs, async obj => await saveObject(obj, overwriteAll));
+  await awaitEachItemInParallel(
+    objs,
+    async obj => await saveObject(obj, overwriteAll)
+  );
 }
 
 export async function saveObject(obj, overwriteAll) {
@@ -111,7 +113,7 @@ export async function resolveSavedSearches(
   savedSearches,
   services,
   indexPatterns,
-  overwriteAll,
+  overwriteAll
 ) {
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
@@ -132,14 +134,16 @@ export async function resolveSavedObjects(
   const docTypes = groupByType(savedObjects);
 
   // Start with the index patterns since everything is dependent on them
-  await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
-    const obj = await getIndexPattern(indexPatternDoc, indexPatterns);
-    // TODO: handle overwriteAll
-    if (obj) {
-      return;
+  await awaitEachItemInParallel(
+    docTypes.indexPatterns,
+    async indexPatternDoc => {
+      const obj = await getIndexPattern(indexPatternDoc, indexPatterns);
+      if (obj && !overwriteAll) {
+        return;
+      }
+      await importIndexPattern(indexPatternDoc, indexPatterns);
     }
-    await importIndexPattern(indexPatternDoc, indexPatterns);
-  });
+  );
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be depedent on those saved searches existing
@@ -148,7 +152,7 @@ export async function resolveSavedObjects(
   // exist. We will provide a way for the user to manually select a new index pattern for those
   // saved objects.
   const conflictedIndexPatterns = [];
-  // It's possbile to have saved objects that link to saved searches which then link to index patterns
+  // It's possible to have saved objects that link to saved searches which then link to index patterns
   // and those could error out, but the error comes as an index pattern not found error. We can't resolve
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
   // likely that these saved objects will work once resaved so keep them around to resave them.
