@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiFormRow,
   EuiToolTip,
-  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 
@@ -21,7 +20,7 @@ export function FormRow(props) {
   let label = props.label;
   if (props.control.warning && props.control.warning.length > 0) {
     label = (
-      <EuiText>
+      <Fragment>
         {props.label}
         <EuiIconTip
           content={props.control.warning}
@@ -29,7 +28,7 @@ export function FormRow(props) {
           type="alert"
           aria-label="Warning"
         />
-      </EuiText>
+      </Fragment>
     );
   }
 

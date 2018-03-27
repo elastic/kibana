@@ -10,7 +10,6 @@ import {
   EuiSelect,
   EuiButtonEmpty,
   EuiIconTip,
-  EuiText,
 } from '@elastic/eui';
 
 function filterField(field) {
@@ -30,7 +29,7 @@ export class ListControlEditor extends Component {
           <EuiFormRow
             id={`timeout-${this.props.controlIndex}`}
             label={(
-              <EuiText>
+              <Fragment>
                 Timeout
                 <EuiIconTip
                   content={`Terms search timeout (seconds),
@@ -38,7 +37,7 @@ export class ListControlEditor extends Component {
                     bail with the hits accumulated up to that point when expired.`}
                   position="right"
                 />
-              </EuiText>
+              </Fragment>
             )}
           >
             <EuiFieldNumber
@@ -53,14 +52,14 @@ export class ListControlEditor extends Component {
           <EuiFormRow
             id={`terminateAfter-${this.props.controlIndex}`}
             label={(
-              <EuiText>
+              <Fragment>
                 Terminate After
                 <EuiIconTip
                   content={`The maximum number of documents to collect for each shard, upon reaching
                     which the query execution will terminate early.`}
                   position="right"
                 />
-              </EuiText>
+              </Fragment>
             )}
           >
             <EuiFieldNumber

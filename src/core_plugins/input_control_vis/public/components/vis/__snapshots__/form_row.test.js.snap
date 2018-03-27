@@ -41,7 +41,7 @@ exports[`renders warning with tooltip 1`] = `
   hasEmptyLabelSpace={false}
   id="controlId"
   label={
-    <EuiText>
+    <UNDEFINED>
       test control
       <EuiIconTip
         aria-label="Warning"
@@ -49,7 +49,7 @@ exports[`renders warning with tooltip 1`] = `
         position="right"
         type="alert"
       />
-    </EuiText>
+    </UNDEFINED>
   }
 >
   <div>
