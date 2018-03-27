@@ -104,16 +104,16 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to hide all panel titles', async function () {
-      const areTitlesHidden = await PageObjects.dashboard.checkHideTitle(true);
+      await PageObjects.dashboard.checkHideTitle(true);
       await retry.tryForTime(10000, async function () {
         const titles = await PageObjects.dashboard.getPanelTitles();
-        log.debug('we are getting this value');
-        expect(titles[0]).to.eql(['']);
+        expect(titles[0]).to.eql('');
       });
+      await PageObjects.dashboard.unCheckHideTitle(true);
     });
 
 
-    describe.skip('expanding a panel', () => {
+    describe('expanding a panel', () => {
       it('hides other panels', async () => {
         // Don't expand TSVB since it doesn't have the spy panel.
         const panels = await PageObjects.dashboard.getDashboardPanels();
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('embed mode', () => {
+    describe('embed mode', () => {
       it('hides the chrome', async () => {
         let isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(true);
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('full screen mode', () => {
+    describe('full screen mode', () => {
       it('option not available in edit mode', async () => {
         await PageObjects.dashboard.clickEdit();
         const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
@@ -248,7 +248,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('add new visualization link', () => {
+    describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickAddVisualization();
