@@ -25,11 +25,10 @@ export class ListControlEditor extends Component {
 
   renderAdvancedOptions() {
     if (this.state.showAdvanced) {
-      const timeoutId = `size-${this.props.controlIndex}`;
       return (
         <Fragment>
           <EuiFormRow
-            id={timeoutId}
+            id={`timeout-${this.props.controlIndex}`}
             label={(
               <EuiText>
                 Timeout
@@ -52,7 +51,7 @@ export class ListControlEditor extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            id={timeoutId}
+            id={`terminateAfter-${this.props.controlIndex}`}
             label={(
               <EuiText>
                 Terminate After
@@ -103,8 +102,6 @@ export class ListControlEditor extends Component {
   }
 
   render() {
-    const multiselectId = `multiselect-${this.props.controlIndex}`;
-    const sizeId = `size-${this.props.controlIndex}`;
     return (
       <div>
 
@@ -127,7 +124,7 @@ export class ListControlEditor extends Component {
         { this.renderParentSelect() }
 
         <EuiFormRow
-          id={multiselectId}
+          id={`multiselect-${this.props.controlIndex}`}
         >
           <EuiSwitch
             label="Multiselect"
@@ -140,7 +137,7 @@ export class ListControlEditor extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          id={sizeId}
+          id={`size-${this.props.controlIndex}`}
           label="Size"
         >
           <EuiFieldNumber
