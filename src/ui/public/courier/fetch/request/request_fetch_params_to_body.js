@@ -75,8 +75,10 @@ export function requestFetchParamsToBody(
           search_type: fetchParams.search_type,
           ignore_unavailable: true,
         };
-        if (config.get('courier:setRequestPreference')) {
+        if (config.get('courier:setRequestPreference') === 'sessionId') {
           header.preference = sessionId;
+        } else if (config.get('courier:setRequestPreference') === 'custom') {
+          header.preference = config.get('courier:customRequestPreference');
         }
 
         return `${JSON.stringify(header)}\n${toJson(body, JSON.stringify)}`;

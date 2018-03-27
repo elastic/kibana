@@ -14,7 +14,7 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
     sessionId: DEFAULT_SESSION_ID,
     config: {
       get: () => {
-        return true;
+        return 'sessionId';
       }
     }
   };
@@ -109,16 +109,36 @@ describe('headers', () => {
     return JSON.parse(requestParts[0]);
   };
 
-  describe('preference', async () => {
-    test('should be set to sessionId when courier:setRequestPreference is true', async () => {
-      const header = await getHeader({ requestFetchParams });
+  describe('search request preference', async () => {
+    test('should be set to sessionId when courier:setRequestPreference is "sessionId"', async () => {
+      const config = {
+        get: () => {
+          return 'sessionId';
+        }
+      };
+      const header = await getHeader({ requestFetchParams, config });
       expect(header.preference).toBe(DEFAULT_SESSION_ID);
     });
 
-    test('should not be set when courier:setRequestPreference is false', async () => {
+    test('should be set to custom string when courier:setRequestPreference is "custom"', async () => {
+      const CUSTOM_PREFERENCE = '_local';
+      const config = {
+        get: (key) => {
+          if (key === 'courier:setRequestPreference') {
+            return 'custom';
+          } else if (key === 'courier:customRequestPreference') {
+            return CUSTOM_PREFERENCE;
+          }
+        }
+      };
+      const header = await getHeader({ requestFetchParams, config });
+      expect(header.preference).toBe(CUSTOM_PREFERENCE);
+    });
+
+    test('should not be set when courier:setRequestPreference is "none"', async () => {
       const config = {
         get: () => {
-          return false;
+          return 'none';
         }
       };
       const header = await getHeader({ requestFetchParams, config });
