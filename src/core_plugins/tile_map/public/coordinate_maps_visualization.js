@@ -82,7 +82,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._recreateGeohashLayer(this._chartData.geoJson);
     }
 
-    _recreateGeohashLayer(geojsonData){
+    _recreateGeohashLayer(geojsonData) {
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
@@ -101,7 +101,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
       const geohashOptions = this._getGeohashOptions();
-      if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)){
+      if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
         if (this._chartData && this._chartData.geoJson) {
           this._recreateGeohashLayer(this._chartData.geoJson);
         }

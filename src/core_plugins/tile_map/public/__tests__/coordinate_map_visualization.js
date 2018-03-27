@@ -1,22 +1,21 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
-import {CoordinateMapsVisualizationProvider} from '../coordinate_maps_visualization';
+import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
-import {ImageComparator} from 'test_utils/image_comparator';
+import { ImageComparator } from 'test_utils/image_comparator';
 import sinon from 'sinon';
-import dummy_es_response from './dummy_es_response.json';
+import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
-import heatmap_raw from './heatmap_raw.png';
+import heatmapRaw from './heatmap_raw.png';
 
 function mockRawData() {
-  let stack = [dummy_es_response];
+  const stack = [dummyESResponse];
   let node;
   do {
     node = stack.pop();
     if (typeof node === 'object') {
-      for (let key in node) {
+      for (const key in node) {
         if (node.hasOwnProperty(key)) {
           if (key === 'aggConfig') {
             node[key].makeLabel = () => 'foobar';
@@ -80,8 +79,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       let contents = null;
       if (url.startsWith(tmsManifestUrl)) {
         contents = tmsManifest;
-        // } else if (url.startsWith(vectorManifestUrl)) {
-        //   contents = vectorManifest;
       } else if (url.startsWith(manifestUrl)) {
         contents = manifest;
       }
@@ -121,7 +118,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
     it('should initialize OK', async function () {
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
@@ -140,7 +137,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle to Heatmap OK', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
@@ -150,7 +147,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
@@ -158,7 +155,7 @@ describe('CoordinateMapsVisualizationTest', function () {
         uiState: false
       });
 
-      const mismatchedPixels = await compareImage(heatmap_raw, 1);
+      const mismatchedPixels = await compareImage(heatmapRaw, 1);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
@@ -168,7 +165,7 @@ describe('CoordinateMapsVisualizationTest', function () {
     it('should toggle back&forth OK between mapTypes', async function () {
 
       const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: true,
@@ -177,7 +174,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Heatmap';
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,
@@ -186,7 +183,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       vis.params.mapType = 'Scaled Circle Markers';
-      await coordinateMapVisualization.render(dummy_es_response, {
+      await coordinateMapVisualization.render(dummyESResponse, {
         resize: false,
         params: true,
         aggs: false,

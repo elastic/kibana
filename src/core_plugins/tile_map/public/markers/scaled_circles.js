@@ -11,8 +11,8 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._geohashGeoJson = featureCollection;
     this._zoom = targetZoom;
 
-    this._valueFormatter = options.valueFormatter || ((x) => {x});
-    this._tooltipFormatter = options.tooltipFormatter || ((x) => {x});
+    this._valueFormatter = options.valueFormatter || ((x) => {x;});
+    this._tooltipFormatter = options.tooltipFormatter || ((x) => {x;});
 
     this._legendColors = null;
     this._legendQuantizer = null;
