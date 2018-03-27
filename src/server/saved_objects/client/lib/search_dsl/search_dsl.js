@@ -13,9 +13,8 @@ export function getSearchDsl(mappings, options = {}) {
     sortOrder
   } = options;
 
-  if (!type && sortField) {
-    // TODO: why is this not allowed?
-    // throw Boom.notAcceptable('Cannot sort without filtering by type');
+  if ((!type && !includeTypes) && sortField) {
+    throw Boom.notAcceptable('Cannot sort without filtering by type');
   }
 
   if (sortOrder && !sortField) {

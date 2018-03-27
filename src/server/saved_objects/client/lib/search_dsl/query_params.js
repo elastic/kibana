@@ -71,7 +71,7 @@ export function getQueryParams(mappings, type, includeTypes, search, searchField
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            type ? [type] : Object.keys(getRootProperties(mappings))
+            type ? [type] : Object.keys(getRootProperties(mappings)),
           )
         }
       }

@@ -110,6 +110,7 @@ export class ObjectsTable extends Component {
         page: page + 1,
         sortField: 'type',
         fields: ['title', 'id'],
+        searchFields: ['title'],
         includeTypes,
       });
 
@@ -142,7 +143,10 @@ export class ObjectsTable extends Component {
   };
 
   onQueryChange = query => {
-    this.setState({ activeQuery: query }, () => this.fetchSavedObjects(query));
+    this.setState({
+      activeQuery: query,
+      page: 0, // Reset this on each query change
+    }, () => this.fetchSavedObjects(query));
   };
 
   onTableChange = async (table) => {
