@@ -63,7 +63,7 @@ export class Plugin {
         this.status = kbnServer.status.createForPlugin(this);
         server.expose('status', this.status);
         const nativeController = kbnServer.nativeControllers[this.id];
-        await this.externalInit(server, options, nativeController);
+        await this.externalInit(server, options, nativeController ? nativeController.process : null);
       }
     };
 

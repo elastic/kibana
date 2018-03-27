@@ -13,7 +13,7 @@ import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
-import { spawnNativeControllers } from './native_controllers';
+import * as NativeControllers from './native_controllers';
 import { activateSystemCallFilters } from './system_call_filters';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
@@ -32,7 +32,7 @@ export default class KbnServer {
     this.settings = settings || {};
 
     this.ready = constant(this.mixin(
-      spawnNativeControllers,
+      NativeControllers.prepare,
       activateSystemCallFilters,
       Plugins.waitForInitSetupMixin,
 
@@ -52,6 +52,8 @@ export default class KbnServer {
 
       // find plugins and set this.plugins and this.pluginSpecs
       Plugins.scanMixin,
+
+      NativeControllers.killOrStart,
 
       // tell the config we are done loading plugins
       configCompleteMixin,

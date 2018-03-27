@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { spawnNativeController } from './spawn_native_controller';
 import { findPluginSpecs } from '../../plugin_discovery';
 import { safeChildProcess } from '../../utils/child_process/safe_child_process';
+import { NativeController } from './native_controller';
 
 const getNativeControllers = async (settings) => {
   const {
@@ -12,30 +13,29 @@ const getNativeControllers = async (settings) => {
 
   return await pack$
     .mergeMap(pack => {
-      const nativeControllers = get(pack.getPkg(), 'kibana.nativeControllers');
-      if (nativeControllers) {
-        return Observable.from(nativeControllers.map(nativeController => {
+      const nativeControllerSpecs = get(pack.getPkg(), 'kibana.nativeControllers');
+      if (nativeControllerSpecs) {
+        return Observable.from(nativeControllerSpecs.map(nativeControllerSpec => {
           return {
-            pluginId: nativeController.pluginId,
-            path: path.resolve(pack.getPath(), nativeController.path)
+            pluginId: nativeControllerSpec.pluginId,
+            path: path.resolve(pack.getPath(), nativeControllerSpec.path)
           };
         }));
       }
 
       return Observable.empty();
     })
-    .map(nativeController => {
-      return {
-        process: spawnNativeController(nativeController.path),
-        pluginId: nativeController.pluginId
-      };
+    .map(nativeControllerSpec => {
+      const process = spawnNativeController(nativeControllerSpec.path);
+      return new NativeController(nativeControllerSpec.pluginId, process);
     })
     .do(nativeController => {
-      const childProcess = nativeController.process;
-      safeChildProcess(childProcess);
+      safeChildProcess(nativeController.process);
+      nativeController.process.on('exit', (code) => {
+        if (nativeController.killed) {
+          return;
+        }
 
-      // if the child process is killed, we kill the main process
-      childProcess.on('exit', (code) => {
         console.error(`${nativeController.pluginId}'s native controller exited with code ${code}`);
         process.exit();
       });
@@ -44,10 +44,37 @@ const getNativeControllers = async (settings) => {
     .toPromise();
 };
 
-export async function spawnNativeControllers(kbnServer) {
+export async function prepare(kbnServer) {
   const nativeControllers = await getNativeControllers(kbnServer.settings);
   kbnServer.nativeControllers = nativeControllers.reduce((acc, nativeController) => {
-    acc[nativeController.pluginId] = nativeController.process;
+    acc[nativeController.pluginId] = nativeController;
     return acc;
   }, {});
+}
+
+export async function killOrStart(kbnServer) {
+  const started$ = Observable.from(kbnServer.pluginSpecs)
+    .mergeMap(spec => {
+      const nativeController = kbnServer.nativeControllers[spec.getId()];
+      if (!nativeController) {
+        return Observable.empty();
+      }
+
+      nativeController.start();
+      return nativeController.started$;
+    });
+
+
+  const killed$ = Observable.from(kbnServer.disabledPluginSpecs)
+    .do(spec => {
+      const nativeController = kbnServer.nativeControllers[spec.getId()];
+      if (!nativeController) {
+        return;
+      }
+
+      nativeController.kill();
+    });
+
+  // await completion of start$, kill$
+  await Observable.merge(started$, killed$).toPromise();
 }
