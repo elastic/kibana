@@ -11,7 +11,7 @@ const getNativeControllers = async (settings) => {
     pack$,
   } = findPluginSpecs(settings);
 
-  return await pack$
+  const spec$ = pack$
     .mergeMap(pack => {
       const nativeControllerSpecs = get(pack.getPkg(), 'kibana.nativeControllers');
       if (nativeControllerSpecs) {
@@ -24,11 +24,15 @@ const getNativeControllers = async (settings) => {
       }
 
       return Observable.empty();
-    })
-    .map(nativeControllerSpec => {
-      const process = spawnNativeController(nativeControllerSpec.path);
-      return new NativeController(nativeControllerSpec.pluginId, process);
-    })
+    });
+
+  const nativeController$ = spec$
+    .map(spec => {
+      const process = spawnNativeController(spec.path);
+      return new NativeController(spec.pluginId, process);
+    });
+
+  return await nativeController$
     .do(nativeController => {
       safeChildProcess(nativeController.process);
       nativeController.process.on('exit', (code) => {
