@@ -29,7 +29,7 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, includeTypes, search, searchFields) {
+export function getQueryParams(mappings, type, search, searchFields, includeTypes) {
   if (!type && !search) {
     if (includeTypes) {
       return {

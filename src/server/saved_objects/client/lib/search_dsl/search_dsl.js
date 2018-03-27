@@ -22,7 +22,7 @@ export function getSearchDsl(mappings, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, type, includeTypes, search, searchFields),
+    ...getQueryParams(mappings, type, search, searchFields, includeTypes),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }
