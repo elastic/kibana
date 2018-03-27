@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.tryForTime(10000, async function () {
         const titles = await PageObjects.dashboard.getPanelTitles();
         log.debug('we are getting this value');
-        expect(titles).to.eql([ '', '', '', '', '', '', '', '', '' ]);
+        expect(titles[0]).to.eql(['']);
       });
     });
 
