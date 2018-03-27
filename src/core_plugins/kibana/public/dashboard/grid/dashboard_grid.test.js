@@ -10,6 +10,12 @@ import { DashboardGrid } from './dashboard_grid';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
 
 function getProps(props = {}) {
   const defaultTestProps = {
