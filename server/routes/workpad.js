@@ -97,7 +97,7 @@ export function workpad(server) {
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
     handler: function(request, reply) {
       createWorkpad(request)
-        .then(formatResponse(reply))
+        .then(() => reply({ ok: true }))
         .catch(formatResponse(reply));
     },
   });
@@ -109,7 +109,7 @@ export function workpad(server) {
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
     handler: function(request, reply) {
       updateWorkpad(request)
-        .then(formatResponse(reply))
+        .then(() => reply({ ok: true }))
         .catch(formatResponse(reply));
     },
   });
@@ -120,7 +120,7 @@ export function workpad(server) {
     path: `${routePrefix}/{id}`,
     handler: function(request, reply) {
       deleteWorkpad(request)
-        .then(formatResponse(reply))
+        .then(() => reply({ ok: true }))
         .catch(formatResponse(reply));
     },
   });
