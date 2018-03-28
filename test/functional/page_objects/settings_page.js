@@ -559,6 +559,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await testSubjects.findAll(`objectsTableRow`);
     }
 
+    async waitUntilSavedObjectsTableIsNotLoading() {
+      await retry.try(async () => {
+        try {
+          await remote.setFindTimeout(defaultFindTimeout)
+            .findByCssSelector(`*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading`);
+        } catch (e) {
+          return;
+        }
+        throw 'Found';
+      });
+    }
+
     async getSavedObjectsInTable() {
       const table = await testSubjects.findAll('savedObjectsTable');
       const cells = await table[0].findAll('css selector', 'td:nth-child(3)');

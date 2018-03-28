@@ -21,11 +21,9 @@ export default function ({ getService, getPageObjects }) {
     it('should import saved objects normally', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
-      // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
-      // Wait for the refresh to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(3);
     });
@@ -33,15 +31,12 @@ export default function ({ getService, getPageObjects }) {
     it('should import conflicts using a confirm modal', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
-      // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.setImportIndexFieldOption(2);
       await PageObjects.settings.clickConfirmConflicts();
-      // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
-      // Wait for refresh to happen
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(3);
     });
@@ -63,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       // Finish the flyout
       await PageObjects.settings.clickImportDone();
       // Wait...
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(2);
@@ -85,6 +80,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // Finish the flyout
       await PageObjects.settings.clickImportDone();
+      // Wait for table to refresh
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(2);
@@ -111,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
       // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(2);
