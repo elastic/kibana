@@ -236,10 +236,9 @@ export class Flyout extends Component {
     const value = e.target.value;
     this.setState(state => {
       const conflictIndex = state.conflicts.findIndex(
-        conflict => conflict.id === id
+        conflict => conflict.existingIndexPatternId === id
       );
       if (conflictIndex === -1) {
-        // console.warn('Unable to find conflict');
         return state;
       }
 
