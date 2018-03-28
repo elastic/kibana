@@ -201,7 +201,7 @@ export const JS_CLIENT_INSTRUCTIONS = [
     commands: `import {curlyOpen} init as initApm {curlyClose} from 'elastic-apm-js-base'
 var apm = initApm({curlyOpen}
 
-  // Set required service name
+  // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
   serviceName: '',
 
   // Set custom APM Server URL (default: http://localhost:8200)
@@ -213,6 +213,6 @@ var apm = initApm({curlyOpen}
     textPost:
       'See the [documentation]' +
       '({config.docs.base_url}guide/en/apm/agent/js-base/0.x/index.html)  for advanced usage.\n\n' +
-      '**Warning: The JS agent is currently in Alpha and not meant for production use.**',
+      '**Warning: The JS agent is currently in Beta and not meant for production use.**',
   },
 ];
