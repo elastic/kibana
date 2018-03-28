@@ -4,7 +4,7 @@ import { isValid } from '../../../common/lib/dataurl';
 
 export const revealImage = () => ({
   name: 'revealImage',
-  displayName: 'Repeating Image',
+  displayName: 'Reveal Image',
   help: '',
   modelArgs: [['size', { label: 'Percentage (Between 0 & 1)' }]],
   args: [

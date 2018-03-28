@@ -6,7 +6,6 @@ export const revealImage = () => ({
   help: 'Reveal a percentage of an image to make a custom gauge-style chart',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const container = document.createElement('div');
     const aligner = document.createElement('div');
     const img = new Image();
     img.onload = function() {
@@ -15,17 +14,17 @@ export const revealImage = () => ({
     };
     handlers.onResize(img.onload);
 
-    container.className = 'revealImage';
     aligner.className = 'revealImageAligner';
     aligner.style.backgroundImage = `url(${config.emptyImage})`;
-    img.style.clipPath = getClipPath(config.percent, config.origin);
-    container.appendChild(aligner);
     aligner.appendChild(img);
+    img.style.clipPath = getClipPath(config.percent, config.origin);
     img.src = config.image;
+    domNode.className = 'revealImage';
 
     function finish() {
-      // eslint-disable-next-line no-unsanitized/property
-      domNode.innerHTML = container.outerHTML;
+      const firstChild = domNode.firstChild;
+      if (firstChild) domNode.replaceChild(aligner, firstChild);
+      else domNode.appendChild(aligner);
       handlers.done();
     }
 
