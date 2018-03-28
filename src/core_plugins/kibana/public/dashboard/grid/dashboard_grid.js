@@ -91,19 +91,21 @@ export class DashboardGrid extends React.Component {
     this.gridItems = {};
 
     let isLayoutInvalid = false;
-    let invalidMsg;
     let layout;
     try {
       layout = this.buildLayoutFromPanels();
     } catch (error) {
       isLayoutInvalid = true;
-      invalidMsg = error.message;
+      toastNotifications.addDanger({
+        title: 'Unable to load dashboard.',
+        text: error.message,
+      });
+      window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
     }
     this.state = {
       focusedPanelIndex: undefined,
       layout,
       isLayoutInvalid,
-      invalidMsg,
     };
 
     // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
@@ -216,11 +218,6 @@ export class DashboardGrid extends React.Component {
 
   render() {
     if (this.state.isLayoutInvalid) {
-      toastNotifications.addDanger({
-        title: 'Unable to load dashboard.',
-        text: this.state.invalidMsg,
-      });
-      window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
       return null;
     }
 
