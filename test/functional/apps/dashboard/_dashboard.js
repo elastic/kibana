@@ -104,14 +104,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to hide all panel titles', async function () {
-      await PageObjects.dashboard.checkHideTitle(true);
+      await PageObjects.dashboard.checkHideTitle();
       await retry.tryForTime(10000, async function () {
         const titles = await PageObjects.dashboard.getPanelTitles();
         expect(titles[0]).to.eql('');
       });
-      await PageObjects.dashboard.unCheckHideTitle(true);
+      await PageObjects.dashboard.checkHideTitle();
     });
-
 
     describe('expanding a panel', () => {
       it('hides other panels', async () => {
@@ -246,6 +245,8 @@ export default function ({ getService, getPageObjects }) {
           expect(isChromeVisible).to.be(true);
         });
       });
+
+
     });
 
     describe('add new visualization link', () => {

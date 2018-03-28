@@ -606,30 +606,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }));
     }
 
-   async isHidePanelTitleOn() {
-     log.debug('getting the status of hide title checkbox');
-     await this.openOptions();
-     const hidePanelTitleCheckBox = await testSubjects.find('dashboardPanelTitlesCheckbox');
-     return await hidePanelTitleCheckBox.getProperty('checked');
-  }
-
-  async checkHideTitle(on) {
-    log.debug('ensure that you can click on hide title checkbox');
-    await this.openOptions();
-    const isHidePanelTitleOn = await this.isHidePanelTitleOn();
-    if (isHidePanelTitleOn !== on){
-      return await testSubjects.click('dashboardPanelTitlesCheckbox');
+    async isHidePanelTitleOn() {
+      log.debug('getting the status of hide title checkbox');
+      await this.openOptions();
+      const hidePanelTitleCheckBox = await testSubjects.find('dashboardPanelTitlesCheckbox');
+      return await hidePanelTitleCheckBox.getProperty('checked');
     }
-  }
 
-  async unCheckHideTitle(off){
-    log.debug('reset panel titles after testing hide all panel titles checkbox');
-    await this.openOptions();
-    const isHidePanelTitlesOff = await this.isHidePanelTitleOn();
-    if (isHidePanelTitlesOff !== off){
-      return await testSubjects.click('dashboardPanelTitlesCheckbox');
-    }
-  }
+    async checkHideTitle() {
+      log.debug('ensure that you can click on hide title checkbox');
+      await this.openOptions();
+      const isHidePanelTitleOn = await this.isHidePanelTitleOn();
+      log.debug(`isHidePanelTitleOn = ${isHidePanelTitleOn}`);
+      if (isHidePanelTitleOn == false) {
+        return await testSubjects.click('dashboardPanelTitlesCheckbox');
+      } else if (isHidePanelTitleOn == true) {
+        return await testSubjects.click('dashboardPanelTitlesCheckbox');
+      }
+      }
+
 
 
   }
