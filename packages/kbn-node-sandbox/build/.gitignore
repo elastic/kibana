@@ -1,5 +1,5 @@
 *
 !.gitignore
 !*/
-!*/sandbox_mac.node
+!*/sandbox_linux.node
 !*/sandbox_win32.node
