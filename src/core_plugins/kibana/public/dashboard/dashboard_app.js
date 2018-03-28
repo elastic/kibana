@@ -20,7 +20,6 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
@@ -67,18 +66,17 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardStateManager = new DashboardStateManager(dash, AppState, dashboardConfig.getHideWriteControls());
+      const dashboardStateManager = new DashboardStateManager({
+        savedDashboard: dash,
+        AppState,
+        hideWriteControls: dashboardConfig.getHideWriteControls(),
+        addFilter: ({ field, value, operator, index }) => {
+          filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
+        }
+      });
 
       $scope.getDashboardState = () => dashboardStateManager;
       $scope.appState = dashboardStateManager.getAppState();
-      $scope.containerApi = new DashboardContainerAPI(
-        dashboardStateManager,
-        (field, value, operator, index) => {
-          filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
-          dashboardStateManager.saveState();
-        }
-      );
-      $scope.getContainerApi = () => $scope.containerApi;
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -212,11 +210,6 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$watch('model.timeRestore', () => dashboardStateManager.setTimeRestore($scope.model.timeRestore));
       $scope.indexPatterns = [];
 
-      $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
-        dashboardStateManager.registerPanelIndexPatternMap(panelIndex, pattern);
-        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
-      };
-
       $scope.onPanelRemoved = (panelIndex) => {
         dashboardStateManager.removePanel(panelIndex);
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
@@ -224,7 +217,9 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
-      $scope.$listen(timefilter, 'fetch', $scope.refresh);
+      $scope.$listen(timefilter, 'fetch', () => {
+        dashboardStateManager.handleTimeChange($scope.timefilter);
+      });
 
       function updateViewMode(newMode) {
         $scope.topNavMenu = getTopNavConfig(newMode, navActions, dashboardConfig.getHideWriteControls()); // eslint-disable-line no-use-before-define

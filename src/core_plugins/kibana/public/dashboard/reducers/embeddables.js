@@ -1,13 +1,56 @@
 import { handleActions } from 'redux-actions';
+import _ from 'lodash';
 
 import {
-  embeddableRenderFinished,
-  embeddableRenderError,
-  destroyEmbeddable,
+  embeddableIsInitializing,
+  embeddableError,
+  embeddableInitialized,
+  setStagedFilter,
+  clearStagedFilters,
+  deletePanel,
 } from '../actions';
 
 export const embeddables = handleActions({
-  [destroyEmbeddable]:
+  [clearStagedFilters]:
+    (embeddables) => {
+      return _.reduce(embeddables, (embeddablesCopy, embeddable, key) => {
+        embeddablesCopy[key] = { ...embeddable };
+        delete embeddablesCopy[key].stagedFilters;
+        return embeddablesCopy;
+      }, {});
+    },
+
+  [embeddableInitialized]:
+  /**
+   *
+   * @param embeddables {Object.<string, EmbeddableState>}
+   * @param payload {String} The id of the panel whose embeddable should be loaded
+   * @return {Object.<string, EmbeddableState>}
+   */
+    (embeddables, { payload }) => {
+      return {
+        ...embeddables,
+        [payload]: {
+          ...embeddables[payload],
+          initialized: true,
+        }
+      };
+    },
+
+  // TODO: Currently only saved search uses this to apply a filter. When visualize uses it too, we will need to
+  // support multiple staged filters.
+  [setStagedFilter]:
+    (embeddables, { payload }) => {
+      return {
+        ...embeddables,
+        [payload.panelId]: {
+          ...embeddables[payload.panelId],
+          stagedFilter: payload.stagedFilter,
+        }
+      };
+    },
+
+  [deletePanel]:
     /**
      *
      * @param embeddables {Object.<string, EmbeddableState>}
@@ -20,7 +63,7 @@ export const embeddables = handleActions({
       return embeddablesCopy;
     },
 
-  [embeddableRenderFinished]:
+  [embeddableIsInitializing]:
     /**
      *
      * @param embeddables {Object.<string, EmbeddableState>}
@@ -32,14 +75,14 @@ export const embeddables = handleActions({
     (embeddables, { payload }) => {
       return {
         ...embeddables,
-        [payload.panelId]: {
-          ...payload.embeddable,
+        [payload]: {
+          initialized: false,
           error: undefined,
         }
       };
     },
 
-  [embeddableRenderError]:
+  [embeddableError]:
     /**
      *
      * @param embeddables {Object.<string, EmbeddableState>}

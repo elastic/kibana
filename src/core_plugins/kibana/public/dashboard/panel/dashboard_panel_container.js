@@ -5,39 +5,34 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 import {
-  renderEmbeddable,
-  destroyEmbeddable
+  initializeEmbeddable,
+  deletePanel,
 } from '../actions';
 
 import {
-  getPanel,
   getEmbeddable,
   getFullScreenMode,
   getViewMode,
-  getEmbeddableTitle,
-  getEmbeddableEditUrl,
-  getMaximizedPanelId,
   getEmbeddableError,
+  getEmbeddableInitialized,
 } from '../selectors';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   return {
-    title: embeddable ? getEmbeddableTitle(dashboard, panelId) : '',
-    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
     error: embeddable ? getEmbeddableError(dashboard, panelId) : '',
-
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
-    isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    panel: getPanel(dashboard, panelId),
+    initialized: embeddable ? getEmbeddableInitialized(dashboard, panelId) : false
   };
 };
 
-const mapDispatchToProps = (dispatch, { embeddableFactory, panelId, getContainerApi }) => ({
-  renderEmbeddable: (panelElement, panel) => (
-    dispatch(renderEmbeddable(embeddableFactory, panelElement, panel, getContainerApi()))
+const mapDispatchToProps = (dispatch, { embeddableFactory, panelId }) => ({
+  initializeEmbeddable: () => (
+    dispatch(initializeEmbeddable({ embeddableFactory, panelId }))
   ),
-  onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableFactory)),
+  destroy: () => (
+    dispatch(deletePanel(panelId))
+  )
 });
 
 export const DashboardPanelContainer = connect(
@@ -51,9 +46,6 @@ DashboardPanelContainer.propTypes = {
    * @type {EmbeddableFactory}
    */
   embeddableFactory: PropTypes.shape({
-    destroy: PropTypes.func.isRequired,
-    render: PropTypes.func.isRequired,
-    addDestroyEmeddable: PropTypes.func.isRequired,
+    create: PropTypes.func.isRequired,
   }).isRequired,
-  getContainerApi: PropTypes.func.isRequired,
 };

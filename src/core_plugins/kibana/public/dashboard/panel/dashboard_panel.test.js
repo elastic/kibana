@@ -5,12 +5,15 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
+import { embeddableHandlerCache } from '../cache/embeddable_handler_cache';
+import { Embeddable } from 'ui/embeddable';
+
 import {
   updateViewMode,
   setPanels,
+  updateTimeRange,
 } from '../actions';
 import { Provider } from 'react-redux';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import {
   takeMountedSnapshot,
@@ -18,18 +21,24 @@ import {
 
 function getProps(props = {}) {
   const defaultTestProps = {
-    panel: { panelIndex: 'foo1' },
-    renderEmbeddable: jest.fn(),
+    panelId: 'foo1',
+    initializeEmbeddable: jest.fn(),
     viewOnlyMode: false,
-    onDestroy: () => {},
-    embeddableFactory: getEmbeddableFactoryMock(),
+    destroy: () => {},
+    initialized: true,
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
 beforeAll(() => {
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  embeddableHandlerCache.register('foo1', new Embeddable());
+});
+
+afterAll(() => {
+  embeddableHandlerCache.destroy('foo1');
 });
 
 test('DashboardPanel matches snapshot', () => {
@@ -37,10 +46,16 @@ test('DashboardPanel matches snapshot', () => {
   expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
-test('Calls render', () => {
-  const props = getProps();
+test('Does not call initializeEmbeddable when initialized is true', () => {
+  const props = getProps({ initialized: true });
   mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
-  expect(props.renderEmbeddable.mock.calls.length).toBe(1);
+  expect(props.initializeEmbeddable.mock.calls.length).toBe(0);
+});
+
+test('Calls initializeEmbeddable when initialized is false', () => {
+  const props = getProps({ initialized: false });
+  mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
+  expect(props.initializeEmbeddable.mock.calls.length).toBe(1);
 });
 
 test('renders an error when error prop is passed', () => {

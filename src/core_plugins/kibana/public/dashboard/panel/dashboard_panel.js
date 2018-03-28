@@ -4,37 +4,40 @@ import classNames from 'classnames';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
+import { EmbeddableViewportContainer } from './embeddable_viewport_container';
 
 export class DashboardPanel extends React.Component {
-  async componentDidMount() {
-    this.props.renderEmbeddable(this.panelElement, this.props.panel);
+  constructor(props) {
+    super(props);
+  }
+
+  componentDidMount() {
+    if (!this.props.initialized) {
+      this.props.initializeEmbeddable();
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.destroy();
   }
 
   onFocus = () => {
-    const { onPanelFocused, panel } = this.props;
+    const { onPanelFocused, panelId } = this.props;
     if (onPanelFocused) {
-      onPanelFocused(panel.panelIndex);
+      onPanelFocused(panelId);
     }
   };
 
   onBlur = () => {
-    const { onPanelBlurred, panel } = this.props;
+    const { onPanelBlurred, panelId } = this.props;
     if (onPanelBlurred) {
-      onPanelBlurred(panel.panelIndex);
+      onPanelBlurred(panelId);
     }
   };
 
-  componentWillUnmount() {
-    this.props.onDestroy();
-  }
-
-  renderEmbeddedContent() {
+  renderEmbeddableViewport() {
     return (
-      <div
-        id="embeddedPanel"
-        className="panel-content"
-        ref={panelElement => this.panelElement = panelElement}
-      />
+      <EmbeddableViewportContainer panelId={this.props.panelId} />
     );
   }
 
@@ -42,8 +45,23 @@ export class DashboardPanel extends React.Component {
     return <PanelError error={this.props.error} />;
   }
 
+  renderLoader() {
+    return <div>Loading...</div>;
+  }
+
+  renderContent() {
+    const { error, initialized } = this.props;
+    if (error) {
+      return this.renderEmbeddedError();
+    } else if (!initialized) {
+      return this.renderLoader();
+    } else {
+      return this.renderEmbeddableViewport();
+    }
+  }
+
   render() {
-    const { viewOnlyMode, error, panel, embeddableFactory } = this.props;
+    const { viewOnlyMode, panelId } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -58,11 +76,10 @@ export class DashboardPanel extends React.Component {
           data-test-subj="dashboardPanel"
         >
           <PanelHeader
-            embeddableFactory={embeddableFactory}
-            panelId={panel.panelIndex}
+            panelId={panelId}
           />
 
-          {error ? this.renderEmbeddedError() : this.renderEmbeddedContent()}
+          {this.renderContent()}
 
         </div>
       </div>
@@ -71,17 +88,15 @@ export class DashboardPanel extends React.Component {
 }
 
 DashboardPanel.propTypes = {
-  panel: PropTypes.shape({
-    panelIndex: PropTypes.string,
-  }),
-  renderEmbeddable: PropTypes.func.isRequired,
   viewOnlyMode: PropTypes.bool.isRequired,
-  onDestroy: PropTypes.func.isRequired,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
   error: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object
   ]),
-  embeddableFactory: PropTypes.object.isRequired,
+  panelId: PropTypes.string,
+  initializeEmbeddable: PropTypes.func,
+  initialized: PropTypes.bool,
+  destroy: PropTypes.func.isRequired,
 };

@@ -11,13 +11,11 @@ import {
 } from '../actions';
 import { Provider } from 'react-redux';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
-import { getContainerApiMock } from '../__tests__/get_container_api_mock';
 
 function getProps(props = {}) {
   const defaultTestProps = {
     panelId: 'foo1',
     embeddableFactory: getEmbeddableFactoryMock(),
-    getContainerApi: () => getContainerApiMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
@@ -27,9 +25,9 @@ beforeAll(() => {
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
 });
 
-test('renders an error when embeddableFactory.render throws an error', (done) => {
+test('renders an error when embeddableFactory.create throws an error', (done) => {
   const props = getProps();
-  props.embeddableFactory.render = () => {
+  props.embeddableFactory.create = () => {
     return new Promise(() => {
       throw new Error('simulated error');
     });
