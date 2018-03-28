@@ -1,3 +1,5 @@
+import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+
 /**
  * This class processes all Vega spec customizations,
  * converting url object parameters into query results.
@@ -40,7 +42,7 @@ export class EmsFileParser {
       }
 
       // This URL can bypass loader sanitization at the later stage
-      obj.url = () => foundLayer.url;
+      obj.url = bypassExternalUrlCheck(foundLayer.url);
     }
   }
 

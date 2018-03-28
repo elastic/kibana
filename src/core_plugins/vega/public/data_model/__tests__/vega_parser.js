@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import { VegaParser } from '../vega_parser';
+import { bypassToken } from '../../vega_view/vega_base_view';
 
 describe(`VegaParser._setDefaultValue`, () => {
 
@@ -63,10 +64,6 @@ describe('VegaParser._resolveEsQueries', () => {
       });
       await vp._resolveDataUrls();
 
-      if (vp.spec.data && typeof vp.spec.data.url === 'function') {
-        vp.spec.data.url = vp.spec.data.url();
-      }
-
       expect(vp.spec).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount || 0);
     };
@@ -78,7 +75,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
   it('es', test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
   it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('emsfile', test({ data: { url: { '%type%': 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
+  it('emsfile', test(
+    { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
+    { data: { url: { url: 'url1', bypassToken: bypassToken } } }));
 });
 
 describe('VegaParser._parseSchema', () => {

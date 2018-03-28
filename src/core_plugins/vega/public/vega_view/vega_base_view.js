@@ -8,6 +8,13 @@ vega.scheme('elastic',
   ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
 );
 
+export const bypassToken = Symbol();
+
+export function bypassExternalUrlCheck(url) {
+  // processed in the  loader.sanitize  below
+  return { url, bypassToken };
+}
+
 export class VegaBaseView {
   constructor(vegaConfig, editorMode, parentEl, vegaParser, serviceSettings) {
     this._vegaConfig = vegaConfig;
@@ -77,13 +84,12 @@ export class VegaBaseView {
     const loader = vega.loader();
     const originalSanitize = loader.sanitize.bind(loader);
     loader.sanitize = (uri, options) => {
-      if (typeof uri === 'function') {
-        // If uri is a function, it must have come from this integration layer,
+      if (uri.bypassToken === bypassToken) {
+        // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
-        // A function means that the value can be trusted (e.g. emsfile service)
-        uri = uri();
+        uri = uri.url;
       } else if (!this._vegaConfig.enableExternalUrls) {
-        throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
+        throw new Error('External URLs are not enabled. Add   vega.enableExternalUrls: true   to kibana.yml');
       }
       return originalSanitize(uri, options);
     };
