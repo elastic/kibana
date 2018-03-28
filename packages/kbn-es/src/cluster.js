@@ -119,15 +119,31 @@ exports.Cluster = class Cluster {
       this._log.error(chalk.red(data.toString()))
     );
 
+    this._outcome = new Promise((resolve, reject) => {
+      this._process.on('exit', code => {
+        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+        if (code > 0 && !(code === 143 || code === 130)) {
+          return reject(`ES exitted with code ${code}`);
+        }
+
+        resolve();
+      });
+    });
+
     return process;
   }
 
   /**
    * Stops ES process, if it's running
+   *
+   * @returns {Promise}
    */
-  async stop() {
-    if (this._process) {
-      await this._process.kill();
+  stop() {
+    if (!this._process || !this._outcome) {
+      return Promise.reject('ES has not been started');
     }
+
+    this._process.kill();
+    return this._outcome;
   }
 };
