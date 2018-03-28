@@ -48,7 +48,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} appName As defined in the apps config
      * @param {string} subUrl The route after the hash (#)
      */
-    navigateToUrl(appName, subUrl) {
+    async navigateToUrl(appName, subUrl) {
       const appConfig = {
         ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
@@ -56,7 +56,27 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
-      return remote.get(appUrl);
+      await remote.get(appUrl);
+      await this.loginIfPrompted(appUrl);
+    }
+
+    async loginIfPrompted(appUrl) {
+      let currentUrl = await remote.getCurrentUrl();
+      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
+      await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      const loginPage = currentUrl.includes('/login');
+      const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
+
+      if (loginPage && !wantedLoginPage) {
+        log.debug(`Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`);
+        await PageObjects.shield.login(
+          config.get('servers.kibana.username'),
+          config.get('servers.kibana.password')
+        );
+        await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        currentUrl = await remote.getCurrentUrl();
+        log.debug(`Finished login process currentUrl = ${currentUrl}`);
+      }
     }
 
     navigateToApp(appName) {
@@ -65,8 +85,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
+        const self = this;
         return retry.try(function () {
-          // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
             .then(function (defaultIndex) {
               if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
@@ -78,38 +98,17 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                   log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                   return kibanaServer.uiSettings.update({
                     'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*'
+                    'defaultIndex': 'logstash-*',
+                    'telemetry:optIn': false
                   });
                 }
               }
             })
-            .then(function () {
-              log.debug('navigate to: ' + url);
+            .then(async function () {
               return remote.get(url);
             })
-            .then(function () {
-              return self.sleep(700);
-            })
-            .then(function () {
-              log.debug('returned from get, calling refresh');
-              return remote.refresh();
-            })
             .then(async function () {
-              const currentUrl = await remote.getCurrentUrl();
-              const loginPage = currentUrl.includes('/login');
-              const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
-
-              if (loginPage && !wantedLoginPage) {
-                log.debug(`Found loginPage username = ${config.get('servers.kibana.username')}`);
-                await PageObjects.shield.login(
-                  config.get('servers.kibana.username'),
-                  config.get('servers.kibana.password')
-                );
-              }
-
-              if (currentUrl.includes('app/kibana')) {
-                await testSubjects.find('kibanaChrome');
-              }
+              await self.loginIfPrompted(appUrl);
             })
             .then(async function () {
               const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
@@ -152,11 +151,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             return retry.try(function () {
               // give the app time to update the URL
               return self.sleep(501)
+              // or use this?
+              // await remote.setFindTimeout(15000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
                 .then(function () {
                   return remote.getCurrentUrl();
                 })
                 .then(function (currentUrl) {
-                  log.debug('in navigateTo url = ' + currentUrl);
+                  log.debug('Checking url = ' + currentUrl);
                   if (lastUrl !== currentUrl) {
                     lastUrl = currentUrl;
                     throw new Error('URL changed, waiting for it to settle');
