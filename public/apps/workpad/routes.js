@@ -42,7 +42,7 @@ export const routes = [
 
           // fetch the workpad again, to get changes
           const workpad = getWorkpad(getState());
-          const pageNumber = Number.parseInt(params.page);
+          const pageNumber = parseInt(params.page, 10);
 
           // no page provided, append current page to url
           if (isNaN(pageNumber)) {
