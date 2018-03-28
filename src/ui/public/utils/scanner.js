@@ -96,8 +96,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         .slice(0, allResults.total - allResults.hits.length);
 
       hits = hits.map(hit => {
-        const inferredType = hit._source.type;
-        const type = this.type || inferredType;
+        const type = this.type || hit._source.type;
         if (hit._type === 'doc') {
           return {
             _id: hit._id.replace(`${type}:`, ''),
