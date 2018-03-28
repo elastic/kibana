@@ -63,7 +63,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async loginIfPrompted(appUrl) {
       let currentUrl = await remote.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
@@ -79,99 +79,57 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    navigateToApp(appName) {
+    async navigateToApp(appName) {
       const self = this;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
       log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-      function navigateTo(url) {
-        const self = this;
-        return retry.try(function () {
-          return kibanaServer.uiSettings.getDefaultIndex()
-            .then(function (defaultIndex) {
-              if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
-                if (!defaultIndex) {
-                  // https://github.com/elastic/kibana/issues/7496
-                  // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
-                  // that change.  If we got here, fix it.
-                  log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
-                  log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
-                  return kibanaServer.uiSettings.update({
-                    'dateFormat:tz': 'UTC',
-                    'defaultIndex': 'logstash-*',
-                    'telemetry:optIn': false
-                  });
-                }
-              }
-            })
-            .then(async function () {
-              return remote.get(url);
-            })
-            .then(async function () {
-              await self.loginIfPrompted(appUrl);
-            })
-            .then(async function () {
-              const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
-              const maxAdditionalLengthOnNavUrl = 230;
-              // On several test failures at the end of the TileMap test we try to navigate back to
-              // Visualize so we can create the next Vertical Bar Chart, but we can see from the
-              // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
-              // with a new timestamped URL go? I thought that sleep(700) between the get and the
-              // refresh would solve the problem but didn't seem to always work.
-              // So this hack fails the navSuccessful check if the currentUrl doesn't match the
-              // appUrl plus up to 230 other chars.
-              // Navigating to Settings when there is a default index pattern has a URL length of 196
-              // (from debug output). Some other tabs may also be long. But a rather simple configured
-              // visualization is about 1000 chars long. So at least we catch that case.
 
-              // Browsers don't show the ':port' if it's 80 or 443 so we have to
-              // remove that part so we can get a match in the tests.
-              const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
-                + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
-                .test(currentUrl);
-
-              if (!navSuccessful) {
-                const msg = 'App failed to load: ' + appName +
-                  ' in ' + defaultFindTimeout + 'ms' +
-                  ' appUrl = ' + appUrl +
-                  ' currentUrl = ' + currentUrl;
-                log.debug(msg);
-                throw new Error(msg);
-              }
-
-              return currentUrl;
-            });
-        });
-      }
-
-      return retry.tryForTime(defaultTryTimeout * 3, () => {
-        return navigateTo(appUrl)
-          .then(function (currentUrl) {
-            let lastUrl = currentUrl;
-            return retry.try(function () {
-              // give the app time to update the URL
-              return self.sleep(501)
-              // or use this?
-              // await remote.setFindTimeout(15000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
-                .then(function () {
-                  return remote.getCurrentUrl();
-                })
-                .then(function (currentUrl) {
-                  log.debug('Checking url = ' + currentUrl);
-                  if (lastUrl !== currentUrl) {
-                    lastUrl = currentUrl;
-                    throw new Error('URL changed, waiting for it to settle');
-                  }
-                });
-            });
-          })
-          .then(async () => {
-            if (appName === 'status_page') return;
-            if (await testSubjects.exists('statusPageContainer')) {
-              throw new Error('Navigation ended up at the status page.');
-            }
+      if (appName === 'discover' || appName === 'visualize' || appName === 'dashboard') {
+        const defaultIndex = await kibanaServer.uiSettings.getDefaultIndex();
+        if (!defaultIndex) {
+          // https://github.com/elastic/kibana/issues/7496
+          // Even though most tests are using esClient to set the default index, sometimes Kibana clobbers
+          // that change.  If we got here, fix it.
+          log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
+          log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
+          await kibanaServer.uiSettings.update({
+            'dateFormat:tz': 'UTC',
+            'defaultIndex': 'logstash-*',
+            'telemetry:optIn': false
           });
-      });
+        }
+      }
+      await remote.get(appUrl);
+      await remote.setFindTimeout(defaultTryTimeout * 2).findByCssSelector('[data-test-subj="kibanaChrome"]');
+      await self.loginIfPrompted(appUrl);
+      const currentUrl = (await remote.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+      const maxAdditionalLengthOnNavUrl = 230;
+      // On several test failures at the end of the TileMap test we try to navigate back to
+      // Visualize so we can create the next Vertical Bar Chart, but we can see from the
+      // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
+      // with a new timestamped URL go? I thought that sleep(700) between the get and the
+      // refresh would solve the problem but didn't seem to always work.
+      // So this hack fails the navSuccessful check if the currentUrl doesn't match the
+      // appUrl plus up to 230 other chars.
+      // Navigating to Settings when there is a default index pattern has a URL length of 196
+      // (from debug output). Some other tabs may also be long. But a rather simple configured
+      // visualization is about 1000 chars long. So at least we catch that case.
+
+      // Browsers don't show the ':port' if it's 80 or 443 so we have to
+      // remove that part so we can get a match in the tests.
+      const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
+      + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
+        .test(currentUrl);
+
+      if (!navSuccessful) {
+        const msg = 'App failed to load: ' + appName +
+        ' in ' + defaultFindTimeout + 'ms' +
+        '\n appUrl     = ' + appUrl +
+        '\n currentUrl = ' + currentUrl;
+        log.debug(msg);
+        throw new Error(msg);
+      }
     }
 
     runScript(fn, timeout = 10000) {
