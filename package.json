@@ -275,7 +275,7 @@
     "leadfoot": "silne30/leadfoot#validation_for_response_in_ff58",
     "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
-    "makelogs": "^4.0.4",
+    "makelogs": "^4.0.5",
     "marked-text-renderer": "0.1.0",
     "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
