@@ -1,6 +1,7 @@
 .aws-config.json
 .signing-config.json
 .ackrc
+/.es
 .DS_Store
 .node_binaries
 node_modules
@@ -18,7 +19,6 @@ target
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
 /html_docs
-/esvm
 .htpasswd
 .eslintcache
 /plugins/

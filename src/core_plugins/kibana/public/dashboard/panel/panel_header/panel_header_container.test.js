@@ -28,7 +28,7 @@ let component;
 
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
-  store.dispatch(setPanels([{ panelIndex: 'foo1' }]));
+  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
   store.dispatch(embeddableRenderFinished('foo1', { title: 'my embeddable title', editUrl: 'editme' }));
 });
 

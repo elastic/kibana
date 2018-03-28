@@ -27,6 +27,11 @@ exports[`renders DashboardGrid 1`] = `
   <div
     className=""
     key="1"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
       embeddableFactory={
@@ -47,6 +52,11 @@ exports[`renders DashboardGrid 1`] = `
   <div
     className=""
     key="2"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
       embeddableFactory={

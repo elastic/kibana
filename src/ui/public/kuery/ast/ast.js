@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
+import * as errors from '../errors';
 import { parse as parseKuery } from './kuery';
 import { parse as parseLegacyKuery } from './legacy_kuery';
 
@@ -27,7 +28,7 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
 
   parseOptions = {
     ...parseOptions,
-    helpers: { nodeTypes }
+    helpers: { nodeTypes, errors }
   };
 
   return parse(expression, parseOptions);

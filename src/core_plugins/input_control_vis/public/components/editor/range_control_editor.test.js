@@ -8,22 +8,20 @@ import {
 } from './range_control_editor';
 
 const getIndexPatterns = () => {
-  return Promise.resolve({
-    savedObjects: [
-      {
-        id: 'indexPattern1',
-        attributes: {
-          title: 'indexPattern1'
-        }
-      },
-      {
-        id: 'indexPattern2',
-        attributes: {
-          title: 'indexPattern2'
-        }
+  return Promise.resolve([
+    {
+      id: 'indexPattern1',
+      attributes: {
+        title: 'indexPattern1'
       }
-    ]
-  });
+    },
+    {
+      id: 'indexPattern2',
+      attributes: {
+        title: 'indexPattern2'
+      }
+    }
+  ]);
 };
 const getIndexPattern = () => {
   return Promise.resolve({

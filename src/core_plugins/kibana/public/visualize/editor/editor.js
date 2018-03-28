@@ -78,7 +78,7 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -144,7 +144,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query: '', language: config.get('search:queryLanguage') },
+    query: searchSource.getOwn('query') || {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+    },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
@@ -186,6 +189,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.timefilter = timefilter;
+    $scope.timeRange = timefilter.time;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -216,6 +220,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       }
     });
 
+    const updateTimeRange = () => {
+      $scope.timeRange = timefilter.time;
+    };
+
+    timefilter.on('update', updateTimeRange);
+
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
       $state.save();
@@ -230,15 +240,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
+      timefilter.off('update', updateTimeRange);
     });
   }
 
   $scope.updateQueryAndFetch = function (query) {
-    // reset state if language changes
-    if ($state.query.language && $state.query.language !== query.language) {
-      $state.filters = [];
-      $state.$newFilters = [];
-    }
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };

@@ -41,6 +41,7 @@
             app-name="'visualize'"
             on-submit="updateQueryAndFetch($query)"
             disable-auto-focus="true"
+            index-patterns="[indexPattern]"
           >
           </query-bar>
         </div>
@@ -56,7 +57,7 @@
   ></filter-bar>
 
   <div
-    class="euiCallOut euiCallOut--warning euiCallOut--small hide-for-sharing"
+    class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"
     ng-if="vis.type.shouldMarkAsExperimentalInUI()"
     data-test-subj="experimentalVisInfo"
   >
@@ -71,6 +72,7 @@
     app-state="state"
     editor-mode="chrome.getVisible()"
     show-spy-panel="chrome.getVisible()"
+    time-range="timeRange"
     >
 
   </visualize>

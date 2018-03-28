@@ -12,23 +12,14 @@ export const setPanelTitle = createAction('SET_PANEl_TITLE',
   (title, panelIndex) => ({ title, panelIndex })
 );
 
-
-function panelArrayToMap(panels) {
-  const panelsMap = {};
-  panels.forEach(panel => {
-    panelsMap[panel.panelIndex] = panel;
-  });
-  return panelsMap;
-}
+/**
+ * @param panels {Array<PanelState>}
+ * @return {Object}
+ */
+export const updatePanels = createAction('UPDATE_PANELS');
 
 /**
  * @param panels {Array<PanelState>}
  * @return {Object}
  */
-export const updatePanels = createAction('UPDATE_PANELS', panels => panelArrayToMap(panels));
-
-/**
- * @param panels {Array<PanelState>}
- * @return {Object}
- */
-export const setPanels = createAction('SET_PANELS', panels => panelArrayToMap(panels));
+export const setPanels = createAction('SET_PANELS');

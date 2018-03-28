@@ -38,6 +38,8 @@ A high level overview of our contributing guidelines.
 
 Don't fret, it's not as daunting as the table of contents makes it out to be!
 
+## Effective issue reporting in Kibana
+
 ### Voicing the importance of an issue
 
 We seriously appreciate thoughtful comments. If an issue is important to you, add a comment with a solid write up of your use case and explain why it's so important. Please avoid posting comments comprised solely of a thumbs up emoji 👍.
@@ -168,11 +170,13 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch.
+Start elasticsearch from a nightly snapshot.
 
 ```bash
-yarn elasticsearch
+yarn es snapshot
 ```
+
+Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 

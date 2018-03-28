@@ -261,16 +261,6 @@ describe('Notifier', function () {
       expect(customNotification.lifetime).to.be(5000);
     });
 
-    it('dynamic lifetime for "banner" config', function () {
-      // destroy the default custom notification, avoid duplicate handling
-      customNotification.clear();
-
-      const errorTypeParams = _.defaults({ type: 'banner' }, customParams);
-      customNotification = notifier.custom(customText, errorTypeParams);
-      expect(customNotification.type).to.be('banner');
-      expect(customNotification.lifetime).to.be(3000000);
-    });
-
     it('dynamic lifetime for "warning" config', function () {
       // destroy the default custom notification, avoid duplicate handling
       customNotification.clear();
