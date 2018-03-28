@@ -606,23 +606,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }));
     }
 
-    async isHidePanelTitleOn() {
-      log.debug('getting the status of hide title checkbox');
-      await this.openOptions();
-      const hidePanelTitleCheckBox = await testSubjects.find('dashboardPanelTitlesCheckbox');
-      return await hidePanelTitleCheckBox.getProperty('checked');
-    }
-
     async checkHideTitle() {
       log.debug('ensure that you can click on hide title checkbox');
       await this.openOptions();
-      const isHidePanelTitleOn = await this.isHidePanelTitleOn();
-      log.debug(`isHidePanelTitleOn = ${isHidePanelTitleOn}`);
-      if (isHidePanelTitleOn === false) {
-        return await testSubjects.click('dashboardPanelTitlesCheckbox');
-      } else if (isHidePanelTitleOn === true) {
-        return await testSubjects.click('dashboardPanelTitlesCheckbox');
-      }
+      return await testSubjects.click('dashboardPanelTitlesCheckbox');
     }
 
   }

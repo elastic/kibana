@@ -109,7 +109,15 @@ export default function ({ getService, getPageObjects }) {
         const titles = await PageObjects.dashboard.getPanelTitles();
         expect(titles[0]).to.eql('');
       });
+
+    });
+
+    it('should be able to unhide all panel titles', async function () {
       await PageObjects.dashboard.checkHideTitle();
+      await retry.tryForTime(10000, async function () {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('TSVB');
+      });
     });
 
     describe('expanding a panel', () => {
