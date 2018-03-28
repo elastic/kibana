@@ -1,8 +1,7 @@
-import { cloneDeep, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import moment from 'moment';
 import { queryDatatable } from '../../../common/lib/datatable/query';
-import ci from './ci.json';
-import shirts from './shirts.json';
+import { getDemoRows } from './get_demo_rows';
 
 export const demodata = () => ({
   name: 'demodata',
@@ -21,8 +20,10 @@ export const demodata = () => ({
     },
   },
   fn: (context, args) => {
-    const sets = {
-      ci: {
+    const demoRows = getDemoRows(args._);
+    let set = {};
+    if (args._ === 'ci') {
+      set = {
         columns: [
           { name: 'time', type: 'date' },
           { name: 'cost', type: 'number' },
@@ -34,25 +35,25 @@ export const demodata = () => ({
           { name: 'project', type: 'string' },
         ],
         rows: sortBy(
-          cloneDeep(ci).map(row => ({
+          demoRows.map(row => ({
             ...row,
             time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
-          })),
-          'time'
+          }))
         ),
-      },
-      shirts: {
+      };
+    } else if (args._ === 'shirts') {
+      set = {
         columns: [
           { name: 'size', type: 'string' },
           { name: 'color', type: 'string' },
           { name: 'price', type: 'number' },
           { name: 'cut', type: 'string' },
         ],
-        rows: cloneDeep(shirts),
-      },
-    };
+        rows: demoRows,
+      };
+    }
 
-    const { columns, rows } = sets[args._];
+    const { columns, rows } = set;
     return queryDatatable(
       {
         type: 'datatable',
