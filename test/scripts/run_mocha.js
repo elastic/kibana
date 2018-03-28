@@ -4,6 +4,7 @@ const debugInBand = process.execArgv.some(arg => {
     case '--debug-brk':
     case '-d':
     case '--inspect':
+    case '--inspect-brk':
       return true;
   }
 });
