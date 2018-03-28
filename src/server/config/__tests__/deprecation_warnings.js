@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 
 import expect from 'expect.js';
 
-const KIBANA_WORKER = require.resolve('./fixtures/kbn_server_worker');
+const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
 const BABEL_REGISTER = require.resolve('../../../babel-register');
 const SECOND = 1000;
 
@@ -15,7 +15,7 @@ describe('config/deprecation warnings mixin', function () {
   before(() => new Promise((resolve, reject) => {
     proc = spawn(process.execPath, [
       '-r', BABEL_REGISTER,
-      KIBANA_WORKER
+      RUN_KBN_SERVER_STARTUP
     ], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
