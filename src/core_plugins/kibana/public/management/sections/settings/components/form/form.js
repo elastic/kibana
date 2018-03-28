@@ -23,11 +23,19 @@ export class Form extends PureComponent {
 
   constructor(props) {
     super(props);
+    const { settings } = this.props;
     this.state = {
-      settings: this.mapSettings(this.props.settings),
+      query: null,
+      settings: this.mapSettings(settings),
     };
+  }
 
-    console.log(this.state);
+  componentWillReceiveProps(nextProps) {
+    const { query } = this.state;
+    const { settings } = nextProps;
+    this.setState({
+      settings: this.mapSettings(query ? Query.execute(query, settings) : settings),
+    });
   }
 
   mapSettings(settings) {
@@ -40,6 +48,7 @@ export class Form extends PureComponent {
 
   onQueryChange = (query) => {
     this.setState({
+      query,
       settings: this.mapSettings(Query.execute(query, this.props.settings)),
     });
   }

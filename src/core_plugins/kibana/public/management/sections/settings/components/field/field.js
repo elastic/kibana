@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFieldNumber,
   EuiFieldText,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiImage,
+  EuiLink,
   EuiTextArea,
   EuiTextColor,
   EuiSelect,
@@ -23,56 +24,200 @@ export class Field extends PureComponent {
 
   static propTypes = {
     setting: PropTypes.object.isRequired,
+    save: PropTypes.func.isRequired,
+    clear: PropTypes.func.isRequired,
   }
 
   constructor(props) {
     super(props);
+    const { type, value, defVal } = this.props.setting;
+    const editableValue = this.getEditableValue(type, value, defVal);
+
     this.state = {
-      savedValue: this.getEditableValue(this.props.setting),
-      unsavedValue: this.getEditableValue(this.props.setting),
+      loading: false,
+      changeImage: false,
+      savedValue: editableValue,
+      unsavedValue: editableValue,
     };
   }
 
-  onFieldChange = (e) => {
+  componentWillReceiveProps(nextProps) {
+    const { unsavedValue } = this.state;
+    const { type, value, defVal } = nextProps.setting;
+    const editableValue = this.getEditableValue(type, value, defVal);
+
     this.setState({
-      unsavedValue: e.target.value,
+      savedValue: editableValue,
+      unsavedValue: (value === null || value === undefined) ? editableValue : unsavedValue,
+    });
+  }
+
+  getEditableValue(type, value, defVal) {
+    const val = (value === null || value === undefined) ? defVal : value;
+    switch(type) {
+      case 'array':
+        return val.join(', ');
+      case 'number':
+        return Number(val);
+      case 'image':
+        return val;
+      default:
+        return val || '';
+    }
+  }
+
+  setLoading(loading) {
+    this.setState({
+      loading
+    });
+  }
+
+  onFieldChange = (e) => {
+    let newUnsavedValue = undefined;
+    const value = e.target.value;
+    const { type } = this.props.setting;
+    const { unsavedValue } = this.state;
+    switch (type) {
+      case 'boolean':
+        newUnsavedValue = !unsavedValue;
+        break;
+      case 'number':
+        newUnsavedValue = Number(value);
+        break;
+      default:
+        newUnsavedValue = value;
+    }
+    this.setState({
+      unsavedValue: newUnsavedValue,
     });
   }
 
   onFieldKeyDown = ({ keyCode }) => {
-    if (keyCodes.ENTER === keyCode) {
-      // todo: save this
+    if (keyCode === keyCodes.ENTER) {
+      this.saveEdit();
     }
-  };
-
-  getEditableValue(setting) {
-    const value = setting.value == null ? setting.defVal : setting.value;
-    return setting.type === 'array' ? value.join(', ') : value || '';
+    if (keyCode === keyCodes.ESCAPE) {
+      this.cancelEdit();
+    }
   }
 
-  cancelEdit = (e) => {
+  onImageChange = async (files) => {
+    if(!files.length) {
+      this.setState({
+        unsavedValue: null,
+      });
+      return;
+    }
+
+    const file = files[0];
+    try {
+      const base64Image = await this.getImageAsBase64(file);
+      this.setState({
+        unsavedValue: base64Image,
+      });
+    } catch(err) {
+      this.setState({
+        unsavedValue: null,
+      });
+    }
+  }
+
+  getImageAsBase64(file) {
+    if(!file instanceof File) {
+      return null;
+    }
+
+    const reader  = new FileReader();
+    reader.readAsDataURL(file);
+
+    return new Promise((resolve, reject) => {
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = (err) => {
+        reject(err);
+      };
+    });
+  }
+
+  changeImage = () => {
+    this.setState({
+      changeImage: true,
+    });
+  }
+
+  cancelChangeImage = () => {
     const { savedValue } = this.state;
     this.setState({
-      unsavedValue: savedValue
+      changeImage: false,
+      unsavedValue: savedValue,
     });
   }
 
-  saveEdit = () => {
-    //todo: call real function
+  cancelEdit = () => {
+    const { savedValue } = this.state;
     this.setState({
-      savedValue: this.state.unsavedValue
+      unsavedValue: savedValue,
     });
+  }
+
+  saveEdit = async () => {
+    const { name, defVal, type } = this.props.setting;
+    const { savedValue, unsavedValue } = this.state;
+    let value = unsavedValue;
+
+    if(savedValue === value) {
+      return;
+    }
+
+    switch(type) {
+      case 'array':
+        return value = value.split(',').map(val => val.trim());
+      case 'json':
+        return value = value.trim() ? value.trim() : '{}';
+      default:
+        return;
+    }
+
+    this.setLoading(true);
+    try {
+      if (value === defVal) {
+        await this.props.clear(name);
+      } else {
+        await this.props.save(name, value);
+      }
+      this.cancelChangeImage();
+    } catch(e) {
+      //todo: error handling here
+      console.log('we got an error jen', e);
+    }
+    this.setLoading(false);
+  }
+
+  resetField = async () => {
+    const { name } = this.props.setting;
+    this.setLoading(true);
+    try {
+      await this.props.clear(name);
+      this.cancelChangeImage();
+    } catch(e) {
+      //todo: error handling here
+      console.log('we got an error jen', e);
+    }
+    this.setLoading(false);
   }
 
   renderField(setting) {
-    const { unsavedValue } = this.state;
+    const { loading, changeImage, changeImageValue, unsavedValue } = this.state;
+    const { name, value, editor, options } = setting;
 
-    switch(setting.editor) {
+    switch(editor) {
       case 'boolean':
         return (
           <EuiSwitch
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
+            disabled={loading}
           />
         );
       case 'markdown':
@@ -81,20 +226,39 @@ export class Field extends PureComponent {
           <EuiTextArea
             value={unsavedValue}
             onChange={this.onFieldChange}
+            disabled={loading}
           />
         );
       case 'image':
-        return (
-          <EuiFilePicker />
-        );
+        if(!isDefaultValue(setting) && !changeImage) {
+          return (
+            <EuiImage
+              allowFullScreen
+              url={value}
+              alt={name}
+            />
+          );
+        } else {
+          console.log(this.state);
+          return (
+            <EuiFilePicker
+              disabled={loading}
+              onChange={this.onImageChange}
+              accept=".jpg,.jpeg,.png"
+              max={options.maxSize && options.maxSize.length}
+            />
+          );
+        }
       case 'select':
         return (
           <EuiSelect
             value={unsavedValue}
-            options={setting.options.map((text) => {
+            options={options.map((text) => {
               return { text, value: text };
             })}
             onChange={this.onFieldChange}
+            isLoading={loading}
+            disabled={loading}
           />
         );
       case 'number':
@@ -102,6 +266,8 @@ export class Field extends PureComponent {
           <EuiFieldNumber
             value={unsavedValue}
             onChange={this.onFieldChange}
+            isLoading={loading}
+            disabled={loading}
             onKeyDown={this.onFieldKeyDown}
           />
         );
@@ -110,6 +276,8 @@ export class Field extends PureComponent {
           <EuiFieldText
             value={unsavedValue}
             onChange={this.onFieldChange}
+            isLoading={loading}
+            disabled={loading}
             onKeyDown={this.onFieldKeyDown}
           />
         );
@@ -125,10 +293,21 @@ export class Field extends PureComponent {
             <EuiTextColor color="subdued"> (Custom Setting) </EuiTextColor>
             : ''
         }
+      </Fragment>
+    );
+  }
+
+  renderHelpText(setting) {
+    const { changeImage } = this.state;
+    return (
+      <Fragment>
+        <div>
+          <span dangerouslySetInnerHTML={{ __html: setting.description }} />
+        </div>
         {
           !isDefaultValue(setting) ?
-            <EuiTextColor color="subdued">
-              Default:
+            <div>
+              Default:&nbsp;
               <em>
                 {
                   (setting.defVal === undefined || setting.defVal === null || setting.defVal === '') ?
@@ -136,37 +315,21 @@ export class Field extends PureComponent {
                     : String(setting.defVal)
                 }
               </em>
-            </EuiTextColor>
-            : ''
-        }
-      </Fragment>
-    );
-  }
-
-  renderHelpText(setting) {
-    return (
-      <span dangerouslySetInnerHTML={{ __html: setting.description }} />
-    );
-  }
-
-  renderActions(setting) {
-    const { savedValue, unsavedValue } = this.state;
-    return(
-      <Fragment>
-        {
-          (savedValue !== unsavedValue) ?
-            <Fragment>
-              <EuiButtonIcon
-                onClick={this.saveEdit}
-                iconType="checkInCircleFilled"
-                aria-label="Save"
-              />
-              <EuiButtonIcon
-                onClick={this.cancelEdit}
-                iconType="cross"
-                aria-label="Cancel"
-              />
-            </Fragment>
+              &nbsp;&nbsp;
+              <EuiLink onClick={this.resetField}>
+                Reset
+              </EuiLink>
+              {
+                setting.editor === 'image' && !isDefaultValue(setting) && !changeImage ?
+                  <Fragment>
+                    &nbsp;
+                    <EuiLink onClick={this.changeImage}>
+                      Change
+                    </EuiLink>
+                  </Fragment>
+                  : ''
+              }
+            </div>
             : ''
         }
       </Fragment>
@@ -175,6 +338,7 @@ export class Field extends PureComponent {
 
   render() {
     const { setting } = this.props;
+    const { loading, changeImage, savedValue, unsavedValue } = this.state;
 
     return(
       <EuiFlexGroup>
@@ -186,11 +350,33 @@ export class Field extends PureComponent {
             {this.renderField(setting)}
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow hasEmptyLabelSpace>
-            {this.renderActions(setting)}
-          </EuiFormRow>
-        </EuiFlexItem>
+        {
+          (savedValue !== unsavedValue || changeImage) ?
+            <EuiFlexItem>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem>
+                    <EuiButton
+                      fill
+                      onClick={this.saveEdit}
+                      disabled={loading}
+                    >
+                      Save
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
+                      disabled={loading}
+                    >
+                      Cancel
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+            </EuiFlexItem>
+            : ''
+        }
       </EuiFlexGroup>
     );
   }

@@ -25,19 +25,24 @@ export class AdvancedSettingsTable extends Component {
 
   constructor(props) {
     super(props);
+    const { config } = this.props;
 
     this.state = {
-      settings: this.mapConfig(this.props.config)
+      settings: this.mapConfig(config)
     };
+  }
 
-    console.log('jen', this.state);
-    console.log(Comparators);
+  componentWillReceiveProps(nextProps) {
+    const { config } = nextProps;
+    this.setState({
+      settings: this.mapConfig(config)
+    });
   }
 
   mapConfig(config) {
     const all = config.getAll();
 
-    return  Object.entries(all)
+    return Object.entries(all)
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],
@@ -50,23 +55,12 @@ export class AdvancedSettingsTable extends Component {
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
-
-  // setup loading flag, run async op, then clear loading and editing flag (just in case)
-  // const loading = loadingfunction (conf, fn) {
-  //   conf.loading = true;
-  //   fn()
-  //     .then(function () {
-  //       conf.loading = conf.editing = false;
-  //     })
-  //     .catch(fatalError);
-  // };
-
-  saveConfig(name, value) {
-    this.config.set(name, value);
+  saveConfig = (name, value) => {
+    return this.props.config.set(name, value);
   }
 
-  clearConfig(name) {
-    this.config.remove(name);
+  clearConfig = (name) => {
+    return this.props.config.remove(name);
   }
 
   render() {

@@ -1,6 +1,3 @@
-import _ from 'lodash';
-import { toEditableConfig } from './lib/to_editable_config';
-import './advanced_row';
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -13,7 +10,7 @@ import { AdvancedSettingsTable } from './advanced_settings_table';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettingsTable';
 
-function renderAdvancedSettingsTable($scope, config) {
+function updateAdvancedSettingsTable($scope, config) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
     if (!node) {
@@ -44,31 +41,13 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       link: function ($scope) {
-        renderAdvancedSettingsTable($scope, config);
+        config.watchAll(() => {
+          updateAdvancedSettingsTable($scope, config);
+        }, $scope);
 
         $scope.$on('$destory', () => {
           destroyAdvancedSettingsTable();
         });
-
-      // // react to changes of the config values
-      //   config.watchAll(changed, $scope);
-      //
-      //   // initial config setup
-      //   changed();
-      //
-      //   function changed() {
-      //     const all = config.getAll();
-      //     const editable = _(all)
-      //       .map((def, name) => toEditableConfig({
-      //         def,
-      //         name,
-      //         value: def.userValue,
-      //         isCustom: config.isCustom(name)
-      //       }))
-      //       .value();
-      //     const writable = _.reject(editable, 'readonly');
-      //     $scope.configs = writable;
-      //   }
       }
     };
   });

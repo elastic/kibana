@@ -1,3 +1,3 @@
-export function isDefaultValue(item) {
-  return (item.isCustom || item.value === undefined || item.value === '' || String(item.value) === String(item.defVal));
+export function isDefaultValue(setting) {
+  return (setting.isCustom || setting.value === undefined || setting.value === '' || String(setting.value) === String(setting.defVal));
 }
