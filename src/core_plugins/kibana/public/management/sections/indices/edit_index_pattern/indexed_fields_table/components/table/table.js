@@ -28,7 +28,7 @@ export class Table extends PureComponent {
             <EuiIconTip
               type="clock"
               color="primary"
-              aria-label="Info"
+              aria-label="Primary time field"
               content="This field represents the time that events occurred."
             />
           </span>
@@ -47,7 +47,7 @@ export class Table extends PureComponent {
             <EuiIconTip
               type="alert"
               color="warning"
-              aria-label="Warning"
+              aria-label="Multiple type field"
               content="The type of this field changes across indices. It is unavailable for many analysis functions."
             />
           </span>

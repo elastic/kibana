@@ -6,7 +6,7 @@ exports[`Table should render conflicting type 1`] = `
   <span>
      
     <EuiIconTip
-      aria-label="Warning"
+      aria-label="Multiple type field"
       color="warning"
       content="The type of this field changes across indices. It is unavailable for many analysis functions."
       type="alert"
@@ -147,7 +147,7 @@ exports[`Table should render timestamp field name 1`] = `
   <span>
      
     <EuiIconTip
-      aria-label="Info"
+      aria-label="Primary time field"
       color="primary"
       content="This field represents the time that events occurred."
       type="clock"
