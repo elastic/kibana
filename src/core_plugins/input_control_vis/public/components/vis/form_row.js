@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
   EuiFormRow,
@@ -7,23 +7,30 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-export function FormRow(props) {
-  let control = props.children;
-  if (!props.control.isEnabled()) {
-    control = (
-      <EuiToolTip placement="top" content={props.control.disabledReason}>
-        {control}
-      </EuiToolTip>
-    );
+export class FormRow extends Component {
+
+  renderControl() {
+    if (!this.props.control.isEnabled()) {
+      return (
+        <EuiToolTip placement="top" content={this.props.control.disabledReason}>
+          {this.props.children}
+        </EuiToolTip>
+      );
+    }
+
+    return this.props.children;
   }
 
-  let label = props.label;
-  if (props.control.warning && props.control.warning.length > 0) {
-    label = (
+  renderLabel() {
+    if (!this.props.control.warning || this.props.control.warning.length === 0) {
+      return this.props.label;
+    }
+
+    return (
       <Fragment>
-        {props.label}
+        {`${this.props.label} `}
         <EuiIconTip
-          content={props.control.warning}
+          content={this.props.control.warning}
           position="right"
           type="alert"
           aria-label="Warning"
@@ -32,15 +39,17 @@ export function FormRow(props) {
     );
   }
 
-  return (
-    <EuiFormRow
-      label={label}
-      id={props.id}
-      data-test-subj={'inputControl' + props.controlIndex}
-    >
-      {control}
-    </EuiFormRow>
-  );
+  render() {
+    return (
+      <EuiFormRow
+        label={this.renderLabel()}
+        id={this.props.id}
+        data-test-subj={'inputControl' + this.props.controlIndex}
+      >
+        {this.renderControl()}
+      </EuiFormRow>
+    );
+  }
 }
 
 FormRow.propTypes = {

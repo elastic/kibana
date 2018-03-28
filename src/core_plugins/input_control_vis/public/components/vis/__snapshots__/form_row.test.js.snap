@@ -42,7 +42,7 @@ exports[`renders warning with tooltip 1`] = `
   id="controlId"
   label={
     <UNDEFINED>
-      test control
+      test control 
       <EuiIconTip
         aria-label="Warning"
         content="I am showing a warning for testing purposes"

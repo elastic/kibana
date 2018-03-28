@@ -30,7 +30,7 @@ export class ListControlEditor extends Component {
             id={`timeout-${this.props.controlIndex}`}
             label={(
               <Fragment>
-                Timeout
+                {'Timeout '}
                 <EuiIconTip
                   content={`Terms search timeout (seconds),
                     bounding the terms request to be executed within the specified time value and
@@ -53,7 +53,7 @@ export class ListControlEditor extends Component {
             id={`terminateAfter-${this.props.controlIndex}`}
             label={(
               <Fragment>
-                Terminate After
+                {'Terminate After '}
                 <EuiIconTip
                   content={`The maximum number of documents to collect for each shard, upon reaching
                     which the query execution will terminate early.`}
