@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('embed mode', () => {
+    describe.skip('embed mode', () => {
       it('hides the chrome', async () => {
         let isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(true);
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('full screen mode', () => {
+    describe.skip('full screen mode', () => {
       it('option not available in edit mode', async () => {
         await PageObjects.dashboard.clickEdit();
         const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();
@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('add new visualization link', () => {
+    describe.skip('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickAddVisualization();
