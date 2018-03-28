@@ -1,4 +1,4 @@
-import sandbox from 'sandbox';
+import sandbox from '@kbn/node-sandbox';
 
 export async function activateSystemCallFilters() {
   // Darwin doesn't support system call filtering/sandboxing so we don't do anything here
