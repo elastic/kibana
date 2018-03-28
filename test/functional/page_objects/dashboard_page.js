@@ -618,14 +618,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.openOptions();
       const isHidePanelTitleOn = await this.isHidePanelTitleOn();
       log.debug(`isHidePanelTitleOn = ${isHidePanelTitleOn}`);
-      if (isHidePanelTitleOn == false) {
+      if (isHidePanelTitleOn === false) {
         return await testSubjects.click('dashboardPanelTitlesCheckbox');
-      } else if (isHidePanelTitleOn == true) {
+      } else if (isHidePanelTitleOn === true) {
         return await testSubjects.click('dashboardPanelTitlesCheckbox');
       }
-      }
-
-
+    }
 
   }
 
