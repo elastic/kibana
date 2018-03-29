@@ -27,23 +27,24 @@ export default class BasePathProxy {
     const sslEnabled = config.get('server.ssl.enabled');
     if (sslEnabled) {
       const agentOptions = {
-        passphrase: config.get('server.ssl.keyPassphrase'),
         ca: map(config.get('server.ssl.certificateAuthorities'), (certAuthority) => readFileSync(certAuthority)),
         rejectUnauthorized: false
       };
 
-      const pfxConfig = config.get('server.ssl.pfx');
+      const keystoreConfig = config.get('server.ssl.keystore.path');
       const pemConfig = config.get('server.ssl.certificate');
 
-      if (pfxConfig && pemConfig) {
-        throw new Error(`Invalid Configuration: please specify either "server.ssl.pfx" or "server.ssl.certificate", not both.`);
+      if (keystoreConfig && pemConfig) {
+        throw new Error(`Invalid Configuration: please specify either "server.ssl.keystore.path" or "server.ssl.certificate", not both.`);
       }
 
-      if (pfxConfig) {
-        agentOptions.pfx = readFileSync(pfxConfig);
+      if (keystoreConfig) {
+        agentOptions.pfx = readFileSync(keystoreConfig);
+        agentOptions.passphrase = config.get('server.ssl.keystore.password');
       } else {
         agentOptions.key = readFileSync(config.get('server.ssl.key'));
         agentOptions.cert = readFileSync(pemConfig);
+        agentOptions.passphrase = config.get('server.ssl.keyPassphrase');
       }
 
       this.proxyAgent = new HttpsAgent(agentOptions);

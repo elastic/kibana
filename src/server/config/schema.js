@@ -8,7 +8,10 @@ import { getData } from '../path';
 const sslSchema = Joi.object({
   enabled: Joi.boolean().optional().default(false),
   redirectHttpFromPort: Joi.number().default(),
-  pfx: Joi.string(),
+  keystore: Joi.object({
+    path: Joi.string(),
+    password: Joi.string()
+  }).default(),
   certificate: Joi.string(),
   key: Joi.when('certificate', {
     is: Joi.exist(),

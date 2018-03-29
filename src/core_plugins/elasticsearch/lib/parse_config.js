@@ -57,16 +57,18 @@ export function parseConfig(serverConfig = {}) {
   }
 
   // Add client certificate and key if required by elasticsearch
-  const pfxConfig = get(serverConfig, 'ssl.pfx');
+  const keystoreConfig = get(serverConfig, 'ssl.keystore.path');
   const pemConfig = get(serverConfig, 'ssl.certificate');
 
-  if (pfxConfig && pemConfig) {
-    throw new Error(`Invalid Configuration: please specify either "elasticsearch.ssl.pfx" or "elasticsearch.ssl.certificate", not both.`);
+  if (keystoreConfig && pemConfig) {
+    throw new Error(
+      `Invalid Configuration: please specify either "elasticsearch.ssl.keystore.path" or "elasticsearch.ssl.certificate", not both.`
+    );
   }
 
-  if (pfxConfig) {
-    config.ssl.pfx = readBinaryFile(pfxConfig);
-    config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
+  if (keystoreConfig) {
+    config.ssl.pfx = readBinaryFile(keystoreConfig);
+    config.ssl.passphrase = get(serverConfig, 'ssl.keystore.password');
   } else if (pemConfig && get(serverConfig, 'ssl.key')) {
     config.ssl.cert = readFile(pemConfig);
     config.ssl.key = readFile(serverConfig.ssl.key);

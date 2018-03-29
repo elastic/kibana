@@ -19,11 +19,13 @@ describe('server/config', function () {
         expect(result.server.ssl.enabled).to.be(true);
       });
 
-      it('sets enabled to true when pfx is set', function () {
+      it('sets enabled to true when keystore.path is set', function () {
         const settings = {
           server: {
             ssl: {
-              pfx: '/server.pfx'
+              keystore: {
+                path: '/server.pfx'
+              }
             }
           }
         };

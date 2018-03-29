@@ -25,7 +25,10 @@ export default function (kibana) {
           then: Joi.string().required(),
           otherwise: Joi.string().forbidden()
         }),
-        pfx: Joi.string(),
+        keystore: Joi.object({
+          path: Joi.string(),
+          password: Joi.string()
+        }).default(),
         keyPassphrase: Joi.string()
       }).default();
 

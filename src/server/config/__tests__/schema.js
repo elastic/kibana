@@ -141,7 +141,7 @@ describe('Config schema', function () {
         });
       });
 
-      describe('pfx', function () {
+      describe('keystore.path', function () {
         it('isn\'t required when ssl isn\'t enabled', function () {
           const config = {};
           set(config, 'server.ssl.enabled', false);
@@ -152,7 +152,24 @@ describe('Config schema', function () {
         it('is allowed when ssl is enabled, and a certificate is not specified', function () {
           const config = {};
           set(config, 'server.ssl.enabled', true);
-          set(config, 'server.ssl.pfx', '/path.pfx');
+          set(config, 'server.ssl.keystore.path', '/path.p12');
+          const { error } = validate(config);
+          expect(error).to.be(null);
+        });
+      });
+
+      describe('keystore.password', function () {
+        it('isn\'t required when ssl isn\'t enabled', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', false);
+          const { error } = validate(config);
+          expect(error).to.be(null);
+        });
+
+        it('is allowed when ssl is enabled, and a certificate is not specified', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', true);
+          set(config, 'server.ssl.keystore.password', 'secret');
           const { error } = validate(config);
           expect(error).to.be(null);
         });
