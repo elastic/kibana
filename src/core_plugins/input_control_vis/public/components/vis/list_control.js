@@ -8,11 +8,6 @@ import {
 } from '@elastic/eui';
 
 export class ListControl extends Component {
-  constructor(props) {
-    super(props);
-
-    this.truncate = this.truncate.bind(this);
-  }
 
   handleOnChange = (selectedOptions) => {
     this.props.stageFilter(this.props.controlIndex, selectedOptions);
@@ -29,6 +24,8 @@ export class ListControl extends Component {
     }
     console.log(this.props.control.value);
     console.log(this.props.control.selectOptions);
+
+
 
 
     /*
@@ -51,6 +48,7 @@ export class ListControl extends Component {
         options={this.props.control.selectOptions}
         selectedOptions={this.props.control.value}
         onChange={this.handleOnChange}
+
       />
     );
   }
