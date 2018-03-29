@@ -317,6 +317,7 @@ export function getUiSettingDefaults() {
         { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 1 },
         { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 1 },
         { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 1 },
+        { from: 'now-2d',   to: 'now',      display: 'Last 2 days',           section: 1 },
         { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 1 },
 
         { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
