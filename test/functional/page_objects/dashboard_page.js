@@ -605,6 +605,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         };
       }));
     }
+
+    async checkHideTitle() {
+      log.debug('ensure that you can click on hide title checkbox');
+      await this.openOptions();
+      return await testSubjects.click('dashboardPanelTitlesCheckbox');
+    }
+
   }
 
   return new DashboardPage();
