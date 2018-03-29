@@ -78,7 +78,7 @@
     "redux-thunks": "^1.0.0",
     "socket.io": "^1.7.3",
     "style-it": "^1.6.12",
-    "tinymath": "0.2.0",
+    "tinymath": "^0.5.0",
     "uuid": "^3.0.1"
   },
   "devDependencies": {
