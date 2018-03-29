@@ -102,12 +102,6 @@ export function getUiSettingDefaults() {
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
         'Highlighting makes requests slow when working on big documents.',
     },
-    'courier:maxSegmentCount': {
-      value: 30,
-      description: 'Requests in discover are split into segments to prevent massive requests from being sent to ' +
-        'elasticsearch. This setting attempts to prevent the list of segments from getting too long, which might ' +
-        'cause requests to take much longer to process'
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       value: false,
       description: 'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +

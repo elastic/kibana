@@ -20,6 +20,14 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 *Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
 
 [float]
+=== Removed courier:maxSegmentCount advanced settings
+*Details:* This setting gave users control over segmentation of search requests for time interval based index patterns.
+Time interval index patterns are no longer supported in 7.0 now that Elasticsearch can handle wildcard patterns in
+an efficient manner.
+
+*Impact:* Users must switch to wildcard based index patterns.
+
+[float]
 === Advanced setting query:queryString:options no longer applies to filters
 *Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
 and custom filters using the `query_string` query. This could cause errors if a custom filter used options that 
