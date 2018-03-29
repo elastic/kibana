@@ -48,9 +48,9 @@ export class ControlsTab extends Component {
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleIndexPatternChange = (controlIndex, evt) => {
+  handleIndexPatternChange = (controlIndex, indexPatternId) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
-    updatedControl.indexPattern = evt.value;
+    updatedControl.indexPattern = indexPatternId;
     updatedControl.fieldName = '';
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }

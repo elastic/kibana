@@ -15,40 +15,27 @@ export class ListControl extends Component {
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      // react-select clobbers the tooltip, so just returning a disabled input instead
       return (
         <EuiFieldText
+          placeholder="Select..."
           disabled={true}
         />
       );
     }
-    console.log(this.props.control.value);
-    console.log(this.props.control.selectOptions);
 
-
-
-
-    /*
-    <Select
-        className="list-control-react-select"
-        placeholder="Select..."
-        multi={this.props.control.options.multiselect}
-        simpleValue={true}
-        delimiter={this.props.control.getMultiSelectDelimiter()}
-        value={this.props.control.value}
-        options={this.props.control.selectOptions}
-        onChange={this.handleOnChange}
-        valueRenderer={this.truncate}
-        inputProps={{ id: this.props.control.id }}
-      />
-      */
+    const options = this.props.control.selectOptions.map(option => {
+      option['data-test-subj'] = `option_${option.value.replace(' ', '_')}`;
+      return option;
+    });
 
     return (
       <EuiComboBox
-        options={this.props.control.selectOptions}
+        placeholder="Select..."
+        options={options}
         selectedOptions={this.props.control.value}
         onChange={this.handleOnChange}
         singleSelection={!this.props.control.options.multiselect}
+        data-test-subj={`listControlSelect${this.props.controlIndex}`}
       />
     );
   }

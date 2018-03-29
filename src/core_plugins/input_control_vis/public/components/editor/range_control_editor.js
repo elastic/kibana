@@ -28,6 +28,7 @@ export function RangeControlEditor(props) {
         value={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        getIndexPattern={props.getIndexPattern}
         controlIndex={props.controlIndex}
       />
 

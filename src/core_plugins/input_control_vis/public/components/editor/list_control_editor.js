@@ -55,6 +55,7 @@ export function ListControlEditor(props) {
         value={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        getIndexPattern={props.getIndexPattern}
         controlIndex={props.controlIndex}
       />
 
