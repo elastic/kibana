@@ -8,7 +8,7 @@ vega.scheme('elastic',
   ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
 );
 
-export const bypassToken = Symbol();
+const bypassToken = Symbol();
 
 export function bypassExternalUrlCheck(url) {
   // processed in the  loader.sanitize  below
