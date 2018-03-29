@@ -62,16 +62,34 @@ export class FieldSelect extends Component {
       return;
     }
 
-    const fields = indexPattern.fields
+    const fieldsByTypeMap = new Map();
+    const fields = [];
+    indexPattern.fields
       .filter(this.filterField)
-      .sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-      })
-      .map(function (field) {
-        return { label: field.name, value: field.name };
+      .forEach(field => {
+        if (fieldsByTypeMap.has(field.type)) {
+          const fieldsList = fieldsByTypeMap.get(field.type);
+          fieldsList.push(field.name);
+          fieldsByTypeMap.set(field.type, fieldsList);
+        } else {
+          fieldsByTypeMap.set(field.type, [field.name]);
+        }
       });
+
+    fieldsByTypeMap.forEach((fieldsList, fieldType) => {
+      fields.push({
+        label: fieldType,
+        options: fieldsList.sort().map(fieldName => {
+          return { value: fieldName, label: fieldName };
+        })
+      });
+    });
+
+    fields.sort((a, b) => {
+      if (a.label < b.label) return -1;
+      if (a.label > b.label) return 1;
+      return 0;
+    });
 
     this.setState({
       isLoading: false,
