@@ -61,6 +61,8 @@ export class Field extends PureComponent {
     switch(type) {
       case 'array':
         return val.join(', ');
+      case 'boolean':
+        return !!val;
       case 'number':
         return Number(val);
       case 'image':
@@ -85,6 +87,13 @@ export class Field extends PureComponent {
   setLoading(loading) {
     this.setState({
       loading
+    });
+  }
+
+  clearError() {
+    this.setState({
+      isInvalid: false,
+      error: null,
     });
   }
 
@@ -140,9 +149,8 @@ export class Field extends PureComponent {
 
   onImageChange = async (files) => {
     if(!files.length) {
+      this.clearError();
       this.setState({
-        isInvalid: false,
-        error: null,
         unsavedValue: null,
       });
       return;
@@ -205,6 +213,7 @@ export class Field extends PureComponent {
 
   cancelEdit = () => {
     const { savedValue } = this.state;
+    this.clearError();
     this.setState({
       unsavedValue: savedValue,
     });
@@ -255,6 +264,7 @@ export class Field extends PureComponent {
     try {
       await this.props.clear(name);
       this.cancelChangeImage();
+      this.clearError();
     } catch(e) {
       toastNotifications.addDanger(`Unable to reset ${name}`);
     }
