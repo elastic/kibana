@@ -48,7 +48,7 @@ export class ListControl extends Component {
         options={this.props.control.selectOptions}
         selectedOptions={this.props.control.value}
         onChange={this.handleOnChange}
-
+        singleSelection={!this.props.control.options.multiselect}
       />
     );
   }
