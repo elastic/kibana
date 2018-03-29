@@ -48,6 +48,7 @@ exports[`Field for array setting should render default value if there is no user
       }
     >
       <EuiFieldText
+        data-test-subj="advancedSetting-editField-array:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}
@@ -102,7 +103,7 @@ exports[`Field for array setting should render user value if there is user value
             <EuiLink
               aria-label="Reset array test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-array:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -125,6 +126,7 @@ exports[`Field for array setting should render user value if there is user value
       }
     >
       <EuiFieldText
+        data-test-subj="advancedSetting-editField-array:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}
@@ -186,6 +188,7 @@ exports[`Field for boolean setting should render default value if there is no us
     >
       <EuiSwitch
         checked={true}
+        data-test-subj="advancedSetting-editField-boolean:test:setting"
         disabled={false}
         onChange={[Function]}
         onKeyDown={[Function]}
@@ -237,7 +240,7 @@ exports[`Field for boolean setting should render user value if there is user val
             <EuiLink
               aria-label="Reset boolean test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-boolean:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -261,6 +264,7 @@ exports[`Field for boolean setting should render user value if there is user val
     >
       <EuiSwitch
         checked={false}
+        data-test-subj="advancedSetting-editField-boolean:test:setting"
         disabled={false}
         onChange={[Function]}
         onKeyDown={[Function]}
@@ -319,6 +323,7 @@ exports[`Field for image setting should render default value if there is no user
     >
       <EuiFilePicker
         accept=".jpg,.jpeg,.png"
+        data-test-subj="advancedSetting-editField-image:test:setting"
         disabled={false}
         initialPromptText="Select or drag and drop a file"
         onChange={[Function]}
@@ -371,7 +376,7 @@ exports[`Field for image setting should render user value if there is user value
             <EuiLink
               aria-label="Reset image test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-image:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -383,7 +388,7 @@ exports[`Field for image setting should render user value if there is user value
             <EuiLink
               aria-label="Change image test setting"
               color="primary"
-              data-test-subj="changeImage"
+              data-test-subj="advancedSetting-changeImage-image:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -458,7 +463,7 @@ exports[`Field for json setting should render default value if there is no user 
             <EuiLink
               aria-label="Reset json test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-json:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -481,6 +486,7 @@ exports[`Field for json setting should render default value if there is no user 
       }
     >
       <EuiTextArea
+        data-test-subj="advancedSetting-editField-json:test:setting"
         disabled={false}
         fullWidth={false}
         isInvalid={false}
@@ -536,7 +542,7 @@ exports[`Field for json setting should render user value if there is user value 
             <EuiLink
               aria-label="Reset json test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-json:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -559,6 +565,7 @@ exports[`Field for json setting should render user value if there is user value 
       }
     >
       <EuiTextArea
+        data-test-subj="advancedSetting-editField-json:test:setting"
         disabled={false}
         fullWidth={false}
         isInvalid={false}
@@ -620,6 +627,7 @@ exports[`Field for markdown setting should render default value if there is no u
       }
     >
       <EuiTextArea
+        data-test-subj="advancedSetting-editField-markdown:test:setting"
         disabled={false}
         fullWidth={false}
         isInvalid={false}
@@ -675,7 +683,7 @@ exports[`Field for markdown setting should render user value if there is user va
             <EuiLink
               aria-label="Reset markdown test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-markdown:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -698,6 +706,7 @@ exports[`Field for markdown setting should render user value if there is user va
       }
     >
       <EuiTextArea
+        data-test-subj="advancedSetting-editField-markdown:test:setting"
         disabled={false}
         fullWidth={false}
         isInvalid={false}
@@ -759,6 +768,7 @@ exports[`Field for number setting should render default value if there is no use
       }
     >
       <EuiFieldNumber
+        data-test-subj="advancedSetting-editField-number:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}
@@ -813,7 +823,7 @@ exports[`Field for number setting should render user value if there is user valu
             <EuiLink
               aria-label="Reset number test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-number:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -836,6 +846,7 @@ exports[`Field for number setting should render user value if there is user valu
       }
     >
       <EuiFieldNumber
+        data-test-subj="advancedSetting-editField-number:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}
@@ -896,6 +907,7 @@ exports[`Field for select setting should render default value if there is no use
       }
     >
       <EuiSelect
+        data-test-subj="advancedSetting-editField-select:test:setting"
         disabled={false}
         fullWidth={false}
         hasNoInitialSelection={false}
@@ -967,7 +979,7 @@ exports[`Field for select setting should render user value if there is user valu
             <EuiLink
               aria-label="Reset select test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-select:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -990,6 +1002,7 @@ exports[`Field for select setting should render user value if there is user valu
       }
     >
       <EuiSelect
+        data-test-subj="advancedSetting-editField-select:test:setting"
         disabled={false}
         fullWidth={false}
         hasNoInitialSelection={false}
@@ -1067,6 +1080,7 @@ exports[`Field for string setting should render default value if there is no use
       }
     >
       <EuiFieldText
+        data-test-subj="advancedSetting-editField-string:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}
@@ -1121,7 +1135,7 @@ exports[`Field for string setting should render user value if there is user valu
             <EuiLink
               aria-label="Reset string test setting"
               color="primary"
-              data-test-subj="resetField"
+              data-test-subj="advancedSetting-resetField-string:test:setting"
               onClick={[Function]}
               type="button"
             >
@@ -1144,6 +1158,7 @@ exports[`Field for string setting should render user value if there is user valu
       }
     >
       <EuiFieldText
+        data-test-subj="advancedSetting-editField-string:test:setting"
         disabled={false}
         fullWidth={false}
         isLoading={false}

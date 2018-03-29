@@ -159,14 +159,14 @@ describe('Field', () => {
         it('should be able to change value from no value and cancel', async () => {
           await component.instance().onImageChange([userValue]);
           component.update();
-          findTestSubject(component, 'cancelEditField').simulate('click');
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
           expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
         });
 
         it('should be able to change value and save', async () => {
           await component.instance().onImageChange([userValue]);
           component.update();
-          findTestSubject(component, 'saveEditField').simulate('click');
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: userValue });
           await component.setProps({ setting: {
@@ -178,10 +178,10 @@ describe('Field', () => {
 
         it('should be able to change value from existing value and save', async () => {
           const newUserValue = `${userValue}=`;
-          findTestSubject(component, 'changeImage').simulate('click');
+          findTestSubject(component, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           await component.instance().onImageChange([newUserValue]);
           component.update();
-          findTestSubject(component, 'saveEditField').simulate('click');
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: newUserValue });
           await component.setProps({ setting: {
@@ -192,7 +192,7 @@ describe('Field', () => {
         });
 
         it('should be able to reset to default value', async () => {
-          findTestSubject(component, 'resetField').simulate('click');
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(clear).toBeCalled();
         });
       });
@@ -212,14 +212,14 @@ describe('Field', () => {
         it('should be able to change value and cancel', async () => {
           component.instance().onFieldChange({ target: { value: fieldUserValue } });
           component.update();
-          findTestSubject(component, 'cancelEditField').simulate('click');
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
           expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
         });
 
         it('should be able to change value and save', async () => {
           component.instance().onFieldChange({ target: { value: fieldUserValue } });
           component.update();
-          findTestSubject(component, 'saveEditField').simulate('click');
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
           expect(save).toBeCalled();
           component.setState({ savedValue: fieldUserValue });
           await component.setProps({ setting: {
@@ -230,7 +230,7 @@ describe('Field', () => {
         });
 
         it('should be able to reset to default value', async () => {
-          findTestSubject(component, 'resetField').simulate('click');
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
           expect(clear).toBeCalled();
         });
       });

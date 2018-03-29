@@ -105,12 +105,14 @@ export class Field extends PureComponent {
         newUnsavedValue = Number(value);
         break;
       case 'json':
+        newUnsavedValue = value.trim() || '{}';
         try {
-          JSON.parse(value);
+          JSON.parse(newUnsavedValue);
         } catch (e) {
           isInvalid = true;
           error = 'Invalid JSON syntax';
         }
+        break;
       default:
         newUnsavedValue = value;
     }
@@ -153,7 +155,7 @@ export class Field extends PureComponent {
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
       this.setState({
         isInvalid,
-        error: isInvalid ? 'Image is too large, maximum size is ' + maxSize.description : null,
+        error: isInvalid ? `Image is too large, maximum size is ${maxSize.description}` : null,
         changeImage: true,
         unsavedValue: base64Image,
       });
@@ -242,7 +244,7 @@ export class Field extends PureComponent {
         this.cancelChangeImage();
       }
     } catch(e) {
-      toastNotifications.addDanger('Unable to save ' + name);
+      toastNotifications.addDanger(`Unable to save ${name}`);
     }
     this.setLoading(false);
   }
@@ -254,7 +256,7 @@ export class Field extends PureComponent {
       await this.props.clear(name);
       this.cancelChangeImage();
     } catch(e) {
-      toastNotifications.addDanger('Unable to reset ' + name);
+      toastNotifications.addDanger(`Unable to reset ${name}`);
     }
     this.setLoading(false);
   }
@@ -271,6 +273,7 @@ export class Field extends PureComponent {
             onChange={this.onFieldChange}
             disabled={loading}
             onKeyDown={this.onFieldKeyDown}
+            data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       case 'markdown':
@@ -282,6 +285,7 @@ export class Field extends PureComponent {
             onChange={this.onFieldChange}
             disabled={loading}
             onKeyDown={this.onFieldEscape}
+            data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       case 'image':
@@ -301,6 +305,7 @@ export class Field extends PureComponent {
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
               onKeyDown={this.onFieldEscape}
+              data-test-subj={`advancedSetting-editField-${name}`}
             />
           );
         }
@@ -315,6 +320,7 @@ export class Field extends PureComponent {
             isLoading={loading}
             disabled={loading}
             onKeyDown={this.onFieldKeyDown}
+            data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       case 'number':
@@ -325,6 +331,7 @@ export class Field extends PureComponent {
             isLoading={loading}
             disabled={loading}
             onKeyDown={this.onFieldKeyDown}
+            data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
       default:
@@ -335,6 +342,7 @@ export class Field extends PureComponent {
             isLoading={loading}
             disabled={loading}
             onKeyDown={this.onFieldKeyDown}
+            data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
     }
@@ -362,7 +370,7 @@ export class Field extends PureComponent {
   }
 
   renderDefaultValue(setting) {
-    const { type, defVal, ariaName } = setting;
+    const { type, defVal, ariaName, name } = setting;
     if(isDefaultValue(setting)) {
       return;
     }
@@ -371,9 +379,9 @@ export class Field extends PureComponent {
         Default: <em>{this.getDisplayedDefaultValue(type, defVal)}</em>
         &nbsp;&nbsp;
         <EuiLink
-          aria-label={'Reset ' + ariaName}
+          aria-label={`Reset ${ariaName}`}
           onClick={this.resetField}
-          data-test-subj="resetField"
+          data-test-subj={`advancedSetting-resetField-${name}`}
         >
           Reset
         </EuiLink>
@@ -384,16 +392,16 @@ export class Field extends PureComponent {
 
   renderChangeImageLink(setting) {
     const { changeImage } = this.state;
-    const { type, value, ariaName } = setting;
+    const { type, value, ariaName, name } = setting;
     if(type !== 'image' || !value || changeImage) {
       return;
     }
     return (
       <span>
         <EuiLink
-          aria-label={'Change ' + ariaName}
+          aria-label={`Change ${ariaName}`}
           onClick={this.changeImage}
-          data-test-subj="changeImage"
+          data-test-subj={`advancedSetting-changeImage-${name}`}
         >
           Change
         </EuiLink>
@@ -402,7 +410,7 @@ export class Field extends PureComponent {
   }
 
   renderActions(setting) {
-    const { ariaName } = setting;
+    const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
     if(savedValue === unsavedValue && !changeImage) {
       return;
@@ -414,20 +422,20 @@ export class Field extends PureComponent {
             <EuiFlexItem>
               <EuiButton
                 fill
-                aria-label={'Save ' + ariaName}
+                aria-label={`Save ${ariaName}`}
                 onClick={this.saveEdit}
                 disabled={loading || isInvalid}
-                data-test-subj="saveEditField"
+                data-test-subj={`advancedSetting-saveEditField-${name}`}
               >
                 Save
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
-                aria-label={'Cancel editing ' + ariaName}
+                aria-label={`Cancel editing ${ariaName}`}
                 onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
                 disabled={loading}
-                data-test-subj="cancelEditField"
+                data-test-subj={`advancedSetting-cancelEditField-${name}`}
               >
                 Cancel
               </EuiButton>
