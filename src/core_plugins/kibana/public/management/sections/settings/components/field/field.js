@@ -1,6 +1,7 @@
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
+import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiFieldNumber,
@@ -34,11 +35,14 @@ export class Field extends PureComponent {
     const editableValue = this.getEditableValue(type, value, defVal);
 
     this.state = {
+      isInvalid: false,
+      error: null,
       loading: false,
       changeImage: false,
       savedValue: editableValue,
       unsavedValue: editableValue,
     };
+    this.changeImageForm = null;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -66,6 +70,18 @@ export class Field extends PureComponent {
     }
   }
 
+  getDisplayedDefaultValue(type, defVal) {
+    if(defVal === undefined || defVal === null || defVal === '') {
+      return 'null';
+    }
+    switch(type) {
+      case 'array':
+        return defVal.join(', ');
+      default:
+        return String(defVal);
+    }
+  }
+
   setLoading(loading) {
     this.setState({
       loading
@@ -73,10 +89,14 @@ export class Field extends PureComponent {
   }
 
   onFieldChange = (e) => {
-    let newUnsavedValue = undefined;
     const value = e.target.value;
     const { type } = this.props.setting;
     const { unsavedValue } = this.state;
+
+    let newUnsavedValue = undefined;
+    let isInvalid = false;
+    let error = null;
+
     switch (type) {
       case 'boolean':
         newUnsavedValue = !unsavedValue;
@@ -84,10 +104,19 @@ export class Field extends PureComponent {
       case 'number':
         newUnsavedValue = Number(value);
         break;
+      case 'json':
+        try {
+          JSON.parse(value);
+        } catch (e) {
+          isInvalid = true;
+          error = 'Invalid JSON syntax';
+        }
       default:
         newUnsavedValue = value;
     }
     this.setState({
+      error,
+      isInvalid,
       unsavedValue: newUnsavedValue,
     });
   }
@@ -101,24 +130,36 @@ export class Field extends PureComponent {
     }
   }
 
+  onFieldEscape = ({ keyCode }) => {
+    if (keyCode === keyCodes.ESCAPE) {
+      this.cancelEdit();
+    }
+  }
+
   onImageChange = async (files) => {
     if(!files.length) {
       this.setState({
+        isInvalid: false,
+        error: null,
         unsavedValue: null,
       });
       return;
     }
 
     const file = files[0];
+    const { maxSize } = this.props.setting.options;
     try {
       const base64Image = await this.getImageAsBase64(file);
+      const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
       this.setState({
+        isInvalid,
+        error: isInvalid ? 'Image is too large, maximum size is ' + maxSize.description : null,
+        changeImage: true,
         unsavedValue: base64Image,
       });
     } catch(err) {
-      this.setState({
-        unsavedValue: null,
-      });
+      toastNotifications.addDanger('Image could not be saved');
+      this.cancelChangeImage();
     }
   }
 
@@ -148,6 +189,12 @@ export class Field extends PureComponent {
 
   cancelChangeImage = () => {
     const { savedValue } = this.state;
+
+    if(this.changeImageForm) {
+      this.changeImageForm.fileInput.value = null;
+      this.changeImageForm.handleChange();
+    }
+
     this.setState({
       changeImage: false,
       unsavedValue: savedValue,
@@ -163,33 +210,39 @@ export class Field extends PureComponent {
 
   saveEdit = async () => {
     const { name, defVal, type } = this.props.setting;
-    const { savedValue, unsavedValue } = this.state;
-    let value = unsavedValue;
+    const { changeImage, savedValue, unsavedValue } = this.state;
 
-    if(savedValue === value) {
+    if(savedValue === unsavedValue) {
       return;
     }
 
+    let valueToSave = unsavedValue;
+    let isSameValue = false;
+
     switch(type) {
       case 'array':
-        return value = value.split(',').map(val => val.trim());
+        valueToSave = valueToSave.split(',').map(val => val.trim());
+        isSameValue = valueToSave.join(',') === defVal.join(',');
+        break;
       case 'json':
-        return value = value.trim() ? value.trim() : '{}';
+        valueToSave = valueToSave.trim() ? valueToSave.trim() : '{}';
       default:
-        return;
+        isSameValue = valueToSave === defVal;
     }
 
     this.setLoading(true);
     try {
-      if (value === defVal) {
+      if (isSameValue) {
         await this.props.clear(name);
       } else {
-        await this.props.save(name, value);
+        await this.props.save(name, valueToSave);
       }
-      this.cancelChangeImage();
+
+      if(changeImage) {
+        this.cancelChangeImage();
+      }
     } catch(e) {
-      //todo: error handling here
-      console.log('we got an error jen', e);
+      toastNotifications.addDanger('Unable to save ' + name);
     }
     this.setLoading(false);
   }
@@ -201,32 +254,34 @@ export class Field extends PureComponent {
       await this.props.clear(name);
       this.cancelChangeImage();
     } catch(e) {
-      //todo: error handling here
-      console.log('we got an error jen', e);
+      toastNotifications.addDanger('Unable to reset ' + name);
     }
     this.setLoading(false);
   }
 
   renderField(setting) {
-    const { loading, changeImage, changeImageValue, unsavedValue } = this.state;
-    const { name, value, editor, options } = setting;
+    const { loading, changeImage, unsavedValue, isInvalid } = this.state;
+    const { name, value, type, options } = setting;
 
-    switch(editor) {
+    switch(type) {
       case 'boolean':
         return (
           <EuiSwitch
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
             disabled={loading}
+            onKeyDown={this.onFieldKeyDown}
           />
         );
       case 'markdown':
       case 'json':
         return (
           <EuiTextArea
+            isInvalid={isInvalid}
             value={unsavedValue}
             onChange={this.onFieldChange}
             disabled={loading}
+            onKeyDown={this.onFieldEscape}
           />
         );
       case 'image':
@@ -239,13 +294,13 @@ export class Field extends PureComponent {
             />
           );
         } else {
-          console.log(this.state);
           return (
             <EuiFilePicker
               disabled={loading}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
-              max={options.maxSize && options.maxSize.length}
+              ref={(input) => { this.changeImageForm = input; }}
+              onKeyDown={this.onFieldEscape}
             />
           );
         }
@@ -259,6 +314,7 @@ export class Field extends PureComponent {
             onChange={this.onFieldChange}
             isLoading={loading}
             disabled={loading}
+            onKeyDown={this.onFieldKeyDown}
           />
         );
       case 'number':
@@ -286,97 +342,119 @@ export class Field extends PureComponent {
 
   renderLabel(setting) {
     return(
-      <Fragment>
+      <span>
         <span> {setting.name} </span>
-        {
-          setting.isCustom ?
-            <EuiTextColor color="subdued"> (Custom Setting) </EuiTextColor>
-            : ''
-        }
-      </Fragment>
+        {setting.isCustom ? <EuiTextColor color="subdued"> (Custom Setting) </EuiTextColor> : ''}
+      </span>
     );
   }
 
   renderHelpText(setting) {
-    const { changeImage } = this.state;
     return (
-      <Fragment>
+      <div>
         <div>
           <span dangerouslySetInnerHTML={{ __html: setting.description }} />
         </div>
-        {
-          !isDefaultValue(setting) ?
-            <div>
-              Default:&nbsp;
-              <em>
-                {
-                  (setting.defVal === undefined || setting.defVal === null || setting.defVal === '') ?
-                    'null'
-                    : String(setting.defVal)
-                }
-              </em>
-              &nbsp;&nbsp;
-              <EuiLink onClick={this.resetField}>
-                Reset
-              </EuiLink>
-              {
-                setting.editor === 'image' && !isDefaultValue(setting) && !changeImage ?
-                  <Fragment>
-                    &nbsp;
-                    <EuiLink onClick={this.changeImage}>
-                      Change
-                    </EuiLink>
-                  </Fragment>
-                  : ''
-              }
-            </div>
-            : ''
-        }
-      </Fragment>
+        {this.renderDefaultValue(setting)}
+        {this.renderChangeImageLink(setting)}
+      </div>
+    );
+  }
+
+  renderDefaultValue(setting) {
+    const { type, defVal, ariaName } = setting;
+    if(isDefaultValue(setting)) {
+      return;
+    }
+    return (
+      <span>
+        Default: <em>{this.getDisplayedDefaultValue(type, defVal)}</em>
+        &nbsp;&nbsp;
+        <EuiLink
+          aria-label={'Reset ' + ariaName}
+          onClick={this.resetField}
+          data-test-subj="resetField"
+        >
+          Reset
+        </EuiLink>
+        &nbsp;&nbsp;
+      </span>
+    );
+  }
+
+  renderChangeImageLink(setting) {
+    const { changeImage } = this.state;
+    const { type, value, ariaName } = setting;
+    if(type !== 'image' || !value || changeImage) {
+      return;
+    }
+    return (
+      <span>
+        <EuiLink
+          aria-label={'Change ' + ariaName}
+          onClick={this.changeImage}
+          data-test-subj="changeImage"
+        >
+          Change
+        </EuiLink>
+      </span>
+    );
+  }
+
+  renderActions(setting) {
+    const { ariaName } = setting;
+    const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
+    if(savedValue === unsavedValue && !changeImage) {
+      return;
+    }
+    return (
+      <EuiFlexItem>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiButton
+                fill
+                aria-label={'Save ' + ariaName}
+                onClick={this.saveEdit}
+                disabled={loading || isInvalid}
+                data-test-subj="saveEditField"
+              >
+                Save
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                aria-label={'Cancel editing ' + ariaName}
+                onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
+                disabled={loading}
+                data-test-subj="cancelEditField"
+              >
+                Cancel
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   }
 
   render() {
     const { setting } = this.props;
-    const { loading, changeImage, savedValue, unsavedValue } = this.state;
+    const { error, isInvalid } = this.state;
 
     return(
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
           <EuiFormRow
+            isInvalid={isInvalid}
+            error={error}
             label={this.renderLabel(setting)}
             helpText={this.renderHelpText(setting)}
           >
             {this.renderField(setting)}
           </EuiFormRow>
         </EuiFlexItem>
-        {
-          (savedValue !== unsavedValue || changeImage) ?
-            <EuiFlexItem>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <EuiButton
-                      fill
-                      onClick={this.saveEdit}
-                      disabled={loading}
-                    >
-                      Save
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButton
-                      onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
-                      disabled={loading}
-                    >
-                      Cancel
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            </EuiFlexItem>
-            : ''
-        }
+        {this.renderActions(setting)}
       </EuiFlexGroup>
     );
   }

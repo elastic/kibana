@@ -6,11 +6,11 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AdvancedSettingsTable } from './advanced_settings_table';
+import { AdvancedSettings } from './advanced_settings';
 
-const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettingsTable';
+const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
-function updateAdvancedSettingsTable($scope, config) {
+function updateAdvancedSettings($scope, config) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
     if (!node) {
@@ -18,7 +18,7 @@ function updateAdvancedSettingsTable($scope, config) {
     }
 
     render(
-      <AdvancedSettingsTable
+      <AdvancedSettings
         config={config}
       />,
       node,
@@ -26,7 +26,7 @@ function updateAdvancedSettingsTable($scope, config) {
   });
 }
 
-function destroyAdvancedSettingsTable() {
+function destroyAdvancedSettings() {
   const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
 }
@@ -42,11 +42,11 @@ uiModules.get('apps/management')
       restrict: 'E',
       link: function ($scope) {
         config.watchAll(() => {
-          updateAdvancedSettingsTable($scope, config);
+          updateAdvancedSettings($scope, config);
         }, $scope);
 
         $scope.$on('$destory', () => {
-          destroyAdvancedSettingsTable();
+          destroyAdvancedSettings();
         });
       }
     };

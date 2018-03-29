@@ -1,5 +1,4 @@
 import { getValType } from './get_val_type';
-import { getEditorType } from './get_editor_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
 
@@ -25,8 +24,6 @@ export function toEditableConfig({ def, name, value, isCustom }) {
     description: def.description,
     options: def.options,
   };
-
-  conf.editor = getEditorType(conf);
 
   return conf;
 }

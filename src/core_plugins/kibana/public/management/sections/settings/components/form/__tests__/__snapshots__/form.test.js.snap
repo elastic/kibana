@@ -1,0 +1,210 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Form should filter based on the query bar 1`] = `
+<React.Fragment>
+  <EuiForm>
+    <EuiFormRow
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+    >
+      <EuiSearchBar
+        box={
+          Object {
+            "incremental": true,
+          }
+        }
+        filters={
+          Array [
+            Object {
+              "field": "category",
+              "multiSelect": false,
+              "name": "Category",
+              "options": Array [
+                Object {
+                  "name": "General",
+                  "value": "general",
+                },
+              ],
+              "type": "field_value_selection",
+            },
+          ]
+        }
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiForm>
+  <EuiSpacer
+    size="l"
+  />
+  <React.Fragment
+    key="general"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          General
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="general:test:date"
+        save={[Function]}
+        setting={
+          Object {
+            "category": "general",
+            "description": "bar",
+            "name": "general:test:date",
+          }
+        }
+      />
+    </EuiForm>
+  </React.Fragment>
+</React.Fragment>
+`;
+
+exports[`Form should render normally 1`] = `
+<React.Fragment>
+  <EuiForm>
+    <EuiFormRow
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+    >
+      <EuiSearchBar
+        box={
+          Object {
+            "incremental": true,
+          }
+        }
+        filters={
+          Array [
+            Object {
+              "field": "category",
+              "multiSelect": false,
+              "name": "Category",
+              "options": Array [
+                Object {
+                  "name": "Dashboard",
+                  "value": "dashboard",
+                },
+                Object {
+                  "name": "General",
+                  "value": "general",
+                },
+                Object {
+                  "name": "X-pack",
+                  "value": "x-pack",
+                },
+              ],
+              "type": "field_value_selection",
+            },
+          ]
+        }
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiForm>
+  <EuiSpacer
+    size="l"
+  />
+  <React.Fragment
+    key="dashboard"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          Dashboard
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="dashboard:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "category": "dashboard",
+            "name": "dashboard:test:setting",
+          }
+        }
+      />
+    </EuiForm>
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+  </React.Fragment>
+  <React.Fragment
+    key="general"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          General
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="general:test:date"
+        save={[Function]}
+        setting={
+          Object {
+            "category": "general",
+            "description": "bar",
+            "name": "general:test:date",
+          }
+        }
+      />
+      <Field
+        clear={[Function]}
+        key="setting:test"
+        save={[Function]}
+        setting={
+          Object {
+            "category": "general",
+            "description": "foo",
+            "name": "setting:test",
+          }
+        }
+      />
+    </EuiForm>
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+  </React.Fragment>
+  <React.Fragment
+    key="x-pack"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          X-pack
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="xpack:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "category": "x-pack",
+            "description": "bar",
+            "name": "xpack:test:setting",
+          }
+        }
+      />
+    </EuiForm>
+  </React.Fragment>
+</React.Fragment>
+`;

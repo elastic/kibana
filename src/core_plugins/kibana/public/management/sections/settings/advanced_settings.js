@@ -2,13 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  EuiSpacer,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   Comparators,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
@@ -16,9 +10,9 @@ import { Form } from './components/form';
 
 import { toEditableConfig } from './lib';
 
-import './advanced_settings_table.less';
+import './advanced_settings.less';
 
-export class AdvancedSettingsTable extends Component {
+export class AdvancedSettings extends Component {
   static propTypes = {
     config: PropTypes.object.isRequired,
   }
@@ -41,7 +35,6 @@ export class AdvancedSettingsTable extends Component {
 
   mapConfig(config) {
     const all = config.getAll();
-
     return Object.entries(all)
       .map((setting) => {
         return toEditableConfig({
@@ -67,21 +60,17 @@ export class AdvancedSettingsTable extends Component {
     const { settings } = this.state;
     return (
       <div className="advancedSettings">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <CallOuts/>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div>
+          <CallOuts/>
+        </div>
 
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <Form
-              settings={settings}
-              save={this.saveConfig}
-              clear={this.clearConfig}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div>
+          <Form
+            settings={settings}
+            save={this.saveConfig}
+            clear={this.clearConfig}
+          />
+        </div>
       </div>
     );
   }

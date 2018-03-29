@@ -1,0 +1,1157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field for array setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Array test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            array:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldText
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value="default_value"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for array setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Array test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              default_value
+            </em>
+              
+            <EuiLink
+              aria-label="Reset array test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            array:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldText
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value="user, value"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Boolean test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            boolean:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiSwitch
+        checked={true}
+        disabled={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Boolean test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              true
+            </em>
+              
+            <EuiLink
+              aria-label="Reset boolean test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            boolean:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiSwitch
+        checked={false}
+        disabled={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Image test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            image:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFilePicker
+        accept=".jpg,.jpeg,.png"
+        disabled={false}
+        initialPromptText="Select or drag and drop a file"
+        onChange={[Function]}
+        onKeyDown={[Function]}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Image test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              null
+            </em>
+              
+            <EuiLink
+              aria-label="Reset image test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+          <span>
+            <EuiLink
+              aria-label="Change image test setting"
+              color="primary"
+              data-test-subj="changeImage"
+              onClick={[Function]}
+              type="button"
+            >
+              Change
+            </EuiLink>
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            image:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiImage
+        allowFullScreen={true}
+        alt="image:test:setting"
+        fullScreenIconColor="light"
+        size="original"
+        url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Json test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              null
+            </em>
+              
+            <EuiLink
+              aria-label="Reset json test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            json:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiTextArea
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value="{\\"foo\\": \\"bar\\"}"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Json test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              null
+            </em>
+              
+            <EuiLink
+              aria-label="Reset json test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            json:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiTextArea
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value="{\\"hello\\": \\"world\\"}"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Markdown test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            markdown:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiTextArea
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Markdown test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              null
+            </em>
+              
+            <EuiLink
+              aria-label="Reset markdown test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            markdown:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiTextArea
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value="**bold**"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Number test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            number:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldNumber
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value={5}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Number test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              5
+            </em>
+              
+            <EuiLink
+              aria-label="Reset number test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            number:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldNumber
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value={10}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Select test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            select:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiSelect
+        disabled={false}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "apple",
+              "value": "apple",
+            },
+            Object {
+              "text": "orange",
+              "value": "orange",
+            },
+            Object {
+              "text": "banana",
+              "value": "banana",
+            },
+          ]
+        }
+        value="orange"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Select test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              orange
+            </em>
+              
+            <EuiLink
+              aria-label="Reset select test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            select:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiSelect
+        disabled={false}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "apple",
+              "value": "apple",
+            },
+            Object {
+              "text": "orange",
+              "value": "orange",
+            },
+            Object {
+              "text": "banana",
+              "value": "banana",
+            },
+          ]
+        }
+        value="banana"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render default value if there is no user value set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "String test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            string:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldText
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render user value if there is user value is set 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "String test setting",
+                }
+              }
+            />
+          </div>
+          <span>
+            Default: 
+            <em>
+              null
+            </em>
+              
+            <EuiLink
+              aria-label="Reset string test setting"
+              color="primary"
+              data-test-subj="resetField"
+              onClick={[Function]}
+              type="button"
+            >
+              Reset
+            </EuiLink>
+              
+          </span>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <span>
+          <span>
+             
+            string:test:setting
+             
+          </span>
+          
+        </span>
+      }
+    >
+      <EuiFieldText
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value="foo"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

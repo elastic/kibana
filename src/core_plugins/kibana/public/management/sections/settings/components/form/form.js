@@ -1,9 +1,10 @@
-import React, { PureComponent , Fragment} from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -53,23 +54,26 @@ export class Form extends PureComponent {
     });
   }
 
-  renderCategory(category, settings) {
+  renderCategory(category, settings, isLast) {
     return (
       <Fragment key={category}>
-        <EuiText>
-          <h2>{getCategoryName(category)}</h2>
-        </EuiText>
-        <EuiSpacer size="m" />
-        {settings.map(setting => {
-          return (
-            <Field
-              key={setting.name}
-              setting={setting}
-              save={this.props.save}
-              clear={this.props.clear}
-            />
-          );
-        })}
+        <EuiForm>
+          <EuiText>
+            <h2>{getCategoryName(category)}</h2>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {settings.map(setting => {
+            return (
+              <Field
+                key={setting.name}
+                setting={setting}
+                save={this.props.save}
+                clear={this.props.clear}
+              />
+            );
+          })}
+        </EuiForm>
+        {isLast ? '' : <EuiHorizontalRule />}
       </Fragment>
     );
   }
@@ -103,21 +107,23 @@ export class Form extends PureComponent {
     ];
 
     return (
-      <EuiForm>
-        <EuiFormRow>
-          <EuiSearchBar
-            box={box}
-            filters={filters}
-            onChange={this.onQueryChange}
-          />
-        </EuiFormRow>
-
-        {categories.map(category => {
+      <Fragment>
+        <EuiForm>
+          <EuiFormRow>
+            <EuiSearchBar
+              box={box}
+              filters={filters}
+              onChange={this.onQueryChange}
+            />
+          </EuiFormRow>
+        </EuiForm>
+        <EuiSpacer />
+        {categories.map((category, i) => {
           return (
-            this.renderCategory(category, settings[category])
+            this.renderCategory(category, settings[category], i === categories.length - 1)
           );
         })}
-      </EuiForm>
+      </Fragment>
     );
   }
 }
