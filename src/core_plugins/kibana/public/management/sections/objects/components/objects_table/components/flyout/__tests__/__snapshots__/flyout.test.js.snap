@@ -60,7 +60,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             "render": [Function],
           },
           Object {
-            "field": "id",
+            "field": "existingIndexPatternId",
             "name": "New index pattern",
             "render": [Function],
           },
