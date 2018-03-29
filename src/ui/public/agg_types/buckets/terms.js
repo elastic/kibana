@@ -201,7 +201,7 @@ export function AggTypesBucketsTermsProvider(Private) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
-          if (agg.params.missingBucket) {
+          if (agg.params.missingBucket && agg.params.field.type === 'string') {
             output.params.missing = '__missing__';
           }
 
