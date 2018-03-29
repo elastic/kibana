@@ -19,3 +19,12 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 
 *Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
 
+[float]
+=== Advanced setting query:queryString:options no longer applies to filters
+*Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
+and custom filters using the `query_string` query. This could cause errors if a custom filter used options that 
+conflicted with the Advanced Setting. In 7.0 `query:queryString:options` will no longer be applied to filters so that
+users can have full control over their custom filters.
+
+*Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on 
+`query:queryString:options`.
