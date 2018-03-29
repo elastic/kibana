@@ -52,7 +52,7 @@ export function ListControlEditor(props) {
     <div>
 
       <IndexPatternSelect
-        value={props.controlParams.indexPattern}
+        indexPatternId={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
         getIndexPattern={props.getIndexPattern}
@@ -60,7 +60,7 @@ export function ListControlEditor(props) {
       />
 
       <FieldSelect
-        value={props.controlParams.fieldName}
+        fieldName={props.controlParams.fieldName}
         indexPatternId={props.controlParams.indexPattern}
         filterField={filterField}
         onChange={props.handleFieldNameChange}

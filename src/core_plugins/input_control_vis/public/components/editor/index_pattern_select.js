@@ -29,12 +29,12 @@ export class IndexPatternSelect extends Component {
 
   componentDidMount() {
     this.fetchOptions();
-    this.fetchSelectedIndexPattern(this.props.value);
+    this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.props.value) {
-      this.fetchSelectedIndexPattern(nextProps.value);
+    if (nextProps.indexPatternId !== this.props.indexPatternId) {
+      this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
   }
 
@@ -129,6 +129,6 @@ IndexPatternSelect.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
+  indexPatternId: PropTypes.string,
   controlIndex: PropTypes.number.isRequired,
 };

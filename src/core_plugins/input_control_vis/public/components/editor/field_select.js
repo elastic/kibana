@@ -1,46 +1,64 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Select from 'react-select';
 
 import {
   EuiFormRow,
+  EuiComboBox,
 } from '@elastic/eui';
 
 export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
-    // not storing activeIndexPatternId in react state
-    // 1) does not effect rendering
-    // 2) requires synchronous modification to avoid race condition
-    this.activeIndexPatternId = props.indexPatternId;
-
     this.state = {
-      fields: []
+      isLoading: false,
+      fields: [],
+      indexPatternId: props.indexPatternId,
     };
     this.filterField = _.get(props, 'filterField', () => { return true; });
-    this.loadFields(props.indexPatternId);
+  }
+
+  componentWillMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this.loadFields(this.state.indexPatternId);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
-      this.activeIndexPatternId = nextProps.indexPatternId;
-      this.setState({ fields: [] });
       this.loadFields(nextProps.indexPatternId);
     }
   }
 
-  async loadFields(indexPatternId) {
+  loadFields = (indexPatternId) => {
+    this.setState({
+      isLoading: true,
+      fields: [],
+      indexPatternId
+    }, this.debouncedLoad.bind(null, indexPatternId));
+  }
+
+  debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
     const indexPattern = await this.props.getIndexPattern(indexPatternId);
 
+    if (!this._isMounted) {
+      return;
+    }
+
     // props.indexPatternId may be updated before getIndexPattern returns
     // ignore response when fetched index pattern does not match active index pattern
-    if (indexPattern.id !== this.activeIndexPatternId) {
+    if (indexPattern.id !== this.state.indexPatternId) {
       return;
     }
 
@@ -54,7 +72,19 @@ export class FieldSelect extends Component {
       .map(function (field) {
         return { label: field.name, value: field.name };
       });
-    this.setState({ fields: fields });
+
+    this.setState({
+      isLoading: false,
+      fields: fields
+    });
+  }, 300);
+
+  onChange = (selectedOptions) => {
+    let selectedFieldName;
+    if (selectedOptions.length) {
+      selectedFieldName = selectedOptions[0].value;
+    }
+    this.props.onChange(selectedFieldName);
   }
 
   render() {
@@ -62,20 +92,24 @@ export class FieldSelect extends Component {
       return null;
     }
 
-    const selectId = `fieldSelect-${this.props.controlIndex}`;
+    const selectedOptions = [];
+    if (this.props.fieldName) {
+      selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
+    }
+
     return (
       <EuiFormRow
-        id={selectId}
+        id={`fieldSelect-${this.props.controlIndex}`}
         label="Field"
       >
-        <Select
-          className="field-react-select"
+        <EuiComboBox
           placeholder="Select field..."
-          value={this.props.value}
+          singleSelection={true}
+          isLoading={this.state.isLoading}
           options={this.state.fields}
-          onChange={this.props.onChange}
-          resetValue={''}
-          inputProps={{ id: selectId }}
+          selectedOptions={selectedOptions}
+          onChange={this.onChange}
+          data-test-subj="fieldSelect"
         />
       </EuiFormRow>
     );
@@ -86,7 +120,7 @@ FieldSelect.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
+  fieldName: PropTypes.string,
   filterField: PropTypes.func,
   controlIndex: PropTypes.number.isRequired,
 };
