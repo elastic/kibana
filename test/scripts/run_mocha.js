@@ -1,8 +1,5 @@
 const debugInBand = process.execArgv.some(arg => {
   switch (arg) {
-    case '--debug':
-    case '--debug-brk':
-    case '-d':
     case '--inspect':
     case '--inspect-brk':
       return true;
