@@ -292,7 +292,7 @@ export class Flyout extends Component {
         },
       },
       {
-        field: 'id',
+        field: 'existingIndexPatternId',
         name: 'New index pattern',
         render: id => {
           const options = this.state.indexPatterns.map(indexPattern => ({
