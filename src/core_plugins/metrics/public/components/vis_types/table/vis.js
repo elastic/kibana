@@ -44,8 +44,9 @@ class TableVis extends Component {
         order: 'asc',
       }),
     };
+    const { visData } = props;
     this.pager = new Pager(
-      props.visData.series.length,
+      (visData.series && visData.series.length) || 0,
       this.state.itemsPerPage
     );
     this.state.firstItemIndex = this.pager.getFirstItemIndex();
