@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 import expect from 'expect.js';
 
 const RUN_KBN_SERVER_STARTUP = require.resolve('./fixtures/run_kbn_server_startup');
-const BABEL_REGISTER = require.resolve('../../../babel-register');
+const BABEL_REGISTER = require.resolve('../../../optimize/babel/register');
 const SECOND = 1000;
 
 describe('config/deprecation warnings mixin', function () {
@@ -23,9 +23,7 @@ describe('config/deprecation warnings mixin', function () {
           logging: {
             quiet: false
           },
-          uiSettings: {
-            enabled: true
-          }
+          kibana_index: 'my-kibana-index'
         })
       }
     });
@@ -74,6 +72,9 @@ describe('config/deprecation warnings mixin', function () {
       ));
 
     expect(deprecationLines).to.have.length(1);
-    expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    expect(deprecationLines[0]).to.have.property(
+      'message',
+      'Config key "kibana_index" is deprecated. It has been replaced with "kibana.index"'
+    );
   });
 });
