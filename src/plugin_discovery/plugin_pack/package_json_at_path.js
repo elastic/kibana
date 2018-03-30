@@ -3,9 +3,8 @@ import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
 import { isDirectory } from './lib';
-import { PluginPack } from './plugin_pack';
 
-async function createPackAtPath(path) {
+async function createPackageJsonAtPath(path) {
   if (!await isDirectory(path)) {
     throw createInvalidPackError(path, 'must be a directory');
   }
@@ -23,19 +22,14 @@ async function createPackAtPath(path) {
     throw createInvalidPackError(path, 'must have a valid package.json file');
   }
 
-  let provider = require(path);
-  if (provider.__esModule) {
-    provider = provider.default;
-  }
-  if (typeof provider !== 'function') {
-    throw createInvalidPackError(path, 'must export a function');
-  }
-
-  return new PluginPack({ path, pkg, provider });
+  return {
+    directoryPath: path,
+    contents: pkg,
+  };
 }
 
-export const createPackAtPath$ = (path) => (
-  Observable.defer(() => createPackAtPath(path))
-    .map(pack => ({ pack }))
+export const createPackageJsonAtPath$ = (path) => (
+  Observable.defer(() => createPackageJsonAtPath(path))
+    .map(packageJson => ({ packageJson }))
     .catch(error => [{ error }])
 );

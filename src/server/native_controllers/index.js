@@ -8,19 +8,19 @@ import { NativeController } from './native_controller';
 
 const getNativeControllers = async (settings) => {
   const {
-    pack$,
+    packageJson$,
   } = findPluginSpecs(settings);
 
-  const spec$ = pack$
-    .mergeMap(pack => {
-      const nativeControllerSpecs = get(pack.getPkg(), 'kibana.nativeControllers');
+  const spec$ = packageJson$
+    .mergeMap(packageJson => {
+      const nativeControllerSpecs = get(packageJson.contents, 'kibana.nativeControllers');
       if (nativeControllerSpecs) {
-        return Observable.from(nativeControllerSpecs.map(nativeControllerSpec => {
+        return nativeControllerSpecs.map(spec => {
           return {
-            pluginId: nativeControllerSpec.pluginId,
-            path: path.resolve(pack.getPath(), nativeControllerSpec.path)
+            pluginId: spec.pluginId,
+            path: path.resolve(packageJson.directoryPath, spec.path)
           };
-        }));
+        });
       }
 
       return Observable.empty();
