@@ -152,6 +152,12 @@ export function AggTypesBucketsTermsProvider(Private) {
             return aggFilter.includes(`!${agg.type.name}`);
           };
 
+          $scope.$watch('agg.params.field.type', (type) => {
+            if (type !== 'string') {
+              $scope.agg.params.missingBucket = false;
+            }
+          });
+
           function updateOrderAgg() {
             // abort until we get the responseValueAggs
             if (!$scope.responseValueAggs) return;
