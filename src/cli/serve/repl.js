@@ -14,31 +14,40 @@ export function startRepl(server) {
   });
 
   replServer.context.server = server;
+  replServer.context.repl = {
+    print(obj, depth = null) {
+      console.log(promisePrint(obj, () => replServer.displayPrompt(), depth));
+      return '';
+    },
+  };
 }
 
-function colorize(o) {
-  return util.inspect(o, { colors: true, depth: null });
+function colorize(o, depth) {
+  return util.inspect(o, { colors: true, depth });
 }
 
-function prettyPrint(text, o) {
-  console.log(text, colorize(o));
+function prettyPrint(text, o, depth) {
+  console.log(text, colorize(o, depth));
 }
 
 // This lets us handle promises more gracefully than the default REPL,
 // which doesn't show the results.
 function promiseFriendlyWriter(displayPrompt) {
-  return (result) => {
-    if (result && typeof result.then === 'function') {
-      // Bit of a hack to encourage the user to wait for the result of a promise
-      // by printing text out beside the current prompt.
-      Promise.resolve()
-        .then(() => console.log('Waiting for promise...'))
-        .then(() => result)
-        .then((o) => prettyPrint('Promise Resolved: \n', o))
-        .catch((err) => prettyPrint('Promise Rejected: \n', err))
-        .then(displayPrompt);
-      return '';
-    }
-    return colorize(result);
-  };
+  const PRINT_DEPTH = 5;
+  return (result) => promisePrint(result, displayPrompt, PRINT_DEPTH);
+}
+
+function promisePrint(result, displayPrompt, depth) {
+  if (result && typeof result.then === 'function') {
+    // Bit of a hack to encourage the user to wait for the result of a promise
+    // by printing text out beside the current prompt.
+    Promise.resolve()
+      .then(() => console.log('Waiting for promise...'))
+      .then(() => result)
+      .then((o) => prettyPrint('Promise Resolved: \n', o, depth))
+      .catch((err) => prettyPrint('Promise Rejected: \n', err, depth))
+      .then(displayPrompt);
+    return '';
+  }
+  return colorize(result, depth);
 }
