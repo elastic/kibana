@@ -1,18 +1,21 @@
-@import (reference) "../../style/variables";
+@import (reference) '../../style/variables';
 
 .canvas__page-manager {
   .canvas__page-manager--pages {
-    white-space: nowrap;
     overflow-y: hidden;
     overflow-x: auto;
-    max-height: 148px;
+    max-height: @spacingXXXL * 3;
     padding-top: @spacingS;
     margin-bottom: @spacingS;
   }
 
+  .canvas__page-manager--pages a {
+    box-shadow: none;
+    padding-left: @spacingXS;
+  }
+
   .canvas__page-manager--page.active {
-    background-color: @trueWhite !important;
-    color: @textMain !important;
+    box-shadow: 0 0 1px 2px @blue;
   }
 
   .canvas__page-manager--page:hover {
@@ -21,7 +24,6 @@
   }
 
   .canvas__page-manager--page {
-    background-color: @darkGrey;
     position: relative;
     color: @mediumGrey;
     border: @borderStyle;
@@ -29,8 +31,8 @@
     vertical-align: top;
     font-weight: bold;
     text-align: center;
-    width: 77px;
-    height: 100px;
+    width: @spacingXXXXL;
+    height: @spacingXXXL * 2;
     margin: 0 @spacingM @spacingS 0;
     cursor: pointer;
 
@@ -41,6 +43,8 @@
         position: absolute;
         text-align: center;
         width: 100%;
+        background-color: @darkestGrey;
+        opacity: 0.75;
 
         > * {
           padding: @spacingXS;
@@ -68,8 +72,8 @@
     .canvas__page-manager--page-remove {
       display: none;
       position: absolute;
-      top: -8px;
-      right: -12px;
+      top: -@spacingS;
+      right: -@spacingXS * 3;
     }
 
     .canvas__page-manager--page-controls {
@@ -77,8 +81,27 @@
     }
 
     .canvas__page-manager--page-index {
-      line-height: 100px;
-      font-size: @textLarge;
+      overflow: hidden;
+      height: @spacingXXXL * 2;
+    }
+
+    .canvas--interactable-actions,
+    .canvas--interactable-meta,
+    .canvas--interactable-resize,
+    .canvas__element--remove-icon {
+      display: none;
+    }
+  }
+
+  .canvas__page-manager--page-add {
+    display: inline-block;
+    line-height: @spacingXXL * 2;
+    font-size: @textXXLarge;
+    padding: 0 @spacingS;
+    color: @mediumGrey;
+
+    &:hover {
+      color: @trueWhite;
     }
   }
 }

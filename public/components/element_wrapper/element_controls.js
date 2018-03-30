@@ -52,6 +52,7 @@ export const ElementControls = pure(props => {
         <RemoveIcon
           style={{ position: 'absolute', top: -20, right: -20 }}
           onClick={removeHandler}
+          className={'canvas__element--remove-icon'}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ export const PageStack = ({ pages, selectedPageId, height, width }) => {
   return pages.map(page => (
     <div
       key={page.id}
+      id={page.id}
       className="canvas__page"
       style={{
         top: selectedPageId === page.id ? undefined : '-9999999px',
