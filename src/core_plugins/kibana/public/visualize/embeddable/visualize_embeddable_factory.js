@@ -108,13 +108,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         }
 
         function getFilterLabel(filter) {
-          if (!_.has(filter, 'meta.alias') ||
-            (!_.has(filter, 'meta.key') && !_.has(filter, 'meta.value')) ) {
+          if (!_.has(filter, 'meta') || (!filter.meta.alias &&
+            (!filter.meta.key && !filter.meta.value)) ) {
             return '';
           }
 
           let prefix = _.get(filter, 'meta.negate', false) ? 'NOT' : '';
-          if (_.has(filter, 'meta.alias')) {
+          if (filter.meta.alias) {
             return `"${prefix} ${filter.meta.alias}"`
           }
 
