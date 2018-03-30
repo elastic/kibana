@@ -31,9 +31,7 @@ export const routes = [
         action: (dispatch, getState) => async ({ params, router }) => {
           // load workpad if given a new id via url param
           const currentWorkpad = getWorkpad(getState());
-          console.log('load workpad. current: ', currentWorkpad.id);
           if (params.id !== currentWorkpad.id) {
-            console.log('load workpad from server:', params.id);
             // TODO: handle missing/invalid workpad id's (mostly 404)
             const { assets, ...workpad } = await workpadService.get(params.id);
             dispatch(setWorkpad(workpad));
@@ -46,7 +44,6 @@ export const routes = [
 
           // no page provided, append current page to url
           if (isNaN(pageNumber)) {
-            console.log('redirect to loaded workpad page', { router });
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
           }
 

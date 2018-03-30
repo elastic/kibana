@@ -3,10 +3,13 @@ import uniqBy from 'lodash.uniqby';
 import moment from 'moment';
 import { evaluate } from 'tinymath';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
+import { unquoteString } from '../../../common/lib/unquote_string.js';
 import { isColumnReference } from './lib/is_column_reference.js';
 import { getExpressionType } from './lib/get_expression_type';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
+
+const columnExists = (cols, colName) => cols.includes(unquoteString(colName));
 
 export const pointseries = () => ({
   name: 'pointseries',
@@ -44,15 +47,22 @@ export const pointseries = () => ({
   },
   fn: (context, args) => {
     // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
-    const mathScope = pivotObjectArray(context.rows, context.columns.map(col => col.name));
+    const columnNames = context.columns.map(col => col.name);
+    const mathScope = pivotObjectArray(context.rows, columnNames);
+    const autoQuoteColumn = col => {
+      if (!columnNames.includes(col)) return col;
+      return col.match(/\s/) ? `'${col}'` : col;
+    };
 
     const measureNames = [];
-    const dimensionNames = [];
+    const dimensions = [];
     const columns = {};
 
-    // Separates args into dimensions and measures arrays by checking if arg is a column reference (dimension)
+    // Separates args into dimensions and measures arrays
+    // by checking if arg is a column reference (dimension)
     Object.keys(args).forEach(arg => {
-      const mathExp = args[arg];
+      const mathExp = autoQuoteColumn(args[arg]);
+
       if (mathExp != null && mathExp.trim() !== '') {
         const col = {
           type: '',
@@ -61,10 +71,13 @@ export const pointseries = () => ({
         };
 
         if (isColumnReference(mathExp)) {
-          // TODO: Check if column exists
-          if (!context.columns.filter(col => col.name === mathExp).length) return;
+          // TODO: Do something better if the column does not exist
+          if (!columnExists(columnNames, mathExp)) return;
 
-          dimensionNames.push(arg);
+          dimensions.push({
+            name: arg,
+            value: mathExp,
+          });
           col.type = getExpressionType(context.columns, mathExp);
           col.role = 'dimension';
         } else {
@@ -97,13 +110,10 @@ export const pointseries = () => ({
     // Group rows by their dimension values, using the argument values and preserving the PRIMARY_KEY
     // There's probably a better way to do this
     const results = rows.reduce((acc, row, i) => {
-      const newRow = dimensionNames.reduce(
-        (acc, dimension) => {
-          const colName = args[dimension];
+      const newRow = dimensions.reduce(
+        (acc, { name, value }) => {
           try {
-            acc[dimension] = colName
-              ? normalizeValue(colName, evaluate(colName, mathScope)[i])
-              : '_all';
+            acc[name] = args[name] ? normalizeValue(value, evaluate(value, mathScope)[i]) : '_all';
           } catch (e) {
             // TODO: handle invalid column names...
             // Do nothing if column does not exist
@@ -120,12 +130,9 @@ export const pointseries = () => ({
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureKeys = groupBy(rows, row => {
-      const dimensions = dimensionNames.map(
-        dimension => (args[dimension] ? row[args[dimension]] : '_all')
-      );
-      return dimensions.join('::%BURLAP%::');
-    });
+    const measureKeys = groupBy(rows, row =>
+      dimensions.map(({ name }) => (args[name] ? row[args[name]] : '_all')).join('::%BURLAP%::')
+    );
 
     // Then compute that 1 value for each measure
     values(measureKeys).forEach(rows => {

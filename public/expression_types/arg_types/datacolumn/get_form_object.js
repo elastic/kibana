@@ -1,4 +1,6 @@
 import { parse } from 'tinymath';
+import { unquoteString } from '../../../../common/lib/unquote_string.js';
+
 // break out into separate function, write unit tests first
 export function getFormObject(argValue) {
   if (argValue === '') {
@@ -14,11 +16,12 @@ export function getFormObject(argValue) {
   if (typeof mathObj === 'string') {
     return {
       fn: '',
-      column: argValue,
+      column: unquoteString(argValue),
     };
   }
 
-  // Check if its a simple function, eg a function wrapping a symbol node, check for only one arg of type string
+  // Check if its a simple function, eg a function wrapping a symbol node
+  // check for only one arg of type string
   if (
     typeof mathObj === 'object' &&
     mathObj.args.length === 1 &&
@@ -26,7 +29,7 @@ export function getFormObject(argValue) {
   ) {
     return {
       fn: mathObj.name,
-      column: mathObj.args[0],
+      column: unquoteString(mathObj.args[0]),
     };
   }
 

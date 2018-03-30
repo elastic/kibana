@@ -4,7 +4,8 @@ import { isColumnReference } from './is_column_reference';
 import { getFieldNames } from './get_field_names';
 
 export function getExpressionType(columns, mathExpression) {
-  // if isColumnReference returns true, then mathExpression is just a string referencing a column in a datatable
+  // if isColumnReference returns true, then mathExpression is just a string
+  // referencing a column in a datatable
   if (isColumnReference(mathExpression)) return getFieldType(columns, mathExpression);
 
   const parsedMath = parse(mathExpression);
@@ -25,5 +26,6 @@ export function getExpressionType(columns, mathExpression) {
     }
     return 'number';
   }
+
   return typeof parsedMath;
 }

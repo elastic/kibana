@@ -9,8 +9,9 @@ import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 import './datacolumn.less';
 
-// TODO: Garbage, we could make a much nicer math form that can handle way more.
+const maybeQuoteValue = val => (val.match(/\s/) ? `'${val}'` : val);
 
+// TODO: Garbage, we could make a much nicer math form that can handle way more.
 const DatacolumnArgInput = ({
   onValueChange,
   columns,
@@ -26,7 +27,7 @@ const DatacolumnArgInput = ({
     // if setting size, auto-select the first column if no column is already set
     if (inputRefs.fn.value === 'size') {
       const col = inputRefs.column.value || (columns[0] && columns[0].name);
-      if (col) return onValueChange(`${inputRefs.fn.value}(${col})`);
+      if (col) return onValueChange(`${inputRefs.fn.value}(${maybeQuoteValue(col)})`);
     }
 
     // inputRefs.column is the column selection, if there is no value, do nothing
@@ -34,13 +35,13 @@ const DatacolumnArgInput = ({
       return setMathFunction(inputRefs.fn.value);
     }
 
-    // inputRefs.fn is the math.js function to use, if it's not set, just use the value input
+    // inputRefs.fn is the math function to use, if it's not set, just use the value input
     if (valueNotSet(inputRefs.fn.value)) {
       return onValueChange(inputRefs.column.value);
     }
 
     // inputRefs.fn has a value, so use it as a math.js expression
-    onValueChange(`${inputRefs.fn.value}(${inputRefs.column.value})`);
+    onValueChange(`${inputRefs.fn.value}(${maybeQuoteValue(inputRefs.column.value)})`);
   };
 
   const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
@@ -82,11 +83,13 @@ DatacolumnArgInput.propTypes = {
 };
 
 const simpleTemplate = compose(
-  withPropsOnChange(['argValue'], ({ argValue }) => ({
+  withPropsOnChange(['argValue', 'columns'], ({ argValue, columns }) => ({
     mathValue: (argValue => {
       if (getType(argValue) !== 'string') return { error: 'argValue is not a string type' };
       try {
-        return getFormObject(argValue);
+        const matchedCol = columns.find(({ name }) => argValue === name);
+        const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
+        return getFormObject(val);
       } catch (e) {
         return { error: e.message };
       }
@@ -100,6 +103,7 @@ const simpleTemplate = compose(
 
 simpleTemplate.propTypes = {
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
+  columns: PropTypes.array.isRequired,
 };
 
 export const datacolumn = () => ({
