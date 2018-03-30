@@ -25,7 +25,10 @@ export function buildNode(value) {
 
 export function test(node, string) {
   const { value } = node;
-  const regex = value.split(wildcardSymbol).map(escapeRegExp).join('.*');
+  const regex = value
+    .split(wildcardSymbol)
+    .map(escapeRegExp)
+    .join('.*');
   const regexp = new RegExp(`^${regex}$`);
   return regexp.test(string);
 }
@@ -37,10 +40,18 @@ export function toElasticsearchQuery(node) {
 
 export function toQueryStringQuery(node) {
   const { value } = node;
-  return value.split(wildcardSymbol).map(escapeQueryString).join('*');
+  return value
+    .split(wildcardSymbol)
+    .map(escapeQueryString)
+    .join('*');
 }
 
 export function hasLeadingWildcard(node) {
   const { value } = node;
-  return value.startsWith(wildcardSymbol);
+  // A lone wildcard turns into an `exists` query, so we're only concerned with
+  // leading wildcards followed by additional characters.
+  return (
+    value.startsWith(wildcardSymbol) &&
+    value.replace(wildcardSymbol, '').length > 0
+  );
 }
