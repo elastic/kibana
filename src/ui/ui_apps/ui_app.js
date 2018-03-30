@@ -13,13 +13,16 @@ export class UiApp {
       hidden,
       linkToLastSubUrl,
       listed,
-      injectVars,
       url = `/app/${id}`,
       uses = []
     } = spec;
 
     if (!id) {
       throw new Error('Every app must specify an id');
+    }
+
+    if (spec.injectVars) {
+      throw new Error(`uiApp.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
     }
 
     this._id = id;
@@ -32,7 +35,6 @@ export class UiApp {
     this._hidden = hidden;
     this._listed = listed;
     this._url = url;
-    this._injectedVarsProvider = injectVars;
     this._pluginId = pluginId;
     this._kbnServer = kbnServer;
 
@@ -92,25 +94,6 @@ export class UiApp {
     if (this.isListed()) {
       return this._navLink;
     }
-  }
-
-  getInjectedVars() {
-    const provider = this._injectedVarsProvider;
-    const plugin = this._getPlugin();
-
-    if (!provider) {
-      return;
-    }
-
-    return provider.call(
-      plugin,
-      plugin
-        ? plugin.getServer()
-        : this._kbnServer.server,
-      plugin
-        ? plugin.getOptions()
-        : undefined
-    );
   }
 
   getModules() {

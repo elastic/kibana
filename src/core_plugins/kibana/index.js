@@ -64,7 +64,6 @@ export default function (kibana) {
           'docViews',
           'embeddableFactories',
         ],
-        injectVars,
       },
 
       links: [
@@ -155,8 +154,7 @@ export default function (kibana) {
       registerTutorials(server);
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
-      server.expose('injectVars', injectVars);
-
+      server.injectUiAppVars('kibana', () => injectVars(server));
     }
   });
 }

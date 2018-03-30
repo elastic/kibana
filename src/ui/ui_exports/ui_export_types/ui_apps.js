@@ -1,4 +1,4 @@
-import { noop, uniq } from 'lodash';
+import { uniq } from 'lodash';
 
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
@@ -15,7 +15,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden = false,
     linkToLastSubUrl = true,
     listed = !hidden,
-    injectVars = noop,
     url = `/app/${id}`,
     uses = [],
   } = spec;
@@ -31,7 +30,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden,
     linkToLastSubUrl,
     listed,
-    injectVars,
     url,
     uses: uniq([
       ...uses,
