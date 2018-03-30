@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 
 import expect from 'expect.js';
+import { isEqual } from 'lodash';
 import { findPluginSpecs } from '../find_plugin_specs';
 import { PluginSpec } from '../plugin_spec';
 
@@ -17,6 +18,7 @@ describe('plugin discovery', () => {
             paths: [
               resolve(PLUGIN_FIXTURES, 'foo'),
               resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
             ]
           }
         });
@@ -58,7 +60,8 @@ describe('plugin discovery', () => {
           plugins: {
             paths: [
               resolve(PLUGIN_FIXTURES, 'foo'),
-              resolve(PLUGIN_FIXTURES, 'bar')
+              resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
             ]
           }
         });
@@ -81,6 +84,8 @@ describe('plugin discovery', () => {
               resolve(PLUGIN_FIXTURES, 'foo'),
               resolve(PLUGIN_FIXTURES, 'bar'),
               resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
             ],
           }
         });
@@ -96,22 +101,72 @@ describe('plugin discovery', () => {
     });
 
     describe('packageJson$', () => {
+      const checkPackageJsons = (packageJsons) => {
+        expect(packageJsons).to.have.length(2);
+        const package1 = packageJsons.find(packageJson => isEqual({
+          directoryPath: resolve(PLUGIN_FIXTURES, 'foo'),
+          contents: {
+            name: 'foo',
+            version: 'kibana'
+          }
+        }, packageJson));
+        expect(package1).to.be.an(Object);
+        const package2 = packageJsons.find(packageJson => isEqual({
+          directoryPath: resolve(PLUGIN_FIXTURES, 'bar'),
+          contents: {
+            name: 'foo',
+            version: 'kibana'
+          }
+        }, packageJson));
+        expect(package2).to.be.an(Object);
+      };
+
       it('finds packageJson for specified plugin paths', async () => {
         const { packageJson$ } = findPluginSpecs({
           plugins: {
             paths: [
               resolve(PLUGIN_FIXTURES, 'foo'),
               resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
             ]
           }
         });
 
         const packageJsons = await packageJson$.toArray().toPromise();
-        expect(packageJsons).to.have.length(2);
-        packageJsons.forEach(spec => {
-          expect(spec).to.have.property('directoryPath');
-          expect(spec).to.have.property('contents');
+        checkPackageJsons(packageJsons);
+      });
+
+      it('finds all packageJsons in scanDirs', async () => {
+        const { packageJson$ } = findPluginSpecs({
+          // used to ensure the dev_mode plugin is enabled
+          env: 'development',
+
+          plugins: {
+            scanDirs: [PLUGIN_FIXTURES]
+          }
         });
+
+        const packageJsons = await packageJson$.toArray().toPromise();
+        checkPackageJsons(packageJsons);
+      });
+
+      it('dedupes duplicate packageJson', async () => {
+        const { packageJson$ } = findPluginSpecs({
+          plugins: {
+            scanDirs: [PLUGIN_FIXTURES],
+            paths: [
+              resolve(PLUGIN_FIXTURES, 'foo'),
+              resolve(PLUGIN_FIXTURES, 'foo'),
+              resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'bar'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
+              resolve(PLUGIN_FIXTURES, 'broken'),
+            ],
+          }
+        });
+
+        const packageJsons = await packageJson$.toArray().toPromise();
+        checkPackageJsons(packageJsons);
       });
     });
 
