@@ -134,6 +134,7 @@ exports[`Table should render the boolean template (true) 1`] = `
   aria-label="Is searchable"
   className="euiIcon euiIcon--medium euiIcon--secondary"
   height="16"
+  style={null}
   viewBox="0 0 16 16"
   width="16"
   xmlns="http://www.w3.org/2000/svg"
