@@ -15,6 +15,7 @@ import pluginsScanMixin from './plugins/scan';
 import pluginsCheckEnabledMixin from './plugins/check_enabled';
 import pluginsCheckVersionMixin from './plugins/check_version';
 import configCompleteMixin from './config/complete';
+import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import uiMixin from '../ui';
 import optimizeMixin from '../optimize';
 import pluginsInitializeMixin from './plugins/initialize';
@@ -37,6 +38,7 @@ module.exports = class KbnServer {
       // sets this.server
       httpMixin,
       loggingMixin,
+      configDeprecationWarningsMixin,
       warningsMixin,
       statusMixin,
 
