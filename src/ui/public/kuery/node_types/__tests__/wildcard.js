@@ -62,6 +62,22 @@ describe('kuery node types', function () {
 
     });
 
+    describe('hasLeadingWildcard', function () {
+      it('should determine whether a wildcard node contains a leading wildcard', function () {
+        const node = wildcard.buildNode('foo*bar');
+        expect(wildcard.hasLeadingWildcard(node)).to.be(false);
+
+        const leadingWildcardNode = wildcard.buildNode('*foobar');
+        expect(wildcard.hasLeadingWildcard(leadingWildcardNode)).to.be(true);
+      });
+
+      // Lone wildcards become exists queries, so we aren't worried about their performance
+      it('should not consider a lone wildcard to be a leading wildcard', function () {
+        const leadingWildcardNode = wildcard.buildNode('*');
+        expect(wildcard.hasLeadingWildcard(leadingWildcardNode)).to.be(false);
+      });
+    });
+
   });
 
 });
