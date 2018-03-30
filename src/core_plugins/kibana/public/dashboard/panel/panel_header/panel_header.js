@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles }) {
+import {
+  EuiIconTip,
+} from '@elastic/eui';
+
+export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles, hasSearch, searchLabel }) {
+  console.log(hasSearch);
   if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
       <div className="panel-heading-floater">
@@ -12,6 +17,26 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
     );
   }
 
+  const renderTitle = () => {
+    if (hidePanelTitles) {
+      return '';
+    }
+
+    if (hasSearch) {
+      return (
+        <Fragment>
+          {`${title} `}
+          <EuiIconTip
+            content={searchLabel}
+            type="kqlSelector"
+          />
+        </Fragment>
+      );
+    }
+
+    return title;
+  }
+
   return (
     <div className="panel-heading">
       <span
@@ -20,7 +45,7 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
         title={title}
         aria-label={`Dashboard panel: ${title}`}
       >
-        {hidePanelTitles ? '' : title}
+        {renderTitle()}
       </span>
 
       <div className="kuiMicroButtonGroup">
@@ -33,6 +58,8 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
 PanelHeader.propTypes = {
   isViewOnlyMode: PropTypes.bool,
   title: PropTypes.string,
+  hasSearch: PropTypes.bool,
+  searchLabel: PropTypes.string,
   actions: PropTypes.node,
   hidePanelTitles: PropTypes.bool.isRequired,
 };
