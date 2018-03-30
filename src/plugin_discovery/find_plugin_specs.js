@@ -9,7 +9,7 @@ import {
 } from './plugin_config';
 
 import {
-  createPack,
+  createPack$,
   createPackageJsonAtPath$,
   createPackageJsonsInDirectory$,
 } from './plugin_pack';
@@ -72,19 +72,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     .distinct(getDistinctKeyForFindResult)
     .share();
 
-  const pack$ = packageJson$
-    .mergeMap(({ error, packageJson }) => {
-      if (error) {
-        return [{ error }];
-      }
-
-      return [{
-        pack: createPack(packageJson)
-      }];
-    })
-    // createPack can throw errors, and we want them to be represented
-    // like the errors we consume from createPackageJsonAtPath/Directory
-    .catch(error => [{ error }])
+  const pack$ = createPack$(packageJson$)
     .share();
 
   const extendConfig$ = pack$
