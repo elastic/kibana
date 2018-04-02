@@ -14,7 +14,8 @@ const settings = {
   array: {
     name: 'array:test:setting',
     ariaName: 'array test setting',
-    description: 'Array test setting',
+    displayName: 'Array test setting',
+    description: 'Description for Array test setting',
     type: 'array',
     value: undefined,
     defVal: ['default_value'],
@@ -24,7 +25,8 @@ const settings = {
   boolean: {
     name: 'boolean:test:setting',
     ariaName: 'boolean test setting',
-    description: 'Boolean test setting',
+    displayName: 'Boolean test setting',
+    description: 'Description for Boolean test setting',
     type: 'boolean',
     value: undefined,
     defVal: true,
@@ -34,7 +36,8 @@ const settings = {
   image: {
     name: 'image:test:setting',
     ariaName: 'image test setting',
-    description: 'Image test setting',
+    displayName: 'Image test setting',
+    description: 'Description for Image test setting',
     type: 'image',
     value: undefined,
     defVal: null,
@@ -42,14 +45,16 @@ const settings = {
     options: {
       maxSize: {
         length: 1000,
-        description: '1 kB',
+        displayName: '1 kB',
+        description: 'Description for 1 kB',
       }
     },
   },
   json: {
     name: 'json:test:setting',
     ariaName: 'json test setting',
-    description: 'Json test setting',
+    displayName: 'Json test setting',
+    description: 'Description for Json test setting',
     type: 'json',
     value: '{"foo": "bar"}',
     defVal: '',
@@ -59,7 +64,8 @@ const settings = {
   markdown: {
     name: 'markdown:test:setting',
     ariaName: 'markdown test setting',
-    description: 'Markdown test setting',
+    displayName: 'Markdown test setting',
+    description: 'Description for Markdown test setting',
     type: 'markdown',
     value: undefined,
     defVal: '',
@@ -69,7 +75,8 @@ const settings = {
   number: {
     name: 'number:test:setting',
     ariaName: 'number test setting',
-    description: 'Number test setting',
+    displayName: 'Number test setting',
+    description: 'Description for Number test setting',
     type: 'number',
     value: undefined,
     defVal: 5,
@@ -79,7 +86,8 @@ const settings = {
   select: {
     name: 'select:test:setting',
     ariaName: 'select test setting',
-    description: 'Select test setting',
+    displayName: 'Select test setting',
+    description: 'Description for Select test setting',
     type: 'select',
     value: undefined,
     defVal: 'orange',
@@ -89,7 +97,8 @@ const settings = {
   string: {
     name: 'string:test:setting',
     ariaName: 'string test setting',
-    description: 'String test setting',
+    displayName: 'String test setting',
+    description: 'Description for String test setting',
     type: 'string',
     value: undefined,
     defVal: null,
@@ -133,6 +142,21 @@ describe('Field', () => {
             setting={{
               ...setting,
               value: userValues[type],
+            }}
+            save={save}
+            clear={clear}
+          />
+        );
+
+        expect(component).toMatchSnapshot();
+      });
+
+      it('should render custom setting icon if it is custom', async () => {
+        const component = shallow(
+          <Field
+            setting={{
+              ...setting,
+              isCustom: true,
             }}
             save={save}
             clear={clear}

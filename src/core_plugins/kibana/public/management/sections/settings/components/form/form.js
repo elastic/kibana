@@ -20,14 +20,15 @@ export class Form extends PureComponent {
     settings: PropTypes.array.isRequired,
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
+    query: PropTypes.string,
   }
 
   constructor(props) {
     super(props);
-    const { settings } = this.props;
+    const { settings, query } = this.props;
     this.state = {
-      query: null,
-      settings: this.mapSettings(settings),
+      query: query || null,
+      settings: this.mapSettings(query ? Query.execute(Query.parse(query), settings) : settings),
     };
   }
 
@@ -41,7 +42,9 @@ export class Form extends PureComponent {
 
   mapSettings(settings) {
     return settings.reduce((groupedSettings, setting) => {
-      const category = setting.category || DEFAULT_CATEGORY;
+      // We will want to change this logic when we put each category on its
+      // own page aka allowing a setting to be included in multiple categories.
+      const category = setting.category[0];
       (groupedSettings[category] = groupedSettings[category] || []).push(setting);
       return groupedSettings;
     }, {});
@@ -79,16 +82,17 @@ export class Form extends PureComponent {
   }
 
   render() {
-    const { settings } = this.state;
+    const { settings, query } = this.state;
 
     const categories = Object.keys(settings).sort((a, b) => {
       if(a === DEFAULT_CATEGORY) return -1;
+      if(b === DEFAULT_CATEGORY) return 1;
       if(a > b) return 1;
       return a === b ? 0 : -1;
     });
 
     const box = {
-      incremental: true
+      incremental: true,
     };
 
     const filters = [
@@ -114,6 +118,7 @@ export class Form extends PureComponent {
               box={box}
               filters={filters}
               onChange={this.onQueryChange}
+              defaultQuery={query}
             />
           </EuiFormRow>
         </EuiForm>

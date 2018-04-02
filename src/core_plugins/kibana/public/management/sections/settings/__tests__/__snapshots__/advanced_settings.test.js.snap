@@ -15,11 +15,14 @@ exports[`AdvancedSettings should render normally 1`] = `
         Array [
           Object {
             "ariaName": "test array setting",
-            "category": "elasticsearch",
+            "category": Array [
+              "elasticsearch",
+            ],
             "defVal": Array [
               "default_value",
             ],
-            "description": "Test array setting",
+            "description": "Description for Test array setting",
+            "displayName": "Test array setting",
             "isCustom": undefined,
             "name": "test:array:setting",
             "options": undefined,
@@ -29,9 +32,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test boolean setting",
-            "category": "elasticsearch",
+            "category": Array [
+              "elasticsearch",
+            ],
             "defVal": true,
-            "description": "Test boolean setting",
+            "description": "Description for Test boolean setting",
+            "displayName": "Test boolean setting",
             "isCustom": undefined,
             "name": "test:boolean:setting",
             "options": undefined,
@@ -41,9 +47,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test customstring setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": null,
-            "description": "Test custom string setting",
+            "description": "Description for Test custom string setting",
+            "displayName": "Test custom string setting",
             "isCustom": undefined,
             "name": "test:customstring:setting",
             "options": undefined,
@@ -53,9 +62,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test image setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": null,
-            "description": "Test image setting",
+            "description": "Description for Test image setting",
+            "displayName": "Test image setting",
             "isCustom": undefined,
             "name": "test:image:setting",
             "options": undefined,
@@ -65,9 +77,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test json setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": "{\\"foo\\": \\"bar\\"}",
-            "description": "Test json setting",
+            "description": "Description for Test json setting",
+            "displayName": "Test json setting",
             "isCustom": undefined,
             "name": "test:json:setting",
             "options": undefined,
@@ -77,9 +92,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test markdown setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": "",
-            "description": "Test markdown setting",
+            "description": "Description for Test markdown setting",
+            "displayName": "Test markdown setting",
             "isCustom": undefined,
             "name": "test:markdown:setting",
             "options": undefined,
@@ -89,9 +107,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test number setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": 5,
-            "description": "Test number setting",
+            "description": "Description for Test number setting",
+            "displayName": "Test number setting",
             "isCustom": undefined,
             "name": "test:number:setting",
             "options": undefined,
@@ -101,9 +122,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test select setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": "orange",
-            "description": "Test select setting",
+            "description": "Description for Test select setting",
+            "displayName": "Test select setting",
             "isCustom": undefined,
             "name": "test:select:setting",
             "options": Array [
@@ -117,9 +141,12 @@ exports[`AdvancedSettings should render normally 1`] = `
           },
           Object {
             "ariaName": "test string setting",
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "defVal": null,
-            "description": "Test string setting",
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
             "isCustom": undefined,
             "name": "test:string:setting",
             "options": undefined,

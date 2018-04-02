@@ -14,9 +14,10 @@ export function toEditableConfig({ def, name, value, isCustom }) {
   }
   const conf = {
     name,
+    displayName: def.name || name,
     ariaName: getAriaName(name),
     value,
-    category: def.category || DEFAULT_CATEGORY,
+    category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
     readonly: !!def.readonly,
     defVal: def.value,

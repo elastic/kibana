@@ -8,6 +8,7 @@ const names = {
   'discover': 'Discover',
   'dashboard': 'Dashboard',
   'reporting': 'Reporting',
+  'search': 'Search',
 };
 
 export function getCategoryName(category) {

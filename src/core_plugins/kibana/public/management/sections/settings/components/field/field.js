@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiImage,
   EuiLink,
   EuiTextArea,
@@ -360,10 +361,29 @@ export class Field extends PureComponent {
 
   renderLabel(setting) {
     return(
-      <span>
-        <span> {setting.name} </span>
-        {setting.isCustom ? <EuiTextColor color="subdued"> (Custom Setting) </EuiTextColor> : ''}
-      </span>
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+        <EuiFlexItem className="advancedSettings__field__name">{setting.displayName}</EuiFlexItem>
+        <EuiFlexItem className="advancedSettings__field__key" grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {setting.name !== setting.displayName ?
+              <EuiFlexItem className="advancedSettings__field__key__wrapper">
+                <EuiTextColor
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                  aria-label={setting.ariaName}
+                >
+                  {setting.name}
+                </EuiTextColor>
+              </EuiFlexItem>
+              : ''}
+            {setting.isCustom ?
+              <EuiFlexItem grow={false}>
+                <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
+              </EuiFlexItem>
+              : ''}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

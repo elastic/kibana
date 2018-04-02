@@ -13,21 +13,25 @@ jest.mock('../../field', () => ({
 const settings = [
   {
     name: 'dashboard:test:setting',
-    category: 'dashboard',
+    displayName: 'Dashboard test setting',
+    category: ['dashboard'],
   },
   {
     name: 'general:test:date',
+    displayName: 'Test date',
     description: 'bar',
-    category: 'general',
+    category: ['general'],
   },
   {
     name: 'setting:test',
+    displayName: 'Test setting',
     description: 'foo',
-    category: 'general',
+    category: ['general'],
   },
   {
     name: 'xpack:test:setting',
-    category: 'x-pack',
+    displayName: 'X-Pack test setting',
+    category: ['x-pack'],
     description: 'bar',
   }
 ];
@@ -42,6 +46,19 @@ describe('Form', () => {
         settings={settings}
         save={save}
         clear={clear}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should filter based on initial query', async () => {
+    const component = shallow(
+      <Form
+        settings={settings}
+        save={save}
+        clear={clear}
+        query="setting\:test"
       />
     );
 

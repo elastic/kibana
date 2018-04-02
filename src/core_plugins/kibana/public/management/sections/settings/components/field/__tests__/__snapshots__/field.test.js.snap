@@ -1,5 +1,113 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Array test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Array test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="array test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  array:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFieldText
+        data-test-subj="advancedSetting-editField-array:test:setting"
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value="default_value"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
@@ -28,7 +136,7 @@ exports[`Field for array setting should render default value if there is no user
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Array test setting",
+                  "__html": "Description for Array test setting",
                 }
               }
             />
@@ -37,14 +145,51 @@ exports[`Field for array setting should render default value if there is no user
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            array:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Array test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="array test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  array:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldText
@@ -89,7 +234,7 @@ exports[`Field for array setting should render user value if there is user value
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Array test setting",
+                  "__html": "Description for Array test setting",
                 }
               }
             />
@@ -115,14 +260,51 @@ exports[`Field for array setting should render user value if there is user value
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            array:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Array test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="array test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  array:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldText
@@ -133,6 +315,112 @@ exports[`Field for array setting should render user value if there is user value
         onChange={[Function]}
         onKeyDown={[Function]}
         value="user, value"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Boolean test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Boolean test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="boolean test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  boolean:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiSwitch
+        checked={true}
+        data-test-subj="advancedSetting-editField-boolean:test:setting"
+        disabled={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -167,7 +455,7 @@ exports[`Field for boolean setting should render default value if there is no us
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Boolean test setting",
+                  "__html": "Description for Boolean test setting",
                 }
               }
             />
@@ -176,14 +464,51 @@ exports[`Field for boolean setting should render default value if there is no us
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            boolean:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Boolean test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="boolean test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  boolean:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiSwitch
@@ -226,7 +551,7 @@ exports[`Field for boolean setting should render user value if there is user val
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Boolean test setting",
+                  "__html": "Description for Boolean test setting",
                 }
               }
             />
@@ -252,20 +577,164 @@ exports[`Field for boolean setting should render user value if there is user val
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            boolean:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Boolean test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="boolean test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  boolean:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiSwitch
         checked={false}
         data-test-subj="advancedSetting-editField-boolean:test:setting"
         disabled={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Image test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Image test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="image test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  image:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFilePicker
+        accept=".jpg,.jpeg,.png"
+        data-test-subj="advancedSetting-editField-image:test:setting"
+        disabled={false}
+        initialPromptText="Select or drag and drop a file"
         onChange={[Function]}
         onKeyDown={[Function]}
       />
@@ -302,7 +771,7 @@ exports[`Field for image setting should render default value if there is no user
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Image test setting",
+                  "__html": "Description for Image test setting",
                 }
               }
             />
@@ -311,14 +780,51 @@ exports[`Field for image setting should render default value if there is no user
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            image:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Image test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="image test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  image:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFilePicker
@@ -362,7 +868,7 @@ exports[`Field for image setting should render user value if there is user value
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Image test setting",
+                  "__html": "Description for Image test setting",
                 }
               }
             />
@@ -399,14 +905,51 @@ exports[`Field for image setting should render user value if there is user value
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            image:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Image test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="image test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  image:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiImage
@@ -415,6 +958,115 @@ exports[`Field for image setting should render user value if there is user value
         fullScreenIconColor="light"
         size="original"
         url="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Json test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Json test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="json test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  json:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiTextArea
+        data-test-subj="advancedSetting-editField-json:test:setting"
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value="{\\"foo\\": \\"bar\\"}"
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -449,7 +1101,7 @@ exports[`Field for json setting should render default value if there is no user 
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Json test setting",
+                  "__html": "Description for Json test setting",
                 }
               }
             />
@@ -475,14 +1127,51 @@ exports[`Field for json setting should render default value if there is no user 
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            json:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Json test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="json test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  json:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiTextArea
@@ -528,7 +1217,7 @@ exports[`Field for json setting should render user value if there is user value 
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Json test setting",
+                  "__html": "Description for Json test setting",
                 }
               }
             />
@@ -554,14 +1243,51 @@ exports[`Field for json setting should render user value if there is user value 
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            json:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Json test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="json test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  json:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiTextArea
@@ -573,6 +1299,115 @@ exports[`Field for json setting should render user value if there is user value 
         onKeyDown={[Function]}
         rows={6}
         value="{\\"hello\\": \\"world\\"}"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Markdown test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Markdown test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="markdown test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  markdown:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiTextArea
+        data-test-subj="advancedSetting-editField-markdown:test:setting"
+        disabled={false}
+        fullWidth={false}
+        isInvalid={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        rows={6}
+        value=""
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -607,7 +1442,7 @@ exports[`Field for markdown setting should render default value if there is no u
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Markdown test setting",
+                  "__html": "Description for Markdown test setting",
                 }
               }
             />
@@ -616,14 +1451,51 @@ exports[`Field for markdown setting should render default value if there is no u
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            markdown:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Markdown test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="markdown test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  markdown:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiTextArea
@@ -669,7 +1541,7 @@ exports[`Field for markdown setting should render user value if there is user va
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Markdown test setting",
+                  "__html": "Description for Markdown test setting",
                 }
               }
             />
@@ -695,14 +1567,51 @@ exports[`Field for markdown setting should render user value if there is user va
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            markdown:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Markdown test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="markdown test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  markdown:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiTextArea
@@ -714,6 +1623,114 @@ exports[`Field for markdown setting should render user value if there is user va
         onKeyDown={[Function]}
         rows={6}
         value="**bold**"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Number test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Number test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="number test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  number:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFieldNumber
+        data-test-subj="advancedSetting-editField-number:test:setting"
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value={5}
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -748,7 +1765,7 @@ exports[`Field for number setting should render default value if there is no use
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Number test setting",
+                  "__html": "Description for Number test setting",
                 }
               }
             />
@@ -757,14 +1774,51 @@ exports[`Field for number setting should render default value if there is no use
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            number:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Number test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="number test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  number:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldNumber
@@ -809,7 +1863,7 @@ exports[`Field for number setting should render user value if there is user valu
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Number test setting",
+                  "__html": "Description for Number test setting",
                 }
               }
             />
@@ -835,14 +1889,51 @@ exports[`Field for number setting should render user value if there is user valu
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            number:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Number test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="number test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  number:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldNumber
@@ -853,6 +1944,131 @@ exports[`Field for number setting should render user value if there is user valu
         onChange={[Function]}
         onKeyDown={[Function]}
         value={10}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for Select test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Select test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="select test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  select:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiSelect
+        data-test-subj="advancedSetting-editField-select:test:setting"
+        disabled={false}
+        fullWidth={false}
+        hasNoInitialSelection={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "apple",
+              "value": "apple",
+            },
+            Object {
+              "text": "orange",
+              "value": "orange",
+            },
+            Object {
+              "text": "banana",
+              "value": "banana",
+            },
+          ]
+        }
+        value="orange"
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -887,7 +2103,7 @@ exports[`Field for select setting should render default value if there is no use
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Select test setting",
+                  "__html": "Description for Select test setting",
                 }
               }
             />
@@ -896,14 +2112,51 @@ exports[`Field for select setting should render default value if there is no use
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            select:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Select test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="select test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  select:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiSelect
@@ -965,7 +2218,7 @@ exports[`Field for select setting should render user value if there is user valu
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "Select test setting",
+                  "__html": "Description for Select test setting",
                 }
               }
             />
@@ -991,14 +2244,51 @@ exports[`Field for select setting should render user value if there is user valu
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            select:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            Select test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="select test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  select:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiSelect
@@ -1026,6 +2316,114 @@ exports[`Field for select setting should render user value if there is user valu
           ]
         }
         value="banana"
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+    style={
+      Object {
+        "minWidth": 400,
+      }
+    }
+  >
+    <EuiFormRow
+      error={null}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <div>
+          <div>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": "Description for String test setting",
+                }
+              }
+            />
+          </div>
+        </div>
+      }
+      isInvalid={false}
+      label={
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            String test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="string test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  string:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={false}
+              >
+                <EuiIconTip
+                  aria-label="Custom setting"
+                  color="primary"
+                  content="Custom setting"
+                  type="asterisk"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFieldText
+        data-test-subj="advancedSetting-editField-string:test:setting"
+        disabled={false}
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        value=""
       />
     </EuiFormRow>
   </EuiFlexItem>
@@ -1060,7 +2458,7 @@ exports[`Field for string setting should render default value if there is no use
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "String test setting",
+                  "__html": "Description for String test setting",
                 }
               }
             />
@@ -1069,14 +2467,51 @@ exports[`Field for string setting should render default value if there is no use
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            string:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            String test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="string test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  string:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldText
@@ -1121,7 +2556,7 @@ exports[`Field for string setting should render user value if there is user valu
             <span
               dangerouslySetInnerHTML={
                 Object {
-                  "__html": "String test setting",
+                  "__html": "Description for String test setting",
                 }
               }
             />
@@ -1147,14 +2582,51 @@ exports[`Field for string setting should render user value if there is user valu
       }
       isInvalid={false}
       label={
-        <span>
-          <span>
-             
-            string:test:setting
-             
-          </span>
-          
-        </span>
+        <EuiFlexGroup
+          alignItems="stretch"
+          component="div"
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          responsive={true}
+          wrap={false}
+        >
+          <EuiFlexItem
+            className="advancedSettings__field__name"
+            component="div"
+            grow={true}
+          >
+            String test setting
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="advancedSettings__field__key"
+            component="div"
+            grow={false}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              component="div"
+              gutterSize="xs"
+              justifyContent="flexStart"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                className="advancedSettings__field__key__wrapper"
+                component="div"
+                grow={true}
+              >
+                <EuiTextColor
+                  aria-label="string test setting"
+                  className="advancedSettings__field__key__text"
+                  color="subdued"
+                >
+                  string:test:setting
+                </EuiTextColor>
+              </EuiFlexItem>
+              
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiFieldText

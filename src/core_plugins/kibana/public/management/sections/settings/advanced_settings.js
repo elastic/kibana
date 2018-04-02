@@ -15,6 +15,7 @@ import './advanced_settings.less';
 export class AdvancedSettings extends Component {
   static propTypes = {
     config: PropTypes.object.isRequired,
+    query: PropTypes.string,
   }
 
   constructor(props) {
@@ -58,6 +59,8 @@ export class AdvancedSettings extends Component {
 
   render() {
     const { settings } = this.state;
+    const { query } = this.props;
+
     return (
       <div className="advancedSettings">
         <div>
@@ -69,6 +72,7 @@ export class AdvancedSettings extends Component {
             settings={settings}
             save={this.saveConfig}
             clear={this.clearConfig}
+            query={query}
           />
         </div>
       </div>

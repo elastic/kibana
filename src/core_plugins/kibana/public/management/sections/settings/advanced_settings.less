@@ -1,16 +1,23 @@
 .advancedSettings {
   padding: 20px;
 
-  &__table {
-
-    .euiTableCellContent--overflowingContent {
-      overflow: hidden;
+  &__field {
+    &__name {
+      white-space: nowrap;
     }
 
-    &__value {
+    &__key {
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: normal;
+
+      &__wrapper {
+        overflow: hidden;
+      }
+
+      &__text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 }

@@ -16,6 +16,7 @@ describe('Settings', function () {
         expect(getCategoryName('discover')).to.be('Discover');
         expect(getCategoryName('dashboard')).to.be('Dashboard');
         expect(getCategoryName('reporting')).to.be('Reporting');
+        expect(getCategoryName('search')).to.be('Search');
       });
 
       it('should capitalize unknown category', function () {

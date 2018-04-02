@@ -10,7 +10,7 @@ import { AdvancedSettings } from './advanced_settings';
 
 const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
 
-function updateAdvancedSettings($scope, config) {
+function updateAdvancedSettings($scope, config, query) {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
     if (!node) {
@@ -20,6 +20,7 @@ function updateAdvancedSettings($scope, config) {
     render(
       <AdvancedSettings
         config={config}
+        query={query}
       />,
       node,
     );
@@ -32,22 +33,26 @@ function destroyAdvancedSettings() {
 }
 
 uiRoutes
-  .when('/management/kibana/settings', {
+  .when('/management/kibana/settings/:setting?', {
     template: indexTemplate
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementAdvanced', function (config) {
+  .directive('kbnManagementAdvanced', function (config, $route) {
     return {
       restrict: 'E',
       link: function ($scope) {
+        const query = ($route.current.params.setting || '').replace(':', '\\:');
+
         config.watchAll(() => {
-          updateAdvancedSettings($scope, config);
+          updateAdvancedSettings($scope, config, query);
         }, $scope);
 
         $scope.$on('$destory', () => {
           destroyAdvancedSettings();
         });
+
+        $route.updateParams({ setting: null });
       }
     };
   });

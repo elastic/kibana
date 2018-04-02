@@ -1,5 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Form should filter based on initial query 1`] = `
+<React.Fragment>
+  <EuiForm>
+    <EuiFormRow
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+    >
+      <EuiSearchBar
+        box={
+          Object {
+            "incremental": true,
+          }
+        }
+        defaultQuery="setting\\\\:test"
+        filters={
+          Array [
+            Object {
+              "field": "category",
+              "multiSelect": false,
+              "name": "Category",
+              "options": Array [
+                Object {
+                  "name": "General",
+                  "value": "general",
+                },
+              ],
+              "type": "field_value_selection",
+            },
+          ]
+        }
+        onChange={[Function]}
+      />
+    </EuiFormRow>
+  </EuiForm>
+  <EuiSpacer
+    size="l"
+  />
+  <React.Fragment
+    key="general"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          General
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="setting:test"
+        save={[Function]}
+        setting={
+          Object {
+            "category": Array [
+              "general",
+            ],
+            "description": "foo",
+            "displayName": "Test setting",
+            "name": "setting:test",
+          }
+        }
+      />
+    </EuiForm>
+  </React.Fragment>
+</React.Fragment>
+`;
+
 exports[`Form should filter based on the query bar 1`] = `
 <React.Fragment>
   <EuiForm>
@@ -11,6 +80,52 @@ exports[`Form should filter based on the query bar 1`] = `
         box={
           Object {
             "incremental": true,
+          }
+        }
+        defaultQuery={
+          Query {
+            "ast": _AST {
+              "_clauses": Array [
+                Object {
+                  "field": "category",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "general",
+                },
+                Object {
+                  "match": "must",
+                  "type": "term",
+                  "value": "date",
+                },
+              ],
+              "_indexedClauses": Object {
+                "field": Object {
+                  "category": Array [
+                    Object {
+                      "field": "category",
+                      "match": "must",
+                      "operator": "eq",
+                      "type": "field",
+                      "value": "general",
+                    },
+                  ],
+                },
+                "is": Object {},
+                "term": Array [
+                  Object {
+                    "match": "must",
+                    "type": "term",
+                    "value": "date",
+                  },
+                ],
+              },
+            },
+            "syntax": Object {
+              "parse": [Function],
+              "print": [Function],
+            },
+            "text": "category:general date",
           }
         }
         filters={
@@ -54,8 +169,11 @@ exports[`Form should filter based on the query bar 1`] = `
         save={[Function]}
         setting={
           Object {
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "description": "bar",
+            "displayName": "Test date",
             "name": "general:test:date",
           }
         }
@@ -78,6 +196,7 @@ exports[`Form should render normally 1`] = `
             "incremental": true,
           }
         }
+        defaultQuery={null}
         filters={
           Array [
             Object {
@@ -86,12 +205,12 @@ exports[`Form should render normally 1`] = `
               "name": "Category",
               "options": Array [
                 Object {
-                  "name": "Dashboard",
-                  "value": "dashboard",
-                },
-                Object {
                   "name": "General",
                   "value": "general",
+                },
+                Object {
+                  "name": "Dashboard",
+                  "value": "dashboard",
                 },
                 Object {
                   "name": "X-pack",
@@ -110,35 +229,6 @@ exports[`Form should render normally 1`] = `
     size="l"
   />
   <React.Fragment
-    key="dashboard"
-  >
-    <EuiForm>
-      <EuiText>
-        <h2>
-          Dashboard
-        </h2>
-      </EuiText>
-      <EuiSpacer
-        size="m"
-      />
-      <Field
-        clear={[Function]}
-        key="dashboard:test:setting"
-        save={[Function]}
-        setting={
-          Object {
-            "category": "dashboard",
-            "name": "dashboard:test:setting",
-          }
-        }
-      />
-    </EuiForm>
-    <EuiHorizontalRule
-      margin="l"
-      size="full"
-    />
-  </React.Fragment>
-  <React.Fragment
     key="general"
   >
     <EuiForm>
@@ -156,8 +246,11 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "description": "bar",
+            "displayName": "Test date",
             "name": "general:test:date",
           }
         }
@@ -168,9 +261,44 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
-            "category": "general",
+            "category": Array [
+              "general",
+            ],
             "description": "foo",
+            "displayName": "Test setting",
             "name": "setting:test",
+          }
+        }
+      />
+    </EuiForm>
+    <EuiHorizontalRule
+      margin="l"
+      size="full"
+    />
+  </React.Fragment>
+  <React.Fragment
+    key="dashboard"
+  >
+    <EuiForm>
+      <EuiText>
+        <h2>
+          Dashboard
+        </h2>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        key="dashboard:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "category": Array [
+              "dashboard",
+            ],
+            "displayName": "Dashboard test setting",
+            "name": "dashboard:test:setting",
           }
         }
       />
@@ -198,8 +326,11 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
-            "category": "x-pack",
+            "category": Array [
+              "x-pack",
+            ],
             "description": "bar",
+            "displayName": "X-Pack test setting",
             "name": "xpack:test:setting",
           }
         }
