@@ -1,6 +1,6 @@
 import {
   resolveSavedObjects,
-  resolveConflicts,
+  resolveIndexPatternConflicts,
   saveObjects,
   saveObject,
 } from '../resolve_saved_objects';
@@ -43,7 +43,9 @@ describe('resolveSavedObjects', () => {
 
       const indexPatterns = {
         get: async () => {
-          return {};
+          return {
+            create: () => '2',
+          };
         },
         create: async () => {
           return '2';
@@ -135,7 +137,9 @@ describe('resolveSavedObjects', () => {
 
       const indexPatterns = {
         get: async () => {
-          return {};
+          return {
+            create: () => '2',
+          };
         },
         create: async () => {
           return '2';
@@ -206,7 +210,7 @@ describe('resolveSavedObjects', () => {
     });
   });
 
-  describe('resolveConflicts', () => {
+  describe('resolveIndexPatternConflicts', () => {
     it('should resave resolutions', async () => {
       const hydrateIndexPattern = jest.fn();
       const save = jest.fn();
@@ -249,7 +253,7 @@ describe('resolveSavedObjects', () => {
 
       const overwriteAll = false;
 
-      await resolveConflicts(
+      await resolveIndexPatternConflicts(
         resolutions,
         conflictedIndexPatterns,
         overwriteAll

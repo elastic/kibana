@@ -27,7 +27,7 @@ import { importFile } from '../../../../lib/import_file';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
-  resolveConflicts,
+  resolveIndexPatternConflicts,
   saveObjects,
 } from '../../../../lib/resolve_saved_objects';
 import { INCLUDED_TYPES } from '../../objects_table';
@@ -116,6 +116,7 @@ export class Flyout extends Component {
       conflictedIndexPatterns,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
+      importedObjectCount,
     } = await resolveSavedObjects(
       contents,
       isOverwriteAllChecked,
@@ -147,7 +148,7 @@ export class Flyout extends Component {
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       conflicts,
-      importCount: contents.length,
+      importCount: importedObjectCount,
       isLoading: false,
       wasImportSuccessful: conflicts.length === 0,
     });
@@ -172,10 +173,6 @@ export class Flyout extends Component {
     );
   }
 
-  get unresolvedConflictsCount() {
-    return this.state.conflicts.filter(({ newIndexPatternId }) => !newIndexPatternId).length;
-  }
-
   confirmImport = async () => {
     const {
       conflictedIndexPatterns,
@@ -192,6 +189,8 @@ export class Flyout extends Component {
       loadingMessage: undefined,
     });
 
+    let importCount = this.state.importCount;
+
     if (this.hasConflicts) {
       try {
         const resolutions = this.resolutions;
@@ -199,21 +198,21 @@ export class Flyout extends Component {
         // Do not Promise.all these calls as the order matters
         this.setState({ loadingMessage: 'Resolving conflicts...' });
         if (resolutions.length) {
-          await resolveConflicts(
+          importCount += await resolveIndexPatternConflicts(
             resolutions,
             conflictedIndexPatterns,
             isOverwriteAllChecked
           );
         }
         this.setState({ loadingMessage: 'Saving conflicts...' });
-        await saveObjects(
+        importCount += await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches,
           isOverwriteAllChecked
         );
         this.setState({
           loadingMessage: 'Ensure saved searches are linked properly...',
         });
-        await resolveSavedSearches(
+        importCount += await resolveSavedSearches(
           conflictedSearchDocs,
           services,
           indexPatterns,
@@ -229,7 +228,7 @@ export class Flyout extends Component {
       }
     }
 
-    this.setState({ isLoading: false, wasImportSuccessful: true });
+    this.setState({ isLoading: false, wasImportSuccessful: true, importCount });
   };
 
   onIndexChanged = (id, e) => {
@@ -372,10 +371,9 @@ export class Flyout extends Component {
     }
 
     if (wasImportSuccessful) {
-      const count = importCount - this.unresolvedConflictsCount;
       return (
         <EuiCallOut title="Import successful" color="success" iconType="check">
-          <p>Successfully imported {count} objects.</p>
+          <p>Successfully imported {importCount} objects.</p>
         </EuiCallOut>
       );
     }

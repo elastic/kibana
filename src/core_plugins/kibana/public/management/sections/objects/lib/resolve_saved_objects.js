@@ -2,14 +2,7 @@ import { SavedObjectNotFound } from 'ui/errors';
 
 async function getSavedObject(doc, services) {
   const service = services.find(service => service.type === doc._type);
-
   if (!service) {
-    // const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-    // const reason = `Invalid type: "${doc._type}"`;
-
-    // console.warn(`${msg}, ${reason}`, {
-    // lifetime: 0,
-    // });
     return;
   }
 
@@ -18,24 +11,7 @@ async function getSavedObject(doc, services) {
   return obj;
 }
 
-async function getIndexPattern(doc, indexPatterns) {
-  let indexPattern;
-
-  try {
-    indexPattern = await indexPatterns.get(doc._id);
-  } catch (err) {
-    // Maybe it's store as the title?
-    try {
-      indexPattern = await indexPatterns.get(doc._source.title);
-    } catch (err2) {
-      // Do nothing...
-    }
-  }
-
-  return indexPattern;
-}
-
-async function importIndexPattern(doc, indexPatterns) {
+async function importIndexPattern(doc, indexPatterns, overwriteAll) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.get();
   Object.assign(emptyPattern, {
@@ -43,7 +19,7 @@ async function importIndexPattern(doc, indexPatterns) {
     title: doc._source.title,
     timeFieldName: doc._source.timeFieldName,
   });
-  const newId = await emptyPattern.create();
+  const newId = await emptyPattern.create(true, !overwriteAll);
   indexPatterns.cache.clear(newId);
   return newId;
 }
@@ -79,30 +55,38 @@ async function awaitEachItemInParallel(list, op) {
   return await Promise.all(list.map(item => op(item)));
 }
 
-export async function resolveConflicts(
+export async function resolveIndexPatternConflicts(
   resolutions,
   conflictedIndexPatterns,
   overwriteAll
 ) {
+  let importCount = 0;
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
-    const oldIndexId = obj.searchSource.getOwn('index');
-    const newIndexId = resolutions.find(({ oldId }) => oldId === oldIndexId)
-      .newId;
-    // If the user did not select a new index pattern in the modal, the id
-    // will be same as before, so don't try to update it
-    if (newIndexId === oldIndexId) {
-      return;
+    let oldIndexId = obj.searchSource.getOwn('index');
+    // Depending on the object, this can either be the raw id or the actual index pattern object
+    if (typeof oldIndexId !== 'string') {
+      oldIndexId = oldIndexId.id;
     }
+    const newIndexId = resolutions.find(({ oldId }) => oldId === oldIndexId).newId;
     await obj.hydrateIndexPattern(newIndexId);
-    return await saveObject(obj, overwriteAll);
+    if (await saveObject(obj, overwriteAll)) {
+      importCount++;
+    }
   });
+  return importCount;
 }
 
 export async function saveObjects(objs, overwriteAll) {
+  let importCount = 0;
   await awaitEachItemInParallel(
     objs,
-    async obj => await saveObject(obj, overwriteAll)
+    async obj => {
+      if (await saveObject(obj, overwriteAll)) {
+        importCount++;
+      }
+    }
   );
+  return importCount;
 }
 
 export async function saveObject(obj, overwriteAll) {
@@ -115,14 +99,18 @@ export async function resolveSavedSearches(
   indexPatterns,
   overwriteAll
 ) {
+  let importCount = 0;
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
     if (!obj) {
       // Just ignore?
       return;
     }
-    await importDocument(obj, searchDoc, overwriteAll);
+    if (await importDocument(obj, searchDoc, overwriteAll)) {
+      importCount++;
+    }
   });
+  return importCount;
 }
 
 export async function resolveSavedObjects(
@@ -133,15 +121,17 @@ export async function resolveSavedObjects(
 ) {
   const docTypes = groupByType(savedObjects);
 
+  // Keep track of how many we actually import because the user
+  // can cancel an override
+  let importedObjectCount = 0;
+
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(
     docTypes.indexPatterns,
     async indexPatternDoc => {
-      const obj = await getIndexPattern(indexPatternDoc, indexPatterns);
-      if (obj && !overwriteAll) {
-        return;
+      if (await importIndexPattern(indexPatternDoc, indexPatterns, overwriteAll)) {
+        importedObjectCount++;
       }
-      await importIndexPattern(indexPatternDoc, indexPatterns);
     }
   );
 
@@ -162,7 +152,9 @@ export async function resolveSavedObjects(
     const obj = await getSavedObject(searchDoc, services);
 
     try {
-      await importDocument(obj, searchDoc, overwriteAll);
+      if (await importDocument(obj, searchDoc, overwriteAll)) {
+        importedObjectCount++;
+      }
     } catch (err) {
       if (err instanceof SavedObjectNotFound) {
         if (err.savedObjectType === 'index-pattern') {
@@ -178,7 +170,9 @@ export async function resolveSavedObjects(
     const obj = await getSavedObject(otherDoc, services);
 
     try {
-      await importDocument(obj, otherDoc, overwriteAll);
+      if (await importDocument(obj, otherDoc, overwriteAll)) {
+        importedObjectCount++;
+      }
     } catch (err) {
       if (err instanceof SavedObjectNotFound) {
         if (err.savedObjectType === 'index-pattern') {
@@ -196,5 +190,6 @@ export async function resolveSavedObjects(
     conflictedIndexPatterns,
     conflictedSavedObjectsLinkedToSavedSearches,
     conflictedSearchDocs,
+    importedObjectCount,
   };
 }

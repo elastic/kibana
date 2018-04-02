@@ -113,5 +113,40 @@ export default function ({ getService, getPageObjects }) {
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.length).to.be(2);
     });
+
+    it('should work with index patterns', async () => {
+      // First, import the objects
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      // Wait for all the saves to happen
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.length).to.be(2);
+    });
+
+    it('should work when the index pattern does not exist', async () => {
+      // First, we need to delete the index pattern
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.removeIndexPattern();
+
+      // Second, create it
+      await PageObjects.settings.createIndexPattern('logstash-', '@timestamp');
+
+      // Then, import the objects
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickImportDone();
+      // Wait for all the saves to happen
+      await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
+
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.length).to.be(2);
+    });
   });
 }

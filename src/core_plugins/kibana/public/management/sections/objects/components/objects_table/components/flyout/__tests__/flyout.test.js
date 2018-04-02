@@ -31,7 +31,7 @@ jest.mock('../../../../../lib/import_file', () => ({
 jest.mock('../../../../../lib/resolve_saved_objects', () => ({
   resolveSavedObjects: jest.fn(),
   resolveSavedSearches: jest.fn(),
-  resolveConflicts: jest.fn(),
+  resolveIndexPatternConflicts: jest.fn(),
   saveObjects: jest.fn(),
 }));
 
@@ -118,7 +118,7 @@ describe('Flyout', () => {
     const {
       resolveSavedObjects,
       resolveSavedSearches,
-      resolveConflicts,
+      resolveIndexPatternConflicts,
       saveObjects,
     } = require('../../../../../lib/resolve_saved_objects');
 
@@ -163,6 +163,7 @@ describe('Flyout', () => {
         conflictedIndexPatterns: mockConflictedIndexPatterns,
         conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
+        importedObjectCount: 2,
       }));
     });
 
@@ -236,7 +237,7 @@ describe('Flyout', () => {
         .simulate('click');
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
-      expect(resolveConflicts).toHaveBeenCalledWith(
+      expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
         false
@@ -261,7 +262,7 @@ describe('Flyout', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      resolveConflicts.mockImplementation(() => {
+      resolveIndexPatternConflicts.mockImplementation(() => {
         throw new Error('foobar');
       });
 
