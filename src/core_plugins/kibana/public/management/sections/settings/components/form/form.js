@@ -100,7 +100,7 @@ export class Form extends PureComponent {
         type: 'field_value_selection',
         field: 'category',
         name: 'Category',
-        multiSelect: false,
+        multiSelect: 'or',
         options: categories.map(category => {
           return {
             value: category,

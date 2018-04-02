@@ -18,7 +18,7 @@ exports[`Form should filter based on initial query 1`] = `
           Array [
             Object {
               "field": "category",
-              "multiSelect": false,
+              "multiSelect": "or",
               "name": "Category",
               "options": Array [
                 Object {
@@ -132,7 +132,7 @@ exports[`Form should filter based on the query bar 1`] = `
           Array [
             Object {
               "field": "category",
-              "multiSelect": false,
+              "multiSelect": "or",
               "name": "Category",
               "options": Array [
                 Object {
@@ -201,7 +201,7 @@ exports[`Form should render normally 1`] = `
           Array [
             Object {
               "field": "category",
-              "multiSelect": false,
+              "multiSelect": "or",
               "name": "Category",
               "options": Array [
                 Object {

@@ -1,5 +1,13 @@
+@import (reference) '~ui/styles/variables/colors';
+
 .advancedSettings {
   padding: 20px;
+  background: @globalColorLightestGray;
+
+  > .euiPanel {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
 
   &__field {
     &__name {

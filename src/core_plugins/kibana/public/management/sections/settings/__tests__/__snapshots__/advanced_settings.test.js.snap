@@ -4,10 +4,13 @@ exports[`AdvancedSettings should render normally 1`] = `
 <div
   className="advancedSettings"
 >
-  <div>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+    size="l"
+  >
     <CallOuts />
-  </div>
-  <div>
     <Form
       clear={[Function]}
       save={[Function]}
@@ -157,6 +160,6 @@ exports[`AdvancedSettings should render normally 1`] = `
         ]
       }
     />
-  </div>
+  </EuiPanel>
 </div>
 `;

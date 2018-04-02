@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   Comparators,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
@@ -63,18 +64,15 @@ export class AdvancedSettings extends Component {
 
     return (
       <div className="advancedSettings">
-        <div>
+        <EuiPanel size="l">
           <CallOuts/>
-        </div>
-
-        <div>
           <Form
             settings={settings}
             save={this.saveConfig}
             clear={this.clearConfig}
             query={query}
           />
-        </div>
+        </EuiPanel>
       </div>
     );
   }

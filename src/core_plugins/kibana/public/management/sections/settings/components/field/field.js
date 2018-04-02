@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldNumber,
   EuiFieldText,
   EuiFilePicker,
@@ -449,7 +450,7 @@ export class Field extends PureComponent {
       <EuiFlexItem>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 fill
                 aria-label={`Save ${ariaName}`}
@@ -460,15 +461,15 @@ export class Field extends PureComponent {
                 Save
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
                 aria-label={`Cancel editing ${ariaName}`}
                 onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
                 disabled={loading}
                 data-test-subj={`advancedSetting-cancelEditField-${name}`}
               >
                 Cancel
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFormRow>
