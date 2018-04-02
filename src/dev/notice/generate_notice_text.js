@@ -33,7 +33,7 @@ export async function generateNoticeText() {
 
   let noticeText = '';
   noticeText += 'Kibana\n';
-  noticeText += `Copyright 2012-${(new Date()).getUTCFullYear()} Elasticsearch\n`;
+  noticeText += `Copyright 2012-${(new Date()).getUTCFullYear()} Elasticsearch B.V.\n`;
 
   for (const comment of noticeComments.sort()) {
     noticeText += '\n---\n';
