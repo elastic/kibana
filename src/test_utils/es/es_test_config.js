@@ -1,4 +1,5 @@
-import { format as formatUrl, url } from 'url';
+import url, {  format as formatUrl } from 'url';
+// import url from 'url';
 import pkg from '../../../package.json';
 import { admin } from '../../../test/shield';
 
@@ -31,7 +32,8 @@ export const esTestConfig = new class EsTestConfig {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
       testEsUrl = url.parse(process.env.TEST_ES_URL);
-      testEsProtocol = testEsUrl.protocol;
+      // have to remove the ":" off protocol
+      testEsProtocol = testEsUrl.protocol.slice(0, -1);
       testEsHostname = testEsUrl.hostname;
       testEsPort = parseInt(testEsUrl.port, 10);
       testEsUsername = testEsUrl.username;
@@ -45,7 +47,7 @@ export const esTestConfig = new class EsTestConfig {
       testEsUsername = process.env.TEST_ES_USERNAME || admin.username;
       testEsPassword = process.env.TEST_ES_PASSWORD || admin.password;
     }
-
+    console.log(testEsProtocol);
 
 
     return {

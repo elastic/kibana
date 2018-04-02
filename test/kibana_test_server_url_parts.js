@@ -11,7 +11,8 @@ let testKibanaPassword;
 // Allow setting one complete TEST_KIBANA_URL for Kibana like https://elastic:changeme@myCloudInstance:5601
 if (process.env.TEST_KIBANA_URL) {
   testKibanaUrl = url.parse(process.env.TEST_KIBANA_URL);
-  testKibanaProtocol = testKibanaUrl.protocol;
+  // have to remove the ":" off protocol
+  testKibanaProtocol = testKibanaUrl.protocol.slice(0, -1);
   testKibanaHostname = testKibanaUrl.hostname;
   testKibanaPort = parseInt(testKibanaUrl.port, 10);
   testKibanaUsername = testKibanaUrl.username;
