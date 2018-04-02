@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { flattenDeep } from 'lodash';
 import { Header } from './components/header';
@@ -6,7 +6,7 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
-import { EuiSpacer, EuiHorizontalRule, Query } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { retrieveAndExportDocs } from '../../lib/retrieve_and_export_docs';
 import { scanAllTypes } from '../../lib/scan_all_types';
 import { saveToFile } from '../../lib/save_to_file';
@@ -281,7 +281,7 @@ export class ObjectsTable extends Component {
     }));
 
     return (
-      <Fragment>
+      <div style={{ padding: '0 1rem' }}>
         {this.renderFlyout()}
         {this.renderRelationships()}
         <Header
@@ -291,7 +291,6 @@ export class ObjectsTable extends Component {
           totalCount={totalItemCount}
         />
         <EuiSpacer size="xs" />
-        <EuiHorizontalRule margin="s" />
         <Table
           selectionConfig={selectionConfig}
           selectedSavedObjects={selectedSavedObjects}
@@ -309,7 +308,7 @@ export class ObjectsTable extends Component {
           isSearching={isSearching}
           onShowRelationships={this.onShowRelationships}
         />
-      </Fragment>
+      </div>
     );
   }
 }

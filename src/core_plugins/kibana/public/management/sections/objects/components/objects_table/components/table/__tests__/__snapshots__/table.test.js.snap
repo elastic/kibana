@@ -46,6 +46,9 @@ exports[`Table should render normally 1`] = `
       ]
     }
   />
+  <EuiSpacer
+    size="s"
+  />
   <div
     data-test-subj="savedObjectsTable"
   >
@@ -53,6 +56,7 @@ exports[`Table should render normally 1`] = `
       columns={
         Array [
           Object {
+            "align": "center",
             "description": "Type of the saved object",
             "field": "type",
             "name": "Type",

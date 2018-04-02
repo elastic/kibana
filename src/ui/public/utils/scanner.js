@@ -3,7 +3,6 @@ import chrome from 'ui/chrome';
 
 export const Scanner = function ($http, { index, type, typesToInclude } = {}) {
   if (!index) throw new Error('Expected index');
-  // if (!type) throw new Error('Expected type');
   if (!$http) throw new Error('Expected $http');
 
   this.$http = $http;

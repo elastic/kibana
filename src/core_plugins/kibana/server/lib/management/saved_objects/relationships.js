@@ -79,8 +79,14 @@ async function findSavedSearchRelationships(id, size, callCluster, savedObjectsC
   const search = await savedObjectsClient.get('search', id);
 
   const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
-  const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index);
-  const indexPatterns = [{ id: indexPattern.id, title: indexPattern.attributes.title }];
+
+  let indexPatterns = [];
+  try {
+    const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index);
+    indexPatterns = [{ id: indexPattern.id, title: indexPattern.attributes.title }];
+  } catch (err) {
+    // Do nothing
+  }
 
   const allVisualizationsResponse = await callCluster('search', {
     index: kibanaIndex,

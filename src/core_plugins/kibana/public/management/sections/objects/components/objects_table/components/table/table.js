@@ -1,7 +1,14 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSearchBar, EuiBasicTable, EuiButton, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiSearchBar,
+  EuiBasicTable,
+  EuiButton,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
 
 export class Table extends PureComponent {
@@ -79,11 +86,16 @@ export class Table extends PureComponent {
         field: 'type',
         name: 'Type',
         width: '35px',
+        align: 'center',
         description: `Type of the saved object`,
         sortable: false,
-        render: (type) => {
+        render: type => {
           return (
-            <EuiIcon type={getSavedObjectIcon(type)} size="s"/>
+            <EuiIcon
+              aria-label={type}
+              type={getSavedObjectIcon(type)}
+              size="s"
+            />
           );
         },
       },
@@ -94,9 +106,7 @@ export class Table extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => (
-          <EuiLink href={getEditUrl(object.id, object.type)}>
-            {title}
-          </EuiLink>
+          <EuiLink href={getEditUrl(object.id, object.type)}>{title}</EuiLink>
         ),
       },
       {
@@ -104,18 +114,21 @@ export class Table extends PureComponent {
         actions: [
           {
             name: 'In app',
-            description: 'View the relationships this saved object has to other saved objects',
+            description:
+              'View the relationships this saved object has to other saved objects',
             icon: 'eye',
-            onClick: object => goInApp(object.id, object.type)
+            onClick: object => goInApp(object.id, object.type),
           },
           {
             name: 'Relationships',
-            description: 'View the relationships this saved object has to other saved objects',
+            description:
+              'View the relationships this saved object has to other saved objects',
             icon: 'kqlSelector',
-            onClick: object => onShowRelationships(object.id, object.type, object.title)
-          }
-        ]
-      }
+            onClick: object =>
+              onShowRelationships(object.id, object.type, object.title),
+          },
+        ],
+      },
     ];
 
     return (
@@ -145,6 +158,7 @@ export class Table extends PureComponent {
             </EuiButton>,
           ]}
         />
+        <EuiSpacer size="s" />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

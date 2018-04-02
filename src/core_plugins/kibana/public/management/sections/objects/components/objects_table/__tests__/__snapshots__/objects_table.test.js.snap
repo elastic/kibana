@@ -27,7 +27,13 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable should render normally 1`] = `
-<React.Fragment>
+<div
+  style={
+    Object {
+      "padding": "0 1rem",
+    }
+  }
+>
   <Component
     onExportAll={[Function]}
     onImport={[Function]}
@@ -36,10 +42,6 @@ exports[`ObjectsTable should render normally 1`] = `
   />
   <EuiSpacer
     size="xs"
-  />
-  <EuiHorizontalRule
-    margin="s"
-    size="full"
   />
   <Table
     filterOptions={
@@ -113,5 +115,5 @@ exports[`ObjectsTable should render normally 1`] = `
     }
     totalItemCount={4}
   />
-</React.Fragment>
+</div>
 `;
