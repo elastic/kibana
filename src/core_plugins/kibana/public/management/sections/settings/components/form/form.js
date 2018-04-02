@@ -11,7 +11,7 @@ import {
   Query,
 } from '@elastic/eui';
 
-import { getCategoryName, DEFAULT_CATEGORY } from '../../lib';
+import { getAriaName, getCategoryName, DEFAULT_CATEGORY } from '../../lib';
 import { Field } from '../field';
 
 export class Form extends PureComponent {
@@ -26,9 +26,10 @@ export class Form extends PureComponent {
   constructor(props) {
     super(props);
     const { settings, query } = this.props;
+    const parsedQuery = query ? Query.parse(`ariaName:"${getAriaName(query)}"`) : null;
     this.state = {
-      query: query || null,
-      settings: this.mapSettings(query ? Query.execute(Query.parse(query), settings) : settings),
+      query: parsedQuery,
+      settings: this.mapSettings(parsedQuery ? Query.execute(parsedQuery, settings) : settings),
     };
   }
 

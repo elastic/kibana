@@ -13,7 +13,41 @@ exports[`Form should filter based on initial query 1`] = `
             "incremental": true,
           }
         }
-        defaultQuery="setting\\\\:test"
+        defaultQuery={
+          Query {
+            "ast": _AST {
+              "_clauses": Array [
+                Object {
+                  "field": "ariaName",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "setting test",
+                },
+              ],
+              "_indexedClauses": Object {
+                "field": Object {
+                  "ariaName": Array [
+                    Object {
+                      "field": "ariaName",
+                      "match": "must",
+                      "operator": "eq",
+                      "type": "field",
+                      "value": "setting test",
+                    },
+                  ],
+                },
+                "is": Object {},
+                "term": Array [],
+              },
+            },
+            "syntax": Object {
+              "parse": [Function],
+              "print": [Function],
+            },
+            "text": "ariaName:\\"setting test\\"",
+          }
+        }
         filters={
           Array [
             Object {
@@ -55,6 +89,7 @@ exports[`Form should filter based on initial query 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "setting test",
             "category": Array [
               "general",
             ],
@@ -169,6 +204,7 @@ exports[`Form should filter based on the query bar 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "general test date",
             "category": Array [
               "general",
             ],
@@ -246,6 +282,7 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "general test date",
             "category": Array [
               "general",
             ],
@@ -261,6 +298,7 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "setting test",
             "category": Array [
               "general",
             ],
@@ -294,6 +332,7 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "dashboard test setting",
             "category": Array [
               "dashboard",
             ],
@@ -326,6 +365,7 @@ exports[`Form should render normally 1`] = `
         save={[Function]}
         setting={
           Object {
+            "ariaName": "xpack test setting",
             "category": Array [
               "x-pack",
             ],

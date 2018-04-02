@@ -13,23 +13,27 @@ jest.mock('../../field', () => ({
 const settings = [
   {
     name: 'dashboard:test:setting',
+    ariaName: 'dashboard test setting',
     displayName: 'Dashboard test setting',
     category: ['dashboard'],
   },
   {
     name: 'general:test:date',
+    ariaName: 'general test date',
     displayName: 'Test date',
     description: 'bar',
     category: ['general'],
   },
   {
     name: 'setting:test',
+    ariaName: 'setting test',
     displayName: 'Test setting',
     description: 'foo',
     category: ['general'],
   },
   {
     name: 'xpack:test:setting',
+    ariaName: 'xpack test setting',
     displayName: 'X-Pack test setting',
     category: ['x-pack'],
     description: 'bar',
@@ -58,7 +62,7 @@ describe('Form', () => {
         settings={settings}
         save={save}
         clear={clear}
-        query="setting\:test"
+        query="setting:test"
       />
     );
 

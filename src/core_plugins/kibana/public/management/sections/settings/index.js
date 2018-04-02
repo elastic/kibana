@@ -42,10 +42,8 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       link: function ($scope) {
-        const query = ($route.current.params.setting || '').replace(':', '\\:');
-
         config.watchAll(() => {
-          updateAdvancedSettings($scope, config, query);
+          updateAdvancedSettings($scope, config, $route.current.params.setting || '');
         }, $scope);
 
         $scope.$on('$destory', () => {
