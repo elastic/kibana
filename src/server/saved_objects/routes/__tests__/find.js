@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createFindRoute } from '../find';
 import { MockServer } from './mock_server';
 
-describe('GET /api/saved_objects/{type?}', () => {
+describe('GET /api/saved_objects/_find', () => {
   const savedObjectsClient = { find: sinon.stub() };
   let server;
 
@@ -29,7 +29,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects'
+      url: '/api/saved_objects/_find'
     };
 
     const clientResponse = {
@@ -63,7 +63,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('calls upon savedObjectClient.find with defaults', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects'
+      url: '/api/saved_objects/_find'
     };
 
     await server.inject(request);
@@ -77,7 +77,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('accepts the query parameter page/per_page', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects?per_page=10&page=50'
+      url: '/api/saved_objects/_find?per_page=10&page=50'
     };
 
     await server.inject(request);
@@ -91,7 +91,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects?search_fields=title'
+      url: '/api/saved_objects/_find?search_fields=title'
     };
 
     await server.inject(request);
@@ -105,7 +105,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('accepts the query parameter fields as a string', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects?fields=title'
+      url: '/api/saved_objects/_find?fields=title'
     };
 
     await server.inject(request);
@@ -119,7 +119,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('accepts the query parameter fields as an array', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects?fields=title&fields=description'
+      url: '/api/saved_objects/_find?fields=title&fields=description'
     };
 
     await server.inject(request);
@@ -135,21 +135,7 @@ describe('GET /api/saved_objects/{type?}', () => {
   it('accepts the type as a query parameter', async () => {
     const request = {
       method: 'GET',
-      url: '/api/saved_objects?type=index-pattern'
-    };
-
-    await server.inject(request);
-
-    expect(savedObjectsClient.find.calledOnce).to.be(true);
-
-    const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).to.eql({ perPage: 20, page: 1, type: 'index-pattern' });
-  });
-
-  it('accepts the type as a URL parameter', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/index-pattern'
+      url: '/api/saved_objects/_find?type=index-pattern'
     };
 
     await server.inject(request);

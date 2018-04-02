@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { createBulkGetRoute } from '../bulk_get';
 import { MockServer } from './mock_server';
 
-describe('POST /api/saved_objects/bulk_get', () => {
+describe('POST /api/saved_objects/_bulk_get', () => {
   const savedObjectsClient = { bulkGet: sinon.stub() };
   let server;
 
@@ -29,7 +29,7 @@ describe('POST /api/saved_objects/bulk_get', () => {
   it('formats successful response', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/bulk_get',
+      url: '/api/saved_objects/_bulk_get',
       payload: [{
         id: 'abc123',
         type: 'index-pattern'
@@ -62,7 +62,7 @@ describe('POST /api/saved_objects/bulk_get', () => {
 
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/bulk_get',
+      url: '/api/saved_objects/_bulk_get',
       payload: docs
     };
 
