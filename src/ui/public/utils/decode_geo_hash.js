@@ -1,18 +1,23 @@
 /*
- * Decodes geohash to object containing
- * top-left and bottom-right corners of
- * rectangle and center point.
- *
  * geohash.js
  * Geohash library for Javascript
  * (c) 2008 David Troy
  * Distributed under the MIT License
+ */
+
+/*
+ * @notice
+ * This product bundles geohash.js which is available under a
+ * "MIT" license.  For details, see src/ui/public/utils/decode_geo_hash.js.
+ */
+
+/**
+ * Decodes geohash to object containing
+ * top-left and bottom-right corners of
+ * rectangle and center point.
  *
- * @method refine_interval
- * @param interval {Array} [long, lat]
- * @param cd {Number}
- * @param mask {Number}
- * @return {Object} interval
+ * @param  {[type]} geohash [description]
+ * @return {[type]}         [description]
  */
 export function decodeGeoHash(geohash) {
   let BITS = [16, 8, 4, 2, 1];
@@ -46,6 +51,13 @@ export function decodeGeoHash(geohash) {
   return { latitude: lat, longitude: lon};
 }
 
+/**
+ * @method refine_interval
+ * @param interval {Array} [long, lat]
+ * @param cd {Number}
+ * @param mask {Number}
+ * @return {Object} interval
+ */
 function refine_interval(interval, cd, mask) {
   if (cd & mask) {
     interval[0] = (interval[0] + interval[1]) / 2;
