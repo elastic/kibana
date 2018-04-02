@@ -197,20 +197,32 @@ the graph must specify `type=map` in the host configuration:
 {
   "config": {
     "kibana": {
-  "type": "map",
+      "type": "map",
 
-  // Initial map position
-  "latitude": 40.7,      // default 0
-  "longitude": -74,      // default 0
-  "zoom": 7,             // default 2
-  "mapStyle": false,     // defaults to "default". Use false to disable base layer.
-  "minZoom": 5,          // default 0
-  "maxZoom": 13,         // defaults to the maximum for the given style, or 25 when base is disabled
-  "zoomControl": false,  // defaults to true, shows +/- buttons to zoom in/out
-  "scrollWheelZoom": false, // defaults to true, disables mouse wheel zoom
+      // Initial map position
+      "latitude": 40.7,   // default 0
+      "longitude": -74,   // default 0
+      "zoom": 7,          // default 2
 
-  // When false, repaints on each move frame. Makes the graph slower when moving the map
-  "delayRepaint": true, // default true
+      // defaults to "default". Use false to disable base layer.
+      "mapStyle": false,
+
+      // default 0
+      "minZoom": 5,
+
+      // defaults to the maximum for the given style,
+      // or 25 when base is disabled
+      "maxZoom": 13,
+
+      // defaults to true, shows +/- buttons to zoom in/out
+      "zoomControl": false,
+
+      // defaults to true, disables mouse wheel zoom
+      "scrollWheelZoom": false,
+
+      // When false, repaints on each move frame.
+      // Makes the graph slower when moving the map
+      "delayRepaint": true, // default true
     }
   },
   /* the rest of Vega JSON */

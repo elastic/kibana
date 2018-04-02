@@ -1,6 +1,6 @@
+import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
-import { KibanaMap } from '../../../tile_map/public/kibana_map';
 import { VegaMapLayer } from './vega_map_layer';
 
 export class VegaMapView extends VegaBaseView {

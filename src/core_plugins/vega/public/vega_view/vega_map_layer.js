@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import 'leaflet-vega';
-import { KibanaMapLayer } from '../../../tile_map/public/kibana_map_layer';
+import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 
 export class VegaMapLayer extends KibanaMapLayer {
 
