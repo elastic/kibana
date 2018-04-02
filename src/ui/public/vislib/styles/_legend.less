@@ -18,18 +18,18 @@ visualize-legend {
   flex-direction: row;
   padding-top: 5px;
 
-  .vislib-container--legend-left & {
+  .vis-container--legend-left & {
     flex-direction: row-reverse;
   }
-  .vislib-container--legend-right & {
+  .vis-container--legend-right & {
     flex-direction: row;
   }
-  .vislib-container--legend-top & {
+  .vis-container--legend-top & {
     flex-direction: column-reverse;
     width: 100%;
     padding-left: 25px;
   }
-  .vislib-container--legend-bottom & {
+  .vis-container--legend-bottom & {
     flex-direction: column;
     width: 100%;
     padding-left: 25px;
@@ -57,8 +57,8 @@ visualize-legend {
 
     flex-direction: column;
 
-    .vislib-container--legend-top &,
-    .vislib-container--legend-bottom & {
+    .vis-container--legend-top &,
+    .vis-container--legend-bottom & {
       width: auto;
       overflow-y: hidden;
 
@@ -106,6 +106,9 @@ visualize-legend {
   .legend-value-color-picker {
     width: 130px;
     margin: auto;
+    position: absolute;
+    background-color:  white;
+
 
     .dot {
       line-height: 14px;
