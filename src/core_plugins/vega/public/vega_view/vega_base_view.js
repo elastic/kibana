@@ -149,23 +149,25 @@ export class VegaBaseView {
     }
 
     if (window) {
-      if (!view) {
-        // disposing, get rid of the stale debug info
-        delete window.VEGA_DEBUG;
-      } else {
-        if (window.VEGA_DEBUG === undefined && console) {
-          console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-          console.log('You can access the Vega view with VEGA_DEBUG. ' +
-            'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
-        }
-
-        window.VEGA_DEBUG = window.VEGA_DEBUG || {};
-        window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-        window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
-        window.VEGA_DEBUG.view = view;
-        window.VEGA_DEBUG.vega_spec = spec;
-        window.VEGA_DEBUG.vegalite_spec = vlspec;
+      if (window.VEGA_DEBUG === undefined && console) {
+        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+        console.log('You can access the Vega view with VEGA_DEBUG. ' +
+          'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
       }
+      const debugObj = {};
+      window.VEGA_DEBUG = debugObj;
+      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
+      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+      window.VEGA_DEBUG.view = view;
+      window.VEGA_DEBUG.vega_spec = spec;
+      window.VEGA_DEBUG.vegalite_spec = vlspec;
+
+      // On dispose, clean up, but don't use undefined to prevent repeated debug statements
+      this._addDestroyHandler(() => {
+        if (debugObj === window.VEGA_DEBUG) {
+          window.VEGA_DEBUG = null;
+        }
+      });
     }
   }
 

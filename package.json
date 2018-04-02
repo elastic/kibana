@@ -211,7 +211,7 @@
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "3.0.10",
-    "vega-lite": "2.1.0",
+    "vega-lite": "2.1.2",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
