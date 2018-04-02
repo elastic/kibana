@@ -1,5 +1,4 @@
 import url, {  format as formatUrl } from 'url';
-// import url from 'url';
 import pkg from '../../../package.json';
 import { admin } from '../../../test/shield';
 
