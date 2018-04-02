@@ -1,5 +1,7 @@
 import { createAction } from 'redux-actions';
 
+import { getPanel } from '../../selectors/dashboard_selectors';
+
 export const destroyEmbeddable = createAction('DESTROY_EMBEDDABLE',
   /**
    *
@@ -36,23 +38,25 @@ export const embeddableRenderError = createAction('EMBEDDABLE_RENDER_ERROR',
  *
  * @param embeddableFactory {EmbeddableFactory}
  * @param panelElement {Node}
- * @param panel {PanelState}
+ * @param panelId {string}
  * @param containerApi {ContainerAPI}
  * @return {function(*, *)}
  */
-export function renderEmbeddable(embeddableFactory, panelElement, panel, containerApi) {
-  return (dispatch) => {
+export function renderEmbeddable(embeddableFactory, panelElement, panelId, containerApi) {
+  return (dispatch, getState) => {
+    const panelState = getPanel(getState(), panelId);
+
     if (!embeddableFactory) {
-      dispatch(embeddableRenderError(panel.panelIndex, new Error(`Invalid embeddable type "${panel.type}"`)));
+      dispatch(embeddableRenderError(panelId, new Error(`Invalid embeddable type "${panelState.type}"`)));
       return;
     }
 
-    return embeddableFactory.render(panelElement, panel, containerApi)
+    return embeddableFactory.render(panelElement, panelState, containerApi)
       .then(embeddable => {
-        return dispatch(embeddableRenderFinished(panel.panelIndex, embeddable));
+        return dispatch(embeddableRenderFinished(panelId, embeddable));
       })
       .catch(error => {
-        dispatch(embeddableRenderError(panel.panelIndex, error.message));
+        dispatch(embeddableRenderError(panelId, error.message));
       });
   };
 }
