@@ -48,7 +48,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
+  constructor(geojsonUrl, attribution, format, showAllShapes, meta, notifier) {
     super();
 
     this._metrics = null;
@@ -61,6 +61,9 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._showAllShapes = showAllShapes;
     this._geojsonUrl = geojsonUrl;
+    this._notifier = notifier;
+
+
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
         layer.on('click', () => {
@@ -119,6 +122,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       } catch (e) {
         this._loaded = true;
         this._error = true;
+        this._notifier.error(`Could not load vector layer at ${geojsonUrl}. 
+        Make sure the file exists at that location. 
+        Also make sure the server hosting that file allows CORS-requests from the Kibana application.`);
+
         resolve();
       }
     });
