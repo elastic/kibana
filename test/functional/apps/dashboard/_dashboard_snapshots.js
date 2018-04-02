@@ -70,8 +70,33 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      // Testing some OS/browser differnces were shown to cause .009 percent difference.
+      // Testing some OS/browser differences were shown to cause .009 percent difference.
       expect(percentSimilar).to.be.lessThan(0.05);
+    });
+
+    it('compare data table snapshot', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+      // We are specificially using a default generated data table here instead of a more complex one because
+      // font and font size differences require a higher threshold the more text is shown on the data table. See
+      // https://github.com/elastic/kibana/issues/15714 for more information.
+      await dashboardVisualizations.createAndAddDataTableVisualization('data table');
+      await PageObjects.dashboard.saveDashboard('data table');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.dashboard.clickFullScreenMode();
+      await PageObjects.dashboard.toggleExpandPanel();
+
+      // TODO: Get rid of this sleep once render-complete is implemented.
+      await PageObjects.dashboard.waitForRenderCounter(2);
+      await PageObjects.common.sleep(1000);
+
+      const percentSimilar = await screenshot.compareAgainstBaseline('data_table', updateBaselines);
+
+      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+
+      expect(percentSimilar).to.be.lessThan(.001);
     });
   });
 }
