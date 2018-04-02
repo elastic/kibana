@@ -152,6 +152,12 @@ export function AggTypesBucketsTermsProvider(Private) {
             return aggFilter.includes(`!${agg.type.name}`);
           };
 
+          $scope.$watch('agg.params.field.type', (type) => {
+            if (type !== 'string') {
+              $scope.agg.params.missingBucket = false;
+            }
+          });
+
           function updateOrderAgg() {
             // abort until we get the responseValueAggs
             if (!$scope.responseValueAggs) return;
@@ -201,7 +207,7 @@ export function AggTypesBucketsTermsProvider(Private) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
-          if (agg.params.missingBucket) {
+          if (agg.params.missingBucket && agg.params.field.type === 'string') {
             output.params.missing = '__missing__';
           }
 

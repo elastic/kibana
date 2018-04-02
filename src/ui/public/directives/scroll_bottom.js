@@ -15,7 +15,7 @@ module.directive('kbnScrollBottom', function () {
 
         if (!height || !position) return;
         if (remaining <= margin) {
-          $scope.$eval(attr.kbnScrollBottom);
+          $scope.$evalAsync(attr.kbnScrollBottom);
         }
       }
 

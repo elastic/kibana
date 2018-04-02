@@ -1,0 +1,18 @@
+{
+  "_template/{name}": {
+    "url_params": {
+      "order": "",
+      "create": "__flag__",
+      "timeout": "",
+      "master_timeout": "",
+      "flat_settings": "__flag__"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_template/{name}"
+    ]
+  }
+}

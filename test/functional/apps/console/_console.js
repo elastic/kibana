@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.common.navigateToApp('console');
     });
 
-    it('should show the default request', function () {
+    it('should show the default *%^$# @ ! ~ request', function () {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       return PageObjects.console.collapseHelp()
         .then(function () {

@@ -56,38 +56,38 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIReleaseServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:testUIReleaseServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'esvm:ui',
+    'run:testEsServer',
     'run:testUIDevServer:keepalive'
   ]);
 
   grunt.registerTask('test:api', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:apiTestServer',
     'functional_test_runner:apiIntegration',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:apiTestServer'
   ]);
 
   grunt.registerTask('test:api:server', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:devApiTestServer:keepalive'
   ]);
 

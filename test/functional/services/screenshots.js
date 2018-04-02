@@ -12,7 +12,6 @@ export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const remote = getService('remote');
-  const lifecycle = getService('lifecycle');
 
   const SESSION_DIRECTORY = resolve(config.get('screenshots.directory'), 'session');
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
@@ -50,12 +49,12 @@ export async function ScreenshotsProvider({ getService }) {
     }
 
     async takeForFailure(name) {
-      return await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
+      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
     }
 
     async _take(path) {
       try {
-        log.debug(`Taking screenshot "${path}"`);
+        log.info(`Taking screenshot "${path}"`);
         const [screenshot] = await Promise.all([
           remote.takeScreenshot(),
           fcb(cb => mkdirp(dirname(path), cb)),
@@ -68,11 +67,5 @@ export async function ScreenshotsProvider({ getService }) {
     }
   }
 
-  const screenshots = new Screenshots();
-
-  lifecycle
-    .on('testFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()))
-    .on('testHookFailure', (err, test) => screenshots.takeForFailure(test.fullTitle()));
-
-  return screenshots;
+  return new Screenshots();
 }

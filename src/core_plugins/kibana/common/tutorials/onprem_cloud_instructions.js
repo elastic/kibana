@@ -1,6 +1,6 @@
 export const TRYCLOUD_OPTION1 = {
   title: 'Option 1: Try module in Elastic Cloud',
-  textPre: 'Go to [Elastic Cloud](https://cloud.elastic.co/). Register if you ' +
+  textPre: 'Go to [Elastic Cloud](https://www.elastic.co/cloud/as-a-service/signup?blade=kib). Register if you ' +
            'don\'t have an account.\n' +
            ' 1. Select **Create Cluster**, leave size slider at 4 GB RAM, and click **Create**.\n' +
            ' 2. Wait for the cluster plan to complete.\n' +

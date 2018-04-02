@@ -41,3 +41,25 @@ should be `kbn-datemath`.
 All new packages should use the `@kbn` namespace, and should be marked with
 `"private": true`.
 
+## Unit tests for a package
+
+Currently there are two patterns used to test packages, one using Mocha and one using Jest. These patterns emerged out of convention and we'd like to make them more similar to each other in the near future.
+
+### 1. Mocha
+Today a package can follow the pattern of having a `__tests__` directory in each source code directory of a package which contains the tests for that module. These are usually run by Mocha.
+
+If a package's tests should be run with Mocha, you'll have to opt-in to run them by appending the package's test file pattern(s) to Kibana's `tasks/config/simplemocha.js` file. These will then be run by the unit test runner.
+
+* `yarn test` or `yarn grunt test` runs all unit tests.
+* `yarn grunt simplemocha:all` runs all Mocha tests.
+
+### 2. Jest
+A package can also follow the pattern of having `.test.js` files as siblings of the source code files, and these run by Jest.
+
+A package using the `.test.js` naming convention will have those tests automatically picked up by Jest and run by the unit test runner, currently mapped to the Kibana `test` script in the root `package.json`.
+
+* `yarn test` or `yarn grunt test` runs all unit tests.
+* `node scripts/jest` runs all Jest tests in Kibana.
+
+----
+Each package can also specify its own `test` script in the package's `package.json`, for cases where you'd prefer to run the tests from the local package directory.

@@ -26,26 +26,30 @@ class MetricVisValue extends Component {
       'metric-container--filterable': hasFilter
     });
 
-    return (
-      <EuiKeyboardAccessible>
+    const metricComponent = (
+      <div
+        className={containerClassName}
+        style={{ backgroundColor: metric.bgColor }}
+        onClick={hasFilter ? this.onClick : null}
+        tabIndex={hasFilter ? 0 : null}
+        role={hasFilter ? 'button' : null}
+      >
         <div
-          className={containerClassName}
-          style={{ backgroundColor: metric.bgColor }}
-          onClick={hasFilter ? this.onClick : null}
-          tabIndex={hasFilter ? 0 : null}
-          role={hasFilter ? 'button' : null}
-        >
-          <div
-            className="metric-value"
-            style={metricValueStyle}
-            dangerouslySetInnerHTML={{ __html: metric.value }}
-          />
-          { showLabel &&
-            <div>{metric.label}</div>
-          }
-        </div>
-      </EuiKeyboardAccessible>
+          className="metric-value"
+          style={metricValueStyle}
+          dangerouslySetInnerHTML={{ __html: metric.value }}
+        />
+        { showLabel &&
+          <div>{metric.label}</div>
+        }
+      </div>
     );
+
+    if (this.onClick) {
+      return (<EuiKeyboardAccessible>{metricComponent}</EuiKeyboardAccessible>);
+    }
+
+    return metricComponent;
   }
 }
 

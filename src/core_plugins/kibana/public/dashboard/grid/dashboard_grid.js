@@ -59,6 +59,9 @@ function ResponsiveGrid({
       className={classes}
       isDraggable={true}
       isResizable={true}
+      // There is a bug with d3 + firefox + elements using transforms.
+      // See https://github.com/elastic/kibana/issues/16870 for more context.
+      useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={DASHBOARD_GRID_HEIGHT}
@@ -85,6 +88,7 @@ export class DashboardGrid extends React.Component {
     // item.
     this.gridItems = {};
     this.state = {
+      focusedPanelIndex: undefined,
       layout: this.buildLayoutFromPanels()
     };
     // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
@@ -131,34 +135,23 @@ export class DashboardGrid extends React.Component {
 
   onLayoutChange = (layout) => {
     const { onPanelsUpdated } = this.props;
-    const updatedPanels = [];
-    layout.forEach(panelLayout => {
-      const updatedPanel = {
+    const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
+      updatedPanelsAcc[panelLayout.i] = {
         panelIndex: panelLayout.i,
-        gridData: {
-          x: panelLayout.x,
-          y: panelLayout.y,
-          w: panelLayout.w,
-          h: panelLayout.h,
-          i: panelLayout.i,
-        }
+        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
       };
-      updatedPanels.push(updatedPanel);
-    });
+      return updatedPanelsAcc;
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
-  onPanelFocused = panelIndex => {
-    const gridItem = this.gridItems[panelIndex];
-    if (gridItem) {
-      gridItem.style.zIndex = '1';
-    }
+  onPanelFocused = focusedPanelIndex => {
+    this.setState({ focusedPanelIndex });
   };
 
-  onPanelBlurred = panelIndex => {
-    const gridItem = this.gridItems[panelIndex];
-    if (gridItem) {
-      gridItem.style.zIndex = 'auto';
+  onPanelBlurred = blurredPanelIndex => {
+    if (this.state.focusedPanelIndex === blurredPanelIndex) {
+      this.setState({ focusedPanelIndex: undefined });
     }
   };
 
@@ -168,6 +161,7 @@ export class DashboardGrid extends React.Component {
       getContainerApi,
       maximizedPanelId
     } = this.props;
+    const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(key => panels[key]);
@@ -188,6 +182,7 @@ export class DashboardGrid extends React.Component {
       });
       return (
         <div
+          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? '2' : 'auto' }}
           className={classes}
           key={panel.panelIndex}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}

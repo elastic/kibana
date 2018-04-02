@@ -12,6 +12,7 @@ module.exports = function () {
         'AFLv2.1',
         'Apache 2.0',
         'Apache License, v2.0',
+        'Apache License, Version 2.0',
         'Apache',
         'Apache*',
         'Apache, Version 2.0',
@@ -25,7 +26,9 @@ module.exports = function () {
         'BSD-3-Clause OR MIT',
         'BSD-3-Clause',
         'BSD-like',
+        'CC0-1.0',
         'CC-BY',
+        'CC-BY-3.0',
         'CC-BY-4.0',
         'ISC',
         'MIT OR GPL-2.0',
@@ -48,6 +51,7 @@ module.exports = function () {
         'map-stream@0.1.0': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
         'png-js@0.1.1': ['MIT'],
+        'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
       }
     }
   };

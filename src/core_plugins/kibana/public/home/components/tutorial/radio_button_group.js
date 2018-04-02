@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {
   KuiButtonGroup,
   KuiButton
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 export class RadioButtonGroup extends React.Component {
 

@@ -1,0 +1,22 @@
+{
+  "{index}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": "",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "{indices}"
+    ]
+  }
+}

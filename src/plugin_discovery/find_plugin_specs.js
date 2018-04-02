@@ -54,6 +54,19 @@ function getDistinctKeyForFindResult(result) {
   return result;
 }
 
+function groupSpecsById(specs) {
+  const specsById = new Map();
+  for (const spec of specs) {
+    const id = spec.getId();
+    if (specsById.has(id)) {
+      specsById.get(id).push(spec);
+    } else {
+      specsById.set(id, [spec]);
+    }
+  }
+  return specsById;
+}
+
 /**
  *  Creates a collection of observables for discovering pluginSpecs
  *  using Kibana's defaults, settings, and config service
@@ -80,6 +93,22 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     .mergeMap(({ pack }) => (
       pack ? pack.getPluginSpecs() : []
     ))
+    // make sure that none of the plugin specs have conflicting ids, fail
+    // early if conflicts detected or merge the specs back into the stream
+    .toArray()
+    .mergeMap(allSpecs => {
+      for (const [id, specs] of groupSpecsById(allSpecs)) {
+        if (specs.length > 1) {
+          throw new Error(
+            `Multple plugins found with the id "${id}":\n${
+              specs.map(spec => `  - ${id} at ${spec.getPath()}`).join('\n')
+            }`
+          );
+        }
+      }
+
+      return allSpecs;
+    })
     .mergeMap(async (spec) => {
       // extend the config service with this plugin spec and
       // collect its deprecations messages if some of its

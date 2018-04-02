@@ -12,7 +12,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/bin/**/*',
   '**/+([A-Z_]).md',
   '**/*.txt',
-  'Gruntfile.js',
+  '**/Gruntfile.js',
   'tasks/config/**/*',
   'tasks/build/docker/docs/{Dockerfile,docker-compose.yml}',
   'packages/kbn-pm/vendor/yarn-1.3.2.js'
@@ -37,7 +37,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
  * When a file in one of these directories is checked, the directory
  * matched by these patterns is removed from the path before
  * the casing check so that the files casing is still checked. This
- * allows folders like `ui_framework/generator-kui` to exist, which
+ * allows folders like `src/ui/public/flot-charts` to exist, which
  * is named to match the npm package and follow the kebab-casing
  * convention there, but allows us to still verify that files within
  * that directory use snake_case
@@ -49,7 +49,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   '**/webpackShims',
   'src/babel-*',
   'packages/*',
-  'ui_framework/generator-kui',
+  'packages/kbn-ui-framework/generator-kui',
   'src/ui/public/angular-bootstrap',
   'src/ui/public/flot-charts',
   'src/ui/public/utils/lodash-mixins',
@@ -180,9 +180,9 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/typeahead/partials/typeahead-items.html',
   'src/ui/public/utils/migrateLegacyQuery.js',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'ui_framework/doc_site/src/images/elastic-logo.svg',
-  'ui_framework/doc_site/src/images/hint-arrow.svg',
-  'ui_framework/doc_site/src/images/react-logo.svg',
+  'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
+  'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
+  'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
   'webpackShims/angular-ui-select.js',
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',

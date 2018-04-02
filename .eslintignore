@@ -9,7 +9,6 @@
 /src/core_plugins/console/public/tests/webpackShims
 /src/ui/public/utils/decode_geo_hash.js
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
-/ui_framework/doc_site/build
 /tasks/vendor
 /packages/*/node_modules
 /packages/*/target
@@ -18,4 +17,7 @@
 /packages/kbn-pm/dist
 /packages/kbn-pm/vendor
 /packages/kbn-plugin-generator/sao_template/template
+/packages/kbn-ui-framework/dist
+/packages/kbn-ui-framework/doc_site/build
+/packages/kbn-ui-framework/generator-kui/*/templates/
 !/.eslintrc.js

@@ -5,37 +5,6 @@ var BOOLEAN = {
 };
 
 export default function (api) {
-  api.addEndpointDescription('_get_mapping', {
-    methods: ['GET'],
-    priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping",
-      "{indices}/_mapping/{types}",
-      "{indices}/{types}/_mapping",
-      "_mapping"
-    ]
-  });
-  api.addEndpointDescription('_get_field_mapping', {
-    methods: ['GET'],
-    priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping/field/{fields}",
-      "{indices}/_mapping/{type}/field/{fields}"
-    ],
-    url_params: {
-      "include_defaults": "__flag__"
-    }
-  });
-  api.addEndpointDescription('_delete_mapping', {
-    methods: ['DELETE'],
-    priority: 10, // collides with get doc by id
-    patterns: [
-      "{indices}/_mapping",
-      "{indices}/_mapping/{types}",
-      "{indices}/{types}/_mapping",
-      "_mapping"
-    ]
-  });
   api.addEndpointDescription('_put_type_mapping', {
     methods: ['PUT', 'POST'],
     patterns: [
