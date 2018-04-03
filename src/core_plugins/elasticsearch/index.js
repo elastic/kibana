@@ -32,7 +32,7 @@ export default function (kibana) {
         preserveHost: boolean().default(true),
         username: string(),
         password: string(),
-        shardTimeout: number().default(0),
+        shardTimeout: number().default(30000),
         requestTimeout: number().default(30000),
         requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
         customHeaders: object().default({}),
