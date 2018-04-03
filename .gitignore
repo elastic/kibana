@@ -25,7 +25,7 @@ target
 /data
 disabledPlugins
 webpackstats.json
-/config/*
+
 /!config/kibana.yml
 coverage
 selenium
