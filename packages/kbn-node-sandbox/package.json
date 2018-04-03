@@ -4,7 +4,7 @@
   "description": "node sandboxing efforts",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js",
+    "test": "jest",
     "build": "node-gyp configure build"
   },
   "repository": {
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/elastic/node-sandbox/issues"
   },
-  "homepage": "https://github.com/elastic/node-sandbox#readme"
+  "homepage": "https://github.com/elastic/node-sandbox#readme",
+  "devDependencies": {
+    "jest": "^22.4.3"
+  }
 }
