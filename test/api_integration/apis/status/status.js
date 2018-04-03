@@ -20,9 +20,9 @@ export default function ({ getService }) {
           expect(body.status.overall.state).to.be('green');
 
           expect(body.status.statuses).to.be.an('array');
-          const kibanaPlugin = body.status.statuses.find(
-            s => s.id.indexOf('plugin:kibana') === 0
-          );
+          const kibanaPlugin = body.status.statuses.find(s => {
+            return s.id.indexOf('plugin:kibana') === 0;
+          });
           expect(kibanaPlugin.state).to.be('green');
 
           expect(body.metrics.collection_interval_in_millis).to.be.a('number');
