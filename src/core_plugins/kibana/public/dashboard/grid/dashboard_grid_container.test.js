@@ -12,6 +12,13 @@ import { updatePanels } from '../actions';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
 
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
+
 function getProps(props = {}) {
   const defaultTestProps = {
     hidden: false,
