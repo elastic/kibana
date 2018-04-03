@@ -38,13 +38,6 @@ function embeddableStateChanged(dispatch, getState, panelId, embeddableState) {
   if (embeddableState.stagedFilter) {
     dispatch(setStagedFilter({ stagedFilter: embeddableState.stagedFilter, panelId }));
   }
-
-  // TODO: communicate time range and filter changes from the embeddable through to dashboard rather than
-  // through angular components.
-  // const timeRange = getTimeRange(getState());
-  // if (!_.isEqual(timeRange, embeddableState.timeRange)) {
-  //   dispatch(updateTimeRange({ ...panel, embeddableConfig: embeddableState.personalization }));
-  // }
 }
 
 /**
@@ -62,7 +55,7 @@ export function initializeEmbeddable({ embeddableFactory, panelId }) {
     }
 
     dispatch(embeddableIsInitializing(panelId));
-    embeddableFactory.create(panel, embeddableStateChanged.bind(this, dispatch, getState, panelId))
+    embeddableFactory.create(panel, (state) => embeddableStateChanged(dispatch, getState, panelId, state))
       .then((embeddable) => {
         embeddableHandlerCache.register(panel.panelIndex, embeddable);
         return dispatch(embeddableInitialized(panel.panelIndex));

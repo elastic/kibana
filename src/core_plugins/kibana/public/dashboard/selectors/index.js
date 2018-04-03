@@ -170,15 +170,8 @@ export const getContainerState = (dashboard, panelId) => ({
 
 /**
  *
- * @param dashboard {DashboardState}
+ * @param embeddables {Array.<EmbeddableState>}
  * @return {Array.<{ field, value, operator, index }>} Array of filters any embeddables wish dashboard to apply
  */
-export const getStagedFilters = dashboard => {
-  const stagedFilters = [];
-  Object.values(dashboard.embeddables).forEach((embeddable) => {
-    if (embeddable.stagedFilter) {
-      stagedFilters.push(embeddable.stagedFilter);
-    }
-  });
-  return stagedFilters;
-};
+export const getStagedFilters = ({ embeddables }) => _.compact(_.map(embeddables, 'stagedFilter'));
+

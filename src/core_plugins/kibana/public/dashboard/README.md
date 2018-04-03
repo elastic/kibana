@@ -7,7 +7,8 @@ embeddables communicate with eachother.
 
 **Embeddable metadata** - Data the embeddable instance gives the dashboard once as a
  return value of EmbeddableFactory.initialize. This is stored in the EmbeddableHandlersCache, accessible via
- `embeddableHandlersCache.getMetadata(panelId)`.
+ `embeddableHandlersCache.getMetadata(panelId)`. Data such as edit link and title go in
+ here.
  
 **Embeddable state** - Data the embeddable gives the dashboard throughout it's lifecycle as 
   things update and the user interacts with it.  This is communicated to the dashboard via the
