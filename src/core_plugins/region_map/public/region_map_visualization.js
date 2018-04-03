@@ -120,8 +120,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           attribution,
           this.vis.params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta,
-          this._notify
+          this.vis.params.selectedLayer.meta
         );
       }
 

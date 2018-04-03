@@ -5,7 +5,7 @@ import d3 from 'd3';
 import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
-
+import { toastNotifications } from 'ui/notify';
 
 const EMPTY_STYLE = {
   weight: 1,
@@ -48,7 +48,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(geojsonUrl, attribution, format, showAllShapes, meta, notifier) {
+  constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
     super();
 
     this._metrics = null;
@@ -61,8 +61,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._showAllShapes = showAllShapes;
     this._geojsonUrl = geojsonUrl;
-    this._notifier = notifier;
-
 
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
@@ -122,9 +120,20 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       } catch (e) {
         this._loaded = true;
         this._error = true;
-        this._notifier.error(`Could not load vector layer at ${geojsonUrl}. 
-        Make sure the file exists at that location. 
-        Also make sure the server hosting that file allows CORS-requests from the Kibana application.`);
+
+        let errorMessage;
+        if (e.status === 404) {
+          errorMessage = `Server responding with '404' when attempting to fetch ${geojsonUrl}. 
+                          Make sure the file exists at that location.`;
+        } else {
+          errorMessage = `Cannot download ${geojsonUrl} file. Please ensure the
+CORS configuration of the server permits requests from the Kibana application on this host.`;
+        }
+
+        toastNotifications.addDanger({
+          title: 'Error downloading vector data',
+          text: errorMessage,
+        });
 
         resolve();
       }
