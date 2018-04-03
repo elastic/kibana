@@ -63,11 +63,12 @@
           class="kuiCheckBox"
           name="showMissing"
           ng-model="agg.params.missingBucket"
+          ng-disabled="agg.params.field.type !== 'string'"
         >
         Show missing values
         <icon-tip
           position="'right'"
-          content="'When enabled, include documents with missing values in the search.  If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.'"
+          content="'Only works for fields of type \'string\'. When enabled, include documents with missing values in the search. If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.'"
         ></icon-tip>
       </label>
     </div>
@@ -82,6 +83,7 @@
           type="text"
           ng-model="agg.params.missingBucketLabel"
           class="form-control kuiSideBarInput"
+          ng-disabled="agg.params.field.type !== 'string'"
         >
       </div>
     </div>

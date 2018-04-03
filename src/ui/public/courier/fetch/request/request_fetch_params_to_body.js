@@ -30,7 +30,8 @@ export function requestFetchParamsToBody(
   Promise,
   timeFilter,
   kbnIndex,
-  sessionId) {
+  sessionId,
+  config) {
   const indexToListMapping = {};
   const timeBounds = timeFilter.getActiveBounds();
   const promises = requestsFetchParams.map(function (fetchParams) {
@@ -68,15 +69,19 @@ export function requestFetchParamsToBody(
           index = indexList;
         }
 
-        return JSON.stringify({
+        const header = {
           index,
           type: fetchParams.type,
           search_type: fetchParams.search_type,
           ignore_unavailable: true,
-          preference: sessionId,
-        })
-        + '\n'
-        + toJson(body, JSON.stringify);
+        };
+        if (config.get('courier:setRequestPreference') === 'sessionId') {
+          header.preference = sessionId;
+        } else if (config.get('courier:setRequestPreference') === 'custom') {
+          header.preference = config.get('courier:customRequestPreference');
+        }
+
+        return `${JSON.stringify(header)}\n${toJson(body, JSON.stringify)}`;
       });
   });
 

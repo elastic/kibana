@@ -17,7 +17,7 @@ describe(`TimeCache`, () => {
       this._max = max;
     }
 
-    getBounds() {
+    calculateBounds() {
       this._accessCount++;
       return {
         min: { valueOf: () => this._min },

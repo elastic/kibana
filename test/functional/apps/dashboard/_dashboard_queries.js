@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setQuery('memory:<80000');
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.pieSliceCount(2);
 
       await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
       await PageObjects.header.clickDashboard();

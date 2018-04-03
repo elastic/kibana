@@ -189,6 +189,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.timefilter = timefilter;
+    $scope.timeRange = timefilter.time;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -211,13 +212,18 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
       if (showTimeFilter) {
-        timefilter.enableAutoRefreshSelector();
         timefilter.enableTimeRangeSelector();
       } else {
-        timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
       }
     });
+
+    const updateTimeRange = () => {
+      $scope.timeRange = timefilter.time;
+    };
+
+    timefilter.enableAutoRefreshSelector();
+    timefilter.on('update', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -233,6 +239,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
+      timefilter.off('update', updateTimeRange);
     });
   }
 
