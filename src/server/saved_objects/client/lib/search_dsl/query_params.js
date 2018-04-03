@@ -1,4 +1,5 @@
 import { getRootProperties } from '../../../../mappings';
+import { convertExperimentalFilterToEsDsl } from './experimental_filter';
 
 /**
  *  Get the field params based on the types and searchFields
@@ -27,14 +28,16 @@ function getFieldsForTypes(searchFields, types) {
  *  @param  {Object} type
  *  @param  {String} search
  *  @param  {Array<string>} searchFields
+ *  @param  {Object} experimentalFilter
  *  @return {Object}
  */
-export function getQueryParams(mappings, type, search, searchFields) {
-  if (!type && !search) {
+export function getQueryParams(mappings, type, search, searchFields, experimentalFilter) {
+  if (!type && !search && !experimentalFilter) {
     return {};
   }
 
   const bool = {};
+  const savedObjectTypes = type ? [type] : Object.keys(getRootProperties(mappings));
 
   if (type) {
     bool.filter = [
@@ -49,11 +52,17 @@ export function getQueryParams(mappings, type, search, searchFields) {
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            type ? [type] : Object.keys(getRootProperties(mappings))
+            savedObjectTypes
           )
         }
       }
     ];
+  }
+
+  if (experimentalFilter) {
+    bool.must = (bool.must || []).concat(
+      convertExperimentalFilterToEsDsl(savedObjectTypes, experimentalFilter)
+    );
   }
 
   return { query: { bool } };

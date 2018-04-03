@@ -79,12 +79,18 @@ export class SavedObjectsClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
+   * @property {object} options.experimentalFilter
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find(options = {}) {
-    const url = this._getUrl(['_find'], keysToSnakeCaseShallow(options));
+    const { experimentalFilter, ...queryParams } = options;
+    const url = this._getUrl(['_find'], keysToSnakeCaseShallow(queryParams));
 
-    return this._request('GET', url).then(resp => {
+    const reqPromise = experimentalFilter
+      ? this._request('POST', url, { experimental_filter: experimentalFilter })
+      : this._request('GET', url);
+
+    return reqPromise.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
       return keysToCamelCaseShallow(resp);
     });

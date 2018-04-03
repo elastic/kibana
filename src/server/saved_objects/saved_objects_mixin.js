@@ -5,6 +5,7 @@ import {
   createCreateRoute,
   createDeleteRoute,
   createFindRoute,
+  createFindPostRoute,
   createGetRoute,
   createUpdateRoute,
 } from './routes';
@@ -23,6 +24,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
+  server.route(createFindPostRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 

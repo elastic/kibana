@@ -260,6 +260,7 @@ export class SavedObjectsClient {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
+   * @property {Object} [options.experimentalFilter] - A filter object that the Saved Objects API should apply. More info to come...
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -272,6 +273,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
+      experimentalFilter,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -295,7 +297,8 @@ export class SavedObjectsClient {
           searchFields,
           type,
           sortField,
-          sortOrder
+          sortOrder,
+          experimentalFilter
         })
       }
     };

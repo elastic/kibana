@@ -1,0 +1,172 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects nested filter types 1`] = `
+Object {
+  "must": Array [
+    Object {
+      "field": "foo",
+      "type": "value",
+      "value": "bar",
+    },
+    Object {
+      "must": Array [],
+      "must_not": Array [],
+      "must_some": Array [
+        Object {
+          "field": "foo2",
+          "type": "value",
+          "value": "bar2",
+        },
+        Object {
+          "field": "foo2",
+          "type": "value",
+          "value": "bar3",
+        },
+      ],
+      "type": "bool",
+    },
+  ],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with must and must_not 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with must and must_some 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with must_not and must_some 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with single must 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with single must_not 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types bool detects with single must_some 1`] = `
+Object {
+  "must": Array [],
+  "must_not": Array [],
+  "must_some": Array [],
+  "type": "bool",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors if gt and gte combined 1`] = `"Invalid range filter: \\"gt\\" must not exist simultaneously with [gte]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors if gt and must combined 1`] = `"Filter property \\"must\\" can't be used with properties \\"field\\" and \\"gt\\""`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors if gt and value combined 1`] = `"Filter property \\"value\\" can't be used with properties \\"field\\" and \\"gt\\""`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors if only field 1`] = `"Unable to determine filter type when only specifying property \\"field\\""`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with gt and lt 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with just gt 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with just gte 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with just lt 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with just lte 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types errors errors with lte and gt 1`] = `"Invalid range filter: child \\"field\\" fails because [\\"field\\" is required]"`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with gt and field 1`] = `
+Object {
+  "field": "foo",
+  "gt": 100,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with gt, lt and field 1`] = `
+Object {
+  "field": "foo",
+  "gt": 100,
+  "lt": 100,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with gte and field 1`] = `
+Object {
+  "field": "foo",
+  "gte": 100,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with lt and field 1`] = `
+Object {
+  "field": "foo",
+  "lt": 10,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with lte and field 1`] = `
+Object {
+  "field": "foo",
+  "lte": 100,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types range detects with lte, gt and field 1`] = `
+Object {
+  "field": "foo",
+  "gt": 100,
+  "lte": 100,
+  "type": "range",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types value detects with just value 1`] = `
+Object {
+  "type": "value",
+  "value": "foo",
+}
+`;
+
+exports[`SavedObjectsClient experimental_filter/detect_types value detects with value and field 1`] = `
+Object {
+  "field": "foo",
+  "type": "value",
+  "value": "bar",
+}
+`;
