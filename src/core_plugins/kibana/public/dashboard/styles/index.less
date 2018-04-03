@@ -35,7 +35,7 @@
 
 /**
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
- * otherwise the heigh is set inline.
+ * otherwise the height is set inline.
  */
 .layout-maximized-panel {
   height: 100% !important; /* 1. */
@@ -236,7 +236,8 @@ dashboard-viewport-provider {
 .grid-item--expanded {
   height: 100% !important; /* 1. */
   width: 100% !important; /* 1. */
-  transform: none !important; /* 1. */
+  top: 0 !important; /* 1. */
+  left: 0 !important; /* 1. */
 }
 
 /**
@@ -362,6 +363,7 @@ dashboard-viewport-provider {
       flex: 1 0 auto;
       justify-content: center;
       flex-direction: column;
+      overflow: auto;
 
       .fa-exclamation-triangle {
         font-size: 2em;

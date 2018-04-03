@@ -23,15 +23,24 @@
       </div>
     </div>
 
-
-    <div class="vis-option-item form-group">
-      <label>
-        <input type="checkbox"
-               name="wms.enabled"
-               ng-model="options.enabled">
-        WMS compliant map server
-        <kbn-info info="Use WMS compliant map tile server. For advanced users only."></kbn-info>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="wmsCompliantMapServer">
+        WMS map server
       </label>
+
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="wmsCompliantMapServer"
+          type="checkbox"
+          name="wms.enabled"
+          ng-model="options.enabled"
+        >
+        &nbsp;
+        <icon-tip
+          content="'Use WMS compliant map tile server. For advanced users only.'"
+          position="'right'"
+        ></icon-tip>
+      </div>
     </div>
 
     <div ng-show="options.enabled" class="well">
@@ -40,7 +49,10 @@
           href="http://www.opengeospatial.org/standards/wms">here</a>.</p>
         <label>
           WMS url*
-          <kbn-info info="The URL of the WMS web service."></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'The URL of the WMS web service'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                name="wms.url"
@@ -50,7 +62,10 @@
       <div class="vis-option-item form-group">
         <label>
           WMS layers*
-          <kbn-info info="A comma seperated list of layers to use."></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'A comma seperated list of layers to use'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                ng-require="options.enabled"
@@ -61,7 +76,10 @@
       <div class="vis-option-item form-group">
         <label>
           WMS version*
-          <kbn-info info="The version of WMS the server supports"></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'The version of WMS the server supports'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                name="wms.options.version"
@@ -71,8 +89,10 @@
       <div class="vis-option-item form-group">
         <label>
           WMS format*
-          <kbn-info
-            info="Usually image/png or image/jpeg. Use png if the server will return transparent layers."></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'Usually image/png or image/jpeg. Use png if the server will return transparent layers.'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                name="wms.options.format"
@@ -82,7 +102,10 @@
       <div class="vis-option-item form-group">
         <label>
           WMS attribution
-          <kbn-info info="Attribution string for the lower right corner."></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'Attribution string for the lower right corner'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                name="wms.options.attribution"
@@ -92,8 +115,10 @@
       <div class="vis-option-item form-group">
         <label>
           WMS styles*
-          <kbn-info
-            info="A comma seperated list of WMS server supported styles to use. Blank in most cases."></kbn-info>
+          <icon-tip
+            position="'right'"
+            content="'A comma seperated list of WMS server supported styles to use. Blank in most cases.'"
+          ></icon-tip>
         </label>
         <input type="text" class="form-control"
                name="wms.options.styles"

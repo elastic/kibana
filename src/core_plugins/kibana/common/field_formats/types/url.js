@@ -89,6 +89,9 @@ export function createUrlFormat(FieldFormat) {
       const label = _.escape(this._formatLabel(rawValue, url));
 
       switch (this.param('type')) {
+        case 'audio':
+          return `<audio controls preload="none" src="${url}">`;
+
         case 'img':
           // If the URL hasn't been formatted to become a meaningful label then the best we can do
           // is tell screen readers where the image comes from.

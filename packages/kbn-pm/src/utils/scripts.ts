@@ -41,7 +41,7 @@ export async function runScriptInPackage(
 /**
  * Run script in the given directory
  */
-export async function runScriptInPackageStreaming(
+export function runScriptInPackageStreaming(
   script: string,
   args: string[],
   pkg: Project
@@ -50,7 +50,7 @@ export async function runScriptInPackageStreaming(
     cwd: pkg.path,
   };
 
-  await spawnStreaming(yarnPath, ['run', script, ...args], execOpts, {
+  return spawnStreaming(yarnPath, ['run', script, ...args], execOpts, {
     prefix: pkg.name,
   });
 }

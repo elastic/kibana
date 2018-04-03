@@ -137,7 +137,7 @@ export const OtherBucketHelperProvider = (Private) => {
       });
 
       resultAgg.filters.filters[key] = {
-        bool: buildQueryFromFilters(filters, _.noop, indexPattern)
+        bool: buildQueryFromFilters(filters, indexPattern)
       };
     };
     walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');

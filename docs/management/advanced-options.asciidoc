@@ -22,8 +22,8 @@ compatible with other configuration settings. Deleting a custom setting removes 
 .Kibana Settings Reference
 [horizontal]
 `query:queryString:options`:: Options for the Lucene query string parser.
+`query:allowLeadingWildcards`:: When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options.
 `search:queryLanguage`:: Default is `lucene`. Query language used by the query bar. Choose between the lucene query syntax and kuery, an experimental new language built specifically for Kibana.
-`search:queryLanguage:switcher:enable`:: Show or hide the query language switcher in the query bar.
 `sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
 `dateFormat`:: The format to use for displaying pretty-formatted dates.
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.

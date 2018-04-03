@@ -20,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export function AddData({ addBasePath, isCloudEnabled }) {
+export function AddData({ addBasePath, apmUiEnabled }) {
 
   const renderCards = () => {
     const cardStyle = {
@@ -29,40 +29,38 @@ export function AddData({ addBasePath, isCloudEnabled }) {
       'border': 'none'
     };
 
-    let apmCard;
-    if (!isCloudEnabled) {
-      apmCard = (
-        <KuiCard style={cardStyle}>
-          <KuiCardDescription>
-            <KuiCardDescriptionTitle>
-              <img
-                src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
-              />
-              <p>
-                APM
-              </p>
-            </KuiCardDescriptionTitle>
+    const getApmCard = () =>  (
+      <KuiCard style={cardStyle}>
+        <KuiCardDescription>
+          <KuiCardDescriptionTitle>
+            <img
+              src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
+            />
+            <p>
+              APM
+            </p>
+          </KuiCardDescriptionTitle>
 
-            <KuiCardDescriptionText>
-              APM automatically collects in-depth performance metrics and errors from inside your applications.
-            </KuiCardDescriptionText>
-          </KuiCardDescription>
+          <KuiCardDescriptionText>
+            APM automatically collects in-depth performance metrics and errors from inside your applications.
+          </KuiCardDescriptionText>
+        </KuiCardDescription>
 
-          <KuiCardFooter>
-            <EuiButton
-              href="#/home/tutorial/apm"
-            >
-              Add APM
-            </EuiButton>
-          </KuiCardFooter>
-        </KuiCard>
-      );
-    }
+        <KuiCardFooter>
+          <EuiButton
+            href="#/home/tutorial/apm"
+          >
+            Add APM
+          </EuiButton>
+        </KuiCardFooter>
+      </KuiCard>
+    );
+
     return (
       <div className="kuiVerticalRhythm">
         <KuiCardGroup>
 
-          {apmCard}
+          {apmUiEnabled !== false && getApmCard()}
 
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
@@ -121,7 +119,7 @@ export function AddData({ addBasePath, isCloudEnabled }) {
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
                 />
                 <p>
-                  Security analytics
+                  Security Analytics
                 </p>
               </KuiCardDescriptionTitle>
 
@@ -184,5 +182,5 @@ export function AddData({ addBasePath, isCloudEnabled }) {
 
 AddData.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  isCloudEnabled: PropTypes.bool.isRequired,
+  apmUiEnabled: PropTypes.bool.isRequired,
 };

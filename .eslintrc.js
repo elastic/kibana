@@ -19,6 +19,7 @@ module.exports = {
       files: [
         '.eslintrc.js',
         'packages/kbn-pm/**/*',
+        'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-plugin-generator/**/*',
       ],

@@ -25,8 +25,8 @@ module.factory('PersistedState', ($injector) => {
   // Extend PersistedState to override the EmitterClass class with
   // our Angular friendly version.
   return class AngularPersistedState extends PersistedState {
-    constructor(value, path, parent, silent) {
-      super(value, path, parent, silent, Events);
+    constructor(value, path) {
+      super(value, path, Events);
     }
   };
 });
