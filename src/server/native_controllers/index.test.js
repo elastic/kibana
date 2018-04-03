@@ -240,4 +240,3 @@ describe('#killOrStart', () => {
     await NativeControllers.killOrStart(kbnServer);
   });
 });
-
