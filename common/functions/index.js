@@ -32,7 +32,6 @@ import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
-import { sleep } from './sleep';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
@@ -77,7 +76,6 @@ export const commonFunctions = [
   rowCount,
   seriesStyle,
   sort,
-  sleep,
   staticColumn,
   string,
   table,
