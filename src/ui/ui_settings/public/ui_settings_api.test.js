@@ -1,10 +1,36 @@
 import { createUiSettingsApi } from './ui_settings_api';
 import { sendRequest } from './send_request';
 
-jest.useFakeTimers();
-jest.mock('./send_request', () => ({
-  sendRequest: jest.fn(() => ({}))
-}));
+jest.mock('./send_request', () => {
+  let resolve;
+  const sendRequest = jest.fn(() => new Promise((res) => {
+    resolve = res;
+  }));
+
+  return {
+    sendRequest,
+
+    resolveMockedSendRequest(value = {}) {
+      resolve(value);
+    },
+
+    async resolveMockedSendRequestAndWaitForNext(value = {}) {
+      const currentCallCount = sendRequest.mock.calls.length;
+      resolve(value);
+
+      const waitStart = Date.now();
+      while (sendRequest.mock.calls.length === currentCallCount) {
+        await new Promise(resolve => {
+          setImmediate(resolve);
+        });
+
+        if (Date.now() - waitStart > 10000) {
+          throw new Error('Waiting for subsequent call to sendRequest() timed out after 10 seconds');
+        }
+      }
+    },
+  };
+});
 
 beforeEach(() => {
   sendRequest.mockRestore();
@@ -12,50 +38,78 @@ beforeEach(() => {
 });
 
 describe('#batchSet', () => {
-  it('batches changes for 200ms, sends all at once', () => {
+  it('sends a single change immediately', () => {
     const uiSettingsApi = createUiSettingsApi();
     const { sendRequest } = require('./send_request');
 
     uiSettingsApi.batchSet('foo', 'bar');
 
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 200);
-    expect(sendRequest).not.toHaveBeenCalled();
-
-    jest.runAllTimers();
-
-    expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(sendRequest).toHaveBeenCalledTimes(1);
-    expect(sendRequest.mock.calls).toMatchSnapshot();
+    expect(sendRequest.mock.calls).toMatchSnapshot('unbuffered foo=bar');
   });
 
-  it('cancels 200ms timer on subsequent requests, always waiting 200ms from most recent call', () => {
+  it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
     const uiSettingsApi = createUiSettingsApi();
+    const { sendRequest, resolveMockedSendRequestAndWaitForNext } = require('./send_request');
 
     uiSettingsApi.batchSet('foo', 'bar');
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(clearTimeout).toHaveBeenCalledTimes(0);
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest.mock.calls).toMatchSnapshot('unbuffered foo=bar');
+    sendRequest.mock.calls.length = 0;
 
     uiSettingsApi.batchSet('foo', 'baz');
-    expect(setTimeout).toHaveBeenCalledTimes(2);
-    expect(clearTimeout).toHaveBeenCalledTimes(1);
+    uiSettingsApi.batchSet('bar', 'bug');
+    expect(sendRequest).not.toHaveBeenCalled();
+
+    await resolveMockedSendRequestAndWaitForNext();
+
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest.mock.calls).toMatchSnapshot('buffered foo=baz bar=bug');
   });
 
-  it('resolves promises with resolve value of Api.request()', async () => {
+  it('Overwrites previously buffered values with new values for the same key', async () => {
     const uiSettingsApi = createUiSettingsApi();
-    const { sendRequest } = require('./send_request');
+    const { sendRequest, resolveMockedSendRequestAndWaitForNext } = require('./send_request');
 
-    sendRequest.mockImplementation(() => 'foobar');
+    uiSettingsApi.batchSet('foo', 'bar');
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest.mock.calls).toMatchSnapshot('unbuffered foo=bar');
+    sendRequest.mock.calls.length = 0;
 
-    const promises = [
-      uiSettingsApi.batchSet('foo', 'bar'),
-      uiSettingsApi.batchSet('foo', 'baz'),
-      uiSettingsApi.batchSet('foo', 'bam'),
-      uiSettingsApi.batchSet('foo', 'bom'),
-    ];
+    // if changes were sent to the API now they would be { bar: 'foo' }
+    uiSettingsApi.batchSet('bar', 'foo');
+    // these changes override the preivous one, we should now send { bar: null }
+    uiSettingsApi.batchSet('bar', null);
 
-    jest.runAllTimers();
+    await resolveMockedSendRequestAndWaitForNext();
 
-    await expect(Promise.all(promises)).resolves.toMatchSnapshot();
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest.mock.calls).toMatchSnapshot('buffered bar=null');
+  });
+
+  it('Buffers are always clear of previously buffered changes', async () => {
+    const uiSettingsApi = createUiSettingsApi();
+    const { sendRequest, resolveMockedSendRequestAndWaitForNext } = require('./send_request');
+
+    uiSettingsApi.batchSet('foo', 'bar');
+    expect(sendRequest).toHaveBeenCalledTimes(1);
+    expect(sendRequest.mock.calls).toMatchSnapshot('unbuffered foo=bar');
+    sendRequest.mock.calls.length = 0;
+
+    // buffer a change
+    uiSettingsApi.batchSet('bar', 'foo');
+
+    // flush the buffer and wait for next request to start
+    await resolveMockedSendRequestAndWaitForNext();
+
+    // buffer another change
+    uiSettingsApi.batchSet('baz', 'box');
+
+    // flush the buffer and wait for next request to start
+    await resolveMockedSendRequestAndWaitForNext();
+
+    expect(sendRequest).toHaveBeenCalledTimes(2);
+    expect(sendRequest.mock.calls[0]).toMatchSnapshot('buffered bar=foo');
+    expect(sendRequest.mock.calls[1]).toMatchSnapshot('buffered baz=box');
   });
 });

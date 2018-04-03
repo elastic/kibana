@@ -1,47 +1,66 @@
 import { sendRequest } from './send_request';
 
+const NOOP_CHANGES = {
+  values: {},
+  callback: () => {},
+};
+
 export function createUiSettingsApi() {
-  let unsavedChanges = {};
-  let pendingCallbacks = [];
-  let timeout = null;
+  let pendingChanges = null;
+  let sendInProgress = false;
 
-  async function send() {
-    const changes = unsavedChanges;
-    const callbacks = pendingCallbacks;
+  async function flushPendingChanges() {
+    if (!pendingChanges) {
+      return;
+    }
 
-    pendingCallbacks = [];
-    unsavedChanges = {};
+    if (sendInProgress) {
+      return;
+    }
+
+    const changes = pendingChanges;
+    pendingChanges = null;
 
     try {
-      const resp = await sendRequest({
+      sendInProgress = true;
+      changes.callback(null, await sendRequest({
         method: 'POST',
         path: '/api/kibana/settings',
-        body: { changes },
-      });
-
-      callbacks.forEach(cb => cb(null, resp));
+        body: {
+          changes: changes.values
+        },
+      }));
     } catch (error) {
-      callbacks.forEach(cb => cb(error));
+      changes.callback(error);
+    } finally {
+      sendInProgress = false;
+      flushPendingChanges();
     }
   }
 
   return new class Api {
     batchSet(key, value) {
-      unsavedChanges[key] = value;
-
       return new Promise((resolve, reject) => {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
+        const prev = pendingChanges || NOOP_CHANGES;
 
-        timeout = setTimeout(send, 200);
-        pendingCallbacks.push((error, resp) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(resp);
-          }
-        });
+        pendingChanges = {
+          values: {
+            ...prev.values,
+            [key]: value,
+          },
+
+          callback(error, resp) {
+            prev.callback(error, resp);
+
+            if (error) {
+              reject(error);
+            } else {
+              resolve(resp);
+            }
+          },
+        };
+
+        flushPendingChanges();
       });
     }
   };
