@@ -190,6 +190,7 @@
     "rimraf": "2.4.3",
     "rison-node": "1.0.0",
     "rxjs": "5.4.3",
+    "sandbox": "https://github.com/elastic/node-sandbox/releases/download/v0.0.1/sandbox-0.0.1.tgz",
     "script-loader": "0.7.2",
     "semver": "5.1.0",
     "style-loader": "0.19.0",

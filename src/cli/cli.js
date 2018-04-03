@@ -1,3 +1,6 @@
+import sandbox from 'sandbox';
+sandbox.activate();
+
 import _ from 'lodash';
 import { pkg } from '../utils';
 import Command from './command';

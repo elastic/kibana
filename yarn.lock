@@ -10106,6 +10106,10 @@ samsam@~1.1:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/samsam/-/samsam-1.1.3.tgz#9f5087419b4d091f232571e7fa52e90b0f552621"
 
+"sandbox@https://github.com/elastic/node-sandbox/releases/download/v0.0.1/sandbox-0.0.1.tgz":
+  version "0.0.1"
+  resolved "https://github.com/elastic/node-sandbox/releases/download/v0.0.1/sandbox-0.0.1.tgz#37465f44cb58f5e416b07af6c2fbee2c18ec2ba0"
+
 sane@^2.0.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/sane/-/sane-2.5.0.tgz#6359cd676f5efd9988b264d8ce3b827dd6b27bec"
