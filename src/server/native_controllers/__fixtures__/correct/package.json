@@ -1,0 +1,12 @@
+{
+  "name": "correct",
+  "version": "kibana",
+  "kibana": {
+    "nativeControllers": [
+      {
+        "pluginId": "correct",
+        "path": "native_controller.js"
+      }
+    ]
+  }
+}
