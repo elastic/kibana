@@ -4,7 +4,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -112,7 +112,7 @@ exports[`Field for array setting should render default value if there is no user
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -210,7 +210,7 @@ exports[`Field for array setting should render user value if there is user value
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -325,7 +325,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -431,7 +431,7 @@ exports[`Field for boolean setting should render default value if there is no us
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -527,7 +527,7 @@ exports[`Field for boolean setting should render user value if there is user val
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -640,7 +640,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -747,7 +747,7 @@ exports[`Field for image setting should render default value if there is no user
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -844,7 +844,7 @@ exports[`Field for image setting should render user value if there is user value
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -968,7 +968,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1077,7 +1077,7 @@ exports[`Field for json setting should render default value if there is no user 
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1193,7 +1193,7 @@ exports[`Field for json setting should render user value if there is user value 
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1309,7 +1309,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1418,7 +1418,7 @@ exports[`Field for markdown setting should render default value if there is no u
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1517,7 +1517,7 @@ exports[`Field for markdown setting should render user value if there is user va
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1633,7 +1633,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1741,7 +1741,7 @@ exports[`Field for number setting should render default value if there is no use
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1839,7 +1839,7 @@ exports[`Field for number setting should render user value if there is user valu
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -1954,7 +1954,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -2079,7 +2079,7 @@ exports[`Field for select setting should render default value if there is no use
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -2194,7 +2194,7 @@ exports[`Field for select setting should render user value if there is user valu
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -2326,7 +2326,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -2434,7 +2434,7 @@ exports[`Field for string setting should render default value if there is no use
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}
@@ -2532,7 +2532,7 @@ exports[`Field for string setting should render user value if there is user valu
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
-  gutterSize="l"
+  gutterSize="m"
   justifyContent="flexStart"
   responsive={true}
   wrap={false}

@@ -27,9 +27,12 @@ export class Form extends PureComponent {
     super(props);
     const { settings, query } = this.props;
     const parsedQuery = query ? Query.parse(`ariaName:"${getAriaName(query)}"`) : null;
+    const groupedSettings = this.mapSettings(parsedQuery ? Query.execute(parsedQuery, settings) : settings);
+
     this.state = {
       query: parsedQuery,
-      settings: this.mapSettings(parsedQuery ? Query.execute(parsedQuery, settings) : settings),
+      settings: groupedSettings,
+      categories: this.getCategories(groupedSettings),
     };
   }
 
@@ -51,6 +54,15 @@ export class Form extends PureComponent {
     }, {});
   }
 
+  getCategories(groupedSettings) {
+    return Object.keys(groupedSettings).sort((a, b) => {
+      if(a === DEFAULT_CATEGORY) return -1;
+      if(b === DEFAULT_CATEGORY) return 1;
+      if(a > b) return 1;
+      return a === b ? 0 : -1;
+    });
+  }
+
   onQueryChange = (query) => {
     this.setState({
       query,
@@ -65,7 +77,7 @@ export class Form extends PureComponent {
           <EuiText>
             <h2>{getCategoryName(category)}</h2>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           {settings.map(setting => {
             return (
               <Field
@@ -83,14 +95,8 @@ export class Form extends PureComponent {
   }
 
   render() {
-    const { settings, query } = this.state;
-
-    const categories = Object.keys(settings).sort((a, b) => {
-      if(a === DEFAULT_CATEGORY) return -1;
-      if(b === DEFAULT_CATEGORY) return 1;
-      if(a > b) return 1;
-      return a === b ? 0 : -1;
-    });
+    const { query, categories, settings } = this.state;
+    const currentCategories = this.getCategories(settings);
 
     const box = {
       incremental: true,
@@ -124,9 +130,9 @@ export class Form extends PureComponent {
           </EuiFormRow>
         </EuiForm>
         <EuiSpacer />
-        {categories.map((category, i) => {
+        {currentCategories.map((category, i) => {
           return (
-            this.renderCategory(category, settings[category], i === categories.length - 1)
+            this.renderCategory(category, settings[category], i === currentCategories.length - 1)
           );
         })}
       </Fragment>

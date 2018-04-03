@@ -482,7 +482,7 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return(
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
           <EuiFormRow
             isInvalid={isInvalid}
