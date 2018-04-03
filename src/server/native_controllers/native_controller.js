@@ -8,19 +8,24 @@ export class NativeController {
     this.pluginId = pluginId;
     this.process = process;
 
-    this.ready$ = Observable
+    this._ready$ = Observable
       .fromEvent(process, 'message')
       .filter(message => message === 'ready')
       .first();
 
-    this.started$ = Observable
+    this._started$ = Observable
       .fromEvent(process, 'message')
       .filter(message => message === 'started')
       .first();
   }
 
-  start() {
-    this.process.send('start');
+  async start() {
+    return this._ready$
+      .mergeMap(() => {
+        this.process.send('start');
+        return this._started$;
+      })
+      .toPromise();
   }
 
   kill() {

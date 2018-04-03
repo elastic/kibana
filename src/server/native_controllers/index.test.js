@@ -144,4 +144,100 @@ describe('#prepare', () => {
   });
 });
 
+describe('#killOrStart', () => {
+  test('starts enabled plugin', async () => {
+    const mockNativeController = {
+      start: jest.fn().mockReturnValue(Promise.resolve()),
+    };
+    const kbnServer = {
+      pluginSpecs: [{
+        getId: () => 'foo'
+      }],
+      disabledPluginSpecs: [],
+      nativeControllers: {
+        'foo': mockNativeController
+      }
+    };
+
+    await NativeControllers.killOrStart(kbnServer);
+
+    expect(mockNativeController.start).toHaveBeenCalledTimes(1);
+  });
+
+  test('waits for started$ before resolving killOrStart Promise', async () => {
+    expect.hasAssertions();
+
+    let resolved = false;
+    let triggerStarted;
+
+    const mockNativeController = {
+      start: jest.fn().mockImplementation(() => new Promise(resolve => {
+        triggerStarted = () => {
+          resolved = true;
+          resolve();
+        };
+      })),
+    };
+    const kbnServer = {
+      pluginSpecs: [{
+        getId: () => 'foo'
+      }],
+      disabledPluginSpecs: [],
+      nativeControllers: {
+        'foo': mockNativeController
+      }
+    };
+
+
+    NativeControllers.killOrStart(kbnServer)
+      .then(() => {
+        expect(resolved).toBe(true);
+      });
+
+    triggerStarted();
+  });
+
+  test(`doesn't throw error when enabled plugin doesn't have a nativeController`, async () => {
+    const kbnServer = {
+      nativeControllers: [],
+      pluginSpecs: [{
+        getId: () => 'foo'
+      }],
+      disabledPluginSpecs: [],
+    };
+
+    await NativeControllers.killOrStart(kbnServer);
+  });
+
+  test('kills disabled plugin', async () => {
+    const mockNativeController = {
+      kill: jest.fn(),
+    };
+    const kbnServer = {
+      pluginSpecs: [],
+      disabledPluginSpecs: [{
+        getId: () => 'foo'
+      }],
+      nativeControllers: {
+        'foo': mockNativeController
+      }
+    };
+
+    await NativeControllers.killOrStart(kbnServer);
+
+    expect(mockNativeController.kill).toHaveBeenCalledTimes(1);
+  });
+
+  test(`doesn't throw error when disabled plugin doesn't have a nativeController`, async () => {
+    const kbnServer = {
+      nativeControllers: [],
+      pluginSpecs: [],
+      disabledPluginSpecs: [{
+        getId: () => 'foo'
+      }],
+    };
+
+    await NativeControllers.killOrStart(kbnServer);
+  });
+});
 

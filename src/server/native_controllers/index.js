@@ -68,8 +68,7 @@ export async function killOrStart(kbnServer) {
         return Observable.empty();
       }
 
-      nativeController.start();
-      return nativeController.started$;
+      return nativeController.start();
     });
 
 
