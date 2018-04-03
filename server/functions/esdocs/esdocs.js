@@ -63,7 +63,7 @@ export const esdocs = () => ({
       {
         index: args.index,
         body: {
-          _source: fields,
+          _source: fields || [],
           sort: getSort(),
           query: {
             bool: {
