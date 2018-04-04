@@ -24,6 +24,10 @@ export class NativeController {
   async start() {
     return this._ready$
       .mergeMap(() => {
+        if (this.process.killed) {
+          throw new Error(`Can't start killed process`);
+        }
+
         this.process.send('start');
         return this._started$;
       })

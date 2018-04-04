@@ -12,12 +12,17 @@ export function safeChildProcess(childProcess, signal = 'SIGTERM') {
     .take(1)
     .share();
 
+  const status = {
+    terminating: false
+  };
+
   // signals that will be sent to the child process as a result of the main process
   // being sent these signals, or the exit being triggered
   const signalForChildProcess$ = Observable.merge(
     ownTerminateSignal$,
     Observable.fromEvent(process, 'exit')
   )
+    .do(() => status.terminating = true)
     .take(1)
     .switchMapTo(childProcessSignal$);
 
@@ -39,4 +44,6 @@ export function safeChildProcess(childProcess, signal = 'SIGTERM') {
   childProcess.on('exit', () => {
     subscription.unsubscribe();
   });
+
+  return status;
 }

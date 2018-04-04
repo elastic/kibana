@@ -34,6 +34,22 @@ describe(`#start`, () => {
     proc.emit('message', 'started');
   });
 
+  test(`throws Error when the proc has been killed after receiving ready`, (done) => {
+    expect.hasAssertions();
+
+    const proc = mockProcess();
+    const nativeController = new NativeController(null, proc);
+
+    nativeController.start()
+      .catch(err => {
+        expect(err).toBeDefined();
+        done();
+      });
+
+    proc.killed = true;
+    proc.emit('message', 'ready');
+  });
+
   test(`sends start when it's received ready message after send it called`, (done) => {
     expect.hasAssertions();
 

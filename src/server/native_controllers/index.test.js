@@ -99,6 +99,7 @@ describe('#prepare', () => {
     };
     const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    safeChildProcess.mockReturnValue({ terminating: false });
 
     await NativeControllers.prepare(kbnServer);
     mockSpawnedProcess.emit('exit');
@@ -124,9 +125,37 @@ describe('#prepare', () => {
     };
     const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    safeChildProcess.mockReturnValue({ terminating: false });
 
     await NativeControllers.prepare(kbnServer);
     kbnServer.nativeControllers.correct.killed = true;
+    mockSpawnedProcess.emit('exit');
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(0);
+    expect(processExitSpy).toHaveBeenCalledTimes(0);
+
+    consoleErrorSpy.mockReset();
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockReset();
+    processExitSpy.mockRestore();
+  });
+
+  test(`doesn't kill process when child process is terminating`, async () => {
+    const kbnServer = {
+      settings: {
+        plugins: {
+          paths: [
+            path.resolve(FIXTURES, 'correct')
+          ]
+        }
+      }
+    };
+    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    safeChildProcess.mockReturnValue({ terminating: true });
+
+    await NativeControllers.prepare(kbnServer);
     mockSpawnedProcess.emit('exit');
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(0);

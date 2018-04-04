@@ -34,9 +34,9 @@ const getNativeControllers = async (settings) => {
 
   return await nativeController$
     .do(nativeController => {
-      safeChildProcess(nativeController.process);
+      const childProcessStatus = safeChildProcess(nativeController.process);
       nativeController.process.on('exit', (code) => {
-        if (nativeController.killed) {
+        if (childProcessStatus.terminating || nativeController.killed) {
           return;
         }
 
