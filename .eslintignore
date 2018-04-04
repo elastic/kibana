@@ -21,3 +21,4 @@
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
 !/.eslintrc.js
+**/*.js.snap
