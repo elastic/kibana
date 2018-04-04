@@ -1,6 +1,7 @@
 $checkboxBackgroundColor: #FFF;
 $checkboxBorderColor: #BEBEBE;
 $checkboxIconColor: #FFF;
+$checkboxDisabledColor: #D9D9D9;
 $checkboxCheckedBackgroundColor: $kuiColorBlue;
 $checkboxDisabledOpacity: 0.3;
 
@@ -49,8 +50,9 @@ $checkboxDisabledOpacity: 0.3;
   }
 
   &:disabled {
-    opacity: $checkboxDisabledOpacity;
-    cursor: not-allowed;
+    background-color: $checkboxDisabledColor !important;
+    border-color: $checkboxDisabledColor !important;
+    cursor: not-allowed !important;
   }
 
   @include darkTheme {
