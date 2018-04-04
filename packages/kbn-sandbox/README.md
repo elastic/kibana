@@ -39,7 +39,7 @@ Building requires you have a compiler environment available. For more details on
 Building:
 
 ```
-yarn build
+yarn build-binaries
 ```
 
 Testing:
