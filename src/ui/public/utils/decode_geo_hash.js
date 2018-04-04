@@ -16,8 +16,8 @@
  * top-left and bottom-right corners of
  * rectangle and center point.
  *
- * @param  {[type]} geohash [description]
- * @return {[type]}         [description]
+ * @param  {string} geohash
+ * @return {{latitude,longitude}}
  */
 export function decodeGeoHash(geohash) {
   let BITS = [16, 8, 4, 2, 1];
