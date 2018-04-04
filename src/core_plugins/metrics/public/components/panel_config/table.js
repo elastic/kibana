@@ -68,14 +68,6 @@ class TablePanelConfig extends Component {
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
                 />
-                <label className="vis_editor__label" htmlFor={htmlId('pivotRowsInput')}>Rows</label>
-                <input
-                  id={htmlId('pivotRowsInput')}
-                  className="vis_editor__input-number"
-                  type="number"
-                  onChange={handleTextChange('pivot_rows')}
-                  value={model.pivot_rows}
-                />
               </div>
             </div>
           </div>

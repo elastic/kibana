@@ -1,44 +1,56 @@
 import expect from 'expect.js';
 
-export default function ({ getService, getPageObjects }) {
+export default ({ getService, getPageObjects }) => {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'header',
+    'settings',
+    'visualBuilder',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
-    before(function () {
+    before(() => {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
 
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
+      return PageObjects.common
+        .navigateToUrl('visualize', 'new')
+        .then(() => {
           log.debug('clickVisualBuilderChart');
           return PageObjects.visualize.clickVisualBuilder();
         })
         .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          log.debug(
+            'Set absolute time range from "' +
+              fromTime +
+              '" to "' +
+              toTime +
+              '"'
+          );
           return PageObjects.header.setAbsoluteRange(fromTime, toTime);
         })
-        .then(function () {
+        .then(() => {
           return PageObjects.header.waitUntilLoadingHasFinished();
         });
     });
 
-    describe('Time Series', function () {
-
-      it('should show the correct count in the legend', async function () {
+    describe('Time Series', () => {
+      it('should show the correct count in the legend', async () => {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('156');
       });
 
-      it('should show the correct count in the legend with 2h offset', async function () {
+      it('should show the correct count in the legend with 2h offset', async () => {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('293');
       });
 
-      it('should show the correct count in the legend with -2h offset', async function () {
+      it('should show the correct count in the legend with -2h offset', async () => {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('53');
@@ -48,7 +60,6 @@ export default function ({ getService, getPageObjects }) {
         // set back to no offset for the next test, an empty string didn't seem to work here
         await PageObjects.visualBuilder.enterOffsetSeries('0h');
       });
-
     });
 
     describe('metric', () => {
@@ -56,19 +67,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetric();
       });
 
-      it('should not display spy panel toggle button', async function () {
+      it('should not display spy panel toggle button', async () => {
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should show correct data', async function () {
-        const expectedMetricValue =  '156';
+      it('should show correct data', async () => {
+        const expectedMetricValue = '156';
 
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
+        return PageObjects.visualBuilder.getMetricValue().then(value => {
+          log.debug(`metric value: ${value}`);
+          expect(value).to.eql(expectedMetricValue);
+        });
       });
     });
 
@@ -79,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on Gauge');
       });
 
-      it('should verfiy gauge label and count display', async function () {
+      it('should verfiy gauge label and count display', async () => {
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -94,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clicked on TopN');
       });
 
-      it('should verfiy topN label and count display', async function () {
+      it('should verfiy topN label and count display', async () => {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -102,30 +112,36 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
-
     describe('markdown', () => {
-
       before(async () => {
         await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.header.setAbsoluteRange(
+          '2015-09-22 06:00:00.000',
+          '2015-09-22 11:00:00.000'
+        );
       });
 
       it('should allow printing raw timestamp of data', async () => {
-        await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
+        await PageObjects.visualBuilder.enterMarkdown(
+          '{{ count.data.raw.[0].[0] }}'
+        );
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('1442901600000');
       });
 
       it.skip('should allow printing raw value of data', async () => {
-        await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
+        await PageObjects.visualBuilder.enterMarkdown(
+          '{{ count.data.raw.[0].[1] }}'
+        );
         const text = await PageObjects.visualBuilder.getMarkdownText();
         expect(text).to.be('6');
       });
 
       describe('allow time offsets', () => {
         before(async () => {
-          await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
+          await PageObjects.visualBuilder.enterMarkdown(
+            '{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}'
+          );
           await PageObjects.visualBuilder.clickMarkdownData();
           await PageObjects.visualBuilder.clickSeriesOption();
         });
@@ -146,13 +162,15 @@ export default function ({ getService, getPageObjects }) {
           expect(value).to.be('23');
         });
       });
-
     });
     // add a table sanity timestamp
     describe('table', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickTable();
-        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.header.setAbsoluteRange(
+          '2015-09-22 06:00:00.000',
+          '2015-09-22 11:00:00.000'
+        );
         log.debug('clicked on Table');
       });
 
@@ -165,14 +183,10 @@ export default function ({ getService, getPageObjects }) {
       it('should be able verify that values are displayed in the table', async () => {
         const tableData = await PageObjects.visualBuilder.getViewTable();
         log.debug(`Values on ${tableData}`);
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+        const expectedData =
+          'OS\nCount\nios\n5\nosx\n3\nwin 7\n12\nwin 8\n13\nRows per page: 10';
         expect(tableData).to.be(expectedData);
       });
-
-
-
     });
-
-
   });
-}
+};
