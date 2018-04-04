@@ -242,7 +242,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/notice',
-        '--frozen'
+        '--validate'
       ]
     }
   };

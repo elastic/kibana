@@ -14,7 +14,7 @@ const unknownFlags = [];
 const opts = getopts(process.argv.slice(2), {
   boolean: [
     'help',
-    'frozen',
+    'validate',
     'verbose',
     'debug',
   ],
@@ -42,7 +42,7 @@ if (opts.help) {
 
     Options:
       --help      Show this help info
-      --frozen    Don't write the NOTICE.txt, just fail if updates would have been made
+      --validate  Don't write the NOTICE.txt, just fail if updates would have been made
       --verbose   Set logging level to verbose
       --debug     Set logging level to debug
   ` + '\n\n');
@@ -52,7 +52,7 @@ if (opts.help) {
 (async function run() {
   log.info('Searching source files for multi-line comments starting with @notify');
   const newText = await generateNoticeText(log);
-  if (!opts.frozen) {
+  if (!opts.validate) {
     log.info('Wrote notice text to', NOTICE_PATH);
     writeFileSync(NOTICE_PATH, newText, 'utf8');
     return;
