@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/sandbox",
+  "version": "1.0.0",
+  "description": "node sandboxing efforts",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "node-gyp configure build"
+  },
+  "private": true,
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "jest": "^22.4.3"
+  }
+}

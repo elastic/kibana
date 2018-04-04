@@ -140,15 +140,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/node-sandbox@link:packages/kbn-node-sandbox":
-  version "0.0.0"
-  uid ""
-
 "@kbn/plugin-generator@link:packages/kbn-plugin-generator":
   version "0.0.0"
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sandbox@link:packages/kbn-sandbox":
   version "0.0.0"
   uid ""
 

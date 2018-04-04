@@ -86,7 +86,7 @@
     "@kbn/datemath": "link:packages/kbn-datemath",
     "@kbn/pm": "link:packages/kbn-pm",
     "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
-    "@kbn/node-sandbox": "link:packages/kbn-node-sandbox",
+    "@kbn/sandbox": "link:packages/kbn-sandbox",
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
