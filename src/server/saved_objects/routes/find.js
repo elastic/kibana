@@ -45,11 +45,12 @@ export const createFindPostRoute = (prereqs) => ({
       }).default()
     },
     handler(request, reply) {
-      const options = keysToCamelCaseShallow(request.query);
-      reply(request.pre.savedObjectsClient.find({
-        ...options,
-        experimentalFilter: request.payload.experimental_filter
-      }));
+      const options = keysToCamelCaseShallow({
+        ...request.query,
+        ...request.payload.experimental_filter,
+      });
+
+      reply(request.pre.savedObjectsClient.find(options));
     }
   }
 });
