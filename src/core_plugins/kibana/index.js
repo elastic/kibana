@@ -4,12 +4,14 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
-import search from './server/routes/api/search';
+import { statusPage } from './server/routes/page/status';
+import { statusApi } from './server/routes/api/status';
+import { searchApi } from './server/routes/api/search';
 import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
-import scripts from './server/routes/api/scripts';
+import { scriptsApi } from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
@@ -141,11 +143,15 @@ export default function (kibana) {
     },
 
     init: function (server) {
+      const { kbnServer } = this;
+
       // uuid
       manageUuid(server);
       // routes
-      search(server);
-      scripts(server);
+      statusPage(server, kbnServer);
+      statusApi(server, kbnServer);
+      searchApi(server);
+      scriptsApi(server);
       scrollSearchApi(server);
       importApi(server);
       exportApi(server);
