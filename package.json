@@ -70,16 +70,17 @@
     "uiFramework:start": "cd packages/kbn-ui-framework && yarn docSiteStart",
     "uiFramework:build": "cd packages/kbn-ui-framework && yarn docSiteBuild",
     "uiFramework:createComponent": "cd packages/kbn-ui-framework && yarn createComponent",
-    "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent"
+    "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
+    "kbn:watch": "node scripts/kibana --dev --logging.json=false"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.26",
+    "@elastic/eui": "^0.0.37",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.3.1",
+    "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/datemath": "link:packages/kbn-datemath",
@@ -167,7 +168,7 @@
     "raw-loader": "0.5.1",
     "react": "^16.2.0",
     "react-addons-shallow-compare": "15.6.2",
-    "react-anything-sortable": "^1.7.3",
+    "react-anything-sortable": "^1.7.4",
     "react-color": "^2.13.8",
     "react-dom": "^16.2.0",
     "react-grid-layout": "^0.16.2",
@@ -202,8 +203,8 @@
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
-    "vega-lib": "^3.1.0",
-    "vega-lite": "^2.1.3",
+    "vega-lib": "^3.2.1",
+    "vega-lite": "^2.3.1",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
@@ -251,7 +252,9 @@
     "grunt-cli": "0.1.13",
     "grunt-contrib-clean": "1.0.0",
     "grunt-contrib-copy": "0.8.1",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-karma": "2.0.0",
+    "grunt-peg": "^2.0.1",
     "grunt-run": "0.7.0",
     "grunt-simple-mocha": "0.4.0",
     "gulp-sourcemaps": "1.7.3",
@@ -273,7 +276,7 @@
     "leadfoot": "silne30/leadfoot#validation_for_response_in_ff58",
     "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
-    "makelogs": "^4.0.4",
+    "makelogs": "^4.0.5",
     "marked-text-renderer": "0.1.0",
     "mocha": "3.3.0",
     "mock-fs": "^4.4.2",
@@ -297,7 +300,7 @@
     "xmlbuilder": "9.0.4"
   },
   "engines": {
-    "node": "8.9.4",
+    "node": "8.11.0",
     "yarn": "^1.3.2"
   }
 }

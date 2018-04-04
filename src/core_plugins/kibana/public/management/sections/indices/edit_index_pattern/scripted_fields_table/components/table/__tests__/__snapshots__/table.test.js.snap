@@ -10,13 +10,14 @@ exports[`Table should render normally 1`] = `
         "field": "displayName",
         "name": "Name",
         "sortable": true,
+        "width": "38%",
       },
       Object {
+        "data-test-subj": "scriptedFieldLang",
         "dataType": "string",
         "description": "Language used for the field",
         "field": "lang",
         "name": "Lang",
-        "render": [Function],
         "sortable": true,
       },
       Object {
@@ -50,6 +51,7 @@ exports[`Table should render normally 1`] = `
           },
         ],
         "name": "",
+        "width": "40px",
       },
     ]
   }

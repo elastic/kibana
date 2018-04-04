@@ -308,6 +308,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('spyToggleButton');
     }
 
+    async setSpyPanelPageSize(size) {
+      await remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+        .click();
+    }
+
     async getMetric() {
       const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
       return await metricElement.getVisibleText();
@@ -787,6 +793,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.openSpyPanel();
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
+    }
+
+    async getVisualizationResponse() {
+      log.debug('getVisualizationResponse');
+      await this.openSpyPanel();
+      await testSubjects.click('spyModeSelect-response');
+      return await testSubjects.getVisibleText('visualizationEsResponseBody');
     }
 
     async getMapBounds() {

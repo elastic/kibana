@@ -3,7 +3,7 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const chalk = require('chalk');
 const path = require('path');
-const { BASE_PATH, DL_PATH } = require('../paths');
+const { BASE_PATH } = require('../paths');
 const { installArchive } = require('./archive');
 const { log: defaultLog, cache } = require('../utils');
 
@@ -40,10 +40,10 @@ exports.installSnapshot = async function installSnapshot({
  * @returns {Promose}
  */
 function downloadFile(url, dest, log) {
-  const downloadPath = path.resolve(DL_PATH, path.basename(dest));
+  const downloadPath = `${dest}.tmp`;
   const cacheMeta = cache.readMeta(dest);
 
-  mkdirp.sync(DL_PATH);
+  mkdirp.sync(path.dirname(dest));
 
   log.info('downloading from %s', chalk.bold(url));
 

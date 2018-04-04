@@ -1,120 +1,182 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
+
 import ngMock from 'ng_mock';
+import chrome from 'ui/chrome';
 
-import { Notifier } from 'ui/notify';
-
-describe('config component', function () {
+describe('Config service', () => {
   let config;
-  let $scope;
+  let uiSettings;
+  let $q;
+  let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
+  beforeEach(ngMock.inject(($injector) => {
     config = $injector.get('config');
-    $scope = $injector.get('$rootScope');
+    uiSettings = chrome.getUiSettingsClient();
+    $q = $injector.get('$q');
+    $rootScope = $injector.get('$rootScope');
   }));
 
-  describe('#get', function () {
-    it('gives access to config values', function () {
-      expect(config.get('dateFormat')).to.be.a('string');
-    });
-
-    it('supports the default value overload', function () {
-      // default values are consumed and returned atomically
-      expect(config.get('obscureProperty1', 'default')).to.be('default');
-    });
-
-    it('after a get for an unknown property, the property is not persisted', function () {
-      const throwaway = config.get('obscureProperty2', 'default'); //eslint-disable-line no-unused-vars
-      // after a get, default values are NOT persisted
-      expect(config.get).withArgs('obscureProperty2').to.throwException();
-    });
-
-    it('honors the default parameter for unset options that are exported', () => {
-      // if you are hitting this error, then a test is setting this config value globally and not unsetting it!
-      expect(config.isDefault('dateFormat')).to.be(true);
-
-      const defaultDateFormat = config.get('dateFormat');
-
-      expect(config.get('dateFormat', 'xyz')).to.be('xyz');
-      // shouldn't change other usages
-      expect(config.get('dateFormat')).to.be(defaultDateFormat);
-      expect(config.get('dataFormat', defaultDateFormat)).to.be(defaultDateFormat);
-    });
-
-    it('throws on unknown properties that don\'t have a value yet.', function () {
-      const msg = 'Unexpected `config.get("throwableProperty")` call on unrecognized configuration setting';
-      expect(config.get).withArgs('throwableProperty').to.throwException(msg);
+  describe('#getAll', () => {
+    it('calls uiSettings.getAll()', () => {
+      sinon.stub(uiSettings, 'getAll');
+      config.getAll();
+      sinon.assert.calledOnce(uiSettings.getAll);
+      sinon.assert.calledWithExactly(uiSettings.getAll);
     });
   });
 
-  describe('#set', function () {
-    it('stores a value in the config val set', function () {
-      const original = config.get('dateFormat');
-      config.set('dateFormat', 'notaformat');
-      expect(config.get('dateFormat')).to.be('notaformat');
-      config.set('dateFormat', original);
-    });
-
-    it('stores a value in a previously unknown config key', function () {
-      expect(config.set).withArgs('unrecognizedProperty', 'somevalue').to.not.throwException();
-      expect(config.get('unrecognizedProperty')).to.be('somevalue');
+  describe('#get', () => {
+    it('calls uiSettings.get(key, default)', () => {
+      sinon.stub(uiSettings, 'get');
+      config.get('key', 'default');
+      sinon.assert.calledOnce(uiSettings.get);
+      sinon.assert.calledWithExactly(uiSettings.get, 'key', 'default');
     });
   });
 
-  describe('#$bind', function () {
-
-    it('binds a config key to a $scope property', function () {
-      const dateFormat = config.get('dateFormat');
-      config.bindToScope($scope, 'dateFormat');
-      expect($scope).to.have.property('dateFormat', dateFormat);
+  describe('#isDeclared', () => {
+    it('calls uiSettings.isDeclared(key)', () => {
+      sinon.stub(uiSettings, 'isDeclared');
+      config.isDeclared('key');
+      sinon.assert.calledOnce(uiSettings.isDeclared);
+      sinon.assert.calledWithExactly(uiSettings.isDeclared, 'key');
     });
-
-    it('allows overriding the property name', function () {
-      const dateFormat = config.get('dateFormat');
-      config.bindToScope($scope, 'dateFormat', 'defaultDateFormat');
-      expect($scope).to.not.have.property('dateFormat');
-      expect($scope).to.have.property('defaultDateFormat', dateFormat);
-    });
-
-    it('keeps the property up to date', function () {
-      const original = config.get('dateFormat');
-      const newDateFormat = original + ' NEW NEW NEW!';
-      config.bindToScope($scope, 'dateFormat');
-
-      expect($scope).to.have.property('dateFormat', original);
-      config.set('dateFormat', newDateFormat);
-      expect($scope).to.have.property('dateFormat', newDateFormat);
-      config.set('dateFormat', original);
-
-    });
-
   });
 
-  describe('#_change', () => {
-
-    it('returns true for success', async () => {
-      // immediately resolve to avoid timing issues
-      const delayedUpdate = () => Promise.resolve();
-
-      expect(await config._change('expect_true', 'value', { _delayedUpdate: delayedUpdate })).to.be(true);
-      // setting to the same should set it to true as well
-      expect(await config._change('expect_true', 'value')).to.be(true);
-
-      config.remove('expect_true');
+  describe('#isDefault', () => {
+    it('calls uiSettings.isDefault(key)', () => {
+      sinon.stub(uiSettings, 'isDefault');
+      config.isDefault('key');
+      sinon.assert.calledOnce(uiSettings.isDefault);
+      sinon.assert.calledWithExactly(uiSettings.isDefault, 'key');
     });
-
-    it('returns false for failure', async () => {
-      const message = 'TEST - _change - EXPECTED';
-      // immediately resolve to avoid timing issues
-      const delayedUpdate = () => Promise.reject(new Error(message));
-
-      expect(await config._change('expected_false', 'value', { _delayedUpdate: delayedUpdate })).to.be(false);
-
-      // cleanup the notification so that the test harness does not complain
-      const notif = Notifier.prototype._notifs.find(notif => notif.content.indexOf(message) !== -1);
-      notif.clear();
-    });
-
   });
 
+  describe('#isCustom', () => {
+    it('calls uiSettings.isCustom(key)', () => {
+      sinon.stub(uiSettings, 'isCustom');
+      config.isCustom('key');
+      sinon.assert.calledOnce(uiSettings.isCustom);
+      sinon.assert.calledWithExactly(uiSettings.isCustom, 'key');
+    });
+  });
+
+  describe('#remove', () => {
+    it('calls uiSettings.remove(key)', () => {
+      sinon.stub(uiSettings, 'remove');
+      config.remove('foobar');
+      sinon.assert.calledOnce(uiSettings.remove);
+      sinon.assert.calledWithExactly(uiSettings.remove, 'foobar');
+    });
+
+    it('returns an angular promise', () => {
+      const promise = config.remove('dateFormat:tz');
+      expect(promise).to.be.a($q);
+    });
+  });
+
+  describe('#set', () => {
+    it('returns an angular promise', () => {
+      const promise = config.set('dateFormat:tz', 'foo');
+      expect(promise).to.be.a($q);
+    });
+
+    it('strips $$-prefixed properties from plain objects', () => {
+      config.set('dateFormat:scaled', {
+        foo: 'bar',
+        $$bax: 'box'
+      });
+
+      expect(config.get('dateFormat:scaled')).to.eql({
+        foo: 'bar'
+      });
+    });
+  });
+
+  describe('$scope events', () => {
+    it('synchronously emits change:config on $rootScope when config changes', () => {
+      const stub = sinon.stub();
+      $rootScope.$on('change:config', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits change:config.${key} on $rootScope when config changes', () => {
+      const stub = sinon.stub();
+      $rootScope.$on('change:config.foobar', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits change:config on child scope when config changes', () => {
+      const stub = sinon.stub();
+      const $parent = $rootScope.$new(false);
+      const $scope = $rootScope.$new(false, $parent);
+      $scope.$on('change:config', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits change:config.${key} on child scope when config changes', () => {
+      const stub = sinon.stub();
+      const $parent = $rootScope.$new(false);
+      const $scope = $rootScope.$new(false, $parent);
+      $scope.$on('change:config.foobar', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits change:config on isolate scope when config changes', () => {
+      const stub = sinon.stub();
+      const $scope = $rootScope.$new(true);
+      $scope.$on('change:config', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits change:config.${key} on isolate scope when config changes', () => {
+      const stub = sinon.stub();
+      const $scope = $rootScope.$new(true);
+      $scope.$on('change:config.foobar', stub);
+      config.set('foobar', 'baz');
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits events when changes are inside a digest cycle', async () => {
+      const stub = sinon.stub();
+
+      $rootScope.$apply(() => {
+        $rootScope.$on('change:config.foobar', stub);
+        config.set('foobar', 'baz');
+      });
+
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+
+    it('synchronously emits events when changes are outside a digest cycle', async () => {
+      const stub = sinon.stub();
+
+      await new Promise((resolve) => {
+        setTimeout(function () {
+          const off = $rootScope.$on('change:config.foobar', stub);
+          config.set('foobar', 'baz');
+          // we unlisten to make sure that stub is not called before our assetions below
+          off();
+          resolve();
+        }, 0);
+      });
+
+      sinon.assert.calledOnce(stub);
+      sinon.assert.calledWithExactly(stub, sinon.match({}), 'baz', undefined, 'foobar', config);
+    });
+  });
 });

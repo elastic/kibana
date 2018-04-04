@@ -8,7 +8,6 @@ function useBat(bin) {
 const tempDir = os.tmpdir();
 
 exports.BASE_PATH = path.resolve(tempDir, 'kbn-es');
-exports.DL_PATH = tempDir;
 
 exports.GRADLE_BIN = useBat('./gradlew');
 exports.ES_BIN = useBat('bin/elasticsearch');

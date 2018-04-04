@@ -119,16 +119,6 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBe(null);
         });
-
-        it('is required when ssl is enabled', function () {
-          const config = {};
-          set(config, 'server.ssl.enabled', true);
-          set(config, 'server.ssl.key', '/path.key');
-          const { error } = validate(config);
-          expect(error).toBeInstanceOf(Object);
-          expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.certificate');
-        });
       });
 
       describe('key', function () {
@@ -147,6 +137,40 @@ describe('Config schema', function () {
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
           expect(error.details[0]).toHaveProperty('path', 'server.ssl.key');
+        });
+      });
+
+      describe('keystore.path', function () {
+        it('isn\'t required when ssl isn\'t enabled', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', false);
+          const { error } = validate(config);
+          expect(error).toBe(null);
+        });
+
+        it('is allowed when ssl is enabled, and a certificate is not specified', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', true);
+          set(config, 'server.ssl.keystore.path', '/path.p12');
+          const { error } = validate(config);
+          expect(error).toBe(null);
+        });
+      });
+
+      describe('keystore.password', function () {
+        it('isn\'t required when ssl isn\'t enabled', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', false);
+          const { error } = validate(config);
+          expect(error).toBe(null);
+        });
+
+        it('is allowed when ssl is enabled, and a certificate is not specified', function () {
+          const config = {};
+          set(config, 'server.ssl.enabled', true);
+          set(config, 'server.ssl.keystore.password', 'secret');
+          const { error } = validate(config);
+          expect(error).toBe(null);
         });
       });
 

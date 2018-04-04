@@ -54,4 +54,8 @@ module.exports = {
     __filename: false,
     __dirname: false,
   },
+
+  watchOptions: {
+    ignored: [/node_modules/, /vendor/],
+  },
 };
