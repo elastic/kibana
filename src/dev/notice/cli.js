@@ -28,7 +28,7 @@ const NOTICE_PATH = resolve(REPO_ROOT, 'NOTICE.txt');
         --help       Show this help info
         --frozen     Don't write the NOTICE.txt, just fail if updates would have been made
     ` + '\n\n');
-    process.exit(1);
+    process.exit(0);
   }
 
   const newText = await generateNoticeText();
