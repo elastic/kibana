@@ -50,18 +50,18 @@ export default function (kibana) {
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
-        tribe: object({
-          url: string().uri({ scheme: ['http', 'https'] }),
-          preserveHost: boolean().default(true),
-          username: string(),
-          password: string(),
-          shardTimeout: number().default(0),
-          requestTimeout: number().default(30000),
-          requestHeadersWhitelist: array().items().single().default(DEFAULT_REQUEST_HEADERS),
-          customHeaders: object().default({}),
-          pingTimeout: number().default(ref('requestTimeout')),
-          startupTimeout: number().default(5000),
-          logQueries: boolean().default(false),
+        tribe: Joi.object({
+          url: Joi.string().uri({ scheme: ['http', 'https'] }),
+          preserveHost: Joi.boolean().default(true),
+          username: Joi.string(),
+          password: Joi.string(),
+          shardTimeout: Joi.number().default(0),
+          requestTimeout: Joi.number().default(30000),
+          requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
+          customHeaders: Joi.object().default({}),
+          pingTimeout: Joi.number().default(Joi.ref('requestTimeout')),
+          startupTimeout: Joi.number().default(5000),
+          logQueries: Joi.boolean().default(false),
           ssl: sslSchema,
           apiVersion: Joi.string().default('master'),
         }).default()
