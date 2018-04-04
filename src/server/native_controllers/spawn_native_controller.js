@@ -9,14 +9,15 @@ let debugPortOffset = 100;
 // will likely need to be updated, as they changed the arguments...
 const getExecArgv = () => {
   if (!process.version.match(/^v8./)) {
-    throw new Error('Unable to determine execArgv for the gatekeeper process with the version of NodeJS');
+    throw new Error('Unable to determine execArgv for the native controller start process with the version of NodeJS');
   }
 
+  const nodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS : '';
   const debugArgRegex = /--inspect(?:-brk|-port)?|--debug-port/;
 
   const execArgv = [...process.execArgv];
 
-  if (execArgv.some((arg) => arg.match(debugArgRegex))) {
+  if (execArgv.some((arg) => arg.match(debugArgRegex)) || nodeOptions.match(debugArgRegex)) {
     const inspectPort = process.debugPort + debugPortOffset;
     debugPortOffset++;
 
