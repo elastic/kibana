@@ -3,7 +3,7 @@ const platform = require('os').platform();
 switch (platform) {
   case 'win32':
   case 'linux':
-    exports.activate = require('./bin/sandbox_' + platform).activate;
+    exports.activate = require(`./bin/sandbox_${platform}.node`).activate;
     break;
   default:
     exports.activate = () => {
