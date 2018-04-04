@@ -29,13 +29,13 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
-      // let previousPrecision = this._kibanaMap.getAutoPrecision();
+      // let previousPrecision = this._kibanaMap.getGeohashPrecision();
       // let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
-        // precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
-        // previousPrecision = this._kibanaMap.getAutoPrecision();
+        // precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
+        // previousPrecision = this._kibanaMap.getGeohashPrecision();
         // const agg = this._getGeoHashAgg();
-        //todo
+
         // const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
         // if (agg && isAutoPrecision) {
         //   agg.params.precision = previousPrecision;
@@ -55,7 +55,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this._kibanaMap.addDrawControl();
       // this._kibanaMap.on('drawCreated:rectangle', event => {
-      // this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
+      //   this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
       // });
       // this._kibanaMap.on('drawCreated:polygon', event => {
       //   this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
@@ -63,7 +63,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     }
 
     async _updateData(esResponse) {
-
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
@@ -86,8 +85,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       }
 
       this._rawEsResponse = esResponse;
-      this._geoJson = convertToGeoJson(esResponse);
-
+      window._vis = this.vis;
+      this._geoJson = convertToGeoJson(esResponse, this.vis.aggs);
       this._recreateGeohashLayer(this._geoJson);
     }
 
@@ -97,7 +96,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         this._geohashLayer = null;
       }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(geojson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer = new GeohashLayer(geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 

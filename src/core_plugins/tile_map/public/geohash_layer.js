@@ -40,16 +40,14 @@ export class GeohashLayer extends KibanaMapLayer {
         break;
       case 'Heatmap':
 
-        throw new Error('Not implemented');
-
         let radius = 15;
-        if (this._geohashGeoJsonAndMeta.properties.geohashGridDimensionsAtEquator) {
-          const minGridLength = _.min(this._geohashGeoJsonAndMeta.properties.geohashGridDimensionsAtEquator);
+        if (this._geohashGeoJsonAndMeta.meta.geohashGridDimensionsAtEquator) {
+          const minGridLength = _.min(this._geohashGeoJsonAndMeta.meta.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
           radius = (minGridLength / metersPerPixel) / 2;
         }
         radius = radius * parseFloat(this._geohashOptions.heatmap.heatClusterSize);
-        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJsonAndMeta, {
+        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJsonAndMeta.featureCollection, {
           radius: radius,
           blur: radius,
           maxZoom: this._kibanaMap.getZoomLevel(),

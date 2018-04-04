@@ -331,7 +331,7 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getMaxZoom();
   }
 
-  getAutoPrecision() {
+  getGeohashPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
 

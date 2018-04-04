@@ -9,9 +9,6 @@ export function AggResponseGeoJsonProvider(Private) {
 
   return function (vis, table) {
 
-
-    console.log('response converted...');
-
     function columnIndex(schema) {
       return _.findIndex(table.columns, function (col) {
         return col.aggConfig.schema.name === schema;
