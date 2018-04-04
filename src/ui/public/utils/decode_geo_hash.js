@@ -51,13 +51,6 @@ export function decodeGeoHash(geohash) {
   return { latitude: lat, longitude: lon};
 }
 
-/**
- * @method refine_interval
- * @param interval {Array} [long, lat]
- * @param cd {Number}
- * @param mask {Number}
- * @return {Object} interval
- */
 function refine_interval(interval, cd, mask) {
   if (cd & mask) {
     interval[0] = (interval[0] + interval[1]) / 2;
