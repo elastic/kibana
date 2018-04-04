@@ -88,7 +88,7 @@ export function getQueryParams(mappings, type, search, searchFields, experimenta
   }
 
   if (experimentalFilter) {
-    bool.must = (bool.must || []).concat(
+    bool.filter = (bool.filter || []).concat(
       convertExperimentalFilterToEsDsl(searchTypes, rootAttributes, experimentalFilter)
     );
   }

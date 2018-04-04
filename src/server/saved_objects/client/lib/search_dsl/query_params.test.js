@@ -61,12 +61,68 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
+  describe('{type,experimentalFilter}', () => {
+    it('includes a terms filter and filters scoped to the type', () => {
+      expect(getQueryParams(MAPPINGS, 'saved', undefined, undefined, { field: 'title', value: 'foo' }))
+        .to.eql({
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { type: 'saved' }
+                },
+                {
+                  multi_match: {
+                    type: 'phrase',
+                    query: 'foo',
+                    fields: ['saved.title'],
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+  });
+
   describe('{search}', () => {
     it('includes just a sqs query', () => {
       expect(getQueryParams(MAPPINGS, null, 'us*'))
         .toEqual({
           query: {
             bool: {
+              must: [
+                {
+                  simple_query_string: {
+                    query: 'us*',
+                    all_fields: true
+                  }
+                }
+              ]
+            }
+          }
+        });
+    });
+  });
+
+  describe('{search,experimentalFilter}', () => {
+    it('includes a sqs query and filters applying to all types', () => {
+      expect(getQueryParams(MAPPINGS, null, 'us*', undefined, { field: 'title', value: 'foo' }))
+        .to.eql({
+          query: {
+            bool: {
+              filter: [
+                {
+                  multi_match: {
+                    type: 'phrase',
+                    query: 'foo',
+                    fields: [
+                      'pending.title',
+                      'saved.title',
+                    ],
+                  }
+                }
+              ],
               must: [
                 {
                   simple_query_string: {
