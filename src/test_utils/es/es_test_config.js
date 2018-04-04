@@ -22,40 +22,38 @@ export const esTestConfig = new class EsTestConfig {
   getUrlParts() {
 
     let testEsUrl;
-    let testEsProtocol;
-    let testEsHostname;
-    let testEsPort;
-    let testEsUsername;
-    let testEsPassword;
+    let protocol;
+    let hostname;
+    let port;
+    let username;
+    let password;
 
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
       testEsUrl = url.parse(process.env.TEST_ES_URL);
       // have to remove the ":" off protocol
-      testEsProtocol = testEsUrl.protocol.slice(0, -1);
-      testEsHostname = testEsUrl.hostname;
-      testEsPort = parseInt(testEsUrl.port, 10);
-      testEsUsername = testEsUrl.username;
-      testEsPassword = testEsUrl.password;
+      protocol = testEsUrl.protocol.slice(0, -1);
+      hostname = testEsUrl.hostname;
+      port = parseInt(testEsUrl.port, 10);
+      username = testEsUrl.username;
+      password = testEsUrl.password;
     } else {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from shield.js)
-      testEsProtocol = process.env.TEST_ES_PROTOCOL || 'http';
-      testEsHostname = process.env.TEST_ES_HOSTNAME || 'localhost';
-      testEsPort = parseInt(process.env.TEST_ES_PORT, 10) || 9220;
-      testEsUsername = process.env.TEST_ES_USERNAME || admin.username;
-      testEsPassword = process.env.TEST_ES_PASSWORD || admin.password;
+      protocol = process.env.TEST_ES_PROTOCOL || 'http';
+      hostname = process.env.TEST_ES_HOSTNAME || 'localhost';
+      port = parseInt(process.env.TEST_ES_PORT, 10) || 9220;
+      username = process.env.TEST_ES_USERNAME || admin.username;
+      password = process.env.TEST_ES_PASSWORD || admin.password;
     }
-    console.log(testEsProtocol);
-
 
     return {
-      protocol: testEsProtocol,
-      hostname: testEsHostname,
-      port: testEsPort,
-      auth: testEsUsername + ':' + testEsPassword,
-      username: testEsUsername,
-      password: testEsPassword,
+      protocol,
+      hostname,
+      port,
+      auth: username + ':' + password,
+      username,
+      password,
     };
   }
 };
