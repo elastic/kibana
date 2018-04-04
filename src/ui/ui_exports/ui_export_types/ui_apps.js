@@ -15,7 +15,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden = false,
     linkToLastSubUrl = true,
     listed = !hidden,
-    templateName = 'ui_app',
     injectVars = noop,
     url = `/app/${id}`,
     uses = [],
@@ -32,7 +31,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden,
     linkToLastSubUrl,
     listed,
-    templateName,
     injectVars,
     url,
     uses: uniq([

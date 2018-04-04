@@ -13,7 +13,6 @@ export class UiApp {
       hidden,
       linkToLastSubUrl,
       listed,
-      templateName = 'ui_app',
       injectVars,
       url = `/app/${id}`,
       uses = []
@@ -32,7 +31,6 @@ export class UiApp {
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._listed = listed;
-    this._templateName = templateName;
     this._url = url;
     this._injectedVarsProvider = injectVars;
     this._pluginId = pluginId;
@@ -77,10 +75,6 @@ export class UiApp {
   getPluginId() {
     const plugin = this._getPlugin();
     return plugin ? plugin.id : undefined;
-  }
-
-  getTemplateName() {
-    return this._templateName;
   }
 
   isHidden() {

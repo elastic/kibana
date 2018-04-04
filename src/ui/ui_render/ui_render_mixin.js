@@ -120,7 +120,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       const request = reply.request;
       const translations = await request.getUiTranslations();
 
-      return reply.view(app.getTemplateName(), {
+      return reply.view('ui_app', {
         app,
         kibanaPayload: await getKibanaPayload({
           app,
