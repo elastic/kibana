@@ -49,7 +49,7 @@ describe('tasks/lib/packages', () => {
           version: '0.0.2',
           repository: 'https://github.com/mycorp/privatedep',
           licenses: [ 'Apache-2.0' ],
-          directory: '/Users/spalger/kbn-dev/master/kibana/tasks/lib/packages/__tests__/fixtures/fixture1/node_modules/privatedep',
+          directory: resolve(FIXTURE1_ROOT, 'node_modules/privatedep'),
           relative: 'node_modules/privatedep'
         }
       ]);
