@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiSpacer,
@@ -16,7 +16,7 @@ export const Header = ({
   onRefresh,
   totalCount,
 }) => (
-  <div>
+  <Fragment>
     <EuiSpacer size="m"/>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
@@ -70,5 +70,5 @@ export const Header = ({
       </p>
     </EuiText>
     <EuiSpacer size="m"/>
-  </div>
+  </Fragment>
 );

@@ -45,17 +45,17 @@ export class Flyout extends Component {
     super(props);
 
     this.state = {
-      isOverwriteAllChecked: false,
-      file: undefined,
-      isLoading: false,
-      loadingMessage: undefined,
       conflictedIndexPatterns: undefined,
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       conflicts: undefined,
-      indexPatterns: undefined,
       error: undefined,
-      importCount: -1,
+      file: undefined,
+      importCount: 0,
+      indexPatterns: undefined,
+      isOverwriteAllChecked: false,
+      isLoading: false,
+      loadingMessage: undefined,
       wasImportSuccessful: false,
     };
   }
@@ -273,7 +273,7 @@ export class Flyout extends Component {
         name: 'Count',
         description: `How many affected objects`,
         render: list => {
-          return <span>{list.length}</span>;
+          return <Fragment>{list.length}</Fragment>;
         },
       },
       {
@@ -287,7 +287,7 @@ export class Flyout extends Component {
               <br />
             </span>
           ));
-          return <span>{sample}</span>;
+          return <Fragment>{sample}</Fragment>;
         },
       },
       {
@@ -360,13 +360,15 @@ export class Flyout extends Component {
 
     if (isLoading) {
       return (
-        <Fragment>
-          <EuiLoadingKibana size="xl" />
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>{loadingMessage}</p>
-          </EuiText>
-        </Fragment>
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingKibana size="xl" />
+            <EuiSpacer size="m" />
+            <EuiText>
+              <p>{loadingMessage}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
@@ -384,7 +386,7 @@ export class Flyout extends Component {
 
     return (
       <EuiForm>
-        <EuiFormRow label="Please select a json file to import">
+        <EuiFormRow label="Please select a JSON file to import">
           <EuiFilePicker
             initialPromptText="Import"
             onChange={this.setImportFile}
@@ -426,7 +428,7 @@ export class Flyout extends Component {
           onClick={this.confirmImport}
           size="s"
           fill
-          isDisabled={isLoading}
+          isLoading={isLoading}
           data-test-subj="importSavedObjectsConfirmBtn"
         >
           Confirm all changes
@@ -438,7 +440,7 @@ export class Flyout extends Component {
           onClick={this.import}
           size="s"
           fill
-          isDisabled={isLoading}
+          isLoading={isLoading}
           data-test-subj="importSavedObjectsImportBtn"
         >
           Import
@@ -478,11 +480,11 @@ export class Flyout extends Component {
           <p>
             The following saved objects use index patterns that do not exist.
             Please select the index patterns you&apos;d like re-associated with
-            them. You can{' '}
-            <EuiLink href={this.props.newIndexPatternUrl}>
-              create a new index pattern
-            </EuiLink>{' '}
-            if necessary.
+            them. You can {(
+              <EuiLink href={this.props.newIndexPatternUrl}>
+                create a new index pattern
+              </EuiLink>
+            )} if necessary.
           </p>
         </EuiCallOut>
       </Fragment>

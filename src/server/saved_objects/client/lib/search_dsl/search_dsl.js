@@ -13,7 +13,7 @@ export function getSearchDsl(mappings, options = {}) {
     sortOrder
   } = options;
 
-  if ((!type && !includeTypes) && sortField) {
+  if (!type && !includeTypes && sortField) {
     throw Boom.notAcceptable('Cannot sort without filtering by type');
   }
 

@@ -122,20 +122,20 @@ async function findIndexPatternRelationships(id, size, callCluster, savedObjects
       body: {
         query: {
           bool: {
-            filter: {
-              exists: {
-                field: 'visualization.kibanaSavedObjectMeta.searchSourceJSON',
-              }
-            },
-            must: [
+            filter: [
+              {
+                exists: {
+                  field: 'visualization.kibanaSavedObjectMeta.searchSourceJSON',
+                }
+              },
               {
                 term: {
                   type: {
-                    value: 'visualization',
+                    value: 'visualization'
                   }
                 }
               }
-            ]
+            ],
           }
         }
       }
@@ -148,16 +148,16 @@ async function findIndexPatternRelationships(id, size, callCluster, savedObjects
       body: {
         query: {
           bool: {
-            filter: {
-              exists: {
-                field: 'search.kibanaSavedObjectMeta.searchSourceJSON',
-              }
-            },
-            must: [
+            filter: [
+              {
+                exists: {
+                  field: 'search.kibanaSavedObjectMeta.searchSourceJSON',
+                }
+              },
               {
                 term: {
                   type: {
-                    value: 'search',
+                    value: 'search'
                   }
                 }
               }

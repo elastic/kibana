@@ -94,7 +94,7 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  findAll(search = '', size = 100, fields = undefined) {
+  findAll(search = '', size = 100, fields) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,

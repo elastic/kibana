@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get } from 'lodash';
 
 export async function getRelationships(type, id, $http, basePath) {
   const url = `${basePath}/api/kibana/management/saved_objects/relationships/${type}/${id}`;
@@ -12,7 +12,7 @@ export async function getRelationships(type, id, $http, basePath) {
     return response ? response.data : undefined;
   }
   catch (resp) {
-    const respBody = _.get(resp, 'data', {});
+    const respBody = get(resp, 'data', {});
     const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 
     err.statusCode = respBody.statusCode || resp.status;

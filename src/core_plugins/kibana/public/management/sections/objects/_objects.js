@@ -2,6 +2,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
 import React from 'react';
@@ -36,7 +37,13 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
           if (type === 'index-pattern') {
             return kbnUrl.eval(`#/management/kibana/indices/${id}`);
           }
-          return kbnUrl.eval(`#/management/kibana/objects/${typeToServiceName(type)}/${id}`);
+          const serviceName = typeToServiceName(type);
+          if (!serviceName) {
+            toastNotifications.addWarning(`Unknown saved object type: ${type}`);
+            return null;
+          }
+
+          return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
         }}
         goInApp={(id, type) => {
           kbnUrl.change(getInAppUrl(id, type));

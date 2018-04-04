@@ -22,8 +22,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         title="Index Pattern Conflicts"
       >
         <p>
-          The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can
-           
+          The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can 
           <EuiLink
             color="primary"
             href=""
@@ -31,8 +30,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           >
             create a new index pattern
           </EuiLink>
-           
-          if necessary.
+           if necessary.
         </p>
       </EuiCallOut>
     </React.Fragment>
@@ -125,7 +123,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
           iconSide="left"
-          isDisabled={false}
+          isLoading={false}
           onClick={[Function]}
           size="s"
           type="button"
@@ -168,7 +166,7 @@ exports[`Flyout should render import step 1`] = `
       <EuiFormRow
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Please select a json file to import"
+        label="Please select a JSON file to import"
       >
         <EuiFilePicker
           initialPromptText="Import"
@@ -221,7 +219,7 @@ exports[`Flyout should render import step 1`] = `
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
           iconSide="left"
-          isDisabled={false}
+          isLoading={false}
           onClick={[Function]}
           size="s"
           type="button"

@@ -44,16 +44,16 @@ export class Relationships extends Component {
   }
 
   componentWillMount() {
-    this.getRelationships();
+    this.getRelationshipData();
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.id !== this.props.id) {
-      this.getRelationships();
+      this.getRelationshipData();
     }
   }
 
-  async getRelationships() {
+  async getRelationshipData() {
     const { id, type, getRelationships } = this.props;
 
     this.setState({ isLoading: true });
@@ -96,70 +96,49 @@ export class Relationships extends Component {
     for (const [type, list] of Object.entries(relationships)) {
       if (list.length === 0) {
         items.push(
-          <EuiDescriptionListTitle>No {type} found.</EuiDescriptionListTitle>
+          <EuiDescriptionListTitle key={`${type}_not_found`}>
+            No {type} found.
+          </EuiDescriptionListTitle>
         );
       } else {
-        let node;
+        // let node;
+        let calloutTitle = 'Warning';
+        let calloutColor = 'warning';
+        let calloutText;
 
         switch (this.props.type) {
           case 'dashboard':
-            node = (
-              <p>
-                Here are some visualizations used on this dashboard. You can
-                safely delete this dashboard and the visualizations will still
-                work properly.
-              </p>
-            );
+            calloutColor = 'success';
+            calloutTitle = 'Dashboard';
+            calloutText = `Here are some visualizations used on this dashboard. You can
+            safely delete this dashboard and the visualizations will still
+            work properly.`;
             break;
           case 'search':
             if (type === 'visualizations') {
-              node = (
-                <EuiCallOut title="Warning" color="warning">
-                  <p>
-                    Here are some visualizations that use this saved search. If
-                    you delete this saved search, these visualizations will not
-                    longer work properly.
-                  </p>
-                </EuiCallOut>
-              );
+              calloutText = `Here are some visualizations that use this saved search. If
+              you delete this saved search, these visualizations will not
+              longer work properly.`;
             } else {
-              node = (
-                <p>Here is the index pattern tied to this saved search.</p>
-              );
+              calloutColor = 'success';
+              calloutTitle = 'Saved Search';
+              calloutText = `Here is the index pattern tied to this saved search.`;
             }
             break;
           case 'visualization':
-            node = (
-              <EuiCallOut title="Warning" color="warning">
-                <p>
-                  Here are some dashboards which contain this visualization. If
-                  you delete this visualization, these dashboards will no longer
-                  show them.
-                </p>
-              </EuiCallOut>
-            );
+            calloutText = `Here are some dashboards which contain this visualization. If
+            you delete this visualization, these dashboards will no longer
+            show them.`;
             break;
           case 'index-pattern':
             if (type === 'visualizations') {
-              node = (
-                <EuiCallOut title="Warning" color="warning">
-                  <p>
-                    Here are some visualizations that use this index pattern. If
-                    you delete this index pattern, these visualizations will not
-                    longer work properly.
-                  </p>
-                </EuiCallOut>
-              );
+              calloutText = `Here are some visualizations that use this index pattern. If
+              you delete this index pattern, these visualizations will not
+              longer work properly.`;
             } else if (type === 'searches') {
-              node = (
-                <EuiCallOut title="Warning" color="warning">
-                  <p>
-                    Here are some saved searches that use this index pattern. If
-                    you delete this index pattern, these saved searches will not
-                    longer work properly.
-                  </p>
-                </EuiCallOut>
-              );
+              calloutText = `Here are some saved searches that use this index pattern. If
+              you delete this index pattern, these saved searches will not
+              longer work properly.`;
             }
             break;
         }
@@ -167,7 +146,9 @@ export class Relationships extends Component {
         items.push(
           <Fragment key={type}>
             <EuiDescriptionListTitle style={{ marginBottom: '1rem' }}>
-              {node}
+              <EuiCallOut color={calloutColor} title={calloutTitle}>
+                <p>{calloutText}</p>
+              </EuiCallOut>
             </EuiDescriptionListTitle>
             <Fragment>
               {list.map(item => (
