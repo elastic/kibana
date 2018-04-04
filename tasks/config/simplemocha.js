@@ -22,9 +22,6 @@ export default {
       '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
       '!**/_*.js',
-
-      // These tests have been moved to Jest
-      '!src/server/**/*.js',
     ],
   },
 };
