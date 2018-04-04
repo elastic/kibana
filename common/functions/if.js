@@ -16,21 +16,11 @@ export const ifFn = () => ({
         'The return value if false. If else is not specified, and the condition is false' +
         'then the input context to the function will be returned',
     },
-    // When we add "action" functions, this could be used a perform an action without
-    passthru: {
-      help:
-        'Instead of returning the value of then, simply execute it and pass the input context through',
-      default: false,
-    },
   },
   fn: (context, args) => {
-    if (typeof args._ === 'undefined') {
-      if (context) return args.then;
-      if (typeof args.else !== 'undefined') return args.else;
-    } else {
-      if (args._) return args.then;
-      if (typeof args.else !== 'undefined') return args.else;
-    }
+    const then = args.then || context;
+    if (args._) return then;
+    if (typeof args.else !== 'undefined') return args.else;
     return context;
   },
 });
