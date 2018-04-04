@@ -22,6 +22,7 @@ import templateApi from './api/template';
 import themeApi from './api/theme';
 import translationsApi from './api/translations';
 import { initChromeXsrfApi } from './api/xsrf';
+import { initUiSettingsApi } from './api/ui_settings';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -39,6 +40,7 @@ const internals = _.defaults(
   }
 );
 
+initUiSettingsApi(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
 initChromeNavApi(chrome, internals);

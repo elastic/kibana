@@ -339,12 +339,11 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
+        timefilter.enableAutoRefreshSelector();
         $scope.$watch('opts.timefield', function (timefield) {
           if (!!timefield) {
-            timefilter.enableAutoRefreshSelector();
             timefilter.enableTimeRangeSelector();
           } else {
-            timefilter.disableAutoRefreshSelector();
             timefilter.disableTimeRangeSelector();
           }
         });
@@ -710,6 +709,10 @@ function discoverController(
         return $scope.vis.getAggConfig().toDsl();
       });
     }
+
+    $scope.vis.filters = {
+      timeRange: timefilter.time
+    };
   }
 
   function resolveIndexPatternLoading() {

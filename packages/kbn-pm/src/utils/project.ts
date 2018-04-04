@@ -157,7 +157,7 @@ export class Project {
     return runScriptInPackage(scriptName, args, this);
   }
 
-  async runScriptStreaming(scriptName: string, args: string[] = []) {
+  runScriptStreaming(scriptName: string, args: string[] = []) {
     return runScriptInPackageStreaming(scriptName, args, this);
   }
 

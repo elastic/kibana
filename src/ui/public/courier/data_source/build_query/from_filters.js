@@ -39,13 +39,7 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 
-export function buildQueryFromFilters(filters, decorateQuery, indexPattern) {
-  _.each(filters, function (filter) {
-    if (filter.query) {
-      decorateQuery(filter.query);
-    }
-  });
-
+export function buildQueryFromFilters(filters, indexPattern) {
   return {
     must: (filters || [])
       .filter(filterNegate(false))

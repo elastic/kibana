@@ -87,13 +87,15 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.33":
-  version "0.0.33"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.33.tgz#de30a9301d48644a94e3cec02dd77332a16cd2a9"
+"@elastic/eui@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.37.tgz#c7cbbcd8c451917e745949ed169caf7b1e9efdbe"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
     core-js "^2.5.1"
+    eslint-config-prettier "^2.9.0"
+    eslint-plugin-prettier "^2.6.0"
     focus-trap-react "^3.0.4"
     highlight.js "^9.12.0"
     html "^1.0.0"
@@ -101,9 +103,11 @@
     keymirror "^0.1.1"
     lodash "^3.10.1"
     numeral "^2.0.6"
+    prettier "^1.11.1"
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-color "^2.13.8"
+    react-input-autosize "^2.2.1"
     serve "^6.3.1"
     tabbable "^1.1.0"
     uuid "^3.1.0"
@@ -112,9 +116,9 @@
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
 
-"@elastic/numeral@2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.1.tgz#743801971d8f0c975f9a122867d0e8939d31b3eb"
+"@elastic/numeral@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.2.tgz#06c9ef22f18dd8c2b39ffe353868d4d0c13ea4f9"
 
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
@@ -7524,9 +7528,9 @@ makeerror@1.0.x:
   dependencies:
     tmpl "1.0.x"
 
-makelogs@^4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.0.4.tgz#feae63a6a4627f85c1464672672e16293ddc05f0"
+makelogs@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/makelogs/-/makelogs-4.0.5.tgz#d0c3c6405305d68c69eb937b49d25d379be2dad7"
   dependencies:
     async "^1.4.2"
     bluebird "^2.10.0"
@@ -9326,7 +9330,7 @@ react-addons-shallow-compare@15.6.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-react-anything-sortable@^1.7.3:
+react-anything-sortable@^1.7.4:
   version "1.7.4"
   resolved "https://registry.yarnpkg.com/react-anything-sortable/-/react-anything-sortable-1.7.4.tgz#c760cf67d7db226bb3943a7bda21c13614dce0cb"
   dependencies:
@@ -9369,7 +9373,7 @@ react-grid-layout@^0.16.2:
     react-draggable "3.x"
     react-resizable "1.x"
 
-react-input-autosize@^2.1.2:
+react-input-autosize@^2.1.2, react-input-autosize@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.1.tgz#ec428fa15b1592994fb5f9aa15bb1eb6baf420f8"
   dependencies:
@@ -11183,6 +11187,9 @@ to-object-path@^0.3.0:
 to-regex-range@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/to-regex-range/-/to-regex-range-2.1.1.tgz#7c80c17b9dfebe599e27367e0d4dd5590141db38"
+  dependencies:
+    is-number "^3.0.0"
+    repeat-string "^1.6.1"
 
 to-regex@^3.0.1:
   version "3.0.2"
@@ -11242,6 +11249,10 @@ traverse@0.6.6:
 tree-kill@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.1.0.tgz#c963dcf03722892ec59cba569e940b71954d1729"
+
+tree-kill@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.0.tgz#5846786237b4239014f05db156b643212d4c6f36"
 
 treeify@^1.0.1:
   version "1.1.0"

@@ -4,6 +4,8 @@ import chrome from 'ui/chrome';
 import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
 import { Notifier } from 'ui/notify';
+import { metadata } from 'ui/metadata';
+import { UiSettingsClient } from '../../ui_settings/public/ui_settings_client';
 
 import './test_harness.less';
 import 'ng_mock';
@@ -23,12 +25,30 @@ setupTestSharding();
 // allows test_harness.less to have higher priority selectors
 document.body.setAttribute('id', 'test-harness-body');
 
-// prevent accidental ajax requests
 before(() => {
+  // prevent accidental ajax requests
   sinon.useFakeXMLHttpRequest();
 });
 
 beforeEach(function () {
+  // stub the UiSettingsClient
+  if (chrome.getUiSettingsClient.restore) {
+    chrome.getUiSettingsClient.restore();
+  }
+
+  const stubUiSettings = new UiSettingsClient({
+    defaults: metadata.uiSettings.defaults,
+    initialSettings: {},
+    notify: new Notifier({ location: 'Config' }),
+    api: {
+      batchSet() {
+        return { settings: stubUiSettings.getAll() };
+      }
+    }
+  });
+  sinon.stub(chrome, 'getUiSettingsClient', () => stubUiSettings);
+
+  // ensure that notifications are not left in the notifiers
   if (Notifier.prototype._notifs.length) {
     const notifs = JSON.stringify(Notifier.prototype._notifs);
     Notifier.prototype._notifs.length = 0;
