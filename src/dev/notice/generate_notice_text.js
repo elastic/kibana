@@ -3,7 +3,7 @@ import vfs from 'vinyl-fs';
 import { REPO_ROOT } from '../constants';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
-const NEWLINE_RE = /\r\n|[\n\r\u2028\u2029]/g;
+const NEWLINE_RE = /\r?\n/g;
 
 export async function generateNoticeText(log) {
   const globs = [
