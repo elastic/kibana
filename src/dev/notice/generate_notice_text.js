@@ -5,25 +5,34 @@ import { REPO_ROOT } from '../constants';
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r\n|[\n\r\u2028\u2029]/g;
 
-export async function generateNoticeText() {
-  const files = vfs.src([
-    '**/*.{js,less,css}',
-  ], {
+export async function generateNoticeText(log) {
+  const globs = [
+    '**/*.{js,less,css,ts}',
+  ];
+
+  const options = {
     cwd: REPO_ROOT,
     nodir: true,
     ignore: [
-      '{node_modules,build,target,dist}/**',
+      '{node_modules,build,target,dist,optimize}/**',
       'packages/*/{node_modules,build,target,dist}/**',
     ]
-  });
+  };
+
+  log.debug('vfs.src globs', globs);
+  log.debug('vfs.src options', options);
+  const files = vfs.src(globs, options);
 
   const noticeComments = [];
   await new Promise((resolve, reject) => {
     files
       .on('data', (file) => {
+        log.verbose(`Checking for @notice comments in ${file.relative}`);
+
         const source = file.contents.toString('utf8');
         let match;
         while ((match = NOTICE_COMMENT_RE.exec(source)) !== null) {
+          log.info(`Found @notice comment in ${file.relative}`);
           noticeComments.push(match[1]);
         }
       })
@@ -53,5 +62,6 @@ export async function generateNoticeText() {
 
   noticeText += '\n';
 
+  log.debug(`notice text:\n\n${noticeText}`);
   return noticeText;
 }
