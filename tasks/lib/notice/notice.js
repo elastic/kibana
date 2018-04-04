@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { generatePackageNoticeText } from './package_notice';
 import { generateNodeNoticeText } from './node_notice';
 
-const BASE_NOTICE = resolve(__dirname, './base_notice.txt');
+const BASE_NOTICE_PATH = resolve(__dirname, '../../../NOTICE.txt');
 
 /**
  *  When given a list of packages and the directory to the
@@ -26,7 +26,7 @@ export async function generateNoticeText(options = {}) {
   );
 
   return [
-    readFileSync(BASE_NOTICE, 'utf8'),
+    readFileSync(BASE_NOTICE_PATH, 'utf8'),
     ...packageNotices,
     generateNodeNoticeText(nodeDir),
   ].join('\n---\n');
