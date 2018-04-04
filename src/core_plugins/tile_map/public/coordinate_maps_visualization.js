@@ -2,17 +2,17 @@ import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+
 import { AggConfig } from 'ui/vis/agg_config';
 
 // import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 // import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
+
 import './styles/_tilemap.less';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
-  // const basicResponseHandler = Private(BasicResponseHandlerProvider).handler;
-  // const geojsonConverter = Private(AggResponseGeoJsonProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
 
@@ -29,28 +29,28 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
-      // let previousPrecision = this._kibanaMap.getGeohashPrecision();
-      // let precisionChange = false;
+      let previousPrecision = this._kibanaMap.getGeohashPrecision();
+      let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
-        // precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
-        // previousPrecision = this._kibanaMap.getGeohashPrecision();
-        // const agg = this._getGeoHashAgg();
-
-        // const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
-        // if (agg && isAutoPrecision) {
-        //   agg.params.precision = previousPrecision;
-        // }
+        precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
+        previousPrecision = this._kibanaMap.getGeohashPrecision();
+        const agg = this._getGeoHashAgg();
+        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
+        if (agg && isAutoPrecision) {
+          agg.params.precision = previousPrecision;
+        }
       });
       this._kibanaMap.on('zoomend', () => {
-        // const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
-        // if (!isAutoPrecision) {
-        //   return;
-        // }
-        // if (precisionChange) {
-        //   this.vis.updateState();
-        // } else {
-        //   this._updateData(this._rawEsResponse);
-        // }
+        const agg = this._getGeoHashAgg();
+        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
+        if (!isAutoPrecision) {
+          return;
+        }
+        if (precisionChange) {
+          this.vis.updateState();
+        } else {
+          this._updateData(this._rawEsResponse);
+        }
       });
 
       this._kibanaMap.addDrawControl();
