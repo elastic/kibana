@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 export const NODE_CLIENT_INSTRUCTIONS = [
   {
     title: 'Install the APM agent',
@@ -22,10 +24,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   // Set custom APM Server URL (default: http://localhost:8200)
   serverUrl: ''
 {curlyClose})`.split('\n'),
-    textPost:
-      'See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html)' +
-      ' for advanced usage. Babel users, refer to [the documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules).',
+    textPost: `See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html) for advanced usage, including how to use with [Babel/ES Modules]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules).`,
   },
 ];
 
