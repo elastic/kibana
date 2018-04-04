@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 
 export class NativeController {
 
@@ -8,10 +8,12 @@ export class NativeController {
     this.pluginId = pluginId;
     this.process = process;
 
-    this._ready$ = Observable
+    this._ready$ = new ReplaySubject(1);
+    Observable
       .fromEvent(process, 'message')
       .filter(message => message === 'ready')
-      .first();
+      .first()
+      .subscribe(this._ready$);
 
     this._started$ = Observable
       .fromEvent(process, 'message')
