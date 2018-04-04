@@ -173,7 +173,6 @@ export class ScaledCirclesMarkers extends EventEmitter {
    * @return {Number}
    */
   _radiusScale(value) {
-
     //magic numbers
     const precisionBiasBase = 5;
     const precisionBiasNumerator = 200;

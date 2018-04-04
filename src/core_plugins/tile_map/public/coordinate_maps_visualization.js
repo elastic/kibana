@@ -49,6 +49,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (precisionChange) {
           this.vis.updateState();
         } else {
+          // console.log('no precision change...');
           this._updateData(this._rawEsResponse);
         }
       });
@@ -69,7 +70,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
         this._getMapsParams().mapType !== 'Heatmap' &&
-        esResponse === this._rawEsResponse) {
+        esResponse === this._rawEsResponse) {//todo this is wrong, because really depends on the thing..
         return;
       }
 
