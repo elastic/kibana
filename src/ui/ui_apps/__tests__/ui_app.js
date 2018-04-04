@@ -18,7 +18,6 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    templateName: 'ui_app_test',
     uses: [
       'visTypes',
       'chromeNavControls',
@@ -73,10 +72,6 @@ describe('ui apps / UiApp', () => {
         expect(app.getPluginId()).to.be(undefined);
       });
 
-      it('has a default template name of ui_app', () => {
-        expect(app.getTemplateName()).to.be('ui_app');
-      });
-
       it('is not hidden', () => {
         expect(app.isHidden()).to.be(false);
       });
@@ -124,10 +119,6 @@ describe('ui apps / UiApp', () => {
 
       it('has no plugin ID', () => {
         expect(app.getPluginId()).to.be(undefined);
-      });
-
-      it('uses the specs template', () => {
-        expect(app.getTemplateName()).to.be(spec.templateName);
       });
 
       it('is not hidden', () => {
