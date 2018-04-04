@@ -1582,8 +1582,9 @@ main {
     box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
     /* 3 */ }
   .kuiCheckBox:disabled {
-    opacity: 0.3;
-    cursor: not-allowed; }
+    background-color: #D9D9D9 !important;
+    border-color: #D9D9D9 !important;
+    cursor: not-allowed !important; }
   .theme-dark .kuiCheckBox {
     background-color: #444444;
     border-color: #444444; }
