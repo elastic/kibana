@@ -167,7 +167,7 @@ exports[`Relationships should render index patterns normally 1`] = `
     <EuiTitle>
       <h2>
         <EuiIcon
-          aria-label="index-pattern"
+          aria-label="index patterns"
           size="m"
           type="indexPatternApp"
         />
@@ -338,7 +338,7 @@ exports[`Relationships should render searches normally 1`] = `
               type="button"
             >
               <EuiIcon
-                aria-label="indexPatterns"
+                aria-label="index patterns"
                 size="s"
                 type="indexPatternApp"
               />

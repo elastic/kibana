@@ -1,4 +1,4 @@
-import { saveToFile } from './save_to_file';
+import { saveToFile } from './';
 
 export async function retrieveAndExportDocs(objs, savedObjectsClient) {
   const response = await savedObjectsClient.bulkGet(objs);

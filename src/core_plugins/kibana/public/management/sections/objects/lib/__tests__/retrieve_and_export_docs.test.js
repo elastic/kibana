@@ -4,6 +4,27 @@ jest.mock('../save_to_file', () => ({
   saveToFile: jest.fn(),
 }));
 
+jest.mock('ui/errors', () => ({
+  SavedObjectNotFound: class SavedObjectNotFound extends Error {
+    constructor(options) {
+      super();
+      for (const option in options) {
+        if (options.hasOwnProperty(option)) {
+          this[option] = options[option];
+        }
+      }
+    }
+  },
+}));
+
+jest.mock('ui/utils/scanner', () => ({
+  Scanner: class {
+    constructor() {
+      this.scanAndMap = () => {};
+    }
+  },
+}));
+
 describe('retrieveAndExportDocs', () => {
   let saveToFile;
 

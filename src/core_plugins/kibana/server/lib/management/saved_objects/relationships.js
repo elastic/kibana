@@ -80,10 +80,10 @@ async function findSavedSearchRelationships(id, size, callCluster, savedObjectsC
 
   const searchSourceJSON = JSON.parse(search.attributes.kibanaSavedObjectMeta.searchSourceJSON);
 
-  let indexPatterns = [];
+  const indexPatterns = [];
   try {
     const indexPattern = await savedObjectsClient.get('index-pattern', searchSourceJSON.index);
-    indexPatterns = [{ id: indexPattern.id, title: indexPattern.attributes.title }];
+    indexPatterns.push({ id: indexPattern.id, title: indexPattern.attributes.title });
   } catch (err) {
     // Do nothing
   }
@@ -202,21 +202,15 @@ async function findIndexPatternRelationships(id, size, callCluster, savedObjects
 }
 
 export async function findRelationships(type, id, size, callCluster, savedObjectsClient) {
-  if (type === 'dashboard') {
-    return await findDashboardRelationships(id, size, callCluster, savedObjectsClient);
+  switch (type) {
+    case 'dashboard':
+      return await findDashboardRelationships(id, size, callCluster, savedObjectsClient);
+    case 'visualization':
+      return await findVisualizationRelationships(id, size, callCluster, savedObjectsClient);
+    case 'search':
+      return await findSavedSearchRelationships(id, size, callCluster, savedObjectsClient);
+    case 'index-pattern':
+      return await findIndexPatternRelationships(id, size, callCluster, savedObjectsClient);
   }
-
-  if (type === 'visualization') {
-    return await findVisualizationRelationships(id, size, callCluster, savedObjectsClient);
-  }
-
-  if (type === 'search') {
-    return await findSavedSearchRelationships(id, size, callCluster, savedObjectsClient);
-  }
-
-  if (type === 'index-pattern') {
-    return await findIndexPatternRelationships(id, size, callCluster, savedObjectsClient);
-  }
-
   return {};
 }

@@ -1,6 +1,27 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+jest.mock('ui/errors', () => ({
+  SavedObjectNotFound: class SavedObjectNotFound extends Error {
+    constructor(options) {
+      super();
+      for (const option in options) {
+        if (options.hasOwnProperty(option)) {
+          this[option] = options[option];
+        }
+      }
+    }
+  },
+}));
+
+jest.mock('ui/utils/scanner', () => ({
+  Scanner: class {
+    constructor() {
+      this.scanAndMap = () => {};
+    }
+  },
+}));
+
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {

@@ -7,15 +7,22 @@ import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
 import { EuiSpacer, Query } from '@elastic/eui';
-import { retrieveAndExportDocs } from '../../lib/retrieve_and_export_docs';
-import { scanAllTypes } from '../../lib/scan_all_types';
-import { saveToFile } from '../../lib/save_to_file';
-import { getQueryText } from '../../lib/get_query_text';
-import { getSavedObjectIcon } from '../../lib/get_saved_object_icon';
+import {
+  retrieveAndExportDocs,
+  scanAllTypes,
+  saveToFile,
+  getQueryText,
+  getSavedObjectIcon,
+  getRelationships,
+} from '../../lib';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
-import { getRelationships } from '../../lib/get_relationships';
 
-export const INCLUDED_TYPES = ['index-pattern', 'visualization', 'dashboard', 'search'];
+export const INCLUDED_TYPES = [
+  'index-pattern',
+  'visualization',
+  'dashboard',
+  'search',
+];
 
 export class ObjectsTable extends Component {
   static propTypes = {
@@ -60,23 +67,28 @@ export class ObjectsTable extends Component {
   }
 
   fetchCounts = async () => {
-    const fetches = INCLUDED_TYPES.map(type => this.props.savedObjectsClient.find({
-      perPage: 1,
-      type,
-      page: 1,
-      fields: ['id'],
-    }));
+    const fetches = INCLUDED_TYPES.map(type =>
+      this.props.savedObjectsClient.find({
+        perPage: 1,
+        type,
+        page: 1,
+        fields: ['id'],
+      })
+    );
     const result = await Promise.all(fetches);
 
-    const savedObjectCounts = result.reduce((accum, { total, savedObjects }) => {
-      if (savedObjects && savedObjects.length) {
-        accum[savedObjects[0].type] = total;
-      }
-      return accum;
-    }, this.state.savedObjectCounts);
+    const savedObjectCounts = result.reduce(
+      (accum, { total, savedObjects }) => {
+        if (savedObjects && savedObjects.length) {
+          accum[savedObjects[0].type] = total;
+        }
+        return accum;
+      },
+      this.state.savedObjectCounts
+    );
 
     this.setState({ savedObjectCounts });
-  }
+  };
 
   fetchSavedObjects = async () => {
     const { savedObjectsClient } = this.props;
@@ -100,39 +112,40 @@ export class ObjectsTable extends Component {
     let savedObjects = [];
     let totalItemCount = 0;
 
-    const includeTypes = INCLUDED_TYPES.filter(type => !visibleTypes || visibleTypes.includes(type));
+    const includeTypes = INCLUDED_TYPES.filter(
+      type => !visibleTypes || visibleTypes.includes(type)
+    );
 
     // TODO: is there a good way to stop existing calls if the input changes?
-    await ensureMinimumTime((async () => {
-      const data = await savedObjectsClient.find({
-        search: queryText ? `${queryText}*` : undefined,
-        perPage,
-        page: page + 1,
-        sortField: 'type',
-        fields: ['title', 'id'],
-        searchFields: ['title'],
-        includeTypes,
-      });
+    await ensureMinimumTime(
+      (async () => {
+        const data = await savedObjectsClient.find({
+          search: queryText ? `${queryText}*` : undefined,
+          perPage,
+          page: page + 1,
+          sortField: 'type',
+          fields: ['title', 'id'],
+          searchFields: ['title'],
+          includeTypes,
+        });
 
-      savedObjects = data.savedObjects.map(savedObject => ({
-        title: savedObject.attributes.title,
-        type: savedObject.type,
-        id: savedObject.id,
-        icon: getSavedObjectIcon(savedObject.type),
-      }));
+        savedObjects = data.savedObjects.map(savedObject => ({
+          title: savedObject.attributes.title,
+          type: savedObject.type,
+          id: savedObject.id,
+          icon: getSavedObjectIcon(savedObject.type),
+        }));
 
-      totalItemCount = data.total;
-    })());
+        totalItemCount = data.total;
+      })()
+    );
 
     this.setState({ savedObjects, totalItemCount, isSearching: false });
   };
 
   refreshData = async () => {
-    await Promise.all([
-      this.fetchSavedObjects(),
-      this.fetchCounts(),
-    ]);
-  }
+    await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
+  };
 
   onSelectionChanged = selection => {
     const selectedSavedObjects = selection.map(item => ({
@@ -143,13 +156,16 @@ export class ObjectsTable extends Component {
   };
 
   onQueryChange = query => {
-    this.setState({
-      activeQuery: query,
-      page: 0, // Reset this on each query change
-    }, () => this.fetchSavedObjects(query));
+    this.setState(
+      {
+        activeQuery: query,
+        page: 0, // Reset this on each query change
+      },
+      () => this.fetchSavedObjects(query)
+    );
   };
 
-  onTableChange = async (table) => {
+  onTableChange = async table => {
     const { index: page, size: perPage } = table.page || {};
 
     this.setState({ page, perPage }, this.fetchSavedObjects);
@@ -162,7 +178,7 @@ export class ObjectsTable extends Component {
       relationshipType: type,
       relationshipTitle: title,
     });
-  }
+  };
 
   onHideRelationships = () => {
     this.setState({
@@ -171,46 +187,50 @@ export class ObjectsTable extends Component {
       relationshipType: undefined,
       relationshipTitle: undefined,
     });
-  }
+  };
 
   onExport = async () => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
     await retrieveAndExportDocs(objects.savedObjects, savedObjectsClient);
-  }
+  };
 
   onExportAll = async () => {
     const { kbnIndex, $http } = this.props;
     const results = await scanAllTypes($http, kbnIndex, INCLUDED_TYPES);
     saveToFile(JSON.stringify(flattenDeep(results.hits), null, 2));
-  }
+  };
 
   finishImport = () => {
     this.hideImportFlyout();
     this.fetchSavedObjects();
     this.fetchCounts();
-  }
+  };
 
   showImportFlyout = () => {
     this.setState({ isShowingImportFlyout: true });
-  }
+  };
 
   hideImportFlyout = () => {
     this.setState({ isShowingImportFlyout: false });
-  }
+  };
 
   onDelete = async () => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
 
-    const indexPatterns = selectedSavedObjects.filter(object => object.type === 'index-pattern');
+    const indexPatterns = selectedSavedObjects.filter(
+      object => object.type === 'index-pattern'
+    );
     if (indexPatterns.length) {
       await this.props.indexPatterns.cache.clearAll();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map(object => savedObjectsClient.delete(object.type, object.id));
+    const deletes = objects.savedObjects.map(object =>
+      savedObjectsClient.delete(object.type, object.id)
+    );
     await Promise.all(deletes);
 
     // Unset this
@@ -219,11 +239,16 @@ export class ObjectsTable extends Component {
     // Fetching all data
     await this.fetchSavedObjects();
     await this.fetchCounts();
-  }
+  };
 
   getRelationships = async (type, id) => {
-    return await getRelationships(type, id, this.props.$http, this.props.basePath);
-  }
+    return await getRelationships(
+      type,
+      id,
+      this.props.$http,
+      this.props.basePath
+    );
+  };
 
   renderFlyout() {
     if (!this.state.isShowingImportFlyout) {

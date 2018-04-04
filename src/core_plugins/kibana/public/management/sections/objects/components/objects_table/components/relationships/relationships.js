@@ -18,8 +18,11 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
 } from '@elastic/eui';
-import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
-import { getInAppUrl } from '../../../../lib/get_in_app_url';
+import {
+  getSavedObjectIcon,
+  getInAppUrl,
+  getSavedObjectLabel,
+} from '../../../../lib';
 
 export class Relationships extends Component {
   static propTypes = {
@@ -170,7 +173,11 @@ export class Relationships extends Component {
               {list.map(item => (
                 <EuiDescriptionListDescription key={item.id}>
                   <EuiLink href={`#${getInAppUrl(item.id, type)}`}>
-                    <EuiIcon aria-label={type} size="s" type={getSavedObjectIcon(type)} />
+                    <EuiIcon
+                      aria-label={getSavedObjectLabel(type)}
+                      size="s"
+                      type={getSavedObjectIcon(type)}
+                    />
                     &nbsp;
                     {item.title}
                   </EuiLink>
@@ -193,7 +200,11 @@ export class Relationships extends Component {
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>
-              <EuiIcon aria-label={type} size="m" type={getSavedObjectIcon(type)} />
+              <EuiIcon
+                aria-label={getSavedObjectLabel(type)}
+                size="m"
+                type={getSavedObjectIcon(type)}
+              />
               &nbsp;&nbsp;
               {title}
             </h2>

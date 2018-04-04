@@ -9,7 +9,7 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
-import { getSavedObjectIcon } from '../../../../lib/get_saved_object_icon';
+import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
 
 export class Table extends PureComponent {
   static propTypes = {
@@ -85,14 +85,14 @@ export class Table extends PureComponent {
       {
         field: 'type',
         name: 'Type',
-        width: '35px',
+        width: '50px',
         align: 'center',
         description: `Type of the saved object`,
         sortable: false,
         render: type => {
           return (
             <EuiIcon
-              aria-label={type}
+              aria-label={getSavedObjectLabel(type)}
               type={getSavedObjectIcon(type)}
               size="s"
             />
