@@ -93,6 +93,9 @@ export default () => Joi.object({
       ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
+    systemCallFilters: Joi.object({
+      enabled: Joi.boolean().default(true)
+    }).default()
   }).default(),
 
   logging: Joi.object().keys({

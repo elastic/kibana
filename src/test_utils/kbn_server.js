@@ -10,6 +10,9 @@ const DEFAULTS_SETTINGS = {
     autoListen: false,
     xsrf: {
       disableProtection: true
+    },
+    systemCallFilters: {
+      enabled: false
     }
   },
   logging: {

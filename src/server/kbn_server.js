@@ -15,7 +15,7 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import * as NativeControllers from './native_controllers';
-import { activateSystemCallFilters } from './system_call_filters';
+import * as SystemCallFilters from './system_call_filters';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
@@ -34,7 +34,7 @@ export default class KbnServer {
 
     this.ready = constant(this.mixin(
       NativeControllers.prepare,
-      activateSystemCallFilters,
+      SystemCallFilters.activate,
       Plugins.waitForInitSetupMixin,
 
       // sets this.config, reads this.settings
@@ -47,6 +47,7 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
+      SystemCallFilters.warnIfDanger,
       statusMixin,
 
       // writes pid file
