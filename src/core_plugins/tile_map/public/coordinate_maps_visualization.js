@@ -54,12 +54,14 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       });
 
       this._kibanaMap.addDrawControl();
-      // this._kibanaMap.on('drawCreated:rectangle', event => {
-      //   this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
-      // });
-      // this._kibanaMap.on('drawCreated:polygon', event => {
-      //   this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
-      // });
+      this._kibanaMap.on('drawCreated:rectangle', event => {
+        const geoAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geoAgg, 'geo_bounding_box', event.bounds);
+      });
+      this._kibanaMap.on('drawCreated:polygon', event => {
+        const geoAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geoAgg, 'geo_polygon', { points: event.points });
+      });
     }
 
     async _updateData(esResponse) {
@@ -80,13 +82,13 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       if (!esResponse) {
         this._geoJson = null;
         this._rawEsResponse = null;
-        //should fix redrawing of map here.
+        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
         return;
       }
 
       this._rawEsResponse = esResponse;
-      window._vis = this.vis;
-      this._geoJson = convertToGeoJson(esResponse, this.vis.aggs);
+      this._geoJson = convertToGeoJson(esResponse, this.vis.aggs[1]);
       this._recreateGeohashLayer(this._geoJson);
     }
 

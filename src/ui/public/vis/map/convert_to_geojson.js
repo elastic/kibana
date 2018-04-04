@@ -15,7 +15,7 @@ import { gridDimensions } from 'ui/agg_response/geo_json/grid_dimensions';
  * @param rawEsResponse raw ES-response of query
  * @return {Object} an object with the geojson Featurecollection and additional metadata.
  */
-export function convertToGeoJson(rawEsResponse, aggs) {
+export function convertToGeoJson(rawEsResponse, geoAgg) {
 
 
   let features;
@@ -104,15 +104,13 @@ export function convertToGeoJson(rawEsResponse, aggs) {
   };
 
 
-
-  const geoAgg = aggs[1];
   return {
     featureCollection: featureCollection,
     meta: {
       min: min,
       max: max,
-      geohashPrecision: geoAgg.params.precision,
-      geohashGridDimensionsAtEquator: gridDimensions(geoAgg.params.precision)
+      geohashPrecision: geoAgg && geoAgg.params.precision,
+      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
     }
   };
 }
