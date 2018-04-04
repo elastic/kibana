@@ -15,29 +15,12 @@ const PACKAGE = {
   relative: 'node_modules/@elastic/httpolyglot',
 };
 
-const INTERNAL_PACKAGE = {
-  name: '@kbn/internal',
-  version: '1.0.0',
-  // `license-checker` marks `private: true` packages as "unlicensed" _even_ if
-  // you add a `license` field to its `package.json`
-  licenses: ['UNLICENSED'],
-  directory: resolve(ROOT, 'packages/kbn-internal'),
-  relative: 'packages/kbn-internal',
-};
-
 describe('tasks/lib/licenses', () => {
   describe('assertLicensesValid()', () => {
     it('returns undefined when package has valid license', () => {
       expect(assertLicensesValid({
         packages: [PACKAGE],
         validLicenses: [...PACKAGE.licenses]
-      })).to.be(undefined);
-    });
-
-    it('returns undefined if internal package that is marked as "UNLICENSED"', () => {
-      expect(assertLicensesValid({
-        packages: [INTERNAL_PACKAGE],
-        validLicenses: ['MIT', 'Apache-2.0']
       })).to.be(undefined);
     });
 

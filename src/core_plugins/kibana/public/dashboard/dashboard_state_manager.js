@@ -89,13 +89,7 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(setPanels(this.getPanels()));
-    store.dispatch(updateViewMode(this.getViewMode()));
-    store.dispatch(updateUseMargins(this.getUseMargins()));
-    store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
-    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
-    store.dispatch(updateTitle(this.getTitle()));
-    store.dispatch(updateDescription(this.getDescription()));
+    this._pushAppStateChangesToStore();
 
     this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
@@ -121,18 +115,17 @@ export class DashboardStateManager {
 
   _areStoreAndAppStatePanelsEqual() {
     const state = store.getState();
-    // We need to run this comparison check or we can enter an infinite loop.
-    let differencesFound = false;
-    for (let i = 0; i < this.appState.panels.length; i++) {
-      const appStatePanel = this.appState.panels[i];
-      const storePanel = getPanel(state, appStatePanel.panelIndex);
-      if (!_.isEqual(appStatePanel, storePanel)) {
-        differencesFound = true;
-        break;
-      }
+    const storePanels = getPanels(store.getState());
+    const appStatePanels = this.getPanels();
+
+    if (Object.values(storePanels).length !== appStatePanels.length) {
+      return false;
     }
 
-    return !differencesFound;
+    return appStatePanels.every((appStatePanel) => {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      return _.isEqual(appStatePanel, storePanel);
+    });
   }
 
   /**
@@ -167,10 +160,26 @@ export class DashboardStateManager {
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
       this.triggerEmbeddableConfigUpdateListeners();
-      store.dispatch(setPanels(this.getPanels()));
+
+      // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
+      // because the panels inside appState can be mutated, while redux state should never be mutated directly.
+      const panelsMap = this.getPanels().reduce((acc, panel) => {
+        acc[panel.panelIndex] = { ...panel };
+        return acc;
+      }, {});
+      store.dispatch(setPanels(panelsMap));
     }
 
     const state = store.getState();
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
+    }
+
     if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
@@ -202,7 +211,7 @@ export class DashboardStateManager {
       const panels = getPanels(store.getState());
       this.appState.panels = [];
       Object.values(panels).map(panel => {
-        this.appState.panels.push(panel);
+        this.appState.panels.push({ ...panel });
       });
       dirty = true;
     }

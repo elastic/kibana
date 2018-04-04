@@ -33,20 +33,11 @@ export function assertLicensesValid(options = {}) {
     licenses.filter(license => !validLicenses.includes(license))
   );
 
-  // If a package is not located in `node_modules`, we know it's a package from
-  // within the Kibana repo. The reason we need to exclude these when checking
-  // for valid licenses , is that our `license-checker` dependency marks all
-  // packages that have `private: true` in their `package.json` as "UNLICENSED".
-  const isInternalPackage = pkg => (
-    !pkg.relative.includes('node_modules/')
-  );
-
   const isPackageInvalid = pkg => (
     !pkg.licenses.length || getInvalid(pkg.licenses).length > 0
   );
 
   const invalidMsgs = packages
-    .filter(pkg => !isInternalPackage(pkg))
     .filter(isPackageInvalid)
     .map(describeInvalidLicenses(getInvalid));
 

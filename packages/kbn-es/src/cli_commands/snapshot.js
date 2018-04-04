@@ -1,6 +1,5 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
-const chalk = require('chalk');
 const { Cluster } = require('../cluster');
 
 exports.description = 'Downloads and run from a nightly snapshot';
@@ -35,11 +34,6 @@ exports.run = async (defaults = {}) => {
   });
 
   const cluster = new Cluster();
-
-  try {
-    const { installPath } = await cluster.installSnapshot(options);
-    await cluster.run(installPath, { esArgs: options.esArgs });
-  } catch (e) {
-    console.log(chalk.red(e.stack));
-  }
+  const { installPath } = await cluster.installSnapshot(options);
+  await cluster.run(installPath, { esArgs: options.esArgs });
 };

@@ -2,7 +2,6 @@ export function getContainerApiMock(config = {}) {
   const containerApiMockDefaults = {
     addFilter: () => {},
     getAppState: () => {},
-    createChildUistate: () => {},
     registerPanelIndexPattern: () => {},
     updatePanel: () => {}
   };

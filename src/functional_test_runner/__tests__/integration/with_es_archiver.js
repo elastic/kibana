@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import expect from 'expect.js';
 
 import { readConfigFile } from '../../lib';
-import { createToolingLog } from '../../../dev';
+import { createToolingLog } from '@kbn/dev-utils';
 import { createReduceStream } from '../../../utils';
 import { createTestCluster } from '../../../test_utils/es';
 import { startupKibana } from '../lib';

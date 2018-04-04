@@ -1,6 +1,5 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
-const chalk = require('chalk');
 const { Cluster } = require('../cluster');
 
 exports.description = 'Install and run from an Elasticsearch tar';
@@ -43,10 +42,6 @@ exports.run = async (defaults = {}) => {
     return;
   }
 
-  try {
-    const { installPath } = await cluster.installArchive(path, options);
-    await cluster.run(installPath, { esArgs: options.esArgs });
-  } catch (e) {
-    console.log(chalk.red(e.stack));
-  }
+  const { installPath } = await cluster.installArchive(path, options);
+  await cluster.run(installPath, { esArgs: options.esArgs });
 };

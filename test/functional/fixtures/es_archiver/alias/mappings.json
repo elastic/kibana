@@ -1,0 +1,221 @@
+{
+  "type": "index",
+  "value": {
+    "index": "test3",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "message": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test9",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test4",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "message": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test2",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "message": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test7",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test6",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test8",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test5",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "test1",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "message": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
