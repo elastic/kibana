@@ -9,9 +9,14 @@ function defaultConfig(settings) {
 
 export async function activate(kbnServer) {
   const config = defaultConfig(kbnServer.settings);
-  // Darwin doesn't support system call filtering/sandboxing so we don't do anything here
-  // we can also explicitly disable them in the settings
-  if (process.platform === 'darwin' || config.get('server.systemCallFilters.enabled') === false) {
+  // if we explicitly disabled the system call filters
+  if (config.get('server.systemCallFilters.enabled') === false) {
+    return;
+  }
+
+  // system call filters not currently enabled for OSX, we don't
+  // support OS X in production, so we're alright with this limitation
+  if (process.platform === 'darwin') {
     return;
   }
 
