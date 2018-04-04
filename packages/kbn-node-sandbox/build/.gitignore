@@ -1,5 +1,0 @@
-*
-!.gitignore
-!*/
-!*/sandbox_linux.node
-!*/sandbox_win32.node
