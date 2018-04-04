@@ -10,11 +10,14 @@ export function createCourierStub() {
   };
 }
 
-export function createSearchSourceStubProvider(hits, timeField, maxTimeValue) {
+export function createSearchSourceStubProvider(hits, timeField) {
   const searchSourceStub = {
     _stubHits: hits,
     _stubTimeField: timeField,
-    _stubMaxTimeValue: maxTimeValue,
+    _createStubHit: (timestamp, tiebreaker = 0) => ({
+      [searchSourceStub._stubTimeField]: timestamp,
+      sort: [timestamp, tiebreaker],
+    })
   };
 
 
@@ -26,36 +29,18 @@ export function createSearchSourceStubProvider(hits, timeField, maxTimeValue) {
     return previousSetCall ? previousSetCall.args[1] : null;
   });
   searchSourceStub.fetchAsRejectablePromise = sinon.spy(function () {
-    const maxTimeAgg = {
-      max_time: {
-        max: {
-          field: searchSourceStub._stubTimeField,
-        },
+    const lastQuery = searchSourceStub.set.withArgs('query').lastCall.args[1];
+    const timeRange = lastQuery.query.constant_score.filter.range[searchSourceStub._stubTimeField];
+    const filteredHits = searchSourceStub._stubHits.filter((hit) => (
+      hit[searchSourceStub._stubTimeField] >= timeRange.gte &&
+      hit[searchSourceStub._stubTimeField] <= timeRange.lte
+    ));
+    return Promise.resolve({
+      hits: {
+        hits: filteredHits,
+        total: filteredHits.length,
       },
-    };
-
-    if (searchSourceStub.set.lastCall.calledWith('aggs', sinon.match(maxTimeAgg))) {
-      return Promise.resolve({
-        aggregations: {
-          max_time: {
-            value: searchSourceStub._stubMaxTimeValue,
-          },
-        },
-      });
-    } else {
-      const lastQuery = searchSourceStub.set.withArgs('query').lastCall.args[1];
-      const timeRange = lastQuery.query.constant_score.filter.range[searchSourceStub._stubTimeField];
-      const filteredHits = searchSourceStub._stubHits.filter((hit) => (
-        hit[searchSourceStub._stubTimeField] >= timeRange.gte &&
-        hit[searchSourceStub._stubTimeField] <= timeRange.lte
-      ));
-      return Promise.resolve({
-        hits: {
-          hits: filteredHits,
-          total: filteredHits.length,
-        },
-      });
-    }
+    });
   });
 
   return function SearchSourceStubProvider() {

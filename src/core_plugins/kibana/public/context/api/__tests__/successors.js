@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import * as _ from 'lodash';
 
 import { createCourierStub, createSearchSourceStubProvider } from './_stubs';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
@@ -21,7 +21,7 @@ describe('context app', function () {
     }));
 
     beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      getSearchSourceStub = createSearchSourceStubProvider([], '@timestamp', MS_PER_DAY * 8);
+      getSearchSourceStub = createSearchSourceStubProvider([], '@timestamp');
       Private.stub(SearchSourceProvider, getSearchSourceStub);
 
       fetchSuccessors = Private(fetchContextProvider).fetchSuccessors;
@@ -30,18 +30,18 @@ describe('context app', function () {
     it('should perform exactly one query when enough hits are returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 5 },
-        { '@timestamp': MS_PER_DAY * 4 },
-        { '@timestamp': MS_PER_DAY * 3 },
-        { '@timestamp': MS_PER_DAY * 2.9 },
-        { '@timestamp': MS_PER_DAY * 2.8 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 5000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 4000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 1),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 2),
       ];
 
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 3,
+        MS_PER_DAY * 3000,
         '_doc',
         'asc',
         0,
@@ -54,21 +54,21 @@ describe('context app', function () {
         });
     });
 
-    it('should perform multiple queries up to the max timestamp when too few hits are returned', function () {
+    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 5 },
-        { '@timestamp': MS_PER_DAY * 4 },
-        { '@timestamp': MS_PER_DAY * 3 },
-        { '@timestamp': MS_PER_DAY * 2 },
-        { '@timestamp': MS_PER_DAY * 1 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 3010),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3002),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2998),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2990),
       ];
 
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 3,
+        MS_PER_DAY * 3000,
         '_doc',
         'asc',
         0,
@@ -76,57 +76,17 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          expect(searchSourceStub.set.calledWith('aggs')).to.be(true);
+          const intervals = searchSourceStub.set.args
+            .filter(([property]) => property === 'query')
+            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          // "end of day 2" until "end of day 3"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 2,
-                      lte: MS_PER_DAY * 3,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
+          expect(intervals.every(({ gte, lte }) => (gte && lte) ? gte < lte : true)).to.be(true);
+          // should have started at the given time
+          expect(intervals[0].lte).to.eql(MS_PER_DAY * 3000);
+          // should have ended with a half-open interval
+          expect(_.last(intervals)).to.only.have.key('lte');
+          expect(intervals.length).to.be.greaterThan(1);
 
-          // "end of day 1" until "end of day 3"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 1,
-                      lte: MS_PER_DAY * 3,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          // "day 0" until "end of day 3"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: 0,
-                      lte: MS_PER_DAY * 3,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          expect(searchSourceStub.fetchAsRejectablePromise.callCount).to.be(4);
           expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
         });
     });
@@ -134,19 +94,19 @@ describe('context app', function () {
     it('should perform multiple queries until the expected hit count is returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 8 },
-        { '@timestamp': MS_PER_DAY * 7 },
-        { '@timestamp': MS_PER_DAY * 6 },
-        { '@timestamp': MS_PER_DAY * 5 },
-        { '@timestamp': MS_PER_DAY * 2 },
-        { '@timestamp': MS_PER_DAY * 1 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 1),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 - 2),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2500),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2200),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1000),
       ];
 
       return fetchSuccessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 8,
+        MS_PER_DAY * 3000,
         '_doc',
         'asc',
         0,
@@ -154,57 +114,16 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          expect(searchSourceStub.set.calledWith('aggs')).to.be(true);
+          const intervals = searchSourceStub.set.args
+            .filter(([property]) => property === 'query')
+            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          // "end of day 7" until "end of day 8"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 7,
-                      lte: MS_PER_DAY * 8,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
+          // should have started at the given time
+          expect(intervals[0].lte).to.eql(MS_PER_DAY * 3000);
+          // should have stopped before reaching MS_PER_DAY * 2200
+          expect(_.last(intervals).gte).to.be.greaterThan(MS_PER_DAY * 2200);
+          expect(intervals.length).to.be.greaterThan(1);
 
-          // "end of day 6" until "end of day 8"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 6,
-                      lte: MS_PER_DAY * 8,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          // "end of day 4" until "end of day 8"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 4,
-                      lte: MS_PER_DAY * 8,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          expect(searchSourceStub.fetchAsRejectablePromise.callCount).to.be(4);
           expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 4));
         });
     });

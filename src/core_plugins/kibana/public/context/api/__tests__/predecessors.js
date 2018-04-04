@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import * as _ from 'lodash';
 
 import { createCourierStub, createSearchSourceStubProvider } from './_stubs';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
@@ -30,18 +30,18 @@ describe('context app', function () {
     it('should perform exactly one query when enough hits are returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 3.2 },
-        { '@timestamp': MS_PER_DAY * 3.1 },
-        { '@timestamp': MS_PER_DAY * 3 },
-        { '@timestamp': MS_PER_DAY * 2 },
-        { '@timestamp': MS_PER_DAY * 1 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 + 2),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000 + 1),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1000),
       ];
 
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 3,
+        MS_PER_DAY * 3000,
         '_doc',
         'asc',
         0,
@@ -54,21 +54,21 @@ describe('context app', function () {
         });
     });
 
-    it('should perform multiple queries up to the max timestamp when too few hits are returned', function () {
+    it('should perform multiple queries with the last being unrestricted when too few hits are returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 6 },
-        { '@timestamp': MS_PER_DAY * 4 },
-        { '@timestamp': MS_PER_DAY * 3 },
-        { '@timestamp': MS_PER_DAY * 2 },
-        { '@timestamp': MS_PER_DAY * 1 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 3010),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3002),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2998),
+        searchSourceStub._createStubHit(MS_PER_DAY * 2990),
       ];
 
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 3,
+        MS_PER_DAY * 3000,
         '_doc',
         'asc',
         0,
@@ -76,93 +76,37 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          expect(searchSourceStub.set.calledWith('aggs')).to.be(true);
+          const intervals = searchSourceStub.set.args
+            .filter(([property]) => property === 'query')
+            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          // "end of day 3" until "end of day 4"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 3,
-                      lte: MS_PER_DAY * 4,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
+          expect(intervals.every(({ gte, lte }) => (gte && lte) ? gte < lte : true)).to.be(true);
+          // should have started at the given time
+          expect(intervals[0].gte).to.eql(MS_PER_DAY * 3000);
+          // should have ended with a half-open interval
+          expect(_.last(intervals)).to.only.have.key('gte');
+          expect(intervals.length).to.be.greaterThan(1);
 
-          // "end of day 3" until "end of day 5"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 3,
-                      lte: MS_PER_DAY * 5,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          // "end of day 3" until "end of day 7"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 3,
-                      lte: MS_PER_DAY * 7,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          // "end of day 3" until "end of day 8"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 3,
-                      lte: MS_PER_DAY * 8,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          expect(searchSourceStub.fetchAsRejectablePromise.callCount).to.be(5);
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 3).reverse());
+          expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 3));
         });
     });
 
     it('should perform multiple queries until the expected hit count is returned', function () {
       const searchSourceStub = getSearchSourceStub();
       searchSourceStub._stubHits = [
-        { '@timestamp': MS_PER_DAY * 8 },
-        { '@timestamp': MS_PER_DAY * 7 },
-        { '@timestamp': MS_PER_DAY * 6 },
-        { '@timestamp': MS_PER_DAY * 5 },
-        { '@timestamp': MS_PER_DAY * 2 },
-        { '@timestamp': MS_PER_DAY * 1 },
+        searchSourceStub._createStubHit(MS_PER_DAY * 4000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1700),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1500),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1200),
+        searchSourceStub._createStubHit(MS_PER_DAY * 1000),
       ];
 
       return fetchPredecessors(
         'INDEX_PATTERN_ID',
         '@timestamp',
         'desc',
-        MS_PER_DAY * 1,
+        MS_PER_DAY * 1000,
         '_doc',
         'asc',
         0,
@@ -170,58 +114,17 @@ describe('context app', function () {
         []
       )
         .then((hits) => {
-          expect(searchSourceStub.set.calledWith('aggs')).to.be(true);
+          const intervals = searchSourceStub.set.args
+            .filter(([property]) => property === 'query')
+            .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          // "end of day 1" until "end of day 2"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 1,
-                      lte: MS_PER_DAY * 2,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
+          // should have started at the given time
+          expect(intervals[0].gte).to.eql(MS_PER_DAY * 1000);
+          // should have stopped before reaching MS_PER_DAY * 1700
+          expect(_.last(intervals).lte).to.be.lessThan(MS_PER_DAY * 1700);
+          expect(intervals.length).to.be.greaterThan(1);
 
-          // "end of day 1" until "end of day 3"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 1,
-                      lte: MS_PER_DAY * 3,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          // "end of day 1" until "end of day 5"
-          expect(searchSourceStub.set.calledWith('query', sinon.match({
-            query: {
-              constant_score: {
-                filter: {
-                  range: {
-                    [searchSourceStub._stubTimeField]: {
-                      gte: MS_PER_DAY * 1,
-                      lte: MS_PER_DAY * 5,
-                    },
-                  },
-                },
-              },
-            },
-          }))).to.be(true);
-
-          expect(searchSourceStub.fetchAsRejectablePromise.callCount).to.be(4);
-          expect(hits).to.eql(searchSourceStub._stubHits.slice(-3).reverse());
+          expect(hits).to.eql(searchSourceStub._stubHits.slice(-3));
         });
     });
 
