@@ -115,7 +115,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title'
                     ]
@@ -136,7 +135,6 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title^3',
                       'pending.title^3',
                       'saved.title^3'
                     ]
@@ -157,10 +155,8 @@ describe('searchDsl/queryParams', () => {
                   simple_query_string: {
                     query: 'y*',
                     fields: [
-                      'type.title',
                       'pending.title',
                       'saved.title',
-                      'type.title.raw',
                       'pending.title.raw',
                       'saved.title.raw',
                     ]

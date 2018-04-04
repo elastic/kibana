@@ -1,70 +1,71 @@
 import { parseAndValidateFromApi } from './parse_and_validate_from_api';
 
-export function convertFilterToEsDsl(types, apiParam) {
-  return convertFilter(types, parseAndValidateFromApi(apiParam));
-}
-
-function getFilterFields(types, field) {
-  switch (field) {
-    case 'type':
-    case 'updated_at':
-      return [field];
-
-    default:
-      return types.reduce((acc, t) => [
-        ...acc,
-        `${t}.${field}`
-      ], []);
+function getExpandedFields(savedObjectTypes, rootAttributes, field) {
+  if (rootAttributes.includes(field)) {
+    return [field];
   }
+
+  return savedObjectTypes.reduce((acc, t) => [
+    ...acc,
+    `${t}.${field}`
+  ], []);
 }
 
-function convertFilter(types, filter) {
-  switch (filter.type) {
-    case 'value': {
-      return {
-        multi_match: {
-          type: 'phrase',
-          query: filter.value,
-          fields: filter.field
-            ? getFilterFields(types, filter.field)
-            : undefined,
-        }
-      };
-    }
+export function convertFilterToEsDsl(savedObjectTypes, rootAttributes, apiParam) {
+  const rootFilter = parseAndValidateFromApi(apiParam);
 
-    case 'range': {
-      const filters = getFilterFields(types, filter.field).map(field => ({
-        range: {
-          [field]: {
-            gt: filter.gt,
-            gte: filter.gte,
-            lt: filter.lt,
-            lte: filter.lte,
-          }
-        }
-      }));
+  function recursivelyConvert(filter) {
+    const fields = filter.field
+      ? getExpandedFields(savedObjectTypes, rootAttributes, filter.field)
+      : undefined;
 
-      if (filters.length > 1) {
+    switch (filter.type) {
+      case 'value': {
         return {
-          bool: {
-            should: filters
+          multi_match: {
+            type: 'phrase',
+            query: filter.value,
+            fields,
           }
         };
       }
 
-      return filters[0];
-    }
+      case 'range': {
+        const filters = fields.map(field => ({
+          range: {
+            [field]: {
+              gt: filter.gt,
+              gte: filter.gte,
+              lt: filter.lt,
+              lte: filter.lte,
+            }
+          }
+        }));
 
-    case 'bool':
-      return {
-        bool: {
-          must: filter.must.map(filter => convertFilter(types, filter)),
-          must_not: filter.must_not.map(filter => convertFilter(types, filter)),
-          should: filter.must_some.map(filter => convertFilter(types, filter)),
+        if (filters.length > 1) {
+          return {
+            bool: {
+              should: filters
+            }
+          };
         }
-      };
 
-    default:
-      throw new Error(`unexpected filter.type "${filter.type}"`);
+        return filters[0];
+      }
+
+      case 'bool':
+        return {
+          bool: {
+            must: filter.must.map(recursivelyConvert),
+            must_not: filter.must_not.map(recursivelyConvert),
+            should: filter.must_some.map(recursivelyConvert),
+          }
+        };
+
+      default:
+        throw new Error(`unexpected filter.type "${filter.type}"`);
+    }
   }
+
+  return recursivelyConvert(rootFilter);
 }

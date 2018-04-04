@@ -57,81 +57,33 @@ Object {
         },
       },
       Object {
-        "bool": Object {
-          "should": Array [
-            Object {
-              "range": Object {
-                "visualize.created": Object {
-                  "gt": undefined,
-                  "gte": 2018-03-02T07:00:00.000Z,
-                  "lt": 2018-03-03T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-            Object {
-              "range": Object {
-                "dashboard.created": Object {
-                  "gt": undefined,
-                  "gte": 2018-03-02T07:00:00.000Z,
-                  "lt": 2018-03-03T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-          ],
+        "range": Object {
+          "updated_at": Object {
+            "gt": undefined,
+            "gte": 2018-03-02T07:00:00.000Z,
+            "lt": 2018-03-03T07:00:00.000Z,
+            "lte": undefined,
+          },
         },
       },
       Object {
-        "bool": Object {
-          "should": Array [
-            Object {
-              "range": Object {
-                "visualize.created": Object {
-                  "gt": undefined,
-                  "gte": 2018-02-25T07:00:00.000Z,
-                  "lt": 2018-03-01T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-            Object {
-              "range": Object {
-                "dashboard.created": Object {
-                  "gt": undefined,
-                  "gte": 2018-02-25T07:00:00.000Z,
-                  "lt": 2018-03-01T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-          ],
+        "range": Object {
+          "updated_at": Object {
+            "gt": undefined,
+            "gte": 2018-02-25T07:00:00.000Z,
+            "lt": 2018-03-01T07:00:00.000Z,
+            "lte": undefined,
+          },
         },
       },
       Object {
-        "bool": Object {
-          "should": Array [
-            Object {
-              "range": Object {
-                "visualize.created": Object {
-                  "gt": undefined,
-                  "gte": undefined,
-                  "lt": 2012-01-01T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-            Object {
-              "range": Object {
-                "dashboard.created": Object {
-                  "gt": undefined,
-                  "gte": undefined,
-                  "lt": 2012-01-01T07:00:00.000Z,
-                  "lte": undefined,
-                },
-              },
-            },
-          ],
+        "range": Object {
+          "updated_at": Object {
+            "gt": undefined,
+            "gte": undefined,
+            "lt": 2012-01-01T07:00:00.000Z,
+            "lte": undefined,
+          },
         },
       },
       Object {
@@ -157,55 +109,23 @@ Object {
           "must_not": Array [],
           "should": Array [
             Object {
-              "bool": Object {
-                "should": Array [
-                  Object {
-                    "range": Object {
-                      "visualize.created": Object {
-                        "gt": undefined,
-                        "gte": 2018-03-02T07:00:00.000Z,
-                        "lt": 2018-03-03T07:00:00.000Z,
-                        "lte": undefined,
-                      },
-                    },
-                  },
-                  Object {
-                    "range": Object {
-                      "dashboard.created": Object {
-                        "gt": undefined,
-                        "gte": 2018-03-02T07:00:00.000Z,
-                        "lt": 2018-03-03T07:00:00.000Z,
-                        "lte": undefined,
-                      },
-                    },
-                  },
-                ],
+              "range": Object {
+                "updated_at": Object {
+                  "gt": undefined,
+                  "gte": 2018-03-02T07:00:00.000Z,
+                  "lt": 2018-03-03T07:00:00.000Z,
+                  "lte": undefined,
+                },
               },
             },
             Object {
-              "bool": Object {
-                "should": Array [
-                  Object {
-                    "range": Object {
-                      "visualize.created": Object {
-                        "gt": undefined,
-                        "gte": 2018-03-01T07:00:00.000Z,
-                        "lt": 2018-03-02T07:00:00.000Z,
-                        "lte": undefined,
-                      },
-                    },
-                  },
-                  Object {
-                    "range": Object {
-                      "dashboard.created": Object {
-                        "gt": undefined,
-                        "gte": 2018-03-01T07:00:00.000Z,
-                        "lt": 2018-03-02T07:00:00.000Z,
-                        "lte": undefined,
-                      },
-                    },
-                  },
-                ],
+              "range": Object {
+                "updated_at": Object {
+                  "gt": undefined,
+                  "gte": 2018-03-01T07:00:00.000Z,
+                  "lt": 2018-03-02T07:00:00.000Z,
+                  "lte": undefined,
+                },
               },
             },
           ],

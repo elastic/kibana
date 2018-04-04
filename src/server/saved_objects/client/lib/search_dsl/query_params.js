@@ -2,12 +2,13 @@ import { getRootProperties } from '../../../../mappings';
 import { convertExperimentalFilterToEsDsl } from './experimental_filter';
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the searchFields and savedObjectTypes+rootAttributes from the mapping
  *  @param  {Array<string>} searchFields
- *  @param  {Array<string>} types
+ *  @param  {Array<string>} savedObjectTypes
+ *  @param  {Array<string>} rootAttributes
  *  @return {Object}
  */
-function getFieldsForTypes(searchFields, types) {
+function getFieldsForTypes(searchFields, types, rootAttributes) {
   if (!searchFields || !searchFields.length) {
     return {
       all_fields: true
@@ -17,8 +18,31 @@ function getFieldsForTypes(searchFields, types) {
   return {
     fields: searchFields.reduce((acc, field) => [
       ...acc,
-      ...types.map(prefix => `${prefix}.${field}`)
+      ...rootAttributes.includes(field)
+        ? [field]
+        : types.map(prefix => `${prefix}.${field}`)
     ], []),
+  };
+}
+
+function readMappings(mappings) {
+  // object types in the mappings are for saved object types
+  const savedObjectTypes = [];
+
+  // non-object types are for shared/global attributes like updated_at and type
+  const rootAttributes = [];
+
+  for (const [propName, propMapping] of Object.entries(getRootProperties(mappings))) {
+    if (propMapping.type === 'object' || propMapping.properties) {
+      savedObjectTypes.push(propName);
+    } else {
+      rootAttributes.push(propName);
+    }
+  }
+
+  return {
+    savedObjectTypes,
+    rootAttributes,
   };
 }
 
@@ -36,8 +60,11 @@ export function getQueryParams(mappings, type, search, searchFields, experimenta
     return {};
   }
 
+  const { savedObjectTypes, rootAttributes } = readMappings(mappings);
+  const searchTypes = type ? [type] : savedObjectTypes;
+
   const bool = {};
-  const savedObjectTypes = type ? [type] : Object.keys(getRootProperties(mappings));
+
 
   if (type) {
     bool.filter = [
@@ -52,7 +79,8 @@ export function getQueryParams(mappings, type, search, searchFields, experimenta
           query: search,
           ...getFieldsForTypes(
             searchFields,
-            savedObjectTypes
+            searchTypes,
+            rootAttributes,
           )
         }
       }
@@ -61,7 +89,7 @@ export function getQueryParams(mappings, type, search, searchFields, experimenta
 
   if (experimentalFilter) {
     bool.must = (bool.must || []).concat(
-      convertExperimentalFilterToEsDsl(savedObjectTypes, experimentalFilter)
+      convertExperimentalFilterToEsDsl(searchTypes, rootAttributes, experimentalFilter)
     );
   }
 
