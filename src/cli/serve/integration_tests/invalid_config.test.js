@@ -1,7 +1,7 @@
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
-const ROOT_DIR = resolve(__dirname, '../../../');
+const ROOT_DIR = resolve(__dirname, '../../../../');
 const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml');
 
 describe('cli invalid config support', function () {
