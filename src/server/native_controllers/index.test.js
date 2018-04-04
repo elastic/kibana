@@ -1,4 +1,5 @@
 import path from 'path';
+import EventEmitter from 'events';
 import * as NativeControllers from './index';
 import { NativeController } from './native_controller';
 import { spawnNativeController } from './spawn_native_controller';
@@ -11,9 +12,7 @@ const FIXTURES = path.resolve(__dirname, '__fixtures__');
 let mockSpawnedProcess;
 beforeEach(() => {
   spawnNativeController.mockClear();
-  mockSpawnedProcess = {
-    on: jest.fn()
-  };
+  mockSpawnedProcess = new EventEmitter();
   spawnNativeController.mockReturnValue(mockSpawnedProcess);
 });
 
@@ -102,9 +101,7 @@ describe('#prepare', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     await NativeControllers.prepare(kbnServer);
-    const exitCall = mockSpawnedProcess.on.mock.calls.find(call => call[0] === 'exit');
-    const onExit = exitCall[1];
-    onExit();
+    mockSpawnedProcess.emit('exit');
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(processExitSpy).toHaveBeenCalledTimes(1);
@@ -129,10 +126,8 @@ describe('#prepare', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     await NativeControllers.prepare(kbnServer);
-    const exitCall = mockSpawnedProcess.on.mock.calls.find(call => call[0] === 'exit');
-    const onExit = exitCall[1];
     kbnServer.nativeControllers.correct.killed = true;
-    onExit();
+    mockSpawnedProcess.emit('exit');
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(0);
     expect(processExitSpy).toHaveBeenCalledTimes(0);
