@@ -1,4 +1,4 @@
-import { relative } from 'path';
+import { relative, resolve } from 'path';
 import Rx from 'rxjs/Rx';
 import { Command } from 'commander';
 import { withProcRunner } from '@kbn/dev-utils';
@@ -16,6 +16,7 @@ import {
 } from './lib';
 
 import { readConfigFile } from '../src/functional_test_runner/lib';
+import { KIBANA_ROOT } from './lib/paths';
 
 const SUCCESS_MESSAGE = `
 
@@ -57,19 +58,28 @@ export async function newRunApiTests() {
 
 // Takes in multiple paths
 // configPath should be paths
+// works with '../test/functional/config.js'
+// try with '../test/http_server_integration/config.js'
+// from x-pack-kibana:
+// try with '../test/api_integration/config.js'
+// try with '../test/saml_api_integration/config.js'
 export async function runWithConfig(configPath = '../test/functional/config.js') {
-  // TODO: pass in config to runFtr
+  const cmd = new Command('node scripts/functional_test_with_config');
+
+  cmd
+    .option('--config [value]', 'Path to config file to specify options', null)
+    .parse(process.argv);
+
+  configPath = cmd.config || configPath;
+
   // be able to chain multiple configs
   await withTmpDir(async tmpDir => {
     await withProcRunner(async procs => {
-      const config = await readConfigFile(log, require.resolve(configPath));
+      const config = await readConfigFile(log, resolve(KIBANA_ROOT, configPath));
 
       await runEs({ tmpDir, procs, config }); // can also run with xpack
       // NOTE: enableUI, useSAML, devMode
       await runKibanaServer({ procs, config });
-
-      // if testFiles: [], spits out a warning
-      // TODO: rename to runTests
       await runFtr({ procs, configPath: require.resolve(configPath) });
 
       // don't stop procs if servers are supposed to keep running

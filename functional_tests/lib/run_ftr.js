@@ -1,4 +1,3 @@
-
 import {
   KIBANA_FTR_SCRIPT,
   PROJECT_ROOT
