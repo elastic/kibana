@@ -332,9 +332,11 @@ export class Observable<T> implements Subscribable<T> {
     op9: OperatorFunction<H, I>
   ): Observable<I>;
   pipe<R>(...operations: OperatorFunction<T, R>[]): Observable<R>;
-  pipe<R>(...operations: OperatorFunction<T, R>[]): Observable<R> {
+  pipe<R>(
+    ...operations: OperatorFunction<T, R>[]
+  ): Observable<R> | Observable<T> {
     if (operations.length === 0) {
-      return this as any;
+      return this;
     }
 
     return pipeFromArray(operations)(this);

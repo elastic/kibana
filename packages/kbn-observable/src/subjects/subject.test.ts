@@ -1,4 +1,4 @@
-import { Observable, PartialObserver } from '../observable';
+import { Observable } from '../observable';
 import { Subject } from './subject';
 import { first } from '../operators';
 import { $of } from '../factories';
@@ -277,12 +277,6 @@ test('does not allow "error" or "next" when already completed', () => {
 
   subject.subscribe(createCollectObserver(results2));
 
-  // subject.subscribe()
-
-  // subject.next('a');
-  // subject.error(error);
-  // subject.next('b');
-
   expect(results1).toEqual(['foo', 'C']);
   expect(results2).toEqual(['C']);
 });
@@ -301,12 +295,6 @@ test('does not allow "complete" or "next" when already errored', () => {
   subject.next('bar');
 
   subject.subscribe(createCollectObserver(results2));
-
-  // subject.subscribe()
-
-  // subject.next('a');
-  // subject.error(error);
-  // subject.next('b');
 
   expect(results1).toEqual(['foo', error]);
   expect(results2).toEqual([error]);

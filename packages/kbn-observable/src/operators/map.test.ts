@@ -1,7 +1,5 @@
-import { Observable } from '../observable';
 import { $of } from '../factories';
 import { map } from './map';
-import { toArray } from './to_array';
 import { collect } from '../lib/collect';
 
 const number$ = $of(1, 2, 3);

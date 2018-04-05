@@ -1,4 +1,3 @@
-import { Observable } from '../observable';
 import { $fromPromise } from './from_promise';
 import { collect } from '../lib/collect';
 

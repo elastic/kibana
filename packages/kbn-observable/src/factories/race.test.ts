@@ -20,7 +20,7 @@ test('completes immediately if given no observable', async () => {
   expect(res).toEqual(['C']);
 });
 
-test('should race cold and cold', done => {
+test('should race cold and cold', () => {
   const obs1 = new Observable<string>(observer => {
     setTimeout(() => {
       observer.next('foo');
@@ -45,15 +45,12 @@ test('should race cold and cold', done => {
     },
   });
 
-  setTimeout(() => {
-    expect(values).toEqual(['foo', 'C']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['foo', 'C']);
 });
 
-test('should race hot and hot', done => {
+test('should race hot and hot', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -78,15 +75,12 @@ test('should race hot and hot', done => {
     obs2.complete();
   }, 70);
 
-  setTimeout(() => {
-    expect(values).toEqual(['bar', 'C']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['bar', 'C']);
 });
 
-test('should race hot and cold', done => {
+test('should race hot and cold', () => {
   const obs1 = new Observable<string>(observer => {
     setTimeout(() => {
       observer.next('foo');
@@ -113,15 +107,12 @@ test('should race hot and cold', done => {
     obs2.complete();
   }, 70);
 
-  setTimeout(() => {
-    expect(values).toEqual(['bar', 'C']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['bar', 'C']);
 });
 
-test('should race 2nd and 1st', done => {
+test('should race 2nd and 1st', () => {
   const obs1 = new Observable<string>(observer => {
     setTimeout(() => {
       observer.next('foo');
@@ -146,15 +137,12 @@ test('should race 2nd and 1st', done => {
     },
   });
 
-  setTimeout(() => {
-    expect(values).toEqual(['bar', 'C']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['bar', 'C']);
 });
 
-test('should race emit and complete', done => {
+test('should race emit and complete', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -176,15 +164,12 @@ test('should race emit and complete', done => {
     obs1.next('foo');
   }, 50);
 
-  setTimeout(() => {
-    expect(values).toEqual(['C']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['C']);
 });
 
-test('should allow unsubscribing early and explicitly', done => {
+test('should allow unsubscribing early and explicitly', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -208,15 +193,12 @@ test('should allow unsubscribing early and explicitly', done => {
     obs1.next('foo');
   }, 50);
 
-  setTimeout(() => {
-    expect(values).toEqual([]);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual([]);
 });
 
-test('should not break unsubscription chains when unsubscribed explicitly', done => {
+test('should not break unsubscription chains when unsubscribed explicitly', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -246,15 +228,12 @@ test('should not break unsubscription chains when unsubscribed explicitly', done
     obs1.next('bar');
   }, 70);
 
-  setTimeout(() => {
-    expect(values).toEqual(['foo']);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['foo']);
 });
 
-test('should throw when error occurs mid stream', done => {
+test('should throw when error occurs mid stream', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -282,15 +261,12 @@ test('should throw when error occurs mid stream', done => {
     obs1.error(error);
   }, 70);
 
-  setTimeout(() => {
-    expect(values).toEqual(['bar', error]);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual(['bar', error]);
 });
 
-test('should throw when error occurs before a winner is found', done => {
+test('should throw when error occurs before a winner is found', () => {
   const obs1 = new Subject<string>();
   const obs2 = new Subject<string>();
 
@@ -318,12 +294,9 @@ test('should throw when error occurs before a winner is found', done => {
     obs1.next('bar');
   }, 70);
 
-  setTimeout(() => {
-    expect(values).toEqual([error]);
-    done();
-  }, 100);
-
   jest.advanceTimersByTime(100);
+
+  expect(values).toEqual([error]);
 });
 
 test('closes all subscriptions when unsubscribed', async () => {

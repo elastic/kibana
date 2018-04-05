@@ -7,7 +7,7 @@ Why build our own observable library? The main reason is that we don't want to
 tie our plugin apis heavily to a large dependency, but rather expose something
 that's much simpler and that we have control over ourselves.
 
-In addition, `@kbn/observable` implements `System.observable` which enables
+In addition, `@kbn/observable` implements `Symbol.observable` which enables
 interop between observable libraries, which means plugins can use whatever
 observable library they want if they don't want to rely on `@kbn/observable`.
 
