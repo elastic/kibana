@@ -30,7 +30,7 @@ describe('server/config', function () {
         };
 
         const result = transformDeprecations(settings);
-        expect(result.server.ssl.enabled).to.be(true);
+        expect(result.server.ssl.enabled).toBe(true);
       });
 
       it('logs a message when automatically setting enabled to true', function () {
