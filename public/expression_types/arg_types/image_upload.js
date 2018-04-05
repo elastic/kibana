@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel } from 'react-bootstrap';
 import { withState } from 'recompose';
 import { encode } from '../../../common/lib/dataurl';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const ImageUploadArgInput = ({
   typeInstance,
@@ -57,9 +58,11 @@ ImageUploadArgInput.propTypes = {
   isLoading: PropTypes.bool,
 };
 
+const EnhancedImageUpload = withState('isLoading', 'setLoading', false)(ImageUploadArgInput);
+
 export const imageUpload = () => ({
   name: 'imageUpload',
   displayName: 'Image Upload',
   help: 'Select or upload an image',
-  template: withState('isLoading', 'setLoading', false)(ImageUploadArgInput),
+  template: templateFromReactComponent(EnhancedImageUpload),
 });

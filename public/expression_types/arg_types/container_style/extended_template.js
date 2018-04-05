@@ -5,7 +5,7 @@ import { AppearanceForm } from './appearance_form';
 
 import './container_style.less';
 
-export const extendedTemplate = ({ getArgValue, setArgValue }) => (
+export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
   <div className="canvas__argtype--containerStyle">
     <div>
       <label>Appearance</label>
@@ -23,16 +23,20 @@ export const extendedTemplate = ({ getArgValue, setArgValue }) => (
         value={getArgValue('border', '')}
         radius={getArgValue('borderRadius')}
         onChange={setArgValue}
+        colors={workpad.colors}
       />
     </div>
   </div>
 );
 
-extendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
+ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 
-extendedTemplate.propTypes = {
+ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
+  workpad: PropTypes.shape({
+    colors: PropTypes.array.isRequired,
+  }).isRequired,
 };

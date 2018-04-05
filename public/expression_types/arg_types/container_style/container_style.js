@@ -1,8 +1,9 @@
 import { withHandlers } from 'recompose';
 import { get } from 'lodash';
 import { set } from 'object-path-immutable';
-import { simpleTemplate } from './simple_template';
-import { extendedTemplate } from './extended_template';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
+import { SimpleTemplate } from './simple_template';
+import { ExtendedTemplate } from './extended_template';
 
 import './container_style.less';
 
@@ -23,6 +24,6 @@ export const containerStyle = () => ({
   name: 'containerStyle',
   displayName: 'Image Upload',
   help: 'Select or upload an image',
-  template: wrap(extendedTemplate),
-  simpleTemplate: wrap(simpleTemplate),
+  simpleTemplate: templateFromReactComponent(wrap(SimpleTemplate)),
+  template: templateFromReactComponent(wrap(ExtendedTemplate)),
 });

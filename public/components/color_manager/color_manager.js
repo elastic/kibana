@@ -19,17 +19,21 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
         onChange={e => onChange(e.target.value)}
       />
     </div>
-    <i onClick={() => addColor(value)} className="canvas__color-manager--add fa fa-plus-circle" />
-    <i
-      onClick={() => removeColor(value)}
-      className="canvas__color-manager--remove fa fa-times-circle"
-    />
+    {addColor && (
+      <i onClick={() => addColor(value)} className="canvas__color-manager--add fa fa-plus-circle" />
+    )}
+    {removeColor && (
+      <i
+        onClick={() => removeColor(value)}
+        className="canvas__color-manager--remove fa fa-times-circle"
+      />
+    )}
   </div>
 );
 
 ColorManager.propTypes = {
   value: PropTypes.string,
-  addColor: PropTypes.func.isRequired,
-  removeColor: PropTypes.func.isRequired,
+  addColor: PropTypes.func,
+  removeColor: PropTypes.func,
   onChange: PropTypes.func.isRequired,
 };

@@ -19,13 +19,14 @@ export class RenderToDom extends React.Component {
   }
 
   render() {
+    const { domNode, setDomNode, style } = this.props;
     const linkRef = refNode => {
-      if (!this.props.domNode && refNode) {
+      if (!domNode && refNode) {
         // Initialize the domNode property. This should only happen once, even if config changes.
-        this.props.setDomNode(refNode);
+        setDomNode(refNode);
       }
     };
 
-    return <div className="render_to_dom" ref={linkRef} style={this.props.style} />;
+    return <div className="render_to_dom" ref={linkRef} style={style} />;
   }
 }

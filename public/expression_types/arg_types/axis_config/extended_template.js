@@ -68,3 +68,5 @@ export class ExtendedTemplate extends React.PureComponent {
     );
   }
 }
+
+ExtendedTemplate.displayName = 'AxisConfigExtendedInput';

@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { get, mapValues, set } from 'lodash';
 import { TextStylePicker } from '../../../components/text_style_picker';
 
-export const extendedTemplate = props => {
-  const { onValueChange, argValue } = props;
+export const ExtendedTemplate = props => {
+  const { onValueChange, argValue, workpad } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
 
@@ -28,17 +28,20 @@ export const extendedTemplate = props => {
         underline={spec.underline || false}
         italic={spec.italic || false}
         onChange={handleChange}
+        colors={workpad.colors}
       />
     </div>
   );
 };
 
-extendedTemplate.displayName = 'FontArgExtendedInput';
-
-extendedTemplate.propTypes = {
+ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
-  labels: PropTypes.array.isRequired,
   renderError: PropTypes.func,
+  workpad: PropTypes.shape({
+    colors: PropTypes.array.isRequired,
+  }).isRequired,
 };
+
+ExtendedTemplate.displayName = 'FontArgExtendedInput';

@@ -4,10 +4,13 @@ import { compose, withProps } from 'recompose';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError }) => {
-  if (typeof value !== 'string') renderError();
-
+  if (typeof value !== 'string') {
+    renderError();
+    return null;
+  }
   return (
     <div>
       <FormGroup>
@@ -37,7 +40,7 @@ TextAreaArgInput.propTypes = {
   renderError: PropTypes.func,
 };
 
-const template = compose(
+const EnhancedTextAreaArgInput = compose(
   withProps(({ onValueChange, typeInstance, argValue }) => ({
     confirm: get(typeInstance, 'options.confirm'),
     commit: onValueChange,
@@ -46,15 +49,16 @@ const template = compose(
   createStatefulPropHoc('value')
 )(TextAreaArgInput);
 
-template.propTypes = {
+EnhancedTextAreaArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
+  renderError: PropTypes.func.isRequired,
 };
 
 export const textarea = () => ({
   name: 'textarea',
   displayName: 'textarea',
   help: 'Input long strings',
-  template: template,
+  template: templateFromReactComponent(EnhancedTextAreaArgInput),
 });

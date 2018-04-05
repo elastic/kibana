@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { LabeledInput } from '../../../components/labeled_input';
 
-export const extendedTemplate = props => {
+export const ExtendedTemplate = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -87,9 +87,9 @@ export const extendedTemplate = props => {
   );
 };
 
-extendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
+ExtendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
 
-extendedTemplate.propTypes = {
+ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,

@@ -4,11 +4,16 @@ import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { ColorPicker } from '../color_picker';
 import { ColorDot } from '../color_dot';
 import './color_picker_mini.less';
+import { WorkpadColorPicker } from '../workpad_color_picker/';
 
-export const ColorPickerMini = ({ onChange, value, placement }) => {
+export const ColorPickerMini = ({ onChange, value, placement, colors }) => {
   const picker = (
     <Popover id="popover-trigger-click" style={{ width: 207 }}>
-      <ColorPicker onChange={onChange} value={value} />
+      {colors ? (
+        <ColorPicker onChange={onChange} value={value} colors={colors} />
+      ) : (
+        <WorkpadColorPicker onChange={onChange} value={value} />
+      )}
     </Popover>
   );
 
@@ -24,6 +29,7 @@ export const ColorPickerMini = ({ onChange, value, placement }) => {
 };
 
 ColorPickerMini.propTypes = {
+  colors: PropTypes.array,
   value: PropTypes.string,
   onChange: PropTypes.func,
   placement: PropTypes.string,

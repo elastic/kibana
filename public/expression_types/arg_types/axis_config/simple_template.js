@@ -14,3 +14,5 @@ SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
 };
+
+SimpleTemplate.displayName = 'AxisConfigSimpleInput';

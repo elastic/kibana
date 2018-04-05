@@ -5,6 +5,7 @@ import { FormControl } from 'react-bootstrap';
 import { sortBy } from 'lodash';
 import { createStatefulPropHoc } from '../../../components/enhance/stateful_prop';
 import { getType } from '../../../../common/lib/get_type';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 import './datacolumn.less';
@@ -19,8 +20,10 @@ const DatacolumnArgInput = ({
   setMathFunction,
   renderError,
 }) => {
-  if (mathValue.error) return renderError();
-
+  if (mathValue.error) {
+    renderError();
+    return null;
+  }
   const inputRefs = {};
   const valueNotSet = val => !val || val.length === 0;
   const updateFunctionValue = () => {
@@ -45,7 +48,6 @@ const DatacolumnArgInput = ({
   };
 
   const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
-
   return (
     <div className="canvas__argtype--datacolumn">
       <SimpleMathFunction
@@ -82,7 +84,7 @@ DatacolumnArgInput.propTypes = {
   renderError: PropTypes.func.isRequired,
 };
 
-const simpleTemplate = compose(
+const EnhancedDatacolumnArgInput = compose(
   withPropsOnChange(['argValue', 'columns'], ({ argValue, columns }) => ({
     mathValue: (argValue => {
       if (getType(argValue) !== 'string') return { error: 'argValue is not a string type' };
@@ -101,7 +103,7 @@ const simpleTemplate = compose(
   })
 )(DatacolumnArgInput);
 
-simpleTemplate.propTypes = {
+EnhancedDatacolumnArgInput.propTypes = {
   argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   columns: PropTypes.array.isRequired,
 };
@@ -111,5 +113,5 @@ export const datacolumn = () => ({
   displayName: 'Column',
   help: 'Select the data column',
   default: '""',
-  simpleTemplate,
+  simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
 });

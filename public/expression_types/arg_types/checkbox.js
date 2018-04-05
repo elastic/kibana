@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const CheckboxArgInput = ({ onValueChange, argValue }) => {
   function handleChange() {
@@ -26,5 +27,5 @@ export const checkbox = () => ({
   name: 'checkbox',
   displayName: 'Checkbox',
   help: 'A true/false checkbox toggle',
-  simpleTemplate: CheckboxArgInput,
+  simpleTemplate: templateFromReactComponent(CheckboxArgInput),
 });

@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
 import { lifecycle } from 'recompose';
 import { get } from 'lodash';
-import { simpleTemplate } from './simple_template';
-import { extendedTemplate } from './extended_template';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
+import { SimpleTemplate } from './simple_template';
+import { ExtendedTemplate } from './extended_template';
 import './series_style.less';
 
-const wrappedTemplate = lifecycle({
+const EnhancedExtendedTemplate = lifecycle({
   formatLabel(label) {
     if (typeof label !== 'string') this.props.renderError();
     return `Style: ${label}`;
@@ -20,9 +21,9 @@ const wrappedTemplate = lifecycle({
       this.props.setLabel(this.formatLabel(newLabel));
     }
   },
-})(extendedTemplate);
+})(ExtendedTemplate);
 
-wrappedTemplate.propTypes = {
+EnhancedExtendedTemplate.propTypes = {
   argValue: PropTypes.any.isRequired,
   setLabel: PropTypes.func.isRequired,
   label: PropTypes.string,
@@ -32,6 +33,6 @@ export const seriesStyle = () => ({
   name: 'seriesStyle',
   displayName: 'Series Style',
   help: 'Set the style for a selected named series',
-  template: wrappedTemplate,
-  simpleTemplate,
+  template: templateFromReactComponent(EnhancedExtendedTemplate),
+  simpleTemplate: templateFromReactComponent(SimpleTemplate),
 });

@@ -15,6 +15,7 @@ export const TextStylePicker = ({
   underline,
   italic,
   onChange,
+  colors,
 }) => {
   function doChange(propName, value) {
     onChange({
@@ -48,7 +49,11 @@ export const TextStylePicker = ({
         <FontPicker value={family} onSelect={value => doChange('family', value)} />
       </FormGroup>
       <FormGroup className="canvas__text-style-picker--bottom">
-        <ColorPickerMini value={color} onChange={value => doChange('color', value)} />
+        <ColorPickerMini
+          value={color}
+          onChange={value => doChange('color', value)}
+          colors={colors}
+        />
         <ButtonGroup bsSize="small">
           <Button
             active={weight === 'bold'}
@@ -89,4 +94,5 @@ TextStylePicker.propTypes = {
   underline: PropTypes.bool,
   italic: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
+  colors: PropTypes.array,
 };

@@ -4,6 +4,7 @@ import { compose, withProps } from 'recompose';
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 // This is basically a direct copy of the string input, but with some Number() goodness maybe you think that's cheating and it should be
 // abstracted. If you can think of a 3rd or 4th usage for that abstraction, cool, do it, just don't make it more confusing. Copying is the
@@ -29,13 +30,12 @@ const NumberArgInput = ({ updateValue, value, confirm, commit }) => (
 
 NumberArgInput.propTypes = {
   updateValue: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
 };
 
-// TODO: Here's where you would put that max/min support stuff
-const template = compose(
+const EnhancedNumberArgInput = compose(
   withProps(({ onValueChange, typeInstance, argValue }) => ({
     confirm: get(typeInstance, 'options.confirm'),
     commit: onValueChange,
@@ -44,7 +44,7 @@ const template = compose(
   createStatefulPropHoc('value')
 )(NumberArgInput);
 
-template.propTypes = {
+EnhancedNumberArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
@@ -54,5 +54,5 @@ export const number = () => ({
   name: 'number',
   displayName: 'number',
   help: 'Input a number',
-  simpleTemplate: template,
+  simpleTemplate: templateFromReactComponent(EnhancedNumberArgInput),
 });

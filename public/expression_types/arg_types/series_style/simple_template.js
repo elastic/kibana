@@ -5,8 +5,8 @@ import { set, del } from 'object-path-immutable';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { Tooltip } from '../../../components/tooltip';
 
-export const simpleTemplate = props => {
-  const { argValue, onValueChange, labels } = props;
+export const SimpleTemplate = props => {
+  const { argValue, onValueChange, labels, workpad } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
   const color = get(chainArgs, 'color.0', '');
@@ -36,7 +36,11 @@ export const simpleTemplate = props => {
           <div className="canvas__argtype--seriesStyle--remove-color">
             <i onClick={() => handlePlain('color', '')} className="fa fa-times-circle clickable" />
           </div>
-          <ColorPickerMini value={color} onChange={val => handlePlain('color', val)} />
+          <ColorPickerMini
+            value={color}
+            onChange={val => handlePlain('color', val)}
+            colors={workpad.colors}
+          />
         </div>
       )}
 
@@ -51,10 +55,13 @@ export const simpleTemplate = props => {
   );
 };
 
-simpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
+SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
 
-simpleTemplate.propTypes = {
+SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   labels: PropTypes.array,
+  workpad: PropTypes.shape({
+    colors: PropTypes.array.isRequired,
+  }).isRequired,
 };

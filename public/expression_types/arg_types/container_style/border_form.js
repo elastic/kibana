@@ -6,7 +6,7 @@ import { LabeledInput } from '../../../components/labeled_input';
 
 const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
 
-export const BorderForm = ({ className, value, radius, onChange }) => {
+export const BorderForm = ({ className, value, radius, onChange, colors }) => {
   const border = value || '';
   const [borderWidth, borderStyle, borderColor] = border.split(' ');
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
@@ -56,7 +56,7 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
       />
 
       <div className="border-color">
-        <ColorPickerMini value={borderColor} onChange={borderColorChange} />
+        <ColorPickerMini value={borderColor} onChange={borderColorChange} colors={colors} />
         <ControlLabel>Color</ControlLabel>
       </div>
     </div>
@@ -68,4 +68,5 @@ BorderForm.propTypes = {
   radius: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   className: PropTypes.string,
+  colors: PropTypes.array.isRequired,
 };

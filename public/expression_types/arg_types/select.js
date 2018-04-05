@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const getArgValueString = argValue => {
   if (typeof argValue === 'object' && argValue !== null) return argValue.value;
@@ -47,5 +48,5 @@ export const select = () => ({
   name: 'select',
   displayName: 'Select',
   help: 'Select from multiple options in a drop down',
-  simpleTemplate: SelectArgInput,
+  simpleTemplate: templateFromReactComponent(SelectArgInput),
 });

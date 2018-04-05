@@ -21,6 +21,9 @@ export function getWorkpadPersisted(state) {
     assets: getAssets(state),
   };
 }
+export function getWorkpadInfo(state) {
+  return omit(getWorkpad(state), ['pages']);
+}
 
 // page getters
 export function getSelectedPageIndex(state) {
