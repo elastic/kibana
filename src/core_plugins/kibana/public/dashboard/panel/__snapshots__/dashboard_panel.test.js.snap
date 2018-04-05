@@ -36,7 +36,9 @@ exports[`DashboardPanel matches snapshot 1`] = `
     <div
       class="panel-content"
       id="embeddedPanel"
-    />
+    >
+      loading...
+    </div>
   </div>
 </div>
 `;

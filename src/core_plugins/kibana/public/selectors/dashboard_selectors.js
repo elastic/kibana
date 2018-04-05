@@ -23,6 +23,8 @@ export const getEmbeddablePersonalization =
   (state, panelId) => DashboardSelectors.getEmbeddablePersonalization(getDashboard(state), panelId);
 export const getEmbeddableStagedFilter =
   (state, panelId) => DashboardSelectors.getEmbeddableStagedFilter(getDashboard(state), panelId);
+export const getEmbeddableMetadata =
+  (state, panelId) => DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
 
 export const getStagedFilters = state => DashboardSelectors.getStagedFilters(getDashboard(state));
 export const getViewMode = state => DashboardSelectors.getViewMode(getDashboard(state));

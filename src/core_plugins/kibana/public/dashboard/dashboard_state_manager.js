@@ -19,7 +19,6 @@ import {
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
-import { embeddableHandlerCache } from './cache/embeddable_handler_cache';
 import { getAppStateDefaults, migrateAppState } from './lib';
 import {
   getViewMode,
@@ -32,6 +31,7 @@ import {
   getHidePanelTitles,
   getStagedFilters,
   getEmbeddables,
+  getEmbeddableMetadata
 } from '../selectors';
 
 /**
@@ -184,7 +184,7 @@ export class DashboardStateManager {
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
-        this.panelIndexPatternMapping[panelId] = embeddableHandlerCache.getMetadata(panelId).indexPattern;
+        this.panelIndexPatternMapping[panelId] = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
         this.dirty = true;
       }
     });

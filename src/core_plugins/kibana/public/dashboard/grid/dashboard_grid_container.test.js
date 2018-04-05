@@ -7,7 +7,7 @@ import sizeMe from 'react-sizeme';
 import { getEmbeddableFactoryMock } from '../__tests__';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
-import { updatePanels } from '../actions';
+import { updatePanels, updateTimeRange } from '../actions';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
 
@@ -44,6 +44,7 @@ beforeAll(() => {
       removeAllRanges: () => {}
     };
   };
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
 });
 
 afterAll(() => {

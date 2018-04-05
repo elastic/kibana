@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {
   embeddableIsInitializing,
   embeddableError,
-  embeddableInitialized,
+  embeddableIsInitialized,
   setStagedFilter,
   clearStagedFilters,
   deletePanel,
@@ -16,19 +16,22 @@ export const embeddables = handleActions({
       return _.mapValues(embeddables, (embeddable) => _.omit({ ...embeddable }, ['stagedFilters']));
     },
 
-  [embeddableInitialized]:
+  [embeddableIsInitialized]:
   /**
    *
    * @param embeddables {Object.<string, EmbeddableState>}
-   * @param payload {String} The id of the panel whose embeddable should be loaded
+   * @param payload {Object}
+   * @param payload.panelId {string} Panel id of embeddable that was initialized
+   * @param payload.metadata {object} Metadata for the embeddable that was initialized
    * @return {Object.<string, EmbeddableState>}
    */
     (embeddables, { payload }) => {
       return {
         ...embeddables,
-        [payload]: {
-          ...embeddables[payload],
+        [payload.panelId]: {
+          ...embeddables[payload.panelId],
           initialized: true,
+          metadata: { ...payload.metadata },
         }
       };
     },

@@ -2,29 +2,55 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import { embeddableHandlerCache } from '../cache/embeddable_handler_cache';
-
 export class EmbeddableViewport extends React.Component {
   constructor(props) {
     super(props);
-    embeddableHandlerCache.onContainerStateChanged(props.panelId, props.containerState);
+    this.mounted = false;
   }
 
   async componentDidMount() {
-    embeddableHandlerCache.render(this.props.panelId, this.panelElement);
+    this.mounted = true;
+    const {
+      initialized,
+      embeddableFactory,
+      embeddableIsInitializing,
+      panel,
+      embeddableStateChanged,
+      embeddableIsInitialized,
+      embeddableError,
+    } = this.props;
+
+    if (!initialized) {
+      embeddableIsInitializing();
+      embeddableFactory.create(panel, embeddableStateChanged)
+        .then((embeddable) => {
+          if (this.mounted) {
+            this.embeddable = embeddable;
+            embeddableIsInitialized(embeddable.metadata);
+            this.embeddable.onContainerStateChanged(this.props.containerState);
+            this.embeddable.render(this.panelElement);
+          } else {
+            embeddable.destroy();
+          }
+        })
+        .catch((error) => {
+          if (this.mounted) {
+            embeddableError(error.message);
+          }
+        });
+    }
   }
 
   componentWillUnmount() {
-    embeddableHandlerCache.destroy(this.props.panelId);
-  }
-
-  shouldComponentUpdate(nextProps) {
-    return !_.isEqual(nextProps.containerState, this.props.containerState);
+    this.mounted = false;
+    if (this.embeddable) {
+      this.embeddable.destroy();
+    }
   }
 
   componentDidUpdate(prevProps) {
-    if (!_.isEqual(prevProps.containerState, this.props.containerState)) {
-      embeddableHandlerCache.onContainerStateChanged(this.props.panelId, this.props.containerState);
+    if (this.embeddable && !_.isEqual(prevProps.containerState, this.props.containerState)) {
+      this.embeddable.onContainerStateChanged(this.props.containerState);
     }
   }
 
@@ -34,16 +60,28 @@ export class EmbeddableViewport extends React.Component {
         id="embeddedPanel"
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
-      />
+      >
+        {!this.props.initialized && 'loading...'}
+      </div>
     );
   }
 }
 
 EmbeddableViewport.propTypes = {
-  panelId: PropTypes.string.isRequired,
   containerState: PropTypes.shape({
     timeRange: PropTypes.object.isRequired,
     embeddablePersonalization: PropTypes.object.isRequired,
     hidePanelTitles: PropTypes.bool.isRequired,
-  })
+  }),
+  embeddableFactory: PropTypes.shape({
+    create: PropTypes.func,
+  }).isRequired,
+  embeddableStateChanged: PropTypes.func.isRequired,
+  embeddableIsInitialized: PropTypes.func.isRequired,
+  embeddableError: PropTypes.func.isRequired,
+  embeddableIsInitializing: PropTypes.func.isRequired,
+  initialized: PropTypes.bool.isRequired,
+  panel: PropTypes.shape({
+    id: PropTypes.string,
+  }).isRequired,
 };

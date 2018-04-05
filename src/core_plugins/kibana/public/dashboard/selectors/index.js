@@ -1,4 +1,3 @@
-import { embeddableHandlerCache } from '../cache/embeddable_handler_cache';
 import _ from 'lodash';
 
 /**
@@ -65,7 +64,7 @@ export const getEmbeddableError = (dashboard, panelId) => getEmbeddable(dashboar
  */
 export const getEmbeddableTitle = (dashboard, panelId) => {
   const embeddable = getEmbeddable(dashboard, panelId);
-  return embeddable && embeddable.initialized ? embeddableHandlerCache.getMetadata(panelId).title : '';
+  return embeddable && embeddable.initialized ? embeddable.metadata.title : '';
 };
 
 /**
@@ -85,13 +84,21 @@ export const getEmbeddableInitialized = (dashboard, panelId) => getEmbeddable(da
 export const getEmbeddableStagedFilter = (dashboard, panelId) => getEmbeddable(dashboard, panelId).stagedFilter;
 
 /**
+ *
+ * @param dashboard {DashboardState}
+ * @param panelId {string}
+ * @return {EmbeddableMetadata}
+ */
+export const getEmbeddableMetadata = (dashboard, panelId) => getEmbeddable(dashboard, panelId).metadata;
+
+/**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string}
  */
 export const getEmbeddableEditUrl = (dashboard, panelId) =>  {
   const embeddable = getEmbeddable(dashboard, panelId);
-  return embeddable && embeddable.initialized ? embeddableHandlerCache.getMetadata(panelId).editUrl : '';
+  return embeddable && embeddable.initialized ? embeddable.metadata.editUrl : '';
 };
 
 /**

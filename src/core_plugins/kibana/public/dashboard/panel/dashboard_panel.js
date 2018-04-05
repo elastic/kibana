@@ -9,12 +9,9 @@ import { EmbeddableViewportContainer } from './embeddable_viewport_container';
 export class DashboardPanel extends React.Component {
   constructor(props) {
     super(props);
-  }
-
-  componentDidMount() {
-    if (!this.props.initialized) {
-      this.props.initializeEmbeddable();
-    }
+    this.state = {
+      error: props.embeddableFactory ? null : `No factory found for embeddable`,
+    };
   }
 
   componentWillUnmount() {
@@ -37,7 +34,10 @@ export class DashboardPanel extends React.Component {
 
   renderEmbeddableViewport() {
     return (
-      <EmbeddableViewportContainer panelId={this.props.panelId} />
+      <EmbeddableViewportContainer
+        panelId={this.props.panelId}
+        embeddableFactory={this.props.embeddableFactory}
+      />
     );
   }
 
@@ -45,16 +45,10 @@ export class DashboardPanel extends React.Component {
     return <PanelError error={this.props.error} />;
   }
 
-  renderLoader() {
-    return <div>Loading...</div>;
-  }
-
   renderContent() {
-    const { error, initialized } = this.props;
+    const { error } = this.props;
     if (error) {
-      return this.renderEmbeddedError();
-    } else if (!initialized) {
-      return this.renderLoader();
+      return this.renderEmbeddedError(error);
     } else {
       return this.renderEmbeddableViewport();
     }
@@ -96,7 +90,5 @@ DashboardPanel.propTypes = {
     PropTypes.object
   ]),
   panelId: PropTypes.string,
-  initializeEmbeddable: PropTypes.func,
-  initialized: PropTypes.bool,
   destroy: PropTypes.func.isRequired,
 };

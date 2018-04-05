@@ -139,6 +139,8 @@ app.directive('dashboardApp', function ($injector) {
         courier.fetch(...args);
       };
       $scope.timefilter = timefilter;
+      dashboardStateManager.handleTimeChange($scope.timefilter);
+
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
 

@@ -5,7 +5,6 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 import {
-  initializeEmbeddable,
   deletePanel,
 } from '../actions';
 
@@ -14,22 +13,25 @@ import {
   getFullScreenMode,
   getViewMode,
   getEmbeddableError,
-  getEmbeddableInitialized,
+  getPanelType,
 } from '../selectors';
 
-const mapStateToProps = ({ dashboard }, { panelId }) => {
+const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
+  let error = null;
+  if (!embeddableFactory) {
+    const panelType = getPanelType(dashboard, panelId);
+    error = `No embeddable factory found for panel type ${panelType}`;
+  } else {
+    error = (embeddable && getEmbeddableError(dashboard, panelId)) || '';
+  }
   return {
-    error: embeddable ? getEmbeddableError(dashboard, panelId) : '',
+    error,
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
-    initialized: embeddable ? getEmbeddableInitialized(dashboard, panelId) : false
   };
 };
 
-const mapDispatchToProps = (dispatch, { embeddableFactory, panelId }) => ({
-  initializeEmbeddable: () => (
-    dispatch(initializeEmbeddable({ embeddableFactory, panelId }))
-  ),
+const mapDispatchToProps = (dispatch, { panelId }) => ({
   destroy: () => (
     dispatch(deletePanel(panelId))
   )

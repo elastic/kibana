@@ -11,11 +11,9 @@ import {
   setPanels,
   setPanelTitle,
   resetPanelTitle,
-  initializeEmbeddable,
+  embeddableIsInitialized,
 } from '../../actions';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getEmbeddableFactoryMock } from '../../__tests__/get_embeddable_factories_mock';
-import { Embeddable } from 'ui/embeddable';
 
 function getProps(props = {}) {
   const defaultTestProps = {
@@ -29,12 +27,8 @@ let component;
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
-  const embeddableFactory = getEmbeddableFactoryMock({
-    create: () => Promise.resolve(new Embeddable({
-      metadata: { title: 'my embeddable title', editUrl: 'editme' }
-    }))
-  });
-  store.dispatch(initializeEmbeddable({ embeddableFactory, panelId: 'foo1' }));
+  const metadata = { title: 'my embeddable title', editUrl: 'editme' };
+  store.dispatch(embeddableIsInitialized({ metadata, panelId: 'foo1' }));
 });
 
 afterAll(() => {

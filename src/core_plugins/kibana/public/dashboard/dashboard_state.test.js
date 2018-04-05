@@ -1,8 +1,7 @@
 import { DashboardStateManager } from './dashboard_state_manager';
-import { initializeEmbeddable, setPanels } from './actions';
-import { getEmbeddableFactoryMock, getAppStateMock, getSavedDashboardMock } from './__tests__';
+import { embeddableIsInitialized, setPanels } from './actions';
+import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { store } from '../store';
-import { Embeddable } from 'ui/embeddable';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
@@ -82,12 +81,8 @@ describe('DashboardState', function () {
 
     function simulateNewEmbeddableWithIndexPattern(id, indexPattern) {
       store.dispatch(setPanels({ [id]: { panelIndex: id } }));
-      const embeddableFactory = getEmbeddableFactoryMock({
-        create: () => Promise.resolve(new Embeddable({
-          metadata: { title: 'my embeddable title', editUrl: 'editme', indexPattern }
-        }))
-      });
-      store.dispatch(initializeEmbeddable({ embeddableFactory, panelId: id }));
+      const metadata = { title: 'my embeddable title', editUrl: 'editme', indexPattern };
+      store.dispatch(embeddableIsInitialized({ metadata, panelId: id }));
     }
 
     test('initially has no index patterns', () => {

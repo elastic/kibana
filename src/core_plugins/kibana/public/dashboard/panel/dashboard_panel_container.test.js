@@ -7,7 +7,7 @@ import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
 import {
   updateViewMode,
-  setPanels,
+  setPanels, updateTimeRange,
 } from '../actions';
 import { Provider } from 'react-redux';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
@@ -22,6 +22,7 @@ function getProps(props = {}) {
 
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
 });
 

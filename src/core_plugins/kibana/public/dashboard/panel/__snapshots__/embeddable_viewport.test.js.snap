@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmbeddableViewport matches snapshot 1`] = `
+<div
+  class="panel-content"
+  id="embeddedPanel"
+/>
+`;
