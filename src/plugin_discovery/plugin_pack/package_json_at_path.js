@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { Observable } from 'rxjs';
 import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
@@ -9,16 +10,17 @@ async function createPackageJsonAtPath(path) {
     throw createInvalidPackError(path, 'must be a directory');
   }
 
-  let pkg;
+  let str;
   try {
-    pkg = require(resolve(path, 'package.json'));
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      throw createInvalidPackError(path, 'must have a package.json file');
-    }
+    str = readFileSync(resolve(path, 'package.json'));
+  } catch (err) {
+    throw createInvalidPackError(path, 'must have a package.json file');
   }
 
-  if (!pkg || typeof pkg !== 'object') {
+  let pkg;
+  try {
+    pkg = JSON.parse(str);
+  } catch (err) {
     throw createInvalidPackError(path, 'must have a valid package.json file');
   }
 
