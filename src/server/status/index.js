@@ -1,7 +1,6 @@
 import ServerStatus from './server_status';
 import { Metrics } from './metrics';
-import { statusPage } from './routes/page';
-import { statusApi } from './routes/api';
+import { registerStatusPage, registerStatusApi } from './routes';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -15,6 +14,6 @@ export function statusMixin(kbnServer, server, config) {
   }
 
   // init routes
-  statusPage(kbnServer, server, config);
-  statusApi(kbnServer, server, config);
+  registerStatusPage(kbnServer, server, config);
+  registerStatusApi(kbnServer, server, config);
 }
