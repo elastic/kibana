@@ -31,13 +31,13 @@ export function uiAppsMixin(kbnServer, server) {
   server.decorate('server', 'getHiddenUiAppById', id => hiddenAppsById.get(id));
 
   const injectedVarProviders = [];
-  server.decorate('server', 'injectUiAppVars', (id, provider) => {
-    injectedVarProviders.push({ id, provider });
+  server.decorate('server', 'injectUiAppVars', (appId, provider) => {
+    injectedVarProviders.push({ appId, provider });
   });
 
-  server.decorate('server', 'getInjectedUiAppVars', async (id) => {
+  server.decorate('server', 'getInjectedUiAppVars', async (appId) => {
     return await injectedVarProviders
-      .filter(p => p.id === id)
+      .filter(p => p.appId === appId)
       .reduce(async (acc, { provider }) => ({
         ...await acc,
         ...await provider(server)
