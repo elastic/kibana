@@ -8,6 +8,8 @@ function defaultConfig(settings) {
 }
 
 export async function activate(kbnServer) {
+  return;
+
   const config = defaultConfig(kbnServer.settings);
   // if we explicitly disabled the system call filters
   if (config.get('server.systemCallFilters.enabled') === false) {
