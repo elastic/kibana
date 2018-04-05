@@ -2,12 +2,19 @@ require('../../babel-register');
 
 process.send('ready');
 
-const nativeControllerPath = process.argv[2];
+// add comment what this is doing
+const [ , , nativeControllerPath, ...configArgs] = process.argv;
+
+const configMap = configArgs.reduce((map, arg) => {
+  const [ , name, value] = /^--(.+)=(.+)/.exec(arg);
+  map.set(name, value);
+  return map;
+}, new Map());
 
 const receivedMessage = (message) => {
   switch (message) {
     case 'start': {
-      require(nativeControllerPath);
+      require(nativeControllerPath)(configMap);
       process.removeListener('message', receivedMessage);
       process.send('started');
       break;

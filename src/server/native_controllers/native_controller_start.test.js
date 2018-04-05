@@ -1,62 +1,75 @@
 let isBabelRegistered;
-let nativeControllerLoadedCount;
 jest.mock('../../babel-register', () => {
   isBabelRegistered = true;
 });
-jest.mock('./__fixtures__/correct/native_controller.js', () => {
-  nativeControllerLoadedCount += 1;
-});
+jest.mock('./native_controller_impl.js',
+  () => jest.fn(),
+  {
+    virtual: true
+  });
 
+let nativeController;
 let originalProcessArgv;
 beforeEach(() => {
-  // we need to do a `require('./native_controller_start')` after the arrange step
-  // in each test, so we're resetting the modules so we "re-require" each time
-  jest.resetModules();
   isBabelRegistered = false;
-  nativeControllerLoadedCount = 0;
+  jest.resetModules();
+
+  // eslint-disable-next-line
+  nativeController = require('./native_controller_impl.js'); // this is virtual, it doesn't really exist
+
   process.send = jest.fn();
   originalProcessArgv = process.argv;
-  jest.spyOn(process, 'addListener');
-  jest.spyOn(process, 'removeListener');
 });
 
 afterEach(() => {
   delete process.send;
   process.argv = originalProcessArgv;
-  process.addListener.mockReset();
-  process.addListener.mockRestore();
-  process.removeListener.mockReset();
-  process.removeListener.mockRestore();
+  process.removeAllListeners();
 });
 
 test(`is babel registered`, () => {
+  process.argv = [null, null, './native_controller_impl.js'];
+
   require('./native_controller_start');
+
   expect(isBabelRegistered).toBe(true);
 });
 
 test(`doesn't load native controller immediately`, () => {
-  process.argv = [null, null, './__fixtures__/correct/native_controller.js'];
+  process.argv = [null, null, './native_controller_impl.js'];
+
   require('./native_controller_start');
-  expect(nativeControllerLoadedCount).toBe(0);
+
+  expect(nativeController).toHaveBeenCalledTimes(0);
 });
 
+
 test(`loads native controller on start message`, () => {
-  process.argv = [null, null, './__fixtures__/correct/native_controller.js'];
+  process.argv = [null, null, './native_controller_impl.js'];
+
   require('./native_controller_start');
-  expect(process.addListener).toHaveBeenCalledTimes(1);
-  const onMessageCall = process.addListener.mock.calls.find(call => call[0] === 'message');
-  const messageListener = onMessageCall[1];
-  messageListener('start');
-  expect(nativeControllerLoadedCount).toBe(1);
+  process.emit('message', 'start');
+
+  expect(nativeController).toHaveBeenCalledTimes(1);
+});
+
+test(`passed config to the nativeController`, () => {
+  process.argv = [null, null, './native_controller_impl.js', '--foo.bar=baz'];
+
+  require('./native_controller_start');
+  process.emit('message', 'start');
+
+  expect(nativeController).toHaveBeenCalledTimes(1);
+  const call = nativeController.mock.calls[0];
+  expect(call[0]).toEqual(new Map([['foo.bar', 'baz']]));
 });
 
 test(`removes listener when start message received`, () => {
-  process.argv = [null, null, './__fixtures__/correct/native_controller.js'];
+  process.argv = [null, null, './native_controller_impl.js'];
+
   require('./native_controller_start');
-  expect(process.addListener).toHaveBeenCalledTimes(1);
-  const onMessageCall = process.addListener.mock.calls.find(call => call[0] === 'message');
-  const messageListener = onMessageCall[1];
-  messageListener('start');
-  expect(process.removeListener).toHaveBeenCalledTimes(1);
-  expect(process.removeListener).toHaveBeenCalledWith('message', expect.anything());
+  process.emit('message', 'start');
+  process.emit('message', 'start');
+
+  expect(nativeController).toHaveBeenCalledTimes(1);
 });

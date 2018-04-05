@@ -1,4 +1,11 @@
 import { fork } from 'child_process';
+import { transformDeprecations, Config } from '../config';
+
+function defaultConfig(settings) {
+  return Config.withDefaultSchema(
+    transformDeprecations(settings)
+  );
+}
 
 
 let debugPortOffset = 100;
@@ -27,8 +34,15 @@ const getExecArgv = () => {
   return execArgv;
 };
 
-export function spawnNativeController(nativeControllerPath) {
-  return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath], {
+export function spawnNativeController(settings, nativeControllerPath, nativeControllerConfig = []) {
+
+  const config = defaultConfig(settings);
+
+  const configParams = nativeControllerConfig.reduce((acc, key) => {
+    return [...acc, `--${key}=${config.get(key)}`];
+  }, []);
+
+  return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath, ...configParams], {
     execArgv: getExecArgv()
   });
 }

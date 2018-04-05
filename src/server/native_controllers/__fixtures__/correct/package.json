@@ -5,7 +5,10 @@
     "nativeControllers": [
       {
         "pluginId": "correct",
-        "path": "native_controller.js"
+        "path": "native_controller.js",
+        "config": [
+          "path.data"
+        ]
       }
     ]
   }

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { spawnNativeController } from './spawn_native_controller';
 import { findPluginSpecs } from '../../plugin_discovery';
 import { safeChildProcess } from '../../utils/child_process/safe_child_process';
+
 import { NativeController } from './native_controller';
 
 const getNativeControllers = async (settings) => {
@@ -18,7 +19,8 @@ const getNativeControllers = async (settings) => {
         return nativeControllerSpecs.map(spec => {
           return {
             pluginId: spec.pluginId,
-            path: path.resolve(packageJson.directoryPath, spec.path)
+            path: path.resolve(packageJson.directoryPath, spec.path),
+            config: spec.config
           };
         });
       }
@@ -28,7 +30,7 @@ const getNativeControllers = async (settings) => {
 
   const nativeController$ = spec$
     .map(spec => {
-      const process = spawnNativeController(spec.path);
+      const process = spawnNativeController(settings, spec.path, spec.config);
       return new NativeController(spec.pluginId, process);
     });
 

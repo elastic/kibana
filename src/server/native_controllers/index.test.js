@@ -18,20 +18,25 @@ beforeEach(() => {
 
 describe('#prepare', () => {
   test(`spawns correct native controller`, async () => {
-    const kbnServer = {
-      settings: {
-        plugins: {
-          paths: [
-            path.resolve(FIXTURES, 'correct')
-          ]
-        }
+    const settings = {
+      plugins: {
+        paths: [
+          path.resolve(FIXTURES, 'correct')
+        ]
       }
+    };
+    const kbnServer = {
+      settings
     };
 
     await NativeControllers.prepare(kbnServer);
 
     expect(spawnNativeController).toHaveBeenCalledTimes(1);
-    expect(spawnNativeController).toHaveBeenCalledWith(path.resolve(FIXTURES, 'correct', 'native_controller.js'));
+    expect(spawnNativeController).toHaveBeenCalledWith(
+      settings,
+      path.resolve(FIXTURES, 'correct', 'native_controller.js'),
+      [ 'path.data' ]
+    );
     expect(kbnServer.nativeControllers).toHaveProperty('correct');
     expect(kbnServer.nativeControllers.correct).toBeInstanceOf(NativeController);
   });
@@ -53,20 +58,26 @@ describe('#prepare', () => {
   });
 
   test(`scans plugin directories`, async () => {
-    const kbnServer = {
-      settings: {
-        plugins: {
-          scanDirs: [
-            FIXTURES
-          ]
-        }
+    const settings = {
+      plugins: {
+        scanDirs: [
+          FIXTURES
+        ]
       }
+    };
+
+    const kbnServer = {
+      settings
     };
 
     await NativeControllers.prepare(kbnServer);
 
     expect(spawnNativeController).toHaveBeenCalledTimes(1);
-    expect(spawnNativeController).toHaveBeenCalledWith(path.resolve(FIXTURES, 'correct', 'native_controller.js'));
+    expect(spawnNativeController).toHaveBeenCalledWith(
+      settings,
+      path.resolve(FIXTURES, 'correct', 'native_controller.js'),
+      [ 'path.data' ]
+    );
     expect(kbnServer.nativeControllers).toHaveProperty('correct');
     expect(kbnServer.nativeControllers.correct).toBeInstanceOf(NativeController);
   });
