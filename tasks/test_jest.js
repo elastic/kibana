@@ -14,7 +14,7 @@ module.exports = function (grunt) {
   function runJest(jestScript) {
     const serverCmd = {
       cmd: 'node',
-      args: [jestScript],
+      args: [jestScript, '--no-cache', '--ci'],
       opts: { stdio: 'inherit' }
     };
 

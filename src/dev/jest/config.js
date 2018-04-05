@@ -4,6 +4,7 @@ export default {
     '<rootDir>/src/server',
     '<rootDir>/src/ui',
     '<rootDir>/src/core_plugins',
+    '<rootDir>/src/server',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [

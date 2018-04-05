@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "dependencies": {
-    "dep1": "0.0.2"
+    "dep1": "0.0.2",
+    "privatedep": "0.0.2"
   }
 }
