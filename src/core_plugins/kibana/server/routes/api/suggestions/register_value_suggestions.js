@@ -1,3 +1,4 @@
+import { get, map } from 'lodash';
 import handleESError from '../../../lib/handle_es_error';
 
 export function registerValueSuggestions(server) {
@@ -11,7 +12,8 @@ export function registerValueSuggestions(server) {
       const body = getBody({ field, query });
       try {
         const response = await callWithRequest(req, 'search', { index, body });
-        const suggestions = response.aggregations.suggestions.buckets.map(bucket => bucket.key);
+        const buckets = get(response, 'aggregations.suggestions.buckets') || [];
+        const suggestions = map(buckets, 'key');
         reply(suggestions);
       } catch (error) {
         reply(handleESError(error));

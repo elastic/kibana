@@ -80,7 +80,7 @@
   "dependencies": {
     "@elastic/eui": "^0.0.37",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.3.1",
+    "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/datemath": "link:packages/kbn-datemath",
@@ -296,6 +296,7 @@
     "tree-kill": "1.1.0",
     "ts-jest": "^22.0.4",
     "typescript": "^2.7.2",
+    "vinyl-fs": "^3.0.2",
     "xml2js": "0.4.19",
     "xmlbuilder": "9.0.4"
   },

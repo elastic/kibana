@@ -10,7 +10,8 @@ describe('plugins/elasticsearch', function () {
         serverConfig = {
           url: 'https://localhost:9200',
           ssl: {
-            verificationMode: 'full'
+            verificationMode: 'full',
+            keystore: {}
           }
         };
       });
@@ -85,6 +86,25 @@ describe('plugins/elasticsearch', function () {
 
         const config = parseConfig(serverConfig);
         expect(config.ssl.passphrase).to.be('secret');
+      });
+
+      it(`sets pfx when a PKCS#12 certificate bundle is specified`, function () {
+        serverConfig.ssl.keystore.path = __dirname + '/fixtures/cert.pfx';
+        serverConfig.ssl.keystore.password = 'secret';
+
+        const config = parseConfig(serverConfig);
+        expect(Buffer.isBuffer(config.ssl.pfx)).to.be(true);
+        expect(config.ssl.pfx.toString('utf-8')).to.be('test pfx\n');
+        expect(config.ssl.passphrase).to.be('secret');
+      });
+
+      it('throws an error when both pfx and certificate are specified', function () {
+        serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
+        serverConfig.ssl.keystore.path = __dirname + '/fixtures/cert.pfx';
+
+        expect(() => parseConfig(serverConfig)).to.throwError(
+          `Invalid Configuration: please specify either "elasticsearch.ssl.keystore.path" or "elasticsearch.ssl.certificate", not both.`
+        );
       });
     });
   });
