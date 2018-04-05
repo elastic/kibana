@@ -1,5 +1,7 @@
 import ServerStatus from './server_status';
 import { Metrics } from './metrics';
+import { statusPage } from './routes/page';
+import { statusApi } from './routes/api';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
@@ -11,4 +13,8 @@ export function statusMixin(kbnServer, server, config) {
       metrics.capture(event).then(data => { kbnServer.metrics = data; });
     });
   }
+
+  // init routes
+  statusPage(kbnServer, server, config);
+  statusApi(kbnServer, server, config);
 }

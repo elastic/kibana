@@ -1,7 +1,6 @@
-import { wrapAuthConfig } from '../../../lib/wrap_auth_config';
+import { wrapAuthConfig } from '../../wrap_auth_config';
 
-export function registerStatusPage(server, kbnServer) {
-  const config = server.config();
+export function registerStatusPage(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
   server.decorate('reply', 'renderStatusPage', async function () {

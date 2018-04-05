@@ -1,9 +1,8 @@
-import { wrapAuthConfig } from '../../../lib/wrap_auth_config';
+import { wrapAuthConfig } from '../../wrap_auth_config';
 
 const matchSnapshot = /-SNAPSHOT$/;
 
-export function registerStatus(server, kbnServer) {
-  const config = server.config();
+export function registerStatusApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
   server.route(wrapAuth({
@@ -12,7 +11,7 @@ export function registerStatus(server, kbnServer) {
     config: {
       tags: ['api']
     },
-    handler: function (request, reply) {
+    async handler(request, reply) {
       const status = {
         name: config.get('server.name'),
         uuid: config.get('server.uuid'),

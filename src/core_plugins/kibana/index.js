@@ -4,8 +4,6 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 
 import manageUuid from './server/lib/manage_uuid';
-import { statusPage } from './server/routes/page/status';
-import { statusApi } from './server/routes/api/status';
 import { searchApi } from './server/routes/api/search';
 import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
@@ -143,13 +141,9 @@ export default function (kibana) {
     },
 
     init: function (server) {
-      const { kbnServer } = this;
-
       // uuid
       manageUuid(server);
       // routes
-      statusPage(server, kbnServer);
-      statusApi(server, kbnServer);
       searchApi(server);
       scriptsApi(server);
       scrollSearchApi(server);
