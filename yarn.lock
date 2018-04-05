@@ -4731,9 +4731,9 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.10.0.tgz#73e2f785666521d0d3a9ddc9fd5a0a5e3bf47845"
+geckodriver@1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.11.0.tgz#2853ccd4f420d347c61542daeed782c87a718687"
   dependencies:
     adm-zip "0.4.7"
     bluebird "3.4.6"
@@ -7186,9 +7186,9 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@silne30/leadfoot#validation_for_response_in_ff58:
-  version "1.7.4"
-  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/460c8ed67c08177adc9c79243ff045880f4cad09"
+leadfoot@1.7.5:
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"
