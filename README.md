@@ -19,7 +19,7 @@ Setup `kibana` and `elasticsearch`. See instructions [here](https://github.com/e
 
 Setup `x-pack-kibana`. See instructions [here](https://github.com/elastic/x-pack-kibana#setup).
 
-Fork, then clone the [Canvas](https://github.com/elastic/kibana-canvas) repo into `kibana-extras/` and change directory into it.
+Fork, then clone the [Canvas](https://github.com/elastic/kibana-canvas) repo into `kibana-extra/` and change directory into it.
 
 ```bash
 # in kibana-extra/
