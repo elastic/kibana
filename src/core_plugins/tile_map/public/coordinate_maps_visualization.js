@@ -49,7 +49,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (precisionChange) {
           this.vis.updateState();
         } else {
-          // console.log('no precision change...');
+          //todo: the issue here is that, if we are zooming out, and there is no precision change, we may want to update the state regardless
+          //when we filter queries by collar
           this._updateData(this._rawEsResponse);
         }
       });
