@@ -83,6 +83,30 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     return this.isDeclared(key) && !('value' in this._cache[key]);
   }
 
+  overrideLocalDefault(key, newDefault) {
+    // capture the previous value
+    const prevDefault = this._defaults[key]
+      ? this._defaults[key].value
+      : undefined;
+
+    // update defaults map
+    this._defaults[key] = {
+      ...this._defaults[key] || {},
+      value: newDefault
+    };
+
+    // update cached default value
+    this._cache[key] = {
+      ...this._cache[key] || {},
+      value: newDefault
+    };
+
+    // don't broadcast change if userValue was already overriding the default
+    if (this._cache[key].userValue == null) {
+      this._broadcastUpdate(key, newDefault, prevDefault);
+    }
+  }
+
   subscribe(observer) {
     this._updateObservers.add(observer);
 
@@ -139,6 +163,10 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
       }
     }
 
+    this._broadcastUpdate(key, newValue, oldValue);
+  }
+
+  _broadcastUpdate(key, newValue, oldValue) {
     this._notify.log(`config change: ${key}: ${oldValue} -> ${newValue}`);
 
     for (const observer of this._updateObservers) {

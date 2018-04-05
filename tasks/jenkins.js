@@ -31,6 +31,7 @@ module.exports = function (grunt) {
 
     'run:eslint',
     'licenses',
+    'run:verifyNotice',
     'test:server',
     'test:jest',
     'test:jest_integration',
