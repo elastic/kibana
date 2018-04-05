@@ -31,8 +31,8 @@ export function uiAppsMixin(kbnServer, server) {
   server.decorate('server', 'getHiddenUiAppById', id => hiddenAppsById.get(id));
 
   const injectedVarProviders = [];
-  server.decorate('server', 'injectUiAppVars', function (id, provider) {
-    injectedVarProviders.push({ id, provider, });
+  server.decorate('server', 'injectUiAppVars', (id, provider) => {
+    injectedVarProviders.push({ id, provider });
   });
 
   server.decorate('server', 'getInjectedUiAppVars', async (id) => {
