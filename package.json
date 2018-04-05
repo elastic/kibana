@@ -92,6 +92,7 @@
     "angular": "1.6.5",
     "angular-aria": "1.6.6",
     "angular-elastic": "2.5.0",
+    "angular-recursion": "^1.0.5",
     "angular-route": "1.4.7",
     "angular-sanitize": "1.5.7",
     "angular-sortable-view": "0.0.15",
