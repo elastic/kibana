@@ -25,7 +25,7 @@ class CalculationVars extends Component {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
     return  (
-      <div className="vis_editor__calc_vars-row" key={row.id}>
+      <div className="vis_editor__calc_vars-row" key={row.id} data-test-subj="varRow">
         <div className="vis_editor__calc_vars-name">
           <input
             aria-label="Variable name"

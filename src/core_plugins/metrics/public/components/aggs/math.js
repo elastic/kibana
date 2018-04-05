@@ -65,6 +65,7 @@ class MathAgg extends Component {
                 Expression
               </label>
               <textarea
+                data-test-subj="mathExpression"
                 id="mathExpressionInput"
                 aria-describedby="mathExpressionDescription"
                 className="vis_editor__input-grows-100"
