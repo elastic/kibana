@@ -126,7 +126,7 @@ describe('Config schema', function () {
           const config = {};
           set(config, 'server.ssl.enabled', false);
           const { error } = validate(config);
-          expect(error).to.be(null);
+          expect(error).toBe(null);
         });
 
         it('is required when ssl is enabled', function () {
@@ -136,7 +136,7 @@ describe('Config schema', function () {
           const { error } = validate(config);
           expect(error).toBeInstanceOf(Object);
           expect(error).toHaveProperty('details');
-          expect(error.details[0]).toHaveProperty('path', 'server.ssl.certificate');
+          expect(error.details[0]).toHaveProperty('path', 'server.ssl.key');
         });
       });
 
@@ -153,7 +153,7 @@ describe('Config schema', function () {
           set(config, 'server.ssl.enabled', true);
           set(config, 'server.ssl.keystore.path', '/path.p12');
           const { error } = validate(config);
-          expect(error).to.be(null);
+          expect(error).toBe(null);
         });
       });
 
@@ -162,7 +162,7 @@ describe('Config schema', function () {
           const config = {};
           set(config, 'server.ssl.enabled', false);
           const { error } = validate(config);
-          expect(error).to.be(null);
+          expect(error).toBe(null);
         });
 
         it('is allowed when ssl is enabled, and a certificate is not specified', function () {
@@ -170,7 +170,7 @@ describe('Config schema', function () {
           set(config, 'server.ssl.enabled', true);
           set(config, 'server.ssl.keystore.password', 'secret');
           const { error } = validate(config);
-          expect(error).to.be(null);
+          expect(error).toBe(null);
         });
       });
 
