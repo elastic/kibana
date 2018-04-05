@@ -19,7 +19,7 @@ describe('UiAppsMixin', () => {
   let kbnServer;
   let server;
 
-  beforeAll(() => {
+  beforeEach(() => {
     kbnServer = {
       uiExports: {
         uiAppSpecs: [
@@ -87,6 +87,30 @@ describe('UiAppsMixin', () => {
 
       server.injectUiAppVars('bar', async () => ({
         thisIsFoo: false
+      }));
+
+      await expect(server.getInjectedUiAppVars('foo'))
+        .resolves.toMatchSnapshot('foo');
+      await expect(server.getInjectedUiAppVars('bar'))
+        .resolves.toMatchSnapshot('bar');
+      await expect(server.getInjectedUiAppVars('baz'))
+        .resolves.toMatchSnapshot('unknown');
+    });
+
+    it('merges injected vars provided by multiple providers in the order they are registered', async () => {
+      server.injectUiAppVars('foo', () => ({
+        foo: true,
+        bar: true,
+        baz: true,
+      }));
+
+      server.injectUiAppVars('foo', async () => ({
+        bar: false,
+        box: true
+      }));
+
+      server.injectUiAppVars('foo', async () => ({
+        baz: 1,
       }));
 
       await expect(server.getInjectedUiAppVars('foo'))

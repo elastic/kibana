@@ -78,6 +78,19 @@ StubUiApp {
 
 exports[`UiAppsMixin server.getUiAppById() returns non-hidden apps when requested, undefined for non-hidden and unknown apps: unknown 1`] = `undefined`;
 
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() merges injected vars provided by multiple providers in the order they are registered: bar 1`] = `Object {}`;
+
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() merges injected vars provided by multiple providers in the order they are registered: foo 1`] = `
+Object {
+  "bar": false,
+  "baz": 1,
+  "box": true,
+  "foo": true,
+}
+`;
+
+exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() merges injected vars provided by multiple providers in the order they are registered: unknown 1`] = `Object {}`;
+
 exports[`UiAppsMixin server.injectUiAppVars()/server.getInjectedUiAppVars() stored injectVars provider and returns provider result when requested: bar 1`] = `
 Object {
   "thisIsFoo": false,
