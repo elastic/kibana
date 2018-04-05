@@ -21,10 +21,6 @@ export class UiApp {
       throw new Error('Every app must specify an id');
     }
 
-    if (spec.injectVars) {
-      throw new Error(`uiApp.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
-    }
-
     this._id = id;
     this._main = main;
     this._title = title;

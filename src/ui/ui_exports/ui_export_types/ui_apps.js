@@ -19,6 +19,10 @@ function applySpecDefaults(spec, type, pluginSpec) {
     uses = [],
   } = spec;
 
+  if (spec.injectVars) {
+    throw new Error(`[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
+  }
+
   return {
     pluginId,
     id,
