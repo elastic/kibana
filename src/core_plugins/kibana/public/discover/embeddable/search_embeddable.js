@@ -44,9 +44,9 @@ export class SearchEmbeddable extends Embeddable {
   onContainerStateChanged(containerState) {
     this.personalization = containerState.embeddablePersonalization || {};
     this.panelTitle = '';
-    if (!containerState.hidePanelTitle) {
+    if (!containerState.hidePanelTitles) {
       this.panelTitle = containerState.customTitle !== undefined ?
-        containerState.customTitle.title :
+        containerState.customTitle :
         this.savedSearch.title;
     }
 

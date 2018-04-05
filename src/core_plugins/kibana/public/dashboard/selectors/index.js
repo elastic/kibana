@@ -173,6 +173,7 @@ export const getContainerState = (dashboard, panelId) => ({
   timeRange: _.cloneDeep(getTimeRange(dashboard)),
   embeddablePersonalization: _.cloneDeep(getEmbeddablePersonalization(dashboard, panelId) || {}),
   hidePanelTitles: getHidePanelTitles(dashboard),
+  customTitle: getPanel(dashboard, panelId).title,
 });
 
 /**

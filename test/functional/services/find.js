@@ -75,8 +75,13 @@ export function FindProvider({ getService }) {
       return await this.allByCustom(remote => remote.findAllByCssSelector(selector), timeout);
     }
 
+    async descendantExistsByCssSelector(selector, parentElement, timeout = 1000) {
+      log.debug('Find.descendantExistsByCssSelector: ' + selector);
+      return await this.exists(async () => await parentElement.findDisplayedByCssSelector(selector), timeout);
+    }
+
     async descendantDisplayedByCssSelector(selector, parentElement) {
-      log.debug('Find.childDisplayedByCssSelector: ' + selector);
+      log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
       return await this._ensureElement(async () => await parentElement.findDisplayedByCssSelector(selector));
     }
 

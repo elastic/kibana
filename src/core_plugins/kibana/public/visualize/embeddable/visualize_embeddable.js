@@ -73,9 +73,9 @@ export class VisualizeEmbeddable extends Embeddable  {
     }
 
     let derivedPanelTitle = '';
-    if (!containerState.hidePanelTitle) {
+    if (!containerState.hidePanelTitles) {
       derivedPanelTitle = containerState.customTitle !== undefined ?
-        containerState.customTitle.title :
+        containerState.customTitle :
         this.savedVisualization.title;
     }
 

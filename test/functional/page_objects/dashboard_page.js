@@ -471,6 +471,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return this.getTestVisualizations().map(visualization => visualization.name);
     }
 
+    getTestVisualizationDescriptions() {
+      return this.getTestVisualizations().map(visualization => visualization.description);
+    }
+
     async showPanelEditControlsDropdownMenu() {
       log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
@@ -555,17 +559,48 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async arePanelMainMenuOptionsOpen(panel) {
+      log.debug('arePanelMainMenuOptionsOpen');
+      // Sub menu used arbitrarily - any option on the main menu panel would do.
+      return panel ?
+        await testSubjects.descendantExists('dashboardPanelOptionsSubMenuLink', panel) :
+        await testSubjects.exists('dashboardPanelOptionsSubMenuLink');
+    }
+
+    async openPanelOptions(panel) {
+      log.debug('openPanelOptions');
+      const panelOpen = await this.arePanelMainMenuOptionsOpen(panel);
+      if (!panelOpen) {
+        await retry.try(async () => {
+          await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+          const toggleMenuItem = panel ?
+            await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
+            await testSubjects.find('dashboardPanelToggleMenuIcon');
+          await toggleMenuItem.click();
+          const panelOpen = await this.arePanelMainMenuOptionsOpen(panel);
+          if (!panelOpen) { throw new Error('Panel menu still not open'); }
+        });
+      }
+    }
+
     async toggleExpandPanel(panel) {
       log.debug('toggleExpandPanel');
-      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-      const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
-      if (!expandShown) {
-        const toggleMenuItem = panel ?
-          await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
-          testSubjects.find('dashboardPanelToggleMenuIcon');
-        await toggleMenuItem.click();
-      }
+      await this.openPanelOptions(panel);
       await testSubjects.click('dashboardPanelExpandIcon');
+    }
+
+    async setCustomPanelTitle(customTitle, panel) {
+      log.debug(`setCustomPanelTitle(${customTitle}, ${panel})`);
+      await this.openPanelOptions(panel);
+      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
+      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+    }
+
+    async resetCustomPanelTitle(panel) {
+      log.debug('resetCustomPanelTitle');
+      await this.openPanelOptions(panel);
+      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
+      await testSubjects.click('resetCustomDashboardPanelTitle');
     }
 
     async getSharedItemsCount() {
