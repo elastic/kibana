@@ -1,6 +1,5 @@
 export { $error } from './error';
 
-export { $bindCallback } from './bind_callback';
 export { $bindNodeCallback } from './bind_node_callback';
 export { $combineLatest } from './combine_latest';
 export { $concat } from './concat';

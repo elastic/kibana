@@ -43,26 +43,33 @@ attached to the `Rx.Observable` class in RxJS.
 
 The available factories:
 
-* `$bindCallback` - takes a function as a parameter, calls this function, and
-  emits the value returned from it as its single emission
-* `$bindNodeCallback` - Similar to `$bindCallback`, but specialized for the
-  "error-first" type of callback functions found in Node.js.
-* `$combineLatest` - when an item is emitted by either of two Observables,
-  combine the latest item emitted by each Observable via a specified function
-  and emit items based on the results of this function
-* `$concat` - emit the emissions from two or more Observables without
-  interleaving them
-* `$error` - create an Observable that emits no items and terminates with an
-  error
-* `$fromIterable` - Converts an Iterator into an observable sequence
-* `$fromObservable` - Converts any object that implements `Symbol.observable`
-  into a `@kbn/observable`
-* `$fromPromise` - Converts a Promise into an Observable, converting its resolve
-  calls into `next` notifications, and its reject calls into `error`
-  notifications.
-* `$race` - Returns an Observable that mirrors the first source Observable to
-  emit an item from the combination of this Observable and supplied Observables.
-* `$of`
+* [`$bindNodeCallback`](./src/factories/bind_node_callback.ts) -
+  Converts a Node.js-style callback API (aka an "error-first" callback) to a
+  function that returns an Observable.
+* [`$combineLatest`](./src/factories/combine_latest.ts) -
+  Emits an array of the latest item emitted by each of the input Observables
+  whenever any of them emit a value.
+* [`$concat`](./src/factories/concat.ts) -
+  Creates an Observable that sequentially emits all values from every input
+  Observable.
+* [`$error`](./src/factories/error.ts) -
+  Creates an Observable that emits no items and immediately terminates with the
+  specified error.
+* [`$fromIterable`](./src/factories/from_iterable.ts) -
+  Converts an Iterator into an Observable.
+* [`$fromObservable`](./src/factories/from_observable.ts) -
+  Converts any object that implements `Symbol.observable` (e.g. an RxJS
+  Observable) into a `@kbn/observable` Observable.
+* [`$fromPromise`](./src/factories/from_promise.ts) -
+  Converts a Promise into an Observable.
+* [`$of`](./src/factories/of.ts) -
+  Creates an Observable that emits each of the input arguments immediately one
+  after the other, and then completes.
+* [`$onSubscribe`](./src/factories/on_subscribe.ts) -
+  Creates an Observable that, on subscribe, calls the provided callback to make
+  an Observable for each new Observer.
+* [`$race`](./src/factories/race.ts) -
+  Creates an Observable that mirrors the first source Observable to emit an item.
 
 ## Operators
 
@@ -103,24 +110,32 @@ $of(1, 2, 3).pipe(map(i => 2017 + i), filter(i => i % 2 === 0));
 
 The available operators:
 
-* `filter` - emit only those items from an Observable that pass a predicate
-  test.
-* `first` - emit only the first item from an Observable
-* `last` - emit only the last item emitted by an Observable
-* `map` - transform the items emitted by an Observable by applying a function to
-  each item
-* `mergeMap` - transform the items emitted by an Observable into Observables,
-  then flatten the emissions from those into a single Observable
-* `reduce` - apply a function to each item emitted by an Observable,
-  sequentially, and emit the final value
-* `scan` - apply a function to each item emitted by an Observable, sequentially,
-  and emit each successive value
-* `skipRepeats` - suppress duplicate items emitted by an Observable
-* `switchMap` - convert an Observable that emits Observables into a single
-  Observable that emits the items emitted by the most-recently-emitted of those
-  Observables
-* `toArray` - collect all items into an array and emit it when Observable is
-  completed
+* [`filter`](./src/operators/filter.ts) -
+  Emit only those items from an Observable that pass a predicate test.
+* [`first`](./src/operators/first.ts) -
+  Emit only the first item from an Observable.
+* [`last`](./src/operators/last.ts) -
+  Emit only the last item emitted by an Observable.
+* [`map`](./src/operators/map.ts) -
+  Transform the items emitted by an Observable by applying a function to each item.
+* [`mergeMap`](./src/operators/merge_map.ts) -
+  Transform the items emitted by an Observable into Observables, then flatten
+  the emissions from those into a single Observable.
+* [`reduce`](./src/operators/reduce.ts) -
+  Apply a function to each item emitted by an Observable, sequentially, and emit
+  the final value.
+* [`scan`](./src/operators/scan.ts) -
+  Apply a function to each item emitted by an Observable, sequentially, and emit
+  each successive value.
+* [`skipRepeats`](./src/operators/skip_repeats.ts) -
+  Suppress duplicate items emitted by an Observable.
+* [`switchMap`](./src/operators/switch_map.ts) -
+  Convert an Observable that emits Observables into a single Observable that
+  emits the items emitted by the most-recently-emitted of those Observables.
+* [`take`](./src/operators/take.ts) -
+  Emits only the first specified number of values emitted by the source Observable.
+* [`toArray`](./src/operators/to_array.ts) -
+  Collect all emitted items into an array and emit it when Observable is completed.
 
 ## More advanced topics
 

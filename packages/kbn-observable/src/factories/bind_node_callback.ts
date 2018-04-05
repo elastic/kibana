@@ -4,9 +4,6 @@ import { Observable } from '../observable';
  * Converts a Node.js-style callback API to a function that returns an
  * Observable.
  *
- * It's just like {@link $bindCallback}, but the callback is expected to be of
- * type `callback(error, result)`.
- *
  * The input is a function `func` with some parameters, but the last parameter
  * must be a callback function that `func` calls when it is done. The callback
  * function is expected to follow Node.js conventions, where the first argument
