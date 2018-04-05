@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build-binaries": "node-gyp configure build"
+    "build": "(cd src && node-gyp configure build)"
   },
   "private": true,
   "license": "Apache-2.0",

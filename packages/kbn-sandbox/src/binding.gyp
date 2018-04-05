@@ -19,7 +19,7 @@
           "copies": [
             {
               "files": [ "<(module_root_dir)/build/Release/sandbox_linux.node" ],
-              "destination": "<(module_root_dir)/bin"
+              "destination": "<(module_root_dir)/../bin"
             }
           ]
         }],
@@ -28,7 +28,7 @@
           "copies": [
             {
               "files": [ "<(module_root_dir)/build/Release/sandbox_win32.node" ],
-              "destination": "<(module_root_dir)/bin"
+              "destination": "<(module_root_dir)/../bin"
             }
           ]
         }],
