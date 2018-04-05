@@ -584,8 +584,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async toggleExpandPanel(panel) {
-      log.debug('toggleExpandPanel');
-      await this.openPanelOptions(panel);
+      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
+      if (!expandShown) {
+        await this.openPanelOptions(panel);
+      }
       await testSubjects.click('dashboardPanelExpandIcon');
     }
 
