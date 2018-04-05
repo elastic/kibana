@@ -1,15 +1,8 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 describe('Color Format', function () {
-  let fieldFormats;
-  let ColorFormat;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-    ColorFormat = fieldFormats.getType('color');
-  }));
+  const fieldFormats = registryFieldFormats;
+  const ColorFormat = fieldFormats.getType('color');
 
   describe('field is a number', () => {
     it('should add colors if the value is in range', function () {

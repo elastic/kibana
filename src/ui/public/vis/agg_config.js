@@ -6,10 +6,10 @@
  */
 
 import _ from 'lodash';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 
-export function VisAggConfigProvider(Private, Promise) {
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
+export function VisAggConfigProvider(Promise) {
+  const fieldFormats = registryFieldFormats;
 
   function AggConfig(vis, opts) {
     const self = this;

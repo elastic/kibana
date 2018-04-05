@@ -2,17 +2,12 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesHitsProvider from 'fixtures/hits';
 describe('_source formatting', function () {
 
-  let fieldFormats;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-  }));
+  const fieldFormats = registryFieldFormats;
 
   describe('Source format', function () {
     let indexPattern;

@@ -1,97 +1,106 @@
 import _ from 'lodash';
-import { uiRegistry } from 'ui/registry/_registry';
+import chrome from 'ui/chrome';
 import { FieldFormat } from '../../field_formats/field_format';
+import { IndexedArray } from 'ui/indexed_array';
 
-export const RegistryFieldFormatsProvider = uiRegistry({
-  name: 'fieldFormats',
-  index: ['id'],
-  group: ['fieldType'],
+class FieldFormatRegistry extends IndexedArray {
+  constructor(config) {
+    const spec = config && config.spec;
+    const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['id'] });
+    super(iaOpts);
 
-  invokeProviders(providers) {
-    // in order to ensure that FieldFormats can be instantiated on the
-    // server and the browser we don't provide them access to the Angular
-    // injector, just the FieldFormat class.
-    return providers.map(createSomeFormat => (
-      createSomeFormat(FieldFormat)
-    ));
-  },
-
-  constructor: function (config) {
-    const getConfig = (...args) => config.get(...args);
-    const self = this;
-    let defaultMap;
-
-    function init() {
-      config.watch('format:defaultTypeMap', parseDefaultTypeMap);
-    }
-
-
-    /**
-     * Get the id of the default type for this field type
-     * using the format:defaultTypeMap config map
-     *
-     * @param  {String} fieldType - the field type
-     * @return {String}
-     */
-    self.getDefaultConfig = function (fieldType) {
-      return defaultMap[fieldType] || defaultMap._default_;
-    };
-
-    /**
-     * Get a FieldFormat type (class) by it's id.
-     *
-     * @param  {String} formatId - the format id
-     * @return {Function}
-     */
-    self.getType = function (formatId) {
-      return self.byId[formatId];
-    };
-
-    /**
-     * Get the default FieldFormat type (class) for
-     * a field type, using the format:defaultTypeMap.
-     *
-     * @param  {String} fieldType
-     * @return {Function}
-     */
-    self.getDefaultType = function (fieldType) {
-      return self.byId[self.getDefaultConfig(fieldType).id];
-    };
-
-    /**
-     * Get the singleton instance of the FieldFormat type by it's id.
-     *
-     * @param  {String} formatId
-     * @return {FieldFormat}
-     */
-    self.getInstance = _.memoize(function (formatId) {
-      const FieldFormat = self.byId[formatId];
-      return new FieldFormat(null, getConfig);
-    });
-
-    /**
-     * Get the default fieldFormat instance for a field format.
-     *
-     * @param  {String} fieldType
-     * @return {FieldFormat}
-     */
-    self.getDefaultInstance = _.memoize(function (fieldType) {
-      const conf = self.getDefaultConfig(fieldType);
-      const FieldFormat = self.byId[conf.id];
-      return new FieldFormat(conf.params, getConfig);
-    });
-
-
-    function parseDefaultTypeMap(value) {
-      defaultMap = value;
-      _.forOwn(self, function (fn) {
-        if (_.isFunction(fn) && fn.cache) {
-          // clear all memoize caches
-          fn.cache = new _.memoize.Cache();
-        }
-      });
-    }
-
-    init();
+    this._config = chrome.getUiSettingsClient();
+    this.getConfig = (...args) => this._config.get(...args);
+    this._defaultMap = [];
+    this._providers = [];
+    this.init();
   }
-});
+
+  init() {
+    this.parseDefaultTypeMap(this._config.get('format:defaultTypeMap'));
+
+    this._config.subscribe(({ key, newValue }) => {
+      if (key === 'format:defaultTypeMap') {
+        this.parseDefaultTypeMap(newValue);
+      }
+    });
+  }
+
+  /**
+   * Get the id of the default type for this field type
+   * using the format:defaultTypeMap config map
+   *
+   * @param  {String} fieldType - the field type
+   * @return {String}
+   */
+  getDefaultConfig = (fieldType) => {
+    return this._defaultMap[fieldType] || this._defaultMap._default_;
+  };
+
+  /**
+   * Get a FieldFormat type (class) by it's id.
+   *
+   * @param  {String} formatId - the format id
+   * @return {Function}
+   */
+  getType = (formatId) => {
+    return this.byId[formatId];
+  };
+
+  /**
+   * Get the default FieldFormat type (class) for
+   * a field type, using the format:defaultTypeMap.
+   *
+   * @param  {String} fieldType
+   * @return {Function}
+   */
+  getDefaultType = (fieldType) => {
+    return this.byId[this.getDefaultConfig(fieldType).id];
+  };
+
+  /**
+   * Get the singleton instance of the FieldFormat type by it's id.
+   *
+   * @param  {String} formatId
+   * @return {FieldFormat}
+   */
+  getInstance = _.memoize(function (formatId) {
+    const FieldFormat = this.byId[formatId];
+    return new FieldFormat(null, this.getConfig);
+  });
+
+  /**
+   * Get the default fieldFormat instance for a field format.
+   *
+   * @param  {String} fieldType
+   * @return {FieldFormat}
+   */
+  getDefaultInstance = _.memoize(function (fieldType) {
+    const conf = this.getDefaultConfig(fieldType);
+    const FieldFormat = this.byId[conf.id];
+    return new FieldFormat(conf.params, this.getConfig);
+  });
+
+
+  parseDefaultTypeMap(value) {
+    this._defaultMap = value;
+    _.forOwn(this, function (fn) {
+      if (_.isFunction(fn) && fn.cache) {
+        // clear all memoize caches
+        fn.cache = new _.memoize.Cache();
+      }
+    });
+  }
+
+  name = 'fieldFormats';
+  index = [ 'id' ];
+  group = [ 'fieldType' ];
+  displayName = '[registry ' + this.name + ']';
+
+  register = (module) => {
+    this.push(module(FieldFormat));
+    return this;
+  };
+}
+
+export const registryFieldFormats = new FieldFormatRegistry();

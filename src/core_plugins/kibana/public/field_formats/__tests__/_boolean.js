@@ -1,15 +1,9 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 
 describe('Boolean Format', function () {
-
-  let boolean;
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
-    boolean = fieldFormats.getInstance('boolean');
-  }));
+  const fieldFormats = registryFieldFormats;
+  const boolean = fieldFormats.getInstance('boolean');
 
 
   [

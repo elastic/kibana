@@ -1,13 +1,7 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 describe('String Truncate Format', function () {
-  let fieldFormats;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-  }));
+  const fieldFormats = registryFieldFormats;
 
   it('truncate large string', function () {
     const Truncate = fieldFormats.getType('truncate');

@@ -1,15 +1,9 @@
 import $ from 'jquery';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 describe('Url Format', function () {
 
-  let fieldFormats;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-  }));
+  const fieldFormats = registryFieldFormats;
 
   const unwrap = $el => {
     expect($el.is('span[ng-non-bindable]')).to.be.ok();

@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
-let fieldFormats;
+const fieldFormats = registryFieldFormats;
 let config;
 let getConfig;
 
@@ -28,8 +28,7 @@ const formatIds = [
 export default describe('conformance', function () {
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
+  beforeEach(ngMock.inject(function ($injector) {
     config = $injector.get('config');
     getConfig = (...args) => config.get(...args);
   }));

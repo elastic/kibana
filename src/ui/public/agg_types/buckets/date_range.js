@@ -3,14 +3,13 @@ import 'ui/directives/validate_date_math';
 import 'ui/directives/documentation_href';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterDateRangeProvider } from 'ui/agg_types/buckets/create_filter/date_range';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { registryFieldFormats } from 'ui/registry/field_formats';
 import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
 
 export function AggTypesBucketsDateRangeProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
-
+  const fieldFormats = registryFieldFormats;
 
   return new BucketAggType({
     name: 'date_range',
