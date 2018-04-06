@@ -72,7 +72,7 @@ exports.run = async (defaults = {}) => {
       log.error(error.message);
     } else {
       log.error('Unhandled error');
-      log.error(error.message);
+      log.error(error);
     }
 
     process.exitCode = 1;
