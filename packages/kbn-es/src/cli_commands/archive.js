@@ -1,6 +1,7 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
+const { createCliError } = require('../errors');
 
 exports.description = 'Install and run from an Elasticsearch tar';
 
@@ -38,8 +39,7 @@ exports.run = async (defaults = {}) => {
   const [, path] = options._;
 
   if (!path || !path.endsWith('tar.gz')) {
-    console.warn('you must provide a path to an ES tar file');
-    return;
+    throw createCliError('you must provide a path to an ES tar file');
   }
 
   const { installPath } = await cluster.installArchive(path, options);
