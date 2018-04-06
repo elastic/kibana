@@ -3,8 +3,8 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from 'ui/agg_response/tabify/_response_writer';
-import { TableGroup } from 'ui/agg_response/tabify/_table_group';
-import { Buckets } from 'ui/agg_response/tabify/_buckets';
+import { TabifyTableGroup } from 'ui/agg_response/tabify/_table_group';
+import { TabifyBuckets } from 'ui/agg_response/tabify/_buckets';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -67,13 +67,13 @@ describe('TabbedAggResponseWriter class', function () {
       });
     });
 
-    it('starts off with a root TableGroup', function () {
+    it('starts off with a root TabifyTableGroup', function () {
       const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
 
       const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
         isHierarchical: vis.isHierarchical()
       });
-      expect(writer.root).to.be.a(TableGroup);
+      expect(writer.root).to.be.a(TabifyTableGroup);
       expect(writer.splitStack).to.be.an('array');
       expect(writer.splitStack).to.have.length(1);
       expect(writer.splitStack[0]).to.be(writer.root);
@@ -84,7 +84,7 @@ describe('TabbedAggResponseWriter class', function () {
     defineSetup();
 
     describe('#response()', function () {
-      it('returns the root TableGroup if splitting', function () {
+      it('returns the root TabifyTableGroup if splitting', function () {
         const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
         const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
           isHierarchical: vis.isHierarchical()
@@ -110,7 +110,7 @@ describe('TabbedAggResponseWriter class', function () {
             { type: 'count', schema: 'metric' }
           ]
         });
-        const buckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        const buckets = new TabifyBuckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
         const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
           isHierarchical: vis.isHierarchical()
         });
@@ -127,7 +127,7 @@ describe('TabbedAggResponseWriter class', function () {
         });
 
         const resp = writer.response();
-        expect(resp).to.be.a(TableGroup);
+        expect(resp).to.be.a(TabifyTableGroup);
         expect(resp.tables).to.have.length(2);
 
         const nginx = resp.tables.shift();
@@ -164,7 +164,7 @@ describe('TabbedAggResponseWriter class', function () {
           ]
         });
         const agg = vis.aggs.bySchemaName.split[0];
-        const buckets = new Buckets({ buckets: [ { key: 'apache' } ] });
+        const buckets = new TabifyBuckets({ buckets: [ { key: 'apache' } ] });
         const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
           isHierarchical: vis.isHierarchical(),
           canSplit: false
@@ -190,9 +190,9 @@ describe('TabbedAggResponseWriter class', function () {
           isHierarchical: vis.isHierarchical(),
           asAggConfigResults: true
         });
-        const extensions = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
-        const types = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
-        const os = new Buckets({ buckets: [ { key: 'window' }, { key: 'osx' } ] });
+        const extensions = new TabifyBuckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
+        const types = new TabifyBuckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        const os = new TabifyBuckets({ buckets: [ { key: 'window' }, { key: 'osx' } ] });
 
         extensions.forEach(function (b, extension) {
           writer.cell(vis.aggs[0], extension, function () {
@@ -283,22 +283,22 @@ describe('TabbedAggResponseWriter class', function () {
         const splits = vis.aggs.bySchemaName.split;
 
         const type = splits[0];
-        const typeBuckets = new Buckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
+        const typeTabifyBuckets = new TabifyBuckets({ buckets: [ { key: 'nginx' }, { key: 'apache' } ] });
 
         const ext = splits[1];
-        const extBuckets = new Buckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
+        const extTabifyBuckets = new TabifyBuckets({ buckets: [ { key: 'jpg' }, { key: 'png' } ] });
 
         const os = splits[2];
-        const osBuckets = new Buckets({ buckets: [ { key: 'windows' }, { key: 'mac' } ] });
+        const osTabifyBuckets = new TabifyBuckets({ buckets: [ { key: 'windows' }, { key: 'mac' } ] });
 
         const count = vis.aggs[3];
 
         const writer = new TabbedAggResponseWriter(vis.getAggConfig().getResponseAggs(), {
           isHierarchical: vis.isHierarchical()
         });
-        writer.split(type, typeBuckets, function () {
-          writer.split(ext, extBuckets, function () {
-            writer.split(os, osBuckets, function (bucket, key) {
+        writer.split(type, typeTabifyBuckets, function () {
+          writer.split(ext, extTabifyBuckets, function () {
+            writer.split(os, osTabifyBuckets, function (bucket, key) {
               writer.cell(count, key === 'windows' ? 1 : 2, function () {
                 writer.row();
               });

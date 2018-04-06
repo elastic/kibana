@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { getColumns } from 'ui/agg_response/tabify/_get_columns';
+import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
@@ -18,7 +18,7 @@ describe('get columns', function () {
       type: 'pie'
     });
     while (vis.aggs.length) vis.aggs.pop();
-    const columns = getColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
 
     expect(columns).to.have.length(1);
     expect(columns[0]).to.have.property('aggConfig');
@@ -33,7 +33,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = getColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
 
     expect(columns).to.have.length(2);
     expect(columns[1]).to.have.property('aggConfig');
@@ -51,7 +51,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = getColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
 
     expect(columns).to.have.length(8);
     columns.forEach(function (column, i) {
@@ -73,7 +73,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = getColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
 
     function checkColumns(column, i) {
       expect(column).to.have.property('aggConfig');
@@ -109,7 +109,7 @@ describe('get columns', function () {
       ]
     });
 
-    const columns = getColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
+    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), null, vis.isHierarchical());
     expect(columns).to.have.length(6);
 
     // sum should be last

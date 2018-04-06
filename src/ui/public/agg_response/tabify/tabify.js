@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { TabbedAggResponseWriter } from 'ui/agg_response/tabify/_response_writer';
-import { Buckets } from 'ui/agg_response/tabify/_buckets';
+import { TabifyBuckets } from 'ui/agg_response/tabify/_buckets';
 
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
   const write = new TabbedAggResponseWriter(aggs, respOpts);
@@ -30,7 +30,7 @@ function collectBucket(write, bucket, key, aggScale) {
 
   switch (agg.schema.group) {
     case 'buckets':
-      const buckets = new Buckets(bucket[agg.id], agg.params);
+      const buckets = new TabifyBuckets(bucket[agg.id], agg.params);
       if (buckets.length) {
         const splitting = write.canSplit && agg.schema.name === 'split';
         if (splitting) {

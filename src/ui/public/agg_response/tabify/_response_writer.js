@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import { Table } from 'ui/agg_response/tabify/_table';
-import { TableGroup } from 'ui/agg_response/tabify/_table_group';
-import { getColumns } from 'ui/agg_response/tabify/_get_columns';
+import { TabifyTable } from 'ui/agg_response/tabify/_table';
+import { TabifyTableGroup } from 'ui/agg_response/tabify/_table_group';
+import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
 
 _.class(SplitAcr).inherits(AggConfigResult);
 function SplitAcr(agg, parent, key) {
@@ -43,10 +43,10 @@ function TabbedAggResponseWriter(aggs, opts) {
   // to their aggConfig and enable the filterbar and tooltip formatters
   this.asAggConfigResults = !!this.opts.asAggConfigResults;
 
-  this.columns = getColumns(aggs, this.minimalColumns);
+  this.columns = tabifyGetColumns(aggs, this.minimalColumns);
   this.aggStack = _.pluck(this.columns, 'aggConfig');
 
-  this.root = new TableGroup();
+  this.root = new TabifyTableGroup();
   this.acrStack = [];
   this.splitStack = [this.root];
 }
@@ -61,7 +61,7 @@ function TabbedAggResponseWriter(aggs, opts) {
  * @return {Table/TableGroup} table - the created table
  */
 TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
-  const Class = (group) ? TableGroup : Table;
+  const Class = (group) ? TabifyTableGroup : TabifyTable;
   const table = new Class();
   const parent = this.splitStack[0];
 

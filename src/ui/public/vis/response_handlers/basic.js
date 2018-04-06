@@ -1,5 +1,5 @@
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { Table } from 'ui/agg_response/tabify/_table';
+import { TabifyTable } from 'ui/agg_response/tabify/_table';
 
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 
@@ -9,7 +9,7 @@ const BasicResponseHandlerProvider = function (Private) {
   function convertTableGroup(vis, tableGroup) {
     const tables = tableGroup.tables;
     const firstChild = tables[0];
-    if (firstChild instanceof Table) {
+    if (firstChild instanceof TabifyTable) {
 
       const chart = convertTable(vis, firstChild);
       // if chart is within a split, assign group title to its label

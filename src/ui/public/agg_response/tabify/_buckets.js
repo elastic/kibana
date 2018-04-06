@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-function Buckets(aggResp, aggParams) {
+function TabifyBuckets(aggResp, aggParams) {
   if (_.has(aggResp, 'buckets')) {
     this.buckets = aggResp.buckets;
   } else if (aggResp) {
@@ -22,7 +22,7 @@ function Buckets(aggResp, aggParams) {
   if (this.length && aggParams) this._orderBucketsAccordingToParams(aggParams);
 }
 
-Buckets.prototype.forEach = function (fn) {
+TabifyBuckets.prototype.forEach = function (fn) {
   const buckets = this.buckets;
 
   if (this.objectMode) {
@@ -36,12 +36,12 @@ Buckets.prototype.forEach = function (fn) {
   }
 };
 
-Buckets.prototype._isRangeEqual = function (range1, range2) {
+TabifyBuckets.prototype._isRangeEqual = function (range1, range2) {
   return _.get(range1, 'from', null) === _.get(range2, 'from', null)
     && _.get(range1, 'to', null) === _.get(range2, 'to', null);
 };
 
-Buckets.prototype._orderBucketsAccordingToParams = function (params) {
+TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
   if (params.filters && this.objectMode) {
     this._keys = params.filters.map(filter => {
       return filter.label || filter.input.query || '*';
@@ -62,4 +62,4 @@ Buckets.prototype._orderBucketsAccordingToParams = function (params) {
   }
 };
 
-export { Buckets };
+export { TabifyBuckets };

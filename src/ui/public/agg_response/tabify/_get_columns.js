@@ -1,16 +1,8 @@
 import _ from 'lodash';
 
-export function getColumns(aggs, minimal, hierarchical) {
+export function tabifyGetColumns(aggs, minimal, hierarchical) {
 
   if (minimal == null) minimal = !hierarchical;
-
-  // todo: we shouldn't be doing this here ?
-  // if (!vis.getAggConfig().bySchemaGroup.metrics) {
-  //   aggs.push(new AggConfig(vis, {
-  //     type: 'count',
-  //     schema: vis.type.schemas.metrics[0].name
-  //   }));
-  // }
 
   // pick the columns
   if (minimal) {

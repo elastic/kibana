@@ -1,16 +1,16 @@
 import expect from 'expect.js';
-import { Buckets } from 'ui/agg_response/tabify/_buckets';
+import { TabifyBuckets } from 'ui/agg_response/tabify/_buckets';
 
 describe('Buckets wrapper', function () {
 
   function test(aggResp, count, keys) {
     it('reads the length', function () {
-      const buckets = new Buckets(aggResp);
+      const buckets = new TabifyBuckets(aggResp);
       expect(buckets).to.have.length(count);
     });
 
     it('itterates properly, passing in the key', function () {
-      const buckets = new Buckets(aggResp);
+      const buckets = new TabifyBuckets(aggResp);
       const keysSent = [];
       buckets.forEach(function (bucket, key) {
         keysSent.push(key);
@@ -57,7 +57,7 @@ describe('Buckets wrapper', function () {
         single_bucket: {},
         doc_count: 5
       };
-      const buckets = new Buckets(aggResp);
+      const buckets = new TabifyBuckets(aggResp);
       expect(buckets).to.have.length(1);
     });
   });
