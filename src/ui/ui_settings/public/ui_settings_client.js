@@ -117,6 +117,31 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     };
   }
 
+  createStubForTests() {
+    const notify = {
+      ...this._notify,
+      // ignore log messages
+      log: () => {}
+    };
+
+    const stubUiSettings = new UiSettingsClient({
+      notify,
+      defaults: this._defaults,
+      initialSettings: {},
+      api: {
+        batchSet() {
+          return { settings: stubUiSettings.getAll() };
+        }
+      }
+    });
+
+    for (const observer of this._updateObservers) {
+      stubUiSettings.subscribe(observer);
+    }
+
+    return stubUiSettings;
+  }
+
   async _update(key, value) {
     const declared = this.isDeclared(key);
     const defaults = this._defaults;
