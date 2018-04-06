@@ -64,17 +64,17 @@ describe('UiAppsMixin', () => {
 
   describe('server.getUiAppById()', () => {
     it('returns non-hidden apps when requested, undefined for non-hidden and unknown apps', () => {
-      expect(server.getUiAppById('foo')).toMatchSnapshot('hidden');
-      expect(server.getUiAppById('bar')).toMatchSnapshot('non-hidden');
-      expect(server.getUiAppById('baz')).toMatchSnapshot('unknown');
+      expect(server.getUiAppById('foo')).toBe(undefined);
+      expect(server.getUiAppById('bar')).toMatchSnapshot();
+      expect(server.getUiAppById('baz')).toBe(undefined);
     });
   });
 
   describe('server.getHiddenUiAppById()', () => {
     it('returns hidden apps when requested, undefined for non-hidden and unknown apps', () => {
-      expect(server.getHiddenUiAppById('foo')).toMatchSnapshot('hidden');
-      expect(server.getHiddenUiAppById('bar')).toMatchSnapshot('non-hidden');
-      expect(server.getHiddenUiAppById('baz')).toMatchSnapshot('unknown');
+      expect(server.getHiddenUiAppById('foo')).toMatchSnapshot();
+      expect(server.getHiddenUiAppById('bar')).toBe(undefined);
+      expect(server.getHiddenUiAppById('baz')).toBe(undefined);
     });
   });
 
@@ -89,12 +89,9 @@ describe('UiAppsMixin', () => {
         thisIsFoo: false
       }));
 
-      await expect(server.getInjectedUiAppVars('foo'))
-        .resolves.toMatchSnapshot('foo');
-      await expect(server.getInjectedUiAppVars('bar'))
-        .resolves.toMatchSnapshot('bar');
-      await expect(server.getInjectedUiAppVars('baz'))
-        .resolves.toMatchSnapshot('unknown');
+      await expect(server.getInjectedUiAppVars('foo')).resolves.toMatchSnapshot('foo');
+      await expect(server.getInjectedUiAppVars('bar')).resolves.toMatchSnapshot('bar');
+      await expect(server.getInjectedUiAppVars('baz')).resolves.toEqual({});
     });
 
     it('merges injected vars provided by multiple providers in the order they are registered', async () => {
@@ -113,12 +110,9 @@ describe('UiAppsMixin', () => {
         baz: 1,
       }));
 
-      await expect(server.getInjectedUiAppVars('foo'))
-        .resolves.toMatchSnapshot('foo');
-      await expect(server.getInjectedUiAppVars('bar'))
-        .resolves.toMatchSnapshot('bar');
-      await expect(server.getInjectedUiAppVars('baz'))
-        .resolves.toMatchSnapshot('unknown');
+      await expect(server.getInjectedUiAppVars('foo')).resolves.toMatchSnapshot('foo');
+      await expect(server.getInjectedUiAppVars('bar')).resolves.toEqual({});
+      await expect(server.getInjectedUiAppVars('baz')).resolves.toEqual({});
     });
   });
 });
