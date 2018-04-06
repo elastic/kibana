@@ -9,6 +9,12 @@ The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
+. <<deb-key,Import the Elastic PGP key>>.
+. Download and install {kib} <<deb-repo,from our APT repository>> or
+<<install-deb,from our website>>.
+include::{xkb-repo-dir}/setup/xpack-passwords.asciidoc[]
+. <<deb-running,Start {kib}>>.
+
 [[deb-key]]
 ==== Import the Elastic PGP Key
 
@@ -117,6 +123,7 @@ sudo dpkg -i kibana-{version}-amd64.deb
 
 endif::[]
 
+[[deb-running]]
 include::init-systemd.asciidoc[]
 
 [[deb-running-init]]

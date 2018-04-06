@@ -9,6 +9,10 @@ link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
 link:/downloads/past-releases[Past Releases page].
 
+. Download and install the <<install-linux64,Linux>> or
+<<install-darwin64,Darwin>> `.tar.gz` package.
+include::{xkb-repo-dir}/setup/xpack-passwords.asciidoc[]
+. <<targz-running,Start {kib}>>.
 
 [[install-linux64]]
 ==== Download and install the Linux 64-bit package
