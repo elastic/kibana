@@ -6,8 +6,8 @@ class mockNetServer extends EventEmitter {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
 
-  getConnections(callback: (error: Error | undefined, count: number) => void) {
-    callback(undefined, 100500);
+  getConnections(callback: (error: Error | null, count: number) => void) {
+    callback(null, 100500);
   }
 }
 jest.mock('net', () => ({
@@ -152,14 +152,14 @@ test('returns connection count from the underlying server.', () => {
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);
-  expect(onGetConnectionsComplete).toHaveBeenCalledWith(undefined, 0);
+  expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 0);
   onGetConnectionsComplete.mockReset();
 
   proxifier.bind(createServer());
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);
-  expect(onGetConnectionsComplete).toHaveBeenCalledWith(undefined, 100500);
+  expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 100500);
 });
 
 test('correctly proxies request and response objects.', () => {

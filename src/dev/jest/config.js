@@ -4,6 +4,7 @@ export default {
     '<rootDir>/src/ui',
     '<rootDir>/src/core_plugins',
     '<rootDir>/packages',
+    '<rootDir>/platform',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',

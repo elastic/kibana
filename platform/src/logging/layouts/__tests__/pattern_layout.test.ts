@@ -1,6 +1,7 @@
 import { LogLevel } from '../../log_level';
 import { LogRecord } from '../../log_record';
 import { PatternLayout } from '../pattern_layout';
+import { stripAnsiSnapshotSerializer } from '../../../test_helpers/strip_ansi_snapshot_serializer';
 
 const records: LogRecord[] = [
   {
@@ -45,6 +46,8 @@ const records: LogRecord[] = [
     level: LogLevel.Trace,
   },
 ];
+
+expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutSchema = PatternLayout.configSchema;

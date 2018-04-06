@@ -4,6 +4,9 @@ jest.mock('../version', () => ({
 
 import { parseArgv } from '../cli';
 import { captureTerminal } from './capture_terminal';
+import { stripAnsiSnapshotSerializer } from '../../test_helpers/strip_ansi_snapshot_serializer';
+
+expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
 test('displays help', () => {
   expect(captureTerminal(parseArgv, ['--help'])).toMatchSnapshot();

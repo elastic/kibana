@@ -16,6 +16,10 @@
     "type-detect": "^4.0.8"
   },
   "devDependencies": {
+    "@types/has-ansi": "^3.0.0",
+    "@types/strip-ansi": "^3.0.0",
+    "has-ansi": "^3.0.0",
+    "strip-ansi": "^4.0.0",
     "typescript": "^2.7.1"
   }
 }
