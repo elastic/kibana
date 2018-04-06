@@ -102,12 +102,16 @@ export class KibanaMap extends EventEmitter {
       center: options.center ? options.center : [0, 0],
       zoom: options.zoom ? options.zoom : 2,
       renderer: L.canvas(),
-      zoomAnimation: false // Desaturate map tiles causes animation rendering artifacts
+      zoomAnimation: false, // Desaturate map tiles causes animation rendering artifacts
+      zoomControl: options.zoomControl === undefined ? true : options.zoomControl,
     };
 
     this._leafletMap = L.map(containerNode, leafletOptions);
     this._leafletMap.attributionControl.setPrefix('');
-    this._leafletMap.scrollWheelZoom.disable();
+
+    if (!options.scrollWheelZoom) {
+      this._leafletMap.scrollWheelZoom.disable();
+    }
 
     let previousZoom = this._leafletMap.getZoom();
     this._leafletMap.on('zoomend', () => {

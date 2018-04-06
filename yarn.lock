@@ -7205,6 +7205,12 @@ leaflet-responsive-popup@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.2.0.tgz#119bfcfae147864730f6a01fbd73b5b2ce274728"
 
+leaflet-vega@0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.8.3.tgz#6d2572aa1909ed50d94937d5f4c2e42b018f4ac2"
+  dependencies:
+    vega-spec-injector "^0.0.2"
+
 leaflet.heat@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/leaflet.heat/-/leaflet.heat-0.2.0.tgz#109d8cf586f0adee41f05aff031e27a77fecc229"
@@ -12024,6 +12030,10 @@ vega-scenegraph@2, vega-scenegraph@^2.3:
 vega-schema-url-parser@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
+
+vega-spec-injector@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/vega-spec-injector/-/vega-spec-injector-0.0.2.tgz#f1d990109dd9d845c524738f818baa4b72a60ca6"
 
 vega-statistics@^1.2:
   version "1.2.1"
