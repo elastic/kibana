@@ -2,7 +2,7 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
-import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
+import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
