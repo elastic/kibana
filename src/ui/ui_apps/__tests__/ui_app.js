@@ -23,9 +23,6 @@ function createStubUiAppSpec(extraParams) {
       'chromeNavControls',
       'hacks',
     ],
-    injectVars() {
-      return { foo: 'bar' };
-    },
     ...extraParams
   };
 }
@@ -84,10 +81,6 @@ describe('ui apps / UiApp', () => {
         expect(app.getNavLink()).to.be.a(UiNavLink);
       });
 
-      it('has no injected vars', () => {
-        expect(app.getInjectedVars()).to.be(undefined);
-      });
-
       it('has an empty modules list', () => {
         expect(app.getModules()).to.eql([]);
       });
@@ -131,10 +124,6 @@ describe('ui apps / UiApp', () => {
 
       it('has no navLink', () => {
         expect(app.getNavLink()).to.be(undefined);
-      });
-
-      it('has injected vars', () => {
-        expect(app.getInjectedVars()).to.eql({ foo: 'bar' });
       });
 
       it('includes main and hack modules', () => {
@@ -295,49 +284,6 @@ describe('ui apps / UiApp', () => {
   });
 
   describe('pluginId', () => {
-    describe('not specified', () => {
-      it('passes the root server and undefined for plugin/optoins to injectVars()', () => {
-        const injectVars = sinon.stub();
-        const kbnServer = createStubKbnServer();
-        createUiApp(createStubUiAppSpec({ injectVars }), kbnServer).getInjectedVars();
-
-        sinon.assert.calledOnce(injectVars);
-        sinon.assert.calledOn(injectVars, sinon.match.same(undefined));
-        sinon.assert.calledWithExactly(
-          injectVars,
-          // server arg, uses root server because there is no plugin
-          sinon.match.same(kbnServer.server),
-          // options is undefined because there is no plugin
-          sinon.match.same(undefined)
-        );
-      });
-    });
-    describe('matches a kbnServer plugin', () => {
-      it('passes the plugin/server/options from the plugin to injectVars()', () => {
-        const server = {};
-        const options = {};
-        const plugin = {
-          id: 'test plugin id',
-          getServer() {
-            return server;
-          },
-          getOptions() {
-            return options;
-          }
-        };
-
-        const kbnServer = createStubKbnServer();
-        kbnServer.plugins.push(plugin);
-
-        const injectVars = sinon.stub();
-        const spec = createStubUiAppSpec({ pluginId: plugin.id, injectVars });
-        createUiApp(spec, kbnServer).getInjectedVars();
-
-        sinon.assert.calledOnce(injectVars);
-        sinon.assert.calledOn(injectVars, sinon.match.same(plugin));
-        sinon.assert.calledWithExactly(injectVars, sinon.match.same(server), sinon.match.same(options));
-      });
-    });
     describe('does not match a kbnServer plugin', () => {
       it('throws an error at instantiation', () => {
         expect(() => {
