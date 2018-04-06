@@ -142,6 +142,10 @@ exports.Cluster = class Cluster {
    * @return {undefined}
    */
   _exec(installPath, { esArgs = [] }) {
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
