@@ -39,7 +39,7 @@ export function spawnNativeController(settings, nativeControllerPath, nativeCont
   const config = defaultConfig(settings);
 
   const configParams = nativeControllerConfig.reduce((acc, key) => {
-    return [...acc, `--${key}=${config.get(key)}`];
+    return [...acc, `${key}=${config.get(key)}`];
   }, []);
 
   return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath, ...configParams], {

@@ -1,15 +1,19 @@
 require('../../babel-register');
+const program = require('commander');
 
-process.send('ready');
-
-// add comment what this is doing
-const [ , , nativeControllerPath, ...configArgs] = process.argv;
-
-const configMap = configArgs.reduce((map, arg) => {
-  const [ , name, value] = /^--(.+)=(.+)/.exec(arg);
-  map.set(name, value);
-  return map;
-}, new Map());
+let nativeControllerPath;
+let configMap;
+program
+  .arguments('<nativeControllerPath> [config...]')
+  .action((nativeControllerPathArg, configArs) => {
+    nativeControllerPath = nativeControllerPathArg;
+    configMap = configArs.reduce((map, arg) => {
+      const [ , name, value] = /^(.+)=(.+)/.exec(arg);
+      map.set(name, value);
+      return map;
+    }, new Map());
+  });
+program.parse(process.argv);
 
 const receivedMessage = (message) => {
   switch (message) {
@@ -26,3 +30,4 @@ const receivedMessage = (message) => {
 };
 
 process.addListener('message', receivedMessage);
+process.send('ready');

@@ -31,7 +31,7 @@ test(`forks native_controller_start.js with settings in command argument`, () =>
   spawnNativeController({ path: { data: '/tmp' } }, nativeControllerPath, ['path.data']);
 
   expect(fork).toHaveBeenCalledTimes(1);
-  const expectedArgs = [nativeControllerPath, '--path.data=/tmp'];
+  const expectedArgs = [nativeControllerPath, 'path.data=/tmp'];
   expect(fork).toHaveBeenCalledWith(require.resolve('./native_controller_start.js'), expectedArgs, expect.anything());
 });
 

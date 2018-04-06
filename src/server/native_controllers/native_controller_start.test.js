@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 test(`is babel registered`, () => {
-  process.argv = [null, null, './native_controller_impl.js'];
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
 
@@ -36,7 +36,7 @@ test(`is babel registered`, () => {
 });
 
 test(`doesn't load native controller immediately`, () => {
-  process.argv = [null, null, './native_controller_impl.js'];
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
 
@@ -45,7 +45,7 @@ test(`doesn't load native controller immediately`, () => {
 
 
 test(`loads native controller on start message`, () => {
-  process.argv = [null, null, './native_controller_impl.js'];
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
   process.emit('message', 'start');
@@ -54,7 +54,7 @@ test(`loads native controller on start message`, () => {
 });
 
 test(`passed config to the nativeController`, () => {
-  process.argv = [null, null, './native_controller_impl.js', '--foo.bar=baz'];
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js', 'foo.bar=baz'];
 
   require('./native_controller_start');
   process.emit('message', 'start');
@@ -65,7 +65,7 @@ test(`passed config to the nativeController`, () => {
 });
 
 test(`removes listener when start message received`, () => {
-  process.argv = [null, null, './native_controller_impl.js'];
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
   process.emit('message', 'start');
