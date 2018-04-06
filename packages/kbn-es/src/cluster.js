@@ -15,17 +15,17 @@ exports.Cluster = class Cluster {
    * @param {Object} options
    * @property {Array} options.installPath
    * @property {Array} options.sourcePath
-   * @returns {Promise}
+   * @returns {Promise<{installPath}>}
    */
   async installSource(options = {}) {
     this._log.info(chalk.bold('Installing from source'));
     this._log.indent(4);
 
-    const install = await installSource({ log: this._log, ...options });
+    const { installPath } = await installSource({ log: this._log, ...options });
 
     this._log.indent(-4);
 
-    return install;
+    return { installPath };
   }
 
   /**
@@ -34,17 +34,20 @@ exports.Cluster = class Cluster {
    * @param {Object} options
    * @property {Array} options.installPath
    * @property {Array} options.sourcePath
-   * @returns {Promise}
+   * @returns {Promise<{installPath}>}
    */
   async installSnapshot(options = {}) {
     this._log.info(chalk.bold('Installing from snapshot'));
     this._log.indent(4);
 
-    const install = await installSnapshot({ log: this._log, ...options });
+    const { installPath } = await installSnapshot({
+      log: this._log,
+      ...options,
+    });
 
     this._log.indent(-4);
 
-    return install;
+    return { installPath };
   }
 
   /**
@@ -53,17 +56,20 @@ exports.Cluster = class Cluster {
    * @param {String} path
    * @param {Object} options
    * @property {Array} options.installPath
-   * @returns {Promise}
+   * @returns {Promise<{installPath}>}
    */
   async installArchive(path, options = {}) {
     this._log.info(chalk.bold('Installing from an archive'));
     this._log.indent(4);
 
-    const install = await installArchive(path, { log: this._log, ...options });
+    const { installPath } = await installArchive(path, {
+      log: this._log,
+      ...options,
+    });
 
     this._log.indent(-4);
 
-    return install;
+    return { installPath };
   }
 
   /**
@@ -75,26 +81,66 @@ exports.Cluster = class Cluster {
    * @returns {Promise}
    */
   async start(installPath, options = {}) {
-    await this.run(installPath, options);
+    this._exec(installPath, options);
 
-    return new Promise(resolve => {
-      this._process.stdout.on('data', data => {
-        if (/started/.test(data)) {
-          return resolve(process);
-        }
-      });
-    });
+    await Promise.race([
+      // await the "started" log message
+      new Promise(resolve => {
+        this._process.stdout.on('data', data => {
+          if (/started/.test(data)) {
+            resolve();
+          }
+        });
+      }),
+
+      // await the outcome of the process in case it exits before starting
+      this._outcome,
+    ]);
   }
 
   /**
-   * Starts Elasticsearch and immediately returns with process
+   * Starts Elasticsearch and waits for Elasticsearch to exit
    *
    * @param {String} installPath
    * @param {Object} options
    * @property {Array} options.esArgs
-   * @returns {Process}
+   * @returns {Promise<undefined>}
    */
-  run(installPath, { esArgs = [] }) {
+  async run(installPath, options = {}) {
+    this._exec(installPath, options);
+
+    // await the final outcome of the process
+    await this._outcome;
+  }
+
+  /**
+   * Stops ES process, if it's running
+   *
+   * @returns {Promise}
+   */
+  async stop() {
+    if (!this._process || !this._outcome) {
+      throw new Error('ES has not been started');
+    }
+
+    this._process.kill();
+    await this._outcome;
+  }
+
+  /**
+   * Common logic from this.start() and this.run()
+   *
+   * Start the elasticsearch process (stored at `this._process`)
+   * and "pipe" its stdio to `this._log`. Also create `this._outcome`
+   * which will be resolved/rejected when the process exits.
+   *
+   * @private
+   * @param {String} installPath
+   * @param {Object} options
+   * @property {Array} options.esArgs
+   * @return {undefined}
+   */
+  _exec(installPath, { esArgs = [] }) {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
@@ -121,29 +167,13 @@ exports.Cluster = class Cluster {
 
     this._outcome = new Promise((resolve, reject) => {
       this._process.on('exit', code => {
-        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+        // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
-          return reject(`ES exitted with code ${code}`);
+          return reject(new Error(`ES exitted with code ${code}`));
         }
 
         resolve();
       });
     });
-
-    return process;
-  }
-
-  /**
-   * Stops ES process, if it's running
-   *
-   * @returns {Promise}
-   */
-  stop() {
-    if (!this._process || !this._outcome) {
-      return Promise.reject('ES has not been started');
-    }
-
-    this._process.kill();
-    return this._outcome;
   }
 };
