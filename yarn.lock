@@ -364,6 +364,10 @@ angular-mocks@1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.4.7.tgz#d7343ee0a033f9216770bda573950f6814d95227"
 
+angular-recursion@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/angular-recursion/-/angular-recursion-1.0.5.tgz#cd405428a0bf55faf52eaa7988c1fe69cd930543"
+
 angular-route@1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.4.7.tgz#9796ac2527547158cd42d757d69d90a891a6d95f"
@@ -4731,9 +4735,9 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.10.0.tgz#73e2f785666521d0d3a9ddc9fd5a0a5e3bf47845"
+geckodriver@1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.11.0.tgz#2853ccd4f420d347c61542daeed782c87a718687"
   dependencies:
     adm-zip "0.4.7"
     bluebird "3.4.6"
@@ -7186,9 +7190,9 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@silne30/leadfoot#validation_for_response_in_ff58:
-  version "1.7.4"
-  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/460c8ed67c08177adc9c79243ff045880f4cad09"
+leadfoot@1.7.5:
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"
@@ -7200,6 +7204,12 @@ leaflet-draw@0.4.10:
 leaflet-responsive-popup@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.2.0.tgz#119bfcfae147864730f6a01fbd73b5b2ce274728"
+
+leaflet-vega@0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.8.3.tgz#6d2572aa1909ed50d94937d5f4c2e42b018f4ac2"
+  dependencies:
+    vega-spec-injector "^0.0.2"
 
 leaflet.heat@0.2.0:
   version "0.2.0"
@@ -12020,6 +12030,10 @@ vega-scenegraph@2, vega-scenegraph@^2.3:
 vega-schema-url-parser@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
+
+vega-spec-injector@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/vega-spec-injector/-/vega-spec-injector-0.0.2.tgz#f1d990109dd9d845c524738f818baa4b72a60ca6"
 
 vega-statistics@^1.2:
   version "1.2.1"
