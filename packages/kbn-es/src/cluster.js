@@ -171,13 +171,13 @@ exports.Cluster = class Cluster {
     );
 
     this._outcome = new Promise((resolve, reject) => {
-      this._process.on('exit', code => {
+      this._process.once('exit', code => {
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
-        if (!code || code === 143 || code === 130) {
-          return;
+        if (code > 0 && !(code === 143 || code === 130)) {
+          reject(createCliError(`ES exitted with code ${code}`));
+        } else {
+          resolve();
         }
-
-        reject(createCliError(`ES exitted with code ${code}`));
       });
     });
   }
