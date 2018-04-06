@@ -176,7 +176,7 @@ exports.Cluster = class Cluster {
       this._process.once('exit', code => {
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
-          reject(createCliError(`ES exitted with code ${code}`));
+          reject(createCliError(`ES exited with code ${code}`));
         } else {
           resolve();
         }
