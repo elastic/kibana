@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('31442901600000');
+          expect(value).to.be('3');
         });
 
         it('allow negative time offsets', async () => {
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
           expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('231442901600000');
+          expect(value).to.be('23');
         });
       });
 
