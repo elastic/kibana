@@ -12985,9 +12985,10 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@silne30/leadfoot#validation_for_response_in_ff58:
-  version "1.7.4"
-  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/8de3013ba2e5b318b5f36329ee97494a934333f9"
+leadfoot@1.7.5:
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
+  integrity sha512-NLPJyZ5HYjM2PbMzkpF89EwOboEpyE/ceyLNOmp7TzFZwJQDdxSxdEj3kuJtnfVCUSZXzxvNMUtO300bS+j4nA==
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"
