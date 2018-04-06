@@ -3,11 +3,6 @@ export default kibana => new kibana.Plugin({
     app: {
       name: 'test_app',
       main: 'plugins/test_app/index.js',
-      injectVars() {
-        return {
-          from_test_app: true
-        };
-      }
     },
 
     injectDefaultVars() {
@@ -15,5 +10,10 @@ export default kibana => new kibana.Plugin({
         from_defaults: true
       };
     }
+  },
+  init(server) {
+    server.injectUiAppVars('test_app', () => ({
+      from_test_app: true
+    }));
   }
 });
