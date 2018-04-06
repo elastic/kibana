@@ -64,7 +64,7 @@ describe('searchDsl/queryParams', () => {
   describe('{type,experimentalFilter}', () => {
     it('includes a terms filter and filters scoped to the type', () => {
       expect(getQueryParams(MAPPINGS, 'saved', undefined, undefined, { field: 'title', value: 'foo' }))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
@@ -108,7 +108,7 @@ describe('searchDsl/queryParams', () => {
   describe('{search,experimentalFilter}', () => {
     it('includes a sqs query and filters applying to all types', () => {
       expect(getQueryParams(MAPPINGS, null, 'us*', undefined, { field: 'title', value: 'foo' }))
-        .to.eql({
+        .toEqual({
           query: {
             bool: {
               filter: [
