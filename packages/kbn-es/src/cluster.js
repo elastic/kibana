@@ -95,7 +95,9 @@ exports.Cluster = class Cluster {
       }),
 
       // await the outcome of the process in case it exits before starting
-      this._outcome,
+      this._outcome.then(() => {
+        throw createCliError('ES exited without starting');
+      }),
     ]);
   }
 
