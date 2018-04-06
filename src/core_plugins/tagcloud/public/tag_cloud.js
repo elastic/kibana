@@ -6,11 +6,10 @@ import { EventEmitter } from 'events';
 const ORIENTATIONS = {
   'single': () => 0,
   'right angled': (tag) => {
-    return hashCode(tag.text) % 2 * 90;
+    return hashWithinRange(tag.text, 2) * 90;
   },
   'multiple': (tag) => {
-    const hashcode = Math.abs(hashCode(tag.text));
-    return ((hashcode % 12) * 15) - 90;//fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
+    return ((hashWithinRange(tag.text, 12)) * 15) - 90;//fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   }
 };
 const D3_SCALING_FUNCTIONS = {
@@ -397,23 +396,13 @@ function getFill(tag) {
   return colorScale(tag.text);
 }
 
-/**
- * Hash a string to a number. Ensures there is no random element in positioning strings
- * Retrieved from http://stackoverflow.com/questions/26057572/string-to-unique-hash-in-javascript-jquery
- * @param string
- */
-function hashCode(string) {
-  string = JSON.stringify(string);
+function hashWithinRange(str, max) {
+  str = JSON.stringify(str);
   let hash = 0;
-  if (string.length === 0) {
-    return hash;
+  for (const ch of str) {
+    hash = ((hash * 31) + ch.charCodeAt(0)) % max;
   }
-  for (let i = 0; i < string.length; i++) {
-    const char = string.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash;
+  return Math.abs(hash) % max;
 }
 
 export default TagCloud;
