@@ -1,29 +1,21 @@
 import $ from 'jquery';
-import _ from 'lodash';
-import { fieldFormats } from '../../registry/field_formats';
 
 export function TileMapTooltipFormatterProvider($compile, $rootScope) {
-
 
   const $tooltipScope = $rootScope.$new();
   const $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
   $compile($el)($tooltipScope);
 
-  return function tooltipFormatter(feature) {
-    if (!feature) return '';
+  return function tooltipFormatter(aggConfig, metricAgg, feature) {
 
-    const value = feature.properties.value;
-    const acr = feature.properties.aggConfigResult;
-    const vis = acr.aggConfig.vis;
-
-    const metricAgg = acr.aggConfig;
-    let geoFormat = _.get(vis.getAggConfig(), 'byTypeName.geohash_grid[0].format');
-    if (!geoFormat) geoFormat = fieldFormats.getDefaultInstance('geo_point');
+    if (!feature) {
+      return '';
+    }
 
     $tooltipScope.details = [
       {
         label: metricAgg.makeLabel(),
-        value: metricAgg.fieldFormatter()(value)
+        value: metricAgg.fieldFormatter()(feature.properties.value)
       },
       {
         label: 'Latitude',

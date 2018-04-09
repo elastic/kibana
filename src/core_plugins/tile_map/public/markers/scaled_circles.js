@@ -141,9 +141,6 @@ export class ScaledCirclesMarkers extends EventEmitter {
     // latLng = latLng || L.latLng(lat, lng);
     latLng = latLng || L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
 
-    //todo
-    return;
-
     const content = this._tooltipFormatter(feature);
     if (!content) {
       return;

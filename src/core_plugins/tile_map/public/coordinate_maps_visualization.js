@@ -10,9 +10,12 @@ import { AggConfig } from 'ui/vis/agg_config';
 
 import './styles/_tilemap.less';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { TileMapTooltipFormatterProvider } from 'ui/agg_response/geo_json/_tooltip_formatter';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+
+  const tooltipFormatter = Private(TileMapTooltipFormatterProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
 
@@ -123,9 +126,14 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
     _getGeohashOptions() {
       const newParams = this._getMapsParams();
+
+
+      const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), this._getMetricAgg());
+
+
       return {
         // valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
-        // tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
+        tooltipFormatter: this._geoJson ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
@@ -179,6 +187,14 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         return _.get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
+
+
+    _getMetricAgg() {
+      return this.vis.getAggConfig().find((agg) => {
+        return agg.type.type === 'metrics';
+      });
+    }
+
 
     _isFilteredByCollar() {
       const DEFAULT = false;
