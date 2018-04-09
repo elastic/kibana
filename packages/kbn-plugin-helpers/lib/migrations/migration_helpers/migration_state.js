@@ -1,5 +1,5 @@
-// Migration contains all of the data we need to persist in an index
-// in ordert to know: 1. do we need to migrate? 2. what migrations
+// Migration state contains all of the data we need to persist in an index
+// in order to know: 1. do we need to migrate? 2. what migrations
 // and mappings have already been applied? 3. mapping info for disabled plugins
 
 import _ from 'lodash';
