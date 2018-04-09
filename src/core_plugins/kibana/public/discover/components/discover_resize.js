@@ -4,10 +4,17 @@ module.exports = function () {
 	const $fieldPanel = $('#discover-sidebar');
 	const $fieldSidebar = $('#discover-sidebar .sidebar-list');
 	const $resizer = $('#discover_resizer');
+	const $container = $('.discover_container');
+	const $contentPanel = $('#discover_content');
+	const paddingWidth = 21;
+
 
 	function setEditorWidth(editorWidth) {
 		$fieldPanel.width(editorWidth);
 		$fieldSidebar.width(editorWidth);
+
+		const totalW = $container.width();
+		$contentPanel.width(totalW - editorWidth - paddingWidth);
 	}
 
 	$resizer
