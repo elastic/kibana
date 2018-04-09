@@ -53,7 +53,7 @@ export class GeohashLayer extends KibanaMapLayer {
           maxZoom: this._kibanaMap.getZoomLevel(),
           minOpacity: 0.1,
           tooltipFormatter: this._geohashOptions.tooltipFormatter
-        }, this._zoom, this._kibanaMap);
+        }, this._zoom, this._geohashGeoJsonAndMeta.meta.max);
         break;
       default:
         throw new Error(`${this._geohashOptions.mapType} mapType not recognized`);

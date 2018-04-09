@@ -5,7 +5,7 @@ import 'ui/vis/map/service_settings';
 
 
 const MINZOOM = 0;
-const MAXZOOM = 22;
+const MAXZOOM = 22;//increase this to 22. Better for WMS
 
 export function BaseMapsVisualizationProvider(serviceSettings) {
 

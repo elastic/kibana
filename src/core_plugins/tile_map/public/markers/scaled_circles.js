@@ -131,21 +131,16 @@ export class ScaledCirclesMarkers extends EventEmitter {
    *
    * @method _showTooltip
    * @param feature {LeafletFeature}
-   * @param latLng? {Leaflet latLng}
    * @return undefined
    */
-  _showTooltip(feature, latLng) {
-
-    // const lat = _.get(feature, 'geometry.coordinates.1');
-    // const lng = _.get(feature, 'geometry.coordinates.0');
-    // latLng = latLng || L.latLng(lat, lng);
-    latLng = latLng || L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+  _showTooltip(feature) {
 
     const content = this._tooltipFormatter(feature);
     if (!content) {
       return;
     }
 
+    const latLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
     this.emit('showTooltip', {
       content: content,
       position: latLng

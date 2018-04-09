@@ -37,10 +37,10 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
-        if (agg && isAutoPrecision) {
-          agg.params.precision = previousPrecision;
+        const geohashAgg = this._getGeoHashAgg();
+        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
+        if (geohashAgg && isAutoPrecision) {
+          geohashAgg.params.precision = previousPrecision;
         }
       });
       this._kibanaMap.on('zoomend', () => {
@@ -74,7 +74,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
         this._getMapsParams().mapType !== 'Heatmap' &&
-        esResponse === this._rawEsResponse) {//todo this is wrong, because really depends on the thing..
+        esResponse === this._rawEsResponse) {
         return;
       }
 

@@ -5,10 +5,8 @@
  * Furthermore, the artificial split between responseHandler and responseConverter basically introduces two conversions.
  * These can be all rolled-up into one.
  * By delaying reading out the values until absolutely required, we can much more efficiently read out the required values.
- * This should alleviate crufty conversion of
  * @param vis
  * @param esResponse
- * @param respOpts
  * @return {*}
  */
 export function identityResponseHandler(vis, esResponse) {
