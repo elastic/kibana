@@ -8,6 +8,10 @@ import hjson from 'hjson';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
+import { VISUALIZATION_COLORS } from '@elastic/eui';
+
+// Set default single color to match other Kibana visualizations
+const defaultColor = VISUALIZATION_COLORS[0];
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -369,10 +373,8 @@ export class VegaParser {
     // Default category coloring to the Elastic color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
-    // Set default single color to match other Kibana visualizations
-    const defaultColor = '#00A69B';
     if (this.isVegaLite) {
-      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00A69B' }}
+      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00B3A4' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
