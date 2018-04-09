@@ -125,14 +125,13 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     }
 
     _getGeohashOptions() {
+
       const newParams = this._getMapsParams();
-
-
-      const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), this._getMetricAgg());
-
+      const metricAgg = this._getMetricAgg();
+      const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), metricAgg);
 
       return {
-        // valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
+        valueFormatter: this._geoJson ? (metricAgg && metricAgg.fieldFormatter()) : null,
         tooltipFormatter: this._geoJson ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
