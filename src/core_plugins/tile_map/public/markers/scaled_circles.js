@@ -29,7 +29,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     // Filter leafletlayer on client when results are not filtered on the server
     if (!options.isFilteredByCollar) {
       layerOptions.filter = (feature) => {
-        const bucketRectBounds = _.get(feature, 'properties.rectangle');
+        const bucketRectBounds = feature.properties.geohash_meta.rectangle;
         return kibanaMap.isInside(bucketRectBounds);
       };
     }
