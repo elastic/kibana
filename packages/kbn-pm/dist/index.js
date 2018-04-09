@@ -9786,7 +9786,9 @@ var _writePkg = _interopRequireDefault(__webpack_require__(666));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function readPackageJson(dir) {
   return (0, _readPkg.default)(dir, {
@@ -9798,7 +9800,7 @@ function writePackageJson(path, json) {
   return (0, _writePkg.default)(path, json);
 }
 
-const createProductionPackageJson = pkgJson => _extends({}, pkgJson, {
+const createProductionPackageJson = pkgJson => _objectSpread({}, pkgJson, {
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 
@@ -34678,7 +34680,9 @@ var _errors = __webpack_require__(73);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 class Project {
   static async fromPath(path) {
@@ -34694,7 +34698,7 @@ class Project {
     this.targetLocation = _path.default.resolve(this.path, 'target');
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
-    this.allDependencies = _extends({}, this.devDependencies, this.productionDependencies);
+    this.allDependencies = _objectSpread({}, this.devDependencies, this.productionDependencies);
     this.scripts = this.json.scripts || {};
   }
 
@@ -58595,7 +58599,9 @@ var _logSymbols = _interopRequireDefault(__webpack_require__(193));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function generateColors() {
   const colorWheel = [_chalk.default.cyan, _chalk.default.magenta, _chalk.default.blue, _chalk.default.yellow, _chalk.default.green, _chalk.default.red];
@@ -58605,7 +58611,7 @@ function generateColors() {
 }
 
 function spawn(command, args, opts) {
-  return (0, _execa.default)(command, args, _extends({}, opts, {
+  return (0, _execa.default)(command, args, _objectSpread({}, opts, {
     stdio: 'inherit'
   }));
 }
@@ -58615,7 +58621,7 @@ const nextColor = generateColors();
 function spawnStreaming(command, args, opts, {
   prefix
 }) {
-  const spawned = (0, _execa.default)(command, args, _extends({}, opts, {
+  const spawned = (0, _execa.default)(command, args, _objectSpread({}, opts, {
     stdio: ['ignore', 'pipe', 'pipe']
   }));
   const color = nextColor();
