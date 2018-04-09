@@ -29,4 +29,18 @@ export function uiAppsMixin(kbnServer, server) {
   server.decorate('server', 'getAllUiApps', () => kbnServer.uiApps.slice(0));
   server.decorate('server', 'getUiAppById', id => appsById.get(id));
   server.decorate('server', 'getHiddenUiAppById', id => hiddenAppsById.get(id));
+
+  const injectedVarProviders = [];
+  server.decorate('server', 'injectUiAppVars', (appId, provider) => {
+    injectedVarProviders.push({ appId, provider });
+  });
+
+  server.decorate('server', 'getInjectedUiAppVars', async (appId) => {
+    return await injectedVarProviders
+      .filter(p => p.appId === appId)
+      .reduce(async (acc, { provider }) => ({
+        ...await acc,
+        ...await provider(server)
+      }), {});
+  });
 }

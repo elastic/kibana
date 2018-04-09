@@ -6,8 +6,12 @@ const chalk = require('chalk');
 const crypto = require('crypto');
 const simpleGit = require('simple-git/promise');
 const { installArchive } = require('./archive');
+const { createCliError } = require('../errors');
 const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
 const { GRADLE_BIN, ES_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
+
+const onceEvent = (emitter, event) =>
+  new Promise(resolve => emitter.once(event, resolve));
 
 /**
  * Installs ES from source
@@ -96,33 +100,35 @@ async function sourceInfo(cwd, log = defaultLog) {
  * @property {ToolingLog} options.log
  * @returns {Object} containing archive and optional plugins
  */
-function createSnapshot({ sourcePath, log = defaultLog }) {
+async function createSnapshot({ sourcePath, log = defaultLog }) {
   const buildArgs = [':distribution:archives:tar:assemble'];
 
-  return new Promise((resolve, reject) => {
-    log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
+  log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
 
-    const build = execa(GRADLE_BIN, buildArgs, {
-      cwd: sourcePath,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    const stdout = readline.createInterface({ input: build.stdout });
-    const stderr = readline.createInterface({ input: build.stderr });
-
-    stdout.on('line', line => log.debug(line));
-    stderr.on('line', line => log.error(line));
-
-    build.stdout.on('end', () => {
-      if (build.exitCode > 0) {
-        reject(new Error('unable to build ES'));
-      } else {
-        const esTarballPath = findMostRecentlyChanged(
-          path.resolve(sourcePath, ES_ARCHIVE_PATTERN)
-        );
-
-        resolve(esTarballPath);
-      }
-    });
+  const build = execa(GRADLE_BIN, buildArgs, {
+    cwd: sourcePath,
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
+
+  const stdout = readline.createInterface({ input: build.stdout });
+  const stderr = readline.createInterface({ input: build.stderr });
+
+  stdout.on('line', line => log.debug(line));
+  stderr.on('line', line => log.error(line));
+
+  const [exitCode] = await Promise.all([
+    onceEvent(build, 'exit'),
+    onceEvent(stdout, 'close'),
+    onceEvent(stderr, 'close'),
+  ]);
+
+  if (exitCode > 0) {
+    throw createCliError('unable to build ES');
+  }
+
+  const esTarballPath = findMostRecentlyChanged(
+    path.resolve(sourcePath, ES_ARCHIVE_PATTERN)
+  );
+
+  return esTarballPath;
 }

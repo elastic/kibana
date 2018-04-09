@@ -1,4 +1,4 @@
-import { noop, uniq } from 'lodash';
+import { uniq } from 'lodash';
 
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
@@ -15,10 +15,13 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden = false,
     linkToLastSubUrl = true,
     listed = !hidden,
-    injectVars = noop,
     url = `/app/${id}`,
     uses = [],
   } = spec;
+
+  if (spec.injectVars) {
+    throw new Error(`[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
+  }
 
   return {
     pluginId,
@@ -31,7 +34,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     hidden,
     linkToLastSubUrl,
     listed,
-    injectVars,
     url,
     uses: uniq([
       ...uses,

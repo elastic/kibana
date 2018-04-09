@@ -6,7 +6,7 @@ import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { IndexedArray } from 'ui/indexed_array';
 
 describe('AggConfigs', function () {
@@ -16,7 +16,6 @@ describe('AggConfigs', function () {
   let AggConfigs;
   let SpiedAggConfig;
   let indexPattern;
-  let Schemas;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -35,7 +34,6 @@ describe('AggConfigs', function () {
     SpiedAggConfig = Private(VisAggConfigProvider);
     AggConfigs = Private(VisAggConfigsProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    Schemas = Private(VisSchemasProvider);
   }));
 
   it('extends IndexedArray', function () {
