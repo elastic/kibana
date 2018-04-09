@@ -1,14 +1,13 @@
 import metricAggTemplate from 'ui/agg_types/controls/sub_agg.html';
 import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWritter } from './parent_pipeline_agg_writter';
 
 export const ParentPipelineAggHelperProvider = function (Private) {
 
   const AggConfig = Private(VisAggConfigProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
   const metricAggSchema = (new Schemas([
