@@ -30,13 +30,30 @@ before(() => {
   sinon.useFakeXMLHttpRequest();
 });
 
-beforeEach(function () {
-  // stub the UiSettingsClient
-  if (chrome.getUiSettingsClient.restore) {
-    chrome.getUiSettingsClient.restore();
-  }
 
-  const stubUiSettings = new UiSettingsClient({
+let stubUiSettings = new UiSettingsClient({
+  defaults: metadata.uiSettings.defaults,
+  initialSettings: {},
+  notify: new Notifier({ location: 'Config' }),
+  api: {
+    batchSet() {
+      return { settings: stubUiSettings.getAll() };
+    }
+  }
+});
+sinon.stub(chrome, 'getUiSettingsClient', () => stubUiSettings);
+
+beforeEach(function () {
+  // ensure that notifications are not left in the notifiers
+  if (Notifier.prototype._notifs.length) {
+    const notifs = JSON.stringify(Notifier.prototype._notifs);
+    Notifier.prototype._notifs.length = 0;
+    throw new Error('notifications were left in the notifier: ' + notifs);
+  }
+});
+
+afterEach(function () {
+  stubUiSettings = new UiSettingsClient({
     defaults: metadata.uiSettings.defaults,
     initialSettings: {},
     notify: new Notifier({ location: 'Config' }),
@@ -46,14 +63,6 @@ beforeEach(function () {
       }
     }
   });
-  sinon.stub(chrome, 'getUiSettingsClient', () => stubUiSettings);
-
-  // ensure that notifications are not left in the notifiers
-  if (Notifier.prototype._notifs.length) {
-    const notifs = JSON.stringify(Notifier.prototype._notifs);
-    Notifier.prototype._notifs.length = 0;
-    throw new Error('notifications were left in the notifier: ' + notifs);
-  }
 });
 
 // Kick off mocha, called at the end of test entry files

@@ -6,7 +6,7 @@ import { IndexedArray } from 'ui/indexed_array';
 class FieldFormatRegistry extends IndexedArray {
   constructor(config) {
     const spec = config && config.spec;
-    const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['id'] });
+    const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['id', 'name', 'fieldType'] });
     super(iaOpts);
 
     this._uiSettings = chrome.getUiSettingsClient();
