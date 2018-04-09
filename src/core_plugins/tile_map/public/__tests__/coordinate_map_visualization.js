@@ -109,6 +109,27 @@ describe('CoordinateMapsVisualizationTest', function () {
         mapZoom: 2,
         mapCenter: [0, 0],
       };
+
+
+      const mockAggs = [
+        {
+          type: {
+            type: 'metrics'
+          },
+          fieldFormatter: (x) => {
+            return x;
+          }
+        }, {
+          type: {
+            type: 'buckets'
+          },
+          params: { useGeoCentroid: true }
+        }];
+      vis.getAggConfig = function () {
+        return mockAggs;
+      };
+      vis.aggs = mockAggs;
+
     });
 
     afterEach(function () {
@@ -131,7 +152,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
     });
-
 
 
     it('should toggle to Heatmap OK', async function () {
@@ -202,9 +222,16 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
   async function compareImage(expectedImageSource, index) {
+
+    console.log(domNode);
+
     const elementList = domNode.querySelectorAll('canvas');
     // expect(elementList.length).to.equal(1);
     const firstCanvasOnMap = elementList[index];
+
+    console.log(firstCanvasOnMap);
+
+
     return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
 

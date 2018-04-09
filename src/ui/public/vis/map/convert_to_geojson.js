@@ -56,8 +56,8 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
 
       if (geoAgg.params.useGeocentroid) {
         // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
-        pointCoordinates[0] = clampGrid(pointCoordinates.lon, location.longitude[0], location.longitude[1]);
-        pointCoordinates[1] = clampGrid(pointCoordinates.lat, location.latitude[0], location.latitude[1]);
+        pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
+        pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
       }
 
 
