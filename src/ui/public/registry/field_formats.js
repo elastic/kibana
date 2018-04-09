@@ -9,17 +9,17 @@ class FieldFormatRegistry extends IndexedArray {
     const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['id'] });
     super(iaOpts);
 
-    this._config = chrome.getUiSettingsClient();
-    this.getConfig = (...args) => this._config.get(...args);
+    this._uiSettings = chrome.getUiSettingsClient();
+    this.getConfig = (...args) => this._uiSettings.get(...args);
     this._defaultMap = [];
     this._providers = [];
     this.init();
   }
 
   init() {
-    this.parseDefaultTypeMap(this._config.get('format:defaultTypeMap'));
+    this.parseDefaultTypeMap(this._uiSettings.get('format:defaultTypeMap'));
 
-    this._config.subscribe(({ key, newValue }) => {
+    this._uiSettings.subscribe(({ key, newValue }) => {
       if (key === 'format:defaultTypeMap') {
         this.parseDefaultTypeMap(newValue);
       }
