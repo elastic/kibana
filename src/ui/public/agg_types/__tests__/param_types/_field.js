@@ -2,20 +2,16 @@ import expect from 'expect.js';
 import { reject } from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { BaseParamTypeProvider } from '../../param_types/base';
-import { FieldParamTypeProvider } from '../../param_types/field';
+import { BaseParamType } from '../../param_types/base';
+import { FieldParamType } from '../../param_types/field';
 
 describe('Field', function () {
 
-  let BaseParamType;
-  let FieldParamType;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseParamType = Private(BaseParamTypeProvider);
-    FieldParamType = Private(FieldParamTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

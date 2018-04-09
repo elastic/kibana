@@ -1,22 +1,18 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { BaseParamTypeProvider } from '../../param_types/base';
-import { RegexParamTypeProvider } from '../../param_types/regex';
+import { BaseParamType } from '../../param_types/base';
+import { RegexParamType } from '../../param_types/regex';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Regex', function () {
 
-  let BaseParamType;
-  let RegexParamType;
   let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseParamType = Private(BaseParamTypeProvider);
-    RegexParamType = Private(RegexParamTypeProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));

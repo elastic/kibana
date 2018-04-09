@@ -3,7 +3,7 @@ import './region_map_vis_params';
 import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
@@ -12,7 +12,6 @@ import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
