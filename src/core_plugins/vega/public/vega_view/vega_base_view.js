@@ -2,11 +2,10 @@ import $ from 'jquery';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
+import { VISUALIZATION_COLORS } from '@elastic/eui';
 
 //https://github.com/elastic/kibana/issues/13327
-vega.scheme('elastic',
-  ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
-);
+vega.scheme('elastic', VISUALIZATION_COLORS);
 
 const bypassToken = Symbol();
 
