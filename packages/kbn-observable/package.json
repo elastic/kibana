@@ -4,10 +4,12 @@
   "license": "Apache-2.0",
   "private": true,
   "main": "target/index.js",
-  "types": "./target/index.d.ts",
+  "types": "target/index.d.ts",
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "yarn build",
+    "watch": "yarn build --watch",
+    "kbn:watch": "yarn watch",
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "dependencies": {

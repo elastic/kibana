@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig",
   "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
     "declaration": true,
-    "stripInternal": true,
     "outDir": "./target"
   },
   "include": [
