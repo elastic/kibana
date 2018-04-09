@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 
 import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
@@ -9,7 +9,6 @@ import metricAggTemplate from 'ui/agg_types/controls/sub_metric.html';
 export const SiblingPipelineAggHelperProvider = function (Private) {
 
   const AggConfig = Private(VisAggConfigProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   const metricAggFilter = [
     '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',

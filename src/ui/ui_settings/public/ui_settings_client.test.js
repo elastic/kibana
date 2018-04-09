@@ -201,3 +201,77 @@ describe('#subscribe', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 });
+
+describe('#overrideLocalDefault', () => {
+  describe('key has no user value', () => {
+    it('synchonously modifies the default value returned by get()', () => {
+      const { config } = setup();
+
+      expect(config.get('dateFormat')).toMatchSnapshot('get before override');
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(config.get('dateFormat')).toMatchSnapshot('get after override');
+    });
+
+    it('synchonously modifies the value returned by getAll()', () => {
+      const { config } = setup();
+
+      expect(config.getAll()).toMatchSnapshot('getAll before override');
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(config.getAll()).toMatchSnapshot('getAll after override');
+    });
+
+    it('calls subscriber with new and previous value', () => {
+      const handler = jest.fn();
+      const { config } = setup();
+
+      config.subscribe(handler);
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(handler.mock.calls).toMatchSnapshot('single subscriber call');
+    });
+  });
+
+  describe('key with user value', () => {
+    it('does not modify the return value of get', () => {
+      const { config } = setup();
+
+      config.set('dateFormat', 'foo');
+      expect(config.get('dateFormat')).toMatchSnapshot('get before override');
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(config.get('dateFormat')).toMatchSnapshot('get after override');
+    });
+
+    it('is included in the return value of getAll', () => {
+      const { config } = setup();
+
+      config.set('dateFormat', 'foo');
+      expect(config.getAll()).toMatchSnapshot('getAll before override');
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(config.getAll()).toMatchSnapshot('getAll after override');
+    });
+
+    it('does not call subscriber', () => {
+      const handler = jest.fn();
+      const { config } = setup();
+
+      config.set('dateFormat', 'foo');
+      config.subscribe(handler);
+      config.overrideLocalDefault('dateFormat', 'bar');
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('returns default override when setting removed', () => {
+      const { config } = setup();
+
+      config.set('dateFormat', 'foo');
+      config.overrideLocalDefault('dateFormat', 'bar');
+
+      expect(config.get('dateFormat')).toMatchSnapshot('get before override');
+      expect(config.getAll()).toMatchSnapshot('getAll before override');
+
+      config.remove('dateFormat');
+
+      expect(config.get('dateFormat')).toMatchSnapshot('get after override');
+      expect(config.getAll()).toMatchSnapshot('getAll after override');
+    });
+  });
+});

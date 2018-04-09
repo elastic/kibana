@@ -1,5 +1,5 @@
 import registerCount from './count/register_count';
 
-export default function (server) {
+export function searchApi(server) {
   registerCount(server);
 }
