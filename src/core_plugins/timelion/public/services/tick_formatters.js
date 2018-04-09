@@ -18,44 +18,29 @@ function baseTickFormatter(value, axis) {
   return formatted;
 }
 
+const UNIT_PREFIXES = ['', 'k', 'm', 'g', 't', 'p'];
+
+function unitFormatter(unit, divisor, prefixUppercase = false) {
+  return (val) => {
+    let index = 0;
+    const isNegative = val < 0;
+    val = Math.abs(val);
+    while (val >= divisor && index < UNIT_PREFIXES.length) {
+      val /= divisor;
+      index++;
+    }
+    const value = Math.round(val * 100) / 100 * (isNegative ? -1 : 1);
+    const unitPrefix = UNIT_PREFIXES[index];
+    return `${value}${prefixUppercase ? unitPrefix.toUpperCase() : unitPrefix}${unit}`;
+  };
+}
+
 export default function tickFormatters() {
   const formatters =  {
-    'bits': function (val) {
-      const labels = ['b', 'kb', 'mb', 'gb', 'tb', 'pb'];
-      let index = 0;
-      while (val >= 1000 && index < labels.length) {
-        val /= 1000;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bits/s': function (val) {
-      const labels = ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s'];
-      let index = 0;
-      while (val >= 1000 && index < labels.length) {
-        val /= 1000;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bytes': function (val) {
-      const labels = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-      let index = 0;
-      while (val >= 1024 && index < labels.length) {
-        val /= 1024;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
-    'bytes/s': function (val) {
-      const labels = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s'];
-      let index = 0;
-      while (val >= 1024 && index < labels.length) {
-        val /= 1024;
-        index++;
-      }
-      return (Math.round(val * 100) / 100) + labels[index];
-    },
+    'bits': unitFormatter('b', 1000),
+    'bits/s': unitFormatter('b/s', 1000),
+    'bytes': unitFormatter('B', 1024, true),
+    'bytes/s': unitFormatter('B/s', 1024, true),
     'currency': function (val, axis) {
       return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
     },
