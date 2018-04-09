@@ -4,7 +4,6 @@ import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
-//https://github.com/elastic/kibana/issues/13327
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
 const bypassToken = Symbol();
