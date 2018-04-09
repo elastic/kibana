@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import { VegaParser } from '../vega_parser';
+import { bypassExternalUrlCheck } from '../../vega_view/vega_base_view';
 
 describe(`VegaParser._setDefaultValue`, () => {
 
@@ -62,6 +63,7 @@ describe('VegaParser._resolveEsQueries', () => {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }]
       });
       await vp._resolveDataUrls();
+
       expect(vp.spec).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount || 0);
     };
@@ -73,7 +75,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
   it('es', test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
   it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('emsfile', test({ data: { url: { '%type%': 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
+  it('emsfile', test(
+    { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
+    { data: { url: bypassExternalUrlCheck('url1') } }));
 });
 
 describe('VegaParser._parseSchema', () => {
@@ -113,7 +117,8 @@ describe('VegaParser._parseMapConfig', () => {
     latitude: 0,
     longitude: 0,
     mapStyle: 'default',
-    zoomControl: true
+    zoomControl: true,
+    scrollWheelZoom: true,
   }, 0));
 
   it('filled', test({
@@ -122,6 +127,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
+    scrollWheelZoom: true,
     maxBounds: [1, 2, 3, 4],
   }, {
     delayRepaint: true,
@@ -129,6 +135,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
+    scrollWheelZoom: true,
     maxBounds: [1, 2, 3, 4],
   }, 0));
 
@@ -139,6 +146,7 @@ describe('VegaParser._parseMapConfig', () => {
     zoom: 'abc', // ignored
     mapStyle: 'abc',
     zoomControl: 'abc',
+    scrollWheelZoom: 'abc',
     maxBounds: [2, 3, 4],
   }, {
     delayRepaint: true,
@@ -146,7 +154,8 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-  }, 4));
+    scrollWheelZoom: true,
+  }, 5));
 });
 
 describe('VegaParser._parseConfig', () => {

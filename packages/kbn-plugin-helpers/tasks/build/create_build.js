@@ -63,7 +63,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         stdio: ['ignore', 'ignore', 'pipe'],
       };
 
-      execFileSync(winCmd('yarn'), ['install', '--production', '--frozen-lockfile'], options);
+      execFileSync(winCmd('yarn'), ['install', '--production', '--pure-lockfile'], options);
     })
     .then(function () {
       const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];

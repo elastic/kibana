@@ -14,13 +14,6 @@ export class ContainerAPI {
   }
 
   /**
-   * @return {AppState}
-   */
-  getAppState() {
-    throw new Error('Must implement getAppState.');
-  }
-
-  /**
    * Call this to tell the container that this panel uses a particular index pattern.
    * @param {string} panelIndex - a unique id that identifies the panel to update.
    * @param {string} indexPattern - an index pattern the panel uses

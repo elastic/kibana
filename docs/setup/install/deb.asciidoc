@@ -109,11 +109,11 @@ The Debian package for Kibana v{version} can be downloaded from the website and 
 ["source","sh",subs="attributes"]
 --------------------------------------------
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb
-sha1sum kibana-{version}-amd64.deb <1>
+shasum -a 512 kibana-{version}-amd64.deb <1>
 sudo dpkg -i kibana-{version}-amd64.deb
 --------------------------------------------
-<1> Compare the SHA produced by `sha1sum` or `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha1[published SHA].
+<1> Compare the SHA produced by `shasum` with the
+    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha512[published SHA].
 
 endif::[]
 

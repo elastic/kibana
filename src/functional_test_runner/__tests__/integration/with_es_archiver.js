@@ -1,16 +1,18 @@
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { format as formatUrl } from 'url';
 
 import expect from 'expect.js';
 
 import { readConfigFile } from '../../lib';
-import { createToolingLog } from '../../../dev';
+import { createToolingLog } from '@kbn/dev-utils';
 import { createReduceStream } from '../../../utils';
-import { createEsTestCluster } from '../../../test_utils/es';
+import { createTestCluster } from '../../../test_utils/es';
 import { startupKibana } from '../lib';
 
-const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
+const SCRIPT = resolve(
+  __dirname,
+  '../../../../scripts/functional_test_runner.js'
+);
 const CONFIG = resolve(__dirname, '../fixtures/with_es_archiver/config.js');
 
 describe('single test that uses esArchiver', () => {
@@ -27,23 +29,20 @@ describe('single test that uses esArchiver', () => {
     log.info('starting elasticsearch');
     log.indent(2);
 
-    const es = createEsTestCluster({
-      log: msg => log.debug(msg),
-      name: 'ftr/withEsArchiver',
-      port: config.get('servers.elasticsearch.port')
-    });
-    cleanupWork.unshift(() => es.stop());
-
+    const es = createTestCluster({ port: config.get('servers.elasticsearch.port'), log });
     this.timeout(es.getStartTimeout());
+
     await es.start();
+    cleanupWork.unshift(async () => await es.cleanup());
 
     log.indent(-2);
 
     log.info('starting kibana');
     log.indent(2);
+
     const kibana = await startupKibana({
       port: config.get('servers.kibana.port'),
-      esUrl: formatUrl(config.get('servers.elasticsearch'))
+      esUrl: es.getUrl(),
     });
     log.indent(-2);
 

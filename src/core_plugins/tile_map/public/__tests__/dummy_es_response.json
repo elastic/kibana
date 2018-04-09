@@ -1,0 +1,1836 @@
+{
+  "title": null,
+  "geohashGridAgg": {
+    "id": "2",
+    "enabled": true,
+    "type": "geohash_grid",
+    "schema": "segment",
+    "params": {
+      "field": "geo.coordinates",
+      "autoPrecision": true,
+      "isFilteredByCollar": true,
+      "useGeocentroid": true,
+      "precision": 2
+    }
+  },
+  "geoJson": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -118.60692598856986,
+            35.88028939906508
+          ]
+        },
+        "properties": {
+          "geohash": "9q",
+          "value": 18339,
+          "aggConfigResult": {
+            "key": 18339,
+            "value": 18339,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9q",
+              "value": "9q",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            36.5625,
+            -118.125
+          ],
+          "rectangle": [
+            [
+              33.75,
+              -123.75
+            ],
+            [
+              33.75,
+              -112.5
+            ],
+            [
+              39.375,
+              -112.5
+            ],
+            [
+              39.375,
+              -123.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -85.65667991526425,
+            37.24450909998268
+          ]
+        },
+        "properties": {
+          "geohash": "dn",
+          "value": 9820,
+          "aggConfigResult": {
+            "key": 9820,
+            "value": 9820,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dn",
+              "value": "dn",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            36.5625,
+            -84.375
+          ],
+          "rectangle": [
+            [
+              33.75,
+              -90
+            ],
+            [
+              33.75,
+              -78.75
+            ],
+            [
+              39.375,
+              -78.75
+            ],
+            [
+              39.375,
+              -90
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -72.59772632271051,
+            41.548056467436254
+          ]
+        },
+        "properties": {
+          "geohash": "dr",
+          "value": 9865,
+          "aggConfigResult": {
+            "key": 9865,
+            "value": 9865,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dr",
+              "value": "dr",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            42.1875,
+            -73.125
+          ],
+          "rectangle": [
+            [
+              39.375,
+              -78.75
+            ],
+            [
+              39.375,
+              -67.5
+            ],
+            [
+              45,
+              -67.5
+            ],
+            [
+              45,
+              -78.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -85.46859855763614,
+            41.79945836775005
+          ]
+        },
+        "properties": {
+          "geohash": "dp",
+          "value": 9633,
+          "aggConfigResult": {
+            "key": 9633,
+            "value": 9633,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dp",
+              "value": "dp",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            42.1875,
+            -84.375
+          ],
+          "rectangle": [
+            [
+              39.375,
+              -90
+            ],
+            [
+              39.375,
+              -78.75
+            ],
+            [
+              45,
+              -78.75
+            ],
+            [
+              45,
+              -90
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.09892912581563,
+            37.339115305803716
+          ]
+        },
+        "properties": {
+          "geohash": "9y",
+          "value": 8453,
+          "aggConfigResult": {
+            "key": 8453,
+            "value": 8453,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9y",
+              "value": "9y",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            36.5625,
+            -95.625
+          ],
+          "rectangle": [
+            [
+              33.75,
+              -101.25
+            ],
+            [
+              33.75,
+              -90
+            ],
+            [
+              39.375,
+              -90
+            ],
+            [
+              39.375,
+              -101.25
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.56561253964901,
+            30.233817854896188
+          ]
+        },
+        "properties": {
+          "geohash": "9v",
+          "value": 6108,
+          "aggConfigResult": {
+            "key": 6108,
+            "value": 6108,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9v",
+              "value": "9v",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            30.9375,
+            -95.625
+          ],
+          "rectangle": [
+            [
+              28.125,
+              -101.25
+            ],
+            [
+              28.125,
+              -90
+            ],
+            [
+              33.75,
+              -90
+            ],
+            [
+              33.75,
+              -101.25
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -106.3621916435659,
+            41.37621588539332
+          ]
+        },
+        "properties": {
+          "geohash": "9x",
+          "value": 3383,
+          "aggConfigResult": {
+            "key": 3383,
+            "value": 3383,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9x",
+              "value": "9x",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            42.1875,
+            -106.875
+          ],
+          "rectangle": [
+            [
+              39.375,
+              -112.5
+            ],
+            [
+              39.375,
+              -101.25
+            ],
+            [
+              45,
+              -101.25
+            ],
+            [
+              45,
+              -112.5
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -82.94600662775338,
+            31.685571656562388
+          ]
+        },
+        "properties": {
+          "geohash": "dj",
+          "value": 5278,
+          "aggConfigResult": {
+            "key": 5278,
+            "value": 5278,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dj",
+              "value": "dj",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            30.9375,
+            -84.375
+          ],
+          "rectangle": [
+            [
+              28.125,
+              -90
+            ],
+            [
+              28.125,
+              -78.75
+            ],
+            [
+              33.75,
+              -78.75
+            ],
+            [
+              33.75,
+              -90
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -93.6816599406302,
+            46.5565253701061
+          ]
+        },
+        "properties": {
+          "geohash": "cb",
+          "value": 6153,
+          "aggConfigResult": {
+            "key": 6153,
+            "value": 6153,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "cb",
+              "value": "cb",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            47.8125,
+            -95.625
+          ],
+          "rectangle": [
+            [
+              45,
+              -101.25
+            ],
+            [
+              45,
+              -90
+            ],
+            [
+              50.625,
+              -90
+            ],
+            [
+              50.625,
+              -101.25
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -107.28628255426884,
+            48.06303957011551
+          ]
+        },
+        "properties": {
+          "geohash": "c8",
+          "value": 6436,
+          "aggConfigResult": {
+            "key": 6436,
+            "value": 6436,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "c8",
+              "value": "c8",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            47.8125,
+            -106.875
+          ],
+          "rectangle": [
+            [
+              45,
+              -112.5
+            ],
+            [
+              45,
+              -101.25
+            ],
+            [
+              50.625,
+              -101.25
+            ],
+            [
+              50.625,
+              -112.5
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -97.78194758109748,
+            40.728308013640344
+          ]
+        },
+        "properties": {
+          "geohash": "9z",
+          "value": 7580,
+          "aggConfigResult": {
+            "key": 7580,
+            "value": 7580,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9z",
+              "value": "9z",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            42.1875,
+            -95.625
+          ],
+          "rectangle": [
+            [
+              39.375,
+              -101.25
+            ],
+            [
+              39.375,
+              -90
+            ],
+            [
+              45,
+              -90
+            ],
+            [
+              45,
+              -101.25
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -106.43365792930126,
+            32.035763463936746
+          ]
+        },
+        "properties": {
+          "geohash": "9t",
+          "value": 12094,
+          "aggConfigResult": {
+            "key": 12094,
+            "value": 12094,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9t",
+              "value": "9t",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            30.9375,
+            -106.875
+          ],
+          "rectangle": [
+            [
+              28.125,
+              -112.5
+            ],
+            [
+              28.125,
+              -101.25
+            ],
+            [
+              33.75,
+              -101.25
+            ],
+            [
+              33.75,
+              -112.5
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -67.56438894197345,
+            45.200666659511626
+          ]
+        },
+        "properties": {
+          "geohash": "f2",
+          "value": 7856,
+          "aggConfigResult": {
+            "key": 7856,
+            "value": 7856,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "f2",
+              "value": "f2",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            47.8125,
+            -73.125
+          ],
+          "rectangle": [
+            [
+              45,
+              -78.75
+            ],
+            [
+              45,
+              -67.5
+            ],
+            [
+              50.625,
+              -67.5
+            ],
+            [
+              50.625,
+              -78.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -76.44883473403752,
+            36.78014885634184
+          ]
+        },
+        "properties": {
+          "geohash": "dq",
+          "value": 2370,
+          "aggConfigResult": {
+            "key": 2370,
+            "value": 2370,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dq",
+              "value": "dq",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            36.5625,
+            -73.125
+          ],
+          "rectangle": [
+            [
+              33.75,
+              -78.75
+            ],
+            [
+              33.75,
+              -67.5
+            ],
+            [
+              39.375,
+              -67.5
+            ],
+            [
+              39.375,
+              -78.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -80.29055558145046,
+            25.793249965645373
+          ]
+        },
+        "properties": {
+          "geohash": "dh",
+          "value": 5412,
+          "aggConfigResult": {
+            "key": 5412,
+            "value": 5412,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "dh",
+              "value": "dh",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            25.3125,
+            -84.375
+          ],
+          "rectangle": [
+            [
+              22.5,
+              -90
+            ],
+            [
+              22.5,
+              -78.75
+            ],
+            [
+              28.125,
+              -78.75
+            ],
+            [
+              28.125,
+              -90
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -64.79855560697615,
+            17.701888871379197
+          ]
+        },
+        "properties": {
+          "geohash": "de",
+          "value": 7172,
+          "aggConfigResult": {
+            "key": 7172,
+            "value": 7172,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "de",
+              "value": "de",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            19.6875,
+            -61.875
+          ],
+          "rectangle": [
+            [
+              16.875,
+              -67.5
+            ],
+            [
+              16.875,
+              -56.25
+            ],
+            [
+              22.5,
+              -56.25
+            ],
+            [
+              22.5,
+              -67.5
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -122.95537831261754,
+            45.29567331075668
+          ]
+        },
+        "properties": {
+          "geohash": "c2",
+          "value": 19052,
+          "aggConfigResult": {
+            "key": 19052,
+            "value": 19052,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "c2",
+              "value": "c2",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            47.8125,
+            -118.125
+          ],
+          "rectangle": [
+            [
+              45,
+              -123.75
+            ],
+            [
+              45,
+              -112.5
+            ],
+            [
+              50.625,
+              -112.5
+            ],
+            [
+              50.625,
+              -123.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -162.00560923665762,
+            60.215904149226844
+          ]
+        },
+        "properties": {
+          "geohash": "b6",
+          "value": 3185,
+          "aggConfigResult": {
+            "key": 3185,
+            "value": 3185,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "b6",
+              "value": "b6",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            59.0625,
+            -163.125
+          ],
+          "rectangle": [
+            [
+              56.25,
+              -168.75
+            ],
+            [
+              56.25,
+              -157.5
+            ],
+            [
+              61.875,
+              -157.5
+            ],
+            [
+              61.875,
+              -168.75
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -110.70403785444796,
+            38.41803719289601
+          ]
+        },
+        "properties": {
+          "geohash": "9w",
+          "value": 8520,
+          "aggConfigResult": {
+            "key": 8520,
+            "value": 8520,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9w",
+              "value": "9w",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            36.5625,
+            -106.875
+          ],
+          "rectangle": [
+            [
+              33.75,
+              -112.5
+            ],
+            [
+              33.75,
+              -101.25
+            ],
+            [
+              39.375,
+              -101.25
+            ],
+            [
+              39.375,
+              -112.5
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -118.9549789018929,
+            43.59212776646018
+          ]
+        },
+        "properties": {
+          "geohash": "9r",
+          "value": 11022,
+          "aggConfigResult": {
+            "key": 11022,
+            "value": 11022,
+            "aggConfig": {
+              "id": "1",
+              "enabled": true,
+              "type": "max",
+              "schema": "metric",
+              "params": {
+                "field": "bytes"
+              }
+            },
+            "$parent": {
+              "key": "9r",
+              "value": "9r",
+              "aggConfig": {
+                "id": "2",
+                "enabled": true,
+                "type": "geohash_grid",
+                "schema": "segment",
+                "params": {
+                  "field": "geo.coordinates",
+                  "autoPrecision": true,
+                  "isFilteredByCollar": true,
+                  "useGeocentroid": true,
+                  "precision": 2
+                }
+              },
+              "$parent": {
+                "aggConfig": {
+                  "id": "filter_agg",
+                  "enabled": true,
+                  "type": "filter",
+                  "params": {
+                    "geo_bounding_box": {
+                      "geo.coordinates": {
+                        "top_left": {
+                          "lat": 90,
+                          "lon": -180
+                        },
+                        "bottom_right": {
+                          "lat": -90,
+                          "lon": 180
+                        }
+                      }
+                    }
+                  }
+                },
+                "type": "bucket"
+              },
+              "type": "bucket"
+            },
+            "type": "metric"
+          },
+          "center": [
+            42.1875,
+            -118.125
+          ],
+          "rectangle": [
+            [
+              39.375,
+              -123.75
+            ],
+            [
+              39.375,
+              -112.5
+            ],
+            [
+              45,
+              -112.5
+            ],
+            [
+              45,
+              -123.75
+            ]
+          ]
+        }
+      }
+    ],
+    "properties": {
+      "min": 2370,
+      "max": 19052,
+      "zoom": 2,
+      "center": [
+        -8.059229627200192,
+        53.08593750000001
+      ],
+      "geohashPrecision": 2,
+      "geohashGridDimensionsAtEquator": [
+        1252300,
+        624100
+      ]
+    }
+  },
+  "hits": 56
+}

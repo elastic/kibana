@@ -20,7 +20,7 @@ describe('buildHierarchicalData()', function () {
           id: id,
           name: name,
           schema: { group: 'buckets' },
-          getKey: _.noop,
+          getKey: (bucket) => bucket.key,
           fieldFormatter: _.constant(String)
         };
       }

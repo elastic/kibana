@@ -10,7 +10,14 @@ import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
 import { updatePanels } from '../actions';
 
-jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
+jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
+
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
 
 function getProps(props = {}) {
   const defaultTestProps = {
@@ -75,7 +82,7 @@ test('loads old panel data in the right order', () => {
 
   const foo8Panel = _.find(panels, panel => panel.id === 'foo8');
   expect(foo8Panel.row).toBe(undefined);
-  expect(foo8Panel.gridData.y).toBe(7);
+  expect(foo8Panel.gridData.y).toBe(35);
   expect(foo8Panel.gridData.x).toBe(0);
 
   grid.unmount();

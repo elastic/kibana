@@ -18,7 +18,7 @@ import {
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccessed }) {
+export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -58,7 +58,7 @@ export function Home({ addBasePath, directories, isCloudEnabled, recentlyAccesse
 
       <AddData
         addBasePath={addBasePath}
-        isCloudEnabled={isCloudEnabled}
+        apmUiEnabled={apmUiEnabled}
       />
 
       <EuiSpacer size="l" />
@@ -125,6 +125,6 @@ Home.propTypes = {
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
   })),
-  isCloudEnabled: PropTypes.bool.isRequired,
+  apmUiEnabled: PropTypes.bool.isRequired,
   recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };

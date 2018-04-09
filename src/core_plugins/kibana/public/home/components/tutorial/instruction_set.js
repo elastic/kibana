@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {
   KuiBar,
   KuiBarSection,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
 import { getDisplayText } from '../../../../common/tutorials/instruction_variant';

@@ -57,6 +57,10 @@ module.exports = {
     __dirname: false,
   },
 
+  watchOptions: {
+    ignored: [/node_modules/, /vendor/],
+  },
+
   optimization: {
     minimize: false,
   },

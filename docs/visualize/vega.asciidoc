@@ -1,16 +1,17 @@
 [[vega-graph]]
 == Vega Graphs
+experimental[]
 
 __________________________________________________________________________________________________________________________________________________________________________________
 Build https://vega.github.io/vega/examples/[Vega] and
 https://vega.github.io/vega-lite/examples/[VegaLite] data visualizations
-into Kibana.
+into Kibana, either standalone, or on top of a map.
 __________________________________________________________________________________________________________________________________________________________________________________
 
 [[vega-introduction-video]]
 === Watch a short introduction video
 
-https://www.youtube.com/watch?v=lQGCipY3th8[image:https://i.ytimg.com/vi_webp/lQGCipY3th8/maxresdefault.webp[Kibana Vega Visualization Video]]
+https://www.youtube.com/watch?v=lQGCipY3th8[Kibana Vega Visualization Video]
 
 [[vega-quick-demo]]
 === Quick Demo
@@ -185,6 +186,55 @@ url: {
 format: {property: "features"}
 ----
 
+[[vega-with-a-map]]
+=== Vega with a map
+
+Kibana's default map can be used as a base of the Vega graph. To enable,
+the graph must specify `type=map` in the host configuration:
+
+[source,yaml]
+----
+{
+  "config": {
+    "kibana": {
+      "type": "map",
+
+      // Initial map position
+      "latitude": 40.7,   // default 0
+      "longitude": -74,   // default 0
+      "zoom": 7,          // default 2
+
+      // defaults to "default". Use false to disable base layer.
+      "mapStyle": false,
+
+      // default 0
+      "minZoom": 5,
+
+      // defaults to the maximum for the given style,
+      // or 25 when base is disabled
+      "maxZoom": 13,
+
+      // defaults to true, shows +/- buttons to zoom in/out
+      "zoomControl": false,
+
+      // defaults to true, disables mouse wheel zoom
+      "scrollWheelZoom": false,
+
+      // When false, repaints on each move frame.
+      // Makes the graph slower when moving the map
+      "delayRepaint": true, // default true
+    }
+  },
+  /* the rest of Vega JSON */
+}
+----
+
+This visualization will automatically inject a projection called
+`"projection"`. Use it to calculate positioning of all geo-aware marks.
+Additionally, you may use `latitude`, `longitude`, and `zoom` signals.
+These signals can be used in the graph, or can be updated to modify the
+positioning of the map.
+
 [[vega-debugging]]
 == Debugging
 
@@ -254,7 +304,8 @@ values. See link:#sizing-and-positioning[sizing and positioning] below.
 [[vega-additional-configuration-options]]
 ==== Additional configuration options
 
-These options are specific to the Kibana.
+These options are specific to the Kibana. link:#vega-with-a-map[Map support] has
+additional configuration options.
 
 [source,yaml]
 ----
@@ -287,3 +338,9 @@ By default, Kibana Vega graphs will use
 and VegaLite graphs. The `fit` model uses all available space, ignores
 `width` and `height` values, but respects the padding values. You may
 override this behaviour by specifying a different `autosize` value.
+
+[[vega-on-a-map]]
+Vega on a map
+
+All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
+values, using `fit` model with zero padding.

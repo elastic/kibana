@@ -103,6 +103,23 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should be able to hide all panel titles', async function () {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.tryForTime(10000, async function () {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('');
+      });
+
+    });
+
+    it('should be able to unhide all panel titles', async function () {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.tryForTime(10000, async function () {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('TSVB');
+      });
+    });
+
     describe('expanding a panel', () => {
       it('hides other panels', async () => {
         // Don't expand TSVB since it doesn't have the spy panel.
@@ -236,6 +253,8 @@ export default function ({ getService, getPageObjects }) {
           expect(isChromeVisible).to.be(true);
         });
       });
+
+
     });
 
     describe('add new visualization link', () => {

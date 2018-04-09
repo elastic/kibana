@@ -1,0 +1,15 @@
+{
+  "_template/{name}": {
+    "url_params": {
+      "flat_settings": "__flag__",
+      "master_timeout": "",
+      "local": "__flag__"
+    },
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      "_template/{name}"
+    ]
+  }
+}

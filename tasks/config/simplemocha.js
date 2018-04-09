@@ -6,7 +6,7 @@ export default {
     slow: 5000,
     ignoreLeaks: false,
     reporter: createAutoJunitReporter({
-      reportName: 'Server Mocha Tests'
+      reportName: 'Server Mocha Tests',
     }),
     globals: ['nil'],
   },
@@ -16,12 +16,13 @@ export default {
       'src/**/__tests__/**/*.js',
       'packages/kbn-pm/**/__tests__/**/*.js',
       'packages/kbn-datemath/test/**/*.js',
+      'packages/kbn-dev-utils/**/__tests__/**/*.js',
       'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
       '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
       '!**/_*.js',
       '!**/node_modules/**',
-    ]
-  }
+    ],
+  },
 };
