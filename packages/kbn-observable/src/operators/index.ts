@@ -8,3 +8,4 @@ export { toArray } from './to_array';
 export { switchMap } from './switch_map';
 export { mergeMap } from './merge_map';
 export { skipRepeats } from './skip_repeats';
+export { take } from './take';
