@@ -1,0 +1,1207 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`migrate creates the index and alias if it does not exist 1`] = `
+Object {
+  "data": Object {
+    ".mufasa-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "hoi",
+                "mappings": "{\\"stuff\\":{\\"type\\":\\"integer\\"}}",
+                "mappingsChecksum": "a2b8b8ab8c524ee1bd50dd9d4ec481a67e034491",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".mufasa": Object {
+        ".mufasa-original": Object {
+          "aliases": Object {
+            ".mufasa": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".mufasa-original": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "stuff": Object {
+              "type": "integer",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {},
+  },
+}
+`;
+
+exports[`migrate data and mappings for disabled plugins is retained 1`] = `
+Object {
+  "data": Object {
+    "disabled-scenario-1": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "quotes",
+                "mappings": "{\\"quote\\":{\\"properties\\":{\\"text\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "f2deb89810821e0e854a94b144159f896b992341",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+              Object {
+                "id": "tweets",
+                "mappings": "{\\"tweet\\":{\\"properties\\":{\\"chars\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "dfc3c70042e0bfcb9d5d586d48b88f5ab0e4a29b",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrating",
+          },
+        },
+        "_version": 43,
+      },
+      "q1": Object {
+        "_source": Object {
+          "quote": Object {
+            "text": "It's a dangerous business going out your front door.",
+          },
+        },
+      },
+      "t1": Object {
+        "_source": Object {
+          "tweet": Object {
+            "chars": "The past is not what it was.",
+          },
+        },
+      },
+    },
+    "disabled-scenario-2": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "tweets",
+                "mappings": "{\\"tweet\\":{\\"properties\\":{\\"chars\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "dfc3c70042e0bfcb9d5d586d48b88f5ab0e4a29b",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+              Object {
+                "id": "quotes",
+                "mappings": "{\\"quote\\":{\\"properties\\":{\\"text\\":{\\"type\\":\\"text\\"},\\"author\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "32bda98830c7014796e40c32edcc9338b7564453",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+      "q1": Object {
+        "_source": Object {
+          "quote": Object {
+            "text": "It's a dangerous business going out your front door.",
+          },
+        },
+      },
+      "t1": Object {
+        "_source": Object {
+          "tweet": Object {
+            "chars": "The past is not what it was.",
+          },
+        },
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      "disabled-scenario": Object {
+        "disabled-scenario-2": Object {
+          "aliases": Object {
+            "disabled-scenario": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      "disabled-scenario-1": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "quote": Object {
+              "properties": Object {
+                "text": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "tweet": Object {
+              "properties": Object {
+                "chars": Object {
+                  "type": "text",
+                },
+              },
+            },
+          },
+        },
+      },
+      "disabled-scenario-2": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "quote": Object {
+              "properties": Object {
+                "author": Object {
+                  "type": "keyword",
+                },
+                "text": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "tweet": Object {
+              "properties": Object {
+                "chars": Object {
+                  "type": "text",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      "disabled-scenario-1": Object {
+        "index": Object {
+          "blocks.read_only": false,
+        },
+      },
+      "disabled-scenario-2": Object {
+        "index": Object {
+          "number_of_replicas": undefined,
+          "number_of_shards": undefined,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`migrate does nothing if there are no migrations defined 1`] = `
+Object {
+  "data": Object {},
+  "meta": Object {
+    "aliases": Object {},
+    "mappings": Object {},
+    "settings": Object {},
+  },
+}
+`;
+
+exports[`migrate existing docs are migrated 1`] = `
+Object {
+  "data": Object {
+    "gentleman-original": Object {
+      "fred": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "name": "rogers",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+        },
+        "_version": 1,
+      },
+    },
+    "gentleman-v2": Object {
+      "fred": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "name": "rogers",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "hoi",
+                "mappings": "{\\"shut_the_front_door\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "01dbd2e953cd934bac0024786ad147a1350bc351",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      "gentleman": Object {
+        "gentleman-v2": Object {
+          "aliases": Object {
+            "gentleman": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      "gentleman-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+      "gentleman-v2": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      "gentleman-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+      "gentleman-v2": Object {
+        "index": Object {
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`migrate existing docs are transformed 1`] = `
+Object {
+  "data": Object {
+    "groovystuff-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+        },
+        "_version": 1,
+      },
+      "p1": Object {
+        "_source": Object {
+          "preference": Object {
+            "color": "blue",
+            "resultSize": 1,
+          },
+        },
+      },
+      "u1": Object {
+        "_source": Object {
+          "user": Object {
+            "name": "jimmy fallon",
+          },
+        },
+      },
+      "u2": Object {
+        "_source": Object {
+          "user": Object {
+            "name": "bono",
+          },
+        },
+      },
+    },
+    "groovystuff-v2": Object {
+      "default_pref": Object {
+        "_source": Object {
+          "preference": Object {
+            "color": "steelblue",
+            "resultSize": 10,
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "users",
+                "mappings": "{\\"user\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"country\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "c46727b1349b57b903e4f6debda29d1f377d98b7",
+                "migrationIds": Array [
+                  "ensure_country",
+                ],
+                "migrationsChecksum": "17605a0182fa119f6acd7739cc1f967f4725a9e7",
+              },
+              Object {
+                "id": "preferences",
+                "mappings": "{\\"preference\\":{\\"properties\\":{\\"resultSize\\":{\\"type\\":\\"integer\\"},\\"color\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "03df4121c2e775ab551beb90c3f3a196e2b61bda",
+                "migrationIds": Array [
+                  "default_pref",
+                ],
+                "migrationsChecksum": "67d77399db16823739150691b6102b31d5c77d8e",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+      "p1": Object {
+        "_source": Object {
+          "preference": Object {
+            "color": "blue",
+            "resultSize": 1,
+          },
+        },
+      },
+      "u1": Object {
+        "_source": Object {
+          "user": Object {
+            "country": "N/A",
+            "name": "jimmy fallon",
+          },
+        },
+      },
+      "u2": Object {
+        "_source": Object {
+          "user": Object {
+            "country": "N/A",
+            "name": "bono",
+          },
+        },
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      "groovystuff": Object {
+        "groovystuff-v2": Object {
+          "aliases": Object {
+            "groovystuff": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      "groovystuff-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "preference": Object {
+              "properties": Object {
+                "color": Object {
+                  "type": "keyword",
+                },
+                "resultSize": Object {
+                  "type": "integer",
+                },
+              },
+            },
+            "user": Object {
+              "name": Object {
+                "type": "keyword",
+              },
+            },
+          },
+        },
+      },
+      "groovystuff-v2": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "preference": Object {
+              "properties": Object {
+                "color": Object {
+                  "type": "keyword",
+                },
+                "resultSize": Object {
+                  "type": "integer",
+                },
+              },
+            },
+            "user": Object {
+              "properties": Object {
+                "country": Object {
+                  "type": "keyword",
+                },
+                "name": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      "groovystuff-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+      "groovystuff-v2": Object {
+        "index": Object {
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`migrate existing indices are converted to aliases and migrated 1`] = `
+Object {
+  "data": Object {
+    ".mufasa-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+        },
+        "_version": 1,
+      },
+    },
+    "mufasa-v1": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "hoi",
+                "mappings": "{\\"stuff\\":{\\"type\\":\\"integer\\"}}",
+                "mappingsChecksum": "a2b8b8ab8c524ee1bd50dd9d4ec481a67e034491",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".mufasa": Object {
+        "mufasa-v1": Object {
+          "aliases": Object {
+            ".mufasa": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".mufasa-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "integer",
+                },
+              },
+            },
+          },
+        },
+      },
+      "mufasa-v1": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "stuff": Object {
+              "type": "integer",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      ".mufasa-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+      "mufasa-v1": Object {
+        "index": Object {
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`migrate existing previously migrated index only runs new migrations 1`] = `
+Object {
+  "data": Object {
+    "aquatica-2": Object {
+      "f1": Object {
+        "_source": Object {
+          "fish": Object {
+            "species": "catfish",
+          },
+        },
+      },
+      "f2": Object {
+        "_source": Object {
+          "fish": Object {
+            "species": "carp",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "fishes",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"species\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "c44cbb34e9a49a64141523438f72c8dc2fb9f773",
+                "migrationIds": Array [
+                  "something_or_other",
+                  "convert_kind_to_species",
+                ],
+                "migrationsChecksum": "a54ec64d9b3feaf81ea3095662211f1c27fb1f17",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+    "aquatica-original": Object {
+      "f1": Object {
+        "_source": Object {
+          "fish": Object {
+            "kind": "catfish",
+          },
+        },
+      },
+      "f2": Object {
+        "_source": Object {
+          "fish": Object {
+            "kind": "carp",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "fishes",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "migrationIds": Array [
+                  "something_or_other",
+                ],
+                "migrationsChecksum": "46e8aedaf5f7df5d406a3db25e2abc78c612ef13",
+              },
+            ],
+            "status": "migrating",
+          },
+        },
+        "_version": 43,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      "aquatica": Object {
+        "aquatica-2": Object {
+          "aliases": Object {
+            "aquatica": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      "aquatica-2": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "fish": Object {
+              "properties": Object {
+                "species": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+      "aquatica-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "fish": Object {
+              "properties": Object {
+                "kind": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      "aquatica-2": Object {
+        "index": Object {
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+      "aquatica-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`migrate new index gets seeded 1`] = `
+Object {
+  "data": Object {
+    ".mufasa-v1": Object {
+      "jazzmeup": Object {
+        "_source": Object {
+          "jazz": Object {
+            "louis": "Armstrong",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "hoi",
+                "mappings": "{\\"jazz\\":{\\"properties\\":{\\"louis\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "f1e1b0a50e740ff353b128ec5bc788e6c932abd3",
+                "migrationIds": Array [
+                  "jazzhands",
+                ],
+                "migrationsChecksum": "6c349fa63409939239bfeb893123ebd6dc5ef474",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".mufasa": Object {
+        ".mufasa-v1": Object {
+          "aliases": Object {
+            ".mufasa": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".mufasa-v1": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "jazz": Object {
+              "properties": Object {
+                "louis": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {},
+  },
+}
+`;
+
+exports[`migrate seeds are transformed 1`] = `
+Object {
+  "data": Object {
+    ".music-dest": Object {
+      "jazzmeup": Object {
+        "_source": Object {
+          "artists": Object {
+            "john": "coltrane",
+            "louis": "Armstrong",
+          },
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "hoi",
+                "mappings": "{\\"artists\\":{\\"properties\\":{\\"louis\\":{\\"type\\":\\"text\\"},\\"john\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "ba944b2559de28ce942aab467b9609481427257c",
+                "migrationIds": Array [
+                  "never_happens",
+                  "add_jazzmeup",
+                  "enter_coltrane",
+                ],
+                "migrationsChecksum": "46c6402e887c1d479266848e5c409e4e9f814c8b",
+              },
+            ],
+            "status": "migrated",
+          },
+        },
+        "_version": 1,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      ".music": Object {
+        ".music-dest": Object {
+          "aliases": Object {
+            ".music": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      ".music-dest": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "artists": Object {
+              "properties": Object {
+                "john": Object {
+                  "type": "text",
+                },
+                "louis": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {},
+  },
+}
+`;

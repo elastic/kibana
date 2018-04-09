@@ -1,0 +1,169 @@
+import { fetchMigrationContext } from './migration_context';
+
+describe('migrationContext', () => {
+  function buildOpts(opts) {
+    return {
+      index: 'shazm',
+      plugins: opts.plugins || [],
+      log() { },
+      callCluster(path) {
+        expect(path).toEqual('get');
+        return Promise.resolve(opts.migrationState);
+      },
+      ...opts,
+    };
+  }
+
+  async function testMigrationContext(testOpts) {
+    const opts = buildOpts(testOpts);
+    return fetchMigrationContext(opts);
+  }
+
+  test('ensures that migrations are not undefined', async () => {
+    const plugins = [
+      { id: 'a', migrations: [{ id: 'shazm' }] },
+      { id: 'b' },
+    ];
+    const actual = await testMigrationContext({ plugins });
+    expect(actual.plugins.length).toEqual(1);
+    expect(actual.plugins[0].migrations).toEqual([{ id: 'shazm' }]);
+  });
+
+  test('creates destIndex name', async () => {
+    const actual = await testMigrationContext({ index: 'dang' });
+    const year = new Date().getFullYear().toString();
+    const regexp = new RegExp(`^dang-${year}`);
+    expect(actual.destIndex)
+      .toEqual(expect.stringMatching(regexp));
+  });
+
+  test('creates a logger that logs info', async () => {
+    const logs = [];
+    const actual = await testMigrationContext({ log: (...args) => logs.push(args) });
+    actual.log.info('Wat up?');
+    actual.log.info('Logging, sucka!');
+    expect(logs)
+      .toEqual([
+        [['info', 'migration'], 'Wat up?'],
+        [['info', 'migration'], 'Logging, sucka!'],
+      ]);
+  });
+
+  test('creates a logger that logs debug', async () => {
+    const logs = [];
+    const actual = await testMigrationContext({ log: (...args) => logs.push(args) });
+    actual.log.debug('I need coffee');
+    actual.log.debug('Lots o coffee');
+    expect(logs)
+      .toEqual([
+        [['debug', 'migration'], 'I need coffee'],
+        [['debug', 'migration'], 'Lots o coffee'],
+      ]);
+  });
+
+  test('passes unknown values through', async () => {
+    const actual = await testMigrationContext({ caffeine: 'yes, please!' });
+    expect(actual.caffeine).toEqual('yes, please!');
+  });
+
+  test('accurately computes applied and unapplied migrations', async () => {
+    const rawPlugins = [
+      { id: 'x-pack', migrations: [{ id: 'foo' }, { id: 'bar' }, { id: 'baz' }] },
+      { id: 'baz' },
+      { id: 'mana', migrations: [{ id: 'mushboom' }, { id: 'rabbite' }] }
+    ];
+    const migrationState = {
+      _source: {
+        migration: {
+          plugins: [
+            { id: 'x-pack', migrationIds: ['foo'] },
+            { id: 'mana', migrationIds: ['mushboom'] },
+          ],
+        },
+      },
+    };
+    const { migrationPlan } = await testMigrationContext({ plugins: rawPlugins, migrationState });
+
+    expect(migrationPlan.migrations.length).toEqual(3);
+    expect(migrationPlan.migrations.map(({ id, pluginId }) => ({ id, pluginId })))
+      .toEqual([
+        { pluginId: 'x-pack', id: 'bar' },
+        { pluginId: 'x-pack', id: 'baz' },
+        { pluginId: 'mana', id: 'rabbite' },
+      ]);
+  });
+
+  test('errors if migration order has changed', () => {
+    const plugins = [
+      { id: 'x-pack', migrations: [{ id: 'foo' }, { id: 'bar' }, { id: 'baz' }] },
+    ];
+    const migrationState = {
+      _source: {
+        migration: {
+          plugins: [{ id: 'x-pack', migrationIds: ['foo', 'baz', 'bar'] }],
+        },
+      },
+    };
+    return expect(testMigrationContext({ plugins, migrationState }))
+      .rejects.toThrowError(/Expected migration "baz", but found "bar"/);
+  });
+
+  test('errors if migrations are defined more than once', () => {
+    const plugins = [{
+      id: 'x-pack',
+      migrations: [{ id: 'foo' }, { id: 'bar' }, { id: 'foo' }],
+    }];
+    expect(testMigrationContext({ plugins }))
+      .rejects.toThrowError(/has migration "foo" defined more than once/);
+  });
+
+  test('index is required', () => {
+    expect(testMigrationContext({ index: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster is required', () => {
+    expect(testMigrationContext({ callCluster: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('plugins are required', () => {
+    expect(testMigrationContext({ plugins: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('log is required', () => {
+    expect(testMigrationContext({ log: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster must be a function', () => {
+    expect(testMigrationContext({ callCluster: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('log must be a function', () => {
+    expect(testMigrationContext({ log: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('index must be a string', () => {
+    expect(testMigrationContext({ index: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('destIndex must be a string', () => {
+    expect(testMigrationContext({ destIndex: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('initialIndex must be a string', () => {
+    expect(testMigrationContext({ initialIndex: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('plugins must be an array', () => {
+    expect(testMigrationContext({ plugins: 'notright' }))
+      .rejects.toThrow(/Got string/);
+  });
+});

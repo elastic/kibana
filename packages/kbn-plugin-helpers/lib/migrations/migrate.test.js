@@ -1,0 +1,317 @@
+import _ from 'lodash';
+import { migrate } from './migrate';
+import { mockCluster } from './test/mock_cluster';
+import { buildMigrationState, sanitizePlugins } from './migration_helpers';
+
+describe('migrate', () => {
+  const log = () => {};
+
+  test('does nothing if there are no migrations defined', async () => {
+    const plugins = [];
+    const index = '.amazemazing';
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, log });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('creates the index and alias if it does not exist', async () => {
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        stuff: { type: 'integer' },
+      },
+    }];
+    const index = '.mufasa';
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, log, destIndex: '.mufasa-original' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('generates the dest index if it is not provided', async () => {
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        stuff: { type: 'integer' },
+      },
+    }];
+    const index = '.mufasa';
+    const callCluster = mockCluster({ [index]: { } });
+    const minIndexName = `${index}-${new Date().getUTCFullYear()}`;
+    const maxIndexName = `${index}-${new Date().getUTCFullYear() + 1}`;
+    const { destIndex } = await migrate({ callCluster, index, plugins, log });
+
+    expect(callCluster.state().data[destIndex]).toBeTruthy();
+    expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
+    expect(destIndex > minIndexName).toBeTruthy();
+    expect(destIndex < maxIndexName).toBeTruthy();
+  });
+
+  test('existing indices are converted to aliases and migrated', async () => {
+    const index = '.mufasa';
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        stuff: { type: 'integer' },
+      },
+    }];
+    const existingData = { [index]: {} };
+    const existingMeta = assocMappings({}, index, {
+      shut_the_front_door: {
+        properties: {
+          name: {
+            type: 'integer',
+          },
+        },
+      },
+    });
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins, log, destIndex: 'mufasa-v1' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('race-condition for new indices, migration fails if attempted to run in parallel', async () => {
+    const plugins = [{
+      id: 'hoi',
+      migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
+    }];
+    const index = '.mufasa';
+    const callCluster = mockCluster({});
+    const results = await Promise.all([
+      migrate({ callCluster, index, plugins, log })
+        .catch(({ statusCode }) => ({ status: statusCode })),
+      migrate({ callCluster, index, plugins, log })
+        .catch(({ statusCode }) => ({ status: statusCode })),
+    ]);
+    expect(results[0].status).toEqual('migrated');
+    expect(results[1].status).toEqual(400);
+  });
+
+  test('race-condition version is used for optimistic concurrency', async () => {
+    const alias = 'race';
+    const index = 'race-v1';
+    const pluginV1 = {
+      id: 'concurrency',
+      migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
+    };
+    const originalMigrationState = buildMigrationState([pluginV1]);
+    const pluginV2 = {
+      ...pluginV1,
+      migrations: [...pluginV1.migrations, { id: 'm2', filter: () => true, transform: _.identity }],
+    };
+    const existingData = assocMigrationState({}, index, originalMigrationState);
+    const existingMeta = assocAlias({}, index, alias);
+    const callCluster = mockCluster(existingData, existingMeta);
+    const results = await Promise.all([
+      migrate({ callCluster, index: alias, plugins: [pluginV2], log })
+        .catch(({ statusCode }) => ({ status: statusCode })),
+      migrate({ callCluster, index: alias, plugins: [pluginV2], log })
+        .catch(({ statusCode }) => ({ status: statusCode })),
+    ]);
+
+    // Our second attempt should fail with a version conflict. If this test begins to fail,
+    // we may need to introduce an artificial delay into callCluster's 'update' call only
+    // for this test.
+    expect(results[0].status).toEqual('migrated');
+    expect(results[1].status).toEqual(409);
+  });
+
+  test('new index gets seeded', async () => {
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        jazz: { properties: { louis: { type: 'text' }, }, },
+      },
+      migrations: [{
+        id: 'jazzhands',
+        seed: () => ({
+          _id: 'jazzmeup',
+          _source: {
+            jazz: { louis: 'Armstrong' },
+          },
+        }),
+      }],
+    }];
+    const index = '.mufasa';
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, log, initialIndex: '.mufasa-v1' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('seeds are transformed', async () => {
+    const index = '.music';
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        artists: { properties: { louis: { type: 'text' }, john: { type: 'text' } } },
+      },
+      migrations: [{
+        id: 'never_happens',
+        filter: ({ artists }) => !!artists,
+        transform: () => ({ miles: 'davis' }),
+      }, {
+        id: 'add_jazzmeup',
+        seed: () => ({
+          _id: 'jazzmeup',
+          _source: {
+            artists: { louis: 'Armstrong' },
+          },
+        }),
+      }, {
+        id: 'enter_coltrane',
+        filter: ({ artists }) => !!artists,
+        transform: (doc) => _.set(_.cloneDeep(doc), ['artists', 'john'], 'coltrane'),
+      }],
+    }];
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, log, initialIndex: '.music-dest' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('existing docs are migrated', async () => {
+    const index = 'gentleman';
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        shut_the_front_door: { properties: { name: { type: 'keyword' } } },
+      },
+    }];
+    const existingData = _.set({}, [index, 'fred', '_source', 'shut_the_front_door', 'name'], 'rogers');
+    const existingMeta = assocMappings({}, index, plugins[0].mappings);
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins, log, destIndex: 'gentleman-v2' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('existing docs are transformed', async () => {
+    const index = 'groovystuff';
+    const plugin1 = {
+      id: 'users',
+      mappings: {
+        user: { properties: { name: { type: 'keyword' }, country: { type: 'keyword' }, }, },
+      },
+      migrations: [{
+        id: 'ensure_country',
+        filter: ({ user }) => !!user,
+        transform: (doc) => _.set(_.cloneDeep(doc), ['user', 'country'], 'N/A'),
+      }],
+    };
+    const plugin2 = {
+      id: 'preferences',
+      mappings: {
+        preference: { properties: { resultSize: { type: 'integer' }, color: { type: 'keyword' }, }, },
+      },
+      migrations: [{
+        id: 'default_pref',
+        seed: () => ({
+          _id: 'default_pref',
+          _source: { preference: { resultSize: 10, color: 'steelblue' } },
+        }),
+      }],
+    };
+    const existingData = {
+      [index]: {
+        u1: { _source: { user: { name: 'jimmy fallon' } } },
+        u2: { _source: { user: { name: 'bono' } } },
+        p1: { _source: { preference: { resultSize: 1, color: 'blue' } } },
+      },
+    };
+    const existingMeta = assocMappings({}, index, {
+      ...plugin2.mappings,
+      user: { name: { type: 'keyword' } },
+    });
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins: [plugin1, plugin2], log, destIndex: 'groovystuff-v2' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('existing previously migrated index only runs new migrations', async () => {
+    const index = 'aquatica';
+    const pluginV1 = {
+      id: 'fishes',
+      mappings: {
+        fish: { properties: { kind: { type: 'keyword' }, }, },
+      },
+      migrations: [{
+        id: 'something_or_other',
+        filter: () => true,
+        transform: (doc) => { throw new Error(JSON.stringify(doc)); },
+      }],
+    };
+    const originalMigrationState = buildMigrationState([pluginV1]);
+    const pluginV2 = {
+      id: pluginV1.id,
+      mappings: {
+        fish: { properties: { species: { type: 'keyword' }, }, },
+      },
+      migrations: [
+        ...pluginV1.migrations, {
+          id: 'convert_kind_to_species',
+          filter: ({ fish }) => !!fish,
+          transform: (doc) => ({ ...doc, fish: { species: doc.fish.kind } }),
+        },
+      ],
+    };
+    const existingData = assocMigrationState({}, index, originalMigrationState);
+    _.set(existingData, [index, 'f1', '_source', 'fish', 'kind'], 'catfish');
+    _.set(existingData, [index, 'f2', '_source', 'fish', 'kind'], 'carp');
+    const existingMeta = assocMappings({}, index, pluginV1.mappings);
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins: [pluginV2], log, destIndex: 'aquatica-2' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('data and mappings for disabled plugins is retained', async () => {
+    const index = 'disabled-scenario';
+    const existingIndex = 'disabled-scenario-1';
+    const pluginsV1 = [{
+      id: 'quotes',
+      mappings: {
+        quote: { properties: { text: { type: 'text' }, }, },
+      },
+    }, {
+      id: 'tweets',
+      mappings: {
+        tweet: { properties: { chars: { type: 'text' }, }, },
+      },
+    }];
+    const pluginsV2 = [{
+      id: 'quotes',
+      mappings: {
+        quote: { properties: { text: { type: 'text' }, author: { type: 'keyword' }, }, },
+      },
+    }];
+    const originalMigrationState = buildMigrationState(sanitizePlugins(pluginsV1));
+    const existingData = assocMigrationState({}, existingIndex, originalMigrationState);
+    _.set(existingData, [existingIndex, 'q1', '_source', 'quote', 'text'], 'It\'s a dangerous business going out your front door.');
+    _.set(existingData, [existingIndex, 't1', '_source', 'tweet', 'chars'], 'The past is not what it was.');
+    const existingMeta = assocAlias({}, existingIndex, index);
+    assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins: pluginsV2, log, destIndex: 'disabled-scenario-2' });
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+});
+
+function assocMigrationState(data, index, migrationState) {
+  return _.set(data, [index, 'migration:migration-state'], {
+    _version: 42,
+    _source: { migration: migrationState },
+  });
+}
+
+function assocAlias(meta, index, alias) {
+  return _.set(meta, ['aliases', alias, index, 'alias', alias], {});
+}
+
+function assocMappings(meta, index, mappings) {
+  return _.set(meta, ['mappings', index, 'doc', 'properties'], mappings);
+}
