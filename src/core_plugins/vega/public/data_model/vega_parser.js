@@ -374,7 +374,7 @@ export class VegaParser {
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
     if (this.isVegaLite) {
-      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00A69B' }}
+      // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00B3A4' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
