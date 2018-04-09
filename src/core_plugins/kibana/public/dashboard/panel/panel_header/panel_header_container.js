@@ -24,13 +24,18 @@ import {
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
+  console.log("embeddable", embeddable);
   const panel = getPanel(dashboard, panelId);
   const embeddableTitle = embeddable ? embeddable.title : '';
+  const title = panel.title === undefined ? embeddableTitle : panel.title;
+  console.log("title", title);
   return {
-    title: panel.title === undefined ? embeddableTitle : panel.title,
+    title: title,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
     isViewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     hidePanelTitles: getHidePanelTitles(dashboard),
+    hasSearch: embeddable ? embeddable.hasSearch : false,
+    searchLabel: embeddable ? embeddable.searchLabel : '',
   };
 };
 
@@ -40,7 +45,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { isExpanded, isViewOnlyMode, title, hidePanelTitles } = stateProps;
+  const { isExpanded, isViewOnlyMode, title, hidePanelTitles, hasSearch, searchLabel } = stateProps;
   const { onMaximizePanel, onMinimizePanel } = dispatchProps;
   const { panelId, embeddableFactory } = ownProps;
   let actions;
@@ -63,6 +68,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     actions,
     isViewOnlyMode,
     hidePanelTitles,
+    hasSearch,
+    searchLabel,
   };
 };
 

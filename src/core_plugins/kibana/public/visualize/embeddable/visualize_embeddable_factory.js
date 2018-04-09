@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import _ from 'lodash';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
@@ -11,12 +12,12 @@ import labDisabledTemplate from './visualize_lab_disabled.html';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor(savedVisualizations, timefilter, Promise, Private, config) {
+  constructor(savedVisualizations, searchLoader, timefilter, Private, config) {
     super();
     this._config = config;
     this.savedVisualizations = savedVisualizations;
+    this.searchLoader = searchLoader;
     this.name = 'visualization';
-    this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
     this.filterBarClickHandler = filterBarClickHandlerProvider(Private);
   }
@@ -25,12 +26,12 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     return this.savedVisualizations.urlFor(panelId);
   }
 
-  render(domNode, panel, container) {
+  render = async (domNode, panel, container) => {
     const editUrl = this.getEditPath(panel.id);
 
     const waitFor = [ getVisualizeLoader(), this.savedVisualizations.get(panel.id) ];
-    return this.Promise.all(waitFor)
-      .then(([loader, savedObject]) => {
+    const [loader, savedObject] = await Promise.all(waitFor);
+
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
@@ -92,10 +93,69 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           handler.destroy();
         });
 
+        function hasQueryOrFilters(searchSource) {
+          const filters = searchSource.get('filter');
+          if (filters.length > 0) {
+            return true;
+          }
+
+          const query = searchSource.get('query');
+          if (query.query && query.query.length > 0) {
+            return true;
+          }
+
+          return false;
+        }
+
+        function getFilterLabel(filter) {
+          if (!_.has(filter, 'meta') || (!filter.meta.alias &&
+            (!filter.meta.key && !filter.meta.value)) ) {
+            return '';
+          }
+
+          let prefix = _.get(filter, 'meta.negate', false) ? 'NOT' : '';
+          if (filter.meta.alias) {
+            return `"${prefix} ${filter.meta.alias}"`
+          }
+
+          return `"${prefix} ${filter.meta.key}:${filter.meta.value}"`;
+        }
+
+        function getSearchSourceLabel(searchSource) {
+          let label = '';
+          const filters = searchSource.get('filter');
+          if (filters.length > 0) {
+            const filterLabels = filters.map(filter => {
+              return getFilterLabel(filter);
+            });
+            label = `filters=${filterLabels.join(',')}`;
+          }
+
+          const query = searchSource.get('query');
+          if (query.query && query.query.length > 0) {
+            label = `${label} query="${query.query}"`;
+          }
+
+          return label;
+        }
+
+        let hasSearch = false;
+        let searchLabel = '';
+        if (hasQueryOrFilters(savedObject.searchSource)) {
+          hasSearch = true;
+          searchLabel = `This visualization has the following search criteria applied: ${getSearchSourceLabel(savedObject.searchSource)}`;
+        }
+        if (savedObject.savedSearchId) {
+          hasSearch = true;
+          const savedSearch = await this.searchLoader.get(savedObject.savedSearchId)
+          searchLabel = `${searchLabel} This visualization is linked to Saved Search "${savedSearch.title}" that applies the following search criteria: ${getSearchSourceLabel(savedSearch.searchSource)}`;
+        }
+
         return new Embeddable({
           title: savedObject.title,
-          editUrl: editUrl
+          editUrl,
+          hasSearch,
+          searchLabel,
         });
-      });
   }
 }
