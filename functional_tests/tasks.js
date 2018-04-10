@@ -56,38 +56,41 @@ export async function newRunApiTests() {
   ]);
 }
 
+// TODO: be able to chain multiple configs
 // Takes in multiple paths
 // configPath should be paths
 // works with '../test/functional/config.js'
+// try with '../test/api_integration/config.js'
 // try with '../test/http_server_integration/config.js'
 // from x-pack-kibana:
 // try with '../test/api_integration/config.js'
 // try with '../test/saml_api_integration/config.js'
-export async function runWithConfig(configPath = '../test/functional/config.js') {
+export async function runWithConfig(configPath = 'test/functional/config.js') {
   const cmd = new Command('node scripts/functional_test_with_config');
 
   cmd
     .option('--config [value]', 'Path to config file to specify options', null)
     .parse(process.argv);
 
-  configPath = cmd.config || configPath;
+  configPath = resolve(KIBANA_ROOT, cmd.config || configPath);
 
-  // be able to chain multiple configs
-  await withTmpDir(async tmpDir => {
-    await withProcRunner(async procs => {
-      const config = await readConfigFile(log, resolve(KIBANA_ROOT, configPath));
+  try {
+    await withTmpDir(async tmpDir => {
+      await withProcRunner(async procs => {
+        const config = await readConfigFile(log, configPath);
 
-      await runEs({ tmpDir, procs, config }); // can also run with xpack
-      // NOTE: enableUI, useSAML, devMode
-      await runKibanaServer({ procs, config });
-      await runFtr({ procs, configPath: require.resolve(configPath) });
+        await runEs({ tmpDir, procs, config }); // can also run with xpack
+        // NOTE: enableUI, useSAML, devMode
+        await runKibanaServer({ procs, config });
+        await runFtr({ procs, configPath });
 
-      // don't stop procs if servers are supposed to keep running
-      //await procs.waitForAllToStop();
-      await procs.stop('kibana');
-      await procs.stop('es');
+        await procs.stop('kibana');
+        await procs.stop('es');
+      });
     });
-  });
+  } catch (err) {
+    console.log('error running with config', err);
+  }
 }
 
 // Takes in only one configPath
@@ -103,7 +106,6 @@ async function startWithConfig(configPath) {
       // Maybe log something here?
       // Maybe emit an event here?
 
-      // don't stop procs if servers are supposed to keep running
       await procs.waitForAllToStop();
     });
   });
