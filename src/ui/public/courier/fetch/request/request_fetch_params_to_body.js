@@ -26,6 +26,7 @@ function emptySearch() {
  * @return {Promise.<string>}
  */
 export function requestFetchParamsToBody(
+  $rootScope,
   requestsFetchParams,
   Promise,
   timeFilter,
@@ -67,6 +68,10 @@ export function requestFetchParamsToBody(
         } else {
           index = indexList;
         }
+
+
+        $rootScope.filterState = { query: body.query };
+
 
         return JSON.stringify({
           index,
