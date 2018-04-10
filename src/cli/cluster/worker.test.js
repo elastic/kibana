@@ -1,11 +1,10 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import cluster from 'cluster';
 import { findIndex } from 'lodash';
 
 import MockClusterFork from './_mock_cluster_fork';
-import Worker from '../worker';
-import Log from '../../log';
+import Worker from './worker';
+import Log from '../log';
 
 const workersToShutdown = [];
 
@@ -52,7 +51,7 @@ describe('CLI cluster manager', function () {
         const worker = setup({ watch: true });
         sinon.stub(worker, 'start');
         worker.onChange('/some/path');
-        expect(worker.changes).to.eql(['/some/path']);
+        expect(worker.changes).toEqual(['/some/path']);
         sinon.assert.calledOnce(worker.start);
       });
     });
@@ -62,7 +61,7 @@ describe('CLI cluster manager', function () {
         const worker = setup({ watch: false });
         sinon.stub(worker, 'start');
         worker.onChange('/some/path');
-        expect(worker.changes).to.eql([]);
+        expect(worker.changes).toEqual([]);
         sinon.assert.notCalled(worker.start);
       });
     });
@@ -73,7 +72,7 @@ describe('CLI cluster manager', function () {
       it('kills the worker and unbinds from message, online, and disconnect events', async function () {
         const worker = setup({ log: new Log(false, true) });
         await worker.start();
-        expect(worker).to.have.property('online', true);
+        expect(worker).toHaveProperty('online', true);
         const fork = worker.fork;
         sinon.assert.notCalled(fork.process.kill);
         assertListenerAdded(fork, 'message');
@@ -139,9 +138,9 @@ describe('CLI cluster manager', function () {
       it('sets the listening flag and emits the listening event', function () {
         const worker = setup();
         const stub = sinon.stub(worker, 'emit');
-        expect(worker).to.have.property('listening', false);
+        expect(worker).toHaveProperty('listening', false);
         worker.onMessage('WORKER_LISTENING');
-        expect(worker).to.have.property('listening', true);
+        expect(worker).toHaveProperty('listening', true);
         sinon.assert.calledWithExactly(stub, 'listening');
       });
     });
