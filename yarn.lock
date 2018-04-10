@@ -87,9 +87,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@^0.0.37":
-  version "0.0.37"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.37.tgz#c7cbbcd8c451917e745949ed169caf7b1e9efdbe"
+"@elastic/eui@v0.0.38":
+  version "0.0.38"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.38.tgz#83d55b7ad111c0a917dee2747247bac9f0be7fb5"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -4735,9 +4735,9 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.10.0.tgz#73e2f785666521d0d3a9ddc9fd5a0a5e3bf47845"
+geckodriver@1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.11.0.tgz#2853ccd4f420d347c61542daeed782c87a718687"
   dependencies:
     adm-zip "0.4.7"
     bluebird "3.4.6"
@@ -7190,9 +7190,9 @@ lead@^1.0.0:
   dependencies:
     flush-write-stream "^1.0.2"
 
-leadfoot@silne30/leadfoot#validation_for_response_in_ff58:
-  version "1.7.4"
-  resolved "https://codeload.github.com/silne30/leadfoot/tar.gz/460c8ed67c08177adc9c79243ff045880f4cad09"
+leadfoot@1.7.5:
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/leadfoot/-/leadfoot-1.7.5.tgz#2188019ba95f524f2fec4dd9fbb06f1e6e832d3e"
   dependencies:
     dojo "2.0.0-alpha.7"
     jszip "2.5.0"
@@ -7204,6 +7204,12 @@ leaflet-draw@0.4.10:
 leaflet-responsive-popup@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/leaflet-responsive-popup/-/leaflet-responsive-popup-0.2.0.tgz#119bfcfae147864730f6a01fbd73b5b2ce274728"
+
+leaflet-vega@0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/leaflet-vega/-/leaflet-vega-0.8.3.tgz#6d2572aa1909ed50d94937d5f4c2e42b018f4ac2"
+  dependencies:
+    vega-spec-injector "^0.0.2"
 
 leaflet.heat@0.2.0:
   version "0.2.0"
@@ -11533,9 +11539,9 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript@^2.7.2:
-  version "2.7.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.7.2.tgz#2d615a1ef4aee4f574425cdff7026edf81919836"
+typescript@^2.8.1:
+  version "2.8.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.8.1.tgz#6160e4f8f195d5ba81d4876f9c0cc1fbc0820624"
 
 ua-parser-js@^0.7.9:
   version "0.7.17"
@@ -12024,6 +12030,10 @@ vega-scenegraph@2, vega-scenegraph@^2.3:
 vega-schema-url-parser@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/vega-schema-url-parser/-/vega-schema-url-parser-1.0.0.tgz#fc17631e354280d663ed39e3fa8eddb62145402e"
+
+vega-spec-injector@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/vega-spec-injector/-/vega-spec-injector-0.0.2.tgz#f1d990109dd9d845c524738f818baa4b72a60ca6"
 
 vega-statistics@^1.2:
   version "1.2.1"

@@ -390,7 +390,7 @@ describe('tag cloud tests', function () {
     });
 
 
-    it('should test', async function () {
+    it('should render simple image', async function () {
 
       tagCloud = new TagCloud(domNode);
       tagCloud.setData(baseTest.data);
