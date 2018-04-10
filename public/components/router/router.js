@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { routes } from '../../apps';
 import { routerProvider } from '../../lib/router_provider';
 
 const getLoadingComponent = msg => <div>{msg || 'Loading...'}</div>;
@@ -15,6 +14,7 @@ export class Router extends React.PureComponent {
     onLoad: PropTypes.func.isRequired,
     onError: PropTypes.func.isRequired,
     restoreRoute: PropTypes.string,
+    routes: PropTypes.array.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
   };
@@ -31,8 +31,8 @@ export class Router extends React.PureComponent {
 
   componentWillMount() {
     // routerProvider is a singleton, and will only ever return one instance
+    const { routes, restoreRoute, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
-    const { restoreRoute, onRouteChange, onLoad, onError } = this.props;
 
     // when the component in the route changes, render it
     router.onPathChange(route => {

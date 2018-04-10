@@ -8,18 +8,26 @@ export const revealImage = () => ({
   render(domNode, config, handlers) {
     const aligner = document.createElement('div');
     const img = new Image();
+
+    // modify the top-level container class
+    domNode.className = 'revealImage';
+
+    // set up the overlay image
     img.onload = function() {
       setSize();
       finish();
     };
-    handlers.onResize(img.onload);
-
-    aligner.className = 'revealImageAligner';
-    aligner.style.backgroundImage = `url(${config.emptyImage})`;
-    aligner.appendChild(img);
     img.style.clipPath = getClipPath(config.percent, config.origin);
     img.src = config.image;
-    domNode.className = 'revealImage';
+    handlers.onResize(img.onload);
+
+    // set up the underlay, "empty" image
+    aligner.className = 'revealImageAligner';
+    aligner.appendChild(img);
+    if (config.emptyImage) {
+      // only use empty image if one is provided
+      aligner.style.backgroundImage = `url(${config.emptyImage})`;
+    }
 
     function finish() {
       const firstChild = domNode.firstChild;

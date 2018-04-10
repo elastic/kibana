@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { routes } from '../../apps';
 import { LOCALSTORAGE_LASTPAGE } from '../../../common/lib/constants';
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { storage } from '../../lib/storage';
@@ -45,6 +46,7 @@ export class App extends React.PureComponent {
       <div className="canvas">
         <UpdateModal />
         <Router
+          routes={routes}
           restoreRoute={restoreRoute}
           showLoading={this.props.appState.ready === false}
           loadingMessage="Canvas is loading"
