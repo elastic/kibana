@@ -20,6 +20,8 @@ export function startRepl(server) {
       return '';
     },
   };
+
+  return replServer;
 }
 
 function colorize(o, depth) {
@@ -33,7 +35,7 @@ function prettyPrint(text, o, depth) {
 // This lets us handle promises more gracefully than the default REPL,
 // which doesn't show the results.
 function promiseFriendlyWriter(displayPrompt) {
-  const PRINT_DEPTH = 5;
+  const PRINT_DEPTH = 15;
   return (result) => promisePrint(result, displayPrompt, PRINT_DEPTH);
 }
 

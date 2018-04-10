@@ -5,9 +5,9 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
+import { startRepl } from '../../server/utils';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
-import { startRepl } from './repl';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
