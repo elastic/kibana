@@ -70,7 +70,7 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
       min = Math.min(min, value);
       max = Math.max(max, value);
 
-      const feature = {
+      return {
         type: 'Feature',
         geometry: {
           type: 'Point',
@@ -86,7 +86,6 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
           value: value
         }
       };
-      return feature;
     });
   } else {
     features = [];

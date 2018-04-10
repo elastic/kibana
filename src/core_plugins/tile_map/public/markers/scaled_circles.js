@@ -6,13 +6,15 @@ import { EventEmitter } from 'events';
 
 export class ScaledCirclesMarkers extends EventEmitter {
 
-  constructor(featureCollection, options, targetZoom, kibanaMap) {
+  constructor(featureCollection, options, targetZoom, kibanaMap, metricAgg) {
     super();
     this._geohashGeoJsonAndMeta = featureCollection;
     this._zoom = targetZoom;
+    this._metricAgg = metricAgg;
 
     this._valueFormatter = options.valueFormatter || ((x) => {x;});
     this._tooltipFormatter = options.tooltipFormatter || ((x) => {x;});
+    this._label = options.label;
 
     this._legendColors = null;
     this._legendQuantizer = null;
@@ -60,9 +62,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
   getLabel() {
     if (this._popups.length) {
-      // throw new Error('Not implemented');
-      return 'foobar';
-      // return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+      return this._label;
     }
     return '';
   }

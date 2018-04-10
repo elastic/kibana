@@ -26,7 +26,8 @@ export class GeohashLayer extends KibanaMapLayer {
     const markerOptions = {
       isFilteredByCollar: this._geohashOptions.isFilteredByCollar,
       valueFormatter: this._geohashOptions.valueFormatter,
-      tooltipFormatter: this._geohashOptions.tooltipFormatter
+      tooltipFormatter: this._geohashOptions.tooltipFormatter,
+      label: this._geohashOptions.label
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':

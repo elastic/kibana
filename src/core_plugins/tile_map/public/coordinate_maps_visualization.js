@@ -131,6 +131,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), metricAgg);
 
       return {
+        label: metricAgg ? metricAgg.makeLabel() : '',
         valueFormatter: this._geoJson ? (metricAgg && metricAgg.fieldFormatter()) : null,
         tooltipFormatter: this._geoJson ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
