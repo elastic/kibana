@@ -9,6 +9,7 @@ import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';
 
 import './vega.less';
+import './vega-tooltip.css';
 
 // Editor-specific code
 import 'brace/mode/hjson';

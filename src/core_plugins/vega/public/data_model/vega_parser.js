@@ -67,6 +67,7 @@ export class VegaParser {
     this.hideWarnings = !!this._config.hideWarnings;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
+    this.tooltips = this._config.tooltips;
 
     this._setDefaultColors();
     this._parseControlPlacement(this._config);
