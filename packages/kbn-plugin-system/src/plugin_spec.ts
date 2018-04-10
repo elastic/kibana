@@ -8,6 +8,14 @@ import {
 
 const noop = () => {};
 
+function isPromise(obj: any) {
+  return (
+    obj != null &&
+    typeof obj === 'object' &&
+    typeof obj.then === 'function'
+  );
+}
+
 export class PluginSpec<C, D extends PluginsType, E> {
   readonly name: PluginName;
   readonly dependencies: PluginName[];
@@ -48,11 +56,13 @@ export class PluginSpec<C, D extends PluginsType, E> {
     );
     const exposedValues = this._pluginInstance.start();
 
-    // TODO throw if then-able? To make sure no one async/awaits while processing the plugin?
-    // Or should we change this to _always_ `await pluginInstance.start()`?
-    // if (isPromise(value)) {
-    //   throw new Error('plugin cannot return a promise')
-    // }
+    if (isPromise(exposedValues)) {
+      throw new Error(
+        `A promise was returned when starting [${
+          this.name
+        }], but systems must start synchronously and return either return undefined or the contract they expose to other plugins.`
+      );
+    }
 
     this._exposedValues =
       exposedValues === undefined ? ({} as E) : exposedValues;
