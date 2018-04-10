@@ -1,10 +1,9 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import fs from 'fs';
 import rimraf from 'rimraf';
 
-import { cleanPrevious, cleanArtifacts } from '../cleanup';
-import Logger from '../../lib/logger';
+import { cleanPrevious, cleanArtifacts } from './cleanup';
+import Logger from '../lib/logger';
 
 describe('kibana cli', function () {
 
@@ -44,7 +43,7 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(errorStub.called).to.be(false);
+              expect(errorStub.called).toBe(false);
             });
         });
 
@@ -59,7 +58,7 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(errorStub.called).to.be(true);
+              expect(errorStub.called).toBe(true);
             });
         });
 
@@ -70,7 +69,7 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
+              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).toBe(true);
             });
         });
 
@@ -84,7 +83,7 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(errorStub.called).to.be(true);
+              expect(errorStub.called).toBe(true);
             });
         });
 
@@ -95,7 +94,7 @@ describe('kibana cli', function () {
           return cleanPrevious(settings, logger)
             .catch(errorStub)
             .then(function () {
-              expect(errorStub.called).to.be(false);
+              expect(errorStub.called).toBe(false);
             });
         });
       });
@@ -111,7 +110,7 @@ describe('kibana cli', function () {
           sinon.stub(rimraf, 'sync');
 
           cleanArtifacts(settings);
-          expect(rimraf.sync.calledWith(settings.workingPath)).to.be(true);
+          expect(rimraf.sync.calledWith(settings.workingPath)).toBe(true);
         });
 
         it('should swallow any errors thrown by rimraf.sync', function () {
@@ -119,7 +118,7 @@ describe('kibana cli', function () {
             throw new Error('Something bad happened.');
           });
 
-          expect(cleanArtifacts).withArgs(settings).to.not.throwError();
+          expect(() => cleanArtifacts(settings)).not.toThrow();
         });
       });
 

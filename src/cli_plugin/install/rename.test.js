@@ -1,8 +1,7 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import fs from 'fs';
 
-import { renamePlugin } from '../rename';
+import { renamePlugin } from './rename';
 
 describe('plugin folder rename', function () {
   let renameStub;
@@ -24,8 +23,8 @@ describe('plugin folder rename', function () {
 
     return renamePlugin('/foo/bar', '/bar/foo')
       .catch(function (err) {
-        expect(err.code).to.be('error');
-        expect(renameStub.callCount).to.be(1);
+        expect(err.code).toBe('error');
+        expect(renameStub.callCount).toBe(1);
       });
   });
 
@@ -36,7 +35,7 @@ describe('plugin folder rename', function () {
 
     return renamePlugin('/foo/bar', '/bar/foo')
       .then(function () {
-        expect(renameStub.callCount).to.be(1);
+        expect(renameStub.callCount).toBe(1);
       })
       .catch(function () {
         throw new Error('We shouln\'t have any errors');
@@ -56,7 +55,6 @@ describe('plugin folder rename', function () {
     });
 
     it('should retry on Windows EPERM errors for up to 3 seconds', function () {
-      this.timeout(5000);
       renameStub = sinon.stub(fs, 'rename', function (from, to, cb) {
         cb({
           code: 'EPERM'
@@ -64,9 +62,9 @@ describe('plugin folder rename', function () {
       });
       return renamePlugin('/foo/bar', '/bar/foo')
         .catch(function (err) {
-          expect(err.code).to.be('EPERM');
-          expect(renameStub.callCount).to.be.greaterThan(1);
+          expect(err.code).toBe('EPERM');
+          expect(renameStub.callCount).toBeGreaterThan(1);
         });
-    });
+    }, 5000);
   });
 });

@@ -1,11 +1,10 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import glob from 'glob-all';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import { extract, getPackData } from '../pack';
-import { _downloadSingle }  from '../download';
+import Logger from '../lib/logger';
+import { extract, getPackData } from './pack';
+import { _downloadSingle }  from './download';
 import { join } from 'path';
 
 describe('kibana cli', function () {
@@ -13,7 +12,7 @@ describe('kibana cli', function () {
   describe('pack', function () {
 
     let testNum = 0;
-    const workingPathRoot = join(__dirname, '.test.data');
+    const workingPathRoot = join(__dirname, '.test.data.pack');
     let testWorkingPath;
     let tempArchiveFilePath;
     let testPluginPath;
@@ -50,7 +49,7 @@ describe('kibana cli', function () {
     });
 
     function copyReplyFile(filename) {
-      const filePath = join(__dirname, 'replies', filename);
+      const filePath = join(__dirname, '__fixtures__', 'replies', filename);
       const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
       return _downloadSingle(settings, logger, sourceUrl);
@@ -83,7 +82,7 @@ describe('kibana cli', function () {
               'public/app.js',
               'extra file only in zip.txt'
             ];
-            expect(files.sort()).to.eql(expected.sort());
+            expect(files.sort()).toEqual(expected.sort());
           });
       });
 
@@ -97,10 +96,10 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(() => {
-            expect(settings.plugins[0].name).to.be('test-plugin');
-            expect(settings.plugins[0].archivePath).to.be('kibana/test-plugin');
-            expect(settings.plugins[0].version).to.be('1.0.0');
-            expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
+            expect(settings.plugins[0].name).toBe('test-plugin');
+            expect(settings.plugins[0].archivePath).toBe('kibana/test-plugin');
+            expect(settings.plugins[0].version).toBe('1.0.0');
+            expect(settings.plugins[0].kibanaVersion).toBe('1.0.0');
           });
       });
 
@@ -111,7 +110,7 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(() => {
-            expect(settings.plugins[0].kibanaVersion).to.be('5.0.1');
+            expect(settings.plugins[0].kibanaVersion).toBe('5.0.1');
           });
       });
 
@@ -122,7 +121,7 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(() => {
-            expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
+            expect(settings.plugins[0].kibanaVersion).toBe('1.0.0');
           });
       });
 
@@ -132,29 +131,29 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(() => {
-            expect(settings.plugins[0].name).to.be('funger-plugin');
-            expect(settings.plugins[0].archivePath).to.be('kibana/funger-plugin');
-            expect(settings.plugins[0].version).to.be('1.0.0');
+            expect(settings.plugins[0].name).toBe('funger-plugin');
+            expect(settings.plugins[0].archivePath).toBe('kibana/funger-plugin');
+            expect(settings.plugins[0].version).toBe('1.0.0');
 
-            expect(settings.plugins[1].name).to.be('pdf');
-            expect(settings.plugins[1].archivePath).to.be('kibana/pdf-linux');
-            expect(settings.plugins[1].version).to.be('1.0.0');
+            expect(settings.plugins[1].name).toBe('pdf');
+            expect(settings.plugins[1].archivePath).toBe('kibana/pdf-linux');
+            expect(settings.plugins[1].version).toBe('1.0.0');
 
-            expect(settings.plugins[2].name).to.be('pdf');
-            expect(settings.plugins[2].archivePath).to.be('kibana/pdf-win32');
-            expect(settings.plugins[2].version).to.be('1.0.0');
+            expect(settings.plugins[2].name).toBe('pdf');
+            expect(settings.plugins[2].archivePath).toBe('kibana/pdf-win32');
+            expect(settings.plugins[2].version).toBe('1.0.0');
 
-            expect(settings.plugins[3].name).to.be('pdf');
-            expect(settings.plugins[3].archivePath).to.be('kibana/pdf-win64');
-            expect(settings.plugins[3].version).to.be('1.0.0');
+            expect(settings.plugins[3].name).toBe('pdf');
+            expect(settings.plugins[3].archivePath).toBe('kibana/pdf-win64');
+            expect(settings.plugins[3].version).toBe('1.0.0');
 
-            expect(settings.plugins[4].name).to.be('pdf');
-            expect(settings.plugins[4].archivePath).to.be('kibana/pdf');
-            expect(settings.plugins[4].version).to.be('1.0.0');
+            expect(settings.plugins[4].name).toBe('pdf');
+            expect(settings.plugins[4].archivePath).toBe('kibana/pdf');
+            expect(settings.plugins[4].version).toBe('1.0.0');
 
-            expect(settings.plugins[5].name).to.be('test-plugin');
-            expect(settings.plugins[5].archivePath).to.be('kibana/test-plugin');
-            expect(settings.plugins[5].version).to.be('1.0.0');
+            expect(settings.plugins[5].name).toBe('test-plugin');
+            expect(settings.plugins[5].archivePath).toBe('kibana/test-plugin');
+            expect(settings.plugins[5].version).toBe('1.0.0');
           });
       });
 
@@ -164,7 +163,7 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(shouldReject, (err) => {
-            expect(err.message).to.match(/No kibana plugins found in archive/i);
+            expect(err.message).toMatch(/No kibana plugins found in archive/i);
           });
       });
 
@@ -174,7 +173,7 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(shouldReject, (err) => {
-            expect(err.message).to.match(/error retrieving/i);
+            expect(err.message).toMatch(/error retrieving/i);
           });
       });
 
@@ -184,7 +183,7 @@ describe('kibana cli', function () {
             return getPackData(settings, logger);
           })
           .then(shouldReject, (err) => {
-            expect(err.message).to.match(/invalid plugin name/i);
+            expect(err.message).toMatch(/invalid plugin name/i);
           });
       });
 

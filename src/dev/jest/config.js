@@ -4,6 +4,9 @@ export default {
     '<rootDir>/src/ui',
     '<rootDir>/src/core_plugins',
     '<rootDir>/src/server',
+    '<rootDir>/src/cli',
+    '<rootDir>/src/cli_keystore',
+    '<rootDir>/src/cli_plugin',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [
@@ -58,6 +61,7 @@ export default {
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',
+    'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
     '<rootDir>/node_modules/enzyme-to-json/serializer',
