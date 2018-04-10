@@ -15,6 +15,7 @@ describe('_source formatting', function () {
     let format;
     let convertHtml;
 
+    beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       hits = Private(FixturesHitsProvider);
