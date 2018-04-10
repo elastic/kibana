@@ -109,12 +109,14 @@ describe('CoordinateMapsVisualizationTest', function () {
         mapZoom: 2,
         mapCenter: [0, 0],
       };
-
-
+      
       const mockAggs = [
         {
           type: {
-            type: 'metrics'
+            type: 'metrics',
+            makeLabel: () =>{
+              return 'foobar';
+            }
           },
           fieldFormatter: (x) => {
             return x;
