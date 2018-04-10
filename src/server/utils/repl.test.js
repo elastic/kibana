@@ -1,17 +1,17 @@
 
 jest.mock('repl');
-const originalConsoleLog = console.log;
 
 describe('repl', () => {
+  const originalConsoleLog = console.log;
+
   beforeEach(() => {
-    // Set up some mocked out file info before each test
+    global.console.log = jest.fn();
     require('repl').start = (opts) => {
       return {
         opts,
         context: { },
       };
     };
-    global.console.log = jest.fn();
   });
 
   afterEach(() => {
