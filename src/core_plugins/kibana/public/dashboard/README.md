@@ -6,17 +6,20 @@ embeddables communicate with eachother.
 ### Types of state
 
 **Embeddable metadata** - Data the embeddable instance gives the dashboard once as a
- return value of EmbeddableFactory.initialize. This is stored in the EmbeddableHandlersCache, accessible via
- `embeddableHandlersCache.getMetadata(panelId)`. Data such as edit link and title go in
- here.
+ return value of EmbeddableFactory.create. Data such as edit link and title go in
+ here. We may later decide to move some of this data to the dynamic embeddable state
+ (for instance, if we implemented inline editing a title could change), but we keep the
+ separation because it allows us to force some consistency in our UX. For example, we may
+ not want a visualization to all of a sudden go from supporting drilldown links to
+ not supporting it, as it would mean disappearing panel context menu items.
  
 **Embeddable state** - Data the embeddable gives the dashboard throughout it's lifecycle as 
   things update and the user interacts with it.  This is communicated to the dashboard via the
-  function `onEmbeddableStateChanged` that is passed in to the `EmbeddableFactory.initialize` call.
+  function `onEmbeddableStateChanged` that is passed in to the `EmbeddableFactory.create` call.
 
 **Container state** - Data the dashboard gives to the embeddable throughout it's lifecycle
  as things update and the user interacts with Kibana. This is communicated to the embeddable via
- the function `onContainerStateChanged` which is returned from the `EmbeddableFactory.initialize` call
+ the function `onContainerStateChanged` which is returned from the `EmbeddableFactory.create` call
 
 **Container metadata** - State that only needs to be given to the embeddable once, 
  and does not change thereafter. This will contain data given to dashboard when a new embeddable is
