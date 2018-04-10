@@ -1,6 +1,5 @@
-import expect from 'expect.js';
 import { set } from 'lodash';
-import BasePathProxy from '../base_path_proxy';
+import BasePathProxy from './base_path_proxy';
 
 describe('CLI Cluster Manager', function () {
   describe('base_path_proxy constructor', function () {
@@ -10,7 +9,7 @@ describe('CLI Cluster Manager', function () {
       set(settings, 'server.ssl.certificate', './cert.crt');
       set(settings, 'server.ssl.key', './cert.key');
 
-      expect(() => new BasePathProxy(null, settings)).to.throwError(
+      expect(() => new BasePathProxy(null, settings)).toThrow(
         `Invalid Configuration: please specify either "server.ssl.keystore.path" or "server.ssl.certificate", not both.`
       );
     });

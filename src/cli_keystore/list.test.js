@@ -1,9 +1,9 @@
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
 
-import { Keystore } from '../../server/keystore';
-import { list } from '../list';
-import Logger from '../../cli_plugin/lib/logger';
+import { Keystore } from '../server/keystore';
+import { list } from './list';
+import Logger from '../cli_plugin/lib/logger';
 
 describe('Kibana keystore', () => {
   describe('list', () => {

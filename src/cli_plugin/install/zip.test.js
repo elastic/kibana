@@ -1,14 +1,13 @@
-import expect from 'expect.js';
 import rimraf from 'rimraf';
 import path from 'path';
 import os from 'os';
 import glob from 'glob';
-import { analyzeArchive, extractArchive, _isDirectory } from '../zip';
+import { analyzeArchive, extractArchive, _isDirectory } from './zip';
 
 describe('kibana cli', function () {
 
   describe('zip', function () {
-    const repliesPath = path.resolve(__dirname, './replies');
+    const repliesPath = path.resolve(__dirname, '__fixtures__', 'replies');
     const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
 
     let tempPath;
@@ -27,11 +26,11 @@ describe('kibana cli', function () {
         const packages = await analyzeArchive(archivePath);
         const plugin = packages[0];
 
-        expect(packages).to.be.an(Array);
-        expect(plugin.name).to.be('test-plugin');
-        expect(plugin.archivePath).to.be('kibana/test-plugin');
-        expect(plugin.archive).to.be(archivePath);
-        expect(plugin.kibanaVersion).to.be('1.0.0');
+        expect(packages).toBeInstanceOf(Array);
+        expect(plugin.name).toBe('test-plugin');
+        expect(plugin.archivePath).toBe('kibana/test-plugin');
+        expect(plugin.archive).toBe(archivePath);
+        expect(plugin.kibanaVersion).toBe('1.0.0');
       });
     });
 
@@ -50,7 +49,7 @@ describe('kibana cli', function () {
           'public/app.js',
           'README.md'
         ];
-        expect(files.sort()).to.eql(expected.sort());
+        expect(files.sort()).toEqual(expected.sort());
       });
     });
 
@@ -66,17 +65,17 @@ describe('kibana cli', function () {
 
   describe('_isDirectory', () => {
     it('should check for a forward slash', () => {
-      expect(_isDirectory('/foo/bar/')).to.be(true);
+      expect(_isDirectory('/foo/bar/')).toBe(true);
     });
 
     it('should check for a backslash', () => {
-      expect(_isDirectory('\\foo\\bar\\')).to.be(true);
+      expect(_isDirectory('\\foo\\bar\\')).toBe(true);
     });
 
     it('should return false for files', () => {
-      expect(_isDirectory('foo.txt')).to.be(false);
-      expect(_isDirectory('\\path\\to\\foo.txt')).to.be(false);
-      expect(_isDirectory('/path/to/foo.txt')).to.be(false);
+      expect(_isDirectory('foo.txt')).toBe(false);
+      expect(_isDirectory('\\path\\to\\foo.txt')).toBe(false);
+      expect(_isDirectory('/path/to/foo.txt')).toBe(false);
     });
   });
 

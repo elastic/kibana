@@ -1,9 +1,8 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
-import Logger from '../../lib/logger';
-import list from '../list';
+import Logger from '../lib/logger';
+import list from './list';
 import { join } from 'path';
 import { writeFileSync, appendFileSync } from 'fs';
 
@@ -18,7 +17,7 @@ describe('kibana cli', function () {
 
   describe('plugin lister', function () {
 
-    const pluginDir = join(__dirname, '.test.data');
+    const pluginDir = join(__dirname, '.test.data.list');
     let logger;
 
     const settings = {
@@ -46,9 +45,9 @@ describe('kibana cli', function () {
 
       list(settings, logger);
 
-      expect(logger.log.calledWith('plugin1@5.0.0-alpha2')).to.be(true);
-      expect(logger.log.calledWith('plugin2@3.2.1')).to.be(true);
-      expect(logger.log.calledWith('plugin3@1.2.3')).to.be(true);
+      expect(logger.log.calledWith('plugin1@5.0.0-alpha2')).toBe(true);
+      expect(logger.log.calledWith('plugin2@3.2.1')).toBe(true);
+      expect(logger.log.calledWith('plugin3@1.2.3')).toBe(true);
     });
 
     it('ignore folders that start with a period', function () {
@@ -60,8 +59,8 @@ describe('kibana cli', function () {
 
       list(settings, logger);
 
-      expect(logger.log.calledWith('.foo@1.0.0')).to.be(false);
-      expect(logger.log.calledWith('.bar@1.0.0')).to.be(false);
+      expect(logger.log.calledWith('.foo@1.0.0')).toBe(false);
+      expect(logger.log.calledWith('.bar@1.0.0')).toBe(false);
     });
 
     it('list should only list folders', function () {
@@ -72,9 +71,9 @@ describe('kibana cli', function () {
 
       list(settings, logger);
 
-      expect(logger.log.calledWith('plugin1@1.0.0')).to.be(true);
-      expect(logger.log.calledWith('plugin2@1.0.0')).to.be(true);
-      expect(logger.log.calledWith('plugin3@1.0.0')).to.be(true);
+      expect(logger.log.calledWith('plugin1@1.0.0')).toBe(true);
+      expect(logger.log.calledWith('plugin2@1.0.0')).toBe(true);
+      expect(logger.log.calledWith('plugin3@1.0.0')).toBe(true);
     });
 
     it('list should throw an exception if a plugin does not have a package.json', function () {
@@ -83,7 +82,7 @@ describe('kibana cli', function () {
 
       expect(function () {
         list(settings, logger);
-      }).to.throwError('Unable to read package.json file for plugin empty-plugin');
+      }).toThrowError('Unable to read package.json file for plugin empty-plugin');
     });
 
     it('list should throw an exception if a plugin have an empty package.json', function () {
@@ -94,7 +93,7 @@ describe('kibana cli', function () {
 
       expect(function () {
         list(settings, logger);
-      }).to.throwError('Unable to read package.json file for plugin invalid-plugin');
+      }).toThrowError('Unable to read package.json file for plugin invalid-plugin');
     });
 
   });

@@ -1,6 +1,5 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
-import index from '../index';
+import index from './index';
 
 describe('kibana cli', function () {
 
@@ -19,7 +18,7 @@ describe('kibana cli', function () {
         sinon.spy(program, 'command');
 
         index(program);
-        expect(program.command.calledWith('install <plugin/url>')).to.be(true);
+        expect(program.command.calledWith('install <plugin/url>')).toBe(true);
 
         program.command.restore();
       });
@@ -28,7 +27,7 @@ describe('kibana cli', function () {
         sinon.spy(program, 'description');
 
         index(program);
-        expect(program.description.calledWith('install a plugin')).to.be(true);
+        expect(program.description.calledWith('install a plugin')).toBe(true);
 
         program.description.restore();
       });
@@ -57,14 +56,14 @@ describe('kibana cli', function () {
           }
         }
 
-        expect(options).to.have.length(0);
+        expect(options).toHaveLength(0);
       });
 
       it('should call the action function', function () {
         sinon.spy(program, 'action');
 
         index(program);
-        expect(program.action.calledOnce).to.be(true);
+        expect(program.action.calledOnce).toBe(true);
 
         program.action.restore();
       });
