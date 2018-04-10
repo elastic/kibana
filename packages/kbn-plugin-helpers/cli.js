@@ -1,7 +1,7 @@
 const program = require('commander');
 
 const pkg = require('./package.json');
-const createTaskRunner = require('./lib/task_runner');
+const createCommanderAction = require('./lib/commander_action');
 const docs = require('./lib/docs');
 const enableCollectingUnknownOptions = require('./lib/enable_collecting_unknown_options');
 
@@ -13,7 +13,7 @@ enableCollectingUnknownOptions(
     .command('start')
     .description('Start kibana and have it include this plugin')
     .on('--help', docs('start'))
-    .action(createTaskRunner('start', (command) => ({
+    .action(createCommanderAction('start', (command) => ({
       flags: command.unknownOptions
     })))
 );
@@ -26,7 +26,7 @@ program
   .option('-d, --build-destination <path>', 'Target path for the build output, absolute or relative to the plugin root')
   .option('-b, --build-version <version>', 'Version for the build output')
   .option('-k, --kibana-version <version>', 'Kibana version for the build output')
-  .action(createTaskRunner('build', (command, files) => ({
+  .action(createCommanderAction('build', (command, files) => ({
     buildDestination: command.buildDestination,
     buildVersion: command.buildVersion,
     kibanaVersion: command.kibanaVersion,
@@ -38,7 +38,7 @@ program
   .command('test')
   .description('Run the server and browser tests')
   .on('--help', docs('test/all'))
-  .action(createTaskRunner('testAll'));
+  .action(createCommanderAction('testAll'));
 
 program
   .command('test:browser')
@@ -46,7 +46,7 @@ program
   .option('--dev', 'Enable dev mode, keeps the test server running')
   .option('-p, --plugins <plugin-ids>', 'Manually specify which plugins\' test bundles to run')
   .on('--help', docs('test/browser'))
-  .action(createTaskRunner('testBrowser', (command) => ({
+  .action(createCommanderAction('testBrowser', (command) => ({
     dev: Boolean(command.dev),
     plugins: command.plugins,
   })));
@@ -55,13 +55,13 @@ program
   .command('test:server [files...]')
   .description('Run the server tests using mocha')
   .on('--help', docs('test/server'))
-  .action(createTaskRunner('testServer', (command, files) => ({
+  .action(createCommanderAction('testServer', (command, files) => ({
     files: files
   })));
 
 program
   .command('postinstall')
-  .action(createTaskRunner('postinstall'));
+  .action(createCommanderAction('postinstall'));
 
 program
   .parse(process.argv);

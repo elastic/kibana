@@ -1,6 +1,6 @@
 const run = require('./run');
 
-module.exports = function createTaskRunner(taskName, getOptions = () => {}) {
+module.exports = function createCommanderAction(taskName, getOptions = () => {}) {
   return async (command, ...args) => {
     try {
       await run(taskName, getOptions(...args));

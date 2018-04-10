@@ -1,6 +1,6 @@
 /*eslint-env jest*/
 
-const createTaskRunner = require('./task_runner');
+const createCommanderAction = require('./commander_action');
 const run = require('./run');
 
 jest.mock('./run', () => jest.fn());
@@ -30,14 +30,14 @@ afterAll(() => {
   jest.restoreAllMocks();
 });
 
-describe('task runner', () => {
+describe('commander action', () => {
   it('creates a function', async () => {
-    expect(typeof createTaskRunner()).toBe('function');
+    expect(typeof createCommanderAction()).toBe('function');
   });
 
   it('passes args to getOptions, calls run() with taskName and options', async () => {
-    const taskRunner = createTaskRunner('taskName', (...args) => ({ args }));
-    await taskRunner('a', 'b', 'c', 'd', 'e', 'f');
+    const action = createCommanderAction('taskName', (...args) => ({ args }));
+    await action('a', 'b', 'c', 'd', 'e', 'f');
     expect(run).toHaveBeenCalledTimes(1);
     expect(run.mock.calls).toMatchSnapshot();
   });
@@ -47,7 +47,7 @@ describe('task runner', () => {
       throw new Error('sync error thrown');
     });
 
-    await createTaskRunner('mockTask')();
+    await createCommanderAction('mockTask')();
 
     expect(process.stderr.write).toHaveBeenCalledTimes(1);
     expect(process.stderr.write.mock.calls).toMatchSnapshot();
@@ -60,7 +60,7 @@ describe('task runner', () => {
       throw new Error('async error thrown');
     });
 
-    await createTaskRunner('mockTask')();
+    await createCommanderAction('mockTask')();
 
     expect(process.stderr.write).toHaveBeenCalledTimes(1);
     expect(process.stderr.write.mock.calls).toMatchSnapshot();
