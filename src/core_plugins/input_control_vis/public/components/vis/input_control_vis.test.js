@@ -16,7 +16,7 @@ const mockListControl = {
   },
   type: 'list',
   label: 'list control',
-  value: '',
+  value: [],
   selectOptions: [
     { label: 'choice1', value: 'choice1' },
     { label: 'choice2', value: 'choice2' }

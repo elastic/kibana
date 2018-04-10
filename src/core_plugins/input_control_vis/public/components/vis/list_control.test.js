@@ -6,21 +6,11 @@ import {
   ListControl,
 } from './list_control';
 
-const control = {
-  id: 'mock-list-control',
-  isEnabled: () => { return true; },
-  options: {
-    type: 'terms',
-    multiselect: true
-  },
-  type: 'list',
-  label: 'list control',
-  value: '',
-  selectOptions: [
-    { label: 'choice1', value: 'choice1' },
-    { label: 'choice2', value: 'choice2' }
-  ]
-};
+const options = [
+  { label: 'choice1', value: 'choice1' },
+  { label: 'choice2', value: 'choice2' }
+];
+
 let stageFilter;
 
 beforeEach(() => {
@@ -29,7 +19,11 @@ beforeEach(() => {
 
 test('renders ListControl', () => {
   const component = shallow(<ListControl
-    control={control}
+    id="mock-list-control"
+    label="list control"
+    options={options}
+    selectedOptions={[]}
+    multiselect={true}
     controlIndex={0}
     stageFilter={stageFilter}
   />);

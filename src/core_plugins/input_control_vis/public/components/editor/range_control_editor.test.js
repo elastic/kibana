@@ -2,36 +2,13 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
+import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
   RangeControlEditor,
 } from './range_control_editor';
 
-const getIndexPatterns = () => {
-  return Promise.resolve([
-    {
-      id: 'indexPattern1',
-      attributes: {
-        title: 'indexPattern1'
-      }
-    },
-    {
-      id: 'indexPattern2',
-      attributes: {
-        title: 'indexPattern2'
-      }
-    }
-  ]);
-};
-const getIndexPattern = () => {
-  return Promise.resolve({
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true }
-    ]
-  });
-};
 const controlParams = {
   id: '1',
   indexPattern: 'indexPattern1',
@@ -55,8 +32,8 @@ beforeEach(() => {
 
 test('renders RangeControlEditor', () => {
   const component = shallow(<RangeControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -68,8 +45,8 @@ test('renders RangeControlEditor', () => {
 
 test('handleNumberOptionChange - step', () => {
   const component = mount(<RangeControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -95,8 +72,8 @@ test('handleNumberOptionChange - step', () => {
 
 test('handleNumberOptionChange - decimalPlaces', () => {
   const component = mount(<RangeControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}

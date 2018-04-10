@@ -14,7 +14,7 @@ export class ListControl extends Component {
   }
 
   renderControl() {
-    if (!this.props.control.isEnabled()) {
+    if (this.props.disableMsg) {
       return (
         <EuiFieldText
           placeholder="Select..."
@@ -23,7 +23,7 @@ export class ListControl extends Component {
       );
     }
 
-    const options = this.props.control.selectOptions.map(option => {
+    const options = this.props.options.map(option => {
       option['data-test-subj'] = `option_${option.value.replace(' ', '_')}`;
       return option;
     });
@@ -32,9 +32,9 @@ export class ListControl extends Component {
       <EuiComboBox
         placeholder="Select..."
         options={options}
-        selectedOptions={this.props.control.value}
+        selectedOptions={this.props.selectedOptions}
         onChange={this.handleOnChange}
-        singleSelection={!this.props.control.options.multiselect}
+        singleSelection={!this.props.multiselect}
         data-test-subj={`listControlSelect${this.props.controlIndex}`}
       />
     );
@@ -43,10 +43,10 @@ export class ListControl extends Component {
   render() {
     return (
       <FormRow
-        id={this.props.control.id}
-        label={this.props.control.label}
+        id={this.props.id}
+        label={this.props.label}
         controlIndex={this.props.controlIndex}
-        control={this.props.control}
+        disableMsg={this.props.disableMsg}
       >
         {this.renderControl()}
       </FormRow>
@@ -54,8 +54,18 @@ export class ListControl extends Component {
   }
 }
 
+const comboBoxOptionShape = PropTypes.shape({
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+});
+
 ListControl.propTypes = {
-  control: PropTypes.object.isRequired,
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
+  options: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
+  disableMsg: PropTypes.string,
+  multiselect: PropTypes.bool.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
 };
