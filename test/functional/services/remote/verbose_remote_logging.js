@@ -1,4 +1,4 @@
-import { green, magenta } from 'ansicolors';
+import { green, magentaBright } from 'chalk';
 
 export function initVerboseRemoteLogging(log, server) {
   const wrap = (original, httpMethod) => (path, requestData, pathParts) => {
@@ -25,7 +25,7 @@ export function initVerboseRemoteLogging(log, server) {
           message = err.message;
         }
 
-        log.verbose(`[remote]  < %s %s ${magenta('ERR')} %j`, httpMethod, url, message.split(/\r?\n/)[0]);
+        log.verbose(`[remote]  < %s %s ${magentaBright('ERR')} %j`, httpMethod, url, message.split(/\r?\n/)[0]);
         throw error;
       });
   };
