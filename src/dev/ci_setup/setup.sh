@@ -3,7 +3,8 @@
 set -e
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"/tmp/kibana"}"
+workspace="$(cd "$dir"/..; pwd)"
+cacheDir="${CACHE_DIR:-"$workspace/.kibana"}"
 
 
 ###
