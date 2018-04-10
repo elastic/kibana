@@ -398,7 +398,7 @@ describe('tag cloud tests', function () {
 
       await fromNode(cb => tagCloud.once('renderComplete', cb));
 
-      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, simpleloadPng, 0.35);
+      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, simpleloadPng, 0.50);
       expect(mismatchedPixels).to.be.lessThan(64);
     });
 
