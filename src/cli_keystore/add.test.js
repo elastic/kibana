@@ -1,12 +1,11 @@
-import expect from 'expect.js';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
 import { PassThrough } from 'stream';
 
-import { Keystore } from '../../server/keystore';
-import { add } from '../add';
-import Logger from '../../cli_plugin/lib/logger';
-import * as prompt from '../../server/utils/prompt';
+import { Keystore } from '../server/keystore';
+import { add } from './add';
+import Logger from '../cli_plugin/lib/logger';
+import * as prompt from '../server/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {
@@ -66,7 +65,7 @@ describe('Kibana keystore', () => {
 
       const { args } = prompt.confirm.getCall(0);
 
-      expect(args[0]).to.eql('Setting a2 already exists. Overwrite?');
+      expect(args[0]).toEqual('Setting a2 already exists. Overwrite?');
     });
 
     it('aborts if overwrite is denied', async () => {
@@ -101,7 +100,7 @@ describe('Kibana keystore', () => {
 
       await add(keystore, 'foo');
 
-      expect(keystore.data.foo).to.eql('bar');
+      expect(keystore.data.foo).toEqual('bar');
     });
 
     it('persists updated keystore', async () => {
@@ -128,7 +127,7 @@ describe('Kibana keystore', () => {
 
       await add(keystore, 'foo', { stdin: true, stdinStream: stdin });
 
-      expect(keystore.data.foo).to.eql('kibana');
+      expect(keystore.data.foo).toEqual('kibana');
     });
   });
 });

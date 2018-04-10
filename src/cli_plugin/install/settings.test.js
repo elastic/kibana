@@ -1,7 +1,6 @@
-import expect from 'expect.js';
-import { fromRoot } from '../../../utils';
+import { fromRoot } from '../../utils';
 import { resolve } from 'path';
-import { parseMilliseconds, parse } from '../settings';
+import { parseMilliseconds, parse } from './settings';
 
 describe('kibana cli', function () {
 
@@ -15,50 +14,50 @@ describe('kibana cli', function () {
           const value = '';
           const result = parseMilliseconds(value);
 
-          expect(result).to.be(0);
+          expect(result).toBe(0);
         });
 
         it('should return 0 for a number with an invalid unit of measure', function () {
           const result = parseMilliseconds('1gigablasts');
-          expect(result).to.be(0);
+          expect(result).toBe(0);
         });
 
         it('should assume a number with no unit of measure is specified as milliseconds', function () {
           const result = parseMilliseconds(1);
-          expect(result).to.be(1);
+          expect(result).toBe(1);
 
           const result2 = parseMilliseconds('1');
-          expect(result2).to.be(1);
+          expect(result2).toBe(1);
         });
 
         it('should interpret a number with "s" as the unit of measure as seconds', function () {
           const result = parseMilliseconds('5s');
-          expect(result).to.be(5 * 1000);
+          expect(result).toBe(5 * 1000);
         });
 
         it('should interpret a number with "second" as the unit of measure as seconds', function () {
           const result = parseMilliseconds('5second');
-          expect(result).to.be(5 * 1000);
+          expect(result).toBe(5 * 1000);
         });
 
         it('should interpret a number with "seconds" as the unit of measure as seconds', function () {
           const result = parseMilliseconds('5seconds');
-          expect(result).to.be(5 * 1000);
+          expect(result).toBe(5 * 1000);
         });
 
         it('should interpret a number with "m" as the unit of measure as minutes', function () {
           const result = parseMilliseconds('9m');
-          expect(result).to.be(9 * 1000 * 60);
+          expect(result).toBe(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minute" as the unit of measure as minutes', function () {
           const result = parseMilliseconds('9minute');
-          expect(result).to.be(9 * 1000 * 60);
+          expect(result).toBe(9 * 1000 * 60);
         });
 
         it('should interpret a number with "minutes" as the unit of measure as minutes', function () {
           const result = parseMilliseconds('9minutes');
-          expect(result).to.be(9 * 1000 * 60);
+          expect(result).toBe(9 * 1000 * 60);
         });
 
       });
@@ -77,14 +76,14 @@ describe('kibana cli', function () {
           it('should default to 0 (milliseconds)', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.timeout).to.be(0);
+            expect(settings.timeout).toBe(0);
           });
 
           it('should set settings.timeout property', function () {
             options.timeout = 1234;
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.timeout).to.be(1234);
+            expect(settings.timeout).toBe(1234);
           });
 
         });
@@ -94,14 +93,14 @@ describe('kibana cli', function () {
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.quiet).to.be(false);
+            expect(settings.quiet).toBe(false);
           });
 
           it('should set settings.quiet property to true', function () {
             options.quiet = true;
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.quiet).to.be(true);
+            expect(settings.quiet).toBe(true);
           });
 
         });
@@ -111,14 +110,14 @@ describe('kibana cli', function () {
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.silent).to.be(false);
+            expect(settings.silent).toBe(false);
           });
 
           it('should set settings.silent property to true', function () {
             options.silent = true;
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.silent).to.be(true);
+            expect(settings.silent).toBe(true);
           });
 
         });
@@ -128,14 +127,14 @@ describe('kibana cli', function () {
           it('should default to ZLS', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.config).to.be('');
+            expect(settings.config).toBe('');
           });
 
           it('should set settings.config property', function () {
             options.config = 'foo bar baz';
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.config).to.be('foo bar baz');
+            expect(settings.config).toBe('foo bar baz');
           });
 
         });
@@ -145,14 +144,14 @@ describe('kibana cli', function () {
           it('should default to plugins', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be(fromRoot('plugins'));
+            expect(settings.pluginDir).toBe(fromRoot('plugins'));
           });
 
           it('should set settings.config property', function () {
             options.pluginDir = 'foo bar baz';
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be('foo bar baz');
+            expect(settings.pluginDir).toBe('foo bar baz');
           });
 
         });
@@ -162,7 +161,7 @@ describe('kibana cli', function () {
           it('should set settings.plugin property', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.plugin).to.be(command);
+            expect(settings.plugin).toBe(command);
           });
 
         });
@@ -177,7 +176,7 @@ describe('kibana cli', function () {
               `https://artifacts.elastic.co/downloads/kibana-plugins/${command}/${command}-1234.zip`
             ];
 
-            expect(settings.urls).to.eql(expected);
+            expect(settings.urls).toEqual(expected);
           });
 
         });
@@ -189,7 +188,7 @@ describe('kibana cli', function () {
             const settings = parse(command, options, kbnPackage);
             const expected = resolve('foo/bar/baz', '.plugin.installing');
 
-            expect(settings.workingPath).to.be(expected);
+            expect(settings.workingPath).toBe(expected);
           });
 
         });
@@ -201,7 +200,7 @@ describe('kibana cli', function () {
             const settings = parse(command, options, kbnPackage);
             const expected = resolve('foo/bar/baz', '.plugin.installing', 'archive.part');
 
-            expect(settings.tempArchiveFile).to.be(expected);
+            expect(settings.tempArchiveFile).toBe(expected);
           });
 
         });
@@ -213,7 +212,7 @@ describe('kibana cli', function () {
             const settings = parse(command, options, kbnPackage);
             const expected = resolve('foo/bar/baz', '.plugin.installing', 'package.json');
 
-            expect(settings.tempPackageFile).to.be(expected);
+            expect(settings.tempPackageFile).toBe(expected);
           });
 
         });

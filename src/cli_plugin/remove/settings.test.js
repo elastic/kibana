@@ -1,6 +1,5 @@
-import expect from 'expect.js';
-import { fromRoot } from '../../../utils';
-import { parse } from '../settings';
+import { fromRoot } from '../../utils';
+import { parse } from './settings';
 
 describe('kibana cli', function () {
 
@@ -22,14 +21,14 @@ describe('kibana cli', function () {
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.quiet).to.be(false);
+            expect(settings.quiet).toBe(false);
           });
 
           it('should set settings.quiet property to true', function () {
             options.quiet = true;
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.quiet).to.be(true);
+            expect(settings.quiet).toBe(true);
           });
 
         });
@@ -39,14 +38,14 @@ describe('kibana cli', function () {
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.silent).to.be(false);
+            expect(settings.silent).toBe(false);
           });
 
           it('should set settings.silent property to true', function () {
             options.silent = true;
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.silent).to.be(true);
+            expect(settings.silent).toBe(true);
           });
 
         });
@@ -56,14 +55,14 @@ describe('kibana cli', function () {
           it('should default to ZLS', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.config).to.be('');
+            expect(settings.config).toBe('');
           });
 
           it('should set settings.config property', function () {
             options.config = 'foo bar baz';
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.config).to.be('foo bar baz');
+            expect(settings.config).toBe('foo bar baz');
           });
 
         });
@@ -73,14 +72,14 @@ describe('kibana cli', function () {
           it('should default to plugins', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be(fromRoot('plugins'));
+            expect(settings.pluginDir).toBe(fromRoot('plugins'));
           });
 
           it('should set settings.config property', function () {
             options.pluginDir = 'foo bar baz';
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be('foo bar baz');
+            expect(settings.pluginDir).toBe('foo bar baz');
           });
 
         });
@@ -90,7 +89,7 @@ describe('kibana cli', function () {
           it('should set settings.plugin property', function () {
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.plugin).to.be(command);
+            expect(settings.plugin).toBe(command);
           });
 
         });
