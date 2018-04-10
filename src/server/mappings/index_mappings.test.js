@@ -132,6 +132,41 @@ describe('server/mapping/index_mapping', function () {
         new IndexMappings(initialMapping, extensions);
       }).toThrowError(/plugin abc123/);
     });
+
+    it('throws if any of the new properties start with _', () => {
+      const initialMapping = {
+        root: { properties: { foo: 'bar' } }
+      };
+      const extensions = [
+        {
+          properties: {
+            _foo: 'bar'
+          }
+        }
+      ];
+
+      expect(() => {
+        new IndexMappings(initialMapping, extensions);
+      }).toThrowErrorMatchingSnapshot();
+    });
+
+    it('includes the pluginId from the extension in the _ error message if defined', () => {
+      const initialMapping = {
+        root: { properties: { foo: 'bar' } }
+      };
+      const extensions = [
+        {
+          pluginId: 'abc123',
+          properties: {
+            _foo: 'bar'
+          }
+        }
+      ];
+
+      expect(() => {
+        new IndexMappings(initialMapping, extensions);
+      }).toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('#getDsl()', () => {

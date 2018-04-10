@@ -390,7 +390,7 @@ describe('tag cloud tests', function () {
     });
 
 
-    it('should test', async function () {
+    it('should render simple image', async function () {
 
       tagCloud = new TagCloud(domNode);
       tagCloud.setData(baseTest.data);
@@ -398,7 +398,7 @@ describe('tag cloud tests', function () {
 
       await fromNode(cb => tagCloud.once('renderComplete', cb));
 
-      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, simpleloadPng, 0.50);
+      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, simpleloadPng, 0.35);
       expect(mismatchedPixels).to.be.lessThan(64);
     });
 
