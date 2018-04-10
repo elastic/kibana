@@ -35,22 +35,37 @@ I'm not sure if *any* data belongs here but we talked about it, so keeping it in
  
 ### Dashboard/Embeddable communication psuedocode
 ```js
-dashboard_panel.js:
+embeddable_viewport.js:
 
-class DashboardPanel extends Component {
+// The EmbeddableViewport react component handles the lifecycle of the
+// embeddable as well as rendering. If we ever need access to the embeddable
+// object externally, we may need to rethink this.
+class EmbeddableViewport extends Component {
   componentDidMount() {
     if (!initialized) {
-      // Goes through the container and passed into a redux action.
-      this.props.initializeEmbeddable();
+      this.props.embeddableFactory.create(panelMetadata, this.props.embeddableStateChanged)
+        .then(embeddable => {
+          this.embeddable = embeddable;
+          this.embeddable.onContainerStateChanged(this.props.containerState);
+          this.embeddable.render(this.panelElement);
+        }
+    }
+  }
+  
+  componentWillUnmount() {
+    this.embeddable.destroy();
+  }
+  
+  // We let react/redux tell us when to tell the embeddable that some container
+  // state changed.
+  componentDidUpdate(prevProps) {
+    if (this.embeddable && !_.isEqual(prevProps.containerState, this.props.containerState)) {
+      this.embeddable.onContainerStateChanged(this.props.containerState);
     }
   }
   
   render() {
-    if (initialized) {
-      return <EmbeddableViewport />
-    } else {
-      return <Loading />
-    }
+    return <div ref={panelElement => this.panelElement = panelElement}></div>;
   }
 }
 
@@ -64,39 +79,6 @@ actions/embeddable.js:
  */
 function onEmbeddableStateChanged(newEmbeddableState) {
   // Map embeddable state properties into our redux tree.
-}
-
-export function initializeEmbeddable(embeddableFactory) {
-  const embeddable = 
-    await embeddableFactory.initialize(panelMetadata, onEmbeddableStateChanged);
-    
-  // This return value will contain a function called onContainerStateChanged that
-  // will be used for dashboard to send state change notifications to
-  // the embeddable.  
-  embeddableHandlersCache.register(embeddable);  
-}
-
------
-embeddable_viewport.js:
-
-class EmbeddableViewport extends Component {
-
-  componentDidMount() {
-    embeddableHandlersCache.render(this.domNode); 
-  }
-
-  componentDidUpdate(newProps) {
-    if (!_.isEqual(newProps.containerState, this.props.containerState) {
-      // This is the main communication point for dashboard to commuicate
-      // state changes to the embeddable. ContainerState is derived
-      // from the redux tree by a selector.
-      embeddableHandlersCache.onContainerStateChanged(newProps.containerState); 
-    }
-  }
-
-  render() {
-     <div ref={node => this.domNode = node} />
-  }
 }
 
 ```
@@ -177,4 +159,3 @@ Embeddable state is the data that the embeddable gives dashboard when something 
    appliedFilters: FilterObject,
 }
 ```
-
