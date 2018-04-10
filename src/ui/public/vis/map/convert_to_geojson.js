@@ -1,5 +1,5 @@
 import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
-import { gridDimensions } from 'ui/agg_response/geo_json/grid_dimensions';
+import { gridDimensions } from './grid_dimensions';
 
 
 /**

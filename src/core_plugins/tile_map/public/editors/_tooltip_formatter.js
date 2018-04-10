@@ -3,7 +3,7 @@ import $ from 'jquery';
 export function TileMapTooltipFormatterProvider($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
+  const $el = $('<div>').html(require('./_tooltip.html'));
   $compile($el)($tooltipScope);
 
   return function tooltipFormatter(aggConfig, metricAgg, feature) {

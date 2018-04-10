@@ -10,7 +10,7 @@ import { AggConfig } from 'ui/vis/agg_config';
 
 import './styles/_tilemap.less';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
-import { TileMapTooltipFormatterProvider } from 'ui/agg_response/geo_json/_tooltip_formatter';
+import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
