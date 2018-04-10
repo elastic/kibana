@@ -1,4 +1,4 @@
-import { createEagerElement } from 'recompose';
+import { createElement } from 'react';
 import { pick } from 'lodash';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
@@ -59,6 +59,6 @@ export class Arg {
       templateProps,
     };
 
-    return createEagerElement(ArgForm, formProps);
+    return createElement(ArgForm, formProps);
   }
 }

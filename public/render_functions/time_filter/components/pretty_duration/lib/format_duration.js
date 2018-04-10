@@ -8,20 +8,21 @@ quickRanges.forEach(function(frame) {
   lookupByRange[frame.from + ' to ' + frame.to] = frame;
 });
 
-function cantLookup(from, to) {
-  const format = (time, to = false) => {
-    if (moment.isMoment(time)) {
-      return time.format('lll');
+function formatTime(time, roundUp = false) {
+  if (moment.isMoment(time)) {
+    return time.format('lll');
+  } else {
+    if (time === 'now') {
+      return 'now';
     } else {
-      if (time === 'now') {
-        return 'now';
-      } else {
-        const tryParse = dateMath.parse(time, to);
-        return moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : time;
-      }
+      const tryParse = dateMath.parse(time, { roundUp });
+      return moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : time;
     }
-  };
-  return `${format(from)} to ${format(to)}`;
+  }
+}
+
+function cantLookup(from, to) {
+  return `${formatTime(from)} to ${formatTime(to)}`;
 }
 
 export function formatDuration(from, to) {
