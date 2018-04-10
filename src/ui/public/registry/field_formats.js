@@ -4,10 +4,11 @@ import { FieldFormat } from '../../field_formats/field_format';
 import { IndexedArray } from 'ui/indexed_array';
 
 class FieldFormatRegistry extends IndexedArray {
-  constructor(config) {
-    const spec = config && config.spec;
-    const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['id', 'name', 'fieldType'] });
-    super(iaOpts);
+  constructor() {
+    super({
+      group: ['fieldType'],
+      index: ['id', 'name']
+    });
 
     this._uiSettings = chrome.getUiSettingsClient();
     this.getConfig = (...args) => this._uiSettings.get(...args);
@@ -93,8 +94,6 @@ class FieldFormatRegistry extends IndexedArray {
   }
 
   name = 'fieldFormats';
-  index = [ 'id' ];
-  group = [ 'fieldType' ];
   displayName = '[registry ' + this.name + ']';
 
   register = (module) => {
