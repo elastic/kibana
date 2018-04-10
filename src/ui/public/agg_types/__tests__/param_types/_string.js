@@ -1,14 +1,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { BaseParamTypeProvider } from '../../param_types/base';
-import { StringParamTypeProvider } from '../../param_types/string';
+import { BaseParamType } from '../../param_types/base';
+import { StringParamType } from '../../param_types/string';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default describe('String', function () {
   const paramName = 'json_test';
-  let BaseParamType;
-  let StringParamType;
   let aggParam;
   let aggConfig;
   let output;
@@ -23,16 +20,13 @@ export default describe('String', function () {
     aggParam = new StringParamType(_.defaults(config, defaults));
   }
 
-  beforeEach(ngMock.module('kibana'));
 
   // fetch our deps
-  beforeEach(ngMock.inject(function (Private) {
-    BaseParamType = Private(BaseParamTypeProvider);
-    StringParamType = Private(StringParamTypeProvider);
+  beforeEach(function () {
 
     aggConfig = { params: {} };
     output = { params: {} };
-  }));
+  });
 
   describe('constructor', function () {
     it('it is an instance of BaseParamType', function () {

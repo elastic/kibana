@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
 import 'ui/private';
-import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
+import { AggParams } from 'ui/agg_types/agg_params';
 import { VisProvider } from 'ui/vis';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
@@ -11,7 +10,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 describe('AggType Class', function () {
   let AggType;
-  let AggParams;
   let indexPattern;
   let fieldFormat;
   let Vis;
@@ -19,8 +17,6 @@ describe('AggType Class', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    AggParams = sinon.spy(Private(AggTypesAggParamsProvider));
-    Private.stub(AggTypesAggParamsProvider, AggParams);
 
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
@@ -121,9 +117,6 @@ describe('AggType Class', function () {
       });
 
       describe('params', function () {
-        beforeEach(function () {
-          AggParams.reset();
-        });
 
         it('defaults to AggParams object with JSON param', function () {
           const aggType = new AggType({
@@ -160,8 +153,6 @@ describe('AggType Class', function () {
 
           expect(aggType.params).to.be.an(AggParams);
           expect(aggType.params.length).to.be(paramLength);
-          expect(AggParams.callCount).to.be(1);
-          expect(AggParams.firstCall.args[0]).to.be(params);
         });
       });
 

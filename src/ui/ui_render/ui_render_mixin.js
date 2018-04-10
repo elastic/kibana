@@ -108,7 +108,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         request,
         defaults(
           injectedVarsOverrides,
-          await app.getInjectedVars() || {},
+          await server.getInjectedUiAppVars(app.getId()),
           defaultInjectedVars,
         ),
       )
