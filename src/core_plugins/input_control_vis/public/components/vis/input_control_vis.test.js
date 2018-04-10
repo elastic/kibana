@@ -158,28 +158,3 @@ test('resetControls', () => {
   sinon.assert.notCalled(submitFilters);
   sinon.assert.notCalled(stageFilter);
 });
-
-test('stageFilter list control', () => {
-  const component = mount(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return true; }}
-  />);
-  const reactSelectInput = component.find(`#${mockListControl.id}`).hostNodes();
-  reactSelectInput.simulate('change', { target: { value: 'choice1' } });
-  reactSelectInput.simulate('keyDown', { keyCode: 9, key: 'Tab' });
-  sinon.assert.notCalled(clearControls);
-  sinon.assert.notCalled(submitFilters);
-  sinon.assert.notCalled(resetControls);
-  const expectedControlIndex = 0;
-  const expectedControlValue = 'choice1';
-  sinon.assert.calledWith(stageFilter,
-    expectedControlIndex,
-    expectedControlValue
-  );
-});
