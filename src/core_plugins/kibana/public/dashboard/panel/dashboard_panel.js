@@ -58,16 +58,16 @@ export class DashboardPanel extends React.Component {
   }
 
   onFocus = () => {
-    const { onPanelFocused, panelId } = this.props;
+    const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
-      onPanelFocused(panelId);
+      onPanelFocused(panel.panelIndex);
     }
   };
 
   onBlur = () => {
-    const { onPanelBlurred, panelId } = this.props;
+    const { onPanelBlurred, panel } = this.props;
     if (onPanelBlurred) {
-      onPanelBlurred(panelId);
+      onPanelBlurred(panel.panelIndex);
     }
   };
 
@@ -106,7 +106,7 @@ export class DashboardPanel extends React.Component {
   }
 
   render() {
-    const { viewOnlyMode, panelId } = this.props;
+    const { viewOnlyMode, panel } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -121,7 +121,7 @@ export class DashboardPanel extends React.Component {
           data-test-subj="dashboardPanel"
         >
           <PanelHeader
-            panelId={panelId}
+            panelId={panel.panelIndex}
           />
 
           {this.renderContent()}
@@ -155,6 +155,6 @@ DashboardPanel.propTypes = {
   embeddableIsInitializing: PropTypes.func.isRequired,
   initialized: PropTypes.bool.isRequired,
   panel: PropTypes.shape({
-    id: PropTypes.string,
+    panelIndex: PropTypes.string,
   }).isRequired,
 };

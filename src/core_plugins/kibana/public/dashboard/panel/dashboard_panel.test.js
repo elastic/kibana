@@ -20,10 +20,14 @@ import {
 
 function getProps(props = {}) {
   const defaultTestProps = {
-    panelId: 'foo1',
+    panel: { panelIndex: 'foo1' },
     viewOnlyMode: false,
     destroy: () => {},
     initialized: true,
+    embeddableIsInitialized: () => {},
+    embeddableIsInitializing: () => {},
+    embeddableStateChanged: () => {},
+    embeddableError: () => {},
     embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
