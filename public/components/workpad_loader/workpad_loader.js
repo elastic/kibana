@@ -9,7 +9,7 @@ import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
 import './workpad_loader.less';
 
-const formatDate = date => moment(date).format('MMM D, YYYY @ h:mma');
+const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
@@ -95,8 +95,8 @@ export class WorkpadLoader extends React.PureComponent {
         <thead>
           <tr>
             <th>Workpad name</th>
-            <th>Updated</th>
             <th>Created</th>
+            <th>Updated</th>
             <th>&nbsp;</th>
           </tr>
         </thead>

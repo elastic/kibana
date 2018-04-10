@@ -48,7 +48,7 @@ export function workpad(server) {
         {
           ...req.payload,
           '@timestamp': now,
-          '@created': workpad['@created'],
+          '@created': workpad.attributes['@created'],
         },
         { overwrite: true, id }
       );
