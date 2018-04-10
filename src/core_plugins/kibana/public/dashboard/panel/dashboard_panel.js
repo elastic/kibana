@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import _ from 'lodash';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
-import { EmbeddableViewportContainer } from './embeddable_viewport_container';
 
 export class DashboardPanel extends React.Component {
   constructor(props) {
@@ -12,10 +12,49 @@ export class DashboardPanel extends React.Component {
     this.state = {
       error: props.embeddableFactory ? null : `No factory found for embeddable`,
     };
+
+    this.mounted = false;
+  }
+
+  async componentDidMount() {
+    this.mounted = true;
+    const {
+      initialized,
+      embeddableFactory,
+      embeddableIsInitializing,
+      panel,
+      embeddableStateChanged,
+      embeddableIsInitialized,
+      embeddableError,
+    } = this.props;
+
+    if (!initialized) {
+      embeddableIsInitializing();
+      embeddableFactory.create(panel, embeddableStateChanged)
+        .then((embeddable) => {
+          if (this.mounted) {
+            this.embeddable = embeddable;
+            embeddableIsInitialized(embeddable.metadata);
+            this.embeddable.onContainerStateChanged(this.props.containerState);
+            this.embeddable.render(this.panelElement);
+          } else {
+            embeddable.destroy();
+          }
+        })
+        .catch((error) => {
+          if (this.mounted) {
+            embeddableError(error.message);
+          }
+        });
+    }
   }
 
   componentWillUnmount() {
     this.props.destroy();
+    this.mounted = false;
+    if (this.embeddable) {
+      this.embeddable.destroy();
+    }
   }
 
   onFocus = () => {
@@ -34,11 +73,23 @@ export class DashboardPanel extends React.Component {
 
   renderEmbeddableViewport() {
     return (
-      <EmbeddableViewportContainer
-        panelId={this.props.panelId}
-        embeddableFactory={this.props.embeddableFactory}
-      />
+      <div
+        id="embeddedPanel"
+        className="panel-content"
+        ref={panelElement => this.panelElement = panelElement}
+      >
+        {!this.props.initialized && 'loading...'}
+      </div>
     );
+  }
+
+  shouldComponentUpdate(nextProps) {
+    if (this.embeddable && !_.isEqual(nextProps.containerState, this.props.containerState)) {
+      this.embeddable.onContainerStateChanged(nextProps.containerState);
+    }
+
+    return nextProps.error !== this.props.error ||
+      nextProps.initialized !== this.props.initialized;
   }
 
   renderEmbeddedError() {
@@ -89,6 +140,21 @@ DashboardPanel.propTypes = {
     PropTypes.string,
     PropTypes.object
   ]),
-  panelId: PropTypes.string,
   destroy: PropTypes.func.isRequired,
+  containerState: PropTypes.shape({
+    timeRange: PropTypes.object.isRequired,
+    embeddablePersonalization: PropTypes.object.isRequired,
+    hidePanelTitles: PropTypes.bool.isRequired,
+  }),
+  embeddableFactory: PropTypes.shape({
+    create: PropTypes.func,
+  }).isRequired,
+  embeddableStateChanged: PropTypes.func.isRequired,
+  embeddableIsInitialized: PropTypes.func.isRequired,
+  embeddableError: PropTypes.func.isRequired,
+  embeddableIsInitializing: PropTypes.func.isRequired,
+  initialized: PropTypes.bool.isRequired,
+  panel: PropTypes.shape({
+    id: PropTypes.string,
+  }).isRequired,
 };

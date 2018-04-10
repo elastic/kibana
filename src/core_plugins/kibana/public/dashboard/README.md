@@ -35,9 +35,9 @@ I'm not sure if *any* data belongs here but we talked about it, so keeping it in
  
 ### Dashboard/Embeddable communication psuedocode
 ```js
-embeddable_viewport.js:
+dashboard_panel.js:
 
-// The EmbeddableViewport react component handles the lifecycle of the
+// The Dashbaord Panel react component handles the lifecycle of the
 // embeddable as well as rendering. If we ever need access to the embeddable
 // object externally, we may need to rethink this.
 class EmbeddableViewport extends Component {
@@ -65,7 +65,12 @@ class EmbeddableViewport extends Component {
   }
   
   render() {
-    return <div ref={panelElement => this.panelElement = panelElement}></div>;
+    return (
+      <div>
+        <PanelHeaderContainer embeddable={this.embeddable} />
+        <div ref={panelElement => this.panelElement = panelElement}></div>
+       </div>
+    );
   }
 }
 
