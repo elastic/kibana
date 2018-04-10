@@ -191,6 +191,9 @@ export default function (program) {
 }
 
 function shouldStartRepl(opts) {
+  // The kbnWorkerType check is necessary to prevent the repl
+  // from being started multiple times in different processes.
+  // We only want one REPL.
   return opts.repl && process.env.kbnWorkerType === 'server';
 }
 
