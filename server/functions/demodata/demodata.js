@@ -1,5 +1,4 @@
 import { sortBy } from 'lodash';
-import moment from 'moment';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 import { getDemoRows } from './get_demo_rows';
 
@@ -34,12 +33,7 @@ export const demodata = () => ({
           { name: 'state', type: 'string' },
           { name: 'project', type: 'string' },
         ],
-        rows: sortBy(
-          demoRows.map(row => ({
-            ...row,
-            time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
-          }))
-        ),
+        rows: sortBy(demoRows, 'time'),
       };
     } else if (args._ === 'shirts') {
       set = {
