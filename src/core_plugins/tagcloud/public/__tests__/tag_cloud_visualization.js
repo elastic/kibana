@@ -8,7 +8,7 @@ import basicdrawPng from './basicdraw.png';
 import afterresizePng from './afterresize.png';
 import afterparamChange from './afterparamchange.png';
 
-const THRESHOLD = 0.35;
+const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
 
 describe('TagCloudVisualizationTest', function () {
