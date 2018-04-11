@@ -103,7 +103,7 @@ describe('SavedObjectsClient', () => {
     beforeEach(() => {
       $http.withArgs({
         method: 'POST',
-        url: `${basePath}/api/saved_objects/bulk_get`,
+        url: `${basePath}/api/saved_objects/_bulk_get`,
         data: sinon.match.any
       }).returns(Promise.resolve({ data: { saved_objects: [doc] } }));
     });
@@ -308,7 +308,7 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.find(body);
       sinon.assert.calledOnce($http);
       sinon.assert.calledWithExactly($http, sinon.match({
-        url: `${basePath}/api/saved_objects/?type=index-pattern&invalid=true`
+        url: `${basePath}/api/saved_objects/_find?type=index-pattern&invalid=true`
       }));
     });
 
@@ -318,7 +318,7 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.find(body);
       sinon.assert.calledOnce($http);
       sinon.assert.calledWithExactly($http, sinon.match({
-        url: `${basePath}/api/saved_objects/?fields=title&fields=description`
+        url: `${basePath}/api/saved_objects/_find?fields=title&fields=description`
       }));
     });
 
@@ -328,7 +328,7 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.find(body);
       sinon.assert.calledOnce($http);
       sinon.assert.alwaysCalledWith($http, sinon.match({
-        url: `${basePath}/api/saved_objects/?from=50&size=10`
+        url: `${basePath}/api/saved_objects/_find?from=50&size=10`
       }));
     });
   });
