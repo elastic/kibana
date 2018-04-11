@@ -30,11 +30,12 @@ Array [
     "taskName",
     Object {
       "args": Array [
+        "f",
+        "a",
         "b",
         "c",
         "d",
         "e",
-        "f",
       ],
     },
   ],
