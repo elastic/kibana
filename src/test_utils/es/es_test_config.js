@@ -35,8 +35,8 @@ export const esTestConfig = new class EsTestConfig {
       protocol = testEsUrl.protocol.slice(0, -1);
       hostname = testEsUrl.hostname;
       port = parseInt(testEsUrl.port, 10);
-      username = testEsUrl.username;
-      password = testEsUrl.password;
+      username = testEsUrl.auth.split(':')[0];
+      password = testEsUrl.auth.split(':')[1];
     } else {
       // Allow setting any individual component(s) of the URL,
       // or use default values (username and password from shield.js)
