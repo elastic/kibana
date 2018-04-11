@@ -1,5 +1,5 @@
 {
-  "{indexy}": {
+  "{index}": {
     "url_params": {
       "wait_for_active_shards": "",
       "timeout": "",
@@ -11,19 +11,6 @@
     ],
     "patterns": [
       "{indices}"
-    ],
-    "data_autocomplete_rules": {
-      "mappings": {
-        "__scope_link": "_put_mapping"
-      },
-      "settings": {
-        "__scope_link": "_put_settings"
-      },
-      "aliases": {
-        "__template": {
-          "NAME": {}
-        }
-      }
-    }
+    ]
   }
 }
