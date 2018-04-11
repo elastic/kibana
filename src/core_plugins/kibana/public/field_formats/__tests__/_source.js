@@ -2,12 +2,12 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesHitsProvider from 'fixtures/hits';
 describe('_source formatting', function () {
 
-  const fieldFormats = registryFieldFormats;
+
 
   describe('Source format', function () {
     let indexPattern;

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('String Format', function () {
-  const fieldFormats = registryFieldFormats;
+
   const StringFormat = fieldFormats.getType('string');
 
   it('convert a string to lower case', function () {

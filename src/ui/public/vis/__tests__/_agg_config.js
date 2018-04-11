@@ -5,7 +5,7 @@ import { VisProvider } from 'ui/vis';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 describe('AggConfig', function () {
 
@@ -13,7 +13,7 @@ describe('AggConfig', function () {
   let AggType;
   let AggConfig;
   let indexPattern;
-  const fieldFormat = registryFieldFormats;
+  const fieldFormat = fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {

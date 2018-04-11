@@ -1,9 +1,8 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import moment from 'moment-timezone';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('Date Format', function () {
-  let fieldFormats;
   let settings;
   let convert;
   let $scope;
@@ -14,7 +13,6 @@ describe('Date Format', function () {
     $scope = $rootScope;
     settings = config;
 
-    fieldFormats = registryFieldFormats;
     const getConfig = (...args) => config.get(...args);
     const DateFormat = fieldFormats.getType('date');
     const date = new DateFormat({}, getConfig);

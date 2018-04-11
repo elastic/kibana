@@ -5,7 +5,7 @@ import { IndexPatternsPatternCacheProvider } from 'ui/index_patterns/_pattern_ca
 import { IndexPatternsGetProvider } from 'ui/index_patterns/_get';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
@@ -15,7 +15,7 @@ export function IndexPatternsProvider(Notifier, Private, config) {
   const IndexPattern = Private(IndexPatternProvider);
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const getProvider = Private(IndexPatternsGetProvider);
-  const fieldFormats = registryFieldFormats;
+
 
   self.get = function (id) {
     if (!id) return self.make();

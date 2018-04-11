@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('String Truncate Format', function () {
-  const fieldFormats = registryFieldFormats;
+
 
   it('truncate large string', function () {
     const Truncate = fieldFormats.getType('truncate');

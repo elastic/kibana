@@ -102,4 +102,4 @@ class FieldFormatRegistry extends IndexedArray {
   };
 }
 
-export const registryFieldFormats = new FieldFormatRegistry();
+export const fieldFormats = new FieldFormatRegistry();

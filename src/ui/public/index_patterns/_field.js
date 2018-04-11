@@ -1,11 +1,11 @@
 import { ObjDefine } from 'ui/utils/obj_define';
 import { FieldFormat } from '../../field_formats/field_format';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import { getKbnFieldType } from '../../../utils';
 
 export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope, Notifier) {
   const notify = new Notifier({ location: 'IndexPattern Field' });
-  const fieldFormats = registryFieldFormats;
+
 
   function Field(indexPattern, spec) {
     // unwrap old instances of Field

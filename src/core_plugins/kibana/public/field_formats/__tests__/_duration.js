@@ -1,8 +1,8 @@
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 describe('Duration Format', function () {
-  const fieldFormats = registryFieldFormats;
+
   const DurationFormat = fieldFormats.getType('duration');
 
   test({ inputFormat: 'seconds', outputFormat: 'humanize' })

@@ -3,12 +3,12 @@ import moment from 'moment';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBucketsCalcAutoIntervalProvider } from 'ui/time_buckets/calc_auto_interval';
 import { TimeBucketsCalcEsIntervalProvider } from 'ui/time_buckets/calc_es_interval';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 export function TimeBucketsProvider(Private, timefilter, config) {
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
-  const fieldFormats = registryFieldFormats;
+
   const getConfig = (...args) => config.get(...args);
 
   function isValidMoment(m) {

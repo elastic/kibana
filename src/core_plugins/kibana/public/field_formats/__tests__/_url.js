@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('Url Format', function () {
 
-  const fieldFormats = registryFieldFormats;
+
 
   const unwrap = $el => {
     expect($el.is('span[ng-non-bindable]')).to.be.ok();

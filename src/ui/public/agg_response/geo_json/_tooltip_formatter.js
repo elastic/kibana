@@ -1,10 +1,10 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 export function TileMapTooltipFormatterProvider($compile, $rootScope) {
 
-  const fieldFormats = registryFieldFormats;
+
   const $tooltipScope = $rootScope.$new();
   const $el = $('<div>').html(require('ui/agg_response/geo_json/_tooltip.html'));
   $compile($el)($tooltipScope);

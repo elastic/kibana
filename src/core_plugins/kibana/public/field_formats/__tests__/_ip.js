@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('IP Address Format', function () {
-  const fieldFormats = registryFieldFormats;
+
   const ip = fieldFormats.getInstance('ip');
 
   it('converts a value from a decimal to a string', function () {

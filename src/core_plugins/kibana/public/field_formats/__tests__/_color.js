@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { registryFieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('Color Format', function () {
-  const fieldFormats = registryFieldFormats;
+
   const ColorFormat = fieldFormats.getType('color');
 
   describe('field is a number', () => {
