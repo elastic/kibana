@@ -30,5 +30,13 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         expect(selectedLegendColor.length).to.be(expectedCount);
       });
     }
+
+    async docTableFieldCount(expectedCount) {
+      log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
+      await retry.try(async () => {
+        const docTableCellCounts = await testSubjects.findAll(`docTableField`);
+        expect(docTableCellCounts.length).to.be(expectedCount);
+      });
+    }
   };
 }
