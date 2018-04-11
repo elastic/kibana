@@ -112,13 +112,13 @@ describe('CoordinateMapsVisualizationTest', function () {
       const mockAggs = [
         {
           type: {
-            type: 'metrics',
-            makeLabel: () =>{
-              return 'foobar';
-            }
+            type: 'metrics'
           },
           fieldFormatter: (x) => {
             return x;
+          },
+          makeLabel: () => {
+            return 'foobar';
           }
         }, {
           type: {
