@@ -1,6 +1,6 @@
 import { $concat } from './concat';
 import { Subject } from '../subjects';
-import { collect } from '../lib/collect';
+import { collect, createCollectObserver } from '../lib/collect';
 import { trackSubscriptions } from '../lib/track_subscriptions';
 
 test('continue on next observable when previous completes', async () => {
@@ -38,9 +38,8 @@ test('handles early unsubscribe', () => {
   const a = new Subject();
   const b = new Subject();
 
-  const next = jest.fn();
-  const complete = jest.fn();
-  const sub = $concat(a, b).subscribe({ next, complete });
+  const values: any[] = [];
+  const sub = $concat(a, b).subscribe(createCollectObserver(values));
 
   a.next('a1');
   sub.unsubscribe();
@@ -49,9 +48,7 @@ test('handles early unsubscribe', () => {
   b.next('b1');
   b.complete();
 
-  expect(next).toHaveBeenCalledTimes(1);
-  expect(next).toHaveBeenCalledWith('a1');
-  expect(complete).toHaveBeenCalledTimes(0);
+  expect(values).toEqual(['a1']);
 });
 
 test('closes all subscriptions when unsubscribed', async () => {

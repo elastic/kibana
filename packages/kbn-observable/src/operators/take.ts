@@ -1,4 +1,4 @@
-import { Observable } from '../observable';
+import { Observable, Subscription } from '../observable';
 import { MonoTypeOperatorFunction } from '../interfaces';
 
 /**
@@ -13,13 +13,14 @@ export function take<T>(count: number): MonoTypeOperatorFunction<T> {
 
     return new Observable(observer => {
       return source.subscribe({
-        next(value) {
+        next(value, subscription) {
           observer.next(value);
 
           i += 1;
 
           if (i === count) {
             observer.complete();
+            subscription.unsubscribe();
           }
         },
         error(error) {

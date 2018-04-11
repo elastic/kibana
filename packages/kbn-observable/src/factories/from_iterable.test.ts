@@ -1,4 +1,6 @@
 import { $fromIterable } from './from_iterable';
+import { createCollectObserver } from '../lib/collect';
+import { Observable, Subscription, filter, take } from '..';
 
 test('handles array', () => {
   const values: number[] = [];
@@ -38,6 +40,39 @@ test('handles iterable', () => {
   expect(values).toEqual([1, 2, 3]);
   expect(error).not.toHaveBeenCalled();
   expect(complete).toHaveBeenCalledTimes(1);
+});
+
+test('handles infinitely iterable values', async () => {
+  function* counter() {
+    let i = 0;
+    while (true) {
+      yield i++;
+    }
+  }
+
+  const infiniteCounter = counter();
+  const received: any[] = [];
+  const results: any[] = [];
+
+  $fromIterable(infiniteCounter)
+    .pipe(
+      source =>
+        new Observable(observer => {
+          return source.subscribe({
+            next(val, subscription) {
+              received.push(val);
+              observer.next(val);
+
+              observer.complete();
+              subscription.unsubscribe();
+            },
+          });
+        })
+    )
+    .subscribe(createCollectObserver(results));
+
+  expect(received).toEqual([0]);
+  expect(results).toEqual([0, 'C']);
 });
 
 test('emits error if iterator throws', () => {

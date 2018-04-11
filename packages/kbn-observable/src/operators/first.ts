@@ -1,4 +1,4 @@
-import { Observable } from '../observable';
+import { Observable, Subscription } from '../observable';
 import { EmptyError } from '../errors';
 import { MonoTypeOperatorFunction } from '../interfaces';
 
@@ -15,9 +15,10 @@ export function first<T>(): MonoTypeOperatorFunction<T> {
   return function firstOperation(source) {
     return new Observable(observer => {
       return source.subscribe({
-        next(value) {
+        next(value, subscription) {
           observer.next(value);
           observer.complete();
+          subscription.unsubscribe();
         },
         error(error) {
           observer.error(error);

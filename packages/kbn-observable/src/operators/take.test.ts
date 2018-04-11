@@ -1,6 +1,7 @@
 import { take } from './take';
 import { Subject } from '../subjects';
-import { collect } from '../lib/collect';
+import { collect, createCollectObserver } from '../lib/collect';
+import { $fromIterable } from '../factories';
 
 test('returns the first value, then completes', async () => {
   const values$ = new Subject();
@@ -63,4 +64,22 @@ test('does not error if completing without receiving all expected values', async
   values$.complete();
 
   expect(await res).toEqual(['foo', 'C']);
+});
+
+test('support infinitely iterable values', async () => {
+  function* counter() {
+    let i = 0;
+    while (true) {
+      yield i++;
+    }
+  }
+
+  const infiniteCounter = counter();
+  const results: any[] = [];
+
+  $fromIterable(infiniteCounter)
+    .pipe(take(4))
+    .subscribe(createCollectObserver(results));
+
+  expect(results).toEqual([0, 1, 2, 3, 'C']);
 });

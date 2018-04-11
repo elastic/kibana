@@ -1,8 +1,9 @@
 import symbolObservable from 'symbol-observable';
 
-import { Observable, SubscriptionObserver } from './observable';
+import { Observable, SubscriptionObserver, Subscription } from './observable';
 import { OperatorFunction, MonoTypeOperatorFunction } from './interfaces';
 import { $of } from './factories';
+import { createCollectObserver } from './lib/collect';
 
 const noop = () => {};
 
@@ -127,25 +128,28 @@ describe('#subscribe', () => {
     expect(subscription.closed).toBe(false);
   });
 
-  test('can specify "next" function', () => {
+  test('receives emitted value and subscription object in "next"', () => {
     let observer!: SubscriptionObserver<string>;
-    const values: string[] = [];
-
     const source = new Observable<string>(_observer => {
       observer = _observer;
     });
+    const next = jest.fn();
 
-    source.subscribe(x => {
-      values.push(x);
-    });
+    source.subscribe({ next });
 
     observer.next('foo');
 
-    expect(values).toEqual(['foo']);
+    expect(next).toHaveBeenCalledTimes(1);
 
-    observer.next('bar');
+    const call = next.mock.calls[0];
+    const value = call[0];
+    const subscription = call[1];
 
-    expect(values).toEqual(['foo', 'bar']);
+    expect(value).toBe('foo');
+
+    expect(typeof subscription).toBe('object');
+    expect(typeof subscription.unsubscribe).toBe('function');
+    expect(subscription.closed).toBe(false);
   });
 
   test('throws if more than one argument is specified', () => {
@@ -229,25 +233,6 @@ describe('SubscriptionObserver#next', () => {
     observer.next('bar');
 
     expect(values).toEqual(['foo', 'bar']);
-  });
-
-  test('it does not forward additional arguments', () => {
-    let observer!: SubscriptionObserver<string>;
-    let observerArgs: any;
-
-    const source = new Observable<string>(_observer => {
-      observer = _observer;
-    });
-
-    source.subscribe({
-      next(...args: any[]) {
-        observerArgs = args;
-      },
-    });
-
-    (observer as any).next('foo', 'bar', 'baz');
-
-    expect(observerArgs).toEqual(['foo']);
   });
 
   test('suppresses the value returned from the observer', () => {
@@ -876,6 +861,67 @@ describe('observable#pipe', () => {
     });
 
     expect(actual).toEqual(['2', '3', '4']);
+  });
+
+  test('should be able to unsubscribe within a subscribe', () => {
+    const factoryState: any[] = [];
+    const operator1State: any[] = [];
+    const operator2State: any[] = [];
+    const output: any[] = [];
+
+    new Observable(observer => {
+      for (let x of [1, 2, 3, 4]) {
+        factoryState.push({ x, isClosed: observer.closed });
+
+        if (observer.closed) return;
+        observer.next(x);
+      }
+
+      observer.complete();
+    })
+      .pipe(
+        source =>
+          new Observable(observer =>
+            source.subscribe({
+              next(x) {
+                operator1State.push({ x, isClosed: observer.closed });
+                observer.next(x);
+              },
+            })
+          ),
+        source =>
+          new Observable(observer =>
+            source.subscribe({
+              next(x, subscription) {
+                operator2State.push({ x, isClosed: observer.closed });
+                observer.next(x);
+
+                if (x > 1) {
+                  subscription.unsubscribe();
+                }
+              },
+            })
+          )
+      )
+      .subscribe(createCollectObserver(output));
+
+    expect(factoryState).toEqual([
+      { x: 1, isClosed: false },
+      { x: 2, isClosed: false },
+      { x: 3, isClosed: false },
+      { x: 4, isClosed: false },
+    ]);
+    expect(operator1State).toEqual([
+      { x: 1, isClosed: false },
+      { x: 2, isClosed: false },
+      { x: 3, isClosed: true },
+      { x: 4, isClosed: true },
+    ]);
+    expect(operator2State).toEqual([
+      { isClosed: false, x: 1 },
+      { isClosed: false, x: 2 },
+    ]);
+    expect(output).toEqual([1, 2]);
   });
 
   test('should return the same observable if there are no arguments', () => {

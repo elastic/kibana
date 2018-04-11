@@ -230,7 +230,7 @@ test('can use subject with pipe', async () => {
   values$.next('test');
 
   expect(next).toHaveBeenCalledTimes(1);
-  expect(next).toHaveBeenCalledWith('test');
+  expect(next).toHaveBeenCalledWith('test', expect.anything());
   expect(error).not.toHaveBeenCalled();
   expect(complete).toHaveBeenCalled();
 });

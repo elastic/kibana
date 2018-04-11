@@ -1,27 +1,17 @@
 import { last } from './last';
 import { Subject } from '../subjects';
+import { collect } from '../lib/collect';
 
 test('returns the last value', async () => {
   const values$ = new Subject();
 
-  const next = jest.fn();
-  const error = jest.fn();
-  const complete = jest.fn();
-
-  values$.pipe(last()).subscribe({ next, error, complete });
+  const res = collect(values$.pipe(last()));
 
   values$.next('foo');
-  expect(next).not.toHaveBeenCalled();
-
   values$.next('bar');
-  expect(next).not.toHaveBeenCalled();
-
   values$.complete();
 
-  expect(next).toHaveBeenCalledTimes(1);
-  expect(next).toHaveBeenCalledWith('bar');
-  expect(error).not.toHaveBeenCalled();
-  expect(complete).toHaveBeenCalledTimes(1);
+  expect(await res).toEqual(['bar', 'C']);
 });
 
 test('returns error if completing without receiving any value', async () => {

@@ -22,7 +22,8 @@ const noop: () => any = () => {};
  */
 export interface Observer<T> {
   // Receives the next value in the sequence
-  next(value: T): void;
+  // TODO describe why subscription is received
+  next(value: T, subscription: Subscription): void;
 
   // Receives the sequence error
   error(errorValue: Error): void;
@@ -144,7 +145,7 @@ class SubscriptionObserverImpl<T> implements SubscriptionObserver<T> {
     if (this.closed) return;
 
     try {
-      this._observer.next && this._observer.next(value);
+      this._observer.next && this._observer.next(value, this._subscription);
     } catch (e) {
       console.error(e);
     }

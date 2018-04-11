@@ -18,6 +18,7 @@ export function $fromIterable<T>(x: Iterable<T>): Observable<T> {
 
   return new Observable<T>(observer => {
     for (let item of x) {
+      if (observer.closed) return;
       observer.next(item);
     }
 
