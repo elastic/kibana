@@ -3,9 +3,7 @@
 set -e
 
 dir="$(pwd)"
-workspace="$(cd "$dir"/..; pwd)"
-cacheDir="${CACHE_DIR:-"$workspace/.kibana"}"
-
+cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
 ###
 ### check that we seem to be in a kibana project
