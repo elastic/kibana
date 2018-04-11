@@ -73,16 +73,6 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eslint-import-resolver-kibana@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-import-resolver-kibana/-/eslint-import-resolver-kibana-1.0.0.tgz#01f0bff6c399626a0f63afd31933fedfffd05d94"
-  dependencies:
-    debug "^2.6.6"
-    eslint-import-resolver-node "^0.3.0"
-    eslint-import-resolver-webpack "^0.8.1"
-    glob-all "^3.1.0"
-    webpack "3.6.0"
-
 "@elastic/eslint-plugin-kibana-custom@link:packages/eslint-plugin-kibana-custom":
   version "0.0.0"
   uid ""
@@ -137,6 +127,10 @@
   uid ""
 
 "@kbn/es@link:packages/kbn-es":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-import-resolver-kibana@link:packages/kbn-eslint-import-resolver-kibana":
   version "0.0.0"
   uid ""
 
