@@ -37,9 +37,9 @@ examples].  *(Do not use makelogs on a production cluster!)*
 VegaLite is a simplified version of Vega, useful to quickly get started,
 but has a number of limitations. VegaLite is automatically converted
 into Vega before rendering. Compare
-link:public/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
 and
-link:public/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
 (both use the same ElasticSearch logstash data). You may use
 https://vega.github.io/editor/[this editor] to convert VegaLite into
 Vega.
