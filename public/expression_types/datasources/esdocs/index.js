@@ -6,10 +6,11 @@ import { ESFieldsSelect } from '../../../components/es_fields_select';
 import { ESFieldSelect } from '../../../components/es_field_select';
 import { ESIndexSelect } from '../../../components/es_index_select';
 import { TooltipIcon } from '../../../components/tooltip_icon';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import header from './header.png';
 import './esdocs.less';
 
-const template = ({ args, updateArgs }) => {
+const EsdocsDatasource = ({ args, updateArgs }) => {
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -120,7 +121,7 @@ const template = ({ args, updateArgs }) => {
   );
 };
 
-template.propTypes = {
+EsdocsDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
 };
@@ -130,5 +131,5 @@ export const esdocs = () => ({
   displayName: 'Elasticsearch Raw Documents',
   help: 'Pull back raw documents from elasticsearch',
   image: header,
-  template,
+  template: templateFromReactComponent(EsdocsDatasource),
 });

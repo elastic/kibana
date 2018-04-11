@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
 import { TooltipIcon } from '../../../components/tooltip_icon';
-import header from './header.png';
 import './timelion.less';
+import { templateFromReactComponent } from '../../../lib/template_from_react_component';
+import header from './header.png';
 
-const template = ({ args, updateArgs }) => {
+const TimelionDatasource = ({ args, updateArgs }) => {
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -76,7 +77,7 @@ const template = ({ args, updateArgs }) => {
   );
 };
 
-template.propTypes = {
+TimelionDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
 };
@@ -86,5 +87,5 @@ export const timelion = () => ({
   displayName: 'Timelion',
   help: 'Use timelion syntax to retrieve a timeseries',
   image: header,
-  template,
+  template: templateFromReactComponent(TimelionDatasource),
 });
