@@ -2,6 +2,14 @@
 
 Resolver for Kibana imports, meant to be used with [eslint-plugin-import](https://github.com/benmosher/eslint-plugin-import).
 
+## Installation
+
+To install this utility use `yarn` to link to the package from the Kibana project:
+
+```sh
+yarn add --dev link:../../kibana/packages/kbn-eslint-import-resolver-kibana
+```
+
 ## Usage
 
 Specify this resolver with the `import/resolver` setting in your eslint config file:
