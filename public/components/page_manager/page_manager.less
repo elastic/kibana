@@ -1,9 +1,11 @@
 @import (reference) '../../style/variables';
 
 .canvas__page-manager {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+
   .canvas__page-manager--pages {
-    overflow-y: hidden;
-    overflow-x: auto;
     max-height: @spacingXXXL * 3;
     padding-top: @spacingS;
     margin-bottom: @spacingS;
@@ -19,6 +21,7 @@
   }
 
   .canvas__page-manager--page {
+    white-space: initial;
     position: relative;
     color: initial;
     border: @borderStyle;
@@ -35,7 +38,6 @@
       .canvas__page-manager--page-controls {
         bottom: 0;
         color: @lightGrey;
-
         display: block;
         position: absolute;
         text-align: center;
