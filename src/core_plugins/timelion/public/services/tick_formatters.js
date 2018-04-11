@@ -18,29 +18,26 @@ function baseTickFormatter(value, axis) {
   return formatted;
 }
 
-const UNIT_PREFIXES = ['', 'k', 'm', 'g', 't', 'p'];
-
-function unitFormatter(unit, divisor, prefixUppercase = false) {
+function unitFormatter(divisor, units) {
   return (val) => {
     let index = 0;
     const isNegative = val < 0;
     val = Math.abs(val);
-    while (val >= divisor && index < UNIT_PREFIXES.length) {
+    while (val >= divisor && index < units.length) {
       val /= divisor;
       index++;
     }
     const value = Math.round(val * 100) / 100 * (isNegative ? -1 : 1);
-    const unitPrefix = UNIT_PREFIXES[index];
-    return `${value}${prefixUppercase ? unitPrefix.toUpperCase() : unitPrefix}${unit}`;
+    return `${value}${units[index]}`;
   };
 }
 
 export default function tickFormatters() {
   const formatters =  {
-    'bits': unitFormatter('b', 1000),
-    'bits/s': unitFormatter('b/s', 1000),
-    'bytes': unitFormatter('B', 1024, true),
-    'bytes/s': unitFormatter('B/s', 1024, true),
+    'bits': unitFormatter(1000, ['b', 'kb', 'mb', 'gb', 'tb', 'pb']),
+    'bits/s': unitFormatter(1000, ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s']),
+    'bytes': unitFormatter(1024, ['B', 'KB', 'MB', 'GB', 'TB', 'PB']),
+    'bytes/s': unitFormatter(1024, ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s']),
     'currency': function (val, axis) {
       return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
     },
