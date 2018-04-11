@@ -6544,36 +6544,30 @@ function buildProjectGraph(projects) {
     return projectGraph;
 }
 function topologicallyBatchProjects(projectsToBatch, projectGraph) {
-    // We're going to be chopping stuff out of this array, so copy it.
-    const projects = [...projectsToBatch.values()];
-    // This maps project names to the number of projects that depend on them.
-    // As projects are completed their names will be removed from this object.
-    const refCounts = {};
-    projects.forEach(pkg => projectGraph.get(pkg.name).forEach(dep => {
-        if (!refCounts[dep.name]) refCounts[dep.name] = 0;
-        refCounts[dep.name]++;
-    }));
+    // We're going to be chopping stuff out of this list, so copy it.
+    const projectToBatchNames = new Set(projectsToBatch.keys());
     const batches = [];
-    while (projects.length > 0) {
+    while (projectToBatchNames.size > 0) {
         // Get all projects that have no remaining dependencies within the repo
         // that haven't yet been picked.
-        const batch = projects.filter(pkg => {
-            const projectDeps = projectGraph.get(pkg.name);
-            return projectDeps.filter(dep => refCounts[dep.name] > 0).length === 0;
-        });
+        const batch = [];
+        for (const projectName of projectToBatchNames) {
+            const projectDeps = projectGraph.get(projectName);
+            const hasNotBatchedDependencies = projectDeps.some(dep => projectToBatchNames.has(dep.name));
+            if (!hasNotBatchedDependencies) {
+                batch.push(projectsToBatch.get(projectName));
+            }
+        }
         // If we weren't able to find a project with no remaining dependencies,
         // then we've encountered a cycle in the dependency graph.
-        const hasCycles = projects.length > 0 && batch.length === 0;
+        const hasCycles = batch.length === 0;
         if (hasCycles) {
-            const cycleProjectNames = projects.map(p => p.name);
+            const cycleProjectNames = [...projectToBatchNames];
             const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
             throw new _errors.CliError(message);
         }
         batches.push(batch);
-        batch.forEach(pkg => {
-            delete refCounts[pkg.name];
-            projects.splice(projects.indexOf(pkg), 1);
-        });
+        batch.forEach(project => projectToBatchNames.delete(project.name));
     }
     return batches;
 }
@@ -36264,7 +36258,9 @@ let run = exports.run = (() => {
         }
         const options = (0, _getopts2.default)(argv, {
             alias: {
-                h: 'help'
+                h: 'help',
+                i: 'include',
+                e: 'exclude'
             }
         });
         const args = options._;
@@ -36327,6 +36323,8 @@ function help() {
 
     Global options:
 
+       -e, --exclude        Exclude specified projects.
+       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
        --skip-kibana        Do not include the root Kibana project when running command.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
@@ -48759,21 +48757,16 @@ const kibanaProjectName = 'kibana';
  * will emit special "marker" once build/watch process is ready that we can use as completion condition for
  * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
- *
- * Command expects two optional arguments:
- * - `-i` - projects enumerated with this option are the only ones that should be watched
- * - `-e` - projects enumerated with this option should NOT be watched at all
  */
 const WatchCommand = exports.WatchCommand = {
     name: 'watch',
     description: 'Runs `kbn:watch` script for every project.',
-    run(projects, projectGraph, { options }) {
+    run(projects, projectGraph) {
         return _asyncToGenerator(function* () {
-            const exclude = getExcludeIncludeFilter(options.e);
-            const include = getExcludeIncludeFilter(options.i);
             const projectsToWatch = new Map();
             for (const project of projects.values()) {
-                if (shouldWatchProject(project, include, exclude)) {
+                // We can't watch project that doesn't have `kbn:watch` script.
+                if (project.hasScript(watchScriptName)) {
                     projectsToWatch.set(project.name, project);
                 }
             }
@@ -48803,26 +48796,6 @@ const WatchCommand = exports.WatchCommand = {
         })();
     }
 };
-function getExcludeIncludeFilter(excludeIncludeRawValue) {
-    if (excludeIncludeRawValue == null) {
-        return [];
-    }
-    if (typeof excludeIncludeRawValue === 'string') {
-        return [excludeIncludeRawValue];
-    }
-    return excludeIncludeRawValue;
-}
-function shouldWatchProject(project, include, exclude) {
-    // We can't watch project that doesn't have `kbn:watch` script.
-    if (!project.hasScript(watchScriptName)) {
-        return false;
-    }
-    // We shouldn't watch project if it has been specifically excluded.
-    if (exclude.includes(project.name)) {
-        return false;
-    }
-    return include.length === 0 || include.includes(project.name);
-}
 
 /***/ }),
 /* 439 */
@@ -59833,6 +59806,21 @@ let runCommand = exports.runCommand = (() => {
             console.log(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
             const projectPaths = (0, _config.getProjectPaths)(config.rootPath, config.options);
             const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths);
+            const exclude = getExcludeIncludeFilter(config.options.exclude);
+            const include = getExcludeIncludeFilter(config.options.include);
+            // Filter out projects that shouldn't be included if any filters are specified.
+            if (exclude.length > 0 || include.length > 0) {
+                for (const [projectName] of projects) {
+                    const excludeProject = exclude.includes(projectName) || include.length > 0 || !include.includes(projectName);
+                    if (excludeProject) {
+                        projects.delete(projectName);
+                    }
+                }
+            }
+            if (projects.size === 0) {
+                console.log(_chalk2.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
+                process.exit(1);
+            }
             const projectGraph = (0, _projects.buildProjectGraph)(projects);
             console.log(_chalk2.default.bold(`Found [${_chalk2.default.green(projects.size.toString())}] projects:\n`));
             console.log((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
@@ -59886,6 +59874,16 @@ var _config = __webpack_require__(321);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+function getExcludeIncludeFilter(excludeIncludeRawValue) {
+    if (excludeIncludeRawValue == null) {
+        return [];
+    }
+    if (typeof excludeIncludeRawValue === 'string') {
+        return [excludeIncludeRawValue];
+    }
+    return excludeIncludeRawValue;
+}
 
 /***/ }),
 /* 735 */

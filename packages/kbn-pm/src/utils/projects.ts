@@ -99,33 +99,30 @@ export function topologicallyBatchProjects(
   projectsToBatch: ProjectMap,
   projectGraph: ProjectGraph
 ) {
-  // We're going to be chopping stuff out of this array, so copy it.
-  const projects = [...projectsToBatch.values()];
-
-  // This maps project names to the number of projects that depend on them.
-  // As projects are completed their names will be removed from this object.
-  const refCounts: { [k: string]: number } = {};
-  projects.forEach(pkg =>
-    projectGraph.get(pkg.name)!.forEach(dep => {
-      if (!refCounts[dep.name]) refCounts[dep.name] = 0;
-      refCounts[dep.name]++;
-    })
-  );
+  // We're going to be chopping stuff out of this list, so copy it.
+  const projectToBatchNames = new Set(projectsToBatch.keys());
 
   const batches = [];
-  while (projects.length > 0) {
+  while (projectToBatchNames.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
-    const batch = projects.filter(pkg => {
-      const projectDeps = projectGraph.get(pkg.name)!;
-      return projectDeps.filter(dep => refCounts[dep.name] > 0).length === 0;
-    });
+    const batch = [];
+    for (const projectName of projectToBatchNames) {
+      const projectDeps = projectGraph.get(projectName)!;
+      const hasNotBatchedDependencies = projectDeps.some(dep =>
+        projectToBatchNames.has(dep.name)
+      );
+
+      if (!hasNotBatchedDependencies) {
+        batch.push(projectsToBatch.get(projectName)!);
+      }
+    }
 
     // If we weren't able to find a project with no remaining dependencies,
     // then we've encountered a cycle in the dependency graph.
-    const hasCycles = projects.length > 0 && batch.length === 0;
+    const hasCycles = batch.length === 0;
     if (hasCycles) {
-      const cycleProjectNames = projects.map(p => p.name);
+      const cycleProjectNames = [...projectToBatchNames];
       const message =
         'Encountered a cycle in the dependency graph. Projects in cycle are:\n' +
         cycleProjectNames.join(', ');
@@ -135,10 +132,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(pkg => {
-      delete refCounts[pkg.name];
-      projects.splice(projects.indexOf(pkg), 1);
-    });
+    batch.forEach(project => projectToBatchNames.delete(project.name));
   }
 
   return batches;
