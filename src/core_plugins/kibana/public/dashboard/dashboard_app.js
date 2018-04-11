@@ -221,6 +221,9 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.$listen(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange($scope.timefilter);
+        // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
+        // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
+        $scope.refresh();
       });
 
       function updateViewMode(newMode) {
