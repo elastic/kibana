@@ -3,7 +3,6 @@ import { topologicallyBatchProjects, ProjectMap } from '../utils/projects';
 import { parallelizeBatches } from '../utils/parallelize';
 import { waitUntilWatchIsReady } from '../utils/watch';
 import { Command } from './';
-import { Project } from '../utils/project';
 
 /**
  * Name of the script in the package/project package.json file to run during `kbn watch`.
@@ -24,22 +23,16 @@ const kibanaProjectName = 'kibana';
  * will emit special "marker" once build/watch process is ready that we can use as completion condition for
  * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
  * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
- *
- * Command expects two optional arguments:
- * - `-i` - projects enumerated with this option are the only ones that should be watched
- * - `-e` - projects enumerated with this option should NOT be watched at all
  */
 export const WatchCommand: Command = {
   name: 'watch',
   description: 'Runs `kbn:watch` script for every project.',
 
-  async run(projects, projectGraph, { options }) {
-    const exclude = getExcludeIncludeFilter(options.e);
-    const include = getExcludeIncludeFilter(options.i);
-
+  async run(projects, projectGraph) {
     const projectsToWatch: ProjectMap = new Map();
     for (const project of projects.values()) {
-      if (shouldWatchProject(project, include, exclude)) {
+      // We can't watch project that doesn't have `kbn:watch` script.
+      if (project.hasScript(watchScriptName)) {
         projectsToWatch.set(project.name, project);
       }
     }
@@ -90,33 +83,3 @@ export const WatchCommand: Command = {
     });
   },
 };
-
-function getExcludeIncludeFilter(excludeIncludeRawValue?: string | string[]) {
-  if (excludeIncludeRawValue == null) {
-    return [];
-  }
-
-  if (typeof excludeIncludeRawValue === 'string') {
-    return [excludeIncludeRawValue];
-  }
-
-  return excludeIncludeRawValue;
-}
-
-function shouldWatchProject(
-  project: Project,
-  include: string[],
-  exclude: string[]
-) {
-  // We can't watch project that doesn't have `kbn:watch` script.
-  if (!project.hasScript(watchScriptName)) {
-    return false;
-  }
-
-  // We shouldn't watch project if it has been specifically excluded.
-  if (exclude.includes(project.name)) {
-    return false;
-  }
-
-  return include.length === 0 || include.includes(project.name);
-}
