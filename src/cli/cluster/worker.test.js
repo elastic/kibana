@@ -24,6 +24,7 @@ function setup(opts = {}) {
   const worker = new Worker({
     log: new Log(false, true),
     ...opts,
+    log: new Log(false, true),
     baseArgv: []
   });
 
