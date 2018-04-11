@@ -1,7 +1,6 @@
 const axios = require('axios');
 const inquirer = require('inquirer');
 const nock = require('nock');
-const os = require('os');
 const httpAdapter = require('axios/lib/adapters/http');
 
 const commitsMock = require('./mocks/commits.json');

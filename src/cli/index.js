@@ -51,19 +51,17 @@ getCombinedConfig()
       process.exit(0);
     }
 
-    const options = Object.assign(
-      {
-        multipleBranches: true,
-        multipleCommits: false,
-        own: true
-      },
-      config,
-      removeUndefined(args),
-      removeUndefined({
+    const options = {
+      multipleBranches: true,
+      multipleCommits: false,
+      own: true,
+      ...config,
+      ...removeUndefined(args),
+      ...removeUndefined({
         multipleBranches: args.multiple,
         multipleCommits: args.multiple
       })
-    );
+    };
 
     return initSteps(options);
   });

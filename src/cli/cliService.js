@@ -26,24 +26,29 @@ function doBackportVersions({
   username,
   labels
 }) {
-  return sequentially(branches, branch => {
-    return withPullRequest(owner, repoName, commits)
-      .then(commitsWithPullRequest => {
-        return doBackportVersion({
-          owner,
-          repoName,
-          commits: commitsWithPullRequest,
-          branch,
-          username,
-          labels
-        });
-      })
-      .then(res => logger.log(`View pull request: ${res.data.html_url}\n`))
-      .catch(handleErrors);
+  return sequentially(branches, async branch => {
+    try {
+      const commitsWithPullRequest = await withPullRequest(
+        owner,
+        repoName,
+        commits
+      );
+      const res = await doBackportVersion({
+        owner,
+        repoName,
+        commits: commitsWithPullRequest,
+        branch,
+        username,
+        labels
+      });
+      logger.log(`View pull request: ${res.data.html_url}\n`);
+    } catch (e) {
+      handleErrors(e);
+    }
   });
 }
 
-function doBackportVersion({
+async function doBackportVersion({
   owner,
   repoName,
   commits,
@@ -55,80 +60,69 @@ function doBackportVersion({
   const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
   logger.log(`Backporting ${refValues} to ${branch}`);
 
-  return withSpinner(
-    resetAndPullMaster(owner, repoName).then(() =>
-      createAndCheckoutBranch(owner, repoName, branch, backportBranchName)
-    ),
-    'Pulling latest changes'
-  )
-    .then(() =>
-      sequentially(commits, commit =>
-        cherrypickAndConfirm(owner, repoName, commit.sha)
-      )
-    )
-    .then(() =>
-      withSpinner(
-        push(owner, repoName, username, backportBranchName),
-        `Pushing branch ${username}:${backportBranchName}`
-      )
-    )
-    .then(() => {
-      const payload = getPullRequestPayload(branch, commits, username);
-      const promise = github
-        .createPullRequest(owner, repoName, payload)
-        .then(res => {
-          if (labels.length > 0) {
-            return github
-              .addLabels(owner, repoName, res.data.number, labels)
-              .then(() => res);
-          }
-          return res;
-        });
+  await withSpinner({ text: 'Pulling latest changes' }, async () => {
+    await resetAndPullMaster(owner, repoName);
+    await createAndCheckoutBranch(owner, repoName, branch, backportBranchName);
+  });
 
-      return withSpinner(promise, 'Creating pull request');
-    });
+  await sequentially(commits, commit =>
+    cherrypickAndConfirm(owner, repoName, commit.sha)
+  );
+
+  await withSpinner(
+    { text: `Pushing branch ${username}:${backportBranchName}` },
+    () => push(owner, repoName, username, backportBranchName)
+  );
+
+  return withSpinner({ text: 'Creating pull request' }, async () => {
+    const payload = await getPullRequestPayload(branch, commits, username);
+    const res = await github.createPullRequest(owner, repoName, payload);
+    if (labels.length > 0) {
+      await github.addLabels(owner, repoName, res.data.number, labels);
+    }
+    return res;
+  });
 }
 
 // Add pull request info to commit if it exists
 function withPullRequest(owner, repoName, commits) {
   const promise = Promise.all(
-    commits.map(commit => {
-      return github
-        .getPullRequestByCommit(owner, repoName, commit.sha)
-        .then(pullRequest => Object.assign({}, commit, { pullRequest }));
+    commits.map(async commit => {
+      const pullRequest = await github.getPullRequestByCommit(
+        owner,
+        repoName,
+        commit.sha
+      );
+      return { ...commit, pullRequest };
     })
   );
-  return withSpinner(promise);
+  return withSpinner({}, () => promise);
 }
 
-function maybeSetupRepo(owner, repoName, username) {
-  return repoExists(owner, repoName).then(exists => {
-    if (exists) {
-      return null;
-    }
+async function maybeSetupRepo(owner, repoName, username) {
+  if (await repoExists(owner, repoName)) {
+    return null;
+  }
 
-    return withSpinner(
-      setupRepo(owner, repoName, username),
-      'Cloning repository (may take a few minutes the first time)'
-    );
-  });
+  return withSpinner(
+    { text: 'Cloning repository (may take a few minutes the first time)' },
+    () => setupRepo(owner, repoName, username)
+  );
 }
 
-function getCommitBySha({ owner, repoName, sha }) {
+async function getCommitBySha({ owner, repoName, sha }) {
   const spinner = ora().start();
-  return github
-    .getCommit(owner, repoName, sha)
-    .catch(e => {
-      spinner.stop();
-      throw e;
-    })
-    .then(commit => {
-      spinner.stopAndPersist({
-        symbol: chalk.green('?'),
-        text: `${chalk.bold('Select commit')} ${chalk.cyan(commit.message)}`
-      });
-      return [commit];
+  try {
+    const commit = await github.getCommit(owner, repoName, sha);
+    spinner.stopAndPersist({
+      symbol: chalk.green('?'),
+      text: `${chalk.bold('Select commit')} ${chalk.cyan(commit.message)}`
     });
+    return [commit];
+  } catch (e) {
+    spinner.stop();
+    throw e;
+  }
 }
 
 class MissingDataError extends Error {
@@ -140,32 +134,30 @@ class MissingDataError extends Error {
   }
 }
 
-function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
+async function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
   const spinner = ora('Loading commits...').start();
-  return github
-    .getCommits(owner, repoName, author)
-    .catch(e => {
-      spinner.fail();
-      throw e;
-    })
-    .then(commits => {
-      if (isEmpty(commits)) {
-        spinner.stopAndPersist({
-          symbol: chalk.green('?'),
-          text: `${chalk.bold('Select commit')} `
-        });
+  try {
+    const commits = await github.getCommits(owner, repoName, author);
+    if (isEmpty(commits)) {
+      spinner.stopAndPersist({
+        symbol: chalk.green('?'),
+        text: `${chalk.bold('Select commit')} `
+      });
 
-        throw new MissingDataError(
-          chalk.red(
-            author
-              ? 'There are no commits by you in this repository'
-              : 'There are no commits in this repository'
-          )
-        );
-      }
-      spinner.stop();
-      return prompts.listCommits(commits, multipleCommits);
-    });
+      throw new MissingDataError(
+        chalk.red(
+          author
+            ? 'There are no commits by you in this repository'
+            : 'There are no commits in this repository'
+        )
+      );
+    }
+    spinner.stop();
+    return prompts.listCommits(commits, multipleCommits);
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 }
 
 function getBranchesByPrompt(branches, isMultipleChoice = false) {
@@ -190,10 +182,10 @@ function handleErrors(e) {
 }
 
 function sequentially(items, handler) {
-  return items.reduce(
-    (p, item) => p.then(() => handler(item)),
-    Promise.resolve()
-  );
+  return items.reduce(async (p, item) => {
+    await p;
+    return handler(item);
+  }, Promise.resolve());
 }
 
 function getBackportBranchName(branch, commits) {
@@ -225,30 +217,33 @@ function isCherrypickConflict(e) {
   return e.cmd.includes('git cherry-pick');
 }
 
-function cherrypickAndConfirm(owner, repoName, sha) {
-  return withSpinner(
-    cherrypick(owner, repoName, sha),
-    'Cherry-picking commit',
-    `Cherry-picking failed. Please resolve conflicts in: ${getRepoPath(
-      owner,
-      repoName
-    )}`
-  ).catch(e => {
+async function cherrypickAndConfirm(owner, repoName, sha) {
+  try {
+    await withSpinner(
+      {
+        text: 'Cherry-picking commit',
+        errorText: `Cherry-picking failed. Please resolve conflicts in: ${getRepoPath(
+          owner,
+          repoName
+        )}`
+      },
+      () => cherrypick(owner, repoName, sha)
+    );
+  } catch (e) {
     if (!isCherrypickConflict(e)) {
       throw e;
     }
 
-    return confirmResolvedRecursive(owner, repoName);
-  });
+    await confirmResolvedRecursive(owner, repoName);
+  }
 }
 
-function confirmResolvedRecursive(owner, repoName) {
-  return prompts
-    .confirmConflictResolved()
-    .then(() => isIndexDirty(owner, repoName))
-    .then(
-      isDirty => (isDirty ? confirmResolvedRecursive(owner, repoName) : null)
-    );
+async function confirmResolvedRecursive(owner, repoName) {
+  await prompts.confirmConflictResolved();
+  const isDirty = isIndexDirty(owner, repoName);
+  if (isDirty) {
+    await confirmResolvedRecursive(owner, repoName);
+  }
 }
 
 function getPullRequestPayload(branch, commits, username) {
@@ -273,24 +268,25 @@ function getPullRequestPayload(branch, commits, username) {
   };
 }
 
-function withSpinner(promise, text, errorText) {
+async function withSpinner({ text, errorText }, fn) {
   const spinner = ora(text).start();
-  return promise
-    .then(res => {
-      if (text) {
-        spinner.succeed();
-      } else {
-        spinner.stop();
-      }
-      return res;
-    })
-    .catch(e => {
-      if (errorText) {
-        spinner.text = errorText;
-      }
-      spinner.fail();
-      throw e;
-    });
+
+  try {
+    const res = await fn();
+    if (text) {
+      spinner.succeed();
+    } else {
+      spinner.stop();
+    }
+
+    return res;
+  } catch (e) {
+    if (errorText) {
+      spinner.text = errorText;
+    }
+    spinner.fail();
+    throw e;
+  }
 }
 
 module.exports = {

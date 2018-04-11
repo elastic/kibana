@@ -10,27 +10,27 @@ const rpc = require('./rpc');
 const prompts = require('./prompts');
 const schemas = require('./schemas');
 
-function maybeCreateGlobalConfigAndFolder() {
+async function maybeCreateGlobalConfigAndFolder() {
   const REPOS_PATH = env.getReposPath();
-  return rpc.mkdirp(REPOS_PATH).then(maybeCreateGlobalConfig);
+  await rpc.mkdirp(REPOS_PATH);
+  await maybeCreateGlobalConfig();
 }
 
-function maybeCreateGlobalConfig() {
+async function maybeCreateGlobalConfig() {
   const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
 
-  return getConfigTemplate().then(configTemplate => {
-    return rpc
-      .writeFile(GLOBAL_CONFIG_PATH, configTemplate, {
-        flag: 'wx', // create and write file. Error if it already exists
-        mode: 0o600 // give the owner read-write privleges, no access for others
-      })
-      .catch(e => {
-        const FILE_ALREADY_EXISTS = 'EEXIST';
-        if (e.code !== FILE_ALREADY_EXISTS) {
-          throw e;
-        }
-      });
-  });
+  try {
+    const configTemplate = await getConfigTemplate();
+    await rpc.writeFile(GLOBAL_CONFIG_PATH, configTemplate, {
+      flag: 'wx', // create and write file. Error if it already exists
+      mode: 0o600 // give the owner read-write privleges, no access for others
+    });
+  } catch (e) {
+    const FILE_ALREADY_EXISTS = 'EEXIST';
+    if (e.code !== FILE_ALREADY_EXISTS) {
+      throw e;
+    }
+  }
 }
 
 function getConfigTemplate() {
@@ -108,64 +108,63 @@ function hasRestrictedPermissions(GLOBAL_CONFIG_PATH) {
   return !hasGroupRead && !hasOthersRead;
 }
 
-function readConfigFile(filepath) {
-  return rpc
-    .readFile(filepath, 'utf8')
-    .then(fileContents => JSON.parse(stripJsonComments(fileContents)));
+async function readConfigFile(filepath) {
+  const fileContents = await rpc.readFile(filepath, 'utf8');
+  return JSON.parse(stripJsonComments(fileContents));
 }
 
-function getGlobalConfig() {
+async function getGlobalConfig() {
+  await maybeCreateGlobalConfigAndFolder();
+
   const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
-  return maybeCreateGlobalConfigAndFolder()
-    .then(() => readConfigFile(GLOBAL_CONFIG_PATH))
-    .then(config => validateGlobalConfig(config, GLOBAL_CONFIG_PATH));
+  const config = await readConfigFile(GLOBAL_CONFIG_PATH);
+  return validateGlobalConfig(config, GLOBAL_CONFIG_PATH);
 }
 
-function getProjectConfig() {
-  return rpc.findUp('.backportrc.json').then(filepath => {
-    if (!filepath) {
-      return null;
-    }
+async function getProjectConfig() {
+  const filepath = await rpc.findUp('.backportrc.json');
+  if (!filepath) {
+    return null;
+  }
 
-    return readConfigFile(filepath).then(config =>
-      validateProjectConfig(config, filepath)
+  const config = await readConfigFile(filepath);
+  return validateProjectConfig(config, filepath);
+}
+
+async function getCombinedConfig() {
+  const [projectConfig, globalConfig] = await Promise.all([
+    getProjectConfig(),
+    getGlobalConfig()
+  ]);
+
+  return _getCombinedConfig(projectConfig, globalConfig);
+}
+
+async function _getCombinedConfig(projectConfig, globalConfig) {
+  if (!projectConfig) {
+    const globalProjects = get(globalConfig, 'projects', []).filter(
+      project => !isEmpty(project.branches) && project.upstream
     );
-  });
-}
 
-function getCombinedConfig() {
-  return Promise.all([getProjectConfig(), getGlobalConfig()]).then(
-    ([projectConfig, globalConfig]) =>
-      _getCombinedConfig(projectConfig, globalConfig)
-  );
-}
-
-function _getCombinedConfig(projectConfig, globalConfig) {
-  return Promise.resolve().then(() => {
-    if (!projectConfig) {
-      const globalProjects = get(globalConfig, 'projects', []).filter(
-        project => !isEmpty(project.branches) && project.upstream
+    if (isEmpty(globalProjects)) {
+      const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
+      throw new InvalidConfigError(
+        `Global config (${GLOBAL_CONFIG_PATH}) does not contain any valid projects, and no project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport#global-configuration`
       );
-      if (isEmpty(globalProjects)) {
-        const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
-        throw new InvalidConfigError(
-          `Global config (${GLOBAL_CONFIG_PATH}) does not contain any valid projects, and no project config (.backportrc.json) was found.\nDocumentation: https://github.com/sqren/backport#global-configuration`
-        );
-      }
-
-      return prompts
-        .listProjects(globalProjects.map(project => project.upstream))
-        .then(upstream => {
-          return validateCombinedConfig(
-            mergeConfigs(projectConfig, globalConfig, upstream)
-          );
-        });
     }
+
+    const upstream = await prompts.listProjects(
+      globalProjects.map(project => project.upstream)
+    );
 
     return validateCombinedConfig(
-      mergeConfigs(projectConfig, globalConfig, projectConfig.upstream)
+      mergeConfigs(projectConfig, globalConfig, upstream)
     );
-  });
+  }
+
+  return validateCombinedConfig(
+    mergeConfigs(projectConfig, globalConfig, projectConfig.upstream)
+  );
 }
 
 function mergeConfigs(projectConfig, globalConfig, upstream) {
@@ -173,15 +172,12 @@ function mergeConfigs(projectConfig, globalConfig, upstream) {
     !isEmpty(globalConfig.projects) &&
     globalConfig.projects.find(project => project.upstream === upstream);
 
-  return Object.assign(
-    {},
-    projectConfig,
-    {
-      accessToken: globalConfig.accessToken,
-      username: globalConfig.username
-    },
-    globalProjectConfig
-  );
+  return {
+    ...projectConfig,
+    accessToken: globalConfig.accessToken,
+    username: globalConfig.username,
+    ...globalProjectConfig
+  };
 }
 
 module.exports = {

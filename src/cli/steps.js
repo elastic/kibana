@@ -8,41 +8,37 @@ const {
   maybeSetupRepo
 } = require('./cliService');
 
-function initSteps(options) {
+async function initSteps(options) {
   const [owner, repoName] = options.upstream.split('/');
-
-  let commits, branches;
   github.setAccessToken(options.accessToken);
 
-  const promise = options.sha
-    ? getCommitBySha({ owner, repoName, sha: options.sha })
-    : getCommitByPrompt({
-        owner,
-        repoName,
-        author: options.own ? options.username : null,
-        multipleCommits: options.multipleCommits
-      });
+  try {
+    const commits = options.sha
+      ? await getCommitBySha({ owner, repoName, sha: options.sha })
+      : await getCommitByPrompt({
+          owner,
+          repoName,
+          author: options.own ? options.username : null,
+          multipleCommits: options.multipleCommits
+        });
 
-  return promise
-    .then(c => {
-      commits = c;
-    })
-    .then(() => getBranchesByPrompt(options.branches, options.multipleBranches))
-    .then(v => {
-      branches = v;
-    })
-    .then(() => maybeSetupRepo(owner, repoName, options.username))
-    .then(() =>
-      doBackportVersions({
-        owner,
-        repoName,
-        commits,
-        branches,
-        username: options.username,
-        labels: options.labels
-      })
-    )
-    .catch(handleErrors);
+    const branches = await getBranchesByPrompt(
+      options.branches,
+      options.multipleBranches
+    );
+
+    await maybeSetupRepo(owner, repoName, options.username);
+    await doBackportVersions({
+      owner,
+      repoName,
+      commits,
+      branches,
+      username: options.username,
+      labels: options.labels
+    });
+  } catch (e) {
+    handleErrors(e);
+  }
 }
 
 module.exports = initSteps;

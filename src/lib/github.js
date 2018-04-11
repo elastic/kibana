@@ -8,7 +8,7 @@ function getCommitMessage(message) {
   return message.split('\n')[0].trim();
 }
 
-function getCommits(owner, repoName, author) {
+async function getCommits(owner, repoName, author) {
   const urlArgs = {
     per_page: 20,
     access_token: accessToken
@@ -19,32 +19,37 @@ function getCommits(owner, repoName, author) {
     urlArgs.per_page = 5;
   }
 
-  return axios(
-    `https://api.github.com/repos/${owner}/${repoName}/commits?${querystring.stringify(
-      urlArgs
-    )}`
-  )
-    .catch(handleError)
-    .then(res =>
-      res.data.map(commit => {
-        const message = getCommitMessage(commit.commit.message);
-        return {
-          message,
-          sha: commit.sha
-        };
-      })
+  try {
+    const res = await axios(
+      `https://api.github.com/repos/${owner}/${repoName}/commits?${querystring.stringify(
+        urlArgs
+      )}`
     );
+
+    return res.data.map(commit => {
+      const message = getCommitMessage(commit.commit.message);
+      return {
+        message,
+        sha: commit.sha
+      };
+    });
+  } catch (e) {
+    return handleError(e);
+  }
 }
 
-function getCommit(owner, repoName, sha) {
-  return axios(
-    `https://api.github.com/repos/${owner}/${repoName}/commits/${sha}?access_token=${accessToken}`
-  )
-    .catch(handleError)
-    .then(res => ({
+async function getCommit(owner, repoName, sha) {
+  try {
+    const res = await axios(
+      `https://api.github.com/repos/${owner}/${repoName}/commits/${sha}?access_token=${accessToken}`
+    );
+    return {
       message: res.data.commit.message,
       sha: res.data.sha
-    }));
+    };
+  } catch (e) {
+    return handleError(e);
+  }
 }
 
 function createPullRequest(owner, repoName, payload) {
@@ -65,12 +70,15 @@ function addLabels(owner, repoName, pullNumber, labels) {
     .catch(handleError);
 }
 
-function getPullRequestByCommit(owner, repoName, commitSha) {
-  return axios(
-    `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
-  )
-    .catch(handleError)
-    .then(res => get(res.data.items[0], 'number'));
+async function getPullRequestByCommit(owner, repoName, commitSha) {
+  try {
+    const res = await axios(
+      `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
+    );
+    return get(res.data.items[0], 'number');
+  } catch (e) {
+    return handleError(e);
+  }
 }
 
 function setAccessToken(_accessToken) {

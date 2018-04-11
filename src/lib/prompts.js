@@ -1,10 +1,11 @@
 const inquirer = require('inquirer');
 const isEmpty = require('lodash.isempty');
 
-function prompt(options) {
-  return inquirer
-    .prompt([Object.assign({}, options, { name: 'promptResult' })])
-    .then(({ promptResult }) => promptResult);
+async function prompt(options) {
+  const { promptResult } = await inquirer.prompt([
+    { ...options, name: 'promptResult' }
+  ]);
+  return promptResult;
 }
 
 function listProjects(repoNames) {
@@ -15,42 +16,40 @@ function listProjects(repoNames) {
   });
 }
 
-function listCommits(commits, isMultipleChoice) {
+async function listCommits(commits, isMultipleChoice) {
   const pageSize = Math.min(10, commits.length);
-  return prompt({
+  const res = await prompt({
     pageSize,
     type: isMultipleChoice ? 'checkbox' : 'list',
     message: 'Select commit to backport',
     choices: commits
-      .map(commit => ({
-        name: commit.message,
-        value: commit,
-        short: commit.message
+      .map(c => ({
+        name: c.message,
+        value: c,
+        short: c.message
       }))
       .concat(commits.length > pageSize ? new inquirer.Separator() : [])
-  })
-    .then(commit => (isMultipleChoice ? commit.reverse() : [commit]))
-    .then(
-      selectedCommits =>
-        isEmpty(selectedCommits)
-          ? listCommits(commits, isMultipleChoice)
-          : selectedCommits
-    );
+  });
+
+  const selectedCommits = isMultipleChoice ? res.reverse() : [res];
+
+  return isEmpty(selectedCommits)
+    ? listCommits(commits, isMultipleChoice)
+    : selectedCommits;
 }
 
-function listBranches(branches, isMultipleChoice) {
-  return prompt({
+async function listBranches(branches, isMultipleChoice) {
+  const res = await prompt({
     type: isMultipleChoice ? 'checkbox' : 'list',
     message: 'Select branch to backport to',
     choices: branches
-  })
-    .then(res => (isMultipleChoice ? res : [res]))
-    .then(
-      selectedBranches =>
-        isEmpty(selectedBranches)
-          ? listBranches(branches, isMultipleChoice)
-          : selectedBranches
-    );
+  });
+
+  const selectedBranches = isMultipleChoice ? res : [res];
+
+  return isEmpty(selectedBranches)
+    ? listBranches(branches, isMultipleChoice)
+    : selectedBranches;
 }
 
 function confirmConflictResolved() {

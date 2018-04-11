@@ -1,17 +1,17 @@
 const env = require('./env');
 const rpc = require('./rpc');
 
-function folderExists(path) {
-  return rpc
-    .stat(path)
-    .then(stats => stats.isDirectory())
-    .catch(e => {
-      if (e.code === 'ENOENT') {
-        return false;
-      }
+async function folderExists(path) {
+  try {
+    const stats = await rpc.stat(path);
+    return stats.isDirectory();
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    }
 
-      throw e;
-    });
+    throw e;
+  }
 }
 
 function repoExists(owner, repoName) {
@@ -19,12 +19,10 @@ function repoExists(owner, repoName) {
 }
 
 // Clone repo and add remotes
-function setupRepo(owner, repoName, username) {
-  return rpc.mkdirp(env.getRepoOwnerPath(owner)).then(() => {
-    return cloneRepo(owner, repoName).then(() =>
-      addRemote(owner, repoName, username)
-    );
-  });
+async function setupRepo(owner, repoName, username) {
+  await rpc.mkdirp(env.getRepoOwnerPath(owner));
+  await cloneRepo(owner, repoName);
+  return addRemote(owner, repoName, username);
 }
 
 function getRemoteUrl(owner, repoName) {
@@ -52,6 +50,7 @@ function cherrypick(owner, repoName, sha) {
   });
 }
 
+// TODO: rewrite to async/await
 function isIndexDirty(owner, repoName) {
   return rpc
     .exec(`git diff-index --quiet HEAD --`, {
