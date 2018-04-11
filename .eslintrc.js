@@ -6,7 +6,7 @@ module.exports = {
 
   settings: {
     'import/resolver': {
-      '@elastic/eslint-import-resolver-kibana': {
+      '@kbn/eslint-import-resolver-kibana': {
         rootPackageName: 'kibana',
         kibanaPath: '.',
       },
