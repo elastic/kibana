@@ -13,12 +13,12 @@ module.exports = function getKibanaPath(config, projectRoot) {
   if (inConfig && config.kibanaPath !== '.') {
     throw new Error(
       'The `kibanaPath` option has been removed from `eslint-import-resolver-kibana`. ' +
-      'During development your plugin must live in `../kibana-extra/{pluginName}` ' +
-      'relative to the Kibana folder to work with this package.'
+        'During development your plugin must live in `../kibana-extra/{pluginName}` ' +
+        'relative to the Kibana folder to work with this package.'
     );
   }
 
-  const kibanaPath = (inConfig)
+  const kibanaPath = inConfig
     ? resolve(projectRoot, config.kibanaPath)
     : resolve(projectRoot, DEFAULT_PLUGIN_PATH);
 

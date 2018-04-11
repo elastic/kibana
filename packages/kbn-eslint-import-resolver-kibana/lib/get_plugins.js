@@ -15,7 +15,7 @@ module.exports = function getPlugins(config, kibanaPath, projectRoot) {
 
     // when the rootPackageName is specified we assume that the root of the project
     // is not a plugin, so don't include it automatically
-    ...(config.rootPackageName ? [] : [projectRoot])
+    ...(config.rootPackageName ? [] : [projectRoot]),
   ];
 
   const globPatterns = [

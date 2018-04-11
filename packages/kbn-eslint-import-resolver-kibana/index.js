@@ -18,9 +18,10 @@ exports.resolve = function resolveKibanaPath(source, file, config) {
 
   // fall back to the webpack resolver
   projectRoot = projectRoot || getProjectRoot(file, settings);
-  webpackConfig = webpackConfig || getWebpackConfig(source, projectRoot, settings);
+  webpackConfig =
+    webpackConfig || getWebpackConfig(source, projectRoot, settings);
   return webpackResolver.resolve(source, file, {
-    config: webpackConfig
+    config: webpackConfig,
   });
 };
 

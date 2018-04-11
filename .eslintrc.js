@@ -22,6 +22,7 @@ module.exports = {
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-plugin-generator/**/*',
+        'packages/kbn-eslint-import-resolver-kibana/**/*',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
