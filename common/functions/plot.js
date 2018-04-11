@@ -41,10 +41,12 @@ export const plot = () => ({
     yaxis: {
       types: ['boolean', 'axisConfig'],
       help: 'Axis configuration, or false to disable',
+      default: true,
     },
     xaxis: {
       types: ['boolean', 'axisConfig'],
       help: 'Axis configuration, or false to disable',
+      default: true,
     },
   },
   fn: (context, args) => {

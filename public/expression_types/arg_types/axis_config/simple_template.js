@@ -12,7 +12,7 @@ export const SimpleTemplate = ({ onValueChange, argValue }) => (
 
 SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
+  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 
 SimpleTemplate.displayName = 'AxisConfigSimpleInput';

@@ -21,7 +21,7 @@ export const ArgAddPopover = ({ options }) => {
           displayName={opt.arg.displayName}
           help={opt.arg.help}
           onValueAdd={() => {
-            opt.onValueAdd(...arguments);
+            opt.onValueAdd();
             close();
           }}
         />

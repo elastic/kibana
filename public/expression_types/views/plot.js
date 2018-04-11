@@ -25,12 +25,14 @@ export const plot = () => ({
       displayName: 'X-Axis',
       help: 'Configure or disable the x-axis',
       argType: 'axisConfig',
+      default: true,
     },
     {
       name: 'yaxis',
       displayName: 'Y-Axis',
       help: 'Configure or disable the Y-axis',
       argType: 'axisConfig',
+      default: true,
     },
     {
       name: 'font',
