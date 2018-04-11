@@ -22,6 +22,7 @@ function assertListenerRemoved(emitter, event) {
 
 function setup(opts = {}) {
   const worker = new Worker({
+    log: new Log(false, true),
     ...opts,
     baseArgv: []
   });
@@ -70,7 +71,7 @@ describe('CLI cluster manager', function () {
   describe('#shutdown', function () {
     describe('after starting()', function () {
       it('kills the worker and unbinds from message, online, and disconnect events', async function () {
-        const worker = setup({ log: new Log(false, true) });
+        const worker = setup();
         await worker.start();
         expect(worker).toHaveProperty('online', true);
         const fork = worker.fork;
@@ -97,7 +98,7 @@ describe('CLI cluster manager', function () {
   describe('#parseIncomingMessage()', function () {
     describe('on a started worker', function () {
       it(`is bound to fork's message event`, async function () {
-        const worker = setup({ log: new Log(false, true) });
+        const worker = setup();
         await worker.start();
         sinon.assert.calledWith(worker.fork.on, 'message');
       });
@@ -157,8 +158,9 @@ describe('CLI cluster manager', function () {
 
   describe('#start', function () {
     describe('when not started', function () {
-      it('creates a fork and waits for it to come online', async function () {
-        const worker = setup({ log: new Log(false, true) });
+      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
+      it.skip('creates a fork and waits for it to come online', async function () {
+        const worker = setup();
 
         sinon.spy(worker, 'on');
 
@@ -168,8 +170,9 @@ describe('CLI cluster manager', function () {
         sinon.assert.calledWith(worker.on, 'fork:online');
       });
 
-      it('listens for cluster and process "exit" events', async function () {
-        const worker = setup({ log: new Log(false, true) });
+      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
+      it.skip('listens for cluster and process "exit" events', async function () {
+        const worker = setup();
 
         sinon.spy(process, 'on');
         sinon.spy(cluster, 'on');
