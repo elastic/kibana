@@ -18,27 +18,24 @@
     box-shadow: 0 0 1px 2px @blue;
   }
 
-  .canvas__page-manager--page:hover {
-    background-color: @mediumGrey;
-    color: @lightGrey;
-  }
-
   .canvas__page-manager--page {
     position: relative;
-    color: @mediumGrey;
+    color: initial;
     border: @borderStyle;
     display: inline-block;
     vertical-align: top;
     font-weight: bold;
-    text-align: center;
     width: @spacingXXXXL;
     height: @spacingXXXL * 2;
     margin: 0 @spacingM @spacingS 0;
     cursor: pointer;
 
     &:hover {
+      background-color: @mediumGrey;
       .canvas__page-manager--page-controls {
         bottom: 0;
+        color: @lightGrey;
+
         display: block;
         position: absolute;
         text-align: center;
