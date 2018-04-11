@@ -24,6 +24,31 @@ export async function runCommand(command: Command, config: CommandConfig) {
     );
 
     const projects = await getProjects(config.rootPath, projectPaths);
+    const exclude = getExcludeIncludeFilter(config.options.exclude);
+    const include = getExcludeIncludeFilter(config.options.include);
+
+    // Filter out projects that shouldn't be included if any filters are specified.
+    if (exclude.length > 0 || include.length > 0) {
+      for (const [projectName] of projects) {
+        const excludeProject =
+          exclude.includes(projectName) ||
+          (include.length > 0 || !include.includes(projectName));
+
+        if (excludeProject) {
+          projects.delete(projectName);
+        }
+      }
+    }
+
+    if (projects.size === 0) {
+      console.log(
+        chalk.red(
+          `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
+        )
+      );
+      process.exit(1);
+    }
+
     const projectGraph = buildProjectGraph(projects);
 
     console.log(
@@ -55,4 +80,16 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     process.exit(1);
   }
+}
+
+function getExcludeIncludeFilter(excludeIncludeRawValue?: string | string[]) {
+  if (excludeIncludeRawValue == null) {
+    return [];
+  }
+
+  if (typeof excludeIncludeRawValue === 'string') {
+    return [excludeIncludeRawValue];
+  }
+
+  return excludeIncludeRawValue;
 }
