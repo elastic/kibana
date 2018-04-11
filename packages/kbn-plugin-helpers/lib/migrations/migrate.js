@@ -14,22 +14,12 @@ import {
   indexExists,
   createIndex,
   fetchMigrationContext,
+  computeMigrationStatus,
 } from './migration_helpers';
-import { fetchMigrationStatus } from './fetch_migration_status';
 
 /**
  * @typedef {elapsedMs: number, index: string, destIndex: string, status: MigrationStatus} MigrationResult
 */
-
-/**
- * The options for running migrations or checking migration status
- * @typedef {Object} MigrationOpts
- * @property {string} index - The index or alias to be migrated
- * @property {((command: string, opts: object) => Promise<any>)} callCluster - A properly secured Elasticsearch access function
- * @property {((meta: string[], message: any) => any)} log - A function which writes out to the Kibana log
- * @property {string|undefined} destIndex - The name of the index to which index will be migrated. The destIndex must not exist prior to calling migrate.
- * @property {string|undefined} initialIndex - The name of the index that will be created if no index exists or if no alias exists.
- */
 
 /**
  * Performs a migration of the specified index using the migrations defined by
@@ -56,7 +46,7 @@ async function measureElapsedTime(fn) {
 
 async function runMigrationIfOutOfDate(opts) {
   const context = await fetchMigrationContext(opts);
-  const status = await fetchMigrationStatus(opts);
+  const status = await computeMigrationStatus(context.plugins, context.migrationState);
 
   if (status !== MigrationStatus.outOfDate) {
     return skipMigration(context, status);

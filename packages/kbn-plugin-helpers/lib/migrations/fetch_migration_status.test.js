@@ -1,10 +1,8 @@
 import { fetchMigrationStatus } from './fetch_migration_status';
 import { buildMigrationState, MigrationStatus } from './migration_helpers';
-import { mockCluster } from './test/mock_cluster';
+import { mockServer } from './test';
 
 describe('fetchMigrationStatus', () => {
-  const log = () => {};
-
   test('is migrated, if the stored migration state matches the plugin state', async () => {
     const plugins = [{
       id: 'shwank',
@@ -15,7 +13,7 @@ describe('fetchMigrationStatus', () => {
     }];
     const index = '.amazemazing';
     const migrationState = buildMigrationState(plugins);
-    const callCluster = mockCluster({
+    const { server } = mockServer({
       [index]: {
         'migration:migration-state': {
           _source: {
@@ -24,7 +22,7 @@ describe('fetchMigrationStatus', () => {
         },
       }
     });
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins, log });
+    const actual = await fetchMigrationStatus({ server, index, plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -36,15 +34,15 @@ describe('fetchMigrationStatus', () => {
         shwank: { type: 'text' },
       },
     }];
-    const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, index: '.amazemazing', plugins, log });
+    const { server } = mockServer({});
+    const actual = await fetchMigrationStatus({ server, index: '.amazemazing', plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('is migrated, if there is no stored state and no plugins with migrations', async () => {
     const plugins = [];
-    const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, index: '.amazemazing', plugins, log });
+    const { server } = mockServer({});
+    const actual = await fetchMigrationStatus({ server, index: '.amazemazing', plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -58,7 +56,7 @@ describe('fetchMigrationStatus', () => {
     }];
     const index = '.kibana';
     const migrationState = buildMigrationState(plugins);
-    const callCluster = mockCluster({
+    const { server } = mockServer({
       [index]: {
         'migration:migration-state': {
           _source: {
@@ -68,7 +66,7 @@ describe('fetchMigrationStatus', () => {
       },
     });
     plugins[0].mappings.shwank.type = 'integer';
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins, log });
+    const actual = await fetchMigrationStatus({ server, index, plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 });

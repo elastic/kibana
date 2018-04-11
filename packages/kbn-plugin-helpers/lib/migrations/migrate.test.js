@@ -1,17 +1,15 @@
 import _ from 'lodash';
 import { migrate } from './migrate';
-import { mockCluster } from './test/mock_cluster';
+import { mockServer } from './test';
 import { buildMigrationState, sanitizePlugins } from './migration_helpers';
 
 describe('migrate', () => {
-  const log = () => {};
-
   test('does nothing if there are no migrations defined', async () => {
     const plugins = [];
     const index = '.amazemazing';
-    const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, log });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer({});
+    await migrate({ server, index, plugins });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -23,9 +21,9 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, log, destIndex: '.mufasa-original' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer({});
+    await migrate({ server, index, plugins, destIndex: '.mufasa-original' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -37,13 +35,13 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const callCluster = mockCluster({ [index]: { } });
+    const { server, cluster } = mockServer({ [index]: { } });
     const minIndexName = `${index}-${new Date().getUTCFullYear()}`;
     const maxIndexName = `${index}-${new Date().getUTCFullYear() + 1}`;
-    const { destIndex } = await migrate({ callCluster, index, plugins, log });
+    const { destIndex } = await migrate({ server, index, plugins });
 
-    expect(callCluster.state().data[destIndex]).toBeTruthy();
-    expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
+    expect(cluster.state().data[destIndex]).toBeTruthy();
+    expect(cluster.state().meta.aliases[index][destIndex]).toBeTruthy();
     expect(destIndex > minIndexName).toBeTruthy();
     expect(destIndex < maxIndexName).toBeTruthy();
   });
@@ -66,9 +64,9 @@ describe('migrate', () => {
         },
       },
     });
-    const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins, log, destIndex: 'mufasa-v1' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer(existingData, existingMeta);
+    await migrate({ server, index, plugins, destIndex: 'mufasa-v1' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -78,11 +76,11 @@ describe('migrate', () => {
       migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
     }];
     const index = '.mufasa';
-    const callCluster = mockCluster({});
+    const { server } = mockServer({});
     const results = await Promise.all([
-      migrate({ callCluster, index, plugins, log })
+      migrate({ server, index, plugins })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ callCluster, index, plugins, log })
+      migrate({ server, index, plugins })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
     expect(results[0].status).toEqual('migrated');
@@ -103,11 +101,11 @@ describe('migrate', () => {
     };
     const existingData = assocMigrationState({}, index, originalMigrationState);
     const existingMeta = assocAlias({}, index, alias);
-    const callCluster = mockCluster(existingData, existingMeta);
+    const { server } = mockServer(existingData, existingMeta);
     const results = await Promise.all([
-      migrate({ callCluster, index: alias, plugins: [pluginV2], log })
+      migrate({ server, index: alias, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ callCluster, index: alias, plugins: [pluginV2], log })
+      migrate({ server, index: alias, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
 
@@ -135,9 +133,9 @@ describe('migrate', () => {
       }],
     }];
     const index = '.mufasa';
-    const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, log, initialIndex: '.mufasa-v1' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer({});
+    await migrate({ server, index, plugins, initialIndex: '.mufasa-v1' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -166,9 +164,9 @@ describe('migrate', () => {
         transform: (doc) => _.set(_.cloneDeep(doc), ['artists', 'john'], 'coltrane'),
       }],
     }];
-    const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, log, initialIndex: '.music-dest' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer({});
+    await migrate({ server, index, plugins, initialIndex: '.music-dest' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -182,9 +180,9 @@ describe('migrate', () => {
     }];
     const existingData = _.set({}, [index, 'fred', '_source', 'shut_the_front_door', 'name'], 'rogers');
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
-    const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins, log, destIndex: 'gentleman-v2' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer(existingData, existingMeta);
+    await migrate({ server, index, plugins, destIndex: 'gentleman-v2' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -225,9 +223,9 @@ describe('migrate', () => {
       ...plugin2.mappings,
       user: { name: { type: 'keyword' } },
     });
-    const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins: [plugin1, plugin2], log, destIndex: 'groovystuff-v2' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer(existingData, existingMeta);
+    await migrate({ server, index, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -262,9 +260,9 @@ describe('migrate', () => {
     _.set(existingData, [index, 'f1', '_source', 'fish', 'kind'], 'catfish');
     _.set(existingData, [index, 'f2', '_source', 'fish', 'kind'], 'carp');
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
-    const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins: [pluginV2], log, destIndex: 'aquatica-2' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer(existingData, existingMeta);
+    await migrate({ server, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 
@@ -294,9 +292,9 @@ describe('migrate', () => {
     _.set(existingData, [existingIndex, 't1', '_source', 'tweet', 'chars'], 'The past is not what it was.');
     const existingMeta = assocAlias({}, existingIndex, index);
     assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
-    const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins: pluginsV2, log, destIndex: 'disabled-scenario-2' });
-    expect(callCluster.state())
+    const { server, cluster } = mockServer(existingData, existingMeta);
+    await migrate({ server, index, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
+    expect(cluster.state())
       .toMatchSnapshot();
   });
 });

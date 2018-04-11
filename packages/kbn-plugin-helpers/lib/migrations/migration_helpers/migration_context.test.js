@@ -1,24 +1,7 @@
 import { fetchMigrationContext } from './migration_context';
+import { mockServer } from '../test';
 
 describe('migrationContext', () => {
-  function buildOpts(opts) {
-    return {
-      index: 'shazm',
-      plugins: opts.plugins || [],
-      log() { },
-      callCluster(path) {
-        expect(path).toEqual('get');
-        return Promise.resolve(opts.migrationState);
-      },
-      ...opts,
-    };
-  }
-
-  async function testMigrationContext(testOpts) {
-    const opts = buildOpts(testOpts);
-    return fetchMigrationContext(opts);
-  }
-
   test('ensures that migrations are not undefined', async () => {
     const plugins = [
       { id: 'a', migrations: [{ id: 'shazm' }] },
@@ -39,7 +22,9 @@ describe('migrationContext', () => {
 
   test('creates a logger that logs info', async () => {
     const logs = [];
-    const actual = await testMigrationContext({ log: (...args) => logs.push(args) });
+    const opts = buildOpts({});
+    opts.server.log = (...args) => logs.push(args);
+    const actual = await fetchMigrationContext(opts);
     actual.log.info('Wat up?');
     actual.log.info('Logging, sucka!');
     expect(logs)
@@ -51,7 +36,9 @@ describe('migrationContext', () => {
 
   test('creates a logger that logs debug', async () => {
     const logs = [];
-    const actual = await testMigrationContext({ log: (...args) => logs.push(args) });
+    const opts = buildOpts({});
+    opts.server.log = (...args) => logs.push(args);
+    const actual = await fetchMigrationContext(opts);
     actual.log.debug('I need coffee');
     actual.log.debug('Lots o coffee');
     expect(logs)
@@ -59,11 +46,6 @@ describe('migrationContext', () => {
         [['debug', 'migration'], 'I need coffee'],
         [['debug', 'migration'], 'Lots o coffee'],
       ]);
-  });
-
-  test('passes unknown values through', async () => {
-    const actual = await testMigrationContext({ caffeine: 'yes, please!' });
-    expect(actual.caffeine).toEqual('yes, please!');
   });
 
   test('accurately computes applied and unapplied migrations', async () => {
@@ -122,8 +104,8 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('callCluster is required', () => {
-    expect(testMigrationContext({ callCluster: undefined }))
+  test('server is required', () => {
+    expect(testMigrationContext({ server: undefined }))
       .rejects.toThrow(/Got undefined/);
   });
 
@@ -132,18 +114,8 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('log is required', () => {
-    expect(testMigrationContext({ log: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('callCluster must be a function', () => {
-    expect(testMigrationContext({ callCluster: 'hello' }))
-      .rejects.toThrow(/Got string/);
-  });
-
-  test('log must be a function', () => {
-    expect(testMigrationContext({ log: 'hello' }))
+  test('server must be an object', () => {
+    expect(testMigrationContext({ server: 'hello' }))
       .rejects.toThrow(/Got string/);
   });
 
@@ -166,4 +138,24 @@ describe('migrationContext', () => {
     expect(testMigrationContext({ plugins: 'notright' }))
       .rejects.toThrow(/Got string/);
   });
+
+  function buildOpts(opts) {
+    const index = 'test-index';
+    const { server } = mockServer({
+      [index]: {
+        'migration:migration-state': opts.migrationState,
+      },
+    });
+    return {
+      index,
+      server,
+      plugins: opts.plugins || [],
+      ...opts,
+    };
+  }
+
+  async function testMigrationContext(testOpts) {
+    const opts = buildOpts(testOpts);
+    return fetchMigrationContext(opts);
+  }
 });

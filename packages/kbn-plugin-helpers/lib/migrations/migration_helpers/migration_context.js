@@ -7,19 +7,21 @@ import { buildMigrationPlan } from './migration_plan';
 import { fetchMigrationState } from './persistence';
 
 export async function fetchMigrationContext(opts) {
-  opts = validateOpts(opts);
-  const { migrationState, migrationStateVersion } = await fetchMigrationState(opts.callCluster, opts.index);
-  const plugins = validatePlugins(opts.plugins, migrationState);
-  const migrationPlan = buildMigrationPlan(plugins, migrationState);
+  const { server, index, initialIndex, destIndex, plugins } = validateOpts(opts);
+  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  const { migrationState, migrationStateVersion } = await fetchMigrationState(callCluster, index);
+  const sanitizedPlugins = validatePlugins(plugins, migrationState);
+  const migrationPlan = buildMigrationPlan(sanitizedPlugins, migrationState);
   return {
-    ...opts,
+    index,
+    callCluster,
     migrationState,
     migrationStateVersion,
-    plugins,
     migrationPlan,
-    destIndex: opts.destIndex || `${opts.index}-${moment().format('YYYYMMDDHHmmss')}`,
-    initialIndex: opts.initialIndex || `${opts.index}-original`,
-    log: migrationLogger(opts.log),
+    plugins: sanitizedPlugins,
+    destIndex: destIndex || `${index}-${moment().format('YYYYMMDDHHmmss')}`,
+    initialIndex: initialIndex || `${index}-original`,
+    log: migrationLogger(server),
   };
 }
 
@@ -36,8 +38,7 @@ function validateOpts(opts) {
   }
 
   validateProp('index', 'string');
-  validateProp('callCluster', 'function');
-  validateProp('log', 'function');
+  validateProp('server', 'object');
   validateProp('plugins', 'array', (v) => Array.isArray(v));
   validateProp('destIndex', 'string', (v) => v === undefined || typeof v === 'string');
   validateProp('initialIndex', 'string', (v) => v === undefined || typeof v === 'string');
@@ -45,14 +46,10 @@ function validateOpts(opts) {
   return opts;
 }
 
-function migrationLogger(log) {
-  const logFn = prefix => msg => log(prefix, typeof msg === 'function' ? msg() : msg);
-  const logger = (...args) => log(...args);
-  logger.info = logFn(['info', 'migration']);
-
-  // Temporarily change this to info, to see migration debug logs without
-  // all the noise of normal Kibana debug logs.
-  logger.debug = logFn(['debug', 'migration']);
-
-  return logger;
+function migrationLogger(server) {
+  const logFn = prefix => msg => server.log(prefix, typeof msg === 'function' ? msg() : msg);
+  return {
+    info: logFn(['info', 'migration']),
+    debug: logFn(['debug', 'migration']),
+  };
 }

@@ -1,8 +1,4 @@
-import { computeMigrationStatus, fetchMigrationState, sanitizePlugins } from './migration_helpers';
-
-/**
- * @typedef {'migrating' | 'migrated' | 'outOfDate'} MigrationStatus
-*/
+import { computeMigrationStatus, fetchMigrationContext } from './migration_helpers';
 
 /**
  * Checks whether or not the specified index is in need of migrations.
@@ -10,7 +6,7 @@ import { computeMigrationStatus, fetchMigrationState, sanitizePlugins } from './
  * @param {MigrationOpts} opts
  * @returns {Promise<MigrationStatus>}
  */
-export async function fetchMigrationStatus({ callCluster, index, plugins }) {
-  const { migrationState } = await fetchMigrationState(callCluster, index);
-  return computeMigrationStatus(sanitizePlugins(plugins), migrationState);
+export async function fetchMigrationStatus(opts) {
+  const { plugins, migrationState } = await fetchMigrationContext(opts);
+  return computeMigrationStatus(plugins, migrationState);
 }
