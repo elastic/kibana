@@ -5,6 +5,8 @@ import {
   buildProjectGraph,
   topologicallyBatchProjects,
   includeTransitiveProjects,
+  ProjectMap,
+  ProjectGraph,
 } from './projects';
 import { Project } from './project';
 import { getProjectPaths } from '../config';
@@ -89,13 +91,26 @@ describe('#buildProjectGraph', () => {
 });
 
 describe('#topologicallyBatchProjects', () => {
+  let projects: ProjectMap;
+  let graph: ProjectGraph;
+  beforeEach(async () => {
+    projects = await getProjects(rootPath, ['.', 'packages/*', '../plugins/*']);
+    graph = buildProjectGraph(projects);
+  });
+
   test('batches projects topologically based on their project dependencies', async () => {
-    const projects = await getProjects(rootPath, [
-      '.',
-      'packages/*',
-      '../plugins/*',
-    ]);
-    const graph = buildProjectGraph(projects);
+    const batches = topologicallyBatchProjects(projects, graph);
+
+    const expectedBatches = batches.map(batch =>
+      batch.map(project => project.name)
+    );
+
+    expect(expectedBatches).toMatchSnapshot();
+  });
+
+  test('batches projects topologically even if graph contains projects not presented in the project map', async () => {
+    // Make sure that the project we remove really existed in the projects map.
+    expect(projects.delete('foo')).toBe(true);
 
     const batches = topologicallyBatchProjects(projects, graph);
 
