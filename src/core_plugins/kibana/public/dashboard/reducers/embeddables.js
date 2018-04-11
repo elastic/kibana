@@ -13,7 +13,7 @@ import {
 export const embeddables = handleActions({
   [clearStagedFilters]:
     (embeddables) => {
-      return _.mapValues(embeddables, (embeddable) => _.omit({ ...embeddable }, ['stagedFilters']));
+      return _.mapValues(embeddables, (embeddable) => _.omit({ ...embeddable }, ['stagedFilter']));
     },
 
   [embeddableIsInitialized]:
