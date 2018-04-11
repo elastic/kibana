@@ -42,7 +42,7 @@ After installation you must update [the global config](#global-configuration) wi
 
 ## Usage
 
-Run the CLI in your project folder:
+Run the CLI in your project folder (eg. in the Kibana folder):
 
 ```
 $ backport
