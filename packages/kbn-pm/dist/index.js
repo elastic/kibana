@@ -59811,7 +59811,7 @@ let runCommand = exports.runCommand = (() => {
             // Filter out projects that shouldn't be included if any filters are specified.
             if (exclude.length > 0 || include.length > 0) {
                 for (const [projectName] of projects) {
-                    const excludeProject = exclude.includes(projectName) || include.length > 0 || !include.includes(projectName);
+                    const excludeProject = exclude.includes(projectName) || include.length > 0 && !include.includes(projectName);
                     if (excludeProject) {
                         projects.delete(projectName);
                     }

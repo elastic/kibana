@@ -32,7 +32,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
       for (const [projectName] of projects) {
         const excludeProject =
           exclude.includes(projectName) ||
-          (include.length > 0 || !include.includes(projectName));
+          (include.length > 0 && !include.includes(projectName));
 
         if (excludeProject) {
           projects.delete(projectName);
