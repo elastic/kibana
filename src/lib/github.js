@@ -1,7 +1,7 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const get = require('lodash.get');
-const constants = require('./constants');
+const { GithubError } = require('./errors');
 
 let accessToken;
 function getCommitMessage(message) {
@@ -83,15 +83,6 @@ async function getPullRequestByCommit(owner, repoName, commitSha) {
 
 function setAccessToken(_accessToken) {
   accessToken = _accessToken;
-}
-
-class GithubError extends Error {
-  constructor(message) {
-    super();
-    Error.captureStackTrace(this, GithubError);
-    this.code = constants.GITHUB_ERROR;
-    this.message = message;
-  }
 }
 
 function handleError(e) {

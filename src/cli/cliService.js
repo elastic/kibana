@@ -4,7 +4,11 @@ const isEmpty = require('lodash.isempty');
 
 const prompts = require('../lib/prompts');
 const github = require('../lib/github');
-const constants = require('../lib/constants');
+const {
+  ERROR_CODES,
+  MissingDataError,
+  AbortApplicationError
+} = require('../lib/errors');
 const { getRepoPath } = require('../lib/env');
 const logger = require('../lib/logger');
 
@@ -125,15 +129,6 @@ async function getCommitBySha({ owner, repoName, sha }) {
   }
 }
 
-class MissingDataError extends Error {
-  constructor(message) {
-    super();
-    Error.captureStackTrace(this, MissingDataError);
-    this.code = constants.MISSING_DATA_ERROR;
-    this.message = message;
-  }
-}
-
 async function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
   const spinner = ora('Loading commits...').start();
   try {
@@ -167,11 +162,9 @@ function getBranchesByPrompt(branches, isMultipleChoice = false) {
 function handleErrors(e) {
   switch (e.code) {
     // Handled exceptions
-    case constants.GITHUB_ERROR:
-      logger.error(JSON.stringify(e.message, null, 4));
-      break;
-
-    case constants.MISSING_DATA_ERROR:
+    case ERROR_CODES.GITHUB_ERROR_CODE:
+    case ERROR_CODES.MISSING_DATA_ERROR_CODE:
+    case ERROR_CODES.ABORT_APPLICATION_ERROR_CODE:
       logger.error(e.message);
       break;
 
@@ -239,7 +232,11 @@ async function cherrypickAndConfirm(owner, repoName, sha) {
 }
 
 async function confirmResolvedRecursive(owner, repoName) {
-  await prompts.confirmConflictResolved();
+  const res = await prompts.confirmConflictResolved();
+  if (!res) {
+    throw new AbortApplicationError('Application was aborted.');
+  }
+
   const isDirty = isIndexDirty(owner, repoName);
   if (isDirty) {
     await confirmResolvedRecursive(owner, repoName);

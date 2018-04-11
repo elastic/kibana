@@ -4,7 +4,7 @@ const isEmpty = require('lodash.isempty');
 const get = require('lodash.get');
 const stripJsonComments = require('strip-json-comments');
 const Joi = require('joi');
-const constants = require('./constants');
+const { InvalidConfigError, InvalidJsonError } = require('./errors');
 const env = require('./env');
 const rpc = require('./rpc');
 const prompts = require('./prompts');
@@ -35,14 +35,6 @@ async function maybeCreateGlobalConfig() {
 
 function getConfigTemplate() {
   return rpc.readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
-}
-
-class InvalidConfigError extends Error {
-  constructor(...args) {
-    super(...args);
-    Error.captureStackTrace(this, InvalidConfigError);
-    this.code = constants.INVALID_CONFIG;
-  }
 }
 
 function validateGlobalConfig(config, filename) {
@@ -110,7 +102,13 @@ function hasRestrictedPermissions(GLOBAL_CONFIG_PATH) {
 
 async function readConfigFile(filepath) {
   const fileContents = await rpc.readFile(filepath, 'utf8');
-  return JSON.parse(stripJsonComments(fileContents));
+  const configWithoutComments = stripJsonComments(fileContents);
+
+  try {
+    return JSON.parse(configWithoutComments);
+  } catch (e) {
+    throw new InvalidJsonError(e.message, filepath, fileContents);
+  }
 }
 
 async function getGlobalConfig() {

@@ -30,7 +30,10 @@
     "postinstall": "scripts/postinstall.js"
   },
   "lint-staged": {
-    "*.js": ["prettier --write", "git add"]
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "author": "Søren Louv-Jansen",
   "homepage": "https://github.com/sqren/backport/blob/master/README.md",
@@ -42,7 +45,9 @@
     "url": "git+https://github.com/sqren/backport.git"
   },
   "jest": {
-    "setupFiles": ["./test/setup.js"]
+    "setupFiles": [
+      "./test/setup.js"
+    ]
   },
   "engines": {
     "node": ">=6.0.0"
