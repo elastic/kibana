@@ -81,4 +81,62 @@ describe('buildMigrationPlan', () => {
       .toThrow(/Mapping \"stuff\" is defined more than once/);
   });
 
+  test('is empty if no migrations are defined', () => {
+    expect(buildMigrationPlan([], {}).migrations).toEqual([]);
+  });
+
+  test('handles new migrations', async () => {
+    const plugins = [{
+      id: 'bon',
+      migrations: [{ id: 'derp' }],
+    }];
+    expect(buildMigrationPlan(plugins, {}).migrations)
+      .toEqual([{ pluginId: 'bon', id: 'derp' }]);
+  });
+
+  test('is empty if migrations are unchanged', async () => {
+    const plugins = [{
+      id: 'bon',
+      mappings: {
+        merlin: { type: 'wizard' },
+      },
+      migrations: [{ id: 'bingo' }],
+    }];
+    const state = buildMigrationState(plugins);
+    expect(buildMigrationPlan(plugins, state).migrations)
+      .toEqual([]);
+  });
+
+  test('lists only new migrations', async () => {
+    const plugins = [{
+      id: 'bon',
+      mappings: {
+        merlin: { type: 'wizard' },
+      },
+      migrations: [{ id: 'bingo' }],
+    }];
+    const state = buildMigrationState(plugins);
+    plugins[0].migrations.push({ id: 'fancipants' });
+    expect(buildMigrationPlan(plugins, state).migrations)
+      .toEqual([{ pluginId: 'bon', id: 'fancipants' }]);
+  });
+
+  test('disabled plugins have no affect on the dry run', async () => {
+    const plugins = [{
+      id: 'bon',
+      mappings: {
+        merlin: { type: 'wizard' },
+      },
+      migrations: [{ id: 'bingo' }],
+    }, {
+      id: 'wart',
+      mappings: {
+        wart: { type: 'king' },
+      },
+      migrations: [{ id: 'arthur' }],
+    }];
+    const state = buildMigrationState(plugins);
+    expect(buildMigrationPlan([plugins[1]], state).migrations)
+      .toEqual([]);
+  });
 });
