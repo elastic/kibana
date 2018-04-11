@@ -1,5 +1,4 @@
-
-jest.mock('repl');
+jest.mock('repl', () => ({ start: (opts) => ({ opts, context: {} }) }), { virtual: true });
 
 describe('repl', () => {
   const originalConsoleLog = console.log;
