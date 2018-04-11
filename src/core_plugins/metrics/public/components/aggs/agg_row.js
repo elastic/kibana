@@ -28,13 +28,14 @@ function AggRow(props) {
 
   return (
     <div className="vis_editor__agg_row">
-      <div className="vis_editor__agg_row-item">
+      <div className="vis_editor__agg_row-item" data-test-subj="aggRow">
         <div className={iconRowClassName}>
           <i className={iconClassName} />
         </div>
         {props.children}
         { dragHandle }
         <AddDeleteButtons
+          testSubj="addMetric"
           addTooltip="Add Metric"
           deleteTooltip="Delete Metric"
           onAdd={props.onAdd}
