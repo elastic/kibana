@@ -48771,7 +48771,7 @@ const WatchCommand = exports.WatchCommand = {
                 }
             }
             if (projectsToWatch.size === 0) {
-                console.log(_chalk2.default.red(`There are no projects to watch, double check project name(s) in '-i'/'-e' arguments.`));
+                console.log(_chalk2.default.red(`\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`));
                 return;
             }
             const projectNames = Array.from(projectsToWatch.keys());
@@ -59819,7 +59819,7 @@ let runCommand = exports.runCommand = (() => {
             }
             if (projects.size === 0) {
                 console.log(_chalk2.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
-                process.exit(1);
+                return process.exit(1);
             }
             const projectGraph = (0, _projects.buildProjectGraph)(projects);
             console.log(_chalk2.default.bold(`Found [${_chalk2.default.green(projects.size.toString())}] projects:\n`));

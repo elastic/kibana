@@ -46,7 +46,7 @@ export async function runCommand(command: Command, config: CommandConfig) {
           `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
         )
       );
-      process.exit(1);
+      return process.exit(1);
     }
 
     const projectGraph = buildProjectGraph(projects);

@@ -40,7 +40,7 @@ export const WatchCommand: Command = {
     if (projectsToWatch.size === 0) {
       console.log(
         chalk.red(
-          `There are no projects to watch, double check project name(s) in '-i'/'-e' arguments.`
+          `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
         )
       );
       return;
