@@ -49,22 +49,32 @@ export function runFunctionTests() {
     .catch(fatalErrorHandler);
 }
 
-export async function newRunApiTests() {
-  await runWithConfig([
-    '../../test/api_integration/config.js',
-    '../../test/saml_api_integration/config.js',
-  ]);
+// Takes in a config that lists multiple configs
+// [x] 'test/functional/config.js'
+// [x] 'test/api_integration/config.js'
+// [ ] 'test/integration/config.js' (http server tests)
+// from x-pack-kibana:
+// [ ] 'test/api_integration/config.js'
+// [ ] 'test/saml_api_integration/config.js'
+export async function newRunTests(configPath = 'test/multiple_config.js') {
+  const cmd = new Command('node scripts/functional_test_with_configs');
+
+  cmd
+    .option('--config [value]', 'Path to config file to specify options', null)
+    .parse(process.argv);
+
+  configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
+  try {
+    const config = require(configPath)();
+
+    for (const configFile of config.configFiles) {
+      await runWithConfig(configFile);
+    }
+  } catch (err) {
+    fatalErrorHandler(err);
+  }
 }
 
-// TODO: be able to chain multiple configs
-// Takes in multiple paths
-// configPath should be paths
-// works with '../test/functional/config.js'
-// try with '../test/api_integration/config.js'
-// try with '../test/http_server_integration/config.js'
-// from x-pack-kibana:
-// try with '../test/api_integration/config.js'
-// try with '../test/saml_api_integration/config.js'
 export async function runWithConfig(configPath = 'test/functional/config.js') {
   const cmd = new Command('node scripts/functional_test_with_config');
 
@@ -80,7 +90,6 @@ export async function runWithConfig(configPath = 'test/functional/config.js') {
         const config = await readConfigFile(log, configPath);
 
         await runEs({ tmpDir, procs, config }); // can also run with xpack
-        // NOTE: enableUI, useSAML, devMode
         await runKibanaServer({ procs, config });
         await runFtr({ procs, configPath });
 
@@ -89,13 +98,13 @@ export async function runWithConfig(configPath = 'test/functional/config.js') {
       });
     });
   } catch (err) {
-    console.log('error running with config', err);
+    fatalErrorHandler(err);
   }
 }
 
 // Takes in only one configPath
 // Only start servers
-async function startWithConfig(configPath) {
+export async function startWithConfig(configPath) {
   await withTmpDir(async tmpDir => {
     await withProcRunner(async procs => {
       const config = require(configPath);
@@ -109,33 +118,6 @@ async function startWithConfig(configPath) {
       await procs.waitForAllToStop();
     });
   });
-}
-
-export async function runApiTests() {
-  try {
-    await withTmpDir(async tmpDir => {
-      await withProcRunner(async procs => {
-        const ftrConfig = await getFtrConfig();
-
-        await runEsWithXpack({ tmpDir, procs, ftrConfig });
-        await runKibanaServer({ procs, ftrConfig, enableUI: false });
-        await runFtr({ procs, configPath: require.resolve('../../test/api_integration/config.js') });
-
-        await procs.stop('kibana');
-        await procs.stop('es');
-
-        // Run SAML specific API integration tests.
-        await runEsWithXpack({ tmpDir, procs, ftrConfig, useSAML: true });
-        await runKibanaServer({ procs, ftrConfig, enableUI: false, useSAML: true });
-        await runFtr({ procs, configPath: require.resolve('../../test/saml_api_integration/config.js') });
-
-        await procs.stop('kibana');
-        await procs.stop('es');
-      });
-    });
-  } catch(err) {
-    fatalErrorHandler(err);
-  }
 }
 
 export async function runFunctionalTestsServer() {

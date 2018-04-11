@@ -88,6 +88,8 @@ export const schema = Joi.object().keys({
     elasticsearch: urlPartsSchema(),
   }).default(),
 
+  kibanaServerArgs: Joi.any(),
+
   env: Joi.object().default(),
 
   chromedriver: Joi.object().keys({

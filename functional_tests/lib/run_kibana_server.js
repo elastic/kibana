@@ -11,7 +11,14 @@ import {
 // TODO: we can't have saml and xpack options in OSS kibana
 // but these can just be part of the config
 // same with devmode, enableui, etc
-export async function runKibanaServer({ procs, config, xpack = false, devMode = false, enableUI = true, useSAML = false }) {
+export async function runKibanaServer({
+  procs,
+  config,
+  xpack = false,
+  useSAML = false,
+}) {
+  const cliArgs = config.get('kibanaServerArgs') || [];
+
   const xpackArgs = xpack
     ? [
       `--server.uuid=${config.get('env').kibana.server.uuid}`,
@@ -32,18 +39,7 @@ export async function runKibanaServer({ procs, config, xpack = false, devMode = 
     cmd: KIBANA_EXEC,
     args: [
       KIBANA_EXEC_PATH,
-      devMode ? '--dev' : '--env=development',
-      '--logging.json=false',
-      '--no-base-path',
-      `--server.port=${config.get('servers.kibana.port')}`,
-      `--optimize.enabled=${enableUI}`,
-      `--optimize.watchPort=${config.get('servers.kibana.port') + 1}`,
-      '--optimize.watchPrebuild=true',
-      '--status.allowAnonymous=true',
-      `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
-      `--elasticsearch.url=${formatUrl(config.get('servers.elasticsearch'))}`,
-      `--elasticsearch.username=${config.get('servers.elasticsearch.username')}`,
-      `--elasticsearch.password=${config.get('servers.elasticsearch.password')}`,
+      ...cliArgs,
       ...xpackArgs,
       ...samlArgs,
     ],

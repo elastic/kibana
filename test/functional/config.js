@@ -78,6 +78,12 @@ export default async function ({ readConfigFile }) {
       failureDebugging: FailureDebuggingProvider,
     },
     servers: commonConfig.get('servers'),
+
+    kibanaServerArgs: [
+      ...commonConfig.get('kibanaServerArgs'),
+      '--optimize.enabled=true',
+    ],
+
     apps: {
       status_page: {
         pathname: '/status',

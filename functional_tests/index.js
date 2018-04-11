@@ -1,4 +1,5 @@
 export {
+  newRunTests,
   runWithConfig,
   runFunctionTests,
   runApiTests,
