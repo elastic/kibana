@@ -1,7 +1,4 @@
 export {
-  newRunTests,
+  runTests,
   runWithConfig,
-  runFunctionTests,
-  runApiTests,
-  runFunctionalTestsServer,
 } from './tasks';
