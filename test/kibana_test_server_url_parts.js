@@ -20,7 +20,7 @@ function getUrlParts() {
   return {
     protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
     hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
-    port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 9220,
+    port: parseInt(process.env.TEST_KIBANA_PORT, 10) || 5620,
     auth: `${username}:${password}`,
     username,
     password,
