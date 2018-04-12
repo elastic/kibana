@@ -10,9 +10,11 @@ export function UnsupportedAgg(props) {
       siblings={props.siblings}
     >
       <div className="vis_editor__row_item">
-        <p>The <code>{props.model.type}</code> aggregation is no longer supported.</p>
+        <p>
+          The <code>{props.model.type}</code> aggregation is no longer
+          supported.
+        </p>
       </div>
     </AggRow>
   );
-
 }

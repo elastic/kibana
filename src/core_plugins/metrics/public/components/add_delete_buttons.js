@@ -3,6 +3,7 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
 function AddDeleteButtons(props) {
+  const { testSubj } = props;
   const createDelete = () => {
     if (props.disableDelete) {
       return null;
@@ -10,8 +11,9 @@ function AddDeleteButtons(props) {
     return (
       <EuiToolTip content={props.deleteTooltip}>
         <button
+          data-test-subj={`${testSubj}DeleteBtn`}
           aria-label={props.deleteTooltip}
-          className="thor__button-outlined-danger sm"
+          className="thor__button-outlined-danger thor__button-delete sm"
           onClick={props.onDelete}
         >
           <i className="fa fa-trash-o" />
@@ -26,8 +28,9 @@ function AddDeleteButtons(props) {
     return (
       <EuiToolTip content={props.addTooltip}>
         <button
+          data-test-subj={`${testSubj}AddBtn`}
           aria-label={props.addTooltip}
-          className="thor__button-outlined-default sm"
+          className="thor__button-outlined-default sm thor__button-add"
           onClick={props.onAdd}
         >
           <i className="fa fa-plus" />
@@ -42,8 +45,9 @@ function AddDeleteButtons(props) {
     clone = (
       <EuiToolTip content={props.cloneTooltip}>
         <button
+          data-test-subj={`${testSubj}CloneBtn`}
           aria-label={props.cloneTooltip}
-          className="thor__button-outlined-default sm"
+          className="thor__button-outlined-default thor__button-clone sm"
           onClick={props.onClone}
         >
           <i className="fa fa-files-o" />
@@ -61,6 +65,7 @@ function AddDeleteButtons(props) {
 }
 
 AddDeleteButtons.defaultProps = {
+  testSubj: 'Add',
   addTooltip: 'Add',
   deleteTooltip: 'Delete',
   cloneTooltip: 'Clone'

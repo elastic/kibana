@@ -4,7 +4,7 @@ import AggConfigResult from 'ui/vis/agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
+import { TabifyTable } from 'ui/agg_response/tabify/_table';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
 
@@ -14,13 +14,11 @@ describe('pointSeriesChartDataFromTable', function () {
 
   let pointSeriesChartDataFromTable;
   let indexPattern;
-  let Table;
   let Vis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    Table = Private(AggResponseTabifyTableProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     pointSeriesChartDataFromTable = Private(AggResponsePointSeriesProvider);
   }));
@@ -30,7 +28,7 @@ describe('pointSeriesChartDataFromTable', function () {
     const agg = vis.aggs[0];
     const result = new AggConfigResult(vis.aggs[0], void 0, 100, 100);
 
-    const table = new Table();
+    const table = new TabifyTable();
     table.columns = [ { aggConfig: agg } ];
     table.rows.push([ result ]);
 
@@ -69,7 +67,7 @@ describe('pointSeriesChartDataFromTable', function () {
     };
 
     const rowCount = 3;
-    const table = new Table();
+    const table = new TabifyTable();
     table.columns = [ x.col, y.col ];
     _.times(rowCount, function (i) {
       const date = new AggConfigResult(x.agg, void 0, x.at(i));
@@ -130,7 +128,7 @@ describe('pointSeriesChartDataFromTable', function () {
     };
 
     const rowCount = 3;
-    const table = new Table();
+    const table = new TabifyTable();
     table.columns = [ date.col, avg.col, max.col ];
     _.times(rowCount, function (i) {
       const dateResult = new AggConfigResult(date.agg, void 0, date.at(i));
@@ -209,7 +207,7 @@ describe('pointSeriesChartDataFromTable', function () {
     const metricCount = 2;
     const rowsPerSegment = 2;
     const rowCount = extensions.length * rowsPerSegment;
-    const table = new Table();
+    const table = new TabifyTable();
     table.columns = [ date.col, term.col, avg.col, max.col ];
     _.times(rowCount, function (i) {
       const dateResult = new AggConfigResult(date.agg, void 0, date.at(i));

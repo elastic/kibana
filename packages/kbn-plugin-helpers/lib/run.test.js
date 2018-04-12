@@ -1,15 +1,16 @@
 /*eslint-env jest*/
 
-const testTask = jest.fn();
-const plugin = { id: 'testPlugin' };
+jest.mock('./plugin_config', () => () => (
+  { id: 'testPlugin' }
+));
 
-jest.mock('./plugin_config', () => () => plugin);
 jest.mock('./tasks', () => {
-  return { testTask };
+  return { testTask: jest.fn() };
 });
+
 const run = require('./run');
 
-describe('task runner', () => {
+describe('lib/run', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('throw given an invalid task', function () {
@@ -22,9 +23,19 @@ describe('task runner', () => {
   it('runs specified task with plugin and runner', function () {
     run('testTask');
 
+    const { testTask } = require('./tasks');
+    const plugin = require('./plugin_config')();
     const args = testTask.mock.calls[0];
     expect(testTask.mock.calls).toHaveLength(1);
-    expect(args[0]).toBe(plugin);
+    expect(args[0]).toEqual(plugin);
     expect(args[1]).toBe(run);
+  });
+
+  it('returns value returned by task', function () {
+    const { testTask } = require('./tasks');
+
+    const symbol = Symbol('foo');
+    testTask.mockReturnValue(symbol);
+    expect(run('testTask')).toBe(symbol);
   });
 });
