@@ -230,8 +230,4 @@ export default () => Joi.object({
     defaultLocale: Joi.string().default('en'),
   }).default(),
 
-  sandbox: Joi.object({
-    processes: Joi.array().items(Joi.string()).default([])
-  }),
-
 }).default();
