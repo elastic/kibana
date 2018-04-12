@@ -10,9 +10,7 @@ const noop = () => {};
 
 function isPromise(obj: any) {
   return (
-    obj != null &&
-    typeof obj === 'object' &&
-    typeof obj.then === 'function'
+    obj != null && typeof obj === 'object' && typeof obj.then === 'function'
   );
 }
 
