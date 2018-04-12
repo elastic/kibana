@@ -14,7 +14,7 @@
     "branches",
     "branching"
   ],
-  "version": "2.3.1",
+  "version": "3.0.0",
   "main": "./src/cli/index.js",
   "bin": {
     "backport": "./src/cli/index.js"
