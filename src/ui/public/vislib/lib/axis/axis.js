@@ -34,7 +34,7 @@ export function VislibLibAxisProvider(Private) {
           return d.x;
         })
         .y(d => {
-          if (this.axisConfig.get('scale.offset') === 'expand') {
+          if (typeof this.axisConfig.get('scale.offset') === 'function' && this.axisConfig.get('scale.offset').name === 'expand') {
             return Math.abs(d.y);
           }
           return d.y;

@@ -152,7 +152,29 @@ export function VislibLibAxisConfigProvider() {
           stacked = false;
           break;
         case SCALE_MODES.PERCENTAGE:
-          offset = 'expand';
+          offset = function expand(data) {
+            // taken from https://github.com/d3/d3/blob/v3.5.6/src/layout/stack.js#L193
+            // fixed to support zeros
+            const n = data.length;
+            const m = data[0].length;
+            const y0 = [];
+
+            for (let j = 0; j < m; ++j) {
+              let o = 0;
+              for (let i = 0; i < n; i++) {
+                o += data[i][j][1];
+              }
+              if (o) {
+                for (let i = 0; i < n; i++) {
+                  data[i][j][1] /= o;
+                }
+              }
+            }
+            for (let j = 0; j < m; ++j) {
+              y0[j] = 0;
+            }
+            return y0;
+          };
           break;
         default:
           offset = this.get('scale.mode');
