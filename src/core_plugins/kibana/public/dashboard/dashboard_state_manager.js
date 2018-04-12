@@ -184,8 +184,11 @@ export class DashboardStateManager {
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
-        this.panelIndexPatternMapping[panelId] = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
-        this.dirty = true;
+        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
+        if (indexPattern) {
+          this.panelIndexPatternMapping[panelId] = indexPattern;
+          this.dirty = true;
+        }
       }
     });
 
