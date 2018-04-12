@@ -10,11 +10,12 @@ export async function nativeControllersPrompt(settings) {
 
 
     const question = `
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@        WARNING: plugin forks a native controller        @
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@         WARNING: plugin forks a native controller          @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 This plugin launches a native controller that is not subject
-to the system call filters.
+to the system call filters. This plugin is capable of spawning
+additional processes and running arbitrary system commands.
 
 Continue with installation? [y/N]`;
 
