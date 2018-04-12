@@ -162,9 +162,10 @@ function getBranchesByPrompt(branches, isMultipleChoice = false) {
 function handleErrors(e) {
   switch (e.code) {
     // Handled exceptions
-    case ERROR_CODES.GITHUB_ERROR_CODE:
-    case ERROR_CODES.MISSING_DATA_ERROR_CODE:
     case ERROR_CODES.ABORT_APPLICATION_ERROR_CODE:
+    case ERROR_CODES.GITHUB_API_ERROR_CODE:
+    case ERROR_CODES.GITHUB_SSH_ERROR_CODE:
+    case ERROR_CODES.MISSING_DATA_ERROR_CODE:
       logger.error(e.message);
       break;
 

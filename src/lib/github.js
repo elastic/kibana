@@ -1,7 +1,7 @@
 const axios = require('axios');
 const querystring = require('querystring');
 const get = require('lodash.get');
-const { GithubError } = require('./errors');
+const { GithubApiError } = require('./errors');
 
 let accessToken;
 function getCommitMessage(message) {
@@ -87,7 +87,7 @@ function setAccessToken(_accessToken) {
 
 function handleError(e) {
   if (get(e.response, 'data')) {
-    throw new GithubError(e.response.data);
+    throw new GithubApiError(e.response.data);
   }
 
   throw e;

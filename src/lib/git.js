@@ -1,5 +1,6 @@
 const env = require('./env');
 const rpc = require('./rpc');
+const { GithubSSHError } = require('./errors');
 
 async function folderExists(path) {
   try {
@@ -20,6 +21,7 @@ function repoExists(owner, repoName) {
 
 // Clone repo and add remotes
 async function setupRepo(owner, repoName, username) {
+  await verifyGithubSshAuth();
   await rpc.mkdirp(env.getRepoOwnerPath(owner));
   await cloneRepo(owner, repoName);
   return addRemote(owner, repoName, username);
@@ -75,7 +77,7 @@ function push(owner, repoName, username, branchName) {
   });
 }
 
-function resetAndPullMaster(owner, repoName) {
+async function resetAndPullMaster(owner, repoName) {
   return rpc.exec(
     `git reset --hard && git clean -d --force && git checkout master && git pull origin master`,
     {
@@ -84,7 +86,35 @@ function resetAndPullMaster(owner, repoName) {
   );
 }
 
+async function verifyGithubSshAuth() {
+  try {
+    await rpc.exec(`ssh -oBatchMode=yes -T git@github.com`);
+    return true;
+  } catch (e) {
+    switch (e.code) {
+      case 1:
+        return true;
+      case 255:
+        if (e.stderr.includes('Host key verification failed.')) {
+          throw new GithubSSHError(
+            'Host verification of github.com failed. To automatically add it to .ssh/known_hosts run:\nssh -T git@github.com'
+          );
+        } else if (e.stderr.includes('Permission denied')) {
+          throw new GithubSSHError(
+            'Permission denied. Please add your ssh private key to the keychain by following these steps:\nhttps://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#adding-your-ssh-key-to-the-ssh-agent'
+          );
+        } else {
+          throw e;
+        }
+
+      default:
+        throw e;
+    }
+  }
+}
+
 module.exports = {
+  verifyGithubSshAuth,
   cherrypick,
   cloneRepo,
   createAndCheckoutBranch,

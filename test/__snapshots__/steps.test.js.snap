@@ -3,6 +3,9 @@
 exports[`run through steps exec should be called with correct args 1`] = `
 Array [
   Array [
+    "ssh -oBatchMode=yes -T git@github.com",
+  ],
+  Array [
     "git clone git@github.com:elastic/kibana",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic",
