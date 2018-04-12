@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
+import { stdDeviationMetricAgg } from 'ui/agg_types/metrics/std_deviation';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -8,13 +8,11 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
 
   let Vis;
   let indexPattern;
-  let aggTypeMetricStandardDeviation;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    aggTypeMetricStandardDeviation = Private(AggTypesMetricsStdDeviationProvider);
   }));
 
   it('uses the custom label if it is set', function () {
@@ -28,7 +26,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
       displayName: 'memory'
     };
 
-    const responseAggs = aggTypeMetricStandardDeviation.getResponseAggs(aggConfig);
+    const responseAggs = stdDeviationMetricAgg.getResponseAggs(aggConfig);
     const lowerStdDevLabel = responseAggs[0].makeLabel();
     const upperStdDevLabel = responseAggs[1].makeLabel();
 
@@ -46,7 +44,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
       displayName: 'memory'
     };
 
-    const responseAggs = aggTypeMetricStandardDeviation.getResponseAggs(aggConfig);
+    const responseAggs = stdDeviationMetricAgg.getResponseAggs(aggConfig);
     const lowerStdDevLabel = responseAggs[0].makeLabel();
     const upperStdDevLabel = responseAggs[1].makeLabel();
 

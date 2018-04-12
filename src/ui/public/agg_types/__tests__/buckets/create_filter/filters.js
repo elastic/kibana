@@ -2,19 +2,17 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterFiltersProvider } from 'ui/agg_types/buckets/create_filter/filters';
+import { createFilterFilters } from 'ui/agg_types/buckets/create_filter/filters';
 
 describe('AggConfig Filters', function () {
   describe('filters', function () {
     let indexPattern;
     let Vis;
-    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      createFilter = Private(AggTypesBucketsCreateFilterFiltersProvider);
     }));
 
     it('should return a filters filter', function () {
@@ -35,7 +33,7 @@ describe('AggConfig Filters', function () {
       });
 
       const aggConfig = vis.aggs.byTypeName.filters[0];
-      const filter = createFilter(aggConfig, 'type:nginx');
+      const filter = createFilterFilters(aggConfig, 'type:nginx');
       expect(filter.query.query_string.query).to.be('type:nginx');
       expect(filter.meta).to.have.property('index', indexPattern.id);
 

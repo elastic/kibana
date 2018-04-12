@@ -1,17 +1,17 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
-import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumulative_sum';
-import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
-import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
+import { derivativeMetricAgg } from 'ui/agg_types/metrics/derivative';
+import { cumulativeSumMetricAgg } from 'ui/agg_types/metrics/cumulative_sum';
+import { movingAvgMetricAgg } from 'ui/agg_types/metrics/moving_avg';
+import { serialDiffMetricAgg } from 'ui/agg_types/metrics/serial_diff';
 import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'derivative', title: 'Derivative', provider: AggTypesMetricsDerivativeProvider },
-  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: AggTypesMetricsCumulativeSumProvider },
-  { name: 'moving_avg', title: 'Moving Avg', provider: AggTypesMetricsMovingAvgProvider },
-  { name: 'serial_diff', title: 'Serial Diff', provider: AggTypesMetricsSerialDiffProvider },
+  { name: 'derivative', title: 'Derivative', provider: derivativeMetricAgg },
+  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: cumulativeSumMetricAgg },
+  { name: 'moving_avg', title: 'Moving Avg', provider: movingAvgMetricAgg },
+  { name: 'serial_diff', title: 'Serial Diff', provider: serialDiffMetricAgg },
 ];
 
 describe('parent pipeline aggs', function () {
@@ -28,7 +28,7 @@ describe('parent pipeline aggs', function () {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
-          metricAgg = Private(metric.provider);
+          metricAgg = metric.provider;
 
           const params = settings || {
             metricAgg: '1',

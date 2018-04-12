@@ -10,11 +10,11 @@
 import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { AggConfig } from 'ui/vis/agg_config';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
-import { createLegacyClass } from '../utils/legacy_class';
+import { aggTypes } from 'ui/agg_types/index';
+import { createLegacyClass } from '../../utils/legacy_class';
 
-export function VisAggConfigsProvider(Private) {
-  AggConfig.aggTypes = Private(AggTypesIndexProvider);
+export function VisAggConfigsProvider() {
+  AggConfig.aggTypes = aggTypes;
 
   createLegacyClass(AggConfigs).inherits(IndexedArray);
   function AggConfigs(vis, configStates) {
