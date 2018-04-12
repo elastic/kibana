@@ -1,2 +1,2 @@
-export { PluginSystem } from './plugin_system';
-export { PluginSpec } from './plugin_spec';
+export { SystemLoader } from './system_loader';
+export { System } from './system';
