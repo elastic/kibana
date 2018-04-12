@@ -120,8 +120,6 @@ describe('buildRequestBody(req)', () => {
           },
           meta: {
             timeField: '@timestamp',
-            from: '2017-01-26T20:37:35.881Z',
-            to: '2017-01-26T20:52:35.881Z',
             bucketSize: 10,
             intervalString: '10s'
           },
