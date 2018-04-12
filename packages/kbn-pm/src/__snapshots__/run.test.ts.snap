@@ -16,10 +16,10 @@ Object {
   },
   "projects": Array [
     "bar",
-    "kibana",
-    "with-additional-projects",
     "baz",
+    "kibana",
     "quux",
+    "with-additional-projects",
   ],
 }
 `;
@@ -33,8 +33,8 @@ Object {
   },
   "projects": Array [
     "kibana",
-    "with-additional-projects",
     "quux",
+    "with-additional-projects",
   ],
 }
 `;
@@ -52,8 +52,8 @@ Object {
   },
   "projects": Array [
     "bar",
-    "foo",
     "baz",
+    "foo",
   ],
 }
 `;
@@ -90,11 +90,11 @@ Object {
   },
   "projects": Array [
     "bar",
+    "baz",
     "foo",
     "kibana",
-    "with-additional-projects",
-    "baz",
     "quux",
+    "with-additional-projects",
   ],
 }
 `;
@@ -106,8 +106,8 @@ Object {
     "foo": Array [],
   },
   "projects": Array [
-    "foo",
     "baz",
+    "foo",
   ],
 }
 `;
