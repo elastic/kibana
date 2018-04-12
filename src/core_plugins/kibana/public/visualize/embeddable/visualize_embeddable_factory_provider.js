@@ -4,9 +4,8 @@ import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_fa
 export function visualizeEmbeddableFactoryProvider(Private) {
   const VisualizeEmbeddableFactoryProvider = (
     savedVisualizations,
-    Promise,
     config) => {
-    return new VisualizeEmbeddableFactory(savedVisualizations, Promise, config);
+    return new VisualizeEmbeddableFactory(savedVisualizations, config);
   };
   return Private(VisualizeEmbeddableFactoryProvider);
 }
