@@ -422,3 +422,35 @@ test('can add plugins before adding its dependencies', () => {
   plugins.addPluginSpec(foo);
   plugins.startPlugins();
 });
+
+test('can add multiple plugin specs at the same time', () => {
+  expect.assertions(1);
+
+  const spy = jest.fn();
+
+  class FooPlugin extends KibanaPlugin<CoreType, {}> {
+    start() {
+      spy();
+    }
+  }
+
+  class BarPlugin extends KibanaPlugin<CoreType, {}> {
+    start() {
+      spy();
+    }
+  }
+
+  const foo = new PluginSpec('foo', {
+    plugin: FooPlugin,
+  });
+
+  const bar = new PluginSpec('bar', {
+    plugin: BarPlugin,
+  });
+
+  const plugins = new PluginSystem(createCoreValues);
+  plugins.addPluginSpecs([foo, bar]);
+  plugins.startPlugins();
+
+  expect(spy).toHaveBeenCalledTimes(2);
+});

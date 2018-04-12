@@ -20,6 +20,12 @@ export class PluginSystem<C> {
     ) => C
   ) {}
 
+  addPluginSpecs(pluginSpecs: PluginSpec<C, any, any>[]) {
+    pluginSpecs.forEach(pluginSpec => {
+      this.addPluginSpec(pluginSpec);
+    });
+  }
+
   addPluginSpec<D extends PluginsType, E = void>(
     pluginSpec: PluginSpec<C, D, E>
   ) {
