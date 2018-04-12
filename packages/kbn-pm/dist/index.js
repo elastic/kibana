@@ -6459,7 +6459,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getProjects = undefined;
 
 let getProjects = exports.getProjects = (() => {
-    var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns) {
+    var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns, { include = [], exclude = [] } = {}) {
         const projects = new Map();
         for (const pattern of projectsPathsPatterns) {
             const pathsToProcess = yield packagesFromGlobPattern({ pattern, rootPath });
@@ -6467,6 +6467,10 @@ let getProjects = exports.getProjects = (() => {
                 const projectConfigPath = normalize(filePath);
                 const projectDir = _path2.default.dirname(projectConfigPath);
                 const project = yield _project.Project.fromPath(projectDir);
+                const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
+                if (excludeProject) {
+                    continue;
+                }
                 if (projects.has(project.name)) {
                     throw new _errors.CliError(`There are multiple projects with the same name [${project.name}]`, {
                         name: project.name,
@@ -6544,36 +6548,30 @@ function buildProjectGraph(projects) {
     return projectGraph;
 }
 function topologicallyBatchProjects(projectsToBatch, projectGraph) {
-    // We're going to be chopping stuff out of this array, so copy it.
-    const projects = [...projectsToBatch.values()];
-    // This maps project names to the number of projects that depend on them.
-    // As projects are completed their names will be removed from this object.
-    const refCounts = {};
-    projects.forEach(pkg => projectGraph.get(pkg.name).forEach(dep => {
-        if (!refCounts[dep.name]) refCounts[dep.name] = 0;
-        refCounts[dep.name]++;
-    }));
+    // We're going to be chopping stuff out of this list, so copy it.
+    const projectToBatchNames = new Set(projectsToBatch.keys());
     const batches = [];
-    while (projects.length > 0) {
+    while (projectToBatchNames.size > 0) {
         // Get all projects that have no remaining dependencies within the repo
         // that haven't yet been picked.
-        const batch = projects.filter(pkg => {
-            const projectDeps = projectGraph.get(pkg.name);
-            return projectDeps.filter(dep => refCounts[dep.name] > 0).length === 0;
-        });
+        const batch = [];
+        for (const projectName of projectToBatchNames) {
+            const projectDeps = projectGraph.get(projectName);
+            const hasNotBatchedDependencies = projectDeps.some(dep => projectToBatchNames.has(dep.name));
+            if (!hasNotBatchedDependencies) {
+                batch.push(projectsToBatch.get(projectName));
+            }
+        }
         // If we weren't able to find a project with no remaining dependencies,
         // then we've encountered a cycle in the dependency graph.
-        const hasCycles = projects.length > 0 && batch.length === 0;
+        const hasCycles = batch.length === 0;
         if (hasCycles) {
-            const cycleProjectNames = projects.map(p => p.name);
+            const cycleProjectNames = [...projectToBatchNames];
             const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
             throw new _errors.CliError(message);
         }
         batches.push(batch);
-        batch.forEach(pkg => {
-            delete refCounts[pkg.name];
-            projects.splice(projects.indexOf(pkg), 1);
-        });
+        batch.forEach(project => projectToBatchNames.delete(project.name));
     }
     return batches;
 }
@@ -36264,7 +36262,9 @@ let run = exports.run = (() => {
         }
         const options = (0, _getopts2.default)(argv, {
             alias: {
-                h: 'help'
+                h: 'help',
+                i: 'include',
+                e: 'exclude'
             }
         });
         const args = options._;
@@ -36327,6 +36327,8 @@ function help() {
 
     Global options:
 
+       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
        --skip-kibana        Do not include the root Kibana project when running command.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
@@ -48765,19 +48767,24 @@ const WatchCommand = exports.WatchCommand = {
     description: 'Runs `kbn:watch` script for every project.',
     run(projects, projectGraph) {
         return _asyncToGenerator(function* () {
-            const projectsWithWatchScript = new Map();
+            const projectsToWatch = new Map();
             for (const project of projects.values()) {
+                // We can't watch project that doesn't have `kbn:watch` script.
                 if (project.hasScript(watchScriptName)) {
-                    projectsWithWatchScript.set(project.name, project);
+                    projectsToWatch.set(project.name, project);
                 }
             }
-            const projectNames = Array.from(projectsWithWatchScript.keys());
+            if (projectsToWatch.size === 0) {
+                console.log(_chalk2.default.red(`\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`));
+                return;
+            }
+            const projectNames = Array.from(projectsToWatch.keys());
             console.log(_chalk2.default.bold(_chalk2.default.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)));
             // Kibana should always be run the last, so we don't rely on automatic
             // topological batching and push it to the last one-entry batch manually.
-            projectsWithWatchScript.delete(kibanaProjectName);
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsWithWatchScript, projectGraph);
-            if (projects.has(kibanaProjectName)) {
+            const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
+            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsToWatch, projectGraph);
+            if (shouldWatchKibanaProject) {
                 batchedProjects.push([projects.get(kibanaProjectName)]);
             }
             yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
@@ -59802,7 +59809,14 @@ let runCommand = exports.runCommand = (() => {
         try {
             console.log(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
             const projectPaths = (0, _config.getProjectPaths)(config.rootPath, config.options);
-            const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths);
+            const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths, {
+                exclude: toArray(config.options.exclude),
+                include: toArray(config.options.include)
+            });
+            if (projects.size === 0) {
+                console.log(_chalk2.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
+                return process.exit(1);
+            }
             const projectGraph = (0, _projects.buildProjectGraph)(projects);
             console.log(_chalk2.default.bold(`Found [${_chalk2.default.green(projects.size.toString())}] projects:\n`));
             console.log((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
@@ -59856,6 +59870,13 @@ var _config = __webpack_require__(321);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+function toArray(value) {
+    if (value == null) {
+        return [];
+    }
+    return Array.isArray(value) ? value : [value];
+}
 
 /***/ }),
 /* 735 */
