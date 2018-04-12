@@ -197,6 +197,7 @@
     "style-loader": "0.19.0",
     "tar": "2.2.0",
     "tinygradient": "0.3.0",
+    "tinymath": "0.2.1",
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
@@ -217,9 +218,9 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
-    "@elastic/eslint-import-resolver-kibana": "1.0.0",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "@kbn/es": "link:packages/kbn-es",
+    "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",

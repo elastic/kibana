@@ -5,21 +5,19 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';
 describe('AggTable Directive', function () {
 
   let $rootScope;
   let $compile;
-  let tabifyAggResponse;
   let Vis;
   let indexPattern;
   let settings;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
-    tabifyAggResponse = Private(AggResponseTabifyProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
     settings = config;
@@ -39,7 +37,11 @@ describe('AggTable Directive', function () {
 
   it('renders a simple response properly', function () {
     const vis = new Vis(indexPattern, 'table');
-    $scope.table = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
+    $scope.table = tabifyAggResponse(
+      vis.getAggConfig().getResponseAggs(),
+      fixtures.metricOnly,
+      { canSplit: false, hierarchical: vis.isHierarchical() }
+    );
 
     const $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
@@ -71,7 +73,10 @@ describe('AggTable Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    $scope.table = tabifyAggResponse(vis, fixtures.threeTermBuckets, { canSplit: false });
+    $scope.table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), fixtures.threeTermBuckets, {
+      canSplit: false,
+      isHierarchical: vis.isHierarchical()
+    });
     const $el = $('<kbn-agg-table table="table"></kbn-agg-table>');
     $compile($el)($scope);
     $scope.$digest();
@@ -134,7 +139,7 @@ describe('AggTable Directive', function () {
       const oldTimezoneSetting = settings.get('dateFormat:tz');
       settings.set('dateFormat:tz', 'UTC');
 
-      $scope.table = tabifyAggResponse(vis,
+      $scope.table = tabifyAggResponse(vis.getAggConfig().getResponseAggs(),
         fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
         { canSplit: false, minimalColumns: true, asAggConfigResults: true }
       );
