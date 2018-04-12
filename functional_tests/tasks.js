@@ -49,12 +49,20 @@ export async function runTests(configPath = 'test/multiple_config.js') {
 
 export async function runWithConfig(configPath = 'test/functional/config.js') {
   const cmd = new Command('node scripts/functional_test_with_config');
+  // TODO: when --config multiple_config.js is passed into runTests
+  // configPath is multiple_config.js, which is incorrectly passed here
+  const originalCall = process.argv[1].split('/').slice(-1);
+  // if this process was started in this method, parse argv
+  if (originalCall === 'functional_test_with_config') {
+    cmd
+      .option('--config [value]', 'Path to config file to specify options', null)
+      .parse(process.argv);
 
-  cmd
-    .option('--config [value]', 'Path to config file to specify options', null)
-    .parse(process.argv);
-
-  configPath = resolve(KIBANA_ROOT, cmd.config || configPath);
+    configPath = resolve(KIBANA_ROOT, cmd.config || configPath);
+  } else {
+  // process was started in another method, so don't parse argv
+    configPath = resolve(KIBANA_ROOT, configPath);
+  }
 
   try {
     await withTmpDir(async tmpDir => {
