@@ -313,7 +313,7 @@ test('can register multiple values in single plugin', () => {
   plugins.startPlugins();
 });
 
-test("throws if starting a plugin that depends on a plugin that's not yet started", () => {
+test("throws if starting a plugin that depends on a plugin that's not present", () => {
   class FooPlugin extends KibanaPlugin<CoreType, {}> {
     start() {}
   }

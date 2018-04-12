@@ -2,4 +2,4 @@
 
 exports[`throws if adding that has the same name as a plugin that's already added 1`] = `"a plugin named [foo] has already been added"`;
 
-exports[`throws if starting a plugin that depends on a plugin that's not yet started 1`] = `"Topological ordering did not complete, these edges could not be ordered: [[\\"foo\\",[\\"does-not-exist\\"]]]"`;
+exports[`throws if starting a plugin that depends on a plugin that's not present 1`] = `"Plugin [foo] depends on [does-not-exist], which is not present"`;

@@ -33,13 +33,25 @@ export class PluginSystem<C> {
   }
 
   startPlugins() {
-    const sortedPluginNames = getSortedPluginNames(this._pluginSpecs);
+    this._ensureAllPluginDependenciesCanBeResolved();
 
-    sortedPluginNames
+    getSortedPluginNames(this._pluginSpecs)
       .map(pluginName => this._pluginSpecs.get(pluginName)!)
       .forEach(pluginSpec => {
         this.startPlugin(pluginSpec);
       });
+  }
+
+  private _ensureAllPluginDependenciesCanBeResolved() {
+    for (const [pluginName, pluginSpec] of this._pluginSpecs) {
+      for (const pluginDep of pluginSpec.dependencies) {
+        if (!this._pluginSpecs.has(pluginDep)) {
+          throw new Error(
+            `Plugin [${pluginName}] depends on [${pluginDep}], which is not present`
+          );
+        }
+      }
+    }
   }
 
   private startPlugin<D extends PluginsType, E = void>(
