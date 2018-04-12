@@ -23,22 +23,10 @@ export async function runCommand(command: Command, config: CommandConfig) {
       config.options as ProjectPathOptions
     );
 
-    const projects = await getProjects(config.rootPath, projectPaths);
-    const exclude = getExcludeIncludeFilter(config.options.exclude);
-    const include = getExcludeIncludeFilter(config.options.include);
-
-    // Filter out projects that shouldn't be included if any filters are specified.
-    if (exclude.length > 0 || include.length > 0) {
-      for (const [projectName] of projects) {
-        const excludeProject =
-          exclude.includes(projectName) ||
-          (include.length > 0 && !include.includes(projectName));
-
-        if (excludeProject) {
-          projects.delete(projectName);
-        }
-      }
-    }
+    const projects = await getProjects(config.rootPath, projectPaths, {
+      exclude: toArray(config.options.exclude),
+      include: toArray(config.options.include),
+    });
 
     if (projects.size === 0) {
       console.log(
@@ -82,14 +70,10 @@ export async function runCommand(command: Command, config: CommandConfig) {
   }
 }
 
-function getExcludeIncludeFilter(excludeIncludeRawValue?: string | string[]) {
-  if (excludeIncludeRawValue == null) {
+function toArray<T>(value?: T | T[]) {
+  if (value == null) {
     return [];
   }
 
-  if (typeof excludeIncludeRawValue === 'string') {
-    return [excludeIncludeRawValue];
-  }
-
-  return excludeIncludeRawValue;
+  return Array.isArray(value) ? value : [value];
 }

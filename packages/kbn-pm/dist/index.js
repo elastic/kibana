@@ -6459,7 +6459,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.getProjects = undefined;
 
 let getProjects = exports.getProjects = (() => {
-    var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns) {
+    var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns, { include = [], exclude = [] } = {}) {
         const projects = new Map();
         for (const pattern of projectsPathsPatterns) {
             const pathsToProcess = yield packagesFromGlobPattern({ pattern, rootPath });
@@ -6467,6 +6467,10 @@ let getProjects = exports.getProjects = (() => {
                 const projectConfigPath = normalize(filePath);
                 const projectDir = _path2.default.dirname(projectConfigPath);
                 const project = yield _project.Project.fromPath(projectDir);
+                const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
+                if (excludeProject) {
+                    continue;
+                }
                 if (projects.has(project.name)) {
                     throw new _errors.CliError(`There are multiple projects with the same name [${project.name}]`, {
                         name: project.name,
@@ -36323,7 +36327,7 @@ function help() {
 
     Global options:
 
-       -e, --exclude        Exclude specified projects.
+       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
        -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
        --skip-kibana        Do not include the root Kibana project when running command.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
@@ -59805,18 +59809,10 @@ let runCommand = exports.runCommand = (() => {
         try {
             console.log(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
             const projectPaths = (0, _config.getProjectPaths)(config.rootPath, config.options);
-            const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths);
-            const exclude = getExcludeIncludeFilter(config.options.exclude);
-            const include = getExcludeIncludeFilter(config.options.include);
-            // Filter out projects that shouldn't be included if any filters are specified.
-            if (exclude.length > 0 || include.length > 0) {
-                for (const [projectName] of projects) {
-                    const excludeProject = exclude.includes(projectName) || include.length > 0 && !include.includes(projectName);
-                    if (excludeProject) {
-                        projects.delete(projectName);
-                    }
-                }
-            }
+            const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths, {
+                exclude: toArray(config.options.exclude),
+                include: toArray(config.options.include)
+            });
             if (projects.size === 0) {
                 console.log(_chalk2.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
                 return process.exit(1);
@@ -59875,14 +59871,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-function getExcludeIncludeFilter(excludeIncludeRawValue) {
-    if (excludeIncludeRawValue == null) {
+function toArray(value) {
+    if (value == null) {
         return [];
     }
-    if (typeof excludeIncludeRawValue === 'string') {
-        return [excludeIncludeRawValue];
-    }
-    return excludeIncludeRawValue;
+    return Array.isArray(value) ? value : [value];
 }
 
 /***/ }),

@@ -9,10 +9,12 @@ const glob = promisify(globSync);
 
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
+export type ProjectsOptions = { include?: string[]; exclude?: string[] };
 
 export async function getProjects(
   rootPath: string,
-  projectsPathsPatterns: string[]
+  projectsPathsPatterns: string[],
+  { include = [], exclude = [] }: ProjectsOptions = {}
 ) {
   const projects: ProjectMap = new Map();
 
@@ -23,6 +25,14 @@ export async function getProjects(
       const projectConfigPath = normalize(filePath);
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
+
+      const excludeProject =
+        exclude.includes(project.name) ||
+        (include.length > 0 && !include.includes(project.name));
+
+      if (excludeProject) {
+        continue;
+      }
 
       if (projects.has(project.name)) {
         throw new CliError(

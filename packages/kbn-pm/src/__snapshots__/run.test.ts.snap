@@ -39,40 +39,6 @@ Object {
 }
 `;
 
-exports[`ignores unknown projects in \`exclude\` filter 1`] = `
-Object {
-  "graph": Object {
-    "baz": Array [],
-    "foo": Array [],
-    "kibana": Array [
-      "foo",
-    ],
-    "quux": Array [
-      "baz",
-    ],
-    "with-additional-projects": Array [],
-  },
-  "projects": Array [
-    "foo",
-    "kibana",
-    "with-additional-projects",
-    "baz",
-    "quux",
-  ],
-}
-`;
-
-exports[`ignores unknown projects in \`include\` filter 1`] = `
-Object {
-  "graph": Object {
-    "bar": Array [],
-  },
-  "projects": Array [
-    "bar",
-  ],
-}
-`;
-
 exports[`includes only projects specified in multiple \`include\` filters 1`] = `
 Object {
   "graph": Object {

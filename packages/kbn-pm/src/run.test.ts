@@ -71,16 +71,6 @@ test('excludes projects if multiple `exclude` filter are specified', async () =>
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-test('ignores unknown projects in `exclude` filter', async () => {
-  await runCommand(command, {
-    ...config,
-    options: { exclude: ['unknown-foo', 'bar', 'unknown-baz'] },
-  });
-
-  expect(command.run).toHaveBeenCalledTimes(1);
-  expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
-});
-
 test('includes single project if single `include` filter is specified', async () => {
   await runCommand(command, {
     ...config,
@@ -101,20 +91,10 @@ test('includes only projects specified in multiple `include` filters', async () 
   expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
 });
 
-test('ignores unknown projects in `include` filter', async () => {
-  await runCommand(command, {
-    ...config,
-    options: { include: ['unknown-foo', 'bar', 'unknown-baz'] },
-  });
-
-  expect(command.run).toHaveBeenCalledTimes(1);
-  expect(getExpectedProjectsAndGraph(command.run)).toMatchSnapshot();
-});
-
 test('respects both `include` and `exclude` filters if specified at the same time', async () => {
   await runCommand(command, {
     ...config,
-    options: { include: ['foo', 'bar', 'baz'], exclude: ['bar'] },
+    options: { include: ['foo', 'bar', 'baz'], exclude: 'bar' },
   });
 
   expect(command.run).toHaveBeenCalledTimes(1);
