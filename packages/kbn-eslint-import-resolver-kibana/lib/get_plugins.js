@@ -27,7 +27,7 @@ module.exports = function getPlugins(config, kibanaPath, projectRoot) {
     const directory = resolveToRoot(config.pluginMap[name]);
     return {
       name,
-      directory: directory,
+      directory,
       publicDirectory: resolve(directory, 'public'),
     };
   });
