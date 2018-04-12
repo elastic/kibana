@@ -33,14 +33,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     /**
-     * checks whether the data is usable.
-     * @return {boolean}
-     */
-    isDataUsable() {
-      return true;
-    }
-
-    /**
      * Implementation of Visualization#render.
      * Child-classes can extend this method if the render-complete function requires more time until rendering has completed.
      * @param esResponse
@@ -60,10 +52,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       }
       if (status.params || status.aggs) {
         await this._updateParams();
-      }
-
-      if (!this.isDataUsable(esResponse)) {
-        return;
       }
 
       if (this._hasESResponseChanged(esResponse)) {

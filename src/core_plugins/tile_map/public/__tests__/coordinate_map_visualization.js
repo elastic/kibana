@@ -223,16 +223,8 @@ describe('CoordinateMapsVisualizationTest', function () {
 
 
   async function compareImage(expectedImageSource, index) {
-
-    console.log(domNode);
-
     const elementList = domNode.querySelectorAll('canvas');
-    // expect(elementList.length).to.equal(1);
     const firstCanvasOnMap = elementList[index];
-
-    console.log(firstCanvasOnMap);
-
-
     return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
 
