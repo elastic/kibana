@@ -11,7 +11,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 describe('AggType Class', function () {
   let AggType;
   let indexPattern;
-  let fieldFormat;
   let Vis;
 
 
@@ -19,7 +18,6 @@ describe('AggType Class', function () {
   beforeEach(ngMock.inject(function (Private) {
 
     Vis = Private(VisProvider);
-    fieldFormat = fieldFormats;
     AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
@@ -89,7 +87,7 @@ describe('AggType Class', function () {
 
           let aggConfig = vis.aggs.byTypeName.date_histogram[0];
 
-          expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('date'));
+          expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
           vis = new Vis(indexPattern, {
             type: 'metric',
@@ -102,7 +100,7 @@ describe('AggType Class', function () {
           });
           aggConfig = vis.aggs.byTypeName.count[0];
 
-          expect(aggType.getFormat(aggConfig)).to.be(fieldFormat.getDefaultInstance('string'));
+          expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('string'));
         });
 
         it('can be overridden via config', function () {

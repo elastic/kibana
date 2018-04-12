@@ -13,7 +13,6 @@ describe('AggConfig', function () {
   let AggType;
   let AggConfig;
   let indexPattern;
-  const fieldFormat = fieldFormats;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -425,7 +424,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getDefaultInstance('number').getConverterFor());
+      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormats.getDefaultInstance('number').getConverterFor());
     });
   });
 
@@ -454,13 +453,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {
