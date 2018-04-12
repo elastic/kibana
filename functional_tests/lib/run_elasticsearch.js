@@ -11,7 +11,7 @@ import {
   ES_REPO_ROOT,
 } from './paths';
 
-async function setupEs({ esExtractPath, procs }) {
+async function setupElasticsearch({ esExtractPath, procs }) {
   await procs.run('buildEs', {
     cmd: ES_GRADLE_WRAPPER_BIN,
     args: [':distribution:archives:tar:assemble'],
@@ -25,10 +25,10 @@ async function setupEs({ esExtractPath, procs }) {
   await extractTarball(esTarballPath, esExtractPath);
 }
 
-export async function runEs({ tmpDir, procs, config }) {
+export async function runElasticsearch({ tmpDir, procs, config }) {
   const esExtractPath = resolve(tmpDir, 'es');
   if (!fs.existsSync(esExtractPath)) {
-    await setupEs({ esExtractPath, procs });
+    await setupElasticsearch({ esExtractPath, procs });
   }
 
   await procs.run('es', {

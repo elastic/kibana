@@ -6,7 +6,7 @@ import { withProcRunner } from '@kbn/dev-utils';
 import {
   withTmpDir,
   runKibanaServer,
-  runEs,
+  runElasticsearch,
   runFtr,
   log,
   isCliError,
@@ -28,7 +28,11 @@ export function fatalErrorHandler(err) {
 // from x-pack-kibana:
 // [ ] 'test/api_integration/config.js'
 // [ ] 'test/saml_api_integration/config.js'
-export async function runTests(configPath = 'test/multiple_config.js') {
+export async function runTests(
+  configPath = 'test/multiple_config.js',
+  runEs = runElasticsearch,
+  runKbn = runKibanaServer,
+) {
   const cmd = new Command('node scripts/functional_test_with_configs');
 
   cmd
@@ -36,18 +40,19 @@ export async function runTests(configPath = 'test/multiple_config.js') {
     .parse(process.argv);
 
   configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
+
   try {
     const config = require(configPath)();
 
     for (const configFile of config.configFiles) {
-      await runWithConfig(configFile);
+      await runWithConfig(configFile, runEs, runKbn);
     }
   } catch (err) {
     fatalErrorHandler(err);
   }
 }
 
-export async function runWithConfig(configPath = 'test/functional/config.js') {
+function resolveConfigPath(configPath) {
   const cmd = new Command('node scripts/functional_test_with_config');
   // TODO: when --config multiple_config.js is passed into runTests
   // configPath is multiple_config.js, which is incorrectly passed here
@@ -58,11 +63,21 @@ export async function runWithConfig(configPath = 'test/functional/config.js') {
       .option('--config [value]', 'Path to config file to specify options', null)
       .parse(process.argv);
 
-    configPath = resolve(KIBANA_ROOT, cmd.config || configPath);
+    return resolve(KIBANA_ROOT, cmd.config || configPath);
   } else {
   // process was started in another method, so don't parse argv
-    configPath = resolve(KIBANA_ROOT, configPath);
+    return resolve(KIBANA_ROOT, configPath);
   }
+}
+
+// Start servers and run tests
+// TODO: doesn't work to pass in config via command line
+export async function runWithConfig(
+  configPath = 'test/functional/config.js',
+  runEs = runElasticsearch,
+  runKbn = runKibanaServer,
+) {
+  configPath = resolveConfigPath(configPath);
 
   try {
     await withTmpDir(async tmpDir => {
@@ -70,8 +85,8 @@ export async function runWithConfig(configPath = 'test/functional/config.js') {
         const config = await readConfigFile(log, configPath);
 
         await runEs({ tmpDir, procs, config }); // can also run with xpack
-        await runKibanaServer({ procs, config });
-        await runFtr({ procs, configPath });
+        await runKbn({ procs, config });
+        await runFtr({ procs, configPath, cwd: process.cwd() });
 
         await procs.stop('kibana');
         await procs.stop('es');
@@ -82,14 +97,13 @@ export async function runWithConfig(configPath = 'test/functional/config.js') {
   }
 }
 
-// Takes in only one configPath
-// Only start servers
+// Start only servers using single config
 export async function startWithConfig(configPath) {
   await withTmpDir(async tmpDir => {
     await withProcRunner(async procs => {
       const config = require(configPath);
 
-      await runEs({ tmpDir, procs, config });
+      await runElasticsearch({ tmpDir, procs, config });
       await runKibanaServer({ procs, config });
 
       // Maybe log something here?

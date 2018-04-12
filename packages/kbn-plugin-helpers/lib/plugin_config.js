@@ -15,7 +15,7 @@ module.exports = function (root) {
     '{lib,public,server,webpackShims,translations}/**/*',
   ];
 
-  return Object.assign({
+  return ({ ...{
     root: root,
     kibanaRoot: resolve(root, '../../kibana'),
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
@@ -24,5 +24,5 @@ module.exports = function (root) {
     id: pkg.name,
     pkg: pkg,
     version: pkg.version,
-  }, config);
+  }, ...config });
 };

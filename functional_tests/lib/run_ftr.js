@@ -3,7 +3,7 @@ import {
   PROJECT_ROOT
 } from './paths';
 
-export async function runFtr({ procs, configPath }) {
+export async function runFtr({ procs, configPath, cwd = PROJECT_ROOT }) {
   const args = [KIBANA_FTR_SCRIPT, '--debug'];
   if (configPath) {
     args.push(...['--config', configPath]);
@@ -12,7 +12,7 @@ export async function runFtr({ procs, configPath }) {
   await procs.run('ftr', {
     cmd: 'node',
     args,
-    cwd: PROJECT_ROOT,
+    cwd,
     wait: true
   });
 }

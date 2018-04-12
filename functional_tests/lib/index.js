@@ -1,7 +1,7 @@
 export { withTmpDir } from './tmp';
 
 export { runKibanaServer } from './run_kibana_server';
-export { runEs } from './run_es';
+export { runElasticsearch } from './run_elasticsearch';
 export { runFtr } from './run_ftr';
 export { log } from './log';
 export { KIBANA_ROOT } from './paths';
