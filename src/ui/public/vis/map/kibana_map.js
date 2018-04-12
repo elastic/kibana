@@ -667,6 +667,12 @@ export class KibanaMap extends EventEmitter {
       visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
+    this._leafletMap.on('resize', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
+    this._leafletMap.on('load', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }
