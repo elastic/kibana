@@ -1,7 +1,8 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
-import { AggConfig } from 'ui/vis/agg_config';
+import * as AggConfigModule from 'ui/vis/agg_config';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 
 describe('Geohash Agg', () => {
@@ -44,9 +45,6 @@ describe('Geohash Agg', () => {
       case 'AggTypesBucketsBucketAggTypeProvider':
         return BucketAggTypeMock;
         break;
-      case 'VisAggConfigProvider':
-        return AggConfigMock;
-        break;
       default:
         return () => {};
     }
@@ -56,6 +54,15 @@ describe('Geohash Agg', () => {
       return 7;//"visualization:tileMap:maxPrecision"
     }
   };
+
+  before(function () {
+    sinon.stub(AggConfigModule, 'AggConfig', AggConfigMock);
+  });
+
+  after(function () {
+    AggConfigModule.AggConfig.restore();
+  });
+
 
   function initVisSessionState() {
     aggMock.vis.sessionState = {
@@ -88,7 +95,7 @@ describe('Geohash Agg', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    AggConfig.aggTypes = Private(AggTypesIndexProvider);
+    AggConfigModule.AggConfig.aggTypes = Private(AggTypesIndexProvider);
   }));
 
   let geohashAgg;

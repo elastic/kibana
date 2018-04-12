@@ -93,7 +93,9 @@ Object.defineProperties(AggConfig.prototype, {
         // almost every agg has fields, so we try to persist that when type changes
         field: _.get(this.getFieldOptions(), ['byName', this.getField()])
       });
-    }
+    },
+
+    configurable: true
   },
   schema: {
     get: function () {
@@ -105,7 +107,9 @@ Object.defineProperties(AggConfig.prototype, {
       }
 
       this.__schema = schema;
-    }
+    },
+
+    configurable: true
   }
 });
 
