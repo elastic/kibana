@@ -254,7 +254,8 @@ module.service('ml', function (prlHttpService) {
     const data = pick(obj, [
       'prefix',
       'groups',
-      'indexPatternName'
+      'indexPatternName',
+      'query'
     ]);
 
     return http.request({

@@ -77,9 +77,14 @@ module
 
     $scope.overallState = SAVE_STATE.NOT_SAVED;
 
-    const { indexPattern, query } = createSearchItems($route);
+    const {
+      indexPattern,
+      savedSearch,
+      query,
+      combinedQuery } = createSearchItems($route);
 
-    const pageTitle = `index pattern ${indexPattern.title}`;
+    const pageTitle = (savedSearch.id !== undefined) ?
+      `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
 
     $scope.ui = {
       formValid: true,
@@ -259,7 +264,10 @@ module
         const prefix = $scope.formConfig.jobLabel;
         const indexPatternName = $scope.formConfig.indexPattern.title;
         const groups = $scope.formConfig.jobGroups;
-        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, indexPatternName })
+        const tempQuery = (savedSearch.id === undefined) ?
+          undefined : combinedQuery;
+
+        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {

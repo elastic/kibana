@@ -22,6 +22,7 @@ export function dataRecognizerProvider(ml) {
       };
 
       this.indexPattern = props.indexPattern;
+      this.savedSearch = props.savedSearch;
       this.className = props.className;
       this.results = props.results;
     }
@@ -35,6 +36,7 @@ export function dataRecognizerProvider(ml) {
               key={r.id}
               config={r}
               indexPattern={this.indexPattern}
+              savedSearch={this.savedSearch}
             />
           ));
           if (typeof this.results === 'object') {
@@ -58,6 +60,7 @@ export function dataRecognizerProvider(ml) {
 
   DataRecognizer.propTypes = {
     indexPattern: PropTypes.object,
+    savedSearch: PropTypes.object,
     className: PropTypes.string,
     results: PropTypes.object,
   };

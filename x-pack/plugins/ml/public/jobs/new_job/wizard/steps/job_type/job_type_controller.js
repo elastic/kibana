@@ -60,6 +60,7 @@ module.controller('MlNewJobStepJobType',
     }
 
     $scope.indexPattern = indexPattern;
+    $scope.savedSearch = savedSearch;
     $scope.recognizerResults = { count: 0 };
 
     $scope.pageTitleLabel = (savedSearch.id !== undefined) ?
