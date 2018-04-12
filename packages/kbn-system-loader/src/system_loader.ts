@@ -2,8 +2,13 @@ import { System } from './system';
 import { SystemName, SystemMetadata, SystemsType } from './system_types';
 import { getSortedSystemNames } from './sorted_systems';
 
-export class SystemLoader<C> {
-  private readonly _systems = new Map<SystemName, System<C, any, any>>();
+export type KibanaSystemApiFactory<C, M> = (
+  name: SystemName,
+  metadata?: M
+) => C;
+
+export class SystemLoader<C, M extends SystemMetadata> {
+  private readonly _systems = new Map<SystemName, System<C, M, any, any>>();
   private _startedSystems: SystemName[] = [];
 
   constructor(
@@ -12,19 +17,16 @@ export class SystemLoader<C> {
      * information about a system before it's started, and the return value will
      * be injected into the system at startup.
      */
-    private readonly _kibanaSystemApiFactory: (
-      name: SystemName,
-      metadata?: SystemMetadata
-    ) => C
+    private readonly _kibanaSystemApiFactory: KibanaSystemApiFactory<C, M>
   ) {}
 
-  addSystems(systemSpecs: System<C, any, any>[]) {
+  addSystems(systemSpecs: System<C, M, any, any>[]) {
     systemSpecs.forEach(systemSpec => {
       this.addSystem(systemSpec);
     });
   }
 
-  addSystem<D extends SystemsType, E = void>(system: System<C, D, E>) {
+  addSystem<D extends SystemsType, E = void>(system: System<C, M, D, E>) {
     if (this._systems.has(system.name)) {
       throw new Error(`a system named [${system.name}] has already been added`);
     }
@@ -55,7 +57,7 @@ export class SystemLoader<C> {
   }
 
   private startSystem<D extends SystemsType, E = void>(
-    system: System<C, D, E>
+    system: System<C, M, D, E>
   ) {
     const dependenciesValues = {} as D;
 

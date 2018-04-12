@@ -1,6 +1,6 @@
 import { System } from './system';
 import { KibanaSystem } from './system_types';
-import { SystemLoader } from './system_loader';
+import { SystemLoader, KibanaSystemApiFactory } from './system_loader';
 
 // To make types simpler in the tests
 type CoreType = void;
@@ -10,21 +10,39 @@ test('starts system with core api', () => {
   expect.assertions(1);
 
   type KibanaCoreApi = { fromCore: boolean; name: string };
+  type Metadata = { configPath?: string };
 
   class FooSystem extends KibanaSystem<KibanaCoreApi, {}> {
     start() {
-      expect(this.kibana).toEqual({ name: 'foo', fromCore: true });
+      expect(this.kibana).toEqual({
+        name: 'foo',
+        fromCore: true,
+        metadata: {
+          configPath: 'config.path.foo',
+        },
+      });
     }
   }
 
   const foo = new System('foo', {
+    metadata: {
+      configPath: 'config.path.foo',
+    },
     implementation: FooSystem,
   });
 
-  const systems = new SystemLoader(systemName => ({
-    name: systemName,
-    fromCore: true,
-  }));
+  const createSystemApi: KibanaSystemApiFactory<KibanaCoreApi, Metadata> = (
+    name,
+    metadata
+  ) => {
+    return {
+      name,
+      metadata,
+      fromCore: true,
+    };
+  };
+
+  const systems = new SystemLoader(createSystemApi);
   systems.addSystem(foo);
 
   systems.startSystems();

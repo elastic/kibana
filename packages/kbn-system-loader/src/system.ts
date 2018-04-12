@@ -14,10 +14,10 @@ function isPromise(obj: any) {
   );
 }
 
-export class System<C, D extends SystemsType, E> {
+export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   readonly name: SystemName;
   readonly dependencies: SystemName[];
-  readonly metadata?: SystemMetadata;
+  readonly metadata?: M;
 
   private readonly _implementation: KibanaSystemClassStatic<C, D, E>;
   private _systemInstance?: KibanaSystem<C, D, E>;
@@ -26,7 +26,7 @@ export class System<C, D extends SystemsType, E> {
   constructor(
     name: SystemName,
     config: {
-      metadata?: SystemMetadata;
+      metadata?: M;
       dependencies?: SystemName[];
       implementation: KibanaSystemClassStatic<C, D, E>;
     }
