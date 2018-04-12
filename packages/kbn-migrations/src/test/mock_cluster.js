@@ -6,7 +6,7 @@
 // The downside, is we run the risk of testing our mock instead of testing our
 // actual migration logic.
 
-import _ from 'lodash';
+const _ = require('lodash');
 
 export function mockCluster(data, meta) {
   // This is used to track non-document information about
@@ -141,7 +141,7 @@ function mockElasticSearchCommands(data, meta) {
   function reindex({ body: { source, dest } }) {
     const destIndex = tryUnAlias(dest.index);
     const sourceIndex = tryUnAlias(source.index);
-    Object.assign(data[destIndex], data[sourceIndex]);
+    _.assign(data[destIndex], data[sourceIndex]);
     return true;
   }
 
@@ -198,7 +198,7 @@ function mockElasticSearchCommands(data, meta) {
   function putMapping({ index, type, body }) {
     index = tryUnAlias(index);
     const mappings = _.get(meta, ['mappings', index, type, 'properties']) || {};
-    const newMappings = Object.assign({}, mappings, body.properties);
+    const newMappings = _.assign({}, mappings, body.properties);
     _.set(meta, ['mappings', index, type, 'properties'], newMappings);
     return true;
   }

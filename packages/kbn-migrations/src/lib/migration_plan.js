@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import { migrationMapping } from './migration_state';
-import { disabledPluginIds } from './plugins';
+const _ = require('lodash');
+const { migrationMapping } = require('./migration_state');
+const { disabledPluginIds } = require('./plugins');
 
 // Given the current set of enabled plugins, and the previous
 // or default migration state, this returns the mappings and

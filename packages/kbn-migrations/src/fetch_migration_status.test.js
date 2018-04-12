@@ -1,6 +1,6 @@
-import { fetchMigrationStatus } from './fetch_migration_status';
-import { buildMigrationState, MigrationStatus } from './migration_helpers';
-import { mockServer } from './test';
+const { fetchMigrationStatus } = require('./fetch_migration_status');
+const { buildMigrationState, MigrationStatus } = require('./lib');
+const { mockServer } = require('./test');
 
 describe('fetchMigrationStatus', () => {
   test('is migrated, if the stored migration state matches the plugin state', async () => {

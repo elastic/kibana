@@ -1,5 +1,5 @@
-import { fetchMigrationContext } from './migration_context';
-import { mockServer } from '../test';
+const { fetchMigrationContext } = require('./migration_context');
+const { mockServer } = require('../test');
 
 describe('migrationContext', () => {
   test('ensures that migrations are not undefined', async () => {

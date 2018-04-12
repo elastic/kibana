@@ -1,6 +1,6 @@
 // The primary logic for applying migrations to an index
-import moment from 'moment';
-import {
+const moment = require('moment');
+const {
   buildMigrationState,
   convertIndexToAlias,
   setReadonly,
@@ -15,7 +15,7 @@ import {
   createIndex,
   fetchMigrationContext,
   computeMigrationStatus,
-} from './migration_helpers';
+} = require('./lib');
 
 /**
  * @typedef {elapsedMs: number, index: string, destIndex: string, status: MigrationStatus} MigrationResult

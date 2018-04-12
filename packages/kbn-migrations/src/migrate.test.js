@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import { migrate } from './migrate';
-import { mockServer } from './test';
-import { buildMigrationState, sanitizePlugins } from './migration_helpers';
+const _ = require('lodash');
+const { migrate } = require('./migrate');
+const { mockServer } = require('./test');
+const { buildMigrationState, sanitizePlugins } = require('./lib');
 
 describe('migrate', () => {
   test('does nothing if there are no migrations defined', async () => {

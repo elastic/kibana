@@ -1,5 +1,5 @@
-import { MigrationStatus, computeMigrationStatus, buildMigrationState } from './migration_state';
-import _ from 'lodash';
+const{ MigrationStatus, computeMigrationStatus, buildMigrationState } = require('./migration_state');
+const _ = require('lodash');
 
 describe('computeMigrationStatus', () => {
   test('is migrating if the migrationState has a status of migrating', () => {

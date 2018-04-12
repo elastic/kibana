@@ -1,4 +1,4 @@
-import { seededDocs, buildTransformFunction } from './documents';
+const { seededDocs, buildTransformFunction } = require('./documents');
 
 describe('buildTransformFunction', () => {
   test('always returns a raw document', () => {

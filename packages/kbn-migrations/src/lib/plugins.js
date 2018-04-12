@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { defaultMigrationState } from './migration_state';
+const _ = require('lodash');
+const { defaultMigrationState } = require('./migration_state');
 
 export function disabledPluginIds(plugins, migrationState) {
   return _.difference(_.map(migrationState.plugins, 'id'), _.map(plugins, 'id'));

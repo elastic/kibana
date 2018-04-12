@@ -1,4 +1,4 @@
-import { computeMigrationStatus, fetchMigrationContext } from './migration_helpers';
+const { computeMigrationStatus, fetchMigrationContext } = require('./lib');
 
 /**
  * Checks whether or not the specified index is in need of migrations.

@@ -2,9 +2,9 @@
 // in order to know: 1. do we need to migrate? 2. what migrations
 // and mappings have already been applied? 3. mapping info for disabled plugins
 
-import _ from 'lodash';
-import objectHash from 'object-hash';
-import { disabledPluginIds } from './plugins';
+const _ = require('lodash');
+const objectHash = require('object-hash');
+const { disabledPluginIds } = require('./plugins');
 
 export const MigrationStatus = {
   migrating: 'migrating',

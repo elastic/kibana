@@ -1,10 +1,10 @@
 // The migration context object contains all of the data and functions
 // that are necessary to analyze and run migrations.
 
-import moment from 'moment';
-import { validatePlugins } from './plugins';
-import { buildMigrationPlan } from './migration_plan';
-import { fetchMigrationState } from './persistence';
+const moment = require('moment');
+const { validatePlugins } = require('./plugins');
+const { buildMigrationPlan } = require('./migration_plan');
+const { fetchMigrationState } = require('./persistence');
 
 export async function fetchMigrationContext(opts) {
   const { server, index, initialIndex, destIndex, plugins } = validateOpts(opts);

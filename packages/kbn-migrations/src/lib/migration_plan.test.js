@@ -1,5 +1,5 @@
-import { buildMigrationPlan } from './migration_plan';
-import { buildMigrationState, migrationMapping } from './migration_state';
+const { buildMigrationPlan } = require('./migration_plan');
+const { buildMigrationState, migrationMapping } = require('./migration_state');
 
 describe('buildMigrationPlan', () => {
   test('produces strict mappings', () => {

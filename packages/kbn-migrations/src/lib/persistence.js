@@ -1,7 +1,7 @@
 // A set of helper functions for calling Elasticsearch
 
-import { DOC_TYPE, MIGRATION_DOC_ID, buildTransformFunction, seededDocs } from './documents';
-import { defaultMigrationState, migrationMapping } from './migration_state';
+const{ DOC_TYPE, MIGRATION_DOC_ID, buildTransformFunction, seededDocs } = require('./documents');
+const{ defaultMigrationState, migrationMapping } = require('./migration_state');
 
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
 export async function applyTransforms(callCluster, log, sourceIndex, destIndex, migrations, scrollSize = 100) {

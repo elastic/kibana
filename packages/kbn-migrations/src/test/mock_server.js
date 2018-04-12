@@ -1,4 +1,4 @@
-import { mockCluster } from './mock_cluster';
+const { mockCluster } = require('./mock_cluster');
 
 export function mockServer(data, meta) {
   const callWithInternalUser = mockCluster(data, meta);
