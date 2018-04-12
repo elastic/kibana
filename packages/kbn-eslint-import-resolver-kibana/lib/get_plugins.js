@@ -23,13 +23,24 @@ module.exports = function getPlugins(config, kibanaPath, projectRoot) {
     ...pluginPaths.map(path => resolve(path, 'package.json')),
   ];
 
-  return glob.sync(globPatterns).map(pkgJsonPath => {
-    const path = dirname(pkgJsonPath);
-    const pkg = require(pkgJsonPath);
+  const pluginsFromMap = Object.keys(config.pluginMap || {}).map(name => {
+    const directory = resolveToRoot(config.pluginMap[name]);
     return {
-      name: pkg.name,
-      directory: path,
-      publicDirectory: resolve(path, 'public'),
+      name,
+      directory,
+      publicDirectory: resolve(directory, 'public'),
     };
   });
+
+  return pluginsFromMap.concat(
+    glob.sync(globPatterns).map(pkgJsonPath => {
+      const path = dirname(pkgJsonPath);
+      const pkg = require(pkgJsonPath);
+      return {
+        name: pkg.name,
+        directory: path,
+        publicDirectory: resolve(path, 'public'),
+      };
+    })
+  );
 };
