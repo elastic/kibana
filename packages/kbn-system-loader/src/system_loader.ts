@@ -1,5 +1,5 @@
 import { System } from './system';
-import { SystemName, SystemConfigPath, SystemsType } from './system_types';
+import { SystemName, SystemMetadata, SystemsType } from './system_types';
 import { getSortedSystemNames } from './sorted_systems';
 
 export class SystemLoader<C> {
@@ -8,12 +8,13 @@ export class SystemLoader<C> {
 
   constructor(
     /**
-     * Creates the Kibana system api for each system. Is called with system
-     * information before system is started.
+     * Creates the Kibana system api for each system. It is called with
+     * information about a system before it's started, and the return value will
+     * be injected into the system at startup.
      */
     private readonly _kibanaSystemApiFactory: (
       name: SystemName,
-      configPath?: SystemConfigPath
+      metadata?: SystemMetadata
     ) => C
   ) {}
 
@@ -66,7 +67,7 @@ export class SystemLoader<C> {
 
     const kibanaSystemApi = this._kibanaSystemApiFactory(
       system.name,
-      system.configPath
+      system.metadata
     );
 
     system.start(kibanaSystemApi, dependenciesValues);

@@ -1,5 +1,7 @@
 export type SystemName = string;
-export type SystemConfigPath = string | string[];
+export type SystemMetadata = {
+  [key: string]: any;
+};
 
 export type SystemsType = {
   [systemName: string]: any;
@@ -16,7 +18,7 @@ export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
 }
 
 /**
- * Defines the "static side" of the Kibana class system.
+ * Defines the "static side" of the Kibana system class.
  *
  * When a class implements an interface, only the instance side of the class is
  * checked, so you can't include static methods there. Because of that we have

@@ -1,7 +1,7 @@
 import {
   SystemsType,
   SystemName,
-  SystemConfigPath,
+  SystemMetadata,
   KibanaSystemClassStatic,
   KibanaSystem,
 } from './system_types';
@@ -17,7 +17,7 @@ function isPromise(obj: any) {
 export class System<C, D extends SystemsType, E> {
   readonly name: SystemName;
   readonly dependencies: SystemName[];
-  readonly configPath?: SystemConfigPath;
+  readonly metadata?: SystemMetadata;
 
   private readonly _implementation: KibanaSystemClassStatic<C, D, E>;
   private _systemInstance?: KibanaSystem<C, D, E>;
@@ -26,14 +26,14 @@ export class System<C, D extends SystemsType, E> {
   constructor(
     name: SystemName,
     config: {
-      configPath?: SystemConfigPath;
+      metadata?: SystemMetadata;
       dependencies?: SystemName[];
       implementation: KibanaSystemClassStatic<C, D, E>;
     }
   ) {
     this.name = name;
     this.dependencies = config.dependencies || [];
-    this.configPath = config.configPath;
+    this.metadata = config.metadata;
     this._implementation = config.implementation;
   }
 
