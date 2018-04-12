@@ -64,11 +64,13 @@ export function onPremInstructions(server) {
           },
         ],
         statusCheck: {
+          title: 'APM Server status',
+          text: 'Make sure APM Server is running before you start implementing the APM agents.',
+          btnLabel: 'Check APM Server status',
           success: 'You have correctly setup APM-Server',
           error: 'APM-Server has still not connected to Elasticsearch',
           esHitsCheck: {
             index: apmIndexPattern,
-            cluster: 'data',
             query: {
               bool: {
                 filter: {

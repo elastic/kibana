@@ -13,6 +13,10 @@ import {
   EuiTab,
   EuiSpacer,
   EuiSteps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButton,
 } from '@elastic/eui';
 
 export class InstructionSet extends React.Component {
@@ -60,6 +64,35 @@ export class InstructionSet extends React.Component {
     ));
   }
 
+  renderStatusCheck() {
+    const checkStausStep = (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              {this.props.statusCheck.text}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            onClick={() => {this.props.onStatusCheck();}}
+          >
+            {this.props.statusCheck.btnLabel ? this.props.statusCheck.btnLabel : 'Check status'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+    return {
+      title: this.props.statusCheck.title ? this.props.statusCheck.title : 'Status Check',
+      children: checkStausStep,
+      key: 'checkStatusStep'
+    };
+  }
+
   renderInstructions = () => {
     const instructionVariant = this.props.instructionVariants.find(variant => {
       return variant.id === this.state.selectedTabId;
@@ -79,11 +112,16 @@ export class InstructionSet extends React.Component {
         />
       );
       return {
+        className: 'test',
         title: instruction.title,
         children: step,
         key: index
       };
     });
+
+    if (this.props.statusCheck) {
+      steps.push(this.renderStatusCheck());
+    }
 
     return (
       <EuiSteps
@@ -175,9 +213,21 @@ const instructionVariantShape = PropTypes.shape({
   instructions: PropTypes.arrayOf(instructionShape).isRequired,
 });
 
+const statusCheckShape = PropTypes.shape({
+  success: PropTypes.string,
+  error: PropTypes.string,
+  title: PropTypes.string,
+  text: PropTypes.string,
+  btnLabel: PropTypes.string,
+  esHitsCheck: PropTypes.object.isRequired,
+});
+
 InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
+  statusCheck: statusCheckShape,
+  statusCheckState: PropTypes.bool,
+  onStatusCheck: PropTypes.func.isRequired,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,

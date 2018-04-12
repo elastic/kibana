@@ -26,11 +26,13 @@ const artifactsSchema = Joi.object({
 });
 
 const statusCheckSchema = Joi.object({
-  success: Joi.string().required(),
-  error: Joi.string().required(),
+  title: Joi.string(),
+  text: Joi.string(),
+  btnLabel: Joi.string(),
+  success: Joi.string(),
+  error: Joi.string(),
   esHitsCheck: Joi.object({
     index: Joi.string().required(),
-    cluster: Joi.string().valid(['data', 'admin']).required(),
     query: Joi.object().required(),
   }).required(),
 });

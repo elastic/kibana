@@ -136,6 +136,8 @@ export class Tutorial extends React.Component {
         <InstructionSet
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
+          statusCheck={instructionSet.statusCheck}
+          onStatusCheck={() => {}}
           offset={currentOffset}
           params={instructions.params}
           paramValues={this.state.paramValues}
