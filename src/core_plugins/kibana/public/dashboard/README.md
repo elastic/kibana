@@ -1,7 +1,12 @@
 ## Dashboard State Walkthrough
 
 A high level walk through of types of dashboard state and how dashboard and
-embeddables communicate with eachother.
+ embeddables communicate with each other. An "embeddable" is anything that can be dropped
+ on a dashboard. It is a pluggable system so new embeddables can be created, as
+ long as they adhere to the communication protocol. Currently the only two embeddable types
+ are saved searches and visualizations. A truly pluggable embeddable system is still a
+ WIP - as the UI currently only supports adding visualizations and saved searches to a dashboard.
+
 
 ### Types of state
 
