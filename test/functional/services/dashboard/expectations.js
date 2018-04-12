@@ -4,6 +4,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard']);
 
   return new class DashboardExpect {
@@ -37,6 +38,11 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const docTableCellCounts = await testSubjects.findAll(`docTableField`);
         expect(docTableCellCounts.length).to.be(expectedCount);
       });
+    }
+
+    async fieldSuggestionIndexPatterns(expectedIndexPatterns) {
+      const indexPatterns = await filterBar.getFilterFieldIndexPatterns();
+      expect(indexPatterns).to.eql(expectedIndexPatterns);
     }
   };
 }
