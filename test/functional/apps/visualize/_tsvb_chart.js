@@ -83,6 +83,37 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
+    describe('Data Timerange', () => {
+      beforeEach(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+      });
+
+      it('should display the correct value for entire timerange', async function () {
+        await PageObjects.visualBuilder.selectDataTimeRange('all');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const expectedMetricValue =  '13,830';
+        return PageObjects.visualBuilder.getMetricValue()
+          .then(function (value) {
+            log.debug(`metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+
+      it('should display the correct value for last value', async function () {
+        await PageObjects.visualBuilder.selectDataTimeRange('last');
+        await PageObjects.visualBuilder.setTimeRangeInterval('1d');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const expectedMetricValue =  '4,459';
+        return PageObjects.visualBuilder.getMetricValue()
+          .then(function (value) {
+            log.debug(`metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+
+    });
+
     describe('metric', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();

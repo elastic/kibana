@@ -182,6 +182,21 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await comboBox.set('groupByField', fieldName);
     }
 
+    async selectDataTimeRange(fieldName) {
+      const element = await testSubjects.find('dataTimeRange');
+      const input = await element.findByCssSelector('.Select-input input');
+      await input.type(fieldName);
+      const option = await element.findByCssSelector('.Select-option');
+      await option.click();
+    }
+
+    async setTimeRangeInterval(value, nth = 0) {
+      const expressions = await testSubjects.findAll('timeRangeInterval');
+      await expressions[nth].clearValue();
+      await expressions[nth].type(value);
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async setLabelValue(value) {
       const el = await testSubjects.find('columnLabelName');
       await el.clearValue();

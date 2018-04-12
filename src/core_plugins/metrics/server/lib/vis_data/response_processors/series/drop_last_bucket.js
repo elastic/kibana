@@ -21,6 +21,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 export function dropLastBucket(resp, panel, series) {
   return next => results => {
+    if (panel.timerange_mode === 'all') return next(results);
     const bucketSize = get(resp, `aggregations.${series.id}.meta.bucketSize`);
     const maxString = get(resp, `aggregations.${series.id}.meta.to`);
     const max = moment.utc(maxString);

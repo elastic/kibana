@@ -94,7 +94,7 @@ export function DataConfig({ onChange, model, fields }) {
           </label>
         ) : null}
         {model.type !== 'timeseries' ? (
-          <div className="vis_editor__row_item">
+          <div className="vis_editor__row_item" data-test-subj="dataTimeRange">
             <EuiComboBox
               options={timerangeModes}
               isClearable={false}
@@ -112,6 +112,7 @@ export function DataConfig({ onChange, model, fields }) {
         {model.type !== 'timeseries' && model.timerange_mode === 'last' && (
           <input
             id={htmlId('timerange_mode_interval')}
+            data-test-subj="timeRangeInterval"
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('timerange_mode_interval')}
