@@ -12,6 +12,8 @@ export class Embeddable {
    * @param {Object|undefined} config
    * @param {EmbeddableMetadata|undefined} config.metadata optional metadata
    * @param {function|undefined} config.render optional render method
+   * @param {function|undefined} config.destroy optional destroy method
+   * @param {function|undefined} config.onContainerStateChanged optional onContainerStateChanged method
    */
   constructor(config = {}) {
     /**
@@ -22,9 +24,15 @@ export class Embeddable {
     if (config.render) {
       this.render = config.render;
     }
+
+    if (config.destroy) {
+      this.destroy = config.destroy;
+    }
+
+    if (config.onContainerStateChanged) {
+      this.onContainerStateChanged = config.onContainerStateChanged;
+    }
   }
-
-
 
   /**
    * @param {ContainerState} containerState

@@ -19,8 +19,8 @@ export const getEmbeddables = state => DashboardSelectors.getEmbeddables(getDash
 export const getEmbeddableError = (state, panelId) =>
   DashboardSelectors.getEmbeddableError((getDashboard(state)), panelId);
 export const getEmbeddableInitialized = (state, panelId) => DashboardSelectors.getEmbeddableInitialized(getDashboard(state), panelId);
-export const getEmbeddablePersonalization =
-  (state, panelId) => DashboardSelectors.getEmbeddablePersonalization(getDashboard(state), panelId);
+export const getEmbeddableCustomization =
+  (state, panelId) => DashboardSelectors.getEmbeddableCustomization(getDashboard(state), panelId);
 export const getEmbeddableStagedFilter =
   (state, panelId) => DashboardSelectors.getEmbeddableStagedFilter(getDashboard(state), panelId);
 export const getEmbeddableMetadata =

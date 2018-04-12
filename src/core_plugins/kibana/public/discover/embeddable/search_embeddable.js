@@ -11,7 +11,7 @@ export class SearchEmbeddable extends Embeddable {
     this.loader = loader;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
-    this.personalization = {};
+    this.customization = {};
 
     /**
      * @type {EmbeddableMetadata}
@@ -29,20 +29,20 @@ export class SearchEmbeddable extends Embeddable {
 
   getEmbeddableState() {
     return {
-      personalization: this.personalization
+      customization: this.customization
     };
   }
 
   pushContainerStateParamsToScope() {
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
-    this.searchScope.columns = this.personalization.columns || this.savedSearch.columns;
-    this.searchScope.sort = this.personalization.sort || this.savedSearch.sort;
+    this.searchScope.columns = this.customization.columns || this.savedSearch.columns;
+    this.searchScope.sort = this.customization.sort || this.savedSearch.sort;
     this.searchScope.sharedItemTitle = this.panelTitle;
   }
 
   onContainerStateChanged(containerState) {
-    this.personalization = containerState.embeddablePersonalization || {};
+    this.customization = containerState.embeddableCustomization || {};
     this.panelTitle = '';
     if (!containerState.hidePanelTitles) {
       this.panelTitle = containerState.customTitle !== undefined ?
@@ -64,27 +64,27 @@ export class SearchEmbeddable extends Embeddable {
     this.searchScope.searchSource = this.savedSearch.searchSource;
 
     this.searchScope.setSortOrder = (columnName, direction) => {
-      this.searchScope.sort = this.personalization.sort = [columnName, direction];
+      this.searchScope.sort = this.customization.sort = [columnName, direction];
       this.emitEmbeddableStateChange(this.getEmbeddableState());
     };
 
     this.searchScope.addColumn = (columnName) => {
       this.savedSearch.searchSource.get('index').popularizeField(columnName, 1);
       columnActions.addColumn(this.searchScope.columns, columnName);
-      this.searchScope.columns = this.personalization.columns = this.searchScope.columns;
+      this.searchScope.columns = this.customization.columns = this.searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
     };
 
     this.searchScope.removeColumn = (columnName) => {
       this.savedSearch.searchSource.get('index').popularizeField(columnName, 1);
       columnActions.removeColumn(this.searchScope.columns, columnName);
-      this.personalization.columns = this.searchScope.columns;
+      this.customization.columns = this.searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
     };
 
     this.searchScope.moveColumn = (columnName, newIndex) => {
       columnActions.moveColumn(this.searchScope.columns, columnName, newIndex);
-      this.personalization.columns = this.searchScope.columns;
+      this.customization.columns = this.searchScope.columns;
       this.emitEmbeddableStateChange(this.getEmbeddableState());
     };
 

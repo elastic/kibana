@@ -42,7 +42,9 @@ export const getPanelType = (dashboard, panelId) => getPanel(dashboard, panelId)
 
 export const getEmbeddables = (dashboard) => dashboard.embeddables;
 
-export const getEmbeddablePersonalization = (dashboard, panelId) => getPanel(dashboard, panelId).embeddableConfig;
+// TODO: rename panel.embeddableConfig to embeddableCustomization. Because it's on the panel that's stored on a
+// dashboard, renaming this will require a migration step.
+export const getEmbeddableCustomization = (dashboard, panelId) => getPanel(dashboard, panelId).embeddableConfig;
 
 /**
  * @param dashboard {DashboardState}
@@ -159,7 +161,7 @@ export const getDescription = dashboard => dashboard.metadata.description;
  * the redux tree structure.
  * @typedef {Object} ContainerState
  * @property {Object} timeRange
- * @property {Object} embeddablePersonalization
+ * @property {Object} embeddableCustomization
  * @property {boolean} hidePanelTitles
  */
 
@@ -171,7 +173,7 @@ export const getDescription = dashboard => dashboard.metadata.description;
  */
 export const getContainerState = (dashboard, panelId) => ({
   timeRange: _.cloneDeep(getTimeRange(dashboard)),
-  embeddablePersonalization: _.cloneDeep(getEmbeddablePersonalization(dashboard, panelId) || {}),
+  embeddableCustomization: _.cloneDeep(getEmbeddableCustomization(dashboard, panelId) || {}),
   hidePanelTitles: getHidePanelTitles(dashboard),
   customTitle: getPanel(dashboard, panelId).title,
 });

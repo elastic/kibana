@@ -1,6 +1,6 @@
 /**
  * @typedef {Object} EmbeddableState
- * @property {Object} personalization - any personalization data that should be stored at the panel level. For
+ * @property {Object} customization - any customization data that should be stored at the panel level. For
  * example, pie slice colors, or custom per panel sort order or columns.
  * @property {Object} stagedFilter - a possible filter the embeddable wishes dashboard to apply.
  */
@@ -25,6 +25,6 @@ export class EmbeddableFactory {
    * @return {Promise.<Embeddable>}
    */
   create(/* containerMetadata, onEmbeddableStateChanged*/) {
-    throw new Error('Must implement initialize.');
+    throw new Error('Must implement create.');
   }
 }

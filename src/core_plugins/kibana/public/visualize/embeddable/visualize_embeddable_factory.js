@@ -6,12 +6,11 @@ import { VisualizeEmbeddable } from './visualize_embeddable';
 import labDisabledTemplate from './visualize_lab_disabled.html';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor(savedVisualizations, Promise, config) {
+  constructor(savedVisualizations, config) {
     super();
     this._config = config;
     this.savedVisualizations = savedVisualizations;
     this.name = 'visualization';
-    this.Promise = Promise;
   }
 
   getEditPath(panelId) {
@@ -31,7 +30,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     const editUrl = this.getEditPath(visId);
 
     const waitFor = [ getVisualizeLoader(), this.savedVisualizations.get(visId) ];
-    return this.Promise.all(waitFor)
+    return Promise.all(waitFor)
       .then(([loader, savedObject]) => {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 

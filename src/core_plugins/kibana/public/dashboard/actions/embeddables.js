@@ -7,7 +7,7 @@ import {
 
 import {
   getPanel,
-  getEmbeddablePersonalization,
+  getEmbeddableCustomization,
 } from '../../selectors/dashboard_selectors';
 
 export const embeddableIsInitializing = createAction('EMBEDDABLE_IS_INITIALIZING');
@@ -27,10 +27,10 @@ export const embeddableError = createAction('EMBEDDABLE_ERROR');
 export function embeddableStateChanged({ panelId, embeddableState }) {
   return (dispatch, getState) => {
     // Translate embeddableState to things redux cares about.
-    const personalization = getEmbeddablePersonalization(getState(), panelId);
-    if (!_.isEqual(embeddableState.personalization, personalization)) {
+    const customization = getEmbeddableCustomization(getState(), panelId);
+    if (!_.isEqual(embeddableState.customization, customization)) {
       const panel = getPanel(getState(), panelId);
-      dispatch(updatePanel({ ...panel, embeddableConfig: _.cloneDeep(embeddableState.personalization) }));
+      dispatch(updatePanel({ ...panel, embeddableConfig: _.cloneDeep(embeddableState.customization) }));
     }
 
     if (embeddableState.stagedFilter) {

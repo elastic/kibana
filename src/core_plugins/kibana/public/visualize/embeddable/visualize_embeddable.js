@@ -11,11 +11,8 @@ export class VisualizeEmbeddable extends Embeddable  {
     this.loader = loader;
 
     const parsedUiState = savedVisualization.uiStateJSON ? JSON.parse(savedVisualization.uiStateJSON) : {};
-    this.uiState = new PersistedState({
-      ...parsedUiState,
-    });
+    this.uiState = new PersistedState(parsedUiState);
 
-    this._uiStateChangeHandler = this._uiStateChangeHandler.bind(this);
     this.uiState.on('change', this._uiStateChangeHandler);
 
     /**
@@ -28,14 +25,14 @@ export class VisualizeEmbeddable extends Embeddable  {
     };
   }
 
-  _uiStateChangeHandler() {
-    this.personalization = this.uiState.toJSON();
+  _uiStateChangeHandler = () => {
+    this.customization = this.uiState.toJSON();
     this._onEmbeddableStateChanged(this.getEmbeddableState());
-  }
+  };
 
   getEmbeddableState() {
     return {
-      personalization: this.personalization,
+      customization: this.customization,
     };
   }
 
@@ -58,16 +55,16 @@ export class VisualizeEmbeddable extends Embeddable  {
   }
 
   onContainerStateChanged(containerState) {
-    const personalization = containerState.embeddablePersonalization;
+    const customization = containerState.embeddableCustomization;
     let isDirty = false;
-    if (!_.isEqual(this.personalization, personalization)) {
+    if (!_.isEqual(this.customization, customization)) {
       // Turn this off or the uiStateChangeHandler will fire for every modification.
       this.uiState.off('change', this._uiStateChangeHandler);
       this.uiState.clearAllKeys();
-      Object.getOwnPropertyNames(personalization).forEach(key => {
-        this.uiState.set(key, personalization[key]);
+      Object.getOwnPropertyNames(customization).forEach(key => {
+        this.uiState.set(key, customization[key]);
       });
-      this.personalization = personalization;
+      this.customization = customization;
       isDirty = true;
       this.uiState.on('change', this._uiStateChangeHandler);
     }

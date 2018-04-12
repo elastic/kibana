@@ -103,7 +103,7 @@ State communicated to the embeddable.
    // Contains per panel customizations like sort, columns, and color choices.
    // This shape is defined by the embeddable. Dashboard stores it and tracks updates
    // to it.
-   embeddablePersonalization: Object,
+   embeddableCustomization: Object,
    hidePanelTitles: boolean,
    title: string,
    
@@ -153,7 +153,7 @@ Embeddable state is the data that the embeddable gives dashboard when something 
 ```
 {
    // This will contain per panel embeddable state, such as pie colors and saved search columns.
-   embeddablePersonalization: Object,
+   embeddableCustomization: Object,
    // If a filter action was initiated by a user action (e.g. clicking on a bar chart)
    // This is how dashboard will know and update itself to match.
    stagedFilters: FilterObject,
