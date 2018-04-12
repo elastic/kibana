@@ -1,14 +1,8 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 describe('String Format', function () {
-  let StringFormat;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
-    StringFormat = fieldFormats.getType('string');
-  }));
+  const StringFormat = fieldFormats.getType('string');
 
   it('convert a string to lower case', function () {
     const string = new StringFormat({
