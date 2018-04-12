@@ -105,13 +105,21 @@ function withPullRequest(owner, repoName, commits) {
 
 async function maybeSetupRepo(owner, repoName, username) {
   if (await repoExists(owner, repoName)) {
-    return null;
+    return;
   }
 
-  return withSpinner(
-    { text: 'Cloning repository (may take a few minutes the first time)' },
-    () => setupRepo(owner, repoName, username)
-  );
+  const text = 'Cloning repository (only first time)';
+  const spinner = ora(`0% ${text}`).start();
+
+  try {
+    await setupRepo(owner, repoName, username, progress => {
+      spinner.text = `${progress}% ${text}`;
+    });
+    spinner.succeed();
+  } catch (e) {
+    spinner.stop();
+    throw e;
+  }
 }
 
 async function getCommitBySha({ owner, repoName, sha }) {

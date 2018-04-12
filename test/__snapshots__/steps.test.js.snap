@@ -6,12 +6,6 @@ Array [
     "ssh -oBatchMode=yes -T git@github.com",
   ],
   Array [
-    "git clone git@github.com:elastic/kibana",
-    Object {
-      "cwd": "/myHomeDir/.backport/repositories/elastic",
-    },
-  ],
-  Array [
     "git remote add sqren git@github.com:sqren/kibana",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
@@ -40,6 +34,18 @@ Array [
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
+  ],
+]
+`;
+
+exports[`run through steps execVanilla should be called with correct args 1`] = `
+Array [
+  Array [
+    "git clone git@github.com:elastic/kibana --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+    },
+    [Function],
   ],
 ]
 `;

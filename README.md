@@ -94,6 +94,7 @@ Your Github username
 
 ##### `projects` (object[])
 
+_Note: This field is optional, and you probably don't need it_
 A list of project-specific settings. This is useful if you want to override project-specific configurations.
 [Read more about the project-specific configuration](#project-specific-configuration)
 
@@ -163,11 +164,3 @@ Default: `true`
 ##### `labels` (string[])
 
 List of labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs
-
-## Troubleshooting
-
-`backport` never touches your local repositories or files. Instead a separate
-clone of your repositories are created in `~/.backport/repositories/`.
-This is also where you'll need to solve merge conflicts. If you are experiencing
-issues, you can try deleting the repository, or the entire `.backport` folder -
-it will be recreated next time you run `backport`.
