@@ -1,10 +1,9 @@
 // import 'ui/agg_table';
-import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
-function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
-  const tabifyAggResponse = Private(AggResponseTabifyProvider);
+function VisSpyTableProvider(Notifier, $filter, $rootScope) {
   const PER_PAGE_DEFAULT = 10;
 
   return {
@@ -23,10 +22,11 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
         } else {
           $scope.rowsPerPage = PER_PAGE_DEFAULT;
 
-          $scope.table = tabifyAggResponse($scope.vis, $scope.searchSource.rawResponse, {
+          $scope.table = tabifyAggResponse($scope.vis.getAggConfig().getResponseAggs(), $scope.searchSource.rawResponse, {
             canSplit: false,
             asAggConfigResults: true,
-            partialRows: true
+            partialRows: true,
+            isHierarchical: $scope.vis.isHierarchical()
           });
         }
       });

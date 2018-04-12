@@ -5,12 +5,11 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
-import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
+import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   let vis;
-  let tabify;
   let convert;
   let esResponse;
   let expectedAggs;
@@ -23,7 +22,6 @@ describe('GeoJson Agg Response Converter', function () {
     const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
     esResponse = Private(FixturesAggRespGeohashGridProvider);
-    tabify = Private(AggResponseTabifyProvider);
     convert = Private(AggResponseGeoJsonProvider);
 
     createVis = function (useGeocentroid) {
@@ -54,7 +52,7 @@ describe('GeoJson Agg Response Converter', function () {
   [ { asAggConfigResults: true }, { asAggConfigResults: false } ].forEach(function (tableOpts) {
 
     function makeTable() {
-      return _.sample(tabify(vis, esResponse, tableOpts).tables);
+      return _.sample(tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResponse, tableOpts).tables);
     }
 
     function makeSingleChart(table) {
