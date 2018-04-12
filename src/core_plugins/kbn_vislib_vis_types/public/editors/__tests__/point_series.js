@@ -6,7 +6,7 @@ import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import LineVisTypeProvider from 'plugins/kbn_vislib_vis_types/line';
 import { VisProvider } from 'ui/vis';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 
 describe('point series editor', function () {
   let $parentScope;
@@ -15,7 +15,6 @@ describe('point series editor', function () {
   let lineVisType;
   let Vis;
   let indexPattern;
-  let AggConfig;
 
   function makeConfig() {
     return {
@@ -31,7 +30,6 @@ describe('point series editor', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
-    AggConfig = Private(VisAggConfigProvider);
     lineVisType = Private(LineVisTypeProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

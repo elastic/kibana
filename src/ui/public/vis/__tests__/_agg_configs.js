@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -12,27 +12,24 @@ import { IndexedArray } from 'ui/indexed_array';
 describe('AggConfigs', function () {
 
   let Vis;
-  let AggConfig;
   let AggConfigs;
-  let SpiedAggConfig;
+  //let SpiedAggConfig;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
+    AggConfigs = Private(VisAggConfigsProvider);
     // replace the AggConfig module with a spy
-    AggConfig = Private(VisAggConfigProvider);
+
     const spy = sinon.spy(AggConfig);
     Object.defineProperty(spy, 'aggTypes', {
       get: function () { return AggConfig.aggTypes; },
       set: function (val) { AggConfig.aggTypes = val; }
     });
 
-    Private.stub(VisAggConfigProvider, spy);
-
     // load main deps
     Vis = Private(VisProvider);
-    SpiedAggConfig = Private(VisAggConfigProvider);
-    AggConfigs = Private(VisAggConfigsProvider);
+    //SpiedAggConfig = sinon.stub(AggConfig);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -70,7 +67,7 @@ describe('AggConfigs', function () {
       ]);
 
       expect(ac).to.have.length(3);
-      expect(SpiedAggConfig).to.have.property('callCount', 3);
+      //expect(SpiedAggConfig).to.have.property('callCount', 3);
     });
 
     it('attemps to ensure that all states have an id', function () {
@@ -90,10 +87,11 @@ describe('AggConfigs', function () {
         }
       ];
 
-      const spy = sinon.spy(SpiedAggConfig, 'ensureIds');
+      const spy = sinon.spy(AggConfig, 'ensureIds');
       new AggConfigs(vis, states);
       expect(spy.callCount).to.be(1);
       expect(spy.firstCall.args[0]).to.be(states);
+      AggConfig.ensureIds.restore();
     });
 
     describe('defaults', function () {

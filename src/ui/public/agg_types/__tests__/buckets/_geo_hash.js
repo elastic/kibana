@@ -1,5 +1,8 @@
 import expect from 'expect.js';
+import ngMock from 'ng_mock';
 import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
+import { AggConfig } from 'ui/vis/agg_config';
+import { AggTypesIndexProvider } from 'ui/agg_types/index';
 
 describe('Geohash Agg', () => {
 
@@ -25,7 +28,8 @@ describe('Geohash Agg', () => {
       params: {
         mapZoom: intialZoom
       },
-      sessionState: {}
+      sessionState: {},
+      aggs: []
     },
     type: 'geohash_grid',
   };
@@ -82,10 +86,16 @@ describe('Geohash Agg', () => {
     };
   }
 
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private) {
+    AggConfig.aggTypes = Private(AggTypesIndexProvider);
+  }));
+
   let geohashAgg;
   beforeEach(() => {
     geohashAgg = AggTypesBucketsGeoHashProvider(PrivateMock, configMock); // eslint-disable-line new-cap
   });
+
 
   describe('precision parameter', () => {
 
