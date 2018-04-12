@@ -28,6 +28,26 @@ describe('cli/serve/read_yaml_config', function () {
     });
   });
 
+  it('should inject an environment variable value when setting a value with ${ENV_VAR}', function () {
+    process.env.KBN_ENV_VAR1 = 'val1';
+    process.env.KBN_ENV_VAR2 = 'val2';
+    const config = readYamlConfig([ fixture('en_var_ref_config.yml') ]);
+
+    expect(config).toEqual({
+      foo: 1,
+      bar: 'pre-val1-mid-val2-post',
+      elasticsearch: {
+        requestHeadersWhitelist: ['val1', 'val2']
+      }
+    });
+  });
+
+  it('should thow an exception when referenced environment variable in a config value does not exist', function () {
+    expect(function () {
+      readYamlConfig([ fixture('invalid_en_var_ref_config.yml') ]);
+    }).toThrow();
+  });
+
   describe('different cwd()', function () {
     const oldCwd = process.cwd();
     const newCwd = join(oldCwd, '..');
@@ -55,4 +75,5 @@ describe('cli/serve/read_yaml_config', function () {
       process.chdir(oldCwd);
     });
   });
+
 });
