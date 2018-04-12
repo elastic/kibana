@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import chrome from 'ui/chrome';
+import { fieldFormats } from 'ui/registry/field_formats';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
-let fieldFormats;
-let config;
-let getConfig;
+const config = chrome.getUiSettingsClient();
+
 
 const formatIds = [
   'bytes',
@@ -27,12 +26,7 @@ const formatIds = [
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default describe('conformance', function () {
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-    config = $injector.get('config');
-    getConfig = (...args) => config.get(...args);
-  }));
+  const getConfig = (...args) => config.get(...args);
 
   formatIds.forEach(function (id) {
     let instance;
