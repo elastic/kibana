@@ -129,7 +129,7 @@ Object {
           "type": "quote",
         },
       },
-      "quote:t1": Object {
+      "tweet:t1": Object {
         "_source": Object {
           "tweet": Object {
             "chars": "The past is not what it was.",
@@ -992,7 +992,16 @@ exports[`migrate existing previously migrated index only runs new migrations 1`]
 Object {
   "data": Object {
     "aquatica-2": Object {
-      "fish:": Object {
+      "fish:f1": Object {
+        "_source": Object {
+          "fish": Object {
+            "species": "catfish",
+          },
+          "type": "fish",
+          "updated_at": undefined,
+        },
+      },
+      "fish:f2": Object {
         "_source": Object {
           "fish": Object {
             "species": "carp",
@@ -1024,7 +1033,7 @@ Object {
       },
     },
     "aquatica-original": Object {
-      "f1": Object {
+      "fish:f1": Object {
         "_source": Object {
           "fish": Object {
             "kind": "catfish",
@@ -1032,7 +1041,7 @@ Object {
           "type": "fish",
         },
       },
-      "f2": Object {
+      "fish:f2": Object {
         "_source": Object {
           "fish": Object {
             "kind": "carp",

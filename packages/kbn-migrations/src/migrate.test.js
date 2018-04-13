@@ -261,8 +261,8 @@ describe('migrate', () => {
       ],
     };
     const existingData = assocMigrationState({}, index, originalMigrationState);
-    _.set(existingData, [index, 'f1', '_source'], { type: 'fish', fish: { kind: 'catfish' } });
-    _.set(existingData, [index, 'f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
+    _.set(existingData, [index, 'fish:f1', '_source'], { type: 'fish', fish: { kind: 'catfish' } });
+    _.set(existingData, [index, 'fish:f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
     const { server, cluster } = mockServer(existingData, existingMeta);
     await migrate({ server, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
@@ -296,7 +296,7 @@ describe('migrate', () => {
       type: 'quote',
       quote: { text: 'It\'s a dangerous business going out your front door.' },
     });
-    _.set(existingData, [existingIndex, 'quote:t1', '_source'], {
+    _.set(existingData, [existingIndex, 'tweet:t1', '_source'], {
       type: 'tweet',
       tweet: { chars: 'The past is not what it was.' },
     });
