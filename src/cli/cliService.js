@@ -246,7 +246,7 @@ async function confirmResolvedRecursive(owner, repoName) {
     throw new AbortApplicationError('Application was aborted.');
   }
 
-  const isDirty = isIndexDirty(owner, repoName);
+  const isDirty = await isIndexDirty(owner, repoName);
   if (isDirty) {
     await confirmResolvedRecursive(owner, repoName);
   }

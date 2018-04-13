@@ -69,14 +69,15 @@ function cherrypick(owner, repoName, sha) {
   });
 }
 
-// TODO: rewrite to async/await
-function isIndexDirty(owner, repoName) {
-  return rpc
-    .exec(`git diff-index --quiet HEAD --`, {
+async function isIndexDirty(owner, repoName) {
+  try {
+    await rpc.exec(`git diff-index --quiet HEAD --`, {
       cwd: env.getRepoPath(owner, repoName)
-    })
-    .then(() => false)
-    .catch(() => true);
+    });
+    return false;
+  } catch (e) {
+    return true;
+  }
 }
 
 function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
