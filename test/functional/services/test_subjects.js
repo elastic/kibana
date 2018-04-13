@@ -35,6 +35,10 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async descendantExists(selector, parentElement) {
+      return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
+    }
+
     async findDescendant(selector, parentElement) {
       return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
