@@ -2,7 +2,11 @@
 == Logstash Configuration Management APIs
 
 * <<logstash-configuration-management-api-create>>
+* <<logstash-configuration-management-api-retrieve>>
 * <<logstash-configuration-management-api-delete>>
+* <<logstash-configuration-management-api-list>>
 
 include::logstash-configuration-management/create.asciidoc[]
+include::logstash-configuration-management/retrieve.asciidoc[]
 include::logstash-configuration-management/delete.asciidoc[]
+include::logstash-configuration-management/list.asciidoc[]

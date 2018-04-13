@@ -12,7 +12,7 @@ The Delete Pipeline API enables you to delete a centrally-managed Logstash pipel
 ==== Path Parameters
 
 `id` (required)::
-  (string) ID for pipeline. Only alphanumeric characters, hyphens, and underscores may be used.
+  (string) ID for pipeline.
 
 
 ==== Examples

@@ -48,7 +48,7 @@ A successful call returns a JSON structure similar to the following example:
 [source,js]
 --------------------------------------------------
 {
-  "id": "getting-started",
+  "id": "hello-world",
   "username": "elastic", <1>
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
