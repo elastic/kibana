@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-
     it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
@@ -32,8 +31,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.clickEdit();
-      await PageObjects.visualize.clickLegendOption('Count');
-      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
+
+      // Opening legend colors has been flaky.
+      retry.try(async () => {
+        await PageObjects.visualize.clickLegendOption('Count');
+        await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
+      });
+
       await PageObjects.dashboard.saveDashboard('Overridden colors');
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
