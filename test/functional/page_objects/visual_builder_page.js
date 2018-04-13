@@ -2,10 +2,26 @@ import Keys from 'leadfoot/keys';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
+  const retry = getService('retry');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
   class VisualBuilderPage {
+
+    async resetPage() {
+      const fromTime = '2015-09-19 06:31:44.000';
+      const toTime = '2015-09-22 18:31:44.000';
+      log.debug('navigateToApp visualize');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      log.debug('clickVisualBuilderChart');
+      await find.clickByPartialLinkText('Visual Builder');
+      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickMetric() {
       const button = await testSubjects.find('metricTsvbTypeBtn');
       await button.click();
@@ -103,6 +119,44 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async clickTable() {
       await testSubjects.click('tableTsvbTypeBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async createNewAgg(nth = 0) {
+      return await retry.try(async () => {
+        const elements = await testSubjects.findAll('addMetricAddBtn');
+        await elements[nth].click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const aggs = await testSubjects.findAll('aggSelector');
+        if (aggs.length < 2) {
+          throw new Error('there should be atleast 2 aggSelectors');
+        }
+      });
+    }
+
+    async selectAggType(type, nth = 0) {
+      const elements = await testSubjects.findAll('aggSelector');
+      const input = await elements[nth].findByCssSelector('.Select-input input');
+      await input.type(type);
+      const option = await elements[nth].findByCssSelector('.Select-option');
+      await option.click();
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async fillInExpression(expression, nth = 0) {
+      const expressions = await testSubjects.findAll('mathExpression');
+      await expressions[nth].type(expression);
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async fillInVariable(name = 'test', metric = 'count', nth = 0) {
+      const elements = await testSubjects.findAll('varRow');
+      const input = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
+      await input.type(name);
+      const select = await elements[nth].findByCssSelector('.Select-input input');
+      await select.type(metric);
+      const option = await elements[nth].findByCssSelector('.Select-option');
+      await option.click();
+      return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
 

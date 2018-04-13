@@ -12,7 +12,7 @@ export default function ({ getService }) {
 
       it('should return 200 with individual responses', async () => (
         await supertest
-          .get('/api/saved_objects/visualization?fields=title')
+          .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
@@ -36,7 +36,7 @@ export default function ({ getService }) {
       describe('unknown type', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/wigwags')
+            .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -52,7 +52,7 @@ export default function ({ getService }) {
       describe('page beyond total', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/visualization?page=100&per_page=100')
+            .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -68,7 +68,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/wigwags?search_fields=a')
+            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -93,7 +93,7 @@ export default function ({ getService }) {
 
       it('should return 200 with empty response', async () => (
         await supertest
-          .get('/api/saved_objects/visualization')
+          .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
@@ -108,7 +108,7 @@ export default function ({ getService }) {
       describe('unknown type', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/wigwags')
+            .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -124,7 +124,7 @@ export default function ({ getService }) {
       describe('page beyond total', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/visualization?page=100&per_page=100')
+            .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -140,7 +140,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/wigwags?search_fields=a')
+            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
