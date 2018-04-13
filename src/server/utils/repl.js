@@ -4,16 +4,17 @@ import util from 'util';
 /**
  * Starts an interactive REPL with a global `server` object.
  *
- * @param {KibanaServer} server
+ * @param {KibanaServer} kbnServer
  */
-export function startRepl(server) {
+export function startRepl(kbnServer) {
   const replServer = repl.start({
     prompt: 'Kibana> ',
     useColors: true,
     writer: promiseFriendlyWriter(() => replServer.displayPrompt()),
   });
 
-  replServer.context.server = server;
+  replServer.context.kbnServer = kbnServer;
+  replServer.context.server = kbnServer.server;
   replServer.context.repl = {
     print(obj, depth = null) {
       console.log(promisePrint(obj, () => replServer.displayPrompt(), depth));

@@ -183,7 +183,7 @@ export default function (program) {
       });
 
       if (shouldStartRepl(opts)) {
-        startRepl(kbnServer.server);
+        startRepl(kbnServer);
       }
 
       return kbnServer;

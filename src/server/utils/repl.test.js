@@ -19,9 +19,12 @@ describe('repl', () => {
 
   test('it exposes the server object', () => {
     const { startRepl } = require('./repl');
-    const testServer = {};
+    const testServer = {
+      server: { },
+    };
     const replServer = startRepl(testServer);
-    expect(replServer.context.server).toBe(testServer);
+    expect(replServer.context.server).toBe(testServer.server);
+    expect(replServer.context.kbnServer).toBe(testServer);
   });
 
   test('it prompts with Kibana>', () => {
