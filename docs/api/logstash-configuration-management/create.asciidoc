@@ -3,7 +3,8 @@
 
 experimental[This functionality is experimental and may be changed or removed completely in a future release.]
 
-The Create Pipeline API enables you to create a centrally-managed Logstash Pipeline.
+The Create Pipeline API enables you to create a centrally-managed Logstash pipeline. You can also use
+it to update an existing pipeline.
 
 ==== Request
 
