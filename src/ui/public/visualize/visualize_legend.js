@@ -84,6 +84,20 @@ uiModules.get('kibana')
           }
         };
 
+        $scope.getLegendValueDetailsClasses = function () {
+          switch ($scope.vis.params.legendPosition) {
+            case 'top':
+              return 'legend-value-details-top';
+            case 'bottom':
+              return 'legend-value-details';
+            case 'left':
+              return 'legend-value-details';
+            case 'right':
+            default:
+              return 'legend-value-details';
+          }
+        };
+
         $scope.filter = function (legendData, negate) {
           clickHandler({ point: legendData, negate: negate });
         };

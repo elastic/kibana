@@ -41,7 +41,7 @@
           {{legendData.label}}
         </div>
 
-        <div ng-if="showDetails" class="legend-value-details">
+        <div ng-if="showDetails" class="{{getLegendValueDetailsClasses()}}">
           <div
             class="kuiButtonGroup kuiButtonGroup--united kuiButtonGroup--fullWidth"
             ng-show="canFilter(legendData)"
