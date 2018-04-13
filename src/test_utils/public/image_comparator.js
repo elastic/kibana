@@ -52,12 +52,15 @@ export class ImageComparator {
       </svg>`;
 
     const sourceImage = new Image();
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       sourceImage.onload = async () => {
         sourceContext2d.drawImage(sourceImage, 0, 0);
         const mismatch = await this.compareImage(sourceCanvas, expectedImageSourcePng, threshold);
         document.body.removeChild(sourceCanvas);
         resolve(mismatch);
+      };
+      sourceImage.onerror = (e) => {
+        reject(e.message);
       };
       sourceImage.src = 'data:image/svg+xml;base64,' + btoa(sourceData);
     });
@@ -72,7 +75,7 @@ export class ImageComparator {
    */
   async compareImage(actualCanvasFromUser, expectedImageSourcePng, threshold) {
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 
       window.setTimeout(() => {
 
@@ -113,6 +116,11 @@ export class ImageComparator {
 
           resolve(mismatchedPixels);
         };
+
+        expectedImage.onerror = (e) => {
+          reject(e.message);
+        };
+
         expectedImage.src = expectedImageSourcePng;
       });
     });

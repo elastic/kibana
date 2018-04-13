@@ -35,9 +35,6 @@ module.exports = function (plugin, run, options) {
     .then(function () {
       if (options.skipArchive) return;
       return createPackage(plugin, buildTarget, buildVersion);
-    })
-    .catch(function (err) {
-      console.log('BUILD ACTION FAILED:', err);
     });
 };
 

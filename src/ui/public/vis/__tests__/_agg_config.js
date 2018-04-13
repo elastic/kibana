@@ -5,7 +5,7 @@ import { VisProvider } from 'ui/vis';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 describe('AggConfig', function () {
 
@@ -13,7 +13,6 @@ describe('AggConfig', function () {
   let AggType;
   let AggConfig;
   let indexPattern;
-  let fieldFormat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -21,7 +20,6 @@ describe('AggConfig', function () {
     AggType = Private(AggTypesAggTypeProvider);
     AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    fieldFormat = Private(RegistryFieldFormatsProvider);
   }));
 
   describe('#toDsl', function () {
@@ -426,7 +424,7 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormat.getDefaultInstance('number').getConverterFor());
+      expect(vis.aggs[0].fieldFormatter()).to.be(fieldFormats.getDefaultInstance('number').getConverterFor());
     });
   });
 
@@ -455,13 +453,13 @@ describe('AggConfig', function () {
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(fieldFormat.getDefaultInstance('string').getConverterFor());
+      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
     });
 
     it('returns the html converter if "html" is passed in', function () {

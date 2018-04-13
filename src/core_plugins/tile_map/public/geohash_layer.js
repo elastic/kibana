@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import _ from 'lodash';
 
-import { KibanaMapLayer } from './kibana_map_layer';
+import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';

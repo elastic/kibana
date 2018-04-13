@@ -29,14 +29,24 @@ export const WatchCommand: Command = {
   description: 'Runs `kbn:watch` script for every project.',
 
   async run(projects, projectGraph) {
-    const projectsWithWatchScript: ProjectMap = new Map();
+    const projectsToWatch: ProjectMap = new Map();
     for (const project of projects.values()) {
+      // We can't watch project that doesn't have `kbn:watch` script.
       if (project.hasScript(watchScriptName)) {
-        projectsWithWatchScript.set(project.name, project);
+        projectsToWatch.set(project.name, project);
       }
     }
 
-    const projectNames = Array.from(projectsWithWatchScript.keys());
+    if (projectsToWatch.size === 0) {
+      console.log(
+        chalk.red(
+          `\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`
+        )
+      );
+      return;
+    }
+
+    const projectNames = Array.from(projectsToWatch.keys());
     console.log(
       chalk.bold(
         chalk.green(
@@ -47,14 +57,14 @@ export const WatchCommand: Command = {
 
     // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
-    projectsWithWatchScript.delete(kibanaProjectName);
+    const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
 
     const batchedProjects = topologicallyBatchProjects(
-      projectsWithWatchScript,
+      projectsToWatch,
       projectGraph
     );
 
-    if (projects.has(kibanaProjectName)) {
+    if (shouldWatchKibanaProject) {
       batchedProjects.push([projects.get(kibanaProjectName)!]);
     }
 
