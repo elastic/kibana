@@ -67,7 +67,16 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   }
 
   stop() {
-    this._systemInstance && this._systemInstance.stop();
     this._exposedValues = undefined;
+
+    const stoppedResponse = this._systemInstance && this._systemInstance.stop();
+
+    if (isPromise(stoppedResponse)) {
+      throw new Error(
+        `A promise was returned when stopping [${
+          this.name
+        }], but systems must stop synchronously.`
+      );
+    }
   }
 }
