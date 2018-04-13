@@ -1,7 +1,9 @@
 // Helper functions for transforming and seeding documents during a migration
+const uuid = require('uuid');
 
 export const DOC_TYPE = 'doc';
-export const MIGRATION_DOC_ID = 'migration:migration-state';
+export const MIGRATION_DOC_TYPE = 'migration';
+export const MIGRATION_DOC_ID = `${MIGRATION_DOC_TYPE}:migration-state`;
 
 // Given a list of migration definitions, returns a list of properly transformed seeds
 export function seededDocs(migrations) {
@@ -9,7 +11,7 @@ export function seededDocs(migrations) {
     .filter(({ m }) => !!m.seed)
     .map(({ m, i }) => {
       const transform = buildTransformFunction(migrations.slice(i));
-      return transform(m.seed());
+      return transform(clientToRaw(m.seed()));
     });
 }
 
@@ -18,19 +20,31 @@ export function seededDocs(migrations) {
 export function buildTransformFunction(migrations) {
   const transforms = migrations.filter(m => m.filter && m.transform);
   const transformDoc = (doc, { filter, transform }) => {
-    const result = filter(doc._source, doc) ? transform(doc._source, doc) : doc;
-    return convertToRaw(result, doc._id);
+    return filter(doc) ? transform(doc) : doc;
   };
-  return (doc) => transforms.reduce(transformDoc, convertToRaw(doc));
+  return (rawDoc) => clientToRaw(transforms.reduce(transformDoc, rawToClient(rawDoc)));
 }
 
-function convertToRaw(_source, _id) {
-  return isRawDoc(_source) ? _source : {
-    _id,
-    _source,
+export function rawToClient(doc) {
+  const { _id, _source } = doc;
+  const { type } = _source;
+  const id = _id.slice(type.length + 1);
+  return {
+    id,
+    type,
+    updated_at: _source.updated_at,
+    attributes: _source[type],
   };
 }
 
-function isRawDoc({ _id, _source }) {
-  return _id !== undefined && _source !== undefined;
+// eslint-disable-next-line camelcase
+export function clientToRaw({ id, type, updated_at, attributes }) {
+  return {
+    _id: `${type}:${id === undefined ? uuid() : id}`,
+    _source: {
+      type,
+      updated_at,
+      [type]: attributes,
+    },
+  };
 }

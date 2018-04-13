@@ -1,125 +1,101 @@
-const { seededDocs, buildTransformFunction } = require('./documents');
+const _ = require('lodash');
+const { seededDocs, buildTransformFunction, rawToClient, clientToRaw } = require('./documents');
+
+// Test if id is not specified by seed, it will be generated
+// Test that seeds blow up, maybe, if type isn't specified, etc?
 
 describe('buildTransformFunction', () => {
   test('always returns a raw document', () => {
     const migrations = [{
-      filter: ({ name }) => name === 'dabbo',
-      transform: ({ name }) => ({ name, age: 'old' }),
+      filter: ({ type }) => type === 'dabo',
+      transform: (doc) => _.set(doc, 'attributes.name', 'swinney'),
     }];
     const fn = buildTransformFunction(migrations);
     expect(fn({
-      _id: 'bar',
-      _source: { name: 'dabbo' },
+      _id: 'dabo:coach',
+      _source: { type: 'dabo', dabo: { name: 'tigers' } },
     })).toEqual({
-      _id: 'bar',
-      _source: { name: 'dabbo', age: 'old' },
+      _id: 'dabo:coach',
+      _source: { type: 'dabo', dabo: { name: 'swinney' } },
     });
   });
 
-  test('passes raw document as second arg', () => {
+  test('runs multiple transforms', () => {
     const migrations = [{
-      filter: (source, { _id }) => _id === 'bar',
-      transform: (source, { _source }) => ({
-        _source,
-        _id: 'changeditonyou',
-      }),
+      filter: ({ type }) => type === 'bar',
+      transform: (doc) => _.set(doc, 'attributes.baz', 'Nifties'),
+    }, {
+      filter: ({ type }) => type === 'bar',
+      transform: (doc) => _.set(doc, 'attributes.bing', 'Bingiton'),
     }];
     const fn = buildTransformFunction(migrations);
     expect(fn({
-      _id: 'bar',
-      _source: { name: 'dabbo' },
+      _id: 'bar:123',
+      _source: { type: 'bar', bar: { baz: 'shazm' } },
     })).toEqual({
-      _id: 'changeditonyou',
-      _source: { name: 'dabbo' },
+      _id: 'bar:123',
+      _source: { type: 'bar', bar: { baz: 'Nifties', bing: 'Bingiton' } },
     });
-  });
-
-  test('can be passed source', () => {
-    const doc = { dunnoes: 'nothin' };
-    const migrations = [{
-      filter: () => true,
-      transform: (source) => ({
-        ...source,
-        also: 'this',
-      }),
-    }];
-    const fn = buildTransformFunction(migrations);
-    expect(fn(doc))
-      .toEqual({
-        _id: undefined,
-        _source: {
-          dunnoes: 'nothin',
-          also: 'this',
-        },
-      });
   });
 
   test('only applies when filter evaluates to true', () => {
     const docA = {
-      _id: 'dont',
+      _id: 'dont:panic',
       _source: {
-        type: 'panic',
-        attributes: {
-          thanks: 'for all the fish',
-        },
-      }
-    };
-    const docB = {
-      _id: 'dont',
-      _source: {
-        type: 'shniky',
-        attributes: {
-          thanks: 'for all the fish',
-        },
-      }
-    };
-    const migrations = [{
-      filter: ({ type }) => type === 'panic',
-      transform: (doc) => ({
-        ...doc,
-        here: true,
-      }),
-    }];
-    const fn = buildTransformFunction(migrations);
-    expect(fn(docA)._source.here).toBeTruthy();
-    expect(fn(docB)).toEqual(docB);
-  });
-
-  test('only applies transform migrations', () => {
-    const doc = {
-      _id: 'dont',
-      _source: {
-        type: 'panic',
-        attributes: {
+        type: 'dont',
+        dont: {
           thanks: 'for all the fish',
         },
       },
     };
+    const docB = {
+      _id: 'do:panic',
+      _source: {
+        type: 'do',
+        do: {
+          thanks: 'and bring a towel',
+        },
+      },
+    };
     const migrations = [{
-      filter: ({ type }) => type === 'panic',
-      transform: (doc) => ({
-        ...doc,
-        here: true,
-      }),
+      filter: ({ type }) => type === 'do',
+      transform: (doc) => _.set(doc, 'attributes.towel', 'massively useful'),
+    }];
+    const fn = buildTransformFunction(migrations);
+    expect(fn(_.cloneDeep(docA))).toEqual(docA);
+    expect(fn(_.cloneDeep(docB))).not.toEqual(docB);
+    expect(fn(_.cloneDeep(docB))._source.do.towel).toEqual('massively useful');
+  });
+
+  test('only applies transform migrations', () => {
+    const doc = {
+      _id: 'here:iam',
+      _source: {
+        type: 'here',
+        here: {
+          there: 'You are',
+        },
+      },
+    };
+    const migrations = [{
+      filter: ({ type }) => type === 'here',
+      transform: (doc) => _.set(doc, 'attributes.a', true),
     }, {
       seed: () => { throw new Error('DOH!'); }
     }, {
       filter: () => true,
-      transform: (doc) => ({
-        ...doc,
-        hereToo: true,
-      }),
+      transform: (doc) => _.set(doc, 'attributes.b', true),
     }];
     const fn = buildTransformFunction(migrations);
     expect(fn(doc))
       .toEqual({
-        _id: 'dont',
+        _id: 'here:iam',
         _source: {
-          type: 'panic',
-          here: true,
-          hereToo: true,
-          attributes: {
-            thanks: 'for all the fish',
+          type: 'here',
+          here: {
+            there: 'You are',
+            a: true,
+            b: true,
           },
         },
       });
@@ -130,37 +106,54 @@ describe('seededDocs', () => {
   test('returns the seeds', () => {
     const migrations = [{
       seed: () => ({
-        _id: 'hey',
-        _source: {
-          type: 'you',
-          attributes: {
-            guys: 'check it out',
-          },
+        id: 'onceandfutureking',
+        type: 'book',
+        attributes: {
+          quote: 'Everything not forbidden is compulsory',
         },
       }),
     }, {
       seed: () => ({
-        _id: 1112,
-        _source: {
-          goob: 'pea',
+        id: 'ireland',
+        type: 'island',
+        attributes: {
+          color: 'emerald',
         },
       }),
     }];
     expect(seededDocs(migrations))
       .toEqual([{
-        _id: 'hey',
+        _id: 'book:onceandfutureking',
         _source: {
-          type: 'you',
-          attributes: {
-            guys: 'check it out',
+          type: 'book',
+          book: {
+            quote: 'Everything not forbidden is compulsory',
           },
         }
       }, {
-        _id: 1112,
+        _id: 'island:ireland',
         _source: {
-          goob: 'pea',
+          type: 'island',
+          island: {
+            color: 'emerald',
+          },
         },
       }]);
+  });
+
+  test('generates id if not provided', () => {
+    const migrations = [{
+      seed: () => ({
+        type: 'animal',
+        attributes: {
+          name: 'Sir Scrambles',
+        },
+      }),
+    }];
+    expect(seededDocs(migrations)[0]._id)
+      .not.toEqual(seededDocs(migrations)[0]._id);
+    expect(seededDocs(migrations)[0]._id)
+      .toMatch(/[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}$/);
   });
 
   test('runs seeds through subsequent transforms', () => {
@@ -169,58 +162,87 @@ describe('seededDocs', () => {
       transform: () => { throw new Error('NOPE'); },
     }, {
       seed: () => ({
-        _id: 'hey',
-        _source: {
-          type: 'you',
-          attributes: {
-            guys: 'check it out',
-          },
+        id: '1984',
+        type: 'novel',
+        attributes: {
+          text: 'Perhaps a lunatic was simply a minority of one.'
         },
       }),
     }, {
-      filter: () => true,
-      transform: (doc, { _source }) => ({
-        _source,
-        _id: 'yoyo',
-      }),
+      filter: ({ type }) => type === 'novel',
+      transform: (doc) => _.set(doc, 'attributes.rating', 5),
     }, {
       seed: () => ({
-        _id: 1112,
-        _source: {
-          goob: 'pea',
-        },
-      }),
-    }, {
-      filter: ({ type }) => type === 'you',
-      transform: (doc) => ({
-        ...doc,
+        id: 'twotowers',
+        type: 'novel',
         attributes: {
-          ...doc.attributes,
-          lastTransform: true,
+          text: 'Fair speech may hide a foul heart.'
         },
       }),
     }, {
-      filter: ({ goob }) => goob === 'pea',
-      transform: (doc, { _source }) => ({
-        _source,
-        _id: 'shazm',
-      }),
+      filter: ({ type }) => type === 'novel',
+      transform: (doc) => _.set(doc, 'attributes.author', 'N/A'),
     }];
-    expect(seededDocs(migrations))
+    expect(seededDocs(_.cloneDeep(migrations)))
       .toEqual([{
-        _id: 'yoyo',
+        _id: 'novel:1984',
         _source: {
-          type: 'you',
-          attributes: {
-            guys: 'check it out',
-            lastTransform: true,
+          type: 'novel',
+          novel: {
+            text: 'Perhaps a lunatic was simply a minority of one.',
+            rating: 5,
+            author: 'N/A',
           },
         },
       }, {
-        _id: 'shazm',
+        _id: 'novel:twotowers',
         _source: {
-          goob: 'pea',
+          type: 'novel',
+          novel: {
+            text: 'Fair speech may hide a foul heart.',
+            author: 'N/A',
+          },
         },
       }]);
+  });
+});
+
+describe('rawToClient', () => {
+  test('it transforms raw docs to the save object client format', () => {
+    const rawDoc = {
+      _id: 'foo:32342',
+      _source: {
+        type: 'foo',
+        updated_at: 'yesterday',
+        foo: { bar: 'baz' },
+      },
+    };
+    expect(rawToClient(rawDoc))
+      .toEqual({
+        id: '32342',
+        type: 'foo',
+        updated_at: 'yesterday',
+        attributes: { bar: 'baz' },
+      });
+  });
+});
+
+describe('clientToRaw', () => {
+  test('it transforms client object format to raw', () => {
+    const clientDoc = {
+      id: '32342',
+      type: 'foo',
+      updated_at: 'yesterday',
+      attributes: { bar: 'baz' },
+    };
+    expect(clientToRaw(clientDoc))
+      .toEqual({
+        _id: 'foo:32342',
+        _source: {
+          type: 'foo',
+          updated_at: 'yesterday',
+          foo: { bar: 'baz' },
+        },
+      });
   });
 });

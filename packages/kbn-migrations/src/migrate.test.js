@@ -1,3 +1,4 @@
+const { MIGRATION_DOC_TYPE, MIGRATION_DOC_ID } = require('./lib/documents');
 const _ = require('lodash');
 const { migrate } = require('./migrate');
 const { mockServer } = require('./test');
@@ -120,13 +121,14 @@ describe('migrate', () => {
     const plugins = [{
       id: 'hoi',
       mappings: {
-        jazz: { properties: { louis: { type: 'text' }, }, },
+        music: { properties: { jazz: { type: 'blob' }, }, },
       },
       migrations: [{
         id: 'jazzhands',
         seed: () => ({
-          _id: 'jazzmeup',
-          _source: {
+          id: 'jazzmeup',
+          type: 'music',
+          attributes: {
             jazz: { louis: 'Armstrong' },
           },
         }),
@@ -153,15 +155,16 @@ describe('migrate', () => {
       }, {
         id: 'add_jazzmeup',
         seed: () => ({
-          _id: 'jazzmeup',
-          _source: {
-            artists: { louis: 'Armstrong' },
+          id: 'jazzmeup',
+          type: 'artists',
+          attributes: {
+            louis: 'Armstrong',
           },
         }),
       }, {
         id: 'enter_coltrane',
-        filter: ({ artists }) => !!artists,
-        transform: (doc) => _.set(_.cloneDeep(doc), ['artists', 'john'], 'coltrane'),
+        filter: ({ type }) => type === 'artists',
+        transform: (doc) => _.set(_.cloneDeep(doc), ['attributes', 'john'], 'coltrane'),
       }],
     }];
     const { server, cluster } = mockServer({});
@@ -175,10 +178,10 @@ describe('migrate', () => {
     const plugins = [{
       id: 'hoi',
       mappings: {
-        shut_the_front_door: { properties: { name: { type: 'keyword' } } },
+        baz: { properties: { bar: { type: 'keyword' } } },
       },
     }];
-    const existingData = _.set({}, [index, 'fred', '_source', 'shut_the_front_door', 'name'], 'rogers');
+    const existingData = _.set({}, [index, 'baz:fred', '_source'], { type: 'baz', baz: { bar: 'bing' } });
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
     const { server, cluster } = mockServer(existingData, existingMeta);
     await migrate({ server, index, plugins, destIndex: 'gentleman-v2' });
@@ -195,8 +198,8 @@ describe('migrate', () => {
       },
       migrations: [{
         id: 'ensure_country',
-        filter: ({ user }) => !!user,
-        transform: (doc) => _.set(_.cloneDeep(doc), ['user', 'country'], 'N/A'),
+        filter: ({ type }) => type === 'user',
+        transform: (doc) => _.set(_.cloneDeep(doc), ['attributes', 'country'], 'N/A'),
       }],
     };
     const plugin2 = {
@@ -207,16 +210,17 @@ describe('migrate', () => {
       migrations: [{
         id: 'default_pref',
         seed: () => ({
-          _id: 'default_pref',
-          _source: { preference: { resultSize: 10, color: 'steelblue' } },
+          id: 'default_pref',
+          type: 'preference',
+          attributes: { resultSize: 10, color: 'steelblue' },
         }),
       }],
     };
     const existingData = {
       [index]: {
-        u1: { _source: { user: { name: 'jimmy fallon' } } },
-        u2: { _source: { user: { name: 'bono' } } },
-        p1: { _source: { preference: { resultSize: 1, color: 'blue' } } },
+        'user:u1': { _source: { type: 'user', user: { name: 'jimmy fallon' } } },
+        'user:u2': { _source: { type: 'user', user: { name: 'bono' } } },
+        'preference:p1': { _source: { type: 'preference', preference: { resultSize: 1, color: 'blue' } } },
       },
     };
     const existingMeta = assocMappings({}, index, {
@@ -251,14 +255,14 @@ describe('migrate', () => {
       migrations: [
         ...pluginV1.migrations, {
           id: 'convert_kind_to_species',
-          filter: ({ fish }) => !!fish,
-          transform: (doc) => ({ ...doc, fish: { species: doc.fish.kind } }),
+          filter: ({ type }) => type === 'fish',
+          transform: (doc) => _.set(doc, 'attributes', { species: doc.attributes.kind }),
         },
       ],
     };
     const existingData = assocMigrationState({}, index, originalMigrationState);
-    _.set(existingData, [index, 'f1', '_source', 'fish', 'kind'], 'catfish');
-    _.set(existingData, [index, 'f2', '_source', 'fish', 'kind'], 'carp');
+    _.set(existingData, [index, 'f1', '_source'], { type: 'fish', fish: { kind: 'catfish' } });
+    _.set(existingData, [index, 'f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
     const { server, cluster } = mockServer(existingData, existingMeta);
     await migrate({ server, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
@@ -288,8 +292,14 @@ describe('migrate', () => {
     }];
     const originalMigrationState = buildMigrationState(sanitizePlugins(pluginsV1));
     const existingData = assocMigrationState({}, existingIndex, originalMigrationState);
-    _.set(existingData, [existingIndex, 'q1', '_source', 'quote', 'text'], 'It\'s a dangerous business going out your front door.');
-    _.set(existingData, [existingIndex, 't1', '_source', 'tweet', 'chars'], 'The past is not what it was.');
+    _.set(existingData, [existingIndex, 'quote:q1', '_source'], {
+      type: 'quote',
+      quote: { text: 'It\'s a dangerous business going out your front door.' },
+    });
+    _.set(existingData, [existingIndex, 'quote:t1', '_source'], {
+      type: 'tweet',
+      tweet: { chars: 'The past is not what it was.' },
+    });
     const existingMeta = assocAlias({}, existingIndex, index);
     assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
     const { server, cluster } = mockServer(existingData, existingMeta);
@@ -300,9 +310,12 @@ describe('migrate', () => {
 });
 
 function assocMigrationState(data, index, migrationState) {
-  return _.set(data, [index, 'migration:migration-state'], {
+  return _.set(data, [index, MIGRATION_DOC_ID], {
     _version: 42,
-    _source: { migration: migrationState },
+    _source: {
+      type: MIGRATION_DOC_TYPE,
+      migration: migrationState,
+    },
   });
 }
 

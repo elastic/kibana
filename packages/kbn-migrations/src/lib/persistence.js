@@ -1,6 +1,6 @@
 // A set of helper functions for calling Elasticsearch
 
-const{ DOC_TYPE, MIGRATION_DOC_ID, buildTransformFunction, seededDocs } = require('./documents');
+const{ DOC_TYPE, MIGRATION_DOC_ID, MIGRATION_DOC_TYPE, buildTransformFunction, seededDocs } = require('./documents');
 const{ defaultMigrationState, migrationMapping } = require('./migration_state');
 
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
@@ -135,6 +135,7 @@ export async function saveMigrationState(callCluster, index, version, migrationS
     type: DOC_TYPE,
     body: {
       doc: {
+        type: MIGRATION_DOC_TYPE,
         migration: migrationState,
       },
       doc_as_upsert: true,

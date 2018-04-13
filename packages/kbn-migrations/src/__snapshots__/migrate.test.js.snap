@@ -18,6 +18,7 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -38,6 +39,14 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -67,6 +76,12 @@ Object {
             },
             "stuff": Object {
               "type": "integer",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
           },
         },
@@ -102,21 +117,24 @@ Object {
             ],
             "status": "migrating",
           },
+          "type": "migration",
         },
         "_version": 43,
       },
-      "q1": Object {
+      "quote:q1": Object {
         "_source": Object {
           "quote": Object {
             "text": "It's a dangerous business going out your front door.",
           },
+          "type": "quote",
         },
       },
-      "t1": Object {
+      "quote:t1": Object {
         "_source": Object {
           "tweet": Object {
             "chars": "The past is not what it was.",
           },
+          "type": "tweet",
         },
       },
     },
@@ -142,21 +160,26 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
-      "q1": Object {
+      "quote:q1": Object {
         "_source": Object {
           "quote": Object {
             "text": "It's a dangerous business going out your front door.",
           },
+          "type": "quote",
+          "updated_at": undefined,
         },
       },
-      "t1": Object {
+      "tweet:t1": Object {
         "_source": Object {
           "tweet": Object {
             "chars": "The past is not what it was.",
           },
+          "type": "tweet",
+          "updated_at": undefined,
         },
       },
     },
@@ -175,6 +198,14 @@ Object {
       "disabled-scenario-1": Object {
         "doc": Object {
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -216,6 +247,12 @@ Object {
                 },
               },
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -223,6 +260,14 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -267,6 +312,12 @@ Object {
                 },
               },
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -303,11 +354,12 @@ exports[`migrate existing docs are migrated 1`] = `
 Object {
   "data": Object {
     "gentleman-original": Object {
-      "fred": Object {
+      "baz:fred": Object {
         "_source": Object {
-          "shut_the_front_door": Object {
-            "name": "rogers",
+          "baz": Object {
+            "bar": "bing",
           },
+          "type": "baz",
         },
       },
       "migration:migration-state": Object {
@@ -316,16 +368,19 @@ Object {
             "plugins": Array [],
             "status": "migrating",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
     },
     "gentleman-v2": Object {
-      "fred": Object {
+      "baz:fred": Object {
         "_source": Object {
-          "shut_the_front_door": Object {
-            "name": "rogers",
+          "baz": Object {
+            "bar": "bing",
           },
+          "type": "baz",
+          "updated_at": undefined,
         },
       },
       "migration:migration-state": Object {
@@ -334,14 +389,15 @@ Object {
             "plugins": Array [
               Object {
                 "id": "hoi",
-                "mappings": "{\\"shut_the_front_door\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "01dbd2e953cd934bac0024786ad147a1350bc351",
+                "mappings": "{\\"baz\\":{\\"properties\\":{\\"bar\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "9d395eb475bfad4d2a8bc2524ab260bb13c932ed",
                 "migrationIds": Array [],
                 "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
               },
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -361,6 +417,21 @@ Object {
       "gentleman-original": Object {
         "doc": Object {
           "properties": Object {
+            "baz": Object {
+              "properties": Object {
+                "bar": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -388,12 +459,11 @@ Object {
                 },
               },
             },
-            "shut_the_front_door": Object {
-              "properties": Object {
-                "name": Object {
-                  "type": "keyword",
-                },
-              },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
           },
         },
@@ -402,6 +472,21 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "baz": Object {
+              "properties": Object {
+                "bar": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -429,12 +514,11 @@ Object {
                 },
               },
             },
-            "shut_the_front_door": Object {
-              "properties": Object {
-                "name": Object {
-                  "type": "keyword",
-                },
-              },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
           },
         },
@@ -469,26 +553,30 @@ Object {
             "plugins": Array [],
             "status": "migrating",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
-      "p1": Object {
+      "preference:p1": Object {
         "_source": Object {
           "preference": Object {
             "color": "blue",
             "resultSize": 1,
           },
+          "type": "preference",
         },
       },
-      "u1": Object {
+      "user:u1": Object {
         "_source": Object {
+          "type": "user",
           "user": Object {
             "name": "jimmy fallon",
           },
         },
       },
-      "u2": Object {
+      "user:u2": Object {
         "_source": Object {
+          "type": "user",
           "user": Object {
             "name": "bono",
           },
@@ -496,14 +584,6 @@ Object {
       },
     },
     "groovystuff-v2": Object {
-      "default_pref": Object {
-        "_source": Object {
-          "preference": Object {
-            "color": "steelblue",
-            "resultSize": 10,
-          },
-        },
-      },
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -529,27 +609,44 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
-      "p1": Object {
+      "preference:default_pref": Object {
+        "_source": Object {
+          "preference": Object {
+            "color": "steelblue",
+            "resultSize": 10,
+          },
+          "type": "preference",
+          "updated_at": undefined,
+        },
+      },
+      "preference:p1": Object {
         "_source": Object {
           "preference": Object {
             "color": "blue",
             "resultSize": 1,
           },
+          "type": "preference",
+          "updated_at": undefined,
         },
       },
-      "u1": Object {
+      "user:u1": Object {
         "_source": Object {
+          "type": "user",
+          "updated_at": undefined,
           "user": Object {
             "country": "N/A",
             "name": "jimmy fallon",
           },
         },
       },
-      "u2": Object {
+      "user:u2": Object {
         "_source": Object {
+          "type": "user",
+          "updated_at": undefined,
           "user": Object {
             "country": "N/A",
             "name": "bono",
@@ -572,6 +669,14 @@ Object {
       "groovystuff-original": Object {
         "doc": Object {
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -608,6 +713,12 @@ Object {
                   "type": "integer",
                 },
               },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
             "user": Object {
               "name": Object {
@@ -621,6 +732,14 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -657,6 +776,12 @@ Object {
                   "type": "integer",
                 },
               },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
             "user": Object {
               "properties": Object {
@@ -701,6 +826,7 @@ Object {
             "plugins": Array [],
             "status": "migrating",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -720,6 +846,7 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -739,6 +866,14 @@ Object {
       ".mufasa-original": Object {
         "doc": Object {
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -773,6 +908,12 @@ Object {
                 },
               },
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -780,6 +921,14 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -810,6 +959,12 @@ Object {
             "stuff": Object {
               "type": "integer",
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -837,18 +992,13 @@ exports[`migrate existing previously migrated index only runs new migrations 1`]
 Object {
   "data": Object {
     "aquatica-2": Object {
-      "f1": Object {
-        "_source": Object {
-          "fish": Object {
-            "species": "catfish",
-          },
-        },
-      },
-      "f2": Object {
+      "fish:": Object {
         "_source": Object {
           "fish": Object {
             "species": "carp",
           },
+          "type": "fish",
+          "updated_at": undefined,
         },
       },
       "migration:migration-state": Object {
@@ -868,6 +1018,7 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -878,6 +1029,7 @@ Object {
           "fish": Object {
             "kind": "catfish",
           },
+          "type": "fish",
         },
       },
       "f2": Object {
@@ -885,6 +1037,7 @@ Object {
           "fish": Object {
             "kind": "carp",
           },
+          "type": "fish",
         },
       },
       "migration:migration-state": Object {
@@ -903,6 +1056,7 @@ Object {
             ],
             "status": "migrating",
           },
+          "type": "migration",
         },
         "_version": 43,
       },
@@ -923,6 +1077,14 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "fish": Object {
               "properties": Object {
                 "species": Object {
@@ -957,12 +1119,26 @@ Object {
                 },
               },
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
       "aquatica-original": Object {
         "doc": Object {
           "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "fish": Object {
               "properties": Object {
                 "kind": Object {
@@ -997,6 +1173,12 @@ Object {
                 },
               },
             },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -1024,21 +1206,14 @@ exports[`migrate new index gets seeded 1`] = `
 Object {
   "data": Object {
     ".mufasa-v1": Object {
-      "jazzmeup": Object {
-        "_source": Object {
-          "jazz": Object {
-            "louis": "Armstrong",
-          },
-        },
-      },
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
                 "id": "hoi",
-                "mappings": "{\\"jazz\\":{\\"properties\\":{\\"louis\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "f1e1b0a50e740ff353b128ec5bc788e6c932abd3",
+                "mappings": "{\\"music\\":{\\"properties\\":{\\"jazz\\":{\\"type\\":\\"blob\\"}}}}",
+                "mappingsChecksum": "4dbf5c4db0d4d02d6b9c1c4506f13f81034db580",
                 "migrationIds": Array [
                   "jazzhands",
                 ],
@@ -1047,8 +1222,20 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
+      },
+      "music:jazzmeup": Object {
+        "_source": Object {
+          "music": Object {
+            "jazz": Object {
+              "louis": "Armstrong",
+            },
+          },
+          "type": "music",
+          "updated_at": undefined,
+        },
       },
     },
   },
@@ -1067,10 +1254,11 @@ Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
-            "jazz": Object {
+            "config": Object {
+              "dynamic": true,
               "properties": Object {
-                "louis": Object {
-                  "type": "text",
+                "buildNum": Object {
+                  "type": "keyword",
                 },
               },
             },
@@ -1101,6 +1289,19 @@ Object {
                 },
               },
             },
+            "music": Object {
+              "properties": Object {
+                "jazz": Object {
+                  "type": "blob",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
           },
         },
       },
@@ -1114,12 +1315,14 @@ exports[`migrate seeds are transformed 1`] = `
 Object {
   "data": Object {
     ".music-dest": Object {
-      "jazzmeup": Object {
+      "artists:jazzmeup": Object {
         "_source": Object {
           "artists": Object {
             "john": "coltrane",
             "louis": "Armstrong",
           },
+          "type": "artists",
+          "updated_at": undefined,
         },
       },
       "migration:migration-state": Object {
@@ -1140,6 +1343,7 @@ Object {
             ],
             "status": "migrated",
           },
+          "type": "migration",
         },
         "_version": 1,
       },
@@ -1170,6 +1374,14 @@ Object {
                 },
               },
             },
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -1196,6 +1408,12 @@ Object {
                   "type": "keyword",
                 },
               },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
             },
           },
         },

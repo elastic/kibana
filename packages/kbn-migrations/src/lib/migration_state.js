@@ -19,6 +19,20 @@ export const defaultMigrationState = {
 
 // The mapping that allows us to store migration state in an index
 export const migrationMapping = {
+  type: {
+    type: 'keyword'
+  },
+  updated_at: {
+    type: 'date'
+  },
+  config: {
+    dynamic: true,
+    properties: {
+      buildNum: {
+        type: 'keyword'
+      }
+    }
+  },
   migration: {
     properties: {
       status: { type: 'keyword' },
