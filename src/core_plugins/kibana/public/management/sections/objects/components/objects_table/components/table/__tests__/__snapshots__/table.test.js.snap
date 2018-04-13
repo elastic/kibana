@@ -91,6 +91,7 @@ exports[`Table should render normally 1`] = `
           },
         ]
       }
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           3,
