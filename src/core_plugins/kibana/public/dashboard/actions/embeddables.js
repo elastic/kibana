@@ -1,58 +1,41 @@
 import { createAction } from 'redux-actions';
+import _ from 'lodash';
 
-export const destroyEmbeddable = createAction('DESTROY_EMBEDDABLE',
-  /**
-   *
-   * @param panelId {string}
-   * @param embeddableFactory {EmbeddableFactory}
-   * @return {string} - the panel id
-   */
-  (panelId, embeddableFactory) => {
-    if (embeddableFactory) {
-      embeddableFactory.destroy(panelId);
-    }
-    return panelId;
-  }
-);
+import {
+  updatePanel
+} from './panels';
 
-export const embeddableRenderFinished = createAction('EMBEDDABLE_RENDER_FINISHED',
-  /**
-   * @param panelId {string}
-   * @param embeddable {Embeddable}
-   */
-  (panelId, embeddable) => ({ embeddable, panelId })
-);
+import {
+  getPanel,
+  getEmbeddableCustomization,
+} from '../../selectors/dashboard_selectors';
 
-export const embeddableRenderError = createAction('EMBEDDABLE_RENDER_ERROR',
-  /**
-   *
-   * @param panelId {string}
-   * @param error {string|object}
-   */
-  (panelId, error) => ({ panelId, error })
-);
+export const embeddableIsInitializing = createAction('EMBEDDABLE_IS_INITIALIZING');
+export const embeddableIsInitialized = createAction('EMBEDDABLE_INITIALIZED');
+export const setStagedFilter = createAction('SET_STAGED_FILTER');
+export const clearStagedFilters = createAction('CLEAR_STAGED_FILTERS');
+export const embeddableError = createAction('EMBEDDABLE_ERROR');
 
 /**
- *
- * @param embeddableFactory {EmbeddableFactory}
- * @param panelElement {Node}
- * @param panel {PanelState}
- * @param containerApi {ContainerAPI}
- * @return {function(*, *)}
+ * The main point of communication from the embeddable to the dashboard. Any time state in the embeddable
+ * changes, this function will be called. The data is then extracted from EmbeddableState and stored in
+ * redux so the appropriate actions are taken and UI updated.
+
+ * @param {string} panelId - the id of the panel whose state has changed.
+ * @param {EmbeddableState} embeddableState - the new state of the embeddable.
  */
-export function renderEmbeddable(embeddableFactory, panelElement, panel, containerApi) {
-  return (dispatch) => {
-    if (!embeddableFactory) {
-      dispatch(embeddableRenderError(panel.panelIndex, new Error(`Invalid embeddable type "${panel.type}"`)));
-      return;
+export function embeddableStateChanged({ panelId, embeddableState }) {
+  return (dispatch, getState) => {
+    // Translate embeddableState to things redux cares about.
+    const customization = getEmbeddableCustomization(getState(), panelId);
+    if (!_.isEqual(embeddableState.customization, customization)) {
+      const panel = getPanel(getState(), panelId);
+      dispatch(updatePanel({ ...panel, embeddableConfig: _.cloneDeep(embeddableState.customization) }));
     }
 
-    return embeddableFactory.render(panelElement, panel, containerApi)
-      .then(embeddable => {
-        return dispatch(embeddableRenderFinished(panel.panelIndex, embeddable));
-      })
-      .catch(error => {
-        dispatch(embeddableRenderError(panel.panelIndex, error.message));
-      });
+    if (embeddableState.stagedFilter) {
+      dispatch(setStagedFilter({ stagedFilter: embeddableState.stagedFilter, panelId }));
+    }
   };
 }
+
