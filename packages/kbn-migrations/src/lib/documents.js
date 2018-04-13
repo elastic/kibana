@@ -32,7 +32,12 @@ function buildTransformFunction(migrations) {
   const transformDoc = (doc, { filter, transform }) => {
     return filter(doc) ? transform(doc) : doc;
   };
-  return (rawDoc) => clientToRaw(transforms.reduce(transformDoc, rawToClient(rawDoc)));
+  return (rawDoc) => {
+    if (canConvertToClient(rawDoc)) {
+      return clientToRaw(transforms.reduce(transformDoc, rawToClient(rawDoc)));
+    }
+    return rawDoc;
+  };
 }
 
 function rawToClient(doc) {
@@ -57,4 +62,13 @@ function clientToRaw({ id, type, updated_at, attributes }) {
       [type]: attributes,
     },
   };
+}
+
+function canConvertToClient(rawDoc) {
+  const { _id, _source } = rawDoc;
+  if (!_id || !_source || !_source.type) {
+    return false;
+  }
+  const { type } = _source;
+  return _id.startsWith(type) && !!_source[type];
 }

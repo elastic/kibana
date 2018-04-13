@@ -100,6 +100,22 @@ describe('buildTransformFunction', () => {
         },
       });
   });
+
+  test('passes non-object-client docs straight through', () => {
+    const doc = {
+      _id: 'dadams',
+      _source: {
+        says: 'You live and learn. At any rate, you live.'
+      },
+    };
+    const migrations = [{
+      filter: () => true,
+      transform: () => { throw new Error(`Shouldn't get called, since there are no object-client docs being migrated`); },
+    }];
+    const fn = buildTransformFunction(migrations);
+    expect(fn(_.cloneDeep(doc)))
+      .toEqual(doc);
+  });
 });
 
 describe('seededDocs', () => {
