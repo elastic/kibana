@@ -1,15 +1,16 @@
+import 'angular';
+import 'angular-recursion';
 import 'ui/paginated_table';
-import 'ui/compile_recursive_directive';
 import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 uiModules
-  .get('kibana')
-  .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
+  .get('kibana', ['RecursionHelper'])
+  .directive('kbnAggTable', function ($filter, config, Private, RecursionHelper) {
+
     const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
     return {
@@ -27,7 +28,7 @@ uiModules
       compile: function ($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
-        return compileRecursiveDirective.compile($el);
+        return RecursionHelper.compile($el);
       },
       controller: function ($scope) {
         const self = this;

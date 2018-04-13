@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { AggParams } from 'ui/agg_types/agg_params';
+import { fieldFormats } from 'ui/registry/field_formats';
 
-export function AggTypesAggTypeProvider(Private) {
-  const AggParams = Private(AggTypesAggParamsProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
+export function AggTypesAggTypeProvider() {
+
+
 
   /**
    * Generic AggType Constructor

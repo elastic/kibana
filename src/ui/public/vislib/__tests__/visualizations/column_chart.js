@@ -12,6 +12,7 @@ import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import { seriesMonthlyInterval } from 'fixtures/vislib/mock_data/date_histogram/_series_monthly_interval';
 import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_rows_series_with_holes';
+import rowsWithZeros from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
@@ -188,6 +189,54 @@ dataTypesArray.forEach(function (dataType) {
         });
       });
     });
+  });
+});
+
+describe('stackData method - data set with zeros in percentage mode', function () {
+  let vis;
+  let persistedState;
+  const visLibParams = {
+    type: 'histogram',
+    addLegend: true,
+    addTooltip: true,
+    mode: 'percentage',
+    zeroFill: true
+  };
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    persistedState = new ($injector.get('PersistedState'))();
+    vis.on('brush', _.noop);
+  }));
+
+  afterEach(function () {
+    vis.destroy();
+  });
+
+  it('should not mutate the injected zeros', function () {
+    vis.render(seriesMonthlyInterval, persistedState);
+
+    expect(vis.handler.charts).to.have.length(1);
+    const chart = vis.handler.charts[0];
+    expect(chart.chartData.series).to.have.length(1);
+    const series = chart.chartData.series[0].values;
+    // with the interval set in seriesMonthlyInterval data, the point at x=1454309600000 does not exist
+    const point = _.find(series, 'x', 1454309600000);
+    expect(point).to.not.be(undefined);
+    expect(point.y).to.be(0);
+  });
+
+  it('should not mutate zeros that exist in the data', function () {
+    vis.render(rowsWithZeros, persistedState);
+
+    expect(vis.handler.charts).to.have.length(2);
+    const chart = vis.handler.charts[0];
+    expect(chart.chartData.series).to.have.length(5);
+    const series = chart.chartData.series[0].values;
+    const point = _.find(series, 'x', 1415826240000);
+    expect(point).to.not.be(undefined);
+    expect(point.y).to.be(0);
   });
 });
 

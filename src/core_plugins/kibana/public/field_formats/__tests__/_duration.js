@@ -1,16 +1,9 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 describe('Duration Format', function () {
-  let fieldFormats;
-  let DurationFormat;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    fieldFormats = Private(RegistryFieldFormatsProvider);
-    DurationFormat = fieldFormats.getType('duration');
-  }));
+  const DurationFormat = fieldFormats.getType('duration');
 
   test({ inputFormat: 'seconds', outputFormat: 'humanize' })
   (-60, 'minus a minute')
