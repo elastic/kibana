@@ -23,7 +23,6 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
-import { createSearchItems, createResultsUrl, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
 import { createFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
@@ -32,6 +31,11 @@ import { ChartDataUtilsProvider } from 'plugins/ml/jobs/new_job/simple/component
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
+import {
+  createSearchItems,
+  createResultsUrl,
+  addNewJobToRecentlyAccessed,
+  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import template from './create_job.html';
 
 uiRoutes
@@ -68,6 +72,7 @@ module
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
     const MlTimeBuckets = Private(IntervalHelperProvider);
+    const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
@@ -653,6 +658,11 @@ module
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
       mlPopulationJobService.stopDatafeed($scope.formConfig);
+    };
+
+    $scope.moveToAdvancedJobCreation = function () {
+      const job = mlPopulationJobService.getJobFromConfig($scope.formConfig);
+      moveToAdvancedJobCreation(job);
     };
 
     // resize the spilt cards on page resize.

@@ -96,6 +96,10 @@
                 <div ng-show="ui.showJobInput && (jobState === JOB_STATE.NOT_STARTED || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING)">
                   <ml-general-job-details></ml-general-job-details>
 
+                  <div class="form-group">
+                    <a href="" ng-click="moveToAdvancedJobCreation()">Move to advanced job configuration</a>
+                  </div>
+
                   <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
                     <div class="euiFlexItem euiFlexItem--flexGrowZero">
                       <ml-validate-job

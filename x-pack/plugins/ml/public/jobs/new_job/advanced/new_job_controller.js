@@ -221,10 +221,14 @@ module.controller('MlNewJob',
           console.log('Editing job', mlJobService.currentJob);
           $scope.ui.pageTitle = 'Editing Job ' + $scope.job.job_id;
         } else {
-          $scope.mode = MODE.CLONE;
-          console.log('Cloning job', mlJobService.currentJob);
-          $scope.ui.pageTitle = 'Clone Job from ' + $scope.job.job_id;
-          $scope.job.job_id = '';
+          if (mlJobService.currentJob.job_version === undefined) {
+            $scope.mode = MODE.NEW;
+          } else {
+            $scope.mode = MODE.CLONE;
+            console.log('Cloning job', mlJobService.currentJob);
+            $scope.ui.pageTitle = 'Clone Job from ' + $scope.job.job_id;
+            $scope.job.job_id = '';
+          }
           setDatafeedUIText();
           setFieldDelimiterControlsFromText();
 
@@ -696,6 +700,7 @@ module.controller('MlNewJob',
 
         const indicesText = datafeedConfig.indices.join(',');
         $scope.ui.fieldsUpToDate = (indicesText === $scope.ui.datafeed.indicesText);
+        const types = Array.isArray(datafeedConfig.types) ? datafeedConfig.types : [];
 
         $scope.ui.datafeed = {
           queryText: angular.toJson(datafeedConfig.query, true),
@@ -706,7 +711,7 @@ module.controller('MlNewJob',
           scrollSizeText: scrollSize,
           scrollSizeDefault: scrollSizeDefault,
           indicesText,
-          typesText: datafeedConfig.types.join(','),
+          typesText: types.join(','),
         };
 
         if ($scope.ui.fieldsUpToDate === false) {
