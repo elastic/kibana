@@ -6,8 +6,6 @@ import {
   KibanaSystem,
 } from './system_types';
 
-const noop = () => {};
-
 function isPromise(obj: any) {
   return (
     obj != null && typeof obj === 'object' && typeof obj.then === 'function'
@@ -19,7 +17,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   readonly dependencies: SystemName[];
   readonly metadata?: M;
 
-  private readonly _implementation: KibanaSystemClassStatic<C, D, E>;
+  private readonly _systemClass: KibanaSystemClassStatic<C, D, E>;
   private _systemInstance?: KibanaSystem<C, D, E>;
   private _exposedValues?: E;
 
@@ -34,7 +32,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
     this.name = name;
     this.dependencies = config.dependencies || [];
     this.metadata = config.metadata;
-    this._implementation = config.implementation;
+    this._systemClass = config.implementation;
   }
 
   getExposedValues(): E {
@@ -48,7 +46,7 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   }
 
   start(kibanaValues: C, dependenciesValues: D) {
-    this._systemInstance = new this._implementation(
+    this._systemInstance = new this._systemClass(
       kibanaValues,
       dependenciesValues
     );
@@ -67,9 +65,10 @@ export class System<C, M extends SystemMetadata, D extends SystemsType, E> {
   }
 
   stop() {
-    this._exposedValues = undefined;
-
     const stoppedResponse = this._systemInstance && this._systemInstance.stop();
+
+    this._exposedValues = undefined;
+    this._systemInstance = undefined;
 
     if (isPromise(stoppedResponse)) {
       throw new Error(
