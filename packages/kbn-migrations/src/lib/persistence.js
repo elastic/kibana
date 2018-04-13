@@ -84,13 +84,20 @@ async function cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings)
     },
   });
 }
+
 // Moves sourceIndex to destIndex, and create an alias named sourceIndex that points to destIndex.
 async function convertIndexToAlias(callCluster, sourceIndex, destIndex) {
   const mappings = await callCluster('indices.getMapping', { index: sourceIndex });
   await cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings[sourceIndex].mappings);
   await reindex(callCluster, sourceIndex, destIndex);
-  await callCluster('indices.delete', { index: sourceIndex });
-  await callCluster('indices.putAlias', { index: destIndex, name: sourceIndex });
+  await callCluster('indices.updateAliases', {
+    body: {
+      actions: [
+        { remove_index: { index: sourceIndex }, },
+        { add: { index: destIndex, alias: sourceIndex }, }
+      ],
+    },
+  });
 }
 
 function indexExists(callCluster, index) {

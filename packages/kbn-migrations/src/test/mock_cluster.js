@@ -195,6 +195,9 @@ function mockElasticSearchCommands(data, meta) {
       if (action.remove) {
         removeAlias(action.remove);
       }
+      if (action.remove_index) {
+        deleteIndex(action.remove_index);
+      }
     });
     return true;
   }
