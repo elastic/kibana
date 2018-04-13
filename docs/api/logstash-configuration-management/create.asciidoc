@@ -11,9 +11,6 @@ The Create Pipeline API enables you to create a centrally-managed Logstash Pipel
 
 ==== Path Parameters
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `config`, and `timelion-sheet`
-
 `id` (required)::
   (string) ID for pipeline. Only alphanumeric characters, hyphens, and underscores may be used.
 
