@@ -1,0 +1,44 @@
+[[logstash-configuration-management-api-list]]
+=== List Pipelines
+
+experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+
+The List Pipelines API enables you to list all centrally-managed Logstash pipelines.
+
+==== Request
+
+`GET /api/logstash/pipelines`
+
+==== Examples
+
+[source,js]
+--------------------------------------------------
+GET api/logstash/pipelines
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "pipelines": [
+    {
+      "id": "hello-world",
+      "username": "elastic"
+      "pipeline": "input { stdin {} } output { stdout {} }",
+        "settings": {
+          "queue.type": "persistent"
+        }
+    },
+    {
+      "id": "sleepy-pipeline",
+      "username": "elastic"
+      "pipeline": "input { generator {} } filter { sleep { time => 5 } } output { stdout {} }",
+        "settings": {
+          "queue.type": "memory"
+        }
+    }
+  ]
+}
+--------------------------------------------------
