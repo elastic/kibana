@@ -121,7 +121,9 @@ describe('buildRequestBody(req)', () => {
           meta: {
             timeField: '@timestamp',
             bucketSize: 10,
-            intervalString: '10s'
+            intervalString: '10s',
+            to: '2017-01-26T20:52:35.881Z',
+            from: '2017-01-26T20:37:35.881Z'
           },
           aggs: {
             timeseries: {
