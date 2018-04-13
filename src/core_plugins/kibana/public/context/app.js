@@ -46,12 +46,13 @@ module.directive('contextApp', function ContextApp() {
   };
 });
 
-function ContextAppController($scope, config, Private, timefilter) {
+function ContextAppController($scope, config, Private, timefilter, intervalfilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
+  intervalfilter.disableIntervalFilter();
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),

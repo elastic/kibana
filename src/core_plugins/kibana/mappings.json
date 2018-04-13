@@ -136,6 +136,22 @@
       },
       "version": {
         "type": "integer"
+      },
+      "dateInterval": {
+        "properties": {
+          "value": {
+            "type": "keyword"
+          },
+          "display": {
+            "type": "keyword"
+          },
+          "section": {
+            "type": "integer"
+          }
+        }
+      },
+      "dateIntervalRestore": {
+        "type": "boolean"
       }
     }
   },

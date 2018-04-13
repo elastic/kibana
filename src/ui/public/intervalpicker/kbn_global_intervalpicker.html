@@ -1,0 +1,11 @@
+<div
+  ng-show="intervalfilter.enabled"
+  data-shared-intervalfilter="{{intervalfilter.enabled}}"
+  class="kuiLocalMenu">
+  <button
+    class="kuiLocalMenuItem navbar-internalpicker"
+    ng-click="kbnTopNav.toggle('date-interval')">
+    <span aria-hidden="true" class="kuiIcon fa-clock-o"></span>
+    <div> {{ intervalfilter.dateInterval.display }}  </div>
+  </button>
+</div>

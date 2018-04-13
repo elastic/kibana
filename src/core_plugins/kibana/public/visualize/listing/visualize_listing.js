@@ -14,10 +14,12 @@ export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const timefilter = $injector.get('timefilter');
+  const intervalfilter = $injector.get('intervalfilter');
   const config = $injector.get('config');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
+  intervalfilter.disableIntervalFilter();
 
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;

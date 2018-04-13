@@ -402,5 +402,16 @@ export function getUiSettingDefaults() {
         'that have the same timestamp value. From this list the first field that ' +
         'is present and sortable in the current index pattern is used.',
     },
+    'datefilter:dateIntervalDefaults': {
+      type: 'json',
+      value:
+      `{
+        "display": "Auto",
+        "value": "auto",
+        "section": 0
+      }`,
+      description: 'The datefilter\'s default interval'
+    }
+
   };
 }

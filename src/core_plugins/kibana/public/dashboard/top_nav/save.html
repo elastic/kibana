@@ -72,6 +72,25 @@
     </div>
   </div>
 
+  <div class="kuiVerticalRhythm">
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
+      <input
+        class="kuiCheckBox"
+        type="checkbox"
+        ng-model="model.dateIntervalRestore"
+        ng-checked="model.dateIntervalRestore"
+      >
+      <span class="kuiCheckBoxLabel__text">
+        Store date interval with {{opts.displayName}}
+      </span>
+    </label>
+
+
+    <div class="kuiLocalDropdownFormNote kuiVerticalRhythmSmall">
+      This changes the date interval of all the date histogram visualizations to the currently selected time interval each time this dashboard is loaded.
+    </div>
+  </div>
+
   <button
     data-test-subj="confirmSaveDashboardButton"
     type="submit"

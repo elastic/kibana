@@ -358,6 +358,22 @@ export class DashboardStateManager {
     return this.savedDashboard.timeRestore;
   }
 
+  getDateIntervalRestore() {
+    return this.appState.dateIntervalRestore;
+  }
+
+  setDateIntervalRestore(dateIntervalRestore) {
+    this.appState.dateIntervalRestore = dateIntervalRestore;
+    this.saveState();
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  getIsDateIntervalSavedWithDashboard() {
+    return this.savedDashboard.dateIntervalRestore;
+  }
+
   getDashboardFilterBars() {
     return FilterUtils.getFilterBarsForDashboard(this.savedDashboard);
   }
@@ -442,11 +458,11 @@ export class DashboardStateManager {
    *
    * @returns {boolean} True if the dashboard has changed since the last save (or, is new).
    */
-  getIsDirty(timeFilter) {
+  getIsDirty(timeFilter, intervalFilter) {
     return this.isDirty ||
       // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
       // changes are not tracked by the state monitor.
-      this.getFiltersChanged(timeFilter);
+      this.getFiltersChanged(timeFilter) || this.getDateIntervalChanged(intervalFilter);
   }
 
   getPanels() {
@@ -511,6 +527,16 @@ export class DashboardStateManager {
     return this.getChangedFilterTypes(timeFilter).length > 0;
   }
 
+  getDateIntervalChanged(intervalFilter) {
+    if (this.savedDashboard.dateIntervalRestore &&
+        (this.savedDashboard.dateInterval &&
+        !_.isEqual(this.savedDashboard.dateInterval, intervalFilter.dateInterval))
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Updates timeFilter to match the time saved with the dashboard.
    * @param timeFilter
@@ -537,6 +563,15 @@ export class DashboardStateManager {
       timeFilter.refreshInterval = this.savedDashboard.refreshInterval;
     }
   }
+
+  syncDateIntervalWithDashboard(intervalFilter) {
+    if(!this.getIsDateIntervalSavedWithDashboard()) {
+      throw new Error('The date interval is not saved with this dashboard so should not be synced.');
+    }
+
+    intervalFilter.dateInterval = this.savedDashboard.dateInterval;
+  }
+
 
   /**
    * Saves the current application state to the URL.

@@ -78,13 +78,16 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
+function VisEditor($scope, $route, timefilter, intervalfilter, AppState, $window, kbnUrl, courier, Private,
+  Promise, config, kbnBaseUrl, localStorage) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   const notify = new Notifier({
     location: 'Visualization Editor'
   });
+
+  intervalfilter.disableIntervalFilter();
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;

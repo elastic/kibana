@@ -31,9 +31,10 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, intervalfilter, Private, config) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
+  intervalfilter.disableIntervalFilter();
 
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
