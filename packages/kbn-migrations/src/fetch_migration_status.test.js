@@ -1,6 +1,6 @@
 const { fetchMigrationStatus } = require('./fetch_migration_status');
 const { buildMigrationState, MigrationStatus } = require('./lib');
-const { mockServer } = require('./test');
+const { mockKbnServer } = require('./test');
 
 describe('fetchMigrationStatus', () => {
   test('is migrated, if the stored migration state matches the plugin state', async () => {
@@ -13,7 +13,7 @@ describe('fetchMigrationStatus', () => {
     }];
     const index = '.amazemazing';
     const migrationState = buildMigrationState(plugins);
-    const { server } = mockServer({
+    const { kbnServer } = mockKbnServer({
       [index]: {
         'migration:migration-state': {
           _source: {
@@ -22,7 +22,7 @@ describe('fetchMigrationStatus', () => {
         },
       }
     });
-    const actual = await fetchMigrationStatus({ server, index, plugins });
+    const actual = await fetchMigrationStatus({ kbnServer, index, plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -34,15 +34,15 @@ describe('fetchMigrationStatus', () => {
         shwank: { type: 'text' },
       },
     }];
-    const { server } = mockServer({});
-    const actual = await fetchMigrationStatus({ server, index: '.amazemazing', plugins });
+    const { kbnServer } = mockKbnServer({});
+    const actual = await fetchMigrationStatus({ kbnServer, index: '.amazemazing', plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('is migrated, if there is no stored state and no plugins with migrations', async () => {
     const plugins = [];
-    const { server } = mockServer({});
-    const actual = await fetchMigrationStatus({ server, index: '.amazemazing', plugins });
+    const { kbnServer } = mockKbnServer({});
+    const actual = await fetchMigrationStatus({ kbnServer, index: '.amazemazing', plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -56,7 +56,7 @@ describe('fetchMigrationStatus', () => {
     }];
     const index = '.kibana';
     const migrationState = buildMigrationState(plugins);
-    const { server } = mockServer({
+    const { kbnServer } = mockKbnServer({
       [index]: {
         'migration:migration-state': {
           _source: {
@@ -66,7 +66,7 @@ describe('fetchMigrationStatus', () => {
       },
     });
     plugins[0].mappings.shwank.type = 'integer';
-    const actual = await fetchMigrationStatus({ server, index, plugins });
+    const actual = await fetchMigrationStatus({ kbnServer, index, plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 });

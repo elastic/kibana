@@ -1,15 +1,15 @@
 const { MIGRATION_DOC_TYPE, MIGRATION_DOC_ID } = require('./lib/documents');
 const _ = require('lodash');
 const { migrate } = require('./migrate');
-const { mockServer } = require('./test');
+const { mockKbnServer } = require('./test');
 const { buildMigrationState, sanitizePlugins } = require('./lib');
 
 describe('migrate', () => {
   test('does nothing if there are no migrations defined', async () => {
     const plugins = [];
     const index = '.amazemazing';
-    const { server, cluster } = mockServer({});
-    await migrate({ server, index, plugins });
+    const { kbnServer, cluster } = mockKbnServer({});
+    await migrate({ kbnServer, index, plugins });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -22,8 +22,8 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const { server, cluster } = mockServer({});
-    await migrate({ server, index, plugins, destIndex: '.mufasa-original' });
+    const { kbnServer, cluster } = mockKbnServer({});
+    await migrate({ kbnServer, index, plugins, destIndex: '.mufasa-original' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -36,10 +36,10 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const { server, cluster } = mockServer({ [index]: { } });
-    const minIndexName = `${index}-${new Date().getUTCFullYear()}`;
-    const maxIndexName = `${index}-${new Date().getUTCFullYear() + 1}`;
-    const { destIndex } = await migrate({ server, index, plugins });
+    const { kbnServer, cluster } = mockKbnServer({ [index]: { } }, {}, '7.7.7');
+    const minIndexName = `${index}-7.7.7-${new Date().getUTCFullYear()}`;
+    const maxIndexName = `${index}-7.7.7-${new Date().getUTCFullYear() + 1}`;
+    const { destIndex } = await migrate({ kbnServer, index, plugins });
 
     expect(cluster.state().data[destIndex]).toBeTruthy();
     expect(cluster.state().meta.aliases[index][destIndex]).toBeTruthy();
@@ -65,8 +65,8 @@ describe('migrate', () => {
         },
       },
     });
-    const { server, cluster } = mockServer(existingData, existingMeta);
-    await migrate({ server, index, plugins, destIndex: 'mufasa-v1' });
+    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
+    await migrate({ kbnServer, index, plugins, destIndex: 'mufasa-v1' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -77,11 +77,11 @@ describe('migrate', () => {
       migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
     }];
     const index = '.mufasa';
-    const { server } = mockServer({});
+    const { kbnServer } = mockKbnServer({});
     const results = await Promise.all([
-      migrate({ server, index, plugins })
+      migrate({ kbnServer, index, plugins })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ server, index, plugins })
+      migrate({ kbnServer, index, plugins })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
     expect(results[0].status).toEqual('migrated');
@@ -102,11 +102,11 @@ describe('migrate', () => {
     };
     const existingData = assocMigrationState({}, index, originalMigrationState);
     const existingMeta = assocAlias({}, index, alias);
-    const { server } = mockServer(existingData, existingMeta);
+    const { kbnServer } = mockKbnServer(existingData, existingMeta);
     const results = await Promise.all([
-      migrate({ server, index: alias, plugins: [pluginV2] })
+      migrate({ kbnServer, index: alias, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ server, index: alias, plugins: [pluginV2] })
+      migrate({ kbnServer, index: alias, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
 
@@ -135,8 +135,8 @@ describe('migrate', () => {
       }],
     }];
     const index = '.mufasa';
-    const { server, cluster } = mockServer({});
-    await migrate({ server, index, plugins, initialIndex: '.mufasa-v1' });
+    const { kbnServer, cluster } = mockKbnServer({});
+    await migrate({ kbnServer, index, plugins, initialIndex: '.mufasa-v1' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -167,8 +167,8 @@ describe('migrate', () => {
         transform: (doc) => _.set(_.cloneDeep(doc), ['attributes', 'john'], 'coltrane'),
       }],
     }];
-    const { server, cluster } = mockServer({});
-    await migrate({ server, index, plugins, initialIndex: '.music-dest' });
+    const { kbnServer, cluster } = mockKbnServer({});
+    await migrate({ kbnServer, index, plugins, initialIndex: '.music-dest' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -183,8 +183,8 @@ describe('migrate', () => {
     }];
     const existingData = _.set({}, [index, 'baz:fred', '_source'], { type: 'baz', baz: { bar: 'bing' } });
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
-    const { server, cluster } = mockServer(existingData, existingMeta);
-    await migrate({ server, index, plugins, destIndex: 'gentleman-v2' });
+    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
+    await migrate({ kbnServer, index, plugins, destIndex: 'gentleman-v2' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -227,8 +227,8 @@ describe('migrate', () => {
       ...plugin2.mappings,
       user: { name: { type: 'keyword' } },
     });
-    const { server, cluster } = mockServer(existingData, existingMeta);
-    await migrate({ server, index, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
+    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
+    await migrate({ kbnServer, index, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -264,8 +264,8 @@ describe('migrate', () => {
     _.set(existingData, [index, 'fish:f1', '_source'], { type: 'fish', fish: { kind: 'catfish' } });
     _.set(existingData, [index, 'fish:f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
-    const { server, cluster } = mockServer(existingData, existingMeta);
-    await migrate({ server, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
+    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
+    await migrate({ kbnServer, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
     expect(cluster.state())
       .toMatchSnapshot();
   });
@@ -294,8 +294,8 @@ describe('migrate', () => {
     };
     const existingData = assocMigrationState({}, index, migrationState);
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
-    const { server } = mockServer(existingData, existingMeta);
-    expect(migrate({ server, index, plugins: [pluginV1] }))
+    const { kbnServer } = mockKbnServer(existingData, existingMeta);
+    expect(migrate({ kbnServer, index, plugins: [pluginV1] }))
       .rejects.toThrow(/migration order has changed/);
   });
 
@@ -331,8 +331,8 @@ describe('migrate', () => {
     });
     const existingMeta = assocAlias({}, existingIndex, index);
     assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
-    const { server, cluster } = mockServer(existingData, existingMeta);
-    await migrate({ server, index, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
+    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
+    await migrate({ kbnServer, index, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
     expect(cluster.state())
       .toMatchSnapshot();
   });

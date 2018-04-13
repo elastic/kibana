@@ -11,7 +11,7 @@ module.exports = {
 };
 
 async function fetchMigrationContext(opts) {
-  const { server, index, initialIndex, destIndex, plugins } = validateOpts(opts);
+  const { server, index, initialIndex, destIndex, plugins, version } = validateOpts(opts);
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const { migrationState, migrationStateVersion } = await fetchMigrationState(callCluster, index);
   const sanitizedPlugins = validatePlugins(plugins, migrationState);
@@ -23,8 +23,8 @@ async function fetchMigrationContext(opts) {
     migrationStateVersion,
     migrationPlan,
     plugins: sanitizedPlugins,
-    destIndex: destIndex || `${index}-${moment().format('YYYYMMDDHHmmss')}`,
-    initialIndex: initialIndex || `${index}-original`,
+    destIndex: destIndex || `${index}-${version}-${moment().format('YYYYMMDDHHmmss')}`,
+    initialIndex: initialIndex || `${index}-${version}-original`,
     log: migrationLogger(server),
   };
 }
@@ -42,12 +42,16 @@ function validateOpts(opts) {
   }
 
   validateProp('index', 'string');
-  validateProp('server', 'object');
+  validateProp('kbnServer', 'object');
   validateProp('plugins', 'array', (v) => Array.isArray(v));
   validateProp('destIndex', 'string', (v) => v === undefined || typeof v === 'string');
   validateProp('initialIndex', 'string', (v) => v === undefined || typeof v === 'string');
 
-  return opts;
+  return {
+    ...opts,
+    server: opts.kbnServer.server,
+    version: opts.kbnServer.version,
+  };
 }
 
 function migrationLogger(server) {

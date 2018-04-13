@@ -3,7 +3,7 @@
 exports[`migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
-    ".mufasa-original": Object {
+    ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -27,7 +27,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        ".mufasa-original": Object {
+        ".mufasa-9.8.7-original": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -35,7 +35,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".mufasa-original": Object {
+      ".mufasa-9.8.7-original": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -353,7 +353,7 @@ Object {
 exports[`migrate existing docs are migrated 1`] = `
 Object {
   "data": Object {
-    "gentleman-original": Object {
+    "gentleman-9.8.7-original": Object {
       "baz:fred": Object {
         "_source": Object {
           "baz": Object {
@@ -414,7 +414,7 @@ Object {
       },
     },
     "mappings": Object {
-      "gentleman-original": Object {
+      "gentleman-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "baz": Object {
@@ -525,7 +525,7 @@ Object {
       },
     },
     "settings": Object {
-      "gentleman-original": Object {
+      "gentleman-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",
@@ -546,7 +546,7 @@ Object {
 exports[`migrate existing docs are transformed 1`] = `
 Object {
   "data": Object {
-    "groovystuff-original": Object {
+    "groovystuff-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -666,7 +666,7 @@ Object {
       },
     },
     "mappings": Object {
-      "groovystuff-original": Object {
+      "groovystuff-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -798,7 +798,7 @@ Object {
       },
     },
     "settings": Object {
-      "groovystuff-original": Object {
+      "groovystuff-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",
@@ -819,7 +819,7 @@ Object {
 exports[`migrate existing indices are converted to aliases and migrated 1`] = `
 Object {
   "data": Object {
-    ".mufasa-original": Object {
+    ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -863,7 +863,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".mufasa-original": Object {
+      ".mufasa-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -970,7 +970,7 @@ Object {
       },
     },
     "settings": Object {
-      ".mufasa-original": Object {
+      ".mufasa-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",
@@ -1032,7 +1032,7 @@ Object {
         "_version": 1,
       },
     },
-    "aquatica-original": Object {
+    "aquatica-9.8.7-original": Object {
       "fish:f1": Object {
         "_source": Object {
           "fish": Object {
@@ -1137,7 +1137,7 @@ Object {
           },
         },
       },
-      "aquatica-original": Object {
+      "aquatica-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1199,7 +1199,7 @@ Object {
           "number_of_shards": "7",
         },
       },
-      "aquatica-original": Object {
+      "aquatica-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",

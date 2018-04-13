@@ -1,5 +1,5 @@
 const { fetchMigrationContext } = require('./migration_context');
-const { mockServer } = require('../test');
+const { mockKbnServer } = require('../test');
 
 describe('migrationContext', () => {
   test('ensures that migrations are not undefined', async () => {
@@ -13,9 +13,9 @@ describe('migrationContext', () => {
   });
 
   test('creates destIndex name', async () => {
-    const actual = await testMigrationContext({ index: 'dang' });
+    const actual = await testMigrationContext({ index: 'dang' }, '2.0.4');
     const year = new Date().getFullYear().toString();
-    const regexp = new RegExp(`^dang-${year}`);
+    const regexp = new RegExp(`^dang-2.0.4-${year}`);
     expect(actual.destIndex)
       .toEqual(expect.stringMatching(regexp));
   });
@@ -23,7 +23,7 @@ describe('migrationContext', () => {
   test('creates a logger that logs info', async () => {
     const logs = [];
     const opts = buildOpts({});
-    opts.server.log = (...args) => logs.push(args);
+    opts.kbnServer.server.log = (...args) => logs.push(args);
     const actual = await fetchMigrationContext(opts);
     actual.log.info('Wat up?');
     actual.log.info('Logging, sucka!');
@@ -37,7 +37,7 @@ describe('migrationContext', () => {
   test('creates a logger that logs debug', async () => {
     const logs = [];
     const opts = buildOpts({});
-    opts.server.log = (...args) => logs.push(args);
+    opts.kbnServer.server.log = (...args) => logs.push(args);
     const actual = await fetchMigrationContext(opts);
     actual.log.debug('I need coffee');
     actual.log.debug('Lots o coffee');
@@ -104,8 +104,8 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('server is required', () => {
-    expect(testMigrationContext({ server: undefined }))
+  test('kbnServer is required', () => {
+    expect(testMigrationContext({ kbnServer: undefined }))
       .rejects.toThrow(/Got undefined/);
   });
 
@@ -114,8 +114,8 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('server must be an object', () => {
-    expect(testMigrationContext({ server: 'hello' }))
+  test('kbnServer must be an object', () => {
+    expect(testMigrationContext({ kbnServer: 'hello' }))
       .rejects.toThrow(/Got string/);
   });
 
@@ -139,23 +139,24 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got string/);
   });
 
-  function buildOpts(opts) {
+  function buildOpts(opts, version) {
     const index = 'test-index';
-    const { server } = mockServer({
+    const data = {
       [index]: {
         'migration:migration-state': opts.migrationState,
       },
-    });
+    };
+    const { kbnServer } = mockKbnServer(data, {}, version);
     return {
       index,
-      server,
+      kbnServer,
       plugins: opts.plugins || [],
       ...opts,
     };
   }
 
-  async function testMigrationContext(testOpts) {
-    const opts = buildOpts(testOpts);
+  async function testMigrationContext(testOpts, version) {
+    const opts = buildOpts(testOpts, version);
     return fetchMigrationContext(opts);
   }
 });

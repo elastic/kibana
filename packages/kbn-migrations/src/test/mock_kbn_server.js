@@ -1,10 +1,10 @@
 const { mockCluster } = require('./mock_cluster');
 
 module.exports = {
-  mockServer,
+  mockKbnServer,
 };
 
-function mockServer(data, meta) {
+function mockKbnServer(data, meta, version = '9.8.7') {
   const callWithInternalUser = mockCluster(data, meta);
   const server = {
     plugins: {
@@ -22,7 +22,10 @@ function mockServer(data, meta) {
     log: () => {},
   };
   return {
-    server,
+    kbnServer: {
+      version,
+      server,
+    },
     cluster: callWithInternalUser,
   };
 }
