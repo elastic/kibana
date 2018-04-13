@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
       it('should display the correct value for entire timerange', async function () {
         await PageObjects.visualBuilder.selectDataTimeRange('all');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const expectedMetricValue =  '13,830';
+        const expectedMetricValue = '13,830';
         return PageObjects.visualBuilder.getMetricValue()
           .then(function (value) {
             log.debug(`metric value: ${value}`);
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.selectDataTimeRange('last');
         await PageObjects.visualBuilder.setTimeRangeInterval('1d');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const expectedMetricValue =  '4,459';
+        const expectedMetricValue = '4,459';
         return PageObjects.visualBuilder.getMetricValue()
           .then(function (value) {
             log.debug(`metric value: ${value}`);
