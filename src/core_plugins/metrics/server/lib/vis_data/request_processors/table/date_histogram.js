@@ -55,11 +55,6 @@ export default function dateHistogram(req, panel) {
         intervalString,
         bucketSize
       });
-      set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
-        timeField,
-        intervalString,
-        bucketSize
-      });
     });
     return next(doc);
   };
