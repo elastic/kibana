@@ -1,5 +1,5 @@
-[[logstash-configuration-management-api-create]]
-=== Create Pipeline
+[[logstash-configuration-management-api-retrieve]]
+=== Retrieve Pipeline
 
 experimental[This functionality is experimental and may be changed or removed completely in a future release.]
 
