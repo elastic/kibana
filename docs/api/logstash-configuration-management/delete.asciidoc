@@ -1,0 +1,26 @@
+[[logstash-configuration-management-api-create]]
+=== Create Pipeline
+
+experimental[This functionality is experimental and may be changed or removed completely in a future release.]
+
+The Delete Pipeline API enables you to delete a centrally-managed Logstash Pipeline.
+
+==== Request
+
+`DELETE /api/logstash/pipeline/<id>`
+
+==== Path Parameters
+
+`id` (required)::
+  (string) ID for pipeline. Only alphanumeric characters, hyphens, and underscores may be used.
+
+
+==== Examples
+
+[source,js]
+--------------------------------------------------
+DELETE api/logstash/pipeline/hello-world
+--------------------------------------------------
+// KIBANA
+
+A successful call returns an HTTP `200 OK` response.
