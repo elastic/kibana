@@ -1,0 +1,8 @@
+[[logstash-configuration-management-api]]
+== Logstash Configuration Management APIs
+
+* <<logstash-configuration-management-api-create>>
+// * <<logstash-configuration-management-api-delete>>
+
+include::logstash-configuration-management/create.asciidoc[]
+// include::logstash-configuration-management/delete.asciidoc[]

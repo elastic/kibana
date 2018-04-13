@@ -31,3 +31,5 @@ entirely.
 --
 
 include::api/saved-objects.asciidoc[]
+include::api/logstash-configuration-management.asciidoc[]
+
