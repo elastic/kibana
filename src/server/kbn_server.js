@@ -8,8 +8,9 @@ import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import statusMixin from './status';
+import { statusMixin } from './status';
 import pidMixin from './pid';
+import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
@@ -39,6 +40,7 @@ export default class KbnServer {
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
+      configDeprecationWarningsMixin,
       warningsMixin,
       statusMixin,
 

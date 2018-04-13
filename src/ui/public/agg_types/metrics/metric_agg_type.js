@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 export function AggTypesMetricsMetricAggTypeProvider(Private) {
   const AggType = Private(AggTypesAggTypeProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
+
 
   _.class(MetricAggType).inherits(AggType);
   function MetricAggType(config) {

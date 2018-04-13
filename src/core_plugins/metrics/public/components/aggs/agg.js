@@ -12,7 +12,7 @@ function Agg(props) {
   }
   const style = {
     cursor: 'default',
-    ...props.style
+    ...props.style,
   };
   return (
     <div
@@ -34,7 +34,6 @@ function Agg(props) {
       />
     </div>
   );
-
 }
 
 Agg.propTypes = {

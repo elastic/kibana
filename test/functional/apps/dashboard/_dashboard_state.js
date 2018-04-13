@@ -21,97 +21,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-
-        const currentQuery = await PageObjects.dashboard.getQuery();
-        expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
-        expect(newQuery).to.equal('hi');
-      });
-
-      it('for panel size parameters', async function () {
-        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
-        const currentUrl = await remote.getCurrentUrl();
-        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
-        await retry.try(async () => {
-          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-          if (newPanelDimensions.length < 0) {
-            throw new Error('No panel dimensions...');
-          }
-          // Some margin of error is allowed (I've noticed it being off by one pixel which probably something to do
-          // with an odd width and dividing by two), but due to https://github.com/elastic/kibana/issues/14542 I'm
-          // adding more margin of error than should be necessary.  That issue looks legit, but because I can't
-          // repro locally, I don't have a quick solution aside from increasing this margin error, for getting the
-          // build to pass consistently again.
-          const marginOfError = 20;
-          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
-          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
-        });
-      });
-
-      describe('for embeddable config color parameters on a visualization', () => {
-        it('updates a pie slice color on a soft refresh', async function () {
-          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
-          await PageObjects.visualize.clickLegendOption('80,000');
-          await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
-          const currentUrl = await remote.getCurrentUrl();
-          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
-          await remote.get(newUrl.toString(), false);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-
-          await retry.try(async () => {
-            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
-            let whitePieSliceCounts = 0;
-            allPieSlicesColor.forEach(style => {
-              if (style.indexOf('rgb(255, 255, 255)') > 0) {
-                whitePieSliceCounts++;
-              }
-            });
-
-            expect(whitePieSliceCounts).to.be(1);
-          });
-        });
-
-        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('and updates the pie slice legend color', async function () {
-          await retry.try(async () => {
-            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
-            expect(colorExists).to.be(true);
-          });
-        });
-
-        it('resets a pie slice color to the original when removed', async function () {
-          const currentUrl = await remote.getCurrentUrl();
-          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
-          await remote.get(newUrl.toString(), false);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-
-          await retry.try(async () => {
-            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
-            // The default green color that was stored with the visualization before any dashboard overrides.
-            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
-          });
-        });
-
-        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('resets the legend color as well', async function () {
-          await retry.try(async () => {
-            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
-            expect(colorExists).to.be(true);
-          });
-        });
-      });
-    });
 
     it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -218,6 +127,109 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeSpyPanel();
 
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+    });
+
+    describe('Directly modifying url updates dashboard state', () => {
+      it('for query parameter', async function () {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        const currentQuery = await PageObjects.dashboard.getQuery();
+        expect(currentQuery).to.equal('');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
+        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+        // soft refresh.
+        await remote.get(newUrl.toString(), false);
+        const newQuery = await PageObjects.dashboard.getQuery();
+        expect(newQuery).to.equal('hi');
+      });
+
+      it('for panel size parameters', async function () {
+        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+        const currentUrl = await remote.getCurrentUrl();
+        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
+        await remote.get(newUrl.toString(), false);
+        await retry.try(async () => {
+          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+          if (newPanelDimensions.length < 0) {
+            throw new Error('No panel dimensions...');
+          }
+          // Some margin of error is allowed (I've noticed it being off by one pixel which probably something to do
+          // with an odd width and dividing by two), but due to https://github.com/elastic/kibana/issues/14542 I'm
+          // adding more margin of error than should be necessary.  That issue looks legit, but because I can't
+          // repro locally, I don't have a quick solution aside from increasing this margin error, for getting the
+          // build to pass consistently again.
+          const marginOfError = 20;
+          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
+          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
+        });
+      });
+
+      it('when removing a panel', async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
+        await remote.get(newUrl.toString(), false);
+
+        await retry.try(async () => {
+          const newPanelCount = await PageObjects.dashboard.getPanelCount();
+          expect(newPanelCount).to.be(0);
+        });
+      });
+
+      describe('for embeddable config color parameters on a visualization', () => {
+        it('updates a pie slice color on a soft refresh', async function () {
+          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+          await PageObjects.visualize.clickLegendOption('80,000');
+          await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
+            let whitePieSliceCounts = 0;
+            allPieSlicesColor.forEach(style => {
+              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+                whitePieSliceCounts++;
+              }
+            });
+
+            expect(whitePieSliceCounts).to.be(1);
+          });
+        });
+
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
+        it.skip('and updates the pie slice legend color', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
+            expect(colorExists).to.be(true);
+          });
+        });
+
+        it('resets a pie slice color to the original when removed', async function () {
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            // The default green color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
+          });
+        });
+
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
+        it.skip('resets the legend color as well', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
+            expect(colorExists).to.be(true);
+          });
+        });
+      });
     });
   });
 }

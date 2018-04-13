@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';
 
@@ -27,7 +27,6 @@ export function getRoutes() {
 }
 
 export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
-  const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
   const fieldsFetcher = Private(FieldsFetcherProvider);
@@ -38,6 +37,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
   const patternCache = Private(IndexPatternsPatternCacheProvider);
   const isUserAwareOfUnsupportedTimePattern = Private(IsUserAwareOfUnsupportedTimePatternProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const fieldformats = fieldFormats;
 
   const type = 'index-pattern';
   const notify = new Notifier();

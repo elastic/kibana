@@ -9,5 +9,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./shorten'));
     loadTestFile(require.resolve('./suggestions'));
+    loadTestFile(require.resolve('./status'));
   });
 }

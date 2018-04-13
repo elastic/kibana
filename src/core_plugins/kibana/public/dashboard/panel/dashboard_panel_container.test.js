@@ -24,7 +24,7 @@ function getProps(props = {}) {
 
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
-  store.dispatch(setPanels([{ panelIndex: 'foo1' }]));
+  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
 });
 
 test('renders an error when embeddableFactory.render throws an error', (done) => {

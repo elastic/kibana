@@ -1,5 +1,5 @@
 import { registerLanguages } from './register_languages';
 
-export default function (server) {
+export function scriptsApi(server) {
   registerLanguages(server);
 }

@@ -1,1 +1,1 @@
-export { AggResponseTabifyProvider } from './tabify';
+export { tabifyAggResponse } from './tabify';
