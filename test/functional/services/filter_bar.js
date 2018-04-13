@@ -31,7 +31,7 @@ export function FilterBarProvider({ getService }) {
       input = await find.byCssSelector(`filter-operator-select input.ui-select-search`);
       await input.type(operator);
       await remote.pressKeys('\uE006');
-      input = await find.byCssSelector(`filter-params-editor input.ui-select-search`);
+      input = await find.byCssSelector(`filter-params-editor input.kuiTextInput`);
       await input.type(value);
       await remote.pressKeys('\uE006');
       await testSubjects.click('saveFilter');
@@ -48,9 +48,17 @@ export function FilterBarProvider({ getService }) {
       return await Promise.all(spans.map(el => el.getVisibleText()));
     }
 
+    async ensureFieldEditorModalIsClosed() {
+      const closeFilterEditorModalButtonExists = await testSubjects.exists('filterEditorModalCloseButton');
+      if (closeFilterEditorModalButtonExists) {
+        await testSubjects.click('filterEditorModalCloseButton');
+      }
+    }
+
     async getFilterFieldIndexPatterns() {
       const indexPatterns = [];
       const groups = await find.allByCssSelector('.ui-select-choices-group-label');
+      console.log('found ' + groups.length + ' index pattern group labels');
       for (let i = 0; i < groups.length; i++) {
         indexPatterns.push(await groups[i].getVisibleText());
       }

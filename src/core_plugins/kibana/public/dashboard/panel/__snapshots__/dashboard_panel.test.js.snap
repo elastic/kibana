@@ -10,6 +10,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
   >
     <div
       class="panel-heading"
+      data-test-subj="dashboardPanelHeading-"
     >
       <span
         aria-label="Dashboard panel: "

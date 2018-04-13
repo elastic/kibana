@@ -9,6 +9,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const remote = getService('remote');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
   const dashboardName = 'Dashboard Panel Controls Test';
 
@@ -34,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
-        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
       });
 
       it('are hidden in view mode', async function () {
@@ -126,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.discover.saveSearch('my search');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.header.clickDashboard();
-          await PageObjects.dashboard.addSavedSearch('my search');
+          await dashboardAddPanel.addSavedSearch('my search');
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.be(1);

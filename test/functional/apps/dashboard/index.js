@@ -3,16 +3,12 @@ export default function ({ getService, loadTestFile }) {
 
   describe('dashboard app', function () {
     before(() => remote.setWindowSize(1200, 900));
-    loadTestFile(require.resolve('./_dashboard_filter_bar'));
+    loadTestFile(require.resolve('./6_3_data'));
     loadTestFile(require.resolve('./_dashboard_time_picker'));
-    loadTestFile(require.resolve('./_dashboard_shared_attributes'));
     loadTestFile(require.resolve('./_bwc_shared_urls'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
     loadTestFile(require.resolve('./_dashboard_snapshots'));
-    loadTestFile(require.resolve('./_dashboard_grid'));
     loadTestFile(require.resolve('./_panel_controls'));
     loadTestFile(require.resolve('./_view_edit'));
-    loadTestFile(require.resolve('./_dashboard'));
     loadTestFile(require.resolve('./_dashboard_state'));
     loadTestFile(require.resolve('./_dashboard_save'));
     loadTestFile(require.resolve('./_dashboard_time'));
