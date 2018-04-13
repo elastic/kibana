@@ -2,10 +2,14 @@ const _ = require('lodash');
 const { migrationMapping } = require('./migration_state');
 const { disabledPluginIds } = require('./plugins');
 
+module.exports = {
+  buildMigrationPlan,
+};
+
 // Given the current set of enabled plugins, and the previous
 // or default migration state, this returns the mappings and
 // migrations which need to be applied.
-export function buildMigrationPlan(plugins, migrationState) {
+function buildMigrationPlan(plugins, migrationState) {
   return {
     mappings: buildMappings(plugins, migrationState),
     migrations: unappliedMigrations(plugins, migrationState),

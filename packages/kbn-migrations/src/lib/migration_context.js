@@ -6,7 +6,11 @@ const { validatePlugins } = require('./plugins');
 const { buildMigrationPlan } = require('./migration_plan');
 const { fetchMigrationState } = require('./persistence');
 
-export async function fetchMigrationContext(opts) {
+module.exports = {
+  fetchMigrationContext,
+};
+
+async function fetchMigrationContext(opts) {
   const { server, index, initialIndex, destIndex, plugins } = validateOpts(opts);
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
   const { migrationState, migrationStateVersion } = await fetchMigrationState(callCluster, index);

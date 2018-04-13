@@ -1,2 +1,4 @@
-export * from './mock_cluster';
-export * from './mock_server';
+module.exports = {
+  ...require('./mock_cluster'),
+  ...require('./mock_server'),
+};

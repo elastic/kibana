@@ -1,5 +1,10 @@
-export { fetchMigrationStatus } from './fetch_migration_status';
-export { migrate } from './migrate';
+const { fetchMigrationStatus } = require('./fetch_migration_status');
+const { migrate } = require('./migrate');
+
+module.exports = {
+  fetchMigrationStatus,
+  migrate,
+};
 
 /**
  * @typedef {'migrating' | 'migrated' | 'outOfDate'} MigrationStatus

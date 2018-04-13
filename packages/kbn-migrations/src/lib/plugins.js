@@ -1,11 +1,16 @@
 const _ = require('lodash');
-const { defaultMigrationState } = require('./migration_state');
 
-export function disabledPluginIds(plugins, migrationState) {
+module.exports = {
+  sanitizePlugins,
+  disabledPluginIds,
+  validatePlugins,
+};
+
+function disabledPluginIds(plugins, migrationState) {
   return _.difference(_.map(migrationState.plugins, 'id'), _.map(plugins, 'id'));
 }
 
-export function sanitizePlugins(plugins) {
+function sanitizePlugins(plugins) {
   return plugins
     .filter(({ mappings, migrations }) => !!mappings || !!migrations)
     .map(p => ({
@@ -14,7 +19,7 @@ export function sanitizePlugins(plugins) {
     }));
 }
 
-export function validatePlugins(rawPlugins, migrationState = defaultMigrationState) {
+function validatePlugins(rawPlugins, migrationState = { plugins: [] }) {
   const plugins = sanitizePlugins(rawPlugins);
   const hash = _.indexBy(migrationState.plugins, 'id');
   plugins.forEach((plugin) => {

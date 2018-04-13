@@ -1,6 +1,10 @@
 const { mockCluster } = require('./mock_cluster');
 
-export function mockServer(data, meta) {
+module.exports = {
+  mockServer,
+};
+
+function mockServer(data, meta) {
   const callWithInternalUser = mockCluster(data, meta);
   const server = {
     plugins: {

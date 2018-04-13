@@ -1,4 +1,6 @@
-export * from './migration_context';
-export * from './persistence';
-export * from './migration_state';
-export * from './plugins';
+module.exports = {
+  ...require('./migration_context'),
+  ...require('./persistence'),
+  ...require('./migration_state'),
+  ...require('./plugins'),
+};

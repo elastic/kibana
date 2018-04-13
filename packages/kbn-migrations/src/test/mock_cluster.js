@@ -8,7 +8,11 @@
 
 const _ = require('lodash');
 
-export function mockCluster(data, meta) {
+module.exports = {
+  mockCluster
+};
+
+function mockCluster(data, meta) {
   // This is used to track non-document information about
   // the state of the Elastic cluster.
   meta = {

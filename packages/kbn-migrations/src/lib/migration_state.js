@@ -6,19 +6,19 @@ const _ = require('lodash');
 const objectHash = require('object-hash');
 const { disabledPluginIds } = require('./plugins');
 
-export const MigrationStatus = {
+const MigrationStatus = {
   migrating: 'migrating',
   migrated: 'migrated',
   outOfDate: 'outOfDate',
 };
 
-export const defaultMigrationState = {
+const defaultMigrationState = {
   status: MigrationStatus.outOfDate,
   plugins: [],
 };
 
 // The mapping that allows us to store migration state in an index
-export const migrationMapping = {
+const migrationMapping = {
   type: {
     type: 'keyword'
   },
@@ -50,9 +50,17 @@ export const migrationMapping = {
   },
 };
 
+module.exports = {
+  MigrationStatus,
+  defaultMigrationState,
+  migrationMapping,
+  buildMigrationState,
+  computeMigrationStatus,
+};
+
 // Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
 // around even if the plugin is disabled / removed.
-export function buildMigrationState(plugins, previousState = defaultMigrationState) {
+function buildMigrationState(plugins, previousState = defaultMigrationState) {
   const isDisabled = disabledPluginIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
   const disabledPlugins = previousState.plugins.filter(({ id }) => isDisabled[id]);
   const enabledPlugins = plugins.map((plugin) => {
@@ -73,7 +81,7 @@ export function buildMigrationState(plugins, previousState = defaultMigrationSta
 // We can't just compare a single checksum, as we may have some plugins that are now disabled,
 // but which were enabled at one point, and whose migrations are already in the index. So, this
 // status check ignores disabled plugins, as their data is vestigial.
-export function computeMigrationStatus(plugins, migrationState) {
+function computeMigrationStatus(plugins, migrationState) {
   if (migrationState.status === MigrationStatus.migrating) {
     return MigrationStatus.migrating;
   }

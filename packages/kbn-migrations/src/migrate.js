@@ -17,6 +17,10 @@ const {
   computeMigrationStatus,
 } = require('./lib');
 
+module.exports = {
+  migrate,
+};
+
 /**
  * @typedef {elapsedMs: number, index: string, destIndex: string, status: MigrationStatus} MigrationResult
 */
@@ -27,7 +31,7 @@ const {
  * @param {MigrationOpts} opts
  * @returns {MigrationResult}
  */
-export async function migrate(opts) {
+async function migrate(opts) {
   const { result, elapsedMs } = await measureElapsedTime(() => runMigrationIfOutOfDate(opts));
   return {
     ...result,

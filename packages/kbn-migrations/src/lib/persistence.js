@@ -3,8 +3,25 @@
 const{ DOC_TYPE, MIGRATION_DOC_ID, MIGRATION_DOC_TYPE, buildTransformFunction, seededDocs } = require('./documents');
 const{ defaultMigrationState, migrationMapping } = require('./migration_state');
 
+module.exports = {
+  applyTransforms,
+  applySeeds,
+  applyMappings,
+  applyTransforms,
+  bulkInsert,
+  cloneIndexSettings,
+  convertIndexToAlias,
+  indexExists,
+  aliasExists,
+  createIndex,
+  fetchMigrationState,
+  saveMigrationState,
+  setAlias,
+  setReadonly,
+};
+
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
-export async function applyTransforms(callCluster, log, sourceIndex, destIndex, migrations, scrollSize = 100) {
+async function applyTransforms(callCluster, log, sourceIndex, destIndex, migrations, scrollSize = 100) {
   const migrationFn = buildTransformFunction(migrations);
   await eachScroll(callCluster, sourceIndex, async (scroll) => {
     const docs = scroll.hits.hits.map(migrationFn);
@@ -12,7 +29,7 @@ export async function applyTransforms(callCluster, log, sourceIndex, destIndex, 
   }, scrollSize);
 }
 
-export async function applyMappings(callCluster, index, mappings) {
+async function applyMappings(callCluster, index, mappings) {
   return await callCluster('indices.putMapping', {
     index,
     type: DOC_TYPE,
@@ -20,14 +37,14 @@ export async function applyMappings(callCluster, index, mappings) {
   });
 }
 
-export async function applySeeds(callCluster, log, index, migrations) {
+async function applySeeds(callCluster, log, index, migrations) {
   const docs = seededDocs(migrations);
   if (docs.length) {
     await bulkInsert(callCluster, log, index, docs);
   }
 }
 
-export async function bulkInsert(callCluster, log, index, docs) {
+async function bulkInsert(callCluster, log, index, docs) {
   const bulkActions = [];
   docs.forEach((doc) => {
     bulkActions.push({
@@ -51,7 +68,7 @@ export async function bulkInsert(callCluster, log, index, docs) {
 }
 
 // Copies the index settings from sourceIndex to destIndex
-export async function cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings) {
+async function cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings) {
   const settings = await getIndexSettings(callCluster, sourceIndex);
   const { index } = settings;
   return callCluster('indices.create', {
@@ -68,7 +85,7 @@ export async function cloneIndexSettings(callCluster, sourceIndex, destIndex, ma
   });
 }
 // Moves sourceIndex to destIndex, and create an alias named sourceIndex that points to destIndex.
-export async function convertIndexToAlias(callCluster, sourceIndex, destIndex) {
+async function convertIndexToAlias(callCluster, sourceIndex, destIndex) {
   const mappings = await callCluster('indices.getMapping', { index: sourceIndex });
   await cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings[sourceIndex].mappings);
   await reindex(callCluster, sourceIndex, destIndex);
@@ -76,15 +93,15 @@ export async function convertIndexToAlias(callCluster, sourceIndex, destIndex) {
   await callCluster('indices.putAlias', { index: destIndex, name: sourceIndex });
 }
 
-export function indexExists(callCluster, index) {
+function indexExists(callCluster, index) {
   return callCluster('indices.exists', { index });
 }
 
-export function aliasExists(callCluster, alias) {
+function aliasExists(callCluster, alias) {
   return callCluster('indices.existsAlias', { name: alias });
 }
 
-export function createIndex(callCluster, index, mappings) {
+function createIndex(callCluster, index, mappings) {
   return callCluster('indices.create', {
     index,
     body: {
@@ -93,7 +110,7 @@ export function createIndex(callCluster, index, mappings) {
   });
 }
 
-export async function fetchMigrationState(callCluster, index) {
+async function fetchMigrationState(callCluster, index) {
   const result = await fetchOrNull(callCluster('get', {
     index,
     id: MIGRATION_DOC_ID,
@@ -113,7 +130,7 @@ export async function fetchMigrationState(callCluster, index) {
   };
 }
 
-export async function fetchOrNull(promise) {
+async function fetchOrNull(promise) {
   try {
     return await promise;
   } catch (err) {
@@ -124,7 +141,7 @@ export async function fetchOrNull(promise) {
   }
 }
 
-export async function saveMigrationState(callCluster, index, version, migrationState) {
+async function saveMigrationState(callCluster, index, version, migrationState) {
   await applyMappings(callCluster, index, {
     properties: migrationMapping,
   });
@@ -145,7 +162,7 @@ export async function saveMigrationState(callCluster, index, version, migrationS
 
 // Points the specified alias to the specified index and removes any other
 // indices from the alias.
-export async function setAlias(callCluster, alias, index) {
+async function setAlias(callCluster, alias, index) {
   const actions = await removeIndicesFromAlias(callCluster, alias);
   callCluster('indices.updateAliases', {
     body: {
@@ -154,7 +171,7 @@ export async function setAlias(callCluster, alias, index) {
   });
 }
 
-export function setReadonly(callCluster, index, readOnly = true) {
+function setReadonly(callCluster, index, readOnly = true) {
   return callCluster('indices.putSettings', {
     index,
     body: {
@@ -187,7 +204,7 @@ async function getIndexSettings(callCluster, index) {
   return Object.values(result)[0].settings;
 }
 
-export async function eachScroll(callCluster, index, eachFn, size = 100) {
+async function eachScroll(callCluster, index, eachFn, size = 100) {
   const scroll = '1m';
   let result = await callCluster('search', { index, scroll, body: { size } });
 
