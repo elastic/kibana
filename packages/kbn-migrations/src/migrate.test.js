@@ -270,6 +270,35 @@ describe('migrate', () => {
       .toMatchSnapshot();
   });
 
+  test('errors if index has later migrations than the current plugins allow', async () => {
+    const index = 'aquatica';
+    const pluginV2 = {
+      id: 'futureplugin',
+      mappings: {
+        future: { properties: { desc: { type: 'keyword' }, }, },
+      },
+      migrations: [{
+        id: 'm1',
+        filter: () => true,
+        transform: _.identity,
+      }, {
+        id: 'm2',
+        filter: () => true,
+        transform: _.identity,
+      }],
+    };
+    const migrationState = buildMigrationState([pluginV2]);
+    const pluginV1 = {
+      ...pluginV2,
+      migrations: [pluginV2.migrations[0]],
+    };
+    const existingData = assocMigrationState({}, index, migrationState);
+    const existingMeta = assocMappings({}, index, pluginV1.mappings);
+    const { server } = mockServer(existingData, existingMeta);
+    expect(migrate({ server, index, plugins: [pluginV1] }))
+      .rejects.toThrow(/migration order has changed/);
+  });
+
   test('data and mappings for disabled plugins is retained', async () => {
     const index = 'disabled-scenario';
     const existingIndex = 'disabled-scenario-1';
