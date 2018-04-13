@@ -49,7 +49,7 @@ module.exports = {
 /**
  * The options for running migrations or checking migration status
  * @typedef {Object} MigrationOpts
- * @property {KibanaServer} server - The Kibana server object, which contains a logger and an Elasticsearch connection
+ * @property {KibanaServer} kbnServer - The Kibana server object, which contains the Elastic stack version info, and a server property
  * @property {MigrationPlugin[]} plugins - A list of plugins that define migrations and/or mappings
  * @property {string} index - The index or alias to be migrated
  * @property {string|undefined} destIndex - The name of the index to which index will be migrated. The destIndex must not exist prior to calling migrate.
