@@ -25,20 +25,17 @@ A successful call returns a JSON structure similar to the following example:
   "pipelines": [
     {
       "id": "hello-world",
-      "username": "elastic"
-      "pipeline": "input { stdin {} } output { stdout {} }",
-        "settings": {
-          "queue.type": "persistent"
-        }
+      "description": "Just a simple pipeline",
+      "last_modified": "2018-04-14T12:23:29.772Z",
+      "username": "elastic" <1>
     },
     {
       "id": "sleepy-pipeline",
-      "username": "elastic"
-      "pipeline": "input { generator {} } filter { sleep { time => 5 } } output { stdout {} }",
-        "settings": {
-          "queue.type": "memory"
-        }
+      "description": "",
+      "last_modified": "2018-03-24T03:41:30.554Z"
     }
   ]
 }
 --------------------------------------------------
+
+<1> The username property may or may not be present, depending on whether Elastic Security was enabled when the pipeline was created or last updated.
