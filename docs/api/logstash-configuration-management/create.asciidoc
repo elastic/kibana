@@ -43,18 +43,4 @@ PUT api/logstash/pipeline/hello-world
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a JSON structure similar to the following example:
-
-[source,js]
---------------------------------------------------
-{
-  "id": "hello-world",
-  "username": "elastic", <1>
-  "pipeline": "input { stdin {} } output { stdout {} }",
-  "settings": {
-    "queue.type": "persistent"
-  }
-}
---------------------------------------------------
-
-<1> This will be the username of the Elasticsearch Security user used when making the the API request
+A successful call returns an HTTP `204 No Content` response.
