@@ -29,7 +29,8 @@ A successful call returns a JSON structure similar to the following example:
 --------------------------------------------------
 {
   "id": "hello-world",
-  "username": "elastic"
+  "description": "Just a simple pipeline",
+  "username": "elastic",
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
     "queue.type": "persistent"
