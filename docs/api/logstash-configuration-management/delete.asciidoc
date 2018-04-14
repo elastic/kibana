@@ -23,4 +23,4 @@ DELETE api/logstash/pipeline/hello-world
 --------------------------------------------------
 // KIBANA
 
-A successful call returns an HTTP `200 OK` response.
+A successful call returns an HTTP `204 No Content` response.
