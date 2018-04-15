@@ -66,6 +66,8 @@ This may take a few minutes. Shakespeare wrote a lot of stuff!
 curl -XPUT localhost:9200/_bulk --data-binary @shakespeare.json
 ---------------------------------------------------------------
 
+*Note:* In windows you may need to replace single quotes with double quotes while using curl command
+
 [[accessing-the-kibana-interface]]
 === Accessing the Kibana interface
 Now that you have data, let's do something with it. Point your browser
