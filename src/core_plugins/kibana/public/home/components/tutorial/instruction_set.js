@@ -89,7 +89,7 @@ export class InstructionSet extends React.Component {
 
     const checkStausStep = (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiText>
             <p>
               {this.props.statusCheckConfig.text}
@@ -137,7 +137,6 @@ export class InstructionSet extends React.Component {
         />
       );
       return {
-        className: 'test',
         title: instruction.title,
         children: step,
         key: index
