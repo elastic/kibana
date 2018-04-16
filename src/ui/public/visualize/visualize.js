@@ -180,6 +180,7 @@ uiModules
 
         $scope.$on('$destroy', () => {
           destroyed = true;
+          $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
