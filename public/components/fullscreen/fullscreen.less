@@ -1,0 +1,38 @@
+body.canvas-fullscreen {
+  nav.global-nav {
+    display: none;
+  }
+
+  .content .app-wrapper {
+    left: 0;
+  }
+
+  .canvas__workpad_app {
+    .canvas__workpad_app--main .canvas__workpad_app--sidebar,
+    .canvas__workpad_app--main .canvas__workpad_header,
+    .canvas__toolbar {
+      display: none;
+    }
+
+    .canvas__workpad_app--main .canvas__workpad_app--workpad {
+      padding: 0;
+      background-color: black;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      .canvas__workpad_app--workspace {
+        width: auto;
+
+        .canvas__checkered {
+          background: none;
+        }
+
+        .canvas__workpad {
+          box-shadow: none;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+}

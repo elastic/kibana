@@ -20,16 +20,23 @@ export const Workpad = props => {
     previousPage,
     isFullscreen,
   } = props;
+
   const { height, width } = workpad;
 
   // TODO: I think this is mixing in background color, that should be pushed down to a page component, otherwise reporting wont work right
   const itsTheNewStyle = { ...style, height, width };
 
   const keyHandler = action => {
+    // handle keypress events for editor and presentation events
+    // this exists in both contexts
     if (action === 'REFRESH') return fetchAllRenderables();
+
+    // editor events
     if (action === 'UNDO') return undoHistory();
     if (action === 'REDO') return redoHistory();
     if (action === 'GRID') return setGrid(!grid);
+
+    // presentation events
     if (action === 'PREV') return previousPage();
     if (action === 'NEXT') return nextPage();
   };
@@ -43,12 +50,13 @@ export const Workpad = props => {
       <Fullscreen>
         {({ isFullscreen, windowSize }) => {
           const scale = Math.min(windowSize.height / height, windowSize.width / width);
+          const transform = `scale3d(${scale}, ${scale}, 1)`;
           const fsStyle = !isFullscreen
             ? {}
             : {
-                WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
-                msTransform: `scale3d(${scale}, ${scale}, 1)`,
-                transform: `scale3d(${scale}, ${scale}, 1)`,
+                transform,
+                WebkitTransform: transform,
+                msTransform: transform,
               };
 
           return (
@@ -57,7 +65,12 @@ export const Workpad = props => {
               style={{ ...itsTheNewStyle, ...fsStyle }}
             >
               {isFullscreen && (
-                <Shortcuts name="PRESENTATION" handler={keyHandler} targetNodeSelector="body" />
+                <Shortcuts
+                  name="PRESENTATION"
+                  handler={keyHandler}
+                  targetNodeSelector="body"
+                  global
+                />
               )}
               <PageStack
                 pages={pages}

@@ -5,6 +5,7 @@ export const keymap = {
     NEXT: 'alt+]',
     PREV: 'alt+[',
     FULLSCREEN: ['alt+p', 'alt+f'],
+    FULLSCREEN_EXIT: ['escape'],
     EDITING: ['alt+e'],
     GRID: 'alt+g',
     REFRESH: 'alt+r',
@@ -13,8 +14,8 @@ export const keymap = {
     DELETE: 'del',
   },
   PRESENTATION: {
-    NEXT: ['space', 'right'],
-    PREV: 'left',
+    NEXT: ['space', 'right', 'alt+]'],
+    PREV: ['left', 'alt+['],
     REFRESH: 'alt+r',
   },
 };

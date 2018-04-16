@@ -21,9 +21,9 @@ export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
         <RefreshControl className={`canvas__workpad_header--refresh ${btnClass}`} />
 
         <FullscreenControl>
-          {({ onFullscreen }) => (
+          {({ toggleFullscreen }) => (
             <span className={`canvas__workpad_header--fullscreenControl ${btnClass}`}>
-              <i className="fa fa-play" onClick={onFullscreen} />
+              <i className="fa fa-play" onClick={toggleFullscreen} />
             </span>
           )}
         </FullscreenControl>

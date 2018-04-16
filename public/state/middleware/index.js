@@ -2,6 +2,7 @@ import { applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
 import { esPersistMiddleware } from './es_persist';
+import { fullscreen } from './fullscreen';
 import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
@@ -13,6 +14,7 @@ const middlewares = [
     thunkMiddleware,
     esPersistMiddleware,
     historyMiddleware,
+    fullscreen,
     inFlight,
     appReady,
     workpadUpdate,
