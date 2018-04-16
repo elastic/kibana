@@ -1,9 +1,19 @@
 // The primary logic for applying migrations to an index
 const moment = require('moment');
-const { MigrationState, MigrationStatus, Persistence, MigrationContext } = require('./lib');
+const { MigrationState, MigrationStatus, Persistence, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
   migrate,
+};
+
+const optsDefinition = {
+  callCluster: 'function',
+  index: 'string',
+  plugins: 'array',
+  log: 'function',
+  elasticVersion: 'string',
+  destIndex: ['undefined', 'string'],
+  initialIndex: ['undefined', 'string'],
 };
 
 /**
@@ -34,7 +44,7 @@ async function measureElapsedTime(fn) {
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  const context = await MigrationContext.fetch(opts);
+  const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
   const status = await MigrationState.status(context.plugins, context.migrationState);
 
   if (status !== MigrationStatus.outOfDate && !context.force) {

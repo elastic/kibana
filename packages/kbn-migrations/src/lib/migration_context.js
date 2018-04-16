@@ -11,7 +11,7 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force } = validateOpts(opts);
+  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force } = opts;
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
@@ -27,30 +27,6 @@ async function fetch(opts) {
     initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
     log: migrationLogger(log),
   };
-}
-
-// Validates the MigrationOpts argument which is passed to all public / exported migration
-// functions. This should provide devs who consume migrations with friendly diagnostic errors
-// if they fail to pass the correct arguments.
-function validateOpts(opts) {
-  function validateProp(prop, type, isValid) {
-    const value = opts[prop];
-    isValid = isValid || (() => typeof value === type);
-    if (!isValid(value)) {
-      throw new Error(`MigrationOpts: property ${prop} must be a ${type}. Got ${typeof value}: ${value}`);
-    }
-  }
-
-  validateProp('index', 'string');
-  validateProp('callCluster', 'function');
-  validateProp('log', 'function');
-  validateProp('elasticVersion', 'string');
-  validateProp('plugins', 'array', (v) => Array.isArray(v));
-  validateProp('destIndex', 'string', (v) => v === undefined || typeof v === 'string');
-  validateProp('initialIndex', 'string', (v) => v === undefined || typeof v === 'string');
-  validateProp('force', 'boolean', (v) => v === undefined || typeof v === 'boolean');
-
-  return opts;
 }
 
 function migrationLogger(log) {

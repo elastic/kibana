@@ -99,66 +99,6 @@ describe('migrationContext', () => {
       .rejects.toThrowError(/has migration "foo" defined more than once/);
   });
 
-  test('index is required', () => {
-    expect(testMigrationContext({ index: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('callCluster is required', () => {
-    expect(testMigrationContext({ callCluster: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('log is required', () => {
-    expect(testMigrationContext({ log: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('log must be a function', () => {
-    expect(testMigrationContext({ log: 'hello' }))
-      .rejects.toThrow(/Got string/);
-  });
-
-  test('elasticVersion is required', () => {
-    expect(testMigrationContext({ elasticVersion: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('elasticVersion must be a string', () => {
-    expect(testMigrationContext({ elasticVersion: 32 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('plugins are required', () => {
-    expect(testMigrationContext({ plugins: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('callCluster must be an object', () => {
-    expect(testMigrationContext({ callCluster: 'hello' }))
-      .rejects.toThrow(/Got string/);
-  });
-
-  test('index must be a string', () => {
-    expect(testMigrationContext({ index: 23 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('destIndex must be a string', () => {
-    expect(testMigrationContext({ destIndex: 23 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('initialIndex must be a string', () => {
-    expect(testMigrationContext({ initialIndex: 23 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('plugins must be an array', () => {
-    expect(testMigrationContext({ plugins: 'notright' }))
-      .rejects.toThrow(/Got string/);
-  });
-
   function buildOpts(opts, elasticVersion = '9.8.7') {
     const index = 'test-index';
     const data = {

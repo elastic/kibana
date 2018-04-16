@@ -1,11 +1,9 @@
+const _ = require('lodash');
 const { fetchMigrationStatus } = require('./fetch_migration_status');
 const { MigrationState, MigrationStatus } = require('./lib');
 const { mockCluster } = require('./test');
 
 describe('fetchMigrationStatus', () => {
-  const log = () => {};
-  const elasticVersion = '2.3.5';
-
   test('is migrated, if the stored migration state matches the plugin state', async () => {
     const plugins = [{
       id: 'shwank',
@@ -25,7 +23,7 @@ describe('fetchMigrationStatus', () => {
         },
       }
     });
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins, elasticVersion, log });
+    const actual = await fetchMigrationStatus({ callCluster, index, plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -38,14 +36,14 @@ describe('fetchMigrationStatus', () => {
       },
     }];
     const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, elasticVersion, log, plugins, index: '.amazemazing' });
+    const actual = await fetchMigrationStatus({ callCluster, plugins, index: '.amazemazing' });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('is migrated, if there is no stored state and no plugins with migrations', async () => {
     const plugins = [];
     const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, elasticVersion, log, plugins, index: '.amazemazing' });
+    const actual = await fetchMigrationStatus({ callCluster, plugins, index: '.amazemazing' });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -69,7 +67,46 @@ describe('fetchMigrationStatus', () => {
       },
     });
     plugins[0].mappings.shwank.type = 'integer';
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins, elasticVersion, log });
+    const actual = await fetchMigrationStatus({ callCluster, index, plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
+
+  test('index is required', () => {
+    expect(testMigrationOpts({ index: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster is required', () => {
+    expect(testMigrationOpts({ callCluster: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('plugins are required', () => {
+    expect(testMigrationOpts({ plugins: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster must be an object', () => {
+    expect(testMigrationOpts({ callCluster: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('index must be a string', () => {
+    expect(testMigrationOpts({ index: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('plugins must be an array', () => {
+    expect(testMigrationOpts({ plugins: 'notright' }))
+      .rejects.toThrow(/Got string/);
+  });
 });
+
+function testMigrationOpts(opts) {
+  return fetchMigrationStatus({
+    callCluster: _.noop,
+    index: 'kibana',
+    plugins: [],
+    ...opts,
+  });
+}

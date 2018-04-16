@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`importDocuments Transforms an old doc to a new doc 1`] = `
+Object {
+  "_source": Object {
+    "space": "THE FINAL FRONTIER!!!",
+    "type": "space",
+    "updated_at": "today",
+  },
+}
+`;
+
+exports[`importDocuments accepts if a disabled plugin is required, but doc is up to date 1`] = `
+Object {
+  "_source": Object {
+    "aha": "Move along",
+    "type": "aha",
+    "updated_at": undefined,
+  },
+}
+`;
+
+exports[`importDocuments importing a doc w/ no exported migration state runs all transforms 1`] = `
+Object {
+  "_source": Object {
+    "space": "SPACE THE FINAL FRONTIER!!!",
+    "type": "space",
+    "updated_at": "today",
+  },
+}
+`;

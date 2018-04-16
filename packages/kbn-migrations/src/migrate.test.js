@@ -386,6 +386,66 @@ describe('migrate', () => {
     expect(callCluster.state())
       .toMatchSnapshot();
   });
+
+  test('index is required', () => {
+    expect(testMigrationOpts({ index: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster is required', () => {
+    expect(testMigrationOpts({ callCluster: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('log is required', () => {
+    expect(testMigrationOpts({ log: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('log must be a function', () => {
+    expect(testMigrationOpts({ log: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('elasticVersion is required', () => {
+    expect(testMigrationOpts({ elasticVersion: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('elasticVersion must be a string', () => {
+    expect(testMigrationOpts({ elasticVersion: 32 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('plugins are required', () => {
+    expect(testMigrationOpts({ plugins: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('callCluster must be an object', () => {
+    expect(testMigrationOpts({ callCluster: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('index must be a string', () => {
+    expect(testMigrationOpts({ index: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('destIndex must be a string', () => {
+    expect(testMigrationOpts({ destIndex: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('initialIndex must be a string', () => {
+    expect(testMigrationOpts({ initialIndex: 23 }))
+      .rejects.toThrow(/Got number/);
+  });
+
+  test('plugins must be an array', () => {
+    expect(testMigrationOpts({ plugins: 'notright' }))
+      .rejects.toThrow(/Got string/);
+  });
 });
 
 function assocMigrationState(data, index, migrationState) {
@@ -395,6 +455,17 @@ function assocMigrationState(data, index, migrationState) {
       type: MigrationState.TYPE,
       migration: migrationState,
     },
+  });
+}
+
+function testMigrationOpts(opts) {
+  return migrate({
+    callCluster: _.noop,
+    log: _.noop,
+    index: 'kibana',
+    elasticVersion: '1.2.3',
+    plugins: [],
+    ...opts,
   });
 }
 

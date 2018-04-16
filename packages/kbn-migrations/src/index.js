@@ -1,9 +1,11 @@
 const { fetchMigrationStatus } = require('./fetch_migration_status');
 const { migrate } = require('./migrate');
+const { importDocuments } = require('./import_documents');
 
 module.exports = {
   fetchMigrationStatus,
   migrate,
+  importDocuments,
 };
 
 /**
@@ -56,4 +58,14 @@ module.exports = {
  * @property {string} index - The index or alias to be migrated
  * @property {string|undefined} destIndex - The name of the index to which index will be migrated. The destIndex must not exist prior to calling migrate.
  * @property {string|undefined} initialIndex - The name of the index that will be created if no index exists or if no alias exists.
+ */
+
+/**
+ * The options for importing documents
+ * @typedef {Object} ImportDocsOpts
+ * @property {((command: string, opts: any) => Promise<any>)} callCluster - A propery secured function that calls Elastic search
+ * @property {((meta: string[], message: string) => void)} log - A function which logs info and debug messages
+ * @property {string} index - The index or alias to be migrated
+ * @property {Document[]} docs - The raw documents being imported
+ * @property {MigrationState} exportedState - The migration state associated with the documents, or an empty object
  */
