@@ -20,8 +20,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }
 
       const index = searchSource.index() || searchSource.getParent().index();
-      const timeFieldName = index.timeFieldName;
-      if (!timeFieldName) {
+      const timeFieldName = index && index.timeFieldName;
+      if (!index || !timeFieldName) {
         return true;
       }
 
