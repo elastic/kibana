@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButton,
+  EuiTextColor,
 } from '@elastic/eui';
 
 export class InstructionSet extends React.Component {
@@ -64,13 +65,34 @@ export class InstructionSet extends React.Component {
     ));
   }
 
+  renderStatusCheckMsg(msg, color) {
+    return (
+      <EuiText>
+        <p>
+          <EuiTextColor color={color}>
+            {msg}
+          </EuiTextColor>
+        </p>
+      </EuiText>
+    );
+  }
+
   renderStatusCheck() {
+    let statusMsg;
+    if (this.props.statusCheckState === 'complete') {
+      const msg = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
+      statusMsg = this.renderStatusCheckMsg(msg, 'secondary');
+    } else if (this.props.hasStatusCheckFailed) {
+      const msg = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
+      statusMsg = this.renderStatusCheckMsg(msg, 'warning');
+    }
+
     const checkStausStep = (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText>
             <p>
-              {this.props.statusCheck.text}
+              {this.props.statusCheckConfig.text}
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -82,13 +104,14 @@ export class InstructionSet extends React.Component {
             onClick={() => {this.props.onStatusCheck();}}
             isLoading={this.props.isCheckingStatus}
           >
-            {this.props.statusCheck.btnLabel ? this.props.statusCheck.btnLabel : 'Check status'}
+            {this.props.statusCheckConfig.btnLabel ? this.props.statusCheckConfig.btnLabel : 'Check status'}
           </EuiButton>
+          {statusMsg}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
     return {
-      title: this.props.statusCheck.title ? this.props.statusCheck.title : 'Status Check',
+      title: this.props.statusCheckConfig.title ? this.props.statusCheckConfig.title : 'Status Check',
       status: this.props.statusCheckState,
       children: checkStausStep,
       key: 'checkStatusStep'
@@ -121,7 +144,7 @@ export class InstructionSet extends React.Component {
       };
     });
 
-    if (this.props.statusCheck) {
+    if (this.props.statusCheckConfig) {
       steps.push(this.renderStatusCheck());
     }
 
@@ -215,22 +238,22 @@ const instructionVariantShape = PropTypes.shape({
   instructions: PropTypes.arrayOf(instructionShape).isRequired,
 });
 
-const statusCheckShape = PropTypes.shape({
+const statusCheckConfigShape = PropTypes.shape({
   success: PropTypes.string,
   error: PropTypes.string,
   title: PropTypes.string,
   text: PropTypes.string,
   btnLabel: PropTypes.string,
-  esHitsCheck: PropTypes.object.isRequired,
 });
 
 InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
-  statusCheck: statusCheckShape,
+  statusCheckConfig: statusCheckConfigShape,
   statusCheckState: PropTypes.string,
   onStatusCheck: PropTypes.func.isRequired,
   isCheckingStatus: PropTypes.bool,
+  hasStatusCheckFailed: PropTypes.bool,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,

@@ -92,6 +92,7 @@ export class Tutorial extends React.Component {
       return {
         hasStatusCheck: instructionSet.statusCheck ? true : false,
         isComplete: false,
+        hasFailed: false,
         isFetchingStatus: false,
       };
     });
@@ -117,35 +118,39 @@ export class Tutorial extends React.Component {
   }
 
   checkInstructionSetStatus = async (instructionSetIndex) => {
+    let isComplete = false;
+    let hasFailed  = false;
     const instructions = this.getInstructions();
     const esHitsCheckConfig = _.get(instructions, `instructionSets[${instructionSetIndex}].statusCheck.esHitsCheck`);
-    if (!esHitsCheckConfig) {
-      return;
-    }
+    if (esHitsCheckConfig) {
+      const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
+      const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
+      const body = `${searchHeader}\n${searchBody}\n`;
 
-    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
-    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
-    const body = `${searchHeader}\n${searchBody}`;
+      const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
+        method: 'post',
+        body: body,
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/x-ndjson',
+          'kbn-xsrf': 'kibana',
+        },
+        credentials: 'same-origin'
+      });
 
-    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
-      method: 'post',
-      body: body,
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/x-ndjson',
-        'kbn-xsrf': 'kibana',
-      },
-      credentials: 'same-origin'
-    });
-
-    let hasHits = false;
-    if (response.status < 300) {
-
+      if (response.status < 300) {
+        const results = await response.json();
+        if (_.get(results, 'responses.[0].hits.hits.length', 0) > 0) {
+          isComplete = true;
+        }
+      }
+      hasFailed = !isComplete;
     }
 
     this.setState((prevState) => {
-      prevState.statusCheck[instructionSetIndex].isComplete = hasHits;
-      prevState.statusCheck[instructionSetIndex].hasFailed = !hasHits;
+      prevState.statusCheck[instructionSetIndex].isComplete = isComplete;
+      prevState.statusCheck[instructionSetIndex].hasFailed = hasFailed;
+      prevState.statusCheck[instructionSetIndex].isFetchingStatus = false;
       return { statusCheck: prevState.statusCheck };
     });
   }
@@ -180,17 +185,20 @@ export class Tutorial extends React.Component {
       offset += instructionSet.instructionVariants[0].instructions.length;
       let statusCheckState = undefined;
       let isCheckingStatus = false;
+      let hasFailed = false;
       if (_.get(this.state, `statusCheck[${index}].hasStatusCheck`, false)) {
         statusCheckState = this.state.statusCheck[index].isComplete ? 'complete' : 'incomplete';
         isCheckingStatus = this.state.statusCheck[index].isFetchingStatus;
+        hasFailed = this.state.statusCheck[index].hasFailed;
       }
       return (
         <InstructionSet
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
-          statusCheck={instructionSet.statusCheck}
+          statusCheckConfig={instructionSet.statusCheck}
           statusCheckState={statusCheckState}
           isCheckingStatus={isCheckingStatus}
+          hasStatusCheckFailed={hasFailed}
           onStatusCheck={() => {
             this.setState((prevState) => {
               prevState.statusCheck[index].isFetchingStatus = true;
