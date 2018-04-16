@@ -82,6 +82,11 @@ export default class KbnServer {
     ));
 
     this.listen = once(this.listen);
+
+    // Kibana running as PID 1 (in containers) will not respond to SIGTERM
+    // and SIGINT.  We explicitly listen and exit gracefully.
+    process.once('SIGTERM', () => this.exit());
+    process.once('SIGINT', () => this.exit());
   }
 
   /**
@@ -130,6 +135,11 @@ export default class KbnServer {
 
   async close() {
     await fromNode(cb => this.server.stop(cb));
+  }
+
+  async exit() {
+    await this.close();
+    process.exit();
   }
 
   async inject(opts) {
