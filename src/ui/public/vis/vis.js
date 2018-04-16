@@ -64,6 +64,12 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
             const appState = getAppState();
             brushEvent(appState)(event);
           }
+        },
+        createInheritedSearchSource: (parentSearchSource) => {
+          if (!parentSearchSource) {
+            throw new Error('Unable to inherit search source, visualize saved object does not have search source.');
+          }
+          return new SearchSource().inherits(parentSearchSource);
         }
       };
     }

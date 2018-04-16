@@ -140,7 +140,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = this.vis.createInheritedSearchSource();
+        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
         searchSource.size(0);
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
