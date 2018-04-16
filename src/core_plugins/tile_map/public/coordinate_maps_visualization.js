@@ -52,9 +52,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (precisionChange) {
           this.vis.updateState();
         } else {
-          //todo: the issue here is that, if we are zooming out, and there is no precision change, we may want to update the state regardless
           //when we filter queries by collar
-          this._updateData(this._rawEsResponse);
+          this._updateData(this._rawTabifiedResponse);
         }
       });
 
@@ -74,7 +73,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
         this._getMapsParams().mapType !== 'Heatmap' &&
-        esResponse === this._rawEsResponse) {
+        esResponse === this._rawTabifiedResponse) {
         return;
       }
 
@@ -86,14 +85,16 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       if (!esResponse) {
         this._geoJson = null;
-        this._rawEsResponse = null;
+        this._rawTabifiedResponse = null;
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
         return;
       }
 
-      this._rawEsResponse = esResponse;
-      this._geoJson = convertToGeoJson(esResponse, this.vis.aggs[1]);
+      this._rawTabifiedResponse = esResponse;
+
+      const geohashAgg = this._getGeoHashAgg();
+      this._geoJson = convertToGeoJson(esResponse, geohashAgg);
       this._recreateGeohashLayer(this._geoJson);
     }
 
@@ -120,7 +121,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (this._geoJson) {
           this._recreateGeohashLayer(this._geoJson);
         }
-        this._updateData(this._rawEsResponse);
+        this._updateData(this._rawTabifiedResponse);
       }
     }
 

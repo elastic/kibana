@@ -2,41 +2,27 @@ import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
 
-/**
- the shape of the ES-response is well-defined and fixed for coordinate maps.
- 1st agg = metric
- 2nd agg = bucket of geohash (only ever one)
- 3rd agg = geocentroid (optional)
-
- We can decode this as-is without having to rely on any dynamic decoding (such as tabify).
-
- The main advantage is that we can ignore all irrelevant functionality.
-
- * @param rawEsResponse raw ES-response of query
- * @return {Object} an object with the geojson Featurecollection and additional metadata.
- */
-export function convertToGeoJson(rawEsResponse, geoAgg) {
-
+export function convertToGeoJson(tabifiedResponse, geoAgg) {
 
   let features;
   let min = Infinity;
   let max = -Infinity;
 
-  if (rawEsResponse.aggregations) {
+  if (tabifiedResponse && tabifiedResponse.tables && tabifiedResponse.tables[0] && tabifiedResponse.tables[0].rows) {
 
-    const buckets = findProperty(rawEsResponse.aggregations, 'buckets');
-    if (!buckets) {//only happens when this function is misused.
-      throw new Error('ES Response should at least contain single bucket aggregation.');
-    }
+    const table = tabifiedResponse.tables[0];
+    const geohashIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geohash_grid');
+    const metricIndex = table.columns.findIndex(column => column.aggConfig.type.type === 'metrics');
+    const geocentroidIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geo_centroid');
 
-    features = buckets.map((bucket) => {
+    features = table.rows.map(row => {
 
-      const geohash = bucket.key;
-      const location = findProperty(bucket, 'location');
+      const geohash = row[geohashIndex];
 
       let pointCoordinates;
       const geohashLocation = decodeGeoHash(geohash);
-      if (location) {
+      if (geocentroidIndex > -1) {
+        const location = row[geocentroidIndex];
         pointCoordinates = [location.lon, location.lat];
       } else {
         pointCoordinates = [geohashLocation.longitude[2], geohashLocation.latitude[2]];
@@ -60,13 +46,7 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
         pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
       }
 
-
-      let value;
-      value = findProperty(bucket, 'value');
-      if (typeof value === 'undefined') {
-        value = bucket.doc_count;
-      }
-
+      const value = row[metricIndex];
       min = Math.min(min, value);
       max = Math.max(max, value);
 
@@ -78,7 +58,6 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
         },
         properties: {
           geohash: geohash,
-          doc_count: bucket.doc_count,
           geohash_meta: {
             center: centerLatLng,
             rectangle: rectangle
@@ -86,7 +65,10 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
           value: value
         }
       };
+
+
     });
+
   } else {
     features = [];
   }
@@ -95,7 +77,6 @@ export function convertToGeoJson(rawEsResponse, geoAgg) {
     type: 'FeatureCollection',
     features: features
   };
-
 
   return {
     featureCollection: featureCollection,
@@ -112,22 +93,4 @@ function clampGrid(val, min, max) {
   if (val > max) val = max;
   else if (val < min) val = min;
   return val;
-}
-
-function findProperty(esReponse, aggName) {
-  const stack = [esReponse];
-  do {
-    const node = stack.pop();
-    for (const key in node) {
-      if (node.hasOwnProperty(key)) {
-        if (key === aggName) {
-          return node[key];
-        } else {
-          if (typeof node[key] === 'object') {
-            stack.push(node[key]);
-          }
-        }
-      }
-    }
-  } while (stack.length);
 }

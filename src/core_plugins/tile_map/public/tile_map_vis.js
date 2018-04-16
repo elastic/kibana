@@ -8,7 +8,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
-import { identityResponseHandler } from './identity_response_handler';
+import { makeTabbedResponseHandler } from './coordinatemap_response_handler';
 
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
@@ -36,7 +36,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
       }
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
-    responseHandler: identityResponseHandler,
+    responseHandler: makeTabbedResponseHandler(),
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
