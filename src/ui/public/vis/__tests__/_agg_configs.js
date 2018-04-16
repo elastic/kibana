@@ -13,7 +13,6 @@ describe('AggConfigs', function () {
 
   let Vis;
   let AggConfigs;
-  //let SpiedAggConfig;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
@@ -29,7 +28,6 @@ describe('AggConfigs', function () {
 
     // load main deps
     Vis = Private(VisProvider);
-    //SpiedAggConfig = sinon.stub(AggConfig);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -67,7 +65,6 @@ describe('AggConfigs', function () {
       ]);
 
       expect(ac).to.have.length(3);
-      //expect(SpiedAggConfig).to.have.property('callCount', 3);
     });
 
     it('attemps to ensure that all states have an id', function () {
