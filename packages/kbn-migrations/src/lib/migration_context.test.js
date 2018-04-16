@@ -1,4 +1,4 @@
-const { fetchMigrationContext } = require('./migration_context');
+const MigrationContext = require('./migration_context');
 const { mockKbnServer } = require('../test');
 
 describe('migrationContext', () => {
@@ -24,7 +24,7 @@ describe('migrationContext', () => {
     const logs = [];
     const opts = buildOpts({});
     opts.kbnServer.server.log = (...args) => logs.push(args);
-    const actual = await fetchMigrationContext(opts);
+    const actual = await MigrationContext.fetch(opts);
     actual.log.info('Wat up?');
     actual.log.info('Logging, sucka!');
     expect(logs)
@@ -38,7 +38,7 @@ describe('migrationContext', () => {
     const logs = [];
     const opts = buildOpts({});
     opts.kbnServer.server.log = (...args) => logs.push(args);
-    const actual = await fetchMigrationContext(opts);
+    const actual = await MigrationContext.fetch(opts);
     actual.log.debug('I need coffee');
     actual.log.debug('Lots o coffee');
     expect(logs)
@@ -157,6 +157,6 @@ describe('migrationContext', () => {
 
   async function testMigrationContext(testOpts, version) {
     const opts = buildOpts(testOpts, version);
-    return fetchMigrationContext(opts);
+    return MigrationContext.fetch(opts);
   }
 });

@@ -1,8 +1,7 @@
-const { MIGRATION_DOC_TYPE, MIGRATION_DOC_ID } = require('./lib/documents');
 const _ = require('lodash');
 const { migrate } = require('./migrate');
 const { mockKbnServer } = require('./test');
-const { buildMigrationState, sanitizePlugins } = require('./lib');
+const { MigrationState, Plugins } = require('./lib');
 
 describe('migrate', () => {
   test('does nothing if there are no migrations defined', async () => {
@@ -95,7 +94,7 @@ describe('migrate', () => {
       id: 'concurrency',
       migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
     };
-    const originalMigrationState = buildMigrationState([pluginV1]);
+    const originalMigrationState = MigrationState.build([pluginV1]);
     const pluginV2 = {
       ...pluginV1,
       migrations: [...pluginV1.migrations, { id: 'm2', filter: () => true, transform: _.identity }],
@@ -246,7 +245,7 @@ describe('migrate', () => {
         transform: (doc) => { throw new Error(JSON.stringify(doc)); },
       }],
     };
-    const originalMigrationState = buildMigrationState([pluginV1]);
+    const originalMigrationState = MigrationState.build([pluginV1]);
     const pluginV2 = {
       id: pluginV1.id,
       mappings: {
@@ -287,7 +286,7 @@ describe('migrate', () => {
         transform: _.identity,
       }],
     };
-    const migrationState = buildMigrationState([pluginV2]);
+    const migrationState = MigrationState.build([pluginV2]);
     const pluginV1 = {
       ...pluginV2,
       migrations: [pluginV2.migrations[0]],
@@ -319,7 +318,7 @@ describe('migrate', () => {
         quote: { properties: { text: { type: 'text' }, author: { type: 'keyword' }, }, },
       },
     }];
-    const originalMigrationState = buildMigrationState(sanitizePlugins(pluginsV1));
+    const originalMigrationState = MigrationState.build(Plugins.sanitize(pluginsV1));
     const existingData = assocMigrationState({}, existingIndex, originalMigrationState);
     _.set(existingData, [existingIndex, 'quote:q1', '_source'], {
       type: 'quote',
@@ -339,10 +338,10 @@ describe('migrate', () => {
 });
 
 function assocMigrationState(data, index, migrationState) {
-  return _.set(data, [index, MIGRATION_DOC_ID], {
+  return _.set(data, [index, MigrationState.ID], {
     _version: 42,
     _source: {
-      type: MIGRATION_DOC_TYPE,
+      type: MigrationState.TYPE,
       migration: migrationState,
     },
   });

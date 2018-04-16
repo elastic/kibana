@@ -1,9 +1,9 @@
-const { buildMigrationPlan } = require('./migration_plan');
-const { buildMigrationState, migrationMapping } = require('./migration_state');
+const MigrationPlan = require('./migration_plan');
+const MigrationState = require('./migration_state');
 
-describe('buildMigrationPlan', () => {
+describe('MigrationPlan.build', () => {
   test('produces strict mappings', () => {
-    expect(buildMigrationPlan([], {}).mappings.doc.dynamic).toEqual('strict');
+    expect(MigrationPlan.build([], {}).mappings.doc.dynamic).toEqual('strict');
   });
 
   test('combines mappings from plugins', () => {
@@ -19,12 +19,12 @@ describe('buildMigrationPlan', () => {
         b: { type: 'integer' },
       },
     }];
-    expect(buildMigrationPlan(plugins, {}).mappings)
+    expect(MigrationPlan.build(plugins, {}).mappings)
       .toEqual({
         doc: {
           dynamic: 'strict',
           properties: {
-            ...migrationMapping,
+            ...MigrationState.mappings,
             stuff: 'goes here',
             a: { type: 'text' },
             b: { type: 'integer' },
@@ -46,14 +46,14 @@ describe('buildMigrationPlan', () => {
         simba: { type: 'tiger' },
       },
     }];
-    const state = buildMigrationState(plugins);
+    const state = MigrationState.build(plugins);
 
-    expect(buildMigrationPlan([plugins[0]], state).mappings)
+    expect(MigrationPlan.build([plugins[0]], state).mappings)
       .toEqual({
         doc: {
           dynamic: 'strict',
           properties: {
-            ...migrationMapping,
+            ...MigrationState.mappings,
             stuff: 'goes here',
             bugs: { type: 'bunny' },
             simba: { type: 'tiger' },
@@ -75,14 +75,14 @@ describe('buildMigrationPlan', () => {
         stuff: { type: 'shazm' },
       },
     }];
-    const state = buildMigrationState(plugins);
+    const state = MigrationState.build(plugins);
 
-    expect(() => buildMigrationPlan([plugins[0]], state))
+    expect(() => MigrationPlan.build([plugins[0]], state))
       .toThrow(/Mapping \"stuff\" is defined more than once/);
   });
 
   test('is empty if no migrations are defined', () => {
-    expect(buildMigrationPlan([], {}).migrations).toEqual([]);
+    expect(MigrationPlan.build([], {}).migrations).toEqual([]);
   });
 
   test('handles new migrations', async () => {
@@ -90,7 +90,7 @@ describe('buildMigrationPlan', () => {
       id: 'bon',
       migrations: [{ id: 'derp' }],
     }];
-    expect(buildMigrationPlan(plugins, {}).migrations)
+    expect(MigrationPlan.build(plugins, {}).migrations)
       .toEqual([{ pluginId: 'bon', id: 'derp' }]);
   });
 
@@ -102,8 +102,8 @@ describe('buildMigrationPlan', () => {
       },
       migrations: [{ id: 'bingo' }],
     }];
-    const state = buildMigrationState(plugins);
-    expect(buildMigrationPlan(plugins, state).migrations)
+    const state = MigrationState.build(plugins);
+    expect(MigrationPlan.build(plugins, state).migrations)
       .toEqual([]);
   });
 
@@ -115,9 +115,9 @@ describe('buildMigrationPlan', () => {
       },
       migrations: [{ id: 'bingo' }],
     }];
-    const state = buildMigrationState(plugins);
+    const state = MigrationState.build(plugins);
     plugins[0].migrations.push({ id: 'fancipants' });
-    expect(buildMigrationPlan(plugins, state).migrations)
+    expect(MigrationPlan.build(plugins, state).migrations)
       .toEqual([{ pluginId: 'bon', id: 'fancipants' }]);
   });
 
@@ -135,8 +135,8 @@ describe('buildMigrationPlan', () => {
       },
       migrations: [{ id: 'arthur' }],
     }];
-    const state = buildMigrationState(plugins);
-    expect(buildMigrationPlan([plugins[1]], state).migrations)
+    const state = MigrationState.build(plugins);
+    expect(MigrationPlan.build([plugins[1]], state).migrations)
       .toEqual([]);
   });
 });

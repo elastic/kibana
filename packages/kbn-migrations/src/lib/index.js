@@ -1,6 +1,7 @@
 module.exports = {
-  ...require('./migration_context'),
-  ...require('./persistence'),
-  ...require('./migration_state'),
-  ...require('./plugins'),
+  Plugins: require('./plugins'),
+  MigrationContext: require('./migration_context'),
+  MigrationStatus: require('./migration_status'),
+  MigrationState: require('./migration_state'),
+  Persistence: require('./persistence'),
 };

@@ -1,9 +1,10 @@
-const{ MigrationStatus, computeMigrationStatus, buildMigrationState } = require('./migration_state');
+const MigrationStatus = require('./migration_status');
+const MigrationState = require('./migration_state');
 const _ = require('lodash');
 
-describe('computeMigrationStatus', () => {
+describe('MigrationState.status', () => {
   test('is migrating if the migrationState has a status of migrating', () => {
-    expect(computeMigrationStatus([], { status: MigrationStatus.migrating }))
+    expect(MigrationState.status([], { status: MigrationStatus.migrating }))
       .toEqual(MigrationStatus.migrating);
   });
 
@@ -15,7 +16,7 @@ describe('computeMigrationStatus', () => {
     }];
     const state = buildMinimalMigrationState(plugins);
 
-    expect(computeMigrationStatus(plugins, state))
+    expect(MigrationState.status(plugins, state))
       .toEqual(MigrationStatus.migrated);
   });
 
@@ -31,7 +32,7 @@ describe('computeMigrationStatus', () => {
     }];
     const state = buildMinimalMigrationState([plugins[0]]);
 
-    expect(computeMigrationStatus(plugins, state))
+    expect(MigrationState.status(plugins, state))
       .toEqual(MigrationStatus.outOfDate);
   });
 
@@ -44,7 +45,7 @@ describe('computeMigrationStatus', () => {
     const state = buildMinimalMigrationState(plugins);
     plugins[0].mappings = { stuff: 'SHAZM' };
 
-    expect(computeMigrationStatus(plugins, state))
+    expect(MigrationState.status(plugins, state))
       .toEqual(MigrationStatus.outOfDate);
   });
 
@@ -57,7 +58,7 @@ describe('computeMigrationStatus', () => {
     const state = buildMinimalMigrationState(plugins);
     plugins[0].migrations.push({ id: 'dang diggity' });
 
-    expect(computeMigrationStatus(plugins, state))
+    expect(MigrationState.status(plugins, state))
       .toEqual(MigrationStatus.outOfDate);
   });
 
@@ -73,19 +74,19 @@ describe('computeMigrationStatus', () => {
     }];
     const state = buildMinimalMigrationState(plugins);
 
-    expect(computeMigrationStatus([plugins[0]], state))
+    expect(MigrationState.status([plugins[0]], state))
       .toEqual(MigrationStatus.migrated);
   });
 
   function buildMinimalMigrationState(plugins) {
-    const state = buildMigrationState(plugins);
+    const state = MigrationState.build(plugins);
     return {
       plugins: state.plugins.map(plugin => _.pick(plugin, ['id', 'migrationsChecksum', 'mappingsChecksum']))
     };
   }
 });
 
-describe('buildMigrationState', () => {
+describe('MigrationState.build', () => {
   test('tracks id, mappings, checksums, and applied migration ids', () => {
     const plugins = [{
       id: 'z',
@@ -96,7 +97,7 @@ describe('buildMigrationState', () => {
       mappings: { and: 'there', stuff: 'here' },
       migrations: [{ id: 'm1' }, { id: 'm2' }],
     }];
-    expect(buildMigrationState(plugins))
+    expect(MigrationState.build(plugins))
       .toEqual({
         status: 'migrated',
         plugins: [{

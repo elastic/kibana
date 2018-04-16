@@ -2,13 +2,9 @@
 const uuid = require('uuid');
 
 const DOC_TYPE = 'doc';
-const MIGRATION_DOC_TYPE = 'migration';
-const MIGRATION_DOC_ID = `${MIGRATION_DOC_TYPE}:migration-state`;
 
 module.exports = {
   DOC_TYPE,
-  MIGRATION_DOC_TYPE,
-  MIGRATION_DOC_ID,
   seededDocs,
   buildTransformFunction,
   rawToClient,

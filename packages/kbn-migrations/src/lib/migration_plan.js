@@ -1,15 +1,15 @@
 const _ = require('lodash');
-const { migrationMapping } = require('./migration_state');
-const { disabledPluginIds } = require('./plugins');
+const MigrationState = require('./migration_state');
+const Plugins = require('./plugins');
 
 module.exports = {
-  buildMigrationPlan,
+  build,
 };
 
 // Given the current set of enabled plugins, and the previous
 // or default migration state, this returns the mappings and
 // migrations which need to be applied.
-function buildMigrationPlan(plugins, migrationState) {
+function build(plugins, migrationState) {
   return {
     mappings: buildMappings(plugins, migrationState),
     migrations: unappliedMigrations(plugins, migrationState),
@@ -35,7 +35,7 @@ function buildMappings(plugins, migrationState) {
   const allMappings = [].concat(
     disabledPluginMappings(plugins, migrationState),
     _.map(plugins, 'mappings'),
-    migrationMapping,
+    MigrationState.mappings,
   );
   return {
     doc: {
@@ -47,7 +47,7 @@ function buildMappings(plugins, migrationState) {
 
 function disabledPluginMappings(plugins, migrationState) {
   const mappingsById = _.indexBy(migrationState.plugins, 'id');
-  return disabledPluginIds(plugins, migrationState)
+  return Plugins.disabledIds(plugins, migrationState)
     .map(id => JSON.parse(mappingsById[id].mappings));
 }
 

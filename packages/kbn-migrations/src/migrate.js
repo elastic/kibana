@@ -1,21 +1,6 @@
 // The primary logic for applying migrations to an index
 const moment = require('moment');
-const {
-  buildMigrationState,
-  convertIndexToAlias,
-  setReadonly,
-  cloneIndexSettings,
-  applySeeds,
-  applyTransforms,
-  saveMigrationState,
-  setAlias,
-  MigrationStatus,
-  aliasExists,
-  indexExists,
-  createIndex,
-  fetchMigrationContext,
-  computeMigrationStatus,
-} = require('./lib');
+const { MigrationState, MigrationStatus, Persistence, MigrationContext } = require('./lib');
 
 module.exports = {
   migrate,
@@ -49,8 +34,8 @@ async function measureElapsedTime(fn) {
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  const context = await fetchMigrationContext(opts);
-  const status = await computeMigrationStatus(context.plugins, context.migrationState);
+  const context = await MigrationContext.fetch(opts);
+  const status = await MigrationState.status(context.plugins, context.migrationState);
 
   if (status !== MigrationStatus.outOfDate) {
     return skipMigration(context, status);
@@ -84,18 +69,18 @@ async function runMigration(context) {
   const { targetIndex, isNew } = await initializeMigration(context);
 
   log.info(() => `Seeding ${targetIndex}`);
-  await applySeeds(callCluster, log, targetIndex, migrationPlan.migrations);
+  await Persistence.applySeeds(callCluster, log, targetIndex, migrationPlan.migrations);
 
   if (!isNew) {
     log.info(() => `Transforming ${index} into ${targetIndex}`);
-    await applyTransforms(callCluster, log, index, targetIndex, migrationPlan.migrations, scrollSize);
+    await Persistence.applyTransforms(callCluster, log, index, targetIndex, migrationPlan.migrations, scrollSize);
   }
 
   log.info(() => `Saving migration state to ${targetIndex}`);
-  await saveMigrationState(callCluster, targetIndex, undefined, buildMigrationState(plugins, migrationState));
+  await MigrationState.save(callCluster, targetIndex, undefined, MigrationState.build(plugins, migrationState));
 
   log.info(() => `Pointing alias ${index} to ${targetIndex}`);
-  await setAlias(callCluster, index, targetIndex);
+  await Persistence.setAlias(callCluster, index, targetIndex);
 
   return {
     index,
@@ -106,20 +91,20 @@ async function runMigration(context) {
 
 async function initializeMigration(context) {
   const { callCluster, index } = context;
-  const exists = await indexExists(callCluster, index);
+  const exists = await Persistence.indexExists(callCluster, index);
   return exists ? initializeExistingIndex(context) : initializeNewIndex(context);
 }
 
 async function initializeNewIndex({ log, initialIndex, callCluster, migrationPlan: { mappings } }) {
   log.info(() => `Creating index ${initialIndex}`);
-  await createIndex(callCluster, initialIndex, mappings);
+  await Persistence.createIndex(callCluster, initialIndex, mappings);
   return { targetIndex: initialIndex, isNew: true };
 }
 
 async function initializeExistingIndex(context) {
   const { log, index, callCluster, migrationStateVersion, migrationState, destIndex, migrationPlan: { mappings } } = context;
   log.info(() => `Marking index ${index} as migrating`);
-  await saveMigrationState(callCluster, index, migrationStateVersion, {
+  await MigrationState.save(callCluster, index, migrationStateVersion, {
     ...migrationState,
     status: MigrationStatus.migrating,
   });
@@ -127,10 +112,10 @@ async function initializeExistingIndex(context) {
   await ensureIsAliased(context);
 
   log.info(() => `Setting index ${index} to read-only`);
-  await setReadonly(callCluster, index, true);
+  await Persistence.setReadonly(callCluster, index, true);
 
   log.info(() => `Creating index ${destIndex}`);
-  await cloneIndexSettings(callCluster, index, destIndex, mappings);
+  await Persistence.cloneIndexSettings(callCluster, index, destIndex, mappings);
 
   return {
     targetIndex: destIndex,
@@ -139,9 +124,9 @@ async function initializeExistingIndex(context) {
 }
 
 async function ensureIsAliased({ callCluster, index, initialIndex, log }) {
-  const isAlias = await aliasExists(callCluster, index);
+  const isAlias = await Persistence.aliasExists(callCluster, index);
   if (!isAlias) {
     log.info(() => `Converting index ${index} to an alias`);
-    await convertIndexToAlias(callCluster, index, initialIndex);
+    await Persistence.convertIndexToAlias(callCluster, index, initialIndex);
   }
 }

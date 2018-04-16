@@ -2,20 +2,20 @@
 // that are necessary to analyze and run migrations.
 
 const moment = require('moment');
-const { validatePlugins } = require('./plugins');
-const { buildMigrationPlan } = require('./migration_plan');
-const { fetchMigrationState } = require('./persistence');
+const Plugins = require('./plugins');
+const MigrationPlan = require('./migration_plan');
+const MigrationState = require('./migration_state');
 
 module.exports = {
-  fetchMigrationContext,
+  fetch,
 };
 
-async function fetchMigrationContext(opts) {
+async function fetch(opts) {
   const { server, index, initialIndex, destIndex, plugins, version } = validateOpts(opts);
   const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-  const { migrationState, migrationStateVersion } = await fetchMigrationState(callCluster, index);
-  const sanitizedPlugins = validatePlugins(plugins, migrationState);
-  const migrationPlan = buildMigrationPlan(sanitizedPlugins, migrationState);
+  const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
+  const sanitizedPlugins = Plugins.validate(plugins, migrationState);
+  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
   return {
     index,
     callCluster,

@@ -1,7 +1,6 @@
 // A set of helper functions for calling Elasticsearch
 
-const{ DOC_TYPE, MIGRATION_DOC_ID, MIGRATION_DOC_TYPE, buildTransformFunction, seededDocs } = require('./documents');
-const{ defaultMigrationState, migrationMapping } = require('./migration_state');
+const { DOC_TYPE, buildTransformFunction, seededDocs } = require('./documents');
 
 module.exports = {
   applyTransforms,
@@ -14,10 +13,9 @@ module.exports = {
   indexExists,
   aliasExists,
   createIndex,
-  fetchMigrationState,
-  saveMigrationState,
   setAlias,
   setReadonly,
+  fetchOrNull,
 };
 
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
@@ -117,26 +115,6 @@ function createIndex(callCluster, index, mappings) {
   });
 }
 
-async function fetchMigrationState(callCluster, index) {
-  const result = await fetchOrNull(callCluster('get', {
-    index,
-    id: MIGRATION_DOC_ID,
-    type: DOC_TYPE,
-  }));
-
-  if (result) {
-    return {
-      migrationStateVersion: result._version,
-      migrationState: result._source.migration,
-    };
-  }
-
-  return {
-    migrationStateVersion: undefined,
-    migrationState: defaultMigrationState,
-  };
-}
-
 async function fetchOrNull(promise) {
   try {
     return await promise;
@@ -146,25 +124,6 @@ async function fetchOrNull(promise) {
     }
     throw err;
   }
-}
-
-async function saveMigrationState(callCluster, index, version, migrationState) {
-  await applyMappings(callCluster, index, {
-    properties: migrationMapping,
-  });
-  return await callCluster('update', {
-    index,
-    version,
-    id: MIGRATION_DOC_ID,
-    type: DOC_TYPE,
-    body: {
-      doc: {
-        type: MIGRATION_DOC_TYPE,
-        migration: migrationState,
-      },
-      doc_as_upsert: true,
-    },
-  });
 }
 
 // Points the specified alias to the specified index and removes any other

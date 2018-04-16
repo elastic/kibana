@@ -4,21 +4,21 @@
 
 const _ = require('lodash');
 const objectHash = require('object-hash');
-const { disabledPluginIds } = require('./plugins');
+const Plugins = require('./plugins');
+const MigrationStatus = require('./migration_status');
+const Persistence = require('./persistence');
+const { DOC_TYPE } = require('./documents');
 
-const MigrationStatus = {
-  migrating: 'migrating',
-  migrated: 'migrated',
-  outOfDate: 'outOfDate',
-};
+const TYPE = 'migration';
+const ID = `${TYPE}:migration-state`;
 
-const defaultMigrationState = {
+const empty = {
   status: MigrationStatus.outOfDate,
   plugins: [],
 };
 
 // The mapping that allows us to store migration state in an index
-const migrationMapping = {
+const mappings = {
   type: {
     type: 'keyword'
   },
@@ -51,17 +51,20 @@ const migrationMapping = {
 };
 
 module.exports = {
-  MigrationStatus,
-  defaultMigrationState,
-  migrationMapping,
-  buildMigrationState,
-  computeMigrationStatus,
+  TYPE,
+  ID,
+  empty,
+  mappings,
+  build,
+  status,
+  fetch,
+  save,
 };
 
 // Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
 // around even if the plugin is disabled / removed.
-function buildMigrationState(plugins, previousState = defaultMigrationState) {
-  const isDisabled = disabledPluginIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
+function build(plugins, previousState = empty) {
+  const isDisabled = Plugins.disabledIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
   const disabledPlugins = previousState.plugins.filter(({ id }) => isDisabled[id]);
   const enabledPlugins = plugins.map((plugin) => {
     const { id, mappings, migrations } = plugin;
@@ -81,7 +84,7 @@ function buildMigrationState(plugins, previousState = defaultMigrationState) {
 // We can't just compare a single checksum, as we may have some plugins that are now disabled,
 // but which were enabled at one point, and whose migrations are already in the index. So, this
 // status check ignores disabled plugins, as their data is vestigial.
-function computeMigrationStatus(plugins, migrationState) {
+function status(plugins, migrationState) {
   if (migrationState.status === MigrationStatus.migrating) {
     return MigrationStatus.migrating;
   }
@@ -94,6 +97,43 @@ function computeMigrationStatus(plugins, migrationState) {
   });
 
   return isMigrated ? MigrationStatus.migrated : MigrationStatus.outOfDate;
+}
+
+async function fetch(callCluster, index) {
+  const result = await Persistence.fetchOrNull(callCluster('get', {
+    index,
+    id: ID,
+    type: DOC_TYPE,
+  }));
+
+  if (result) {
+    return {
+      migrationStateVersion: result._version,
+      migrationState: result._source.migration,
+    };
+  }
+
+  return {
+    migrationStateVersion: undefined,
+    migrationState: empty,
+  };
+}
+
+async function save(callCluster, index, version, migrationState) {
+  await Persistence.applyMappings(callCluster, index, { properties: mappings });
+  return await callCluster('update', {
+    index,
+    version,
+    id: ID,
+    type: DOC_TYPE,
+    body: {
+      doc: {
+        type: TYPE,
+        migration: migrationState,
+      },
+      doc_as_upsert: true,
+    },
+  });
 }
 
 function pluginChecksum({ mappings, migrations }) {

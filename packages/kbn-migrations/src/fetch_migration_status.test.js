@@ -1,5 +1,5 @@
 const { fetchMigrationStatus } = require('./fetch_migration_status');
-const { buildMigrationState, MigrationStatus } = require('./lib');
+const { MigrationState, MigrationStatus } = require('./lib');
 const { mockKbnServer } = require('./test');
 
 describe('fetchMigrationStatus', () => {
@@ -12,7 +12,7 @@ describe('fetchMigrationStatus', () => {
       },
     }];
     const index = '.amazemazing';
-    const migrationState = buildMigrationState(plugins);
+    const migrationState = MigrationState.build(plugins);
     const { kbnServer } = mockKbnServer({
       [index]: {
         'migration:migration-state': {
@@ -55,7 +55,7 @@ describe('fetchMigrationStatus', () => {
       },
     }];
     const index = '.kibana';
-    const migrationState = buildMigrationState(plugins);
+    const migrationState = MigrationState.build(plugins);
     const { kbnServer } = mockKbnServer({
       [index]: {
         'migration:migration-state': {
