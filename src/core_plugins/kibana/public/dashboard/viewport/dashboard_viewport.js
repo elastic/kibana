@@ -4,7 +4,6 @@ import { DashboardGrid } from '../grid';
 import { ExitFullScreenButton } from '../components/exit_full_screen_button';
 
 export function DashboardViewport({
-  getContainerApi,
   maximizedPanelId,
   getEmbeddableFactory,
   panelCount,
@@ -25,7 +24,6 @@ export function DashboardViewport({
       { isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} /> }
       <DashboardGrid
         getEmbeddableFactory={getEmbeddableFactory}
-        getContainerApi={getContainerApi}
         maximizedPanelId={maximizedPanelId}
       />
     </div>
@@ -33,7 +31,6 @@ export function DashboardViewport({
 }
 
 DashboardViewport.propTypes = {
-  getContainerApi: PropTypes.func,
   getEmbeddableFactory: PropTypes.func,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,

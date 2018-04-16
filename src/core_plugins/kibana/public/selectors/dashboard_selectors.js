@@ -15,16 +15,24 @@ export const getPanels = state => DashboardSelectors.getPanels(getDashboard(stat
 export const getPanel = (state, panelId) => DashboardSelectors.getPanel(getDashboard(state), panelId);
 export const getPanelType = (state, panelId) => DashboardSelectors.getPanelType(getDashboard(state), panelId);
 
+export const getEmbeddables = state => DashboardSelectors.getEmbeddables(getDashboard(state));
 export const getEmbeddableError = (state, panelId) =>
   DashboardSelectors.getEmbeddableError((getDashboard(state)), panelId);
-export const getEmbeddableTitle = (state, panelId) => DashboardSelectors.getEmbeddableTitle(getDashboard(state), panelId);
-export const getEmbeddableEditUrl = (state, panelId) => DashboardSelectors.getEmbeddableEditUrl(getDashboard(state), panelId);
+export const getEmbeddableInitialized = (state, panelId) => DashboardSelectors.getEmbeddableInitialized(getDashboard(state), panelId);
+export const getEmbeddableCustomization =
+  (state, panelId) => DashboardSelectors.getEmbeddableCustomization(getDashboard(state), panelId);
+export const getEmbeddableStagedFilter =
+  (state, panelId) => DashboardSelectors.getEmbeddableStagedFilter(getDashboard(state), panelId);
+export const getEmbeddableMetadata =
+  (state, panelId) => DashboardSelectors.getEmbeddableMetadata(getDashboard(state), panelId);
 
+export const getStagedFilters = state => DashboardSelectors.getStagedFilters(getDashboard(state));
 export const getViewMode = state => DashboardSelectors.getViewMode(getDashboard(state));
 export const getFullScreenMode = state => DashboardSelectors.getFullScreenMode(getDashboard(state));
 export const getMaximizedPanelId = state => DashboardSelectors.getMaximizedPanelId(getDashboard(state));
 export const getUseMargins = state => DashboardSelectors.getUseMargins(getDashboard(state));
 export const getHidePanelTitles = state => DashboardSelectors.getHidePanelTitles(getDashboard(state));
+export const getTimeRange = state => DashboardSelectors.getTimeRange(getDashboard(state));
 
 export const getTitle = state => DashboardSelectors.getTitle(getDashboard(state));
 export const getDescription = state => DashboardSelectors.getDescription(getDashboard(state));
