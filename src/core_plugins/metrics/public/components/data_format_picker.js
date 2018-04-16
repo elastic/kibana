@@ -120,7 +120,9 @@ class DataFormatPicker extends Component {
         return to === option.value;
       });
       return (
-        <div className="vis_editor__data_format_picker-container">
+        <div
+          className="vis_editor__data_format_picker-container"
+        >
           <div className="vis_editor__label">
             {this.props.label}
           </div>

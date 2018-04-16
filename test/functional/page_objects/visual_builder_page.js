@@ -162,6 +162,15 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async selectField(type, nth = 0) {
+      const elements = await testSubjects.findAll('fieldSelector');
+      const input = await elements[nth].findByCssSelector('.Select-input input');
+      await input.type(type);
+      const option = await elements[nth].findByCssSelector('.Select-option');
+      await option.click();
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async fillInExpression(expression, nth = 0) {
       const expressions = await testSubjects.findAll('mathExpression');
       await expressions[nth].type(expression);
@@ -188,6 +197,21 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await input.type(fieldName);
       const option = await element.findByCssSelector('.Select-option');
       await option.click();
+    }
+
+    async selectDataFormat(format) {
+      const prefix = '.vis_editor__data_format_picker-container';
+      const input = await find.byCssSelector(`${prefix} .Select-input input`);
+      await input.type(format);
+      const option = await find.byCssSelector(`${prefix} .Select-option`);
+      await option.click();
+    }
+
+    async setFilterRatioNumerator(value, nth = 0) {
+      const el = await testSubjects.findAll('filterRatioNumerator');
+      await el[nth].clearValue();
+      await el[nth].type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setTimeRangeInterval(value, nth = 0) {

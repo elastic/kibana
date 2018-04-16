@@ -41,14 +41,16 @@ function FieldSelect(props) {
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
   return (
-    <EuiComboBox
-      placeholder="Select field..."
-      isDisabled={disabled}
-      options={options}
-      selectedOptions={selectedOptions}
-      onChange={onChange}
-      singleSelection={true}
-    />
+    <div data-test-subj="fieldSelector" className="vis_editor__row_item">
+      <EuiComboBox
+        placeholder="Select field..."
+        isDisabled={disabled}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={onChange}
+        singleSelection={true}
+      />
+    </div>
   );
 }
 

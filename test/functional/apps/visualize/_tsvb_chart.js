@@ -58,6 +58,24 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
+    describe('Filter Ratio', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.resetPage();
+      });
+
+      it('should show the correct value for a filter ratio', async () => {
+        await PageObjects.visualBuilder.selectAggType('filter_ratio');
+        await PageObjects.visualBuilder.setFilterRatioNumerator('machine.os.raw:\'win xp\'');
+        await PageObjects.visualBuilder.selectAggType('avg', 1);
+        await PageObjects.visualBuilder.selectField('bytes', 1);
+        await PageObjects.visualBuilder.clickSeriesOption();
+        await PageObjects.visualBuilder.selectDataFormat('percent');
+        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be('75.08%');
+      });
+
+    });
+
     describe('Math Aggregation', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();

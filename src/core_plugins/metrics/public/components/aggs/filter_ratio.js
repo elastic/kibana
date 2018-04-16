@@ -74,6 +74,7 @@ export const FilterRatioAgg = props => {
             </label>
             <input
               id={htmlId('numerator')}
+              data-test-subj="filterRatioNumerator"
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('numerator')}
               value={model.numerator}
@@ -89,6 +90,7 @@ export const FilterRatioAgg = props => {
             </label>
             <input
               id={htmlId('denominator')}
+              data-test-subj="filterRatioDenominator"
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('denominator')}
               value={model.denominator}
@@ -97,7 +99,7 @@ export const FilterRatioAgg = props => {
           </div>
         </div>
         <div style={{ flex: '1 0 auto', display: 'flex', marginTop: '10px' }}>
-          <div className="vis_editor__row_item">
+          <div className="vis_editor__row_item" data-test-subj="filterRatioMetricAgg">
             <div className="vis_editor__label">Metric Aggregation</div>
             <AggSelect
               siblings={props.siblings}

@@ -161,7 +161,7 @@ AggSelect.propTypes = {
   siblings: PropTypes.array,
   value: PropTypes.string,
   timerangeMode: PropTypes.oneOf(['all', 'last']),
-  metricsOnly: PropTypes.boolean
+  metricsOnly: PropTypes.bool
 };
 
 export default AggSelect;
