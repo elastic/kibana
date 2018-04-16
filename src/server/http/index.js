@@ -24,12 +24,9 @@ const getAuthChallengeResponse = async (req, server) => {
     return null;
   } catch (err) {
     if (err.statusCode !== 401) {
-      throw err;
+      return null;
     }
 
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader = _.get(err, 'body.error.header[WWW-Authenticate]');
-    boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
     return err;
   }
 };
