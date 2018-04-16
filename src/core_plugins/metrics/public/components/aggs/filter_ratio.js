@@ -101,7 +101,7 @@ export const FilterRatioAgg = props => {
             <div className="vis_editor__label">Metric Aggregation</div>
             <AggSelect
               siblings={props.siblings}
-              panelType="metrics"
+              metricsOnly={true}
               timerangeMode={props.panel.timerange_mode}
               value={model.metric_agg}
               onChange={handleSelectChange('metric_agg')}
