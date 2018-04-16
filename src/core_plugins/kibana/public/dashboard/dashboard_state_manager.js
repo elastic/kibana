@@ -112,10 +112,19 @@ export class DashboardStateManager {
 
   /**
    * Time is part of global state so we need to deal with it outside of _pushAppStateChangesToStore.
-   * @param {Object} newTimeFilter
+   * @param {String|Object} newTimeFilter.to -- either a string representing an absolute time in utc format,
+   * or a relative time (now-15m), or a moment object
+   * @param {String|Object} newTimeFilter.from - either a string representing an absolute or a relative time, or a
+   * moment object
+   * @param {String} newTimeFilter.mode
    */
   handleTimeChange(newTimeFilter) {
-    store.dispatch(updateTimeRange(newTimeFilter));
+    const timeFilter = {
+      from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
+      to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
+      mode: newTimeFilter.mode,
+    };
+    store.dispatch(updateTimeRange(timeFilter));
   }
 
   /**
