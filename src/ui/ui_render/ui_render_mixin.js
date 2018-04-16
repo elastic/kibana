@@ -93,7 +93,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         if (kbnServer.status.isGreen()) {
           if (await shouldAuthRedirect(server, req)) {
             const basePath = config.get('server.basePath');
-            return reply.redirect(`/${basePath}?redirectApp=${id}`);
+            return reply.redirect(`${basePath}/?redirectApp=${id}`);
           }
 
           await reply.renderApp(app);
