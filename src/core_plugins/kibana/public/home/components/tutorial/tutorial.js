@@ -22,6 +22,7 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
+      statusCheck: [],  // array holding instruction set status check state
       tutorial: null
     };
 
@@ -51,7 +52,7 @@ export class Tutorial extends React.Component {
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
         tutorial: tutorial
-      }, this.setParamDefaults);
+      }, this.initInstructionsState);
     } else {
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
@@ -77,23 +78,33 @@ export class Tutorial extends React.Component {
     }
   }
 
-  setParamDefaults = () => {
+  initInstructionsState = () => {
     const instructions = this.getInstructions();
+
     const paramValues = {};
     if (instructions.params) {
       instructions.params.forEach((param => {
         paramValues[param.id] = param.defaultValue;
       }));
     }
+
+    const statusCheck = instructions.instructionSets.map((instructionSet) => {
+      return {
+        hasStatusCheck: instructionSet.statusCheck ? true : false,
+        isComplete: false,
+      };
+    });
+
     this.setState({
-      paramValues: paramValues
+      paramValues,
+      statusCheck,
     });
   }
 
   setVisibleInstructions = (instructionsType) => {
     this.setState({
       visibleInstructions: instructionsType
-    }, this.setParamDefaults);
+    }, this.initInstructionsState);
   }
 
   setParameter = (paramId, newValue) => {
@@ -132,12 +143,22 @@ export class Tutorial extends React.Component {
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
+      let statusCheckState = undefined;
+      if (_.get(this.state, `statusCheck[${index}].hasStatusCheck`, false)) {
+        statusCheckState = this.state.statusCheck[index].isComplete ? 'complete' : 'incomplete';
+      }
       return (
         <InstructionSet
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
           statusCheck={instructionSet.statusCheck}
-          onStatusCheck={() => {}}
+          statusCheckState={statusCheckState}
+          onStatusCheck={() => {
+            this.setState((prevState) => {
+              prevState.statusCheck[index].isComplete = true;
+              return { statusCheck: prevState.statusCheck };
+            });
+          }}
           offset={currentOffset}
           params={instructions.params}
           paramValues={this.state.paramValues}

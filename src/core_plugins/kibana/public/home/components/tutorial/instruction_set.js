@@ -88,6 +88,7 @@ export class InstructionSet extends React.Component {
     );
     return {
       title: this.props.statusCheck.title ? this.props.statusCheck.title : 'Status Check',
+      status: this.props.statusCheckState,
       children: checkStausStep,
       key: 'checkStatusStep'
     };
@@ -226,7 +227,7 @@ InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheck: statusCheckShape,
-  statusCheckState: PropTypes.bool,
+  statusCheckState: PropTypes.string,
   onStatusCheck: PropTypes.func.isRequired,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
