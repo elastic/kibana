@@ -84,7 +84,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       }
 
       if (!esResponse) {
-        this._geoJson = null;
+        this._geoJsonFeatureCollectionAndMeta = null;
         this._rawTabifiedResponse = null;
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
@@ -94,17 +94,22 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._rawTabifiedResponse = esResponse;
 
       const geohashAgg = this._getGeoHashAgg();
-      this._geoJson = convertToGeoJson(esResponse, geohashAgg);
-      this._recreateGeohashLayer(this._geoJson);
+      this._geoJsonFeatureCollectionAndMeta = convertToGeoJson(esResponse, geohashAgg);
+      this._recreateGeohashLayer();
     }
 
-    _recreateGeohashLayer(geoJson) {
+    _recreateGeohashLayer() {
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer = new GeohashLayer(
+        this._geoJsonFeatureCollectionAndMeta.featureCollection,
+        this._geoJsonFeatureCollectionAndMeta.meta,
+        geohashOptions,
+        this._kibanaMap.getZoomLevel(),
+        this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
@@ -118,8 +123,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        if (this._geoJson) {
-          this._recreateGeohashLayer(this._geoJson);
+        if (this._geoJsonFeatureCollectionAndMeta) {
+          this._recreateGeohashLayer();
         }
         this._updateData(this._rawTabifiedResponse);
       }
@@ -133,8 +138,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       return {
         label: metricAgg ? metricAgg.makeLabel() : '',
-        valueFormatter: this._geoJson ? (metricAgg && metricAgg.fieldFormatter()) : null,
-        tooltipFormatter: this._geoJson ? boundTooltipFormatter : null,
+        valueFormatter: this._geoJsonFeatureCollectionAndMeta ? (metricAgg && metricAgg.fieldFormatter()) : null,
+        tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),

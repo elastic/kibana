@@ -6,9 +6,11 @@ import { EventEmitter } from 'events';
 
 export class ScaledCirclesMarkers extends EventEmitter {
 
-  constructor(featureCollection, options, targetZoom, kibanaMap, metricAgg) {
+  constructor(featureCollection, featureCollectionMetaData, options, targetZoom, kibanaMap, metricAgg) {
     super();
-    this._geohashGeoJsonAndMeta = featureCollection;
+    this._featureCollection = featureCollection;
+    this._featureCollectionMetaData = featureCollectionMetaData;
+
     this._zoom = targetZoom;
     this._metricAgg = metricAgg;
 
@@ -37,7 +39,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     }
     this._leafletLayer = L.geoJson(null, layerOptions);
 
-    this._leafletLayer.addData(this._geohashGeoJsonAndMeta.featureCollection);
+    this._leafletLayer.addData(this._featureCollection);
   }
 
   getLeafletLayer() {
@@ -46,8 +48,9 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
   getStyleFunction() {
-    const min = _.get(this._geohashGeoJsonAndMeta, 'meta.min', 0);
-    const max = _.get(this._geohashGeoJsonAndMeta, 'meta.max', 1);
+
+    const min = _.get(this._featureCollectionMetaData, 'min', 0);
+    const max = _.get(this._featureCollectionMetaData, 'max', 1);
 
     const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
     this._legendColors = makeCircleMarkerLegendColors(min, max);
@@ -80,7 +83,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._legendColors.forEach((color) => {
       const labelText = this._legendQuantizer
         .invertExtent(color)
-        // .map(this._valueFormatter)
+        .map(this._valueFormatter)
         .join(' – ');
 
       const label = $('<div>');
@@ -169,11 +172,11 @@ export class ScaledCirclesMarkers extends EventEmitter {
     const precisionBiasBase = 5;
     const precisionBiasNumerator = 200;
 
-    const precision = _.max(this._geohashGeoJsonAndMeta.featureCollection.features.map((feature) => {
+    const precision = _.max(this._featureCollection.features.map((feature) => {
       return String(feature.properties.geohash).length;
     }));
 
-    const pct = Math.abs(value) / Math.abs(this._geohashGeoJsonAndMeta.meta.max);
+    const pct = Math.abs(value) / Math.abs(this._featureCollectionMetaData.max);
     const zoomRadius = 0.5 * Math.pow(2, this._zoom);
     const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 

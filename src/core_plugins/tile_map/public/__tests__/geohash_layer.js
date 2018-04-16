@@ -79,7 +79,9 @@ describe('kibana_map tests', function () {
       it(test.options.mapType, async function () {
 
         const geohashGridOptions = test.options;
-        const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+        const geohashLayer = new GeohashLayer(
+          GeoHashSampleData.featureCollection,
+          GeoHashSampleData.featureCollection.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
 
         const elementList = domNode.querySelectorAll('canvas');
@@ -93,13 +95,11 @@ describe('kibana_map tests', function () {
     });
 
     it('should not throw when fitting on empty-data layer', function () {
-      const geohashLayer = new GeohashLayer({
-        meta: {},
-        featureCollection: {
+      const geohashLayer = new GeohashLayer(
+        {
           type: 'FeatureCollection',
           features: []
-        }
-      }, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
+        }, {}, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
 
       expect(() => {
@@ -116,7 +116,8 @@ describe('kibana_map tests', function () {
         }
       };
 
-      const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+      const geohashLayer = new GeohashLayer(GeoHashSampleData.featureCollection,
+        GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
       domNode.style.width = 0;
       domNode.style.height = 0;
@@ -125,9 +126,6 @@ describe('kibana_map tests', function () {
       }).to.not.throwException();
 
     });
-
-
-
 
 
   });

@@ -9,14 +9,17 @@ import { GeohashGridMarkers } from './markers/geohash_grid';
 
 export class GeohashLayer extends KibanaMapLayer {
 
-  constructor(featureCollectionAndMeta, options, zoom, kibanaMap) {
+  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap) {
 
     super();
-    this._geohashGeoJsonAndMeta = featureCollectionAndMeta;
+
+    this._featureCollection = featureCollection;
+    this._featureCollectionMetaData = featureCollectionMetaData;
+
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
-    const geojson = L.geoJson(this._geohashGeoJsonAndMeta.featureCollection);
+    const geojson = L.geoJson(this._featureCollection);
     this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
     this._lastBounds = null;
@@ -31,30 +34,33 @@ export class GeohashLayer extends KibanaMapLayer {
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
-        this._geohashMarkers = new ScaledCirclesMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ScaledCirclesMarkers(this._featureCollection,
+          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Circle Markers':
-        this._geohashMarkers = new ShadedCirclesMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new ShadedCirclesMarkers(this._featureCollection,
+          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Shaded Geohash Grid':
-        this._geohashMarkers = new GeohashGridMarkers(this._geohashGeoJsonAndMeta, markerOptions, this._zoom, this._kibanaMap);
+        this._geohashMarkers = new GeohashGridMarkers(this._featureCollection,
+          this._featureCollectionMetaData, markerOptions, this._zoom, this._kibanaMap);
         break;
       case 'Heatmap':
 
         let radius = 15;
-        if (this._geohashGeoJsonAndMeta.meta.geohashGridDimensionsAtEquator) {
-          const minGridLength = _.min(this._geohashGeoJsonAndMeta.meta.geohashGridDimensionsAtEquator);
+        if (this._featureCollectionMetaData.geohashGridDimensionsAtEquator) {
+          const minGridLength = _.min(this._featureCollectionMetaData.geohashGridDimensionsAtEquator);
           const metersPerPixel = this._kibanaMap.getMetersPerPixel();
           radius = (minGridLength / metersPerPixel) / 2;
         }
         radius = radius * parseFloat(this._geohashOptions.heatmap.heatClusterSize);
-        this._geohashMarkers = new HeatmapMarkers(this._geohashGeoJsonAndMeta.featureCollection, {
+        this._geohashMarkers = new HeatmapMarkers(this._featureCollection, {
           radius: radius,
           blur: radius,
           maxZoom: this._kibanaMap.getZoomLevel(),
           minOpacity: 0.1,
           tooltipFormatter: this._geohashOptions.tooltipFormatter
-        }, this._zoom, this._geohashGeoJsonAndMeta.meta.max);
+        }, this._zoom, this._featureCollectionMetaData.max);
         break;
       default:
         throw new Error(`${this._geohashOptions.mapType} mapType not recognized`);
@@ -80,8 +86,7 @@ export class GeohashLayer extends KibanaMapLayer {
       if (geoHashBounds) {
         const northEast = L.latLng(geoHashBounds.top_left.lat, geoHashBounds.bottom_right.lon);
         const southWest = L.latLng(geoHashBounds.bottom_right.lat, geoHashBounds.top_left.lon);
-        const leaftetBounds = L.latLngBounds(southWest, northEast);
-        return leaftetBounds;
+        return L.latLngBounds(southWest, northEast);
       }
     }
 

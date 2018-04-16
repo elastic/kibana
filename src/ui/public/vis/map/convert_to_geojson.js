@@ -12,62 +12,69 @@ export function convertToGeoJson(tabifiedResponse, geoAgg) {
 
     const table = tabifiedResponse.tables[0];
     const geohashIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geohash_grid');
-    const metricIndex = table.columns.findIndex(column => column.aggConfig.type.type === 'metrics');
-    const geocentroidIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geo_centroid');
 
-    features = table.rows.map(row => {
+    if (geohashIndex === -1) {
+      features = [];
+    } else {
 
-      const geohash = row[geohashIndex];
+      const metricIndex = table.columns.findIndex(column => column.aggConfig.type.type === 'metrics');
+      const geocentroidIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geo_centroid');
 
-      let pointCoordinates;
-      const geohashLocation = decodeGeoHash(geohash);
-      if (geocentroidIndex > -1) {
-        const location = row[geocentroidIndex];
-        pointCoordinates = [location.lon, location.lat];
-      } else {
-        pointCoordinates = [geohashLocation.longitude[2], geohashLocation.latitude[2]];
-      }
+      features = table.rows.map(row => {
 
-      const rectangle = [
-        [geohashLocation.latitude[0], geohashLocation.longitude[0]],
-        [geohashLocation.latitude[0], geohashLocation.longitude[1]],
-        [geohashLocation.latitude[1], geohashLocation.longitude[1]],
-        [geohashLocation.latitude[1], geohashLocation.longitude[0]],
-      ];
+        const geohash = row[geohashIndex];
+        const geohashLocation = decodeGeoHash(geohash);
 
-      const centerLatLng = [
-        geohashLocation.latitude[2],
-        geohashLocation.longitude[2]
-      ];
-
-      if (geoAgg.params.useGeocentroid) {
-        // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
-        pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
-        pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
-      }
-
-      const value = row[metricIndex];
-      min = Math.min(min, value);
-      max = Math.max(max, value);
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: pointCoordinates
-        },
-        properties: {
-          geohash: geohash,
-          geohash_meta: {
-            center: centerLatLng,
-            rectangle: rectangle
-          },
-          value: value
+        let pointCoordinates;
+        if (geocentroidIndex > -1) {
+          const location = row[geocentroidIndex];
+          pointCoordinates = [location.lon, location.lat];
+        } else {
+          pointCoordinates = [geohashLocation.longitude[2], geohashLocation.latitude[2]];
         }
-      };
+
+        const rectangle = [
+          [geohashLocation.latitude[0], geohashLocation.longitude[0]],
+          [geohashLocation.latitude[0], geohashLocation.longitude[1]],
+          [geohashLocation.latitude[1], geohashLocation.longitude[1]],
+          [geohashLocation.latitude[1], geohashLocation.longitude[0]],
+        ];
+
+        const centerLatLng = [
+          geohashLocation.latitude[2],
+          geohashLocation.longitude[2]
+        ];
+
+        if (geoAgg.params.useGeocentroid) {
+          // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
+          pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
+          pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
+        }
+
+        const value = row[metricIndex];
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: pointCoordinates
+          },
+          properties: {
+            geohash: geohash,
+            geohash_meta: {
+              center: centerLatLng,
+              rectangle: rectangle
+            },
+            value: value
+          }
+        };
 
 
-    });
+      });
+
+    }
 
   } else {
     features = [];
