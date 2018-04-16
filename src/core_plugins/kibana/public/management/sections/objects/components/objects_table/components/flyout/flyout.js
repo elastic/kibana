@@ -53,7 +53,7 @@ export class Flyout extends Component {
       file: undefined,
       importCount: 0,
       indexPatterns: undefined,
-      isOverwriteAllChecked: false,
+      isOverwriteAllChecked: true,
       isLoading: false,
       loadingMessage: undefined,
       wasImportSuccessful: false,
@@ -281,13 +281,11 @@ export class Flyout extends Component {
         name: 'Sample of affected objects',
         description: `Sample of affected objects`,
         render: list => {
-          const sample = take(list, 3).map((obj, key) => (
-            <span key={key}>
-              {obj.name}
-              <br />
-            </span>
-          ));
-          return <Fragment>{sample}</Fragment>;
+          return (
+            <ul style={{ listStyle: 'none' }}>
+              {take(list, 3).map((obj, key) => <li key={key}>{obj.name}</li>)}
+            </ul>
+          );
         },
       },
       {
@@ -301,7 +299,7 @@ export class Flyout extends Component {
 
           options.unshift({
             text: '-- Skip Import --',
-            value: undefined,
+            value: '',
           });
 
           return (
@@ -480,11 +478,13 @@ export class Flyout extends Component {
           <p>
             The following saved objects use index patterns that do not exist.
             Please select the index patterns you&apos;d like re-associated with
-            them. You can {(
+            them. You can{' '}
+            {
               <EuiLink href={this.props.newIndexPatternUrl}>
                 create a new index pattern
               </EuiLink>
-            )} if necessary.
+            }{' '}
+            if necessary.
           </p>
         </EuiCallOut>
       </Fragment>

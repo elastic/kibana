@@ -6,7 +6,16 @@ import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
-import { EuiSpacer, Query } from '@elastic/eui';
+import {
+  EuiSpacer,
+  Query,
+  EuiInMemoryTable,
+  EuiIcon,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EUI_MODAL_CONFIRM_BUTTON,
+  EuiCheckboxGroup,
+} from '@elastic/eui';
 import {
   retrieveAndExportDocs,
   scanAllTypes,
@@ -58,6 +67,16 @@ export class ObjectsTable extends Component {
       relationshipId: undefined,
       relationshipType: undefined,
       relationshipTitle: undefined,
+      isShowingDeleteConfirmModal: false,
+      isShowingExportAllOptionsModal: false,
+      exportAllOptions: INCLUDED_TYPES.map(type => ({
+        id: type,
+        label: type,
+      })),
+      exportAllSelectedOptions: INCLUDED_TYPES.reduce((accum, type) => {
+        accum[type] = true;
+        return accum;
+      }, {}),
     };
   }
 
@@ -87,7 +106,14 @@ export class ObjectsTable extends Component {
       this.state.savedObjectCounts
     );
 
-    this.setState({ savedObjectCounts });
+    this.setState(state => ({
+      ...state,
+      savedObjectCounts,
+      exportAllOptions: state.exportAllOptions.map(option => ({
+        ...option,
+        label: `${option.id} (${savedObjectCounts[option.id]})`
+      }))
+    }));
   };
 
   fetchSavedObjects = async () => {
@@ -198,7 +224,15 @@ export class ObjectsTable extends Component {
 
   onExportAll = async () => {
     const { kbnIndex, $http } = this.props;
-    const results = await scanAllTypes($http, kbnIndex, INCLUDED_TYPES);
+    const { exportAllSelectedOptions } = this.state;
+
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
+      if (selected) {
+        accum.push(id);
+      }
+      return accum;
+    }, []);
+    const results = await scanAllTypes($http, kbnIndex, exportTypes);
     saveToFile(JSON.stringify(flattenDeep(results.hits), null, 2));
   };
 
@@ -216,7 +250,11 @@ export class ObjectsTable extends Component {
     this.setState({ isShowingImportFlyout: false });
   };
 
-  onDelete = async () => {
+  onDelete = () => {
+    this.setState({ isShowingDeleteConfirmModal: true });
+  };
+
+  delete = async () => {
     const { savedObjectsClient } = this.props;
     const { selectedSavedObjects } = this.state;
 
@@ -234,7 +272,10 @@ export class ObjectsTable extends Component {
     await Promise.all(deletes);
 
     // Unset this
-    this.setState({ selectedSavedObjects: [] });
+    this.setState({
+      selectedSavedObjects: [],
+      isShowingDeleteConfirmModal: false,
+    });
 
     // Fetching all data
     await this.fetchSavedObjects();
@@ -279,7 +320,83 @@ export class ObjectsTable extends Component {
         getRelationships={this.getRelationships}
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
+        getEditUrl={this.props.getEditUrl}
+        goInApp={this.props.goInApp}
       />
+    );
+  }
+
+  renderDeleteConfirmModal() {
+    if (!this.state.isShowingDeleteConfirmModal) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Delete saved objects"
+          onCancel={() => this.setState({ isShowingDeleteConfirmModal: false })}
+          onConfirm={this.delete}
+          cancelButtonText="Cancel"
+          confirmButtonText="Delete"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        >
+          <p>This action will delete the following saved objects:</p>
+          <EuiInMemoryTable
+            items={this.state.selectedSavedObjects}
+            columns={[
+              {
+                field: 'type',
+                name: 'Type',
+                width: '50px',
+                render: type => (
+                  <EuiIcon type={getSavedObjectIcon(type)}/>
+                )
+              },
+              {
+                field: 'id',
+                name: 'Id/Name',
+              }
+            ]}
+            pagination={true}
+            sorting={false}
+          />
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  }
+
+  renderExportAllOptionsModal() {
+    if (!this.state.isShowingExportAllOptionsModal) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Export All"
+          onCancel={() => this.setState({ isShowingExportAllOptionsModal: false })}
+          onConfirm={this.onExportAll}
+          cancelButtonText="Cancel"
+          confirmButtonText="Export All"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        >
+          <p>Select which types to export. The number in parentheses indicates how many of this type are available to export.</p>
+          <EuiCheckboxGroup
+            options={this.state.exportAllOptions}
+            idToSelectedMap={this.state.exportAllSelectedOptions}
+            onChange={optionId => {
+              const exportAllSelectedOptions = ({ ...this.state.exportAllSelectedOptions, ...{
+                [optionId]: !this.state.exportAllSelectedOptions[optionId],
+              } });
+
+              this.setState({
+                exportAllSelectedOptions: exportAllSelectedOptions,
+              });
+            }}
+          />
+        </EuiConfirmModal>
+      </EuiOverlayMask>
     );
   }
 
@@ -309,8 +426,10 @@ export class ObjectsTable extends Component {
       <div style={{ padding: '0 1rem' }}>
         {this.renderFlyout()}
         {this.renderRelationships()}
+        {this.renderDeleteConfirmModal()}
+        {this.renderExportAllOptionsModal()}
         <Header
-          onExportAll={this.onExportAll}
+          onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
           onRefresh={this.refreshData}
           totalCount={totalItemCount}

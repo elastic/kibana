@@ -22,7 +22,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         title="Index Pattern Conflicts"
       >
         <p>
-          The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can 
+          The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can
+           
           <EuiLink
             color="primary"
             href=""
@@ -30,7 +31,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           >
             create a new index pattern
           </EuiLink>
-           if necessary.
+           
+          if necessary.
         </p>
       </EuiCallOut>
     </React.Fragment>
@@ -178,7 +180,7 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
       >
         <EuiSwitch
-          checked={false}
+          checked={true}
           data-test-subj="importSavedObjectsOverwriteToggle"
           label="Automatically overwrite all saved objects?"
           name="overwriteAll"

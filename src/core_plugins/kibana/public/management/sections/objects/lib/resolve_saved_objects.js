@@ -67,7 +67,12 @@ export async function resolveIndexPatternConflicts(
     if (typeof oldIndexId !== 'string') {
       oldIndexId = oldIndexId.id;
     }
-    const newIndexId = resolutions.find(({ oldId }) => oldId === oldIndexId).newId;
+    const resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
+    if (!resolution) {
+      // The user decided to skip this conflict so do nothing
+      return;
+    }
+    const newIndexId = resolution.newId;
     await obj.hydrateIndexPattern(newIndexId);
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

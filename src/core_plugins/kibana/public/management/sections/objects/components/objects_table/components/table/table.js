@@ -115,7 +115,7 @@ export class Table extends PureComponent {
           {
             name: 'In app',
             description:
-              'View the relationships this saved object has to other saved objects',
+              'View this saved object within Kibana',
             icon: 'eye',
             onClick: object => goInApp(object.id, object.type),
           },

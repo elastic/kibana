@@ -12,15 +12,14 @@ import {
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiLink,
   EuiIcon,
   EuiCallOut,
   EuiLoadingKibana,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 import {
   getSavedObjectIcon,
-  getInAppUrl,
   getSavedObjectLabel,
 } from '../../../../lib';
 
@@ -31,6 +30,8 @@ export class Relationships extends Component {
     type: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     close: PropTypes.func.isRequired,
+    getEditUrl: PropTypes.func.isRequired,
+    goInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -81,6 +82,7 @@ export class Relationships extends Component {
   }
 
   renderRelationships() {
+    const { getEditUrl, goInApp } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -150,21 +152,71 @@ export class Relationships extends Component {
                 <p>{calloutText}</p>
               </EuiCallOut>
             </EuiDescriptionListTitle>
-            <Fragment>
-              {list.map(item => (
-                <EuiDescriptionListDescription key={item.id}>
-                  <EuiLink href={`#${getInAppUrl(item.id, type)}`}>
+            <EuiInMemoryTable
+              items={list}
+              columns={[
+                {
+                  name: 'Type',
+                  render: () => (
                     <EuiIcon
                       aria-label={getSavedObjectLabel(type)}
                       size="s"
                       type={getSavedObjectIcon(type)}
                     />
-                    &nbsp;
-                    {item.title}
-                  </EuiLink>
+                  )
+                },
+                {
+                  name: 'Title',
+                  field: 'title',
+                  render: (title, item) => (
+                    <EuiLink href={`#${getEditUrl(item.id, type)}`}>
+                      {title}
+                    </EuiLink>
+                  )
+                },
+                {
+                  name: 'Actions',
+                  actions: [
+                    {
+                      name: 'In app',
+                      description: 'View this saved object within Kibana',
+                      icon: 'eye',
+                      onClick: object => goInApp(object.id, type),
+                    },
+                  ],
+                }
+              ]}
+              pagination={true}
+            />
+            {/* {list.map(item => (
+                <EuiDescriptionListDescription key={item.id}>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <EuiLink href={`#${getEditUrl(item.id, type)}`}>
+                        <EuiIcon
+                          aria-label={getSavedObjectLabel(type)}
+                          size="s"
+                          type={getSavedObjectIcon(type)}
+                        />
+                        &nbsp;
+                        {item.title}
+                      </EuiLink>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiLink href={`#${getInAppUrl(item.id, type)}`}>
+                        <EuiIcon
+                          aria-label={getSavedObjectLabel(type)}
+                          size="s"
+                          type="eye"
+                        />
+                        &nbsp;
+                        View in app
+                      </EuiLink>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiDescriptionListDescription>
-              ))}
-            </Fragment>
+              ))} */}
+            {/* </Fragment> */}
           </Fragment>
         );
       }

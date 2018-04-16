@@ -69,9 +69,9 @@ describe('Flyout', () => {
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component.state('isOverwriteAllChecked')).toBe(false);
-    component.find('EuiSwitch').simulate('change');
     expect(component.state('isOverwriteAllChecked')).toBe(true);
+    component.find('EuiSwitch').simulate('change');
+    expect(component.state('isOverwriteAllChecked')).toBe(false);
   });
 
   it('should allow picking a file', async () => {
@@ -182,7 +182,7 @@ describe('Flyout', () => {
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
         mockData.slice(0, 2),
-        false,
+        true,
         defaultProps.services,
         defaultProps.indexPatterns
       );
@@ -240,17 +240,17 @@ describe('Flyout', () => {
       expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
-        false
+        true
       );
       expect(saveObjects).toHaveBeenCalledWith(
         mockConflictedSavedObjectsLinkedToSavedSearches,
-        false
+        true
       );
       expect(resolveSavedSearches).toHaveBeenCalledWith(
         mockConflictedSearchDocs,
         defaultProps.services,
         defaultProps.indexPatterns,
-        false
+        true
       );
     });
 

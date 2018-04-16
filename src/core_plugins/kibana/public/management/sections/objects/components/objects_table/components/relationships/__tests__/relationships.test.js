@@ -39,6 +39,8 @@ describe('Relationships', () => {
           }
         ],
       })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
       id: '1',
       type: 'index-pattern',
       title: 'MyIndexPattern*',
@@ -77,6 +79,8 @@ describe('Relationships', () => {
           }
         ],
       })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
       id: '1',
       type: 'search',
       title: 'MySearch',
@@ -113,6 +117,8 @@ describe('Relationships', () => {
           }
         ],
       })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
       id: '1',
       type: 'visualization',
       title: 'MyViz',
@@ -149,6 +155,8 @@ describe('Relationships', () => {
           }
         ],
       })),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',
       title: 'MyDashboard',
@@ -178,6 +186,8 @@ describe('Relationships', () => {
       getRelationships: jest.fn().mockImplementation(() => {
         throw new Error('foo');
       }),
+      getEditUrl: () => '',
+      goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',
       title: 'MyDashboard',

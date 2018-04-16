@@ -75,7 +75,7 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
-                "description": "View the relationships this saved object has to other saved objects",
+                "description": "View this saved object within Kibana",
                 "icon": "eye",
                 "name": "In app",
                 "onClick": [Function],

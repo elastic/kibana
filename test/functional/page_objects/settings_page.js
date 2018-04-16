@@ -523,7 +523,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`importFile(${path})`);
       await (await testSubjects.find('importObjects')).click();
       await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.euiFilePicker__input').type(path);
-      if (overwriteAll) {
+      if (!overwriteAll) {
         await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
       }
       await (await testSubjects.find('importSavedObjectsImportBtn')).click();

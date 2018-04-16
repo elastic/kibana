@@ -3,6 +3,10 @@ import { shallow } from 'enzyme';
 
 import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
 
+jest.mock('../components/header', () => ({
+  Header: () => 'Header',
+}));
+
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
     constructor(options) {
@@ -182,6 +186,24 @@ describe('ObjectsTable', () => {
       expect(retrieveAndExportDocs).toHaveBeenCalledWith(mockSavedObjects, mockSavedObjectsClient);
     });
 
+    it('should allow the user to choose when exporting all', async () => {
+      const component = shallow(
+        <ObjectsTable
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.find('Header').prop('onExportAll')();
+      component.update();
+
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+    });
+
     it('should export all', async () => {
       const { scanAllTypes } = require('../../../lib/scan_all_types');
       const { saveToFile } = require('../../../lib/save_to_file');
@@ -309,6 +331,31 @@ describe('ObjectsTable', () => {
   });
 
   describe('delete', () => {
+    it('should show a confirm modal', async () => {
+      const component = shallow(
+        <ObjectsTable
+          {...defaultProps}
+        />
+      );
+
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' }
+      ];
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+    });
+
     it('should delete selected objects', async () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
@@ -344,7 +391,7 @@ describe('ObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onDelete();
+      await component.instance().delete();
 
       expect(defaultProps.indexPatterns.cache.clearAll).toHaveBeenCalled();
       expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
