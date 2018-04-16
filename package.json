@@ -76,7 +76,7 @@
     "@elastic/datemath": "4.0.2",
     "@elastic/eui": "0.0.14",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.3.1",
+    "@elastic/numeral": "2.3.2",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
@@ -210,8 +210,8 @@
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
-    "vega-lib": "3.0.10",
-    "vega-lite": "2.1.0",
+    "vega-lib": "^3.2.1",
+    "vega-lite": "^2.3.1",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
@@ -313,7 +313,7 @@
     "moment": "2.13.0"
   },
   "engines": {
-    "node": "6.12.2",
+    "node": "6.14.0",
     "yarn": "^1.3.2"
   }
 }
