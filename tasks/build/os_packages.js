@@ -1,12 +1,13 @@
-import { resolve } from 'path';
-import { indexBy } from 'lodash';
+import { resolve, join } from 'path';
 import exec from '../utils/exec';
 
 export default (grunt) => {
   const { config } = grunt;
   const targetDir = config.get('target');
-  const packageScriptsDir = grunt.config.get('packageScriptsDir');
-  const servicesByName = indexBy(config.get('services'), 'name');
+  const rootDir = config.get('root');
+  const packageScriptsDir = join(rootDir, '/tasks/build/package_scripts');
+  const configDir = join(rootDir, '/tasks/build/config');
+  const servicesDir = join(rootDir, '/tasks/build/services');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
@@ -39,12 +40,14 @@ export default (grunt) => {
           '--template-value', `group=${packages.group}`,
           '--template-value', `optimizeDir=${packages.path.home}/optimize`,
           '--template-value', `configDir=${packages.path.conf}`,
+          '--template-value', `logsDir=${packages.path.logs}`,
           '--template-value', `pluginsDir=${packages.path.plugins}`,
           '--template-value', `dataDir=${packages.path.data}`,
           //config folder is moved to path.conf, exclude {path.home}/config
           //uses relative path to --prefix, strip the leading /
           '--exclude', `${packages.path.home.slice(1)}/config`,
-          '--exclude', `${packages.path.home.slice(1)}/data`
+          '--exclude', `${packages.path.home.slice(1)}/data`,
+          '--exclude', `${packages.path.logs.slice(1)}/.empty`
         ];
         const debOptions = [
           '-t', 'deb',
@@ -58,10 +61,11 @@ export default (grunt) => {
         ];
         const args = [
           `${buildDir}/=${packages.path.home}/`,
-          `${buildDir}/config/=${packages.path.conf}/`,
           `${buildDir}/data/=${packages.path.data}/`,
-          `${servicesByName.sysv.outputDir}/etc/=/etc/`,
-          `${servicesByName.systemd.outputDir}/etc/=/etc/`
+          `${configDir}/=${packages.path.conf}/`,
+          `${servicesDir}/sysv/etc/=/etc/`,
+          `${servicesDir}/systemd/etc/=/etc/`,
+          `${servicesDir}/shared/var/=/var/`
         ];
 
         //Manually find flags, multiple args without assignment are not entirely parsed
