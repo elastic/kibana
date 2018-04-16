@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import _ from 'lodash';
 import { migrate } from '@kbn/migrations';
-import { mockKbnServer, waitUntilExists } from './test_helpers';
+import { waitUntilExists } from './test_helpers';
 
-export function migrateOldIndexTest({ callWithInternalUser }) {
+export function migrateOldIndexTest({ callCluster }) {
   it('Migrates an existing index that has never been migrated before', async () => {
     const index = '.test-existing';
     const plugin = {
@@ -33,7 +33,7 @@ export function migrateOldIndexTest({ callWithInternalUser }) {
       }],
     };
 
-    await callWithInternalUser('indices.create', {
+    await callCluster('indices.create', {
       index,
       body: {
         mappings: {
@@ -58,7 +58,7 @@ export function migrateOldIndexTest({ callWithInternalUser }) {
       },
     });
 
-    await callWithInternalUser('create', {
+    await callCluster('create', {
       index,
       type: 'doc',
       id: 'muzak:jessecook',
@@ -69,18 +69,17 @@ export function migrateOldIndexTest({ callWithInternalUser }) {
       },
     });
 
-    await waitUntilExists(() => callWithInternalUser('get', { index, type: 'doc', id: 'muzak:jessecook' }));
+    await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'muzak:jessecook' }));
 
-    const kbnServer = mockKbnServer(callWithInternalUser);
-    const { destIndex } = await migrate({ kbnServer, index, plugins: [plugin] });
+    const { destIndex } = await migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: [plugin] });
 
-    await waitUntilExists(() => callWithInternalUser('get', { index, type: 'doc', id: 'muzak:mars' }));
+    await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'muzak:mars' }));
 
-    const alias = await callWithInternalUser('indices.getAlias', { name: index });
-    const { _source: { migration } } = await callWithInternalUser('get', { index, type: 'doc', id: 'migration:migration-state' });
-    const jesseCook = await callWithInternalUser('get', { index, type: 'doc', id: 'muzak:jessecook' });
-    const mars = await callWithInternalUser('get', { index: destIndex, type: 'doc', id: 'muzak:mars' });
-    const originalDoc = await callWithInternalUser('get', { index: `${index}-9.8.7-original`, type: 'doc', id: 'muzak:jessecook' });
+    const alias = await callCluster('indices.getAlias', { name: index });
+    const { _source: { migration } } = await callCluster('get', { index, type: 'doc', id: 'migration:migration-state' });
+    const jesseCook = await callCluster('get', { index, type: 'doc', id: 'muzak:jessecook' });
+    const mars = await callCluster('get', { index: destIndex, type: 'doc', id: 'muzak:mars' });
+    const originalDoc = await callCluster('get', { index: `${index}-9.8.7-original`, type: 'doc', id: 'muzak:jessecook' });
 
     assert.equal(migration.plugins.length, 1);
     assert.deepEqual(migration.plugins[0].migrationIds, ['add_mars', 'ensure_album']);

@@ -11,8 +11,7 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { server, index, initialIndex, destIndex, plugins, version } = validateOpts(opts);
-  const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion } = validateOpts(opts);
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
@@ -23,9 +22,9 @@ async function fetch(opts) {
     migrationStateVersion,
     migrationPlan,
     plugins: sanitizedPlugins,
-    destIndex: destIndex || `${index}-${version}-${moment().format('YYYYMMDDHHmmss')}`,
-    initialIndex: initialIndex || `${index}-${version}-original`,
-    log: migrationLogger(server),
+    destIndex: destIndex || `${index}-${elasticVersion}-${moment().format('YYYYMMDDHHmmss')}`,
+    initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
+    log: migrationLogger(log),
   };
 }
 
@@ -42,20 +41,18 @@ function validateOpts(opts) {
   }
 
   validateProp('index', 'string');
-  validateProp('kbnServer', 'object');
+  validateProp('callCluster', 'function');
+  validateProp('log', 'function');
+  validateProp('elasticVersion', 'string');
   validateProp('plugins', 'array', (v) => Array.isArray(v));
   validateProp('destIndex', 'string', (v) => v === undefined || typeof v === 'string');
   validateProp('initialIndex', 'string', (v) => v === undefined || typeof v === 'string');
 
-  return {
-    ...opts,
-    server: opts.kbnServer.server,
-    version: opts.kbnServer.version,
-  };
+  return opts;
 }
 
-function migrationLogger(server) {
-  const logFn = prefix => msg => server.log(prefix, typeof msg === 'function' ? msg() : msg);
+function migrationLogger(log) {
+  const logFn = prefix => msg => log(prefix, typeof msg === 'function' ? msg() : msg);
   return {
     info: logFn(['info', 'migration']),
     debug: logFn(['debug', 'migration']),

@@ -8,8 +8,8 @@ import { migrateExistingTest } from './migrate_existing_test';
 
 export default function ({ getService }) {
   const es = getService('es');
-  const callWithInternalUser = (path, ...args) => _.get(es, path).call(es, ...args);
-  const helper = { callWithInternalUser };
+  const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
+  const helper = { callCluster };
 
   describe('migrate', () => {
     migrateNonexistantIndexTest(helper);

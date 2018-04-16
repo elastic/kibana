@@ -1,5 +1,5 @@
 const MigrationContext = require('./migration_context');
-const { mockKbnServer } = require('../test');
+const { mockCluster } = require('../test');
 
 describe('migrationContext', () => {
   test('ensures that migrations are not undefined', async () => {
@@ -23,7 +23,7 @@ describe('migrationContext', () => {
   test('creates a logger that logs info', async () => {
     const logs = [];
     const opts = buildOpts({});
-    opts.kbnServer.server.log = (...args) => logs.push(args);
+    opts.log = (...args) => logs.push(args);
     const actual = await MigrationContext.fetch(opts);
     actual.log.info('Wat up?');
     actual.log.info('Logging, sucka!');
@@ -37,7 +37,7 @@ describe('migrationContext', () => {
   test('creates a logger that logs debug', async () => {
     const logs = [];
     const opts = buildOpts({});
-    opts.kbnServer.server.log = (...args) => logs.push(args);
+    opts.log = (...args) => logs.push(args);
     const actual = await MigrationContext.fetch(opts);
     actual.log.debug('I need coffee');
     actual.log.debug('Lots o coffee');
@@ -104,9 +104,29 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('kbnServer is required', () => {
-    expect(testMigrationContext({ kbnServer: undefined }))
+  test('callCluster is required', () => {
+    expect(testMigrationContext({ callCluster: undefined }))
       .rejects.toThrow(/Got undefined/);
+  });
+
+  test('log is required', () => {
+    expect(testMigrationContext({ log: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('log must be a function', () => {
+    expect(testMigrationContext({ log: 'hello' }))
+      .rejects.toThrow(/Got string/);
+  });
+
+  test('elasticVersion is required', () => {
+    expect(testMigrationContext({ elasticVersion: undefined }))
+      .rejects.toThrow(/Got undefined/);
+  });
+
+  test('elasticVersion must be a string', () => {
+    expect(testMigrationContext({ elasticVersion: 32 }))
+      .rejects.toThrow(/Got number/);
   });
 
   test('plugins are required', () => {
@@ -114,8 +134,8 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('kbnServer must be an object', () => {
-    expect(testMigrationContext({ kbnServer: 'hello' }))
+  test('callCluster must be an object', () => {
+    expect(testMigrationContext({ callCluster: 'hello' }))
       .rejects.toThrow(/Got string/);
   });
 
@@ -139,17 +159,18 @@ describe('migrationContext', () => {
       .rejects.toThrow(/Got string/);
   });
 
-  function buildOpts(opts, version) {
+  function buildOpts(opts, elasticVersion = '9.8.7') {
     const index = 'test-index';
     const data = {
       [index]: {
         'migration:migration-state': opts.migrationState,
       },
     };
-    const { kbnServer } = mockKbnServer(data, {}, version);
     return {
       index,
-      kbnServer,
+      elasticVersion,
+      log: () => {},
+      callCluster: mockCluster(data, {}),
       plugins: opts.plugins || [],
       ...opts,
     };

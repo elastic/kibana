@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import _ from 'lodash';
 import { migrate } from '@kbn/migrations';
-import { mockKbnServer, waitUntilExists } from './test_helpers';
+import { waitUntilExists } from './test_helpers';
 
-export function migrateNonexistantIndexTest({ callWithInternalUser }) {
+export function migrateNonexistantIndexTest({ callCluster }) {
   it('creates and seeds index if index does not exist', async () => {
     const index = '.test-nonexistant';
     const plugin = {
@@ -30,13 +30,12 @@ export function migrateNonexistantIndexTest({ callWithInternalUser }) {
         transform: (doc) => _.set(doc, 'attributes.name', `${doc.attributes.name} Santana`),
       }],
     };
-    const kbnServer = mockKbnServer(callWithInternalUser);
-    const result = await migrate({ kbnServer, index, plugins: [plugin] });
+    const result = await migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: [plugin] });
 
-    await waitUntilExists(() => callWithInternalUser('get', { index, type: 'doc', id: 'migratetest:aseedforyou' }));
+    await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'migratetest:aseedforyou' }));
 
-    const { _source: { migration } } = await callWithInternalUser('get', { index, type: 'doc', id: 'migration:migration-state' });
-    const migratedDoc = await callWithInternalUser('get', { index, type: 'doc', id: 'migratetest:aseedforyou' });
+    const { _source: { migration } } = await callCluster('get', { index, type: 'doc', id: 'migration:migration-state' });
+    const migratedDoc = await callCluster('get', { index, type: 'doc', id: 'migratetest:aseedforyou' });
 
     assert.equal(migration.plugins.length, 1);
     assert.deepEqual(migration.plugins[0].migrationIds, ['m1', 'm2']);

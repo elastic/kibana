@@ -1,15 +1,18 @@
 const _ = require('lodash');
 const { migrate } = require('./migrate');
-const { mockKbnServer } = require('./test');
+const { mockCluster } = require('./test');
 const { MigrationState, Plugins } = require('./lib');
 
 describe('migrate', () => {
+  const elasticVersion = '9.8.7';
+  const log = () => {};
+
   test('does nothing if there are no migrations defined', async () => {
     const plugins = [];
     const index = '.amazemazing';
-    const { kbnServer, cluster } = mockKbnServer({});
-    await migrate({ kbnServer, index, plugins });
-    expect(cluster.state())
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, elasticVersion, log });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -21,9 +24,9 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const { kbnServer, cluster } = mockKbnServer({});
-    await migrate({ kbnServer, index, plugins, destIndex: '.mufasa-original' });
-    expect(cluster.state())
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, log, elasticVersion, index, plugins, destIndex: '.mufasa-original' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -35,13 +38,13 @@ describe('migrate', () => {
       },
     }];
     const index = '.mufasa';
-    const { kbnServer, cluster } = mockKbnServer({ [index]: { } }, {}, '7.7.7');
+    const callCluster = mockCluster({ [index]: { } }, {});
     const minIndexName = `${index}-7.7.7-${new Date().getUTCFullYear()}`;
     const maxIndexName = `${index}-7.7.7-${new Date().getUTCFullYear() + 1}`;
-    const { destIndex } = await migrate({ kbnServer, index, plugins });
+    const { destIndex } = await migrate({ callCluster, index, plugins, log, elasticVersion: '7.7.7' });
 
-    expect(cluster.state().data[destIndex]).toBeTruthy();
-    expect(cluster.state().meta.aliases[index][destIndex]).toBeTruthy();
+    expect(callCluster.state().data[destIndex]).toBeTruthy();
+    expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
     expect(destIndex > minIndexName).toBeTruthy();
     expect(destIndex < maxIndexName).toBeTruthy();
   });
@@ -64,9 +67,9 @@ describe('migrate', () => {
         },
       },
     });
-    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
-    await migrate({ kbnServer, index, plugins, destIndex: 'mufasa-v1' });
-    expect(cluster.state())
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins, log, elasticVersion, destIndex: 'mufasa-v1' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -76,11 +79,11 @@ describe('migrate', () => {
       migrations: [{ id: 'm1', filter: () => true, transform: _.identity }],
     }];
     const index = '.mufasa';
-    const { kbnServer } = mockKbnServer({});
+    const callCluster = mockCluster({});
     const results = await Promise.all([
-      migrate({ kbnServer, index, plugins })
+      migrate({ callCluster, index, plugins, elasticVersion, log })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ kbnServer, index, plugins })
+      migrate({ callCluster, index, plugins, elasticVersion, log })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
     expect(results[0].status).toEqual('migrated');
@@ -101,11 +104,11 @@ describe('migrate', () => {
     };
     const existingData = assocMigrationState({}, index, originalMigrationState);
     const existingMeta = assocAlias({}, index, alias);
-    const { kbnServer } = mockKbnServer(existingData, existingMeta);
+    const callCluster = mockCluster(existingData, existingMeta);
     const results = await Promise.all([
-      migrate({ kbnServer, index: alias, plugins: [pluginV2] })
+      migrate({ callCluster, index: alias, elasticVersion, log, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
-      migrate({ kbnServer, index: alias, plugins: [pluginV2] })
+      migrate({ callCluster, index: alias, elasticVersion, log, plugins: [pluginV2] })
         .catch(({ statusCode }) => ({ status: statusCode })),
     ]);
 
@@ -134,9 +137,9 @@ describe('migrate', () => {
       }],
     }];
     const index = '.mufasa';
-    const { kbnServer, cluster } = mockKbnServer({});
-    await migrate({ kbnServer, index, plugins, initialIndex: '.mufasa-v1' });
-    expect(cluster.state())
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, elasticVersion, log, initialIndex: '.mufasa-v1' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -166,9 +169,9 @@ describe('migrate', () => {
         transform: (doc) => _.set(_.cloneDeep(doc), ['attributes', 'john'], 'coltrane'),
       }],
     }];
-    const { kbnServer, cluster } = mockKbnServer({});
-    await migrate({ kbnServer, index, plugins, initialIndex: '.music-dest' });
-    expect(cluster.state())
+    const callCluster = mockCluster({});
+    await migrate({ callCluster, index, plugins, elasticVersion, log, initialIndex: '.music-dest' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -182,9 +185,9 @@ describe('migrate', () => {
     }];
     const existingData = _.set({}, [index, 'baz:fred', '_source'], { type: 'baz', baz: { bar: 'bing' } });
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
-    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
-    await migrate({ kbnServer, index, plugins, destIndex: 'gentleman-v2' });
-    expect(cluster.state())
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, plugins, elasticVersion, log, destIndex: 'gentleman-v2' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -226,9 +229,9 @@ describe('migrate', () => {
       ...plugin2.mappings,
       user: { name: { type: 'keyword' } },
     });
-    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
-    await migrate({ kbnServer, index, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
-    expect(cluster.state())
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, elasticVersion, log, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -263,9 +266,9 @@ describe('migrate', () => {
     _.set(existingData, [index, 'fish:f1', '_source'], { type: 'fish', fish: { kind: 'catfish' } });
     _.set(existingData, [index, 'fish:f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
-    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
-    await migrate({ kbnServer, index, plugins: [pluginV2], destIndex: 'aquatica-2' });
-    expect(cluster.state())
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, elasticVersion, log, plugins: [pluginV2], destIndex: 'aquatica-2' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 
@@ -293,8 +296,8 @@ describe('migrate', () => {
     };
     const existingData = assocMigrationState({}, index, migrationState);
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
-    const { kbnServer } = mockKbnServer(existingData, existingMeta);
-    expect(migrate({ kbnServer, index, plugins: [pluginV1] }))
+    const callCluster = mockCluster(existingData, existingMeta);
+    expect(migrate({ callCluster, index, elasticVersion, log, plugins: [pluginV1] }))
       .rejects.toThrow(/migration order has changed/);
   });
 
@@ -330,9 +333,9 @@ describe('migrate', () => {
     });
     const existingMeta = assocAlias({}, existingIndex, index);
     assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
-    const { kbnServer, cluster } = mockKbnServer(existingData, existingMeta);
-    await migrate({ kbnServer, index, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
-    expect(cluster.state())
+    const callCluster = mockCluster(existingData, existingMeta);
+    await migrate({ callCluster, index, elasticVersion, log, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
+    expect(callCluster.state())
       .toMatchSnapshot();
   });
 });
