@@ -77,6 +77,9 @@ module
 
     $scope.overallState = SAVE_STATE.NOT_SAVED;
 
+    const moduleId = $route.current.params.id;
+    $scope.moduleId = moduleId;
+
     const {
       indexPattern,
       savedSearch,
@@ -85,6 +88,8 @@ module
 
     const pageTitle = (savedSearch.id !== undefined) ?
       `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
+
+    $scope.displayQueryWarning = (savedSearch.id !== undefined);
 
     $scope.ui = {
       formValid: true,
@@ -124,8 +129,6 @@ module
     };
 
     $scope.resultsUrl = '';
-
-    const moduleId = $route.current.params.id;
 
     $scope.resetJob = function () {
       $scope.overallState = SAVE_STATE.NOT_SAVED;
