@@ -92,6 +92,7 @@ export class Tutorial extends React.Component {
       return {
         hasStatusCheck: instructionSet.statusCheck ? true : false,
         isComplete: false,
+        isFetchingStatus: false,
       };
     });
 
@@ -112,6 +113,40 @@ export class Tutorial extends React.Component {
       const paramValues = _.cloneDeep(previousState.paramValues);
       paramValues[paramId] = newValue;
       return { paramValues: paramValues };
+    });
+  }
+
+  checkInstructionSetStatus = async (instructionSetIndex) => {
+    const instructions = this.getInstructions();
+    const esHitsCheckConfig = _.get(instructions, `instructionSets[${instructionSetIndex}].statusCheck.esHitsCheck`);
+    if (!esHitsCheckConfig) {
+      return;
+    }
+
+    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
+    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
+    const body = `${searchHeader}\n${searchBody}`;
+
+    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
+      method: 'post',
+      body: body,
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/x-ndjson',
+        'kbn-xsrf': 'kibana',
+      },
+      credentials: 'same-origin'
+    });
+
+    let hasHits = false;
+    if (response.status < 300) {
+
+    }
+
+    this.setState((prevState) => {
+      prevState.statusCheck[instructionSetIndex].isComplete = hasHits;
+      prevState.statusCheck[instructionSetIndex].hasFailed = !hasHits;
+      return { statusCheck: prevState.statusCheck };
     });
   }
 
@@ -144,8 +179,10 @@ export class Tutorial extends React.Component {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
       let statusCheckState = undefined;
+      let isCheckingStatus = false;
       if (_.get(this.state, `statusCheck[${index}].hasStatusCheck`, false)) {
         statusCheckState = this.state.statusCheck[index].isComplete ? 'complete' : 'incomplete';
+        isCheckingStatus = this.state.statusCheck[index].isFetchingStatus;
       }
       return (
         <InstructionSet
@@ -153,11 +190,12 @@ export class Tutorial extends React.Component {
           instructionVariants={instructionSet.instructionVariants}
           statusCheck={instructionSet.statusCheck}
           statusCheckState={statusCheckState}
+          isCheckingStatus={isCheckingStatus}
           onStatusCheck={() => {
             this.setState((prevState) => {
-              prevState.statusCheck[index].isComplete = true;
+              prevState.statusCheck[index].isFetchingStatus = true;
               return { statusCheck: prevState.statusCheck };
-            });
+            }, this.checkInstructionSetStatus.bind(null, index));
           }}
           offset={currentOffset}
           params={instructions.params}
@@ -261,5 +299,5 @@ Tutorial.propTypes = {
   isCloudEnabled: PropTypes.bool.isRequired,
   getTutorial: PropTypes.func.isRequired,
   replaceTemplateStrings: PropTypes.func.isRequired,
-  tutorialId: PropTypes.string.isRequired
+  tutorialId: PropTypes.string.isRequired,
 };

@@ -80,6 +80,7 @@ export class InstructionSet extends React.Component {
         >
           <EuiButton
             onClick={() => {this.props.onStatusCheck();}}
+            isLoading={this.props.isCheckingStatus}
           >
             {this.props.statusCheck.btnLabel ? this.props.statusCheck.btnLabel : 'Check status'}
           </EuiButton>
@@ -229,6 +230,7 @@ InstructionSet.propTypes = {
   statusCheck: statusCheckShape,
   statusCheckState: PropTypes.string,
   onStatusCheck: PropTypes.func.isRequired,
+  isCheckingStatus: PropTypes.bool,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,
