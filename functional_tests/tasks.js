@@ -38,6 +38,7 @@ export async function runTests(
 
   cmd
     .option('--config [value]', 'Path to config file to specify options', null)
+    .option('--bail', 'stop tests after the first failure', false)
     .parse(process.argv);
 
   configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
@@ -119,6 +120,7 @@ function resolveConfigPath(configPath) {
   if (originalCall === 'functional_test_with_config') {
     cmd
       .option('--config [value]', 'Path to config file to specify options', null)
+      .option('--bail', 'stop tests after the first failure', false)
       .parse(process.argv);
 
     return resolve(KIBANA_ROOT, cmd.config || configPath);
