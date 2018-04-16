@@ -81,7 +81,6 @@ export default async function ({ readConfigFile }) {
 
     kibanaServerArgs: [
       ...commonConfig.get('kibanaServerArgs'),
-      '--optimize.enabled=true',
     ],
 
     apps: {
