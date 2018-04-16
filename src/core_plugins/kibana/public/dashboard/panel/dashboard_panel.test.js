@@ -5,12 +5,14 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+
 import {
   updateViewMode,
   setPanels,
+  updateTimeRange,
 } from '../actions';
 import { Provider } from 'react-redux';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import {
   takeMountedSnapshot,
@@ -19,15 +21,20 @@ import {
 function getProps(props = {}) {
   const defaultTestProps = {
     panel: { panelIndex: 'foo1' },
-    renderEmbeddable: jest.fn(),
     viewOnlyMode: false,
-    onDestroy: () => {},
+    destroy: () => {},
+    initialized: true,
+    embeddableIsInitialized: () => {},
+    embeddableIsInitializing: () => {},
+    embeddableStateChanged: () => {},
+    embeddableError: () => {},
     embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
 beforeAll(() => {
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
 });
@@ -35,12 +42,6 @@ beforeAll(() => {
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<Provider store={store}><DashboardPanel {...getProps()} /></Provider>);
   expect(takeMountedSnapshot(component)).toMatchSnapshot();
-});
-
-test('Calls render', () => {
-  const props = getProps();
-  mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
-  expect(props.renderEmbeddable.mock.calls.length).toBe(1);
 });
 
 test('renders an error when error prop is passed', () => {

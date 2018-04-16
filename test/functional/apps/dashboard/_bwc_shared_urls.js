@@ -4,6 +4,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
+  const log = getService('log');
+
   let kibanaBaseUrl;
 
   const urlQuery = `` +
@@ -38,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
-
+        log.debug(`Navigating to ${url}`);
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

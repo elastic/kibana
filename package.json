@@ -89,7 +89,7 @@
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
-    "angular": "1.6.5",
+    "angular": "1.6.9",
     "angular-aria": "1.6.6",
     "angular-elastic": "2.5.0",
     "angular-recursion": "^1.0.5",
