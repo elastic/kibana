@@ -58,7 +58,8 @@ module
       NOT_SAVED: 0,
       SAVING: 1,
       SAVED: 2,
-      FAILED: 3
+      FAILED: 3,
+      PARTIAL_FAILURE: 4
     };
 
     const DATAFEED_STATE = {
@@ -216,33 +217,21 @@ module
         angular.element('.results').css('opacity', 1);
         // wait 500ms for the results section to fade in.
         window.setTimeout(() => {
-        // save jobs,datafeeds and kibana savedObjects
+          // save jobs,datafeeds and kibana savedObjects
           saveDataRecognizerItems()
             .then(() => {
-              const jobIds = $scope.formConfig.jobs.map(job => `${$scope.formConfig.jobLabel}${job.id}`);
-
               // open jobs and save start datafeeds
               if ($scope.formConfig.startDatafeedAfterSave) {
                 startDatafeeds()
                   .then(() => {
                     // everything saved correctly and datafeeds have started.
-                    $scope.overallState = SAVE_STATE.SAVED;
-                    $scope.resultsUrl = createResultsUrl(
-                      jobIds,
-                      $scope.formConfig.start,
-                      $scope.formConfig.end,
-                      'explorer');
+                    $scope.setOverallState();
                   }).catch(() => {
-                    $scope.overallState = SAVE_STATE.FAILED;
+                    $scope.setOverallState();
                   });
               } else {
                 // datafeeds didn't need to be started so finish
-                $scope.overallState = SAVE_STATE.SAVED;
-                $scope.resultsUrl = createResultsUrl(
-                  jobIds,
-                  $scope.formConfig.start,
-                  $scope.formConfig.end,
-                  'explorer');
+                $scope.setOverallState();
               }
             });
         }, 500);
@@ -371,6 +360,9 @@ module
 
             function open(job) {
               if (job.jobState === SAVE_STATE.FAILED) {
+                // we're skipping over the datafeed, so bump the
+                // counter up manually so it all tallies at the end.
+                datafeedCounter++;
                 job.runningState = DATAFEED_STATE.FAILED;
                 incrementAndOpen(job);
                 return;
@@ -449,6 +441,29 @@ module
           });
       });
     }
+
+    $scope.setOverallState = function () {
+      const jobIds = $scope.formConfig.jobs.map(job => `${$scope.formConfig.jobLabel}${job.id}`);
+
+      const failedJobsCount = $scope.formConfig.jobs.reduce((count, job) => {
+        return count + (job.jobState === SAVE_STATE.FAILED || job.datafeedState === SAVE_STATE.FAILED) ? 1 : 0;
+      }, 0);
+
+      if (failedJobsCount) {
+        if (failedJobsCount === $scope.formConfig.jobs.length) {
+          $scope.overallState = SAVE_STATE.FAILED;
+        } else {
+          $scope.overallState = SAVE_STATE.PARTIAL_FAILURE;
+        }
+      } else {
+        $scope.resultsUrl = createResultsUrl(
+          jobIds,
+          $scope.formConfig.start,
+          $scope.formConfig.end,
+          'explorer');
+      }
+    };
+
 
     function validateJobs() {
       let valid = true;
