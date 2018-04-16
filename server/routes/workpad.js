@@ -68,6 +68,8 @@ export function workpad(server) {
 
     return savedObjectsClient.find({
       type: CANVAS_TYPE,
+      sortField: '@timestamp',
+      sortOrder: 'desc',
       search: name ? `${name}* | ${name}` : '*',
       searchFields: ['name'],
       fields: ['id', 'name', '@created', '@timestamp'],
