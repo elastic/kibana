@@ -79,7 +79,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         .map(code => {
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
-            throw createCliError(`[${name}] exitted with code ${code}`);
+            throw createCliError(`[${name}] exited with code ${code}`);
           }
 
           return code;
