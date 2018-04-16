@@ -443,10 +443,14 @@ module
     }
 
     $scope.setOverallState = function () {
-      const jobIds = $scope.formConfig.jobs.map(job => `${$scope.formConfig.jobLabel}${job.id}`);
-
+      const jobIds = [];
       const failedJobsCount = $scope.formConfig.jobs.reduce((count, job) => {
-        return count + (job.jobState === SAVE_STATE.FAILED || job.datafeedState === SAVE_STATE.FAILED) ? 1 : 0;
+        if (job.jobState === SAVE_STATE.FAILED || job.datafeedState === SAVE_STATE.FAILED) {
+          return count + 1;
+        } else {
+          jobIds.push(`${$scope.formConfig.jobLabel}${job.id}`);
+          return count;
+        }
       }, 0);
 
       if (failedJobsCount) {
@@ -455,13 +459,13 @@ module
         } else {
           $scope.overallState = SAVE_STATE.PARTIAL_FAILURE;
         }
-      } else {
-        $scope.resultsUrl = createResultsUrl(
-          jobIds,
-          $scope.formConfig.start,
-          $scope.formConfig.end,
-          'explorer');
       }
+
+      $scope.resultsUrl = createResultsUrl(
+        jobIds,
+        $scope.formConfig.start,
+        $scope.formConfig.end,
+        'explorer');
     };
 
 
