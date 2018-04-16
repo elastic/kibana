@@ -13,6 +13,27 @@ import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
+const getAuthChallengeResponse = async (req, server) => {
+  if (req.auth.strategy || req.auth.mode) {
+    return null;
+  }
+
+  try {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+    await callWithRequest(req, 'info');
+    return null;
+  } catch (err) {
+    if (err.statusCode !== 401) {
+      throw err;
+    }
+
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
+    const wwwAuthHeader = _.get(err, 'body.error.header[WWW-Authenticate]');
+    boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
+    return err;
+  }
+};
+
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
@@ -75,8 +96,18 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, reply) {
+    async handler(req, reply) {
+      const authChallengeResponse = await getAuthChallengeResponse(req, server);
+      if (authChallengeResponse) {
+        return reply(authChallengeResponse);
+      }
+
       const basePath = config.get('server.basePath');
+      if (req.query.redirectApp) {
+        reply.redirect(`${basePath}/app/${encodeURIComponent(req.query.redirectApp)}`);
+        return;
+      }
+
       const defaultRoute = config.get('server.defaultRoute');
       reply.redirect(`${basePath}${defaultRoute}`);
     }

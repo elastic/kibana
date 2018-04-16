@@ -4,6 +4,23 @@ import Boom from 'boom';
 import { resolve } from 'path';
 import { AppBootstrap } from './bootstrap';
 
+const shouldAuthRedirect = async (server, req) => {
+  if (req.auth.strategy || req.auth.mode) {
+    return false;
+  }
+
+  try {
+    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+    await callWithRequest(req, 'info');
+    return false;
+  } catch (err) {
+    if (err.statusCode !== 401) {
+      throw err;
+    }
+    return true;
+  }
+};
+
 export function uiRenderMixin(kbnServer, server, config) {
 
   function replaceInjectedVars(request, injectedVars) {
@@ -74,6 +91,11 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       try {
         if (kbnServer.status.isGreen()) {
+          if (await shouldAuthRedirect(server, req)) {
+            const basePath = config.get('server.basePath');
+            return reply.redirect(`/${basePath}?redirectApp=${id}`);
+          }
+
           await reply.renderApp(app);
         } else {
           await reply.renderStatusPage();
