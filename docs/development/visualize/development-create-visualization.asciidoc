@@ -422,8 +422,6 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.API.timeFilter*: allows you to access time picker
 - *vis.API.queryFilter*: gives you access to queryFilter
 - *vis.API.queryManager*: gives you access to add filters to the filter bar
-- *vis.API.filterManager*: gives you access to filterManager
-- *vis.API.kuery*: gives you access to the experimental `keury`-language filter bar
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 

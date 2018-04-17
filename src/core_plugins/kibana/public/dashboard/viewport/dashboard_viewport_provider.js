@@ -13,6 +13,5 @@ export function DashboardViewportProvider(props) {
 }
 
 DashboardViewportProvider.propTypes = {
-  getContainerApi: PropTypes.func.isRequired,
   getEmbeddableFactory: PropTypes.func.isRequired,
 };

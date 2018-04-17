@@ -10,7 +10,7 @@ function getExpectedProjectsAndGraph(runMock: any) {
     any
   >).mock.calls[0];
 
-  const projects = [...fullProjects.keys()];
+  const projects = [...fullProjects.keys()].sort();
 
   const graph = [...fullProjectGraph.entries()].reduce(
     (expected, [projectName, dependencies]) => {
