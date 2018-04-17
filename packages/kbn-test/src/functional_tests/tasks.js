@@ -78,9 +78,10 @@ export async function startServers(
   });
 }
 
-// Start servers and run tests
+// Start servers and run tests for single config
 // TODO: doesn't work to pass in config via command line
-async function runWithConfig(
+// TODO: don't export this--
+export async function runWithConfig(
   configPath = 'test/functional/config.js',
   runEs = runElasticsearch,
   runKbn = runKibanaServer,

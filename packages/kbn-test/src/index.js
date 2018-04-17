@@ -1,6 +1,6 @@
 export {
   runTests,
-  //runWithConfig,
+  runWithConfig,
   startServers,
 } from './functional_tests/tasks';
 
