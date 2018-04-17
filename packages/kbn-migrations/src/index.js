@@ -49,8 +49,10 @@ module.exports = {
 /**
  * The options for running migrations or checking migration status
  * @typedef {Object} MigrationOpts
- * @property {KibanaServer} kbnServer - The Kibana server object, which contains the Elastic stack version info, and a server property
+ * @property {((command: string, opts: any) => Promise<any>)} callCluster - A propery secured function that calls Elastic search
  * @property {MigrationPlugin[]} plugins - A list of plugins that define migrations and/or mappings
+ * @property {string} elasticVersion - The version of Elasticsearch being written to
+ * @property {((meta: string[], message: string) => void)} log - A function which logs info and debug messages
  * @property {string} index - The index or alias to be migrated
  * @property {string|undefined} destIndex - The name of the index to which index will be migrated. The destIndex must not exist prior to calling migrate.
  * @property {string|undefined} initialIndex - The name of the index that will be created if no index exists or if no alias exists.
