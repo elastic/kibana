@@ -2,16 +2,18 @@ import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
 
 
-export function convertToGeoJson(tabifiedResponse, geoAgg) {
+export function convertToGeoJson(tabifiedResponse) {
 
   let features;
   let min = Infinity;
   let max = -Infinity;
+  let geoAgg;
 
   if (tabifiedResponse && tabifiedResponse.tables && tabifiedResponse.tables[0] && tabifiedResponse.tables[0].rows) {
 
     const table = tabifiedResponse.tables[0];
     const geohashIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geohash_grid');
+    geoAgg = table.columns.find(column => column.aggConfig.type.dslName === 'geohash_grid');
 
     if (geohashIndex === -1) {
       features = [];
@@ -45,7 +47,7 @@ export function convertToGeoJson(tabifiedResponse, geoAgg) {
           geohashLocation.longitude[2]
         ];
 
-        if (geoAgg.params.useGeocentroid) {
+        if (geoAgg.aggConfig.params.useGeocentroid) {
           // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
           pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
           pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
@@ -90,8 +92,8 @@ export function convertToGeoJson(tabifiedResponse, geoAgg) {
     meta: {
       min: min,
       max: max,
-      geohashPrecision: geoAgg && geoAgg.params.precision,
-      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
+      geohashPrecision: geoAgg && geoAgg.aggConfig.params.precision,
+      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.aggConfig.params.precision)
     }
   };
 }

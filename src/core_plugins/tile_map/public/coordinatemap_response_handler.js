@@ -1,19 +1,25 @@
 import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 export function makeTabbedResponseHandler() {
 
   let lastEsResponse;
-  let lastTabifiedResponse;
+  let lastGeoJsonResponse;
 
   return function makeIdentityResponseHandler(vis, esResponse) {
-
     if (lastEsResponse === esResponse) {
-      return lastTabifiedResponse;
+      return lastGeoJsonResponse;
     }
-    lastTabifiedResponse = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResponse, {
+
+    lastEsResponse = esResponse;
+
+    //double conversion, first to table, then to geojson
+    //This is to future-proof this code for Canvas-refactoring
+    const tabifiedResponse = tabifyAggResponse(vis.getAggConfig().getResponseAggs(), esResponse, {
       asAggConfigResults: false
     });
-    lastEsResponse = esResponse;
-    return lastTabifiedResponse;
+    lastGeoJsonResponse = convertToGeoJson(tabifiedResponse);
+
+    return lastGeoJsonResponse;
   };
 }

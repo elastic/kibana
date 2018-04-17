@@ -9,7 +9,6 @@ import { AggConfig } from 'ui/vis/agg_config';
 // import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
 import './styles/_tilemap.less';
-import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
@@ -53,7 +52,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
           this.vis.updateState();
         } else {
           //when we filter queries by collar
-          this._updateData(this._rawTabifiedResponse);
+          this._updateData(this._geoJsonFeatureCollectionAndMeta);
         }
       });
 
@@ -68,33 +67,29 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       });
     }
 
-    async _updateData(esResponse) {
+    async _updateData(geojsonFeatureCollectionAndMeta) {
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
         this._getMapsParams().mapType !== 'Heatmap' &&
-        esResponse === this._rawTabifiedResponse) {
+        geojsonFeatureCollectionAndMeta === this._geoJsonFeatureCollectionAndMeta) {
         return;
       }
 
-      //only now should we apply any transformations to the data.
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
       }
 
-      if (!esResponse) {
+      if (!geojsonFeatureCollectionAndMeta) {
         this._geoJsonFeatureCollectionAndMeta = null;
-        this._rawTabifiedResponse = null;
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
         return;
       }
 
-      this._rawTabifiedResponse = esResponse;
 
-      const geohashAgg = this._getGeoHashAgg();
-      this._geoJsonFeatureCollectionAndMeta = convertToGeoJson(esResponse, geohashAgg);
+      this._geoJsonFeatureCollectionAndMeta = geojsonFeatureCollectionAndMeta;
       this._recreateGeohashLayer();
     }
 
@@ -126,7 +121,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         if (this._geoJsonFeatureCollectionAndMeta) {
           this._recreateGeohashLayer();
         }
-        this._updateData(this._rawTabifiedResponse);
+        this._updateData(this._geoJsonFeatureCollectionAndMeta);
       }
     }
 
