@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { contentTypesSetup } from './content_types';
+import { createLegacyClass } from 'ui/utils/legacy_class';
 
 export function FieldFormat(params) {
   // give the constructor a more appropriate name
@@ -17,7 +18,7 @@ export function FieldFormat(params) {
 }
 
 FieldFormat.from = function (converter) {
-  _.class(FieldFormatFromConverter).inherits(FieldFormat);
+  createLegacyClass(FieldFormatFromConverter).inherits(FieldFormat);
   function FieldFormatFromConverter(params) {
     FieldFormatFromConverter.Super.call(this, params);
   }
