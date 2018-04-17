@@ -16,9 +16,6 @@ const DEFAULTS_SETTINGS = {
     quiet: true
   },
   plugins: {},
-  uiSettings: {
-    enabled: false
-  },
   optimize: {
     enabled: false
   },
@@ -34,10 +31,7 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
     url: esTestConfig.getUrl(),
     username: kibanaServer.username,
     password: kibanaServer.password
-  },
-  uiSettings: {
-    enabled: true
-  },
+  }
 };
 
 /**

@@ -38,19 +38,14 @@ export class Table extends PureComponent {
       description: `Name of the field`,
       dataType: 'string',
       sortable: true,
+      width: '38%',
     }, {
       field: 'lang',
       name: 'Lang',
       description: `Language used for the field`,
       dataType: 'string',
       sortable: true,
-      render: value => {
-        return (
-          <span data-test-subj="scriptedFieldLang">
-            {value}
-          </span>
-        );
-      }
+      'data-test-subj': 'scriptedFieldLang',
     }, {
       field: 'script',
       name: 'Script',
@@ -77,6 +72,7 @@ export class Table extends PureComponent {
         color: 'danger',
         onClick: deleteField,
       }],
+      width: '40px',
     }];
 
     const pagination = {

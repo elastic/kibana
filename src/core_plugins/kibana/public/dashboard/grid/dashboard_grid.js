@@ -7,7 +7,9 @@ import classNames from 'classnames';
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
+import { toastNotifications } from 'ui/notify';
 import {
+  DashboardConstants,
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
 } from '../dashboard_constants';
@@ -59,6 +61,9 @@ function ResponsiveGrid({
       className={classes}
       isDraggable={true}
       isResizable={true}
+      // There is a bug with d3 + firefox + elements using transforms.
+      // See https://github.com/elastic/kibana/issues/16870 for more context.
+      useCSSTransforms={false}
       margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={DASHBOARD_GRID_HEIGHT}
@@ -84,9 +89,25 @@ export class DashboardGrid extends React.Component {
     // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
     // item.
     this.gridItems = {};
+
+    let isLayoutInvalid = false;
+    let layout;
+    try {
+      layout = this.buildLayoutFromPanels();
+    } catch (error) {
+      isLayoutInvalid = true;
+      toastNotifications.addDanger({
+        title: 'Unable to load dashboard.',
+        text: error.message,
+      });
+      window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
+    }
     this.state = {
-      layout: this.buildLayoutFromPanels()
+      focusedPanelIndex: undefined,
+      layout,
+      isLayoutInvalid,
     };
+
     // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
     // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
     // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
@@ -131,43 +152,32 @@ export class DashboardGrid extends React.Component {
 
   onLayoutChange = (layout) => {
     const { onPanelsUpdated } = this.props;
-    const updatedPanels = [];
-    layout.forEach(panelLayout => {
-      const updatedPanel = {
+    const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
+      updatedPanelsAcc[panelLayout.i] = {
         panelIndex: panelLayout.i,
-        gridData: {
-          x: panelLayout.x,
-          y: panelLayout.y,
-          w: panelLayout.w,
-          h: panelLayout.h,
-          i: panelLayout.i,
-        }
+        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
       };
-      updatedPanels.push(updatedPanel);
-    });
+      return updatedPanelsAcc;
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
-  onPanelFocused = panelIndex => {
-    const gridItem = this.gridItems[panelIndex];
-    if (gridItem) {
-      gridItem.style.zIndex = '1';
-    }
+  onPanelFocused = focusedPanelIndex => {
+    this.setState({ focusedPanelIndex });
   };
 
-  onPanelBlurred = panelIndex => {
-    const gridItem = this.gridItems[panelIndex];
-    if (gridItem) {
-      gridItem.style.zIndex = 'auto';
+  onPanelBlurred = blurredPanelIndex => {
+    if (this.state.focusedPanelIndex === blurredPanelIndex) {
+      this.setState({ focusedPanelIndex: undefined });
     }
   };
 
   renderDOM() {
     const {
       panels,
-      getContainerApi,
       maximizedPanelId
     } = this.props;
+    const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(key => panels[key]);
@@ -188,13 +198,13 @@ export class DashboardGrid extends React.Component {
       });
       return (
         <div
+          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? '2' : 'auto' }}
           className={classes}
           key={panel.panelIndex}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
           <DashboardPanel
             panelId={panel.panelIndex}
-            getContainerApi={getContainerApi}
             embeddableFactory={this.embeddableFactoryMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
@@ -205,6 +215,10 @@ export class DashboardGrid extends React.Component {
   }
 
   render() {
+    if (this.state.isLayoutInvalid) {
+      return null;
+    }
+
     const { dashboardViewMode, maximizedPanelId, useMargins } = this.props;
     const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
@@ -223,7 +237,6 @@ export class DashboardGrid extends React.Component {
 
 DashboardGrid.propTypes = {
   panels: PropTypes.object.isRequired,
-  getContainerApi: PropTypes.func.isRequired,
   getEmbeddableFactory: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelsUpdated: PropTypes.func.isRequired,

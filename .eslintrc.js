@@ -6,7 +6,7 @@ module.exports = {
 
   settings: {
     'import/resolver': {
-      '@elastic/eslint-import-resolver-kibana': {
+      '@kbn/eslint-import-resolver-kibana': {
         rootPackageName: 'kibana',
         kibanaPath: '.',
       },
@@ -19,8 +19,10 @@ module.exports = {
       files: [
         '.eslintrc.js',
         'packages/kbn-pm/**/*',
+        'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-plugin-generator/**/*',
+        'packages/kbn-eslint-import-resolver-kibana/**/*',
       ],
       plugins: ['prettier'],
       rules: Object.assign(

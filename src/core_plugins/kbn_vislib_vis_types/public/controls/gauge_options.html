@@ -24,25 +24,29 @@
 
   <div class="kuiSideBarFormRow" ng-hide="vis.params.gauge.type === 'simple'">
     <label class="kuiSideBarFormRow__label" for="verticalSplit">
-      Vertical Split &nbsp;
-      <kbn-info
-        placement="right"
-        info="Shows gauges one under another">
-      </kbn-info>
+      Vertical Split
     </label>
     <div class="kuiSideBarFormRow__control">
-      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">
+      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">&nbsp;
+      <icon-tip
+        content="'Shows gauges one under another'"
+        position="'right'"
+      ></icon-tip>
     </div>
   </div>
 
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="displayWarnings">
-      Display warnings &nbsp;
-      <kbn-info info="Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed."></kbn-info>
+      Display warnings
     </label>
 
     <div class="kuiSideBarFormRow__control">
       <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
+      &nbsp;
+      <icon-tip
+        content="'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.'"
+        position="'right'"
+      ></icon-tip>
     </div>
   </div>
 
@@ -84,14 +88,15 @@
     ng-show="vis.params.gauge.colorsRange.length > 1"
   >
     <label class="kuiSideBarFormRow__label" for="extendRange">
-      Auto Extend Range &nbsp;
-      <kbn-info
-        placement="right"
-        info="Extends range to the maximum value in your data">
-      </kbn-info>
+      Auto Extend Range
     </label>
     <div class="kuiSideBarFormRow__control">
       <input class="kuiCheckBox" id="extendRange" type="checkbox" ng-model="vis.params.gauge.extendRange">
+      &nbsp;
+      <icon-tip
+        content="'Extends range to the maximum value in your data'"
+        position="'right'"
+      ></icon-tip>
     </div>
   </div>
 

@@ -1,0 +1,393 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DiscoverNoResults props queryLanguage supports lucene and renders doc link 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiCallOutHeader__icon"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xlink="http://www.w3.org/1999/xlink"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <path
+                d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                id="help-a"
+              />
+            </defs>
+            <use
+              fill-rule="evenodd"
+              href="#help-a"
+            />
+          </svg>
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText"
+      >
+        <h3>
+          Refine your query
+        </h3>
+        <p>
+          The search bar at the top uses Elasticsearch’s support for Lucene 
+          <a
+            class="euiLink euiLink--primary"
+            href="documentation-link"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Query String syntax
+          </a>
+          . Here are some examples of how you can search for web server logs that have been parsed into a few fields.
+        </p>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <dl
+        class="euiDescriptionList euiDescriptionList--column"
+      >
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText"
+          >
+            <strong>
+              Find requests that contain the number 200, in any field
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              200
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText"
+          >
+            <strong>
+              Find 200 in the status field
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:200
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText"
+          >
+            <strong>
+              Find all status codes between 400-499
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499]
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText"
+          >
+            <strong>
+              Find status codes 400-499 with the extension php
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499] AND extension:PHP
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText"
+          >
+            <strong>
+              Find status codes 400-499 with the extension php or html
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499] AND (extension:php OR extension:html)
+            </code>
+          </span>
+        </dd>
+      </dl>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`DiscoverNoResults props shardFailures renders failures list 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiCallOutHeader__icon"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xlink="http://www.w3.org/1999/xlink"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <path
+                d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                id="help-a"
+              />
+            </defs>
+            <use
+              fill-rule="evenodd"
+              href="#help-a"
+            />
+          </svg>
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText"
+      >
+        <h3>
+          Address shard failures
+        </h3>
+        <p>
+          The following shard failures occurred:
+        </p>
+        <div>
+          <div
+            class="euiText euiText--extraSmall"
+          >
+            <strong>
+              Index ‘A’
+            </strong>
+            , shard ‘1’
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
+          >
+            <pre
+              class="euiCodeBlock__pre"
+            >
+              <code
+                class="euiCodeBlock__code"
+              >
+                Awful error
+              </code>
+            </pre>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
+        <div>
+          <div
+            class="euiText euiText--extraSmall"
+          >
+            <strong>
+              Index ‘B’
+            </strong>
+            , shard ‘2’
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
+          >
+            <pre
+              class="euiCodeBlock__pre"
+            >
+              <code
+                class="euiCodeBlock__code"
+              >
+                Bad error
+              </code>
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`DiscoverNoResults props timeFieldName renders time range feedback 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero discoverNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiCallOutHeader__icon"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xlink="http://www.w3.org/1999/xlink"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <path
+                d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                id="help-a"
+              />
+            </defs>
+            <use
+              fill-rule="evenodd"
+              href="#help-a"
+            />
+          </svg>
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText"
+      >
+        <h3>
+          Expand your time range
+        </h3>
+        <p>
+          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try 
+          <button
+            aria-expanded="false"
+            class="euiLink euiLink--primary"
+            data-test-subj="discoverNoResultsTimefilter"
+            type="button"
+          >
+            opening the time picker
+          </button>
+           and changing the time range to one which contains data.
+        </p>
+      </div>
+    </div>
+  </div>,
+]
+`;

@@ -5,6 +5,7 @@ import { findPluginSpecs } from '../find_plugin_specs';
 import { PluginSpec } from '../plugin_spec';
 
 const PLUGIN_FIXTURES = resolve(__dirname, 'fixtures/plugins');
+const CONFLICT_FIXTURES = resolve(__dirname, 'fixtures/conflicts');
 
 describe('plugin discovery', () => {
   describe('findPluginSpecs()', function () {
@@ -91,6 +92,27 @@ describe('plugin discovery', () => {
       });
       expect(specs.map(s => s.getId()).sort())
         .to.eql(['bar:one', 'bar:two', 'foo']);
+    });
+
+    describe('conflicting plugin spec ids', () => {
+      it('fails with informative message', async () => {
+        const { spec$ } = findPluginSpecs({
+          plugins: {
+            scanDirs: [],
+            paths: [
+              resolve(CONFLICT_FIXTURES, 'foo'),
+            ],
+          }
+        });
+
+        try {
+          await spec$.toArray().toPromise();
+          throw new Error('expected spec$ to throw an error');
+        } catch (error) {
+          expect(error.message).to.contain('Multple plugins found with the id "foo"');
+          expect(error.message).to.contain(CONFLICT_FIXTURES);
+        }
+      });
     });
   });
 });

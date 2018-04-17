@@ -16,8 +16,11 @@
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
 /packages/kbn-pm/vendor
+/packages/kbn-types/dist
+/packages/kbn-internal-native-observable
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
 !/.eslintrc.js
+**/*.js.snap

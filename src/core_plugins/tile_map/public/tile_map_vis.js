@@ -4,7 +4,7 @@ import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -13,7 +13,6 @@ import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
-  const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
   const VisFactory = Private(VisFactoryProvider);
   const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);

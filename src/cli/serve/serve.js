@@ -5,9 +5,10 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
-import Config from '../../server/config/config';
+import { Config } from '../../server/config/config';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
@@ -46,7 +47,7 @@ function readServerSettings(opts, extraCliOptions) {
       set('server.ssl.enabled', true);
     }
 
-    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+    if (opts.ssl && !has('server.ssl.keystore.path') && !has('server.ssl.certificate') && !has('server.ssl.key')) {
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }

@@ -12,6 +12,19 @@
         <input id="markdownVisFontSize" type="range" ng-model="vis.params.fontSize" class="form-control" min="8" max="36" />
       </div>
     </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="markdownVisOpenLinksInNewTab">
+        Open links in new tab
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="markdownVisOpenLinksInNewTab"
+          type="checkbox"
+          ng-model="vis.params.openLinksInNewTab"
+          class="kuiCheckBox"
+        />
+      </div>
+    </div>
     <textarea
       id="markdownVisInput"
       ng-model="vis.params.markdown"

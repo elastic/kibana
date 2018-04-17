@@ -294,8 +294,12 @@ Using 'none' as your request handles means your visualization does not require a
 
 [[development-custom-request-handler]]
 ==== custom request handler
-You can define your custom request handler by providing a function with the following definition:
-`function (vis, appState, uiState, searchSource) { ... }`
+You can define your custom request handler by providing a function with the following signature:
+`function (vis, { uiState, appState, timeRange }) { ... }`
+
+The `timeRange` will be an object with a `from` and `to` key, that can contain
+datemath expressions, like `now-7d`. You can use the `datemath` library to parse
+them.
 
 This function must return a promise, which should get resolved with new data that will be passed to responseHandler.
 
@@ -306,7 +310,7 @@ It's up to function to decide when it wants to issue a new request or return pre
 -----------
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
-const myRequestHandler = async (vis, appState, uiState, searchSource) => {
+const myRequestHandler = async (vis, { appState, uiState, timeRange }) => {
   const data = ... parse ...
   return data;
 };
@@ -418,8 +422,6 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.API.timeFilter*: allows you to access time picker
 - *vis.API.queryFilter*: gives you access to queryFilter
 - *vis.API.queryManager*: gives you access to add filters to the filter bar
-- *vis.API.filterManager*: gives you access to filterManager
-- *vis.API.kuery*: gives you access to the experimental `keury`-language filter bar
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 

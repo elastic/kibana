@@ -1,14 +1,12 @@
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import './styles/_tilemap.less';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
   const AggConfig = Private(VisAggConfigProvider);
-  const SearchSource = Private(SearchSourceProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
@@ -73,13 +71,22 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
       }
       if (!this._chartData || !this._chartData.geoJson) {
         return;
       }
 
+      this._recreateGeohashLayer(this._chartData.geoJson);
+    }
+
+    _recreateGeohashLayer(geojsonData) {
+      if (this._geohashLayer) {
+        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
+      }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer = new GeohashLayer(geojsonData, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
@@ -88,11 +95,15 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       await super._updateParams();
 
       this._kibanaMap.setDesaturateBaseLayer(this.vis.params.isDesaturated);
+
+      //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
+      //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        this._updateData(this._chartData);
+        if (this._chartData && this._chartData.geoJson) {
+          this._recreateGeohashLayer(this._chartData.geoJson);
+        }
       }
-
     }
 
 
@@ -129,8 +140,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = new SearchSource();
-        searchSource.index(this.vis.indexPattern);
+        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
         searchSource.size(0);
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {

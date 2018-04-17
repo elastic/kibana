@@ -20,9 +20,11 @@ export interface Command {
 import { BootstrapCommand } from './bootstrap';
 import { CleanCommand } from './clean';
 import { RunCommand } from './run';
+import { WatchCommand } from './watch';
 
 export const commands: { [key: string]: Command } = {
   bootstrap: BootstrapCommand,
   clean: CleanCommand,
   run: RunCommand,
+  watch: WatchCommand,
 };

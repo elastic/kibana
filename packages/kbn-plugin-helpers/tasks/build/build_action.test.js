@@ -84,4 +84,12 @@ describe('calling create_build', () => {
     const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
     options.files.forEach(file => expect(files).toContain(file));
   });
+
+  it('rejects returned promise when build fails', async () => {
+    mockBuild.mockImplementation(async () => {
+      throw new Error('foo bar');
+    });
+
+    await expect(buildAction(PLUGIN, noop)).rejects.toThrowErrorMatchingSnapshot();
+  });
 });

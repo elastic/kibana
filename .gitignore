@@ -1,9 +1,11 @@
 .aws-config.json
 .signing-config.json
 .ackrc
+/.es
 .DS_Store
 .node_binaries
 node_modules
+!/tasks/lib/packages/__tests__/fixtures/fixture1/node_modules
 trash
 /optimize
 target
@@ -18,7 +20,6 @@ target
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
 /html_docs
-/esvm
 .htpasswd
 .eslintcache
 /plugins/
@@ -26,7 +27,7 @@ target
 disabledPlugins
 webpackstats.json
 /config/*
-/!config/kibana.yml
+!/config/kibana.yml
 coverage
 selenium
 .babelcache.json

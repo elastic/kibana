@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { KibanaMap } from '../kibana_map';
+import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 import { GeoHashSampleData } from './geohash_sample_data';
 import heatmapPng from './heatmap.png';

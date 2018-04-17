@@ -52,38 +52,13 @@ uiModules
         });
 
         $scope.vis = $scope.savedObj.vis;
+        $scope.vis.searchSource = $scope.savedObj.searchSource;
 
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
         else $scope.vis._setUiState($scope.uiState);
 
         $scope.vis.description = $scope.savedObj.description;
-
-        if ($scope.timeRange) {
-          $scope.vis.getTimeRange = () => $scope.timeRange;
-
-          const searchSource = $scope.savedObj.searchSource;
-          searchSource.filter(() => {
-            return timefilter.get(searchSource.index(), $scope.timeRange);
-          });
-
-          // we're only adding one range filter against the timeFieldName to ensure
-          // that our filter is the only one applied and override the global filters.
-          // this does rely on the "implementation detail" that filters are added first
-          // on the leaf SearchSource and subsequently on the parents
-          searchSource.addFilterPredicate((filter, state) => {
-            if (!filter.range) {
-              return true;
-            }
-
-            const timeFieldName = searchSource.index().timeFieldName;
-            if (!timeFieldName) {
-              return true;
-            }
-
-            return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
-          });
-        }
 
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
@@ -96,8 +71,25 @@ uiModules
           // was still waiting for its debounce, in this case we don't want to start
           // fetching new data and rendering.
           if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
+
+          // TODO: This should ALWAYS be passed into this component via the loader
+          // in the future. Unfortunately we need some refactoring in dashboard
+          // to make this working and correctly rerender, so for now we will either
+          // use the one passed in to us or look into the timefilter ourselfs (which
+          // will be removed in the future).
+          const timeRange = $scope.timeRange || timefilter.time;
+
+          $scope.vis.filters = { timeRange };
+
+          const handlerParams = {
+            appState: $scope.appState,
+            uiState: $scope.uiState,
+            queryFilter: queryFilter,
+            searchSource: $scope.savedObj.searchSource,
+            timeRange: timeRange,
+          };
           // searchSource is only there for courier request handler
-          requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
+          requestHandler($scope.vis, handlerParams)
             .then(requestHandlerResponse => {
 
             //No need to call the response handler when there have been no data nor has been there changes
@@ -189,6 +181,7 @@ uiModules
 
         $scope.$on('$destroy', () => {
           destroyed = true;
+          $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);

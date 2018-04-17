@@ -1,6 +1,6 @@
 import { badRequest } from 'boom';
 
-export default function (kbnServer, server, config) {
+export function setupXsrf(server, config) {
   const disabled = config.get('server.xsrf.disableProtection');
   const whitelist = config.get('server.xsrf.whitelist');
   const versionHeader = 'kbn-version';

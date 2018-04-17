@@ -12,7 +12,7 @@ run(async ({ log }) => {
     ignore: [
       '**/node_modules/**/*',
       'optimize/**/*',
-      'esvm/**/*',
+      '.es/**/*',
       'data/**/*',
     ]
   });

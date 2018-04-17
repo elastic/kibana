@@ -7,7 +7,8 @@ describe('service_settings (FKA tilemaptest)', function () {
 
 
   let serviceSettings;
-  let mapsConfig;
+  let mapConfig;
+  let tilemapsConfig;
 
   const manifestUrl = 'https://geo.elastic.co/v1/manifest';
   const tmsManifestUrl = `https://tiles.elastic.co/v2/manifest`;
@@ -68,7 +69,6 @@ describe('service_settings (FKA tilemaptest)', function () {
 
 
   beforeEach(ngMock.module('kibana', ($provide) => {
-
     $provide.decorator('mapConfig', () => {
       return {
         manifestServiceUrl: manifestUrl,
@@ -77,10 +77,17 @@ describe('service_settings (FKA tilemaptest)', function () {
     });
   }));
 
+
+  let manifestServiceUrlOriginal;
+  let tilemapsConfigDeprecatedOriginal;
   beforeEach(ngMock.inject(function ($injector, $rootScope) {
 
     serviceSettings = $injector.get('serviceSettings');
-    mapsConfig = $injector.get('mapConfig');
+    mapConfig = $injector.get('mapConfig');
+    tilemapsConfig = $injector.get('tilemapsConfig');
+
+    manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
+    tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
 
     sinon.stub(serviceSettings, '_getManifest', function (url) {
       let contents = null;
@@ -102,6 +109,8 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   afterEach(function () {
     serviceSettings._getManifest.restore();
+    mapConfig.manifestServiceUrl = manifestServiceUrlOriginal;
+    tilemapsConfig.deprecated = tilemapsConfigDeprecatedOriginal;
   });
 
   describe('TMS', function () {
@@ -166,11 +175,74 @@ describe('service_settings (FKA tilemaptest)', function () {
       });
 
       it('when overridden, should continue to work', async () => {
-        mapsConfig.manifestServiceUrl = manifestUrl2;
+        mapConfig.manifestServiceUrl = manifestUrl2;
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
         assertQuery({ foo: 'bar' });
       });
+
+
+      it('should merge in tilemap url', async () => {
+
+        tilemapsConfig.deprecated = {
+          'isOverridden': true,
+          'config': {
+            'url': 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'options': { 'minZoom': 0, 'maxZoom': 20 }
+          }
+        };
+
+        tilemapServices = await serviceSettings.getTMSServices();
+        const expected = [
+          {
+            'attribution': '',
+            'url': 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'id': 'TMS in config/kibana.yml'
+          },
+          {
+            'id': 'road_map',
+            'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+            'minZoom': 0,
+            'maxZoom': 10,
+            'attribution': '<p>&#169; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &#169; <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
+            'subdomains': []
+          }
+        ];
+        expect(tilemapServices).to.eql(expected);
+
+      });
+
+
+      it('should exclude EMS', async () => {
+
+        tilemapsConfig.deprecated = {
+          'isOverridden': true,
+          'config': {
+            'url': 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'options': { 'minZoom': 0, 'maxZoom': 20 }
+          }
+        };
+        mapConfig.includeElasticMapsService = false;
+
+        tilemapServices = await serviceSettings.getTMSServices();
+        const expected = [
+          {
+            'attribution': '',
+            'url': 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'id': 'TMS in config/kibana.yml'
+          }
+        ];
+        expect(tilemapServices).to.eql(expected);
+
+      });
+
+      it('should exclude all when not configured', async () => {
+        mapConfig.includeElasticMapsService = false;
+        tilemapServices = await serviceSettings.getTMSServices();
+        const expected = [];
+        expect(tilemapServices).to.eql(expected);
+      });
+
 
     });
 
@@ -178,7 +250,6 @@ describe('service_settings (FKA tilemaptest)', function () {
   });
 
   describe('File layers', function () {
-
 
     it('should load manifest', async function () {
       serviceSettings.addQueryParams({ foo: 'bar' });
@@ -199,7 +270,12 @@ describe('service_settings (FKA tilemaptest)', function () {
       });
     });
 
-
+    it('should exclude all when not configured', async () => {
+      mapConfig.includeElasticMapsService = false;
+      const fileLayers = await serviceSettings.getFileLayers();
+      const expected = [];
+      expect(fileLayers).to.eql(expected);
+    });
 
   });
 });

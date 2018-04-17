@@ -1,9 +1,7 @@
 
 import 'ui/field_format_editor';
-import 'angular-bootstrap-colorpicker';
-import 'angular-bootstrap-colorpicker/css/colorpicker.css';
 import _ from 'lodash';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
@@ -18,10 +16,10 @@ import {
 import { getKbnTypeNames } from '../../../utils';
 
 uiModules
-  .get('kibana', ['colorpicker.module'])
+  .get('kibana')
   .directive('fieldEditor', function (Private, $sce, confirmModal, config) {
     const getConfig = (...args) => config.get(...args);
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
+
     const Field = Private(IndexPatternsFieldProvider);
     const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
 

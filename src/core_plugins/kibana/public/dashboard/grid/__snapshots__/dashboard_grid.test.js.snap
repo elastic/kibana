@@ -27,18 +27,18 @@ exports[`renders DashboardGrid 1`] = `
   <div
     className=""
     key="1"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
       embeddableFactory={
         Object {
-          "addDestroyEmeddable": [Function],
-          "destroy": [Function],
-          "getEditPath": [Function],
-          "getTitleFor": [Function],
-          "render": [MockFunction],
+          "create": [MockFunction],
         }
       }
-      getContainerApi={[Function]}
       onPanelBlurred={[Function]}
       onPanelFocused={[Function]}
       panelId="1"
@@ -47,18 +47,18 @@ exports[`renders DashboardGrid 1`] = `
   <div
     className=""
     key="2"
+    style={
+      Object {
+        "zIndex": "auto",
+      }
+    }
   >
     <Connect(DashboardPanel)
       embeddableFactory={
         Object {
-          "addDestroyEmeddable": [Function],
-          "destroy": [Function],
-          "getEditPath": [Function],
-          "getTitleFor": [Function],
-          "render": [MockFunction],
+          "create": [MockFunction],
         }
       }
-      getContainerApi={[Function]}
       onPanelBlurred={[Function]}
       onPanelFocused={[Function]}
       panelId="2"

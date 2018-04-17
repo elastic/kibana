@@ -13,6 +13,13 @@ describe('UrlFormat', function () {
       .to.be('<span ng-non-bindable><a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a></span>');
   });
 
+  it('outputs an <audio> if type === "audio"', function () {
+    const url = new UrlFormat({ type: 'audio' });
+
+    expect(url.convert('http://elastic.co', 'html'))
+      .to.be('<span ng-non-bindable><audio controls preload="none" src="http://elastic.co"></span>');
+  });
+
   it('outputs an <image> if type === "img"', function () {
     const url = new UrlFormat({ type: 'img' });
 

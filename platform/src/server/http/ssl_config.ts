@@ -16,6 +16,10 @@ const sslSchema = object(
     certificate: maybe(string()),
     key: maybe(string()),
     keyPassphrase: maybe(string()),
+    keystore: object({
+      path: maybe(string()),
+      password: maybe(string())
+    }),
     certificateAuthorities: maybe(arrayOf(string())),
     supportedProtocols: maybe(
       arrayOf(oneOf([literal('TLSv1'), literal('TLSv1.1'), literal('TLSv1.2')]))
@@ -46,6 +50,10 @@ export class SslConfig {
   certificate: string | undefined;
   certificateAuthorities: string[] | undefined;
   keyPassphrase: string | undefined;
+  keystore: {
+    path: string | undefined,
+    password: string | undefined
+  };
   cipherSuites: string[];
   supportedProtocols: string[] | undefined;
 
@@ -58,6 +66,7 @@ export class SslConfig {
     this.certificate = config.certificate;
     this.certificateAuthorities = config.certificateAuthorities;
     this.keyPassphrase = config.keyPassphrase;
+    this.keystore = config.keystore;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
   }
