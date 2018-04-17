@@ -134,6 +134,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
 
       this.history = [];
       this._requestStartHandlers = [];
+      this._inheritOptions = {};
 
       this._filterPredicates = [
         (filter) => {
@@ -197,8 +198,9 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
      * @param  {SearchSource} searchSource - the parent searchSource
      * @return {this} - chainable
      */
-    inherits(parent) {
+    inherits(parent, options = {}) {
       this._parent = parent;
+      this._inheritOptions = options;
       return this;
     }
 
@@ -458,8 +460,19 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
       this.activeFetchCount = (this.activeFetchCount || 0) + 1;
       this.history = [request];
 
+      const handlers = [...this._requestStartHandlers];
+      // If callparentStartHandlers has been set to true, we also call all
+      // handlers of parent search sources.
+      if (this._inheritOptions.callParentStartHandlers) {
+        let searchSource = this.getParent();
+        while (searchSource) {
+          handlers.push(...searchSource._requestStartHandlers);
+          searchSource = searchSource.getParent();
+        }
+      }
+
       return Promise
-        .map(this._requestStartHandlers, fn => fn(this, request))
+        .map(handlers, fn => fn(this, request))
         .then(_.noop);
     }
 
