@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
       const percentDifferent = await screenshot.compareAgainstBaseline(expectedSavedVizName, updateBaselines);
-      expect(percentDifferent).to.be.lessThan(0.05);
+      expect(percentDifferent).to.be.lessThan(0.062);
 
     }
 
