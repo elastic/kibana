@@ -6,6 +6,7 @@ import {
   updateUseMargins,
   updateHidePanelTitles,
   updateIsFullScreenMode,
+  updateTimeRange,
 } from '../actions';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -14,6 +15,11 @@ export const view = handleActions({
   [updateViewMode]: (state, { payload }) => ({
     ...state,
     viewMode: payload
+  }),
+
+  [updateTimeRange]: (state, { payload }) => ({
+    ...state,
+    timeRange: payload
   }),
 
   [updateUseMargins]: (state, { payload }) => ({

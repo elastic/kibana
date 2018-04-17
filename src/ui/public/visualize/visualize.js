@@ -52,6 +52,7 @@ uiModules
         });
 
         $scope.vis = $scope.savedObj.vis;
+        $scope.vis.searchSource = $scope.savedObj.searchSource;
 
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
@@ -180,6 +181,7 @@ uiModules
 
         $scope.$on('$destroy', () => {
           destroyed = true;
+          $scope.vis.removeListener('reload', reload);
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
