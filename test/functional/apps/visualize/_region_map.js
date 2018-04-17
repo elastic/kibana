@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function selectVectorMap() {
           log.debug('Vector Map = World Countries');
-          return PageObjects.visualize.selectVectorMap('US States');
+          return PageObjects.visualize.selectVectorMap('USA States');
         })
         .then(function () {
           return PageObjects.visualize.clickGo();
