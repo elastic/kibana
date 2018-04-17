@@ -8,6 +8,7 @@ import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
 import { TimefilterLibDiffIntervalProvider } from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { createLegacyClass } from '../utils/legacy_class';
 
 uiRoutes
   .addSetupWork(function (timefilter) {
@@ -24,7 +25,7 @@ uiModules
       return obj.isValid() ? obj : stringTime;
     }
 
-    _.class(Timefilter).inherits(Events);
+    createLegacyClass(Timefilter).inherits(Events);
     function Timefilter() {
       Timefilter.Super.call(this);
 

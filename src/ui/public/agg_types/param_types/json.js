@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import editorHtml from '../controls/raw_json.html';
 import { BaseParamType } from './base';
+import { createLegacyClass } from '../../utils/legacy_class';
 
 
-_.class(JsonParamType).inherits(BaseParamType);
+createLegacyClass(JsonParamType).inherits(BaseParamType);
 function JsonParamType(config) {
   // force name override
   config = _.defaults(config, { name: 'json' });
