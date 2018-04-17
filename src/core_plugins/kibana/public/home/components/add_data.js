@@ -1,13 +1,7 @@
+import './add_data.less';
+import './recently_accessed.less';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  KuiCardGroup,
-  KuiCard,
-  KuiCardDescription,
-  KuiCardDescriptionTitle,
-  KuiCardDescriptionText,
-  KuiCardFooter,
-} from '@kbn/ui-framework/components';
 
 import {
   EuiButton,
@@ -18,126 +12,84 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiCard,
+  EuiIcon,
 } from '@elastic/eui';
 
-export function AddData({ addBasePath, apmUiEnabled }) {
+export function AddData({ apmUiEnabled }) {
 
   const renderCards = () => {
-    const cardStyle = {
-      width: '250px',
-      'minWidth': '200px',
-      'border': 'none'
-    };
-
     const getApmCard = () =>  (
-      <KuiCard style={cardStyle}>
-        <KuiCardDescription>
-          <KuiCardDescriptionTitle>
-            <img
-              src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
-            />
-            <p>
-              APM
-            </p>
-          </KuiCardDescriptionTitle>
-
-          <KuiCardDescriptionText>
-            APM automatically collects in-depth performance metrics and errors from inside your applications.
-          </KuiCardDescriptionText>
-        </KuiCardDescription>
-
-        <KuiCardFooter>
-          <EuiButton
-            href="#/home/tutorial/apm"
-          >
-            Add APM
-          </EuiButton>
-        </KuiCardFooter>
-      </KuiCard>
+      <EuiFlexItem>
+        <EuiCard
+          className="addDataCard"
+          icon={<EuiIcon className="addDataIcon" type="apmApp" />}
+          title="APM"
+          description="APM automatically collects in-depth performance metrics and errors from inside your applications."
+          footer={
+            <EuiButton
+              href="#/home/tutorial/apm"
+            >
+              Add APM
+            </EuiButton>
+          }
+        />
+      </EuiFlexItem>
     );
 
     return (
-      <div className="kuiVerticalRhythm">
-        <KuiCardGroup>
+      <EuiFlexGroup gutterSize="none">
 
-          {apmUiEnabled !== false && getApmCard()}
+        {apmUiEnabled !== false && getApmCard()}
 
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
-                />
-                <p>
-                  Logging
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
+        <EuiFlexItem>
+          <EuiCard
+            className="addDataCard"
+            icon={<EuiIcon  className="addDataIcon" type="loggingApp" />}
+            title="Logging"
+            description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
+            footer={
               <EuiButton
                 href="#/home/tutorial_directory/logging"
               >
                 Add log data
               </EuiButton>
-            </KuiCardFooter>
-          </KuiCard>
+            }
+          />
+        </EuiFlexItem>
 
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
-                />
-                <p>
-                  Metrics
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Collect metrics from the operating system and services running on your servers.
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
+        <EuiFlexItem>
+          <EuiCard
+            className="addDataCard"
+            icon={<EuiIcon className="addDataIcon" type="monitoringApp" />}
+            title="Metrics"
+            description="Collect metrics from the operating system and services running on your servers."
+            footer={
               <EuiButton
                 href="#/home/tutorial_directory/metrics"
               >
                 Add metric data
               </EuiButton>
-            </KuiCardFooter>
-          </KuiCard>
+            }
+          />
+        </EuiFlexItem>
 
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
-                />
-                <p>
-                  Security Analytics
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Centralize security events for interactive investigation in ready-to-go visualizations.
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
+        <EuiFlexItem>
+          <EuiCard
+            className="addDataCard"
+            icon={<EuiIcon className="addDataIcon" type="securityApp" />}
+            title="Security Analytics"
+            description="Centralize security events for interactive investigation in ready-to-go visualizations."
+            footer={
               <EuiButton
                 href="#/home/tutorial_directory/security"
               >
                 Add security events
               </EuiButton>
-            </KuiCardFooter>
-          </KuiCard>
-        </KuiCardGroup>
-      </div>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -181,6 +133,5 @@ export function AddData({ addBasePath, apmUiEnabled }) {
 }
 
 AddData.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
   apmUiEnabled: PropTypes.bool.isRequired,
 };
