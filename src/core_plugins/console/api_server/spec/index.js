@@ -25,5 +25,4 @@ export function getSpec() {
 
     return { ...acc, ...spec };
   }, {});
-  return result;
 }
