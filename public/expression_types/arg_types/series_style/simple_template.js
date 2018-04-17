@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
-import { Tooltip } from '../../../components/tooltip';
+import { TooltipIcon } from '../../../components/tooltip_icon';
 
 export const SimpleTemplate = props => {
   const { argValue, onValueChange, labels, workpad } = props;
@@ -46,9 +46,11 @@ export const SimpleTemplate = props => {
 
       {(!labels || labels.length === 0) && (
         <div className="canvas__argtype--seriesStyle--color-warning">
-          <Tooltip text="Data has no series to style, add a color dimension" placement="left">
-            <i className="fa fa-exclamation-circle" />
-          </Tooltip>
+          <TooltipIcon
+            placement="left"
+            icon="error"
+            text="Data has no series to style, add a color dimension"
+          />
         </div>
       )}
     </div>

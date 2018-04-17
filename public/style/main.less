@@ -55,3 +55,9 @@
     color: @trueBlack;
   }
 }
+
+// TODO: remove this when 6.2.4 goes out
+// hacky fix for issue introduced by https://github.com/elastic/kibana/pull/15542
+body .tooltip {
+  width: auto;
+}

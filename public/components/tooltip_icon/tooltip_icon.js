@@ -6,13 +6,12 @@ export const TooltipIcon = ({ icon = 'info', text, placement }) => {
   const classes = ['fa'];
 
   const icons = {
+    error: ['fa-exclamation-circle'],
     warning: ['fa-warning', 'text-warning'],
     info: ['fa-info-circle'],
   };
 
   if (!Object.keys(icons).includes(icon)) throw new Error('Unsupported icon type');
-
-  return null; // TODO: Fix tips, put them back in
 
   return (
     <Tooltip text={text} placement={placement}>
