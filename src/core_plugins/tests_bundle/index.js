@@ -84,7 +84,7 @@ export default (kibana) => {
       },
 
       __globalImportAliases__: {
-        ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
+        ng_mock$: fromRoot('src/test_utils/public/ng_mock'),
         'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),
