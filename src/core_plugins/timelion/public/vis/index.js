@@ -44,7 +44,9 @@ export default function TimelionVisProvider(Private) {
     requestHandler: timelionRequestHandler.handler,
     responseHandler: 'none',
     options: {
-      showIndexSelection: false
+      showIndexSelection: false,
+      showQueryBar: false,
+      showFilterBar: false,
     }
   });
 }
