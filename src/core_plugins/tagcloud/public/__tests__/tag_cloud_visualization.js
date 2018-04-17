@@ -65,6 +65,7 @@ describe('TagCloudVisualizationTest', function () {
 
     it('simple draw', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
+
       await tagcloudVisualization.render(dummyTableGroup, {
         resize: false,
         params: true,
@@ -72,7 +73,9 @@ describe('TagCloudVisualizationTest', function () {
         data: true,
         uiState: false
       });
-      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, basicdrawPng, THRESHOLD);
+
+      const svgNode = domNode.querySelector('svg');
+      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 512, 512, basicdrawPng, THRESHOLD);
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
@@ -97,13 +100,12 @@ describe('TagCloudVisualizationTest', function () {
         uiState: false
       });
 
-
-      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 256, 368, afterresizePng, THRESHOLD);
+      const svgNode = domNode.querySelector('svg');
+      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 256, 368, afterresizePng, THRESHOLD);
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
     it('with param change', async function () {
-
 
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, {
@@ -126,8 +128,8 @@ describe('TagCloudVisualizationTest', function () {
         uiState: false
       });
 
-
-      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 256, 368, afterparamChange, THRESHOLD);
+      const svgNode = domNode.querySelector('svg');
+      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 256, 368, afterparamChange, THRESHOLD);
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 

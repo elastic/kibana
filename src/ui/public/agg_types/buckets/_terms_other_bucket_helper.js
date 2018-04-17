@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 import { buildExistsFilter } from 'ui/filter_manager/lib/exists';
 import { buildQueryFromFilters } from 'ui/courier/data_source/build_query/from_filters';
@@ -84,8 +84,7 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 };
 
 
-export const OtherBucketHelperProvider = (Private) => {
-  const AggConfig = Private(VisAggConfigProvider);
+export const OtherBucketHelperProvider = () => {
 
   const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');

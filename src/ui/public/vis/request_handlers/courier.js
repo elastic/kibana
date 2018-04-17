@@ -20,8 +20,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       }
 
       const index = searchSource.index() || searchSource.getParent().index();
-      const timeFieldName = index.timeFieldName;
-      if (!timeFieldName) {
+      const timeFieldName = index && index.timeFieldName;
+      if (!index || !timeFieldName) {
         return true;
       }
 
@@ -40,11 +40,32 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
     name: 'courier',
     handler: function (vis, { appState, queryFilter, searchSource, timeRange }) {
 
-      searchSource.filter(() => {
+      // Create a new search source that inherits the original search source
+      // but has the propriate timeRange applied via a filter.
+      // This is a temporary solution until we properly pass down all required
+      // information for the request to the request handler (https://github.com/elastic/kibana/issues/16641).
+      // Using callParentStartHandlers: true we make sure, that the parent searchSource
+      // onSearchRequestStart will be called properly even though we use an inherited
+      // search source.
+      const requestSearchSource = new SearchSource().inherits(searchSource, { callParentStartHandlers: true });
+
+      // For now we need to mirror the history of the passed search source, since
+      // the spy panel wouldn't work otherwise.
+      Object.defineProperty(requestSearchSource, 'history', {
+        get() {
+          return requestSearchSource._parent.history;
+        },
+        set(history) {
+          return requestSearchSource._parent.history = history;
+        }
+      });
+
+      // Add the explicit passed timeRange as a filter to the requestSearchSource.
+      requestSearchSource.filter(() => {
         return timefilter.get(searchSource.index(), timeRange);
       });
 
-      removeSearchSourceParentTimefilter(searchSource, timeRange);
+      removeSearchSourceParentTimefilter(requestSearchSource);
 
       if (queryFilter && vis.editorMode) {
         searchSource.set('filter', queryFilter.getFilters());
@@ -75,7 +96,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       return new Promise((resolve, reject) => {
         if (shouldQuery()) {
           delete vis.reload;
-          searchSource.onResults().then(resp => {
+          requestSearchSource.onResults().then(resp => {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
               query: _.cloneDeep(searchSource.get('query')),
@@ -88,7 +109,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             return _.cloneDeep(resp);
           }).then(async resp => {
             for (const agg of vis.getAggConfig()) {
-              const nestedSearchSource = new SearchSource().inherits(searchSource);
+              const nestedSearchSource = new SearchSource().inherits(requestSearchSource);
               resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
             }
 

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { AggConfig } from 'ui/vis/agg_config';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
@@ -10,8 +10,6 @@ import { OtherBucketHelperProvider } from './_terms_other_bucket_helper';
 
 export function AggTypesBucketsTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  const AggConfig = Private(VisAggConfigProvider);
-  const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(RouteBasedNotifierProvider);
   const { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } = Private(OtherBucketHelperProvider);

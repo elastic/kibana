@@ -46,7 +46,9 @@ describe('visualization_editor directive', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
-    $rootScope.visData = aggResponse.tabify(vis, esResponse);
+    $rootScope.visData = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), esResponse, {
+      isHierarchical: vis.isHierarchical()
+    });
     $rootScope.uiState = require('fixtures/mock_ui_state');
     $rootScope.searchSource = searchSource;
     $el = $('<visualization-editor vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource">');
