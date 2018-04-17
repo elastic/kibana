@@ -19,4 +19,4 @@ set, make sure the *Index contains time-based events* box is checked and select 
 *Time-field name* drop-down.
 
 NOTE: When you define an index pattern, indices that match that pattern must exist in Elasticsearch. Those indices must
-contain data. You can check what indices exist by using `GET _cat/indices` in <<console-kibana>>, under Dev Tools, or `curl -XGET "http://localhost:9200/_cat/indices`.
+contain data. You can check what indices exist by using `GET _cat/indices` in <<console-kibana>>, under Dev Tools, or `curl -XGET "http://localhost:9200/_cat/indices"`.
