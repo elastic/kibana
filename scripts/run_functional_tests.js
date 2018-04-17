@@ -1,2 +1,2 @@
 require('../src/babel-register');
-require('../packages/kbn-test').runWithConfig();
+require('../packages/kbn-test').runTests();
