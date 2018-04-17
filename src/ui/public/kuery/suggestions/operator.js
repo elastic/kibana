@@ -32,11 +32,10 @@ function getDescription(operator) {
   return `<p>${description}</p>`;
 }
 
-export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
+export function getSuggestionsProvider({ fields }) {
   return function getOperatorSuggestions({ end, fieldName }) {
-    const fields = allFields.filter(field => field.name === fieldName);
-    return flatten(fields.map(field => {
+    const matchingFields = fields.filter(field => field.name === fieldName);
+    return flatten(matchingFields.map(field => {
       const matchingOperators = Object.keys(operators).filter(operator => {
         const { fieldTypes } = operators[operator];
         return !fieldTypes || fieldTypes.includes(field.type);

@@ -4,13 +4,15 @@ import { getSuggestionsProvider } from '../operator';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Kuery operator suggestions', function () {
-  let indexPatterns;
+  let indexPattern;
+  let fields;
   let getSuggestions;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
-    getSuggestions = getSuggestionsProvider({ indexPatterns });
+    indexPattern = Private(StubbedLogstashIndexPatternProvider);
+    fields = indexPattern.fields.raw;
+    getSuggestions = getSuggestionsProvider({ fields });
   }));
 
   it('should return a function', function () {

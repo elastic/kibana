@@ -1,4 +1,4 @@
-import { compact, get } from 'lodash';
+import { compact, get, flatten } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
@@ -114,7 +114,8 @@ module.directive('queryBar', function () {
 
       $scope.$watch('queryBar.indexPatterns', () => {
         this.getIndexPatterns().then(indexPatterns => {
-          this.getKuerySuggestions = getSuggestionsProvider({ $http, config, indexPatterns });
+          const fields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
+          this.getKuerySuggestions = getSuggestionsProvider({ $http, config, fields });
           this.updateSuggestions();
         });
       });

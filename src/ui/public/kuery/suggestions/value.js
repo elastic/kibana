@@ -5,8 +5,7 @@ import { escapeQuotes } from './escape_kuery';
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
 
-export function getSuggestionsProvider({ $http, config, indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
+export function getSuggestionsProvider({ $http, config, fields }) {
   const requestSuggestions = memoize((query, field) => {
     const queryParams = { query, field: field.name };
     return $http.post(`${baseUrl}/${field.indexPattern.title}`, queryParams);
@@ -14,10 +13,10 @@ export function getSuggestionsProvider({ $http, config, indexPatterns }) {
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
 
   return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
-    const fields = allFields.filter(field => field.name === fieldName);
+    const matchingFields = fields.filter(field => field.name === fieldName);
     const query = `${prefix}${suffix}`;
 
-    const suggestionsByField = fields.map(field => {
+    const suggestionsByField = matchingFields.map(field => {
       if (field.type === 'boolean') {
         return wrapAsSuggestions(start, end, query, ['true', 'false']);
       } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
