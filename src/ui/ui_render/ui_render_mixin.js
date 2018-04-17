@@ -4,24 +4,27 @@ import Boom from 'boom';
 import { resolve } from 'path';
 import { AppBootstrap } from './bootstrap';
 
-const shouldAuthRedirect = async (server, req) => {
-  if (req.auth.strategy || req.auth.mode) {
-    return false;
-  }
-
-  try {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    await callWithRequest(req, 'info');
-    return false;
-  } catch (err) {
-    if (err.statusCode !== 401) {
-      throw err;
-    }
-    return true;
-  }
-};
 
 export function uiRenderMixin(kbnServer, server, config) {
+
+  const shouldAuthRedirect = async (req) => {
+    if (req.auth.strategy || req.auth.mode) {
+      return false;
+    }
+
+    try {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      await callWithRequest(req, 'indices.exists', {
+        index: config.get('kibana.index')
+      });
+      return false;
+    } catch (err) {
+      if (err.statusCode !== 401) {
+        throw err;
+      }
+      return true;
+    }
+  };
 
   function replaceInjectedVars(request, injectedVars) {
     const { injectedVarsReplacers = [] } = kbnServer.uiExports;
@@ -91,7 +94,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       try {
         if (kbnServer.status.isGreen()) {
-          if (await shouldAuthRedirect(server, req)) {
+          if (await shouldAuthRedirect(req)) {
             const basePath = config.get('server.basePath');
             return reply.redirect(`${basePath}/?redirectApp=${id}`);
           }

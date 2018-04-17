@@ -13,28 +13,31 @@ import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
-const getAuthChallengeResponse = async (req, server) => {
-  if (req.auth.strategy || req.auth.mode) {
-    return null;
-  }
-
-  try {
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-    await callWithRequest(req, 'info');
-    return null;
-  } catch (err) {
-    if (err.statusCode !== 401) {
-      return null;
-    }
-
-    return err;
-  }
-};
-
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
+  const getAuthChallengeResponse = async (req) => {
+    if (req.auth.strategy || req.auth.mode) {
+      return null;
+    }
+
+    try {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      await callWithRequest(req, 'indices.exists', {
+        index: config.get('kibana.index'),
+      });
+      return null;
+    } catch (err) {
+      if (err.statusCode !== 401) {
+        return null;
+      }
+
+      return err;
+    }
+  };
+
   const shortUrlLookup = shortUrlLookupProvider(server);
+
 
   setupConnection(server, config);
   setupBasePathRewrite(server, config);
@@ -94,7 +97,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     async handler(req, reply) {
-      const authChallengeResponse = await getAuthChallengeResponse(req, server);
+      const authChallengeResponse = await getAuthChallengeResponse(req);
       if (authChallengeResponse) {
         return reply(authChallengeResponse);
       }
