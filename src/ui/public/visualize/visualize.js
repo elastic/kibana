@@ -52,6 +52,7 @@ uiModules
         });
 
         $scope.vis = $scope.savedObj.vis;
+        $scope.vis.searchSource = $scope.savedObj.searchSource;
 
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
