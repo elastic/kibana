@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     it('should compare visualization screenshot for data table with minimum bucket metric agg and geohash', async function () {
       const expectedSavedVizName = 'screenshot_datatable_options';
-      await compareScreenshot(expectedSavedVizName);
+      await compareScreenshot(expectedSavedVizName, 0.07);
     });
 
     it('should compare visualization screenshot for data table with count metric agg and significant terms bucket', async function () {
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await compareScreenshot(expectedSavedVizName);
     });
 
-    async function compareScreenshot(expectedSavedVizName) {
+    async function compareScreenshot(expectedSavedVizName, threshold = 0.050) {
 
       if(initialize) {
         initialize = false;
@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(1000);
       const percentDifferent = await screenshot.compareAgainstBaseline(expectedSavedVizName, updateBaselines);
-      expect(percentDifferent).to.be.lessThan(0.062);
+      expect(percentDifferent).to.be.lessThan(threshold);
 
     }
 
