@@ -7,12 +7,10 @@
 
 var _ = require('../node_modules/lodash/index.js').runInContext();
 var lodashLangMixin = require('ui/utils/lodash-mixins/lang').lodashLangMixin;
-var lodashObjectMixin = require('ui/utils/lodash-mixins/object').lodashObjectMixin;
 var lodashCollectionMixin = require('ui/utils/lodash-mixins/collection').lodashCollectionMixin;
 var lodashFunctionMixin = require('ui/utils/lodash-mixins/function').lodashFunctionMixin;
 
 lodashLangMixin(_);
-lodashObjectMixin(_);
 lodashCollectionMixin(_);
 lodashFunctionMixin(_);
 
