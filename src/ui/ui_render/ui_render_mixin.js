@@ -19,10 +19,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       });
       return false;
     } catch (err) {
-      if (err.statusCode !== 401) {
-        throw err;
-      }
-      return true;
+      return err.statusCode === 401;
     }
   };
 
