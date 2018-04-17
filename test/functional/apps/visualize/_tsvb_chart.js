@@ -193,7 +193,7 @@ export default ({ getService, getPageObjects }) => {
         const tableData = await PageObjects.visualBuilder.getViewTable();
         log.debug(`Values on ${tableData}`);
         const expectedData =
-          'OS\nCount\nios\n5\nosx\n3\nwin 7\n12\nwin 8\n13\nRows per page: 10';
+          'OS\nCount\nios\n5\nosx\n3\nwin 7\n12\nwin 8\n13';
         expect(tableData).to.be(expectedData);
       });
     });
