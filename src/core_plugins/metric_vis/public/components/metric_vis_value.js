@@ -37,7 +37,7 @@ class MetricVisValue extends Component {
         <div
           className="metric-value"
           style={metricValueStyle}
-          dangerouslySetInnerHTML={{ __html: metric.value }}
+          dangerouslySetInnerHTML={{ __html: metric.value }} //eslint-disable-line react/no-danger
         />
         { showLabel &&
           <div>{metric.label}</div>

@@ -89,7 +89,7 @@ export class Markdown extends Component {
       <div
         className={classes}
         {...rest}
-        dangerouslySetInnerHTML={this.state.renderedMarkdown}
+        dangerouslySetInnerHTML={this.state.renderedMarkdown} //eslint-disable-line react/no-danger
       />
     );
   }
