@@ -1,9 +1,11 @@
 const { fetchMigrationStatus } = require('./fetch_migration_status');
 const { migrate } = require('./migrate');
 const { importDocuments } = require('./import_documents');
+const { fetchMigrationState } = require('./fetch_migration_state');
 
 module.exports = {
   fetchMigrationStatus,
+  fetchMigrationState,
   migrate,
   importDocuments,
 };

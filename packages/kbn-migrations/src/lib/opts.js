@@ -9,7 +9,7 @@ function validate(def, opts) {
     const type = typeof val;
     const isValid = types.some(t => t === 'array' ? Array.isArray(val) : type === t);
     if (!isValid) {
-      throw new Error(`Options: property ${prop} must be ${types.join(' or ')}. Got ${type}: ${val}`);
+      throw new Error(`Options: property ${prop} must be of type ${types.join(' or ')}. Got ${type}: ${val}`);
     }
   });
   return opts;
