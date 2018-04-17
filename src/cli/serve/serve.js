@@ -191,6 +191,13 @@ export default function (program) {
 }
 
 function shouldStartRepl(opts) {
+  const DEV_ENV = 'dev';
+  const env = process.env.NODE_ENV || DEV_ENV;
+
+  if (opts.repl && env !== DEV_ENV) {
+    throw new Error('Kibana REPL mode can only be run in development mode.');
+  }
+
   // The kbnWorkerType check is necessary to prevent the repl
   // from being started multiple times in different processes.
   // We only want one REPL.
