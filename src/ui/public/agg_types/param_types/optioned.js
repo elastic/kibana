@@ -1,8 +1,8 @@
-import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { BaseParamType } from './base';
+import { createLegacyClass } from '../../utils/legacy_class';
 
-_.class(OptionedParamType).inherits(BaseParamType);
+createLegacyClass(OptionedParamType).inherits(BaseParamType);
 function OptionedParamType(config) {
   OptionedParamType.Super.call(this, config);
 

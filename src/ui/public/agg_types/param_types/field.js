@@ -6,11 +6,11 @@ import 'ui/filters/field_type';
 import { IndexedArray } from 'ui/indexed_array';
 import { Notifier } from 'ui/notify';
 import { propFilter } from 'ui/filters/_prop_filter';
-
+import { createLegacyClass } from '../../utils/legacy_class';
 
 const notifier = new Notifier();
 
-_.class(FieldParamType).inherits(BaseParamType);
+createLegacyClass(FieldParamType).inherits(BaseParamType);
 function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
 }

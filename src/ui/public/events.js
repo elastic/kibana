@@ -7,11 +7,12 @@
 import _ from 'lodash';
 import { fatalError } from 'ui/notify';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { createLegacyClass } from './utils/legacy_class';
 
 const location = 'EventEmitter';
 
 export function EventsProvider(Private, Promise) {
-  _.class(Events).inherits(SimpleEmitter);
+  createLegacyClass(Events).inherits(SimpleEmitter);
   function Events() {
     Events.Super.call(this);
     this._listeners = {};

@@ -13,6 +13,7 @@ import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
 import { fatalError, Notifier } from 'ui/notify';
 import 'ui/state_management/config_provider';
+import { createLegacyClass } from '../utils/legacy_class';
 
 import {
   createStateHash,
@@ -23,7 +24,7 @@ import {
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
-  _.class(State).inherits(Events);
+  createLegacyClass(State).inherits(Events);
   function State(
     urlParam,
     defaults,
