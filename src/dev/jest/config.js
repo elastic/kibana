@@ -3,6 +3,10 @@ export default {
   roots: [
     '<rootDir>/src/ui',
     '<rootDir>/src/core_plugins',
+    '<rootDir>/src/server',
+    '<rootDir>/src/cli',
+    '<rootDir>/src/cli_keystore',
+    '<rootDir>/src/cli_plugin',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [
@@ -48,7 +52,7 @@ export default {
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
-    '<rootDir>/packages/kbn-pm/(dist|vendor)/',
+    '<rootDir>/packages/kbn-pm/dist/',
     'integration_tests/'
   ],
   transform: {
@@ -57,6 +61,7 @@ export default {
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.js$',
+    'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
     '<rootDir>/node_modules/enzyme-to-json/serializer',

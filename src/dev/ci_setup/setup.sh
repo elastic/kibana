@@ -3,8 +3,7 @@
 set -e
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"/tmp/kibana"}"
-
+cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
 ###
 ### check that we seem to be in a kibana project

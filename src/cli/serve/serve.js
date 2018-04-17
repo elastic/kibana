@@ -45,7 +45,7 @@ function readServerSettings(opts, extraCliOptions) {
       set('server.ssl.enabled', true);
     }
 
-    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+    if (opts.ssl && !has('server.ssl.keystore.path') && !has('server.ssl.certificate') && !has('server.ssl.key')) {
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
@@ -187,7 +187,8 @@ export default function (program) {
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
-  } else {
-    console.error('FATAL', message);
   }
+
+  // It's possible for the Hapi logger to not be setup
+  console.error('FATAL', message);
 }

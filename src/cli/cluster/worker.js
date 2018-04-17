@@ -150,7 +150,7 @@ export default class Worker extends EventEmitter {
     this.fork = cluster.fork(this.env);
     this.forkBinder = new BinderFor(this.fork);
 
-    // when the fork sends a message, comes online, or looses it's connection, then react
+    // when the fork sends a message, comes online, or loses its connection, then react
     this.forkBinder.on('message', msg => this.parseIncomingMessage(msg));
     this.forkBinder.on('online', () => this.onOnline());
     this.forkBinder.on('disconnect', () => this.onDisconnect());

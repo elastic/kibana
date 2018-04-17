@@ -6,6 +6,12 @@ import { requestQueue } from '../../_request_queue';
 import { SearchSourceProvider } from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
+function timeout() {
+  return new Promise(resolve => {
+    setTimeout(resolve);
+  });
+}
+
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
@@ -151,6 +157,48 @@ describe('SearchSource', function () {
           expect(source.get('source')).to.be(football);
         });
       });
+    });
+  });
+
+  describe('#onRequestStart()', () => {
+    it('should be called when starting a request', async () => {
+      const source = new SearchSource();
+      const fn = sinon.spy();
+      source.onRequestStart(fn);
+      const request = {};
+      source.requestIsStarting(request);
+      await timeout();
+      expect(fn.calledWith(source, request)).to.be(true);
+    });
+
+    it('should not be called on parent searchSource', async () => {
+      const parent = new SearchSource();
+      const source = new SearchSource().inherits(parent);
+
+      const fn = sinon.spy();
+      source.onRequestStart(fn);
+      const parentFn = sinon.spy();
+      parent.onRequestStart(parentFn);
+      const request = {};
+      source.requestIsStarting(request);
+      await timeout();
+      expect(fn.calledWith(source, request)).to.be(true);
+      expect(parentFn.notCalled).to.be(true);
+    });
+
+    it('should be called on parent searchSource if callParentStartHandlers is true', async () => {
+      const parent = new SearchSource();
+      const source = new SearchSource().inherits(parent, { callParentStartHandlers: true });
+
+      const fn = sinon.spy();
+      source.onRequestStart(fn);
+      const parentFn = sinon.spy();
+      parent.onRequestStart(parentFn);
+      const request = {};
+      source.requestIsStarting(request);
+      await timeout();
+      expect(fn.calledWith(source, request)).to.be(true);
+      expect(parentFn.calledWith(source, request)).to.be(true);
     });
   });
 

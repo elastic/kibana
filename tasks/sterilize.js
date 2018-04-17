@@ -1,4 +1,4 @@
-import { bgRed, white } from 'ansicolors';
+import { bgRed, white } from 'chalk';
 import { execSync } from 'child_process';
 import { createInterface } from 'readline';
 

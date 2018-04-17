@@ -111,6 +111,12 @@ skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
 yarn kbn bootstrap --skip-kibana-extra
 ```
 
+Or just skip few selected packages:
+
+```
+yarn kbn bootstrap --exclude @kbn/pm --exclude @kbn/datemath
+```
+
 For more details, run:
 
 ```
@@ -131,11 +137,30 @@ yarn kbn run build
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
-`--skip-kibana` and `--skip-kibana-extra`:
+with `--exclude` and `--skip-kibana-extra`:
 
 ```
-yarn kbn run build --skip-kibana
+yarn kbn run build --exclude kibana
 ```
+
+### Watching
+
+During development you can also use `kbn` to watch for changes. For this to work
+package should define `kbn:watch` script in the `package.json`:
+
+```
+yarn kbn watch
+``` 
+
+By default `kbn watch` will sort all packages within Kibana into batches based on
+their mutual dependencies and run watch script for all packages in the correct order.
+
+As with any other `kbn` command, you can use `--include` and `--exclude` filters to watch
+only for a selected packages:
+
+```
+yarn kbn watch --include @kbn/pm --include kibana
+``` 
 
 ## Building packages for production
 

@@ -223,5 +223,16 @@ module.exports = function (grunt) {
         `http.port=${esTestConfig.getPort()}`,
       ],
     },
+
+    verifyNotice: {
+      options: {
+        wait: true,
+      },
+      cmd: process.execPath,
+      args: [
+        'scripts/notice',
+        '--validate'
+      ]
+    }
   };
 };

@@ -15,7 +15,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   'tasks/build/docker/docs/{Dockerfile,docker-compose.yml}',
-  'packages/kbn-pm/vendor/yarn-1.3.2.js'
 ];
 
 

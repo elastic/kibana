@@ -19,17 +19,26 @@ function createTypeFilter(restrict, exclude) {
 }
 
 // This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
-export function filterRows(row) {
-  return (
-    !/_bucket$/.test(row.type) &&
-    !/^series/.test(row.type) &&
-    !/^percentile/.test(row.type) &&
-    !/^top_hit/.test(row.type)
-  );
+export function filterRows(includeSiblings) {
+  return row => {
+    if (includeSiblings) {
+      return (
+        !/^series/.test(row.type) &&
+        !/^percentile/.test(row.type) &&
+        row.type !== 'math'
+      );
+    }
+    return (
+      !/_bucket$/.test(row.type) &&
+      !/^series/.test(row.type) &&
+      !/^percentile/.test(row.type) &&
+      row.type !== 'math'
+    );
+  };
 }
 
 function MetricSelect(props) {
-  const { restrict, metric, onChange, value, exclude } = props;
+  const { restrict, metric, onChange, value, exclude, includeSiblings } = props;
 
   const metrics = props.metrics.filter(createTypeFilter(restrict, exclude));
 
@@ -54,7 +63,7 @@ function MetricSelect(props) {
       return acc;
     }, []);
 
-  const options = siblings.filter(filterRows).map(row => {
+  const options = siblings.filter(filterRows(includeSiblings)).map(row => {
     const label = calculateLabel(row, metrics);
     return { value: row.id, label };
   });
@@ -75,6 +84,7 @@ MetricSelect.defaultProps = {
   exclude: [],
   metric: {},
   restrict: 'none',
+  includeSiblings: false,
 };
 
 MetricSelect.propTypes = {
@@ -84,6 +94,7 @@ MetricSelect.propTypes = {
   onChange: PropTypes.func,
   restrict: PropTypes.string,
   value: PropTypes.string,
+  includeSiblings: PropTypes.bool,
 };
 
 export default MetricSelect;

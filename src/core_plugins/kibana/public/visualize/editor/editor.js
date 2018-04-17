@@ -212,10 +212,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
       if (showTimeFilter) {
-        timefilter.enableAutoRefreshSelector();
         timefilter.enableTimeRangeSelector();
       } else {
-        timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
       }
     });
@@ -224,6 +222,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $scope.timeRange = timefilter.time;
     };
 
+    timefilter.enableAutoRefreshSelector();
     timefilter.on('update', updateTimeRange);
 
     // update the searchSource when filters update
