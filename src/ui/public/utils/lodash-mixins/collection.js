@@ -84,23 +84,6 @@ export function lodashCollectionMixin(_) {
     },
 
     /**
-     * Remove or add a value to an array based on it's presense in the
-     * array initially.
-     *
-     * @param  {array} arr
-     * @param  {any} value - the value to toggle
-     * @return {array} arr
-     */
-    toggleInOut: function (arr, value) {
-      if (_.contains(arr, value)) {
-        arr.splice(arr.indexOf(value), 1);
-      } else {
-        arr.push(value);
-      }
-      return arr;
-    },
-
-    /**
      * Efficient and safe version of [].push(dest, source);
      *
      * @param  {Array} source - the array to pull values from
