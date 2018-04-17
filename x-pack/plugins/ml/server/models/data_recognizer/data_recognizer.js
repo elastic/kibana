@@ -223,7 +223,7 @@ export class DataRecognizer {
 
     // create the datafeeds
     if (moduleConfig.datafeeds && moduleConfig.datafeeds.length) {
-      if (typeof query === 'object') {
+      if (typeof query === 'object' && query !== null) {
         moduleConfig.datafeeds.forEach((df) => {
           df.config.query = query;
         });
