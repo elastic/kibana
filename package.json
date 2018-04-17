@@ -222,6 +222,7 @@
     "@kbn/es": "link:packages/kbn-es",
     "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
+    "@kbn/test": "link:packages/kbn-test",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "backport": "2.2.0",

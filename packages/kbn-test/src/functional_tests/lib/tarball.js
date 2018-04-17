@@ -23,9 +23,9 @@ export function extractTarball(archive, dirPath) {
   return new Promise((resolve, reject) => {
     createReadStream(archive)
       .on('error', reject)
-    .pipe(createGunzip())
+      .pipe(createGunzip())
       .on('error', reject)
-    .pipe(tarFs.extract(dirPath, { map: stripOne }))
+      .pipe(tarFs.extract(dirPath, { map: stripOne }))
       .on('error', reject)
       .on('finish', resolve);
   });

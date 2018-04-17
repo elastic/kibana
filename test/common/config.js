@@ -1,5 +1,5 @@
 import { format as formatUrl } from 'url';
-import { OPTIMIZE_BUNDLE_DIR } from '../../functional_tests/lib/paths';
+import { OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
 import {
   KibanaServerProvider,
   EsProvider,

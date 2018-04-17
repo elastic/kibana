@@ -11,15 +11,10 @@ import {
   log,
   isCliError,
   KIBANA_ROOT,
+  MULTIPLE_CONFIG_PATH,
 } from './lib';
 
-import { readConfigFile } from '../src/functional_test_runner/lib';
-
-export function fatalErrorHandler(err) {
-  log.error('FATAL ERROR');
-  log.error(isCliError(err) ? err.message : err);
-  process.exit(1);
-}
+import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 
 // Takes in a config listing multiple configs
 // [x] 'test/functional/config.js'
@@ -30,7 +25,7 @@ export function fatalErrorHandler(err) {
 // [x] 'test/api_integration/config.js'
 // [x] 'test/saml_api_integration/config.js'
 export async function runTests(
-  configPath = 'test/multiple_config.js',
+  configPath = MULTIPLE_CONFIG_PATH,
   runEs = runElasticsearch,
   runKbn = runKibanaServer,
 ) {
@@ -38,7 +33,6 @@ export async function runTests(
 
   cmd
     .option('--config [value]', 'Path to config file to specify options', null)
-    .option('--bail', 'stop tests after the first failure', false)
     .parse(process.argv);
 
   configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
@@ -55,7 +49,7 @@ export async function runTests(
 }
 
 // Start only servers using single config
-export async function startWithConfig(
+export async function startServers(
   configPath = 'test/functional/config.js',
   runEs = runElasticsearch,
   runKbn = runKibanaServer,
@@ -86,7 +80,7 @@ export async function startWithConfig(
 
 // Start servers and run tests
 // TODO: doesn't work to pass in config via command line
-export async function runWithConfig(
+async function runWithConfig(
   configPath = 'test/functional/config.js',
   runEs = runElasticsearch,
   runKbn = runKibanaServer,
@@ -128,4 +122,10 @@ function resolveConfigPath(configPath) {
   // process was started in another method, so don't parse argv
     return resolve(KIBANA_ROOT, configPath);
   }
+}
+
+function fatalErrorHandler(err) {
+  log.error('FATAL ERROR');
+  log.error(isCliError(err) ? err.message : err);
+  process.exit(1);
 }
