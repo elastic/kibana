@@ -272,6 +272,54 @@ describe('migrate', () => {
       .toMatchSnapshot();
   });
 
+  test('migrations are skipped if migration status is migrating', async () => {
+    const index = 'skippy';
+    const pluginV1 = {
+      id: 'fishes',
+      mappings: {
+        fish: { properties: { kind: { type: 'keyword' }, }, },
+      },
+      migrations: [],
+    };
+    const originalMigrationState = MigrationState.build([pluginV1]);
+    const pluginV2 = _.set(_.cloneDeep(pluginV1), 'mappings.fish.properties.freshWater.type', 'boolean');
+    const existingData = assocMigrationState({}, index, {
+      ...originalMigrationState,
+      status: 'migrating',
+    });
+    const existingMeta = assocMappings({}, index, pluginV1.mappings);
+    const callCluster = mockCluster(existingData, existingMeta);
+    const result = await migrate({ callCluster, index, elasticVersion, log, plugins: [pluginV2] });
+    expect(result.destIndex).toEqual(result.index);
+    expect(result.status).toEqual('migrating');
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
+  test('migrations will run, if forced even if index is in migrating state', async () => {
+    const index = 'skippy';
+    const pluginV1 = {
+      id: 'fishes',
+      mappings: {
+        fish: { properties: { kind: { type: 'keyword' }, }, },
+      },
+      migrations: [],
+    };
+    const originalMigrationState = MigrationState.build([pluginV1]);
+    const pluginV2 = _.set(_.cloneDeep(pluginV1), 'mappings.fish.properties.freshWater.type', 'boolean');
+    const existingData = assocMigrationState({}, index, {
+      ...originalMigrationState,
+      status: 'migrating',
+    });
+    const existingMeta = assocMappings({}, index, pluginV1.mappings);
+    const callCluster = mockCluster(existingData, existingMeta);
+    const result = await migrate({ callCluster, index, elasticVersion, log, force: true, plugins: [pluginV2], destIndex: 'skippy-2' });
+    expect(result.destIndex).not.toEqual(result.index);
+    expect(result.status).toEqual('migrated');
+    expect(callCluster.state())
+      .toMatchSnapshot();
+  });
+
   test('errors if index has later migrations than the current plugins allow', async () => {
     const index = 'aquatica';
     const pluginV2 = {

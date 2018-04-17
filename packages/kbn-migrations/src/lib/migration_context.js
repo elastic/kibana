@@ -11,7 +11,7 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion } = validateOpts(opts);
+  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force } = validateOpts(opts);
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
@@ -21,6 +21,7 @@ async function fetch(opts) {
     migrationState,
     migrationStateVersion,
     migrationPlan,
+    force,
     plugins: sanitizedPlugins,
     destIndex: destIndex || `${index}-${elasticVersion}-${moment().format('YYYYMMDDHHmmss')}`,
     initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
@@ -47,6 +48,7 @@ function validateOpts(opts) {
   validateProp('plugins', 'array', (v) => Array.isArray(v));
   validateProp('destIndex', 'string', (v) => v === undefined || typeof v === 'string');
   validateProp('initialIndex', 'string', (v) => v === undefined || typeof v === 'string');
+  validateProp('force', 'boolean', (v) => v === undefined || typeof v === 'boolean');
 
   return opts;
 }

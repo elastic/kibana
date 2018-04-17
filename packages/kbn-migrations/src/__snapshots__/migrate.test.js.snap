@@ -1211,6 +1211,239 @@ Object {
 }
 `;
 
+exports[`migrate migrations are skipped if migration status is migrating 1`] = `
+Object {
+  "data": Object {
+    "skippy": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "fishes",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 42,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {},
+    "mappings": Object {
+      "skippy": Object {
+        "doc": Object {
+          "properties": Object {
+            "fish": Object {
+              "properties": Object {
+                "kind": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {},
+  },
+}
+`;
+
+exports[`migrate migrations will run, if forced even if index is in migrating state 1`] = `
+Object {
+  "data": Object {
+    "skippy-2": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "fishes",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"},\\"freshWater\\":{\\"type\\":\\"boolean\\"}}}}",
+                "mappingsChecksum": "cecff11fdfabe235b839cbfbfcfdf364829bcbc6",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrated",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
+    "skippy-9.8.7-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [
+              Object {
+                "id": "fishes",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "migrationIds": Array [],
+                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+              },
+            ],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 43,
+      },
+    },
+  },
+  "meta": Object {
+    "aliases": Object {
+      "skippy": Object {
+        "skippy-2": Object {
+          "aliases": Object {
+            "skippy": Object {},
+          },
+        },
+      },
+    },
+    "mappings": Object {
+      "skippy-2": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "fish": Object {
+              "properties": Object {
+                "freshWater": Object {
+                  "type": "boolean",
+                },
+                "kind": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      "skippy-9.8.7-original": Object {
+        "doc": Object {
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "fish": Object {
+              "properties": Object {
+                "kind": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+    },
+    "settings": Object {
+      "skippy-2": Object {
+        "index": Object {
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+      "skippy-9.8.7-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "42",
+          "number_of_shards": "7",
+        },
+      },
+    },
+  },
+}
+`;
+
 exports[`migrate new index gets seeded 1`] = `
 Object {
   "data": Object {
