@@ -8,11 +8,11 @@
  * ability to destroy those mappings.
  */
 
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
 import { createLegacyClass } from '../utils/legacy_class';
+import { callEach } from '../utils/function';
 
 const urlParam = '_a';
 
@@ -43,7 +43,7 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
   AppState.prototype.destroy = function () {
     AppState.Super.prototype.destroy.call(this);
     AppState.getAppState._set(null);
-    _.callEach(eventUnsubscribers);
+    callEach(eventUnsubscribers);
   };
 
   /**

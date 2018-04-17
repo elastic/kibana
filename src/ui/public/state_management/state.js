@@ -14,6 +14,7 @@ import { EventsProvider } from 'ui/events';
 import { fatalError, Notifier } from 'ui/notify';
 import 'ui/state_management/config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
+import { callEach } from '../utils/function';
 
 import {
   createStateHash,
@@ -39,7 +40,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     this._hashedItemStore = hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
-    this._cleanUpListeners = _.partial(_.callEach, [
+    this._cleanUpListeners = _.partial(callEach, [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
         this.fetch();
