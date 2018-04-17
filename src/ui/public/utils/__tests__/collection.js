@@ -176,7 +176,7 @@ describe('collection', () => {
     });
   });
 
-  describe('organize', function () {
+  describe('organizeBy', function () {
 
     it('it works', function () {
       const col = [
