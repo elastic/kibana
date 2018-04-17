@@ -45,8 +45,8 @@ For the daring, snapshot builds are available. These builds are created nightly 
 | platform |  |
 | --- | --- |
 | OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux x64 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.9-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.9-SNAPSHOT-x86_64.rpm) |
-| Linux x86 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-linux-x86.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.9-SNAPSHOT-i386.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.9-SNAPSHOT-i686.rpm) |
+| Linux x64 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-x86_64.rpm) |
+| Linux x86 | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-linux-x86.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-i386.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-i686.rpm) |
 | Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-5.6.10-SNAPSHOT-windows-x86.zip) |
 
 ## Documentation
