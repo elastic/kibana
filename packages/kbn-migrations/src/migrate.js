@@ -14,6 +14,7 @@ const optsDefinition = {
   elasticVersion: 'string',
   destIndex: ['undefined', 'string'],
   initialIndex: ['undefined', 'string'],
+  force: ['undefined', 'boolean'],
 };
 
 /**

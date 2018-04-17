@@ -446,6 +446,11 @@ describe('migrate', () => {
     expect(testMigrationOpts({ plugins: 'notright' }))
       .rejects.toThrow(/Got string/);
   });
+
+  test('force must be a boolean if specified', () => {
+    expect(testMigrationOpts({ force: 99 }))
+      .rejects.toThrow(/force must be of type undefined or boolean/);
+  });
 });
 
 function assocMigrationState(data, index, migrationState) {
