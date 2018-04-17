@@ -129,7 +129,7 @@ exports[`ObjectsTable should render normally 1`] = `
     }
   }
 >
-  <Component
+  <Header
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
