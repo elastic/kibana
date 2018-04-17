@@ -101,13 +101,14 @@ export class IndexPatternSelect extends Component {
   }
 
   render() {
+    const selectId = `indexPatternSelect-${this.props.controlIndex}`;
     const selectedOptions = [];
     if (this.state.selectedIndexPattern) {
       selectedOptions.push(this.state.selectedIndexPattern);
     }
     return (
       <EuiFormRow
-        id={`indexPatternSelect-${this.props.controlIndex}`}
+        id={selectId}
         label="Index Pattern"
       >
         <EuiComboBox
@@ -118,7 +119,7 @@ export class IndexPatternSelect extends Component {
           options={this.state.options}
           selectedOptions={selectedOptions}
           onChange={this.onChange}
-          data-test-subj="indexPatternSelect"
+          data-test-subj={selectId}
         />
       </EuiFormRow>
     );

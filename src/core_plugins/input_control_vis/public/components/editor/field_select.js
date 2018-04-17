@@ -110,6 +110,8 @@ export class FieldSelect extends Component {
       return null;
     }
 
+    const selectId = `fieldSelect-${this.props.controlIndex}`;
+
     const selectedOptions = [];
     if (this.props.fieldName) {
       selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
@@ -117,7 +119,7 @@ export class FieldSelect extends Component {
 
     return (
       <EuiFormRow
-        id={`fieldSelect-${this.props.controlIndex}`}
+        id={selectId}
         label="Field"
       >
         <EuiComboBox
@@ -127,7 +129,7 @@ export class FieldSelect extends Component {
           options={this.state.fields}
           selectedOptions={selectedOptions}
           onChange={this.onChange}
-          data-test-subj="fieldSelect"
+          data-test-subj={selectId}
         />
       </EuiFormRow>
     );
