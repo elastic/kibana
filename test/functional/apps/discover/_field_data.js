@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const es = getService('es');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
   describe('discover app', function describeIndexTests() {
@@ -120,13 +121,29 @@ export default function ({ getService, getPageObjects }) {
               expect(rowData).to.be(ExpectedDoc);
             }
             catch (e) {
+              log.info('Attemping to get more debug info on this flaky test. Ping @bargs if you see this fail');
+
+              log.info('Actual doc from ES ====================');
+              const response = await es.search({
+                index: 'logstash-2015.09.22',
+                body: {
+                  query: {
+                    term: { _id: 'AU_x3_g4GFA8no6QjkYX' }
+                  },
+                  _source: true,
+                  docvalue_fields: ['relatedContent.article:modified_time', 'relatedContent.article:published_time']
+                }
+              });
+              log.info(JSON.stringify(response));
+
+              log.info('Doc from response in spy panel ========');
               const esResponse = JSON.parse(await PageObjects.visualize.getVisualizationResponse());
-              const rawActualDoc = esResponse.hits.hits.find(function (hit) {
+              const spyPanelDoc = esResponse.hits.hits.find(function (hit) {
                 return hit._id === 'AU_x3_g4GFA8no6QjkYX' && hit._index === 'logstash-2015.09.22';
               });
-              log.info('Attemping to get more debug info on this flaky test. Ping @bargs if you see this fail');
-              log.info(JSON.stringify(rawActualDoc));
+              log.info(JSON.stringify(spyPanelDoc));
               await PageObjects.visualize.closeSpyPanel();
+
               throw e;
             }
           });
