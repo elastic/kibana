@@ -4,6 +4,7 @@ import { existsSync } from 'fs';
 import { resolve, join, sep } from 'path';
 import { has, isEmpty } from 'lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
+import { addExtensionSpecFilePath } from './api_server/spec';
 
 import {
   ProxyConfigCollection,
@@ -70,6 +71,7 @@ export default function (kibana) {
     },
 
     init: function (server, options) {
+      server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
