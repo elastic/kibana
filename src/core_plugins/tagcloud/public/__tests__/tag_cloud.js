@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import _ from 'lodash';
-import TagCloud from 'plugins/tagcloud/tag_cloud';
+import TagCloud from '../tag_cloud';
 import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';
 import { ImageComparator } from 'test_utils/image_comparator';

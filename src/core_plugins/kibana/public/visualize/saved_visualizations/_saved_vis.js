@@ -9,7 +9,7 @@
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
-import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
+import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 
 uiModules
