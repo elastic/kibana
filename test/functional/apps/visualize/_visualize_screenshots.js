@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     before(async function () {
       await esArchiver.load('visualization_screenshots');
       await PageObjects.common.navigateToApp('visualize');
+      await remote.setWindowSize(1270, 797);
     });
 
 
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     it('should compare visualization screenshot for data table with average metric agg with histogram', async function () {
       const expectedSavedVizName = 'screenshot_datatable_average';
-      await compareScreenshot(expectedSavedVizName);
+      await compareScreenshot(expectedSavedVizName, 0.07);
     });
 
     it('should compare visualization screenshot for data table with minimum bucket metric agg and geohash', async function () {
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     it('should compare visualization screenshot for data table with count metric agg and significant terms bucket', async function () {
       const expectedSavedVizName = 'screenshot_datatable_significant';
-      await compareScreenshot(expectedSavedVizName);
+      await compareScreenshot(expectedSavedVizName, 0.07);
     });
 
     it('should compare visualization screenshot for gauge chart displayes as circles with sum bucket agg and terms', async function () {
@@ -107,7 +108,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
     it('should compare visualization screenshot for mark down with text', async function () {
       const expectedSavedVizName = 'screenshot_markdown_options';
-      await compareScreenshot(expectedSavedVizName);
+      await compareScreenshot(expectedSavedVizName, 0.07);
     });
 
     it('should compare visualization screenshot for metric viz with median metric agg and filters', async function () {
