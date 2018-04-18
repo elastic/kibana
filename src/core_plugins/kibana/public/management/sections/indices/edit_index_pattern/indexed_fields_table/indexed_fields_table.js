@@ -36,6 +36,7 @@ export class IndexedFieldsTable extends Component {
     indexedFieldTypeFilter: PropTypes.string,
     helpers: PropTypes.shape({
       redirectToRoute: PropTypes.func.isRequired,
+      getFieldInfo: PropTypes.func,
     }),
     fieldWildcardMatcher: PropTypes.func.isRequired,
   }
@@ -57,7 +58,7 @@ export class IndexedFieldsTable extends Component {
   }
 
   mapFields(fields) {
-    const { indexPattern, fieldWildcardMatcher } = this.props;
+    const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
     const sourceFilters = indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
@@ -70,6 +71,7 @@ export class IndexedFieldsTable extends Component {
           indexPattern: field.indexPattern,
           format: getFieldFormat(indexPattern, field.name),
           excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
+          info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field.name),
         };
       }) || [];
   }
