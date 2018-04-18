@@ -5,6 +5,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const esArchiver = getService('esArchiver');
   const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const remote = getService('remote');
+
 
 
   describe('visualize app', function describeIndexTests() {
@@ -14,9 +16,13 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.navigateToApp('visualize');
     });
 
+
+
     it('should compare visualization screenshot for bar chart with count metric agg and date histogram with terms', async function () {
       const expectedSavedVizName = 'screenshot_area_chart_bar';
       await compareScreenshot(expectedSavedVizName);
+      const position = await remote.findByCssSelector('g.tick:nth-child(4)').getPosition();
+      log.debug(`x axis max xy: ${position.x} ${position.y} expected xy = 750.4375 409.70758056640625`);
     });
 
     it('should compare visualization screenshot for area chart with legend position and grid lines', async function () {
