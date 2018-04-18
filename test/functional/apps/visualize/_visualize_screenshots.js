@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await compareScreenshot(expectedSavedVizName);
     });
 
-    async function compareScreenshot(expectedSavedVizName, threshold = 0.050) {
+    async function compareScreenshot(expectedSavedVizName, threshold = 0.065) {
 
       if(initialize) {
         initialize = false;
