@@ -22,6 +22,7 @@ import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { consoleExtensions } from './plugins/console_extensions';
 import { notifications } from './plugins/notifications';
+import { rollup } from './plugins/rollup';
 
 module.exports = function (kibana) {
   return [
@@ -43,5 +44,6 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
+    rollup(kibana),
   ];
 };

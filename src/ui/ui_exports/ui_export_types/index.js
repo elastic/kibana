@@ -45,6 +45,7 @@ export {
   navbarExtensions,
   dashboardPanelActions,
   managementSections,
+  indexManagement,
   devTools,
   docViews,
   hacks,

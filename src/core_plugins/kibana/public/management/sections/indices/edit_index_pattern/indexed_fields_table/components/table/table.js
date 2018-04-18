@@ -37,11 +37,24 @@ export class Table extends PureComponent {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
   }
 
-  renderFieldName(name, isTimeField) {
+  renderFieldName(name, field) {
+    const { indexPattern } = this.props;
+
     return (
       <span>
         {name}
-        {isTimeField ? (
+        {field.info && field.info.length ? (
+          <span>
+            &nbsp;
+            <EuiIconTip
+              type="questionInCircle"
+              color="primary"
+              aria-label="Additional field information"
+              content={field.info.map(info => <div>{info}</div>)}
+            />
+          </span>
+        ) : null}
+        {indexPattern.timeFieldName === name ? (
           <span>
             &nbsp;
             <EuiIconTip
@@ -51,7 +64,7 @@ export class Table extends PureComponent {
               content="This field represents the time that events occurred."
             />
           </span>
-        ) : ''}
+        ) : null}
       </span>
     );
   }
@@ -76,7 +89,7 @@ export class Table extends PureComponent {
   }
 
   render() {
-    const { indexPattern, items, editField } = this.props;
+    const { items, editField } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -89,8 +102,8 @@ export class Table extends PureComponent {
         name: 'Name',
         dataType: 'string',
         sortable: true,
-        render: (value) => {
-          return this.renderFieldName(value, indexPattern.timeFieldName === value);
+        render: (value, field) => {
+          return this.renderFieldName(value, field);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',
