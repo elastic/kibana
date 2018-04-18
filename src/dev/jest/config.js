@@ -53,7 +53,7 @@ export default {
   ],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
-    '<rootDir>/packages/kbn-pm/(dist|vendor)/',
+    '<rootDir>/packages/kbn-pm/dist/',
     'integration_tests/'
   ],
   transform: {

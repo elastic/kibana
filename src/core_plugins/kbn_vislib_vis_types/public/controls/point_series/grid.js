@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import vislibGridTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series/grid.html';
+import vislibGridTemplate from './grid.html';
 const module = uiModules.get('kibana');
 
 module.directive('vislibGrid', function () {

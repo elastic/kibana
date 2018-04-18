@@ -1,105 +1,102 @@
-import { IndexedArray } from 'ui/indexed_array';
-import 'ui/agg_types/agg_params';
-import { AggTypesMetricsCountProvider } from 'ui/agg_types/metrics/count';
-import { AggTypesMetricsAvgProvider } from 'ui/agg_types/metrics/avg';
-import { AggTypesMetricsSumProvider } from 'ui/agg_types/metrics/sum';
-import { AggTypesMetricsMedianProvider } from 'ui/agg_types/metrics/median';
-import { AggTypesMetricsMinProvider } from 'ui/agg_types/metrics/min';
-import { AggTypesMetricsMaxProvider } from 'ui/agg_types/metrics/max';
-import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
-import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
-import { AggTypesMetricsCardinalityProvider } from 'ui/agg_types/metrics/cardinality';
-import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
-import { AggTypesMetricsGeoBoundsProvider } from 'ui/agg_types/metrics/geo_bounds';
-import { AggTypesMetricsGeoCentroidProvider } from 'ui/agg_types/metrics/geo_centroid';
-import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
-import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
-import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumulative_sum';
-import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
-import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
-import { AggTypesBucketsDateHistogramProvider } from 'ui/agg_types/buckets/date_histogram';
-import { AggTypesBucketsHistogramProvider } from 'ui/agg_types/buckets/histogram';
-import { AggTypesBucketsRangeProvider } from 'ui/agg_types/buckets/range';
-import { AggTypesBucketsDateRangeProvider } from 'ui/agg_types/buckets/date_range';
-import { AggTypesBucketsIpRangeProvider } from 'ui/agg_types/buckets/ip_range';
-import { AggTypesBucketsTermsProvider } from 'ui/agg_types/buckets/terms';
-import { AggTypesBucketsFilterProvider } from 'ui/agg_types/buckets/filter';
-import { AggTypesBucketsFiltersProvider } from 'ui/agg_types/buckets/filters';
-import { AggTypesBucketsSignificantTermsProvider } from 'ui/agg_types/buckets/significant_terms';
-import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
-import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_sum';
-import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
-import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
-import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
 import 'ui/directives/validate_agg';
+import 'ui/agg_types/agg_params';
+import { IndexedArray } from 'ui/indexed_array';
+import { countMetricAgg } from 'ui/agg_types/metrics/count';
+import { avgMetricAgg } from 'ui/agg_types/metrics/avg';
+import { sumMetricAgg } from 'ui/agg_types/metrics/sum';
+import { medianMetricAgg } from 'ui/agg_types/metrics/median';
+import { minMetricAgg } from 'ui/agg_types/metrics/min';
+import { maxMetricAgg } from 'ui/agg_types/metrics/max';
+import { topHitMetricAgg } from 'ui/agg_types/metrics/top_hit';
+import { stdDeviationMetricAgg } from 'ui/agg_types/metrics/std_deviation';
+import { cardinalityMetricAgg } from 'ui/agg_types/metrics/cardinality';
+import { percentilesMetricAgg } from 'ui/agg_types/metrics/percentiles';
+import { geoBoundsMetricAgg } from 'ui/agg_types/metrics/geo_bounds';
+import { geoCentroidMetricAgg } from 'ui/agg_types/metrics/geo_centroid';
+import { percentileRanksMetricAgg } from 'ui/agg_types/metrics/percentile_ranks';
+import { derivativeMetricAgg } from 'ui/agg_types/metrics/derivative';
+import { cumulativeSumMetricAgg } from 'ui/agg_types/metrics/cumulative_sum';
+import { movingAvgMetricAgg } from 'ui/agg_types/metrics/moving_avg';
+import { serialDiffMetricAgg } from 'ui/agg_types/metrics/serial_diff';
+import { dateHistogramBucketAgg } from 'ui/agg_types/buckets/date_histogram';
+import { histogramBucketAgg } from 'ui/agg_types/buckets/histogram';
+import { rangeBucketAgg } from 'ui/agg_types/buckets/range';
+import { dateRangeBucketAgg } from 'ui/agg_types/buckets/date_range';
+import { ipRangeBucketAgg } from 'ui/agg_types/buckets/ip_range';
+import { termsBucketAgg } from 'ui/agg_types/buckets/terms';
+import { filterBucketAgg } from 'ui/agg_types/buckets/filter';
+import { filtersBucketAgg } from 'ui/agg_types/buckets/filters';
+import { significantTermsBucketAgg } from 'ui/agg_types/buckets/significant_terms';
+import { geoHashBucketAgg } from 'ui/agg_types/buckets/geo_hash';
+import { bucketSumMetricAgg } from 'ui/agg_types/metrics/bucket_sum';
+import { bucketAvgMetricAgg } from 'ui/agg_types/metrics/bucket_avg';
+import { bucketMinMetricAgg } from 'ui/agg_types/metrics/bucket_min';
+import { bucketMaxMetricAgg } from 'ui/agg_types/metrics/bucket_max';
 
-export function AggTypesIndexProvider(Private) {
+const aggs = {
+  metrics: [
+    countMetricAgg,
+    avgMetricAgg,
+    sumMetricAgg,
+    medianMetricAgg,
+    minMetricAgg,
+    maxMetricAgg,
+    stdDeviationMetricAgg,
+    cardinalityMetricAgg,
+    percentilesMetricAgg,
+    percentileRanksMetricAgg,
+    topHitMetricAgg,
+    derivativeMetricAgg,
+    cumulativeSumMetricAgg,
+    movingAvgMetricAgg,
+    serialDiffMetricAgg,
+    bucketAvgMetricAgg,
+    bucketSumMetricAgg,
+    bucketMinMetricAgg,
+    bucketMaxMetricAgg,
+    geoBoundsMetricAgg,
+    geoCentroidMetricAgg
+  ],
+  buckets: [
+    dateHistogramBucketAgg,
+    histogramBucketAgg,
+    rangeBucketAgg,
+    dateRangeBucketAgg,
+    ipRangeBucketAgg,
+    termsBucketAgg,
+    filterBucketAgg,
+    filtersBucketAgg,
+    significantTermsBucketAgg,
+    geoHashBucketAgg
+  ]
+};
 
-  const aggs = {
-    metrics: [
-      Private(AggTypesMetricsCountProvider),
-      Private(AggTypesMetricsAvgProvider),
-      Private(AggTypesMetricsSumProvider),
-      Private(AggTypesMetricsMedianProvider),
-      Private(AggTypesMetricsMinProvider),
-      Private(AggTypesMetricsMaxProvider),
-      Private(AggTypesMetricsStdDeviationProvider),
-      Private(AggTypesMetricsCardinalityProvider),
-      Private(AggTypesMetricsPercentilesProvider),
-      Private(AggTypesMetricsPercentileRanksProvider),
-      Private(AggTypesMetricsTopHitProvider),
-      Private(AggTypesMetricsDerivativeProvider),
-      Private(AggTypesMetricsCumulativeSumProvider),
-      Private(AggTypesMetricsMovingAvgProvider),
-      Private(AggTypesMetricsSerialDiffProvider),
-      Private(AggTypesMetricsBucketAvgProvider),
-      Private(AggTypesMetricsBucketSumProvider),
-      Private(AggTypesMetricsBucketMinProvider),
-      Private(AggTypesMetricsBucketMaxProvider),
-      Private(AggTypesMetricsGeoBoundsProvider),
-      Private(AggTypesMetricsGeoCentroidProvider)
-    ],
-    buckets: [
-      Private(AggTypesBucketsDateHistogramProvider),
-      Private(AggTypesBucketsHistogramProvider),
-      Private(AggTypesBucketsRangeProvider),
-      Private(AggTypesBucketsDateRangeProvider),
-      Private(AggTypesBucketsIpRangeProvider),
-      Private(AggTypesBucketsTermsProvider),
-      Private(AggTypesBucketsFilterProvider),
-      Private(AggTypesBucketsFiltersProvider),
-      Private(AggTypesBucketsSignificantTermsProvider),
-      Private(AggTypesBucketsGeoHashProvider),
-    ]
-  };
-
-  Object.keys(aggs).forEach(function (type) {
-    aggs[type].forEach(function (agg) {
-      agg.type = type;
-    });
+Object.keys(aggs).forEach(function (type) {
+  aggs[type].forEach(function (agg) {
+    agg.type = type;
   });
+});
 
+
+/**
+ * IndexedArray of Aggregation Types.
+ *
+ * These types form two groups, metric and buckets.
+ *
+ * @module agg_types
+ * @type {IndexedArray}
+ */
+export const aggTypes = new IndexedArray({
 
   /**
-   * IndexedArray of Aggregation Types.
-   *
-   * These types form two groups, metric and buckets.
-   *
-   * @module agg_types
-   * @type {IndexedArray}
+   * @type {Array}
    */
-  return new IndexedArray({
+  index: ['name'],
 
-    /**
-     * @type {Array}
-     */
-    index: ['name'],
-
-    /**
-     * [group description]
-     * @type {Array}
-     */
-    group: ['type'],
-    initialSet: aggs.metrics.concat(aggs.buckets)
-  });
-}
+  /**
+   * [group description]
+   * @type {Array}
+   */
+  group: ['type'],
+  initialSet: aggs.metrics.concat(aggs.buckets)
+});

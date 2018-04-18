@@ -1,5 +1,5 @@
 import angular from 'angular';
-import _ from 'lodash';
+import { createLegacyClass } from './utils/legacy_class';
 
 const canStack = (function () {
   const err = new Error();
@@ -30,7 +30,7 @@ export class KbnError {
 // http://stackoverflow.com/questions/33870684/why-doesnt-instanceof-work-on-instances-of-error-subclasses-under-babel-node
 // Hence we are inheriting from it this way, instead of using extends Error, and this will then preserve
 // instanceof checks.
-_.class(KbnError).inherits(Error);
+createLegacyClass(KbnError).inherits(Error);
 
 /**
  * SearchTimeout error class

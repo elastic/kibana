@@ -4,16 +4,14 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { aggTypes } from 'ui/agg_types/index';
+import { AggConfig } from 'ui/vis/agg_config';
 
 describe('params', function () {
 
   let paramWriter;
   let writeInterval;
 
-  let aggTypes;
-  let AggConfig;
   let setTimeBounds;
   let timeField;
 
@@ -24,8 +22,6 @@ describe('params', function () {
     const timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;
-    aggTypes = Private(AggTypesIndexProvider);
-    AggConfig = Private(VisAggConfigProvider);
 
     paramWriter = new AggParamWriter({ aggType: 'date_histogram' });
     writeInterval = function (interval) {

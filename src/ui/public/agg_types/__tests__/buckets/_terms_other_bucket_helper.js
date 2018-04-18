@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { OtherBucketHelperProvider } from 'ui/agg_types/buckets/_terms_other_bucket_helper';
+import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from 'ui/agg_types/buckets/_terms_other_bucket_helper';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -118,7 +118,6 @@ const nestedOtherResponse = {
 
 describe('Terms Agg Other bucket helper', () => {
 
-  let otherBucketHelper;
   let vis;
 
   function init(aggConfig) {
@@ -126,7 +125,6 @@ describe('Terms Agg Other bucket helper', () => {
     ngMock.inject((Private) => {
       const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      otherBucketHelper = Private(OtherBucketHelperProvider);
 
       vis = new Vis(indexPattern, aggConfig);
     });
@@ -136,13 +134,13 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('returns a function', () => {
       init(visConfigSingleTerm);
-      const agg = otherBucketHelper.buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse);
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse);
       expect(agg).to.be.a('function');
     });
 
     it('correctly builds query with single terms agg', () => {
       init(visConfigSingleTerm);
-      const agg = otherBucketHelper.buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
       const expectedResponse = {
         aggs: undefined,
         filters: {
@@ -171,7 +169,7 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('correctly builds query for nested terms agg', () => {
       init(visConfigNestedTerm);
-      const agg = otherBucketHelper.buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
       const expectedResponse = {
         'other-filter': {
           aggs: undefined,
@@ -220,9 +218,13 @@ describe('Terms Agg Other bucket helper', () => {
   describe('mergeOtherBucketAggResponse', () => {
     it('correctly merges other bucket with single terms agg', () => {
       init(visConfigSingleTerm);
-      const otherAggConfig = otherBucketHelper.buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
-      const mergedResponse = otherBucketHelper
-        .mergeOtherBucketAggResponse(vis.aggs, singleTermResponse, singleOtherResponse, vis.aggs[0], otherAggConfig);
+      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs[0], singleTermResponse)();
+      const mergedResponse = mergeOtherBucketAggResponse(
+        vis.aggs,
+        singleTermResponse,
+        singleOtherResponse,
+        vis.aggs[0],
+        otherAggConfig);
 
       expect(mergedResponse.aggregations['1'].buckets[3].key).to.equal('Other');
       expect(mergedResponse.aggregations['1'].buckets[3].filters.length).to.equal(2);
@@ -230,9 +232,9 @@ describe('Terms Agg Other bucket helper', () => {
 
     it('correctly merges other bucket with nested terms agg', () => {
       init(visConfigNestedTerm);
-      const otherAggConfig = otherBucketHelper.buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
-      const mergedResponse = otherBucketHelper
-        .mergeOtherBucketAggResponse(vis.aggs, nestedTermResponse, nestedOtherResponse, vis.aggs[1], otherAggConfig);
+      const otherAggConfig = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponse)();
+      const mergedResponse = mergeOtherBucketAggResponse(vis.aggs, nestedTermResponse,
+        nestedOtherResponse, vis.aggs[1], otherAggConfig);
 
       expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].key).to.equal('Other');
       expect(mergedResponse.aggregations['1'].buckets[1]['2'].buckets[3].filters.length).to.equal(2);
@@ -243,12 +245,12 @@ describe('Terms Agg Other bucket helper', () => {
   describe('updateMissingBucket', () => {
     it('correctly updates missing bucket key', () => {
       init(visConfigNestedTerm);
-      const updatedResponse = otherBucketHelper.updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
+      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
       expect(updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === 'Missing')).to.not.be('undefined');
     });
 
     it('correctly sets the bucket filter', () => {
-      const updatedResponse = otherBucketHelper.updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
+      const updatedResponse = updateMissingBucket(singleTermResponse, vis.aggs, vis.aggs[0]);
       const missingBucket = updatedResponse.aggregations['1'].buckets.find(bucket => bucket.key === 'Missing');
       expect(missingBucket.filters).to.not.be('undefined');
       expect(missingBucket.filters[0]).to.eql({

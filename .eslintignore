@@ -15,7 +15,6 @@
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
-/packages/kbn-pm/vendor
 /packages/kbn-types/dist
 /packages/kbn-internal-native-observable
 /packages/kbn-plugin-generator/sao_template/template

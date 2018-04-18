@@ -37,6 +37,10 @@ Object {
     "enabled": false,
     "key": undefined,
     "keyPassphrase": undefined,
+    "keystore": Object {
+      "password": undefined,
+      "path": undefined,
+    },
     "supportedProtocols": undefined,
   },
 }

@@ -47,7 +47,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the slices with one child to a consistent label', function () {
-      const checkLabel = 'Count';
+      const checkLabel = 'Average bytes';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);

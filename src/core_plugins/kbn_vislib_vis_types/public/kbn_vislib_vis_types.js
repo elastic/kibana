@@ -1,13 +1,13 @@
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import histogramVisTypeProvider from 'plugins/kbn_vislib_vis_types/histogram';
-import lineVisTypeProvider from 'plugins/kbn_vislib_vis_types/line';
-import pieVisTypeProvider from 'plugins/kbn_vislib_vis_types/pie';
-import areaVisTypeProvider from 'plugins/kbn_vislib_vis_types/area';
-import heatmapVisTypeProvider from 'plugins/kbn_vislib_vis_types/heatmap';
-import horizontalBarVisTypeProvider from 'plugins/kbn_vislib_vis_types/horizontal_bar';
-import gaugeVisTypeProvider from 'plugins/kbn_vislib_vis_types/gauge';
-import goalVisTypeProvider from 'plugins/kbn_vislib_vis_types/goal';
+import histogramVisTypeProvider from './histogram';
+import lineVisTypeProvider from './line';
+import pieVisTypeProvider from './pie';
+import areaVisTypeProvider from './area';
+import heatmapVisTypeProvider from './heatmap';
+import horizontalBarVisTypeProvider from './horizontal_bar';
+import gaugeVisTypeProvider from './gauge';
+import goalVisTypeProvider from './goal';
 
 VisTypesRegistryProvider.register(histogramVisTypeProvider);
 VisTypesRegistryProvider.register(lineVisTypeProvider);

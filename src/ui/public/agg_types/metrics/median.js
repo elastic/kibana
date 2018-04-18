@@ -1,34 +1,28 @@
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
-import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
+import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { percentilesMetricAgg } from 'ui/agg_types/metrics/percentiles';
 
-export function AggTypesMetricsMedianProvider(Private) {
-
-  const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);
-  const percentiles = Private(AggTypesMetricsPercentilesProvider);
-
-  return new MetricAggType({
-    name: 'median',
-    dslName: 'percentiles',
-    title: 'Median',
-    makeLabel: function (aggConfig) {
-      return 'Median ' + aggConfig.getFieldDisplayName();
+export const medianMetricAgg = new MetricAggType({
+  name: 'median',
+  dslName: 'percentiles',
+  title: 'Median',
+  makeLabel: function (aggConfig) {
+    return 'Median ' + aggConfig.getFieldDisplayName();
+  },
+  params: [
+    {
+      name: 'field',
+      filterFieldTypes: 'number'
     },
-    params: [
-      {
-        name: 'field',
-        filterFieldTypes: 'number'
-      },
-      {
-        name: 'percents',
-        default: [50]
-      },
-      {
-        write(agg, output) {
-          output.params.keyed = false;
-        }
+    {
+      name: 'percents',
+      default: [50]
+    },
+    {
+      write(agg, output) {
+        output.params.keyed = false;
       }
-    ],
-    getResponseAggs: percentiles.getResponseAggs,
-    getValue: percentiles.getValue
-  });
-}
+    }
+  ],
+  getResponseAggs: percentilesMetricAgg.getResponseAggs,
+  getValue: percentilesMetricAgg.getValue
+});

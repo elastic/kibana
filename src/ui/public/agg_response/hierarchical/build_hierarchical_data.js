@@ -32,7 +32,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
 
     // If buckets is falsy then we should just return the aggs
     if (!buckets) {
-      const label = 'Count';
+      const label = raw.columns[0].label;
       const value = resp.aggregations
         && resp.aggregations[metric.id]
         && resp.aggregations[metric.id].value
