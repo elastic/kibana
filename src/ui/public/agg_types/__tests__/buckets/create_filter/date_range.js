@@ -3,19 +3,17 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterDateRangeProvider } from 'ui/agg_types/buckets/create_filter/date_range';
+import { createFilterDateRange } from 'ui/agg_types/buckets/create_filter/date_range';
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {
     let indexPattern;
     let Vis;
-    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      createFilter = Private(AggTypesBucketsCreateFilterDateRangeProvider);
     }));
 
     it('should return a range filter for date_range agg', function () {
@@ -35,7 +33,7 @@ describe('AggConfig Filters', function () {
       });
 
       const aggConfig = vis.aggs.byTypeName.date_range[0];
-      const filter = createFilter(aggConfig, 'February 1st, 2015 to February 7th, 2015');
+      const filter = createFilterDateRange(aggConfig, 'February 1st, 2015 to February 7th, 2015');
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
