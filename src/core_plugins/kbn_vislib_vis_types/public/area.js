@@ -1,7 +1,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
+import pointSeriesTemplate from './editors/point_series.html';
 import image from './images/icon-area.svg';
 
 export default function PointSeriesVisType(Private) {

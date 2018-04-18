@@ -1,5 +1,5 @@
-import 'plugins/tagcloud/tag_cloud.less';
-import 'plugins/tagcloud/tag_cloud_vis_params';
+import './tag_cloud.less';
+import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';

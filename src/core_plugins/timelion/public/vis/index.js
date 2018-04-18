@@ -6,14 +6,14 @@ import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 
 // we also need to load the controller and directive used by the template
-import 'plugins/timelion/vis/timelion_vis_controller';
-import 'plugins/timelion/directives/timelion_expression_input';
+import './timelion_vis_controller';
+import '../directives/timelion_expression_input';
 
 // Stylin
-import 'plugins/timelion/vis/timelion_vis.less';
+import './timelion_vis.less';
 
-import visConfigTemplate from 'plugins/timelion/vis/timelion_vis.html';
-import editorConfigTemplate from 'plugins/timelion/vis/timelion_vis_params.html';
+import visConfigTemplate from './timelion_vis.html';
+import editorConfigTemplate from './timelion_vis_params.html';
 
 // register the provider with the visTypes registry so that other know it exists
 VisTypesRegistryProvider.register(TimelionVisProvider);
