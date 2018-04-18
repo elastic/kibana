@@ -1,13 +1,7 @@
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-
 import { AggConfig } from 'ui/vis/agg_config';
-
-// import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
-// import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
-
 import './styles/_tilemap.less';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
