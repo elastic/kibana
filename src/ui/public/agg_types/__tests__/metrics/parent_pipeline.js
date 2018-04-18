@@ -8,10 +8,10 @@ import { VisProvider } from 'ui/vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'derivative', title: 'Derivative', provider: derivativeMetricAgg },
-  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: cumulativeSumMetricAgg },
-  { name: 'moving_avg', title: 'Moving Avg', provider: movingAvgMetricAgg },
-  { name: 'serial_diff', title: 'Serial Diff', provider: serialDiffMetricAgg },
+  { name: 'derivative', title: 'Derivative', agg: derivativeMetricAgg },
+  { name: 'cumulative_sum', title: 'Cumulative Sum', agg: cumulativeSumMetricAgg },
+  { name: 'moving_avg', title: 'Moving Avg', agg: movingAvgMetricAgg },
+  { name: 'serial_diff', title: 'Serial Diff', agg: serialDiffMetricAgg },
 ];
 
 describe('parent pipeline aggs', function () {
@@ -28,7 +28,7 @@ describe('parent pipeline aggs', function () {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
-          metricAgg = metric.provider;
+          metricAgg = metric.agg;
 
           const params = settings || {
             metricAgg: '1',

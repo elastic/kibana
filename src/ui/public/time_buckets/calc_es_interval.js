@@ -11,7 +11,7 @@ const largeMax = unitsDesc.indexOf('M');
  * @param  {moment.duration} duration
  * @return {object}
  */
-function esDuration(duration) {
+export function calcEsInterval(duration) {
   for (let i = 0; i < unitsDesc.length; i++) {
     const unit = unitsDesc[i];
     const val = duration.as(unit);
@@ -40,6 +40,3 @@ function esDuration(duration) {
     expression: ms + 'ms'
   };
 }
-
-
-export const calcEsInterval = esDuration;
