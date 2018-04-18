@@ -49,6 +49,7 @@ export class StepIndexPatternComponent extends Component {
     isIncludingSystemIndices: PropTypes.bool.isRequired,
     esService: PropTypes.object.isRequired,
     savedObjectsClient: PropTypes.object.isRequired,
+    indexPatternCreationType: PropTypes.object.isRequired,
     goToNextStep: PropTypes.func.isRequired,
     initialQuery: PropTypes.string,
   }
@@ -59,6 +60,7 @@ export class StepIndexPatternComponent extends Component {
 
   constructor(props) {
     super(props);
+    const { indexPatternCreationType } = this.props;
     this.state = {
       partialMatchedIndices: [],
       exactMatchedIndices: [],
@@ -68,8 +70,11 @@ export class StepIndexPatternComponent extends Component {
       query: props.initialQuery,
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
+      allowWildcards: indexPatternCreationType.getAllowWildcards(),
+      indexPatternName: indexPatternCreationType.getIndexPatternName(),
     };
 
+    this.ILLEGAL_CHARACTERS = indexPatternCreationType.illegalCharacters(ILLEGAL_CHARACTERS);
     this.lastQuery = null;
   }
 
@@ -92,7 +97,7 @@ export class StepIndexPatternComponent extends Component {
   }
 
   fetchIndices = async (query) => {
-    const { esService } = this.props;
+    const { esService, indexPatternCreationType } = this.props;
     const { existingIndexPatterns } = this.state;
 
     if (existingIndexPatterns.includes(query)) {
@@ -103,7 +108,7 @@ export class StepIndexPatternComponent extends Component {
     this.setState({ isLoadingIndices: true, indexPatternExists: false });
 
     if (query.endsWith('*')) {
-      const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, query, MAX_SEARCH_SIZE));
+      const exactMatchedIndices = await ensureMinimumTime(getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE));
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
         return;
@@ -116,8 +121,8 @@ export class StepIndexPatternComponent extends Component {
       partialMatchedIndices,
       exactMatchedIndices,
     ] = await ensureMinimumTime([
-      getIndices(esService, `${query}*`, MAX_SEARCH_SIZE),
-      getIndices(esService, query, MAX_SEARCH_SIZE),
+      getIndices(esService, indexPatternCreationType, `${query}*`, MAX_SEARCH_SIZE),
+      getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE),
     ]);
 
     // If the search changed, discard this state
@@ -133,11 +138,11 @@ export class StepIndexPatternComponent extends Component {
   }
 
   onQueryChanged = e => {
-    const { appendedWildcard } = this.state;
+    const { appendedWildcard, allowWildcards } = this.state;
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(query)) {
+    if (query.length === 1 && allowWildcards && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
@@ -166,6 +171,7 @@ export class StepIndexPatternComponent extends Component {
   }
 
   renderStatusMessage(matchedIndices) {
+    const { indexPatternCreationType } = this.props;
     const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
 
     if (isLoadingIndices || indexPatternExists) {
@@ -175,6 +181,7 @@ export class StepIndexPatternComponent extends Component {
     return (
       <StatusMessage
         matchedIndices={matchedIndices}
+        showSystemIndices={indexPatternCreationType.getShowSystemIndices()}
         isIncludingSystemIndices={isIncludingSystemIndices}
         query={query}
       />
@@ -229,12 +236,13 @@ export class StepIndexPatternComponent extends Component {
   }
 
   renderHeader({ exactMatchedIndices: indices }) {
-    const { goToNextStep, intl } = this.props;
-    const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
+    const { goToNextStep, indexPatternCreationType, intl } = this.props;
+    const { query, showingIndexPatternQueryErrors, indexPatternExists, indexPatternName, allowWildcards } = this.state;
 
     let containsErrors = false;
     const errors = [];
-    const characterList = ILLEGAL_CHARACTERS.slice(0, ILLEGAL_CHARACTERS.length - 1).join(', ');
+    const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(', ');
+    const checkIndices = indexPatternCreationType.checkIndicesForErrors(indices);
 
     if (!query || !query.length || query === '.' || query === '..') {
       // This is an error scenario but do not report an error
@@ -244,11 +252,14 @@ export class StepIndexPatternComponent extends Component {
       const errorMessage = intl.formatMessage(
         {
           id: 'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
-          defaultMessage: 'An index pattern cannot contain spaces or the characters: {characterList}'
+          defaultMessage: 'A ${indexPatternName} cannot contain spaces or the characters: {characterList}'
         },
-        { characterList });
+        { characterList, indexPatternName });
 
       errors.push(errorMessage);
+      containsErrors = true;
+    } else if(checkIndices) {
+      errors.push(...checkIndices);
       containsErrors = true;
     }
 
@@ -265,6 +276,7 @@ export class StepIndexPatternComponent extends Component {
         onQueryChanged={this.onQueryChanged}
         goToNextStep={goToNextStep}
         isNextStepDisabled={isNextStepDisabled}
+        allowWildcards={allowWildcards}
       />
     );
   }

@@ -43,6 +43,7 @@ export class StepTimeFieldComponent extends Component {
     indexPatternsService: PropTypes.object.isRequired,
     goToPreviousStep: PropTypes.func.isRequired,
     createIndexPattern: PropTypes.func.isRequired,
+    indexPatternCreationType: PropTypes.object.isRequired,
   }
 
   constructor(props) {
@@ -56,6 +57,8 @@ export class StepTimeFieldComponent extends Component {
       isFetchingTimeFields: false,
       isCreating: false,
       indexPatternId: '',
+      indexPatternType: props.indexPatternCreationType.getIndexPatternType(),
+      indexPatternName: props.indexPatternCreationType.getIndexPatternName(),
     };
   }
 
@@ -65,9 +68,10 @@ export class StepTimeFieldComponent extends Component {
 
   fetchTimeFields = async () => {
     const { indexPatternsService, indexPattern } = this.props;
+    const { indexPatternType } = this.state;
 
     this.setState({ isFetchingTimeFields: true });
-    const fields = await ensureMinimumTime(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern));
+    const fields = await ensureMinimumTime(indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern, indexPatternType));
     const timeFields = extractTimeFields(fields);
 
     this.setState({ timeFields, isFetchingTimeFields: false });
@@ -113,6 +117,7 @@ export class StepTimeFieldComponent extends Component {
       indexPatternId,
       isCreating,
       isFetchingTimeFields,
+      indexPatternName,
     } = this.state;
 
     if (isCreating) {
@@ -156,8 +161,11 @@ export class StepTimeFieldComponent extends Component {
 
     return (
       <EuiPanel paddingSize="l">
-        <Header indexPattern={indexPattern} />
-        <EuiSpacer size="xs"/>
+        <Header
+          indexPattern={indexPattern}
+          indexPatternName={indexPatternName}
+        />
+        <EuiSpacer size="m"/>
         <TimeField
           isVisible={showTimeField}
           fetchTimeFields={this.fetchTimeFields}
