@@ -1,16 +1,12 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesIndexProvider } from '../..';
+import { aggTypes } from '../..';
 import AggParamWriterProvider from '../agg_param_writer';
+
+const histogram = aggTypes.byName.histogram;
 describe('Histogram Agg', function () {
 
   describe('ordered', function () {
-    let histogram;
-
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      histogram = Private(AggTypesIndexProvider).byName.histogram;
-    }));
 
     it('is ordered', function () {
       expect(histogram.ordered).to.be.ok();

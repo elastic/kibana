@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../../../vis';
-import { AggTypesBucketsIntervalOptionsProvider } from '../../../buckets/_interval_options';
+import { intervalOptions } from '../../../buckets/_interval_options';
 
 describe('editor', function () {
 
@@ -74,9 +74,9 @@ describe('editor', function () {
     let field;
     let interval;
 
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(ngMock.inject(function () {
       field = _.sample(indexPattern.fields);
-      interval = _.sample(Private(AggTypesBucketsIntervalOptionsProvider));
+      interval = _.sample(intervalOptions);
       params = render({ field: field, interval: interval });
     }));
 

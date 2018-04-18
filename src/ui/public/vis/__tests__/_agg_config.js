@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from '..';
-import { AggTypesAggTypeProvider } from '../../agg_types/agg_type';
+import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { fieldFormats } from '../../registry/field_formats';
@@ -10,13 +10,11 @@ import { fieldFormats } from '../../registry/field_formats';
 describe('AggConfig', function () {
 
   let Vis;
-  let AggType;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

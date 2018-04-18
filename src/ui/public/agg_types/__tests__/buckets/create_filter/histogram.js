@@ -3,19 +3,17 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterHistogramProvider } from '../../../buckets/create_filter/histogram';
+import { createFilterHistogram } from '../../../buckets/create_filter/histogram';
 
 describe('AggConfig Filters', function () {
   describe('histogram', function () {
     let indexPattern;
     let Vis;
-    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
     }));
 
     it('should return an range filter for histogram', function () {
@@ -31,7 +29,7 @@ describe('AggConfig Filters', function () {
       });
 
       const aggConfig = vis.aggs.byTypeName.histogram[0];
-      const filter = createFilter(aggConfig, 2048);
+      const filter = createFilterHistogram(aggConfig, 2048);
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
       expect(filter).to.have.property('range');
