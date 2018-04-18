@@ -2,6 +2,7 @@ import { writeFile } from 'fs';
 
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
@@ -247,12 +248,13 @@ export default class BaseOptimizer {
             'NODE_ENV': '"production"'
           }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-          compress: {
-            warnings: false
-          },
+        new UglifyJsPlugin({
           sourceMap: false,
-          mangle: false
+          parallel: true,
+          uglifyOptions: {
+            compress: false,
+            mangle: false
+          }
         }),
       ]
     });

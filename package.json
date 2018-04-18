@@ -201,7 +201,7 @@
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
-    "uglifyjs-webpack-plugin": "0.4.6",
+    "uglifyjs-webpack-plugin": "^1.2.5",
     "ui-select": "0.19.6",
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
