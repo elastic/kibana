@@ -15,7 +15,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
+import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';

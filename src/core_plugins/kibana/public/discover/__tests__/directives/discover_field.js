@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import 'ui/private';
-import 'plugins/kibana/discover/components/field_chooser/discover_field';
+import '../../components/field_chooser/discover_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
