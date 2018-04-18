@@ -1,5 +1,4 @@
 import './add_data.less';
-import './recently_accessed.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -28,6 +27,7 @@ export function AddData({ apmUiEnabled }) {
           description="APM automatically collects in-depth performance metrics and errors from inside your applications."
           footer={
             <EuiButton
+              className="addDataButton"
               href="#/home/tutorial/apm"
             >
               Add APM
@@ -50,6 +50,7 @@ export function AddData({ apmUiEnabled }) {
             description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
             footer={
               <EuiButton
+                className="addDataButton"
                 href="#/home/tutorial_directory/logging"
               >
                 Add log data
@@ -66,6 +67,7 @@ export function AddData({ apmUiEnabled }) {
             description="Collect metrics from the operating system and services running on your servers."
             footer={
               <EuiButton
+                className="addDataButton"
                 href="#/home/tutorial_directory/metrics"
               >
                 Add metric data
@@ -82,6 +84,7 @@ export function AddData({ apmUiEnabled }) {
             description="Centralize security events for interactive investigation in ready-to-go visualizations."
             footer={
               <EuiButton
+                className="addDataButton"
                 href="#/home/tutorial_directory/security"
               >
                 Add security events

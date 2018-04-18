@@ -50,6 +50,7 @@ exports[`apmUiEnabled 1`] = `
         description="APM automatically collects in-depth performance metrics and errors from inside your applications."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial/apm"
@@ -79,6 +80,7 @@ exports[`apmUiEnabled 1`] = `
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
@@ -108,6 +110,7 @@ exports[`apmUiEnabled 1`] = `
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
@@ -137,6 +140,7 @@ exports[`apmUiEnabled 1`] = `
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
@@ -248,6 +252,7 @@ exports[`render 1`] = `
         description="Ingest logs from popular data sources and easily visualize in preconfigured dashboards."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/logging"
@@ -277,6 +282,7 @@ exports[`render 1`] = `
         description="Collect metrics from the operating system and services running on your servers."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/metrics"
@@ -306,6 +312,7 @@ exports[`render 1`] = `
         description="Centralize security events for interactive investigation in ready-to-go visualizations."
         footer={
           <EuiButton
+            className="addDataButton"
             color="primary"
             fill={false}
             href="#/home/tutorial_directory/security"
