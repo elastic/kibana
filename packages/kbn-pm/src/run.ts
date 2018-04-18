@@ -23,7 +23,20 @@ export async function runCommand(command: Command, config: CommandConfig) {
       config.options as ProjectPathOptions
     );
 
-    const projects = await getProjects(config.rootPath, projectPaths);
+    const projects = await getProjects(config.rootPath, projectPaths, {
+      exclude: toArray(config.options.exclude),
+      include: toArray(config.options.include),
+    });
+
+    if (projects.size === 0) {
+      console.log(
+        chalk.red(
+          `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
+        )
+      );
+      return process.exit(1);
+    }
+
     const projectGraph = buildProjectGraph(projects);
 
     console.log(
@@ -55,4 +68,12 @@ export async function runCommand(command: Command, config: CommandConfig) {
 
     process.exit(1);
   }
+}
+
+function toArray<T>(value?: T | T[]) {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
 }

@@ -36,6 +36,17 @@ There are three ways to run the tests depending on your goals:
 +
 ["source","shell"]
 ----------
+export TEST_KIBANA_URL=https://kibana:password@my-kibana-instance.internal.net:443
+
+export TEST_ES_URL=https://elastic:password@my-es-cluster.internal.net:9200
+node scripts/functional_test_runner
+----------
+
+
+** Or you can override any or all of these individual parts of the URL and leave the others to the default values.
++
+["source","shell"]
+----------
 export TEST_KIBANA_PROTOCOL=https
 export TEST_KIBANA_HOSTNAME=my-kibana-instance.internal.net
 export TEST_KIBANA_PORT=443

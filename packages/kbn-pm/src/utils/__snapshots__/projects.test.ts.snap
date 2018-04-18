@@ -32,3 +32,16 @@ Array [
   ],
 ]
 `;
+
+exports[`#topologicallyBatchProjects batches projects topologically even if graph contains projects not presented in the project map 1`] = `
+Array [
+  Array [
+    "kibana",
+    "bar",
+    "baz",
+  ],
+  Array [
+    "quux",
+  ],
+]
+`;

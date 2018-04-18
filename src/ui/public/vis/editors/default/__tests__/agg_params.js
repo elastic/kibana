@@ -5,8 +5,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../agg_params';
 import { VisProvider } from 'ui/vis';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { AggConfig } from 'ui/vis/agg_config';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 
@@ -14,8 +14,6 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
   let $parentScope = {};
   let Vis;
   let vis;
-  let AggConfig;
-  let Schemas;
   let $elem;
   let compile;
   let rootScope;
@@ -35,8 +33,6 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
 
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    Schemas = Private(VisSchemasProvider);
-    AggConfig = Private(VisAggConfigProvider);
   }));
 
   function init(config) {

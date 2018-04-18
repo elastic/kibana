@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import sinon from 'sinon';
-import { BaseParamTypeProvider } from '../../param_types/base';
-import { FieldParamTypeProvider } from '../../param_types/field';
-import { OptionedParamTypeProvider } from '../../param_types/optioned';
+import { BaseParamType } from '../../param_types/base';
+import { FieldParamType } from '../../param_types/field';
+import { OptionedParamType } from '../../param_types/optioned';
+import { createLegacyClass } from '../../../utils/legacy_class';
 
 function ParamClassStub(parent, body) {
   const stub = sinon.spy(body || function () {
     stub.Super && stub.Super.call(this);
   });
-  if (parent) _.class(stub).inherits(parent);
+  if (parent) createLegacyClass(stub).inherits(parent);
   return stub;
 }
 
@@ -29,19 +30,19 @@ function ParamClassStub(parent, body) {
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
-    BaseParamTypeProvider,
+    BaseParamType,
     new ParamClassStub(null, function (config) {
       _.assign(this, config);
     })
   );
 
   Private.stub(
-    FieldParamTypeProvider,
+    FieldParamType,
     new ParamClassStub(BaseAggParam)
   );
 
   Private.stub(
-    OptionedParamTypeProvider,
+    OptionedParamType,
     new ParamClassStub(BaseAggParam)
   );
 }

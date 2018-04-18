@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { aggTypes } from 'ui/agg_types/index';
 
 describe('Terms Agg', function () {
   describe('order agg editor UI', function () {
@@ -10,7 +10,7 @@ describe('Terms Agg', function () {
     function init({ responseValueAggs = [], aggParams = {} }) {
       ngMock.module('kibana');
       ngMock.inject(function (Private, $controller, _$rootScope_) {
-        const terms = Private(AggTypesIndexProvider).byName.terms;
+        const terms = aggTypes.byName.terms;
         const orderAggController = terms.params.byName.orderAgg.controller;
 
         $rootScope = _$rootScope_;

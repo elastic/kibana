@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { inflector } from './inflector';
+import { organizeBy } from '../utils/collection';
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);
 const inflectIndex = inflector('by');
@@ -31,7 +32,7 @@ export class IndexedArray {
     Object.defineProperty(this, 'raw', { value: [] });
 
     this._indexNames = _.union(
-      this._setupIndex(config.group, inflectIndex, _.organizeBy),
+      this._setupIndex(config.group, inflectIndex, organizeBy),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {

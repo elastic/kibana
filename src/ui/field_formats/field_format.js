@@ -17,10 +17,7 @@ export function FieldFormat(params) {
 }
 
 FieldFormat.from = function (converter) {
-  _.class(FieldFormatFromConverter).inherits(FieldFormat);
-  function FieldFormatFromConverter(params) {
-    FieldFormatFromConverter.Super.call(this, params);
-  }
+  class FieldFormatFromConverter extends FieldFormat {}
   FieldFormatFromConverter.prototype._convert = converter;
   return FieldFormatFromConverter;
 };

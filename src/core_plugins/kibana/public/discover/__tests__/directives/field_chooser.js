@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import $ from 'jquery';
 import 'ui/private';
-import 'plugins/kibana/discover/components/field_chooser/field_chooser';
+import '../../components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { SavedObject } from 'ui/saved_objects';

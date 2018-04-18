@@ -5,7 +5,6 @@ import { PanelOptionsMenu } from './panel_options_menu';
 
 import {
   deletePanel,
-  destroyEmbeddable,
   maximizePanel,
   minimizePanel,
   resetPanelTitle,
@@ -17,12 +16,13 @@ import {
   getEmbeddableEditUrl,
   getMaximizedPanelId,
   getPanel,
+  getEmbeddableTitle
 } from '../../selectors';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   const panel = getPanel(dashboard, panelId);
-  const embeddableTitle = embeddable ? embeddable.title : '';
+  const embeddableTitle = getEmbeddableTitle(dashboard, panelId);
   return {
     panelTitle: panel.title === undefined ? embeddableTitle : panel.title,
     editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : null,
@@ -35,10 +35,9 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
  * @param embeddableFactory {EmbeddableFactory}
  * @param panelId {string}
  */
-const mapDispatchToProps = (dispatch, { embeddableFactory, panelId }) => ({
+const mapDispatchToProps = (dispatch, { panelId }) => ({
   onDeletePanel: () => {
     dispatch(deletePanel(panelId));
-    dispatch(destroyEmbeddable(panelId, embeddableFactory));
   },
   onMaximizePanel: () => dispatch(maximizePanel(panelId)),
   onMinimizePanel: () => dispatch(minimizePanel()),
@@ -68,12 +67,4 @@ export const PanelOptionsMenuContainer = connect(
 
 PanelOptionsMenuContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
-  /**
-   * @type {EmbeddableFactory}
-   */
-  embeddableFactory: PropTypes.shape({
-    destroy: PropTypes.func.isRequired,
-    render: PropTypes.func.isRequired,
-    addDestroyEmeddable: PropTypes.func.isRequired,
-  }).isRequired,
 };

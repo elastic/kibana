@@ -5,12 +5,12 @@ import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import aggTableTemplate from 'ui/agg_table/agg_table.html';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
   .directive('kbnAggTable', function ($filter, config, Private, RecursionHelper) {
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
+
     const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
     return {

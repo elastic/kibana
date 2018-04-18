@@ -78,7 +78,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "^0.0.37",
+    "@elastic/eui": "v0.0.38",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -89,7 +89,7 @@
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
-    "angular": "1.6.5",
+    "angular": "1.6.9",
     "angular-aria": "1.6.6",
     "angular-elastic": "2.5.0",
     "angular-recursion": "^1.0.5",
@@ -147,6 +147,7 @@
     "leaflet": "1.0.3",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",
+    "leaflet-vega": "0.8.3",
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
@@ -185,7 +186,7 @@
     "redux-actions": "2.2.1",
     "redux-thunk": "2.2.0",
     "regression": "2.0.0",
-    "request": "2.61.0",
+    "request": "^2.85.0",
     "reselect": "^3.0.1",
     "resize-observer-polyfill": "1.2.1",
     "rimraf": "2.4.3",
@@ -196,6 +197,7 @@
     "style-loader": "0.19.0",
     "tar": "2.2.0",
     "tinygradient": "0.3.0",
+    "tinymath": "0.2.1",
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
@@ -216,9 +218,9 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
-    "@elastic/eslint-import-resolver-kibana": "1.0.0",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "@kbn/es": "link:packages/kbn-es",
+    "@kbn/eslint-import-resolver-kibana": "link:packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
@@ -245,7 +247,7 @@
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
-    "geckodriver": "1.10.0",
+    "geckodriver": "1.11.0",
     "getopts": "2.0.0",
     "grunt": "1.0.1",
     "grunt-aws-s3": "0.14.5",
@@ -274,7 +276,7 @@
     "karma-junit-reporter": "1.2.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
-    "leadfoot": "silne30/leadfoot#validation_for_response_in_ff58",
+    "leadfoot": "1.7.5",
     "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.0.5",
@@ -296,13 +298,13 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "ts-jest": "^22.0.4",
-    "typescript": "^2.7.2",
+    "typescript": "^2.8.1",
     "vinyl-fs": "^3.0.2",
     "xml2js": "0.4.19",
     "xmlbuilder": "9.0.4"
   },
   "engines": {
     "node": "8.11.0",
-    "yarn": "^1.3.2"
+    "yarn": "^1.6.0"
   }
 }

@@ -8,7 +8,8 @@ describe('getSplits(resp, panel, series)', () => {
       aggregations: {
         SERIES: {
           timeseries: { buckets: [] },
-          SIBAGG: { value: 1 }
+          SIBAGG: { value: 1 },
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -26,6 +27,7 @@ describe('getSplits(resp, panel, series)', () => {
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -48,7 +50,8 @@ describe('getSplits(resp, panel, series)', () => {
               timeseries: { buckets: [] },
               SIBAGG: { value: 2 }
             }
-          ]
+          ],
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -69,6 +72,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-01',
         key: 'example-01',
         label: 'example-01',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -77,6 +81,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
@@ -99,7 +104,8 @@ describe('getSplits(resp, panel, series)', () => {
               timeseries: { buckets: [] },
               SIBAGG: { value: 2 }
             }
-          ]
+          ],
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -120,6 +126,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-01',
         key: 'example-01',
         label: 'example-01',
+        meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
@@ -128,6 +135,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:example-02',
         key: 'example-02',
         label: 'example-02',
+        meta: { bucketSize: 10 },
         color: '#930000',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
@@ -146,7 +154,8 @@ describe('getSplits(resp, panel, series)', () => {
             'filter-2': {
               timeseries: { buckets: [] },
             }
-          }
+          },
+          meta: { bucketSize: 10 }
         }
       }
     };
@@ -168,6 +177,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-1',
         key: 'filter-1',
         label: '200s',
+        meta: { bucketSize: 10 },
         color: '#F00',
         timeseries: { buckets: [] },
       },
@@ -175,6 +185,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-2',
         key: 'filter-2',
         label: '300s',
+        meta: { bucketSize: 10 },
         color: '#0F0',
         timeseries: { buckets: [] },
       }
