@@ -1,4 +1,6 @@
 import './reveal_image.less';
+import { elasticOutline } from '../../../common/functions/revealImage/elastic_outline';
+import { isValid } from '../../../common/lib/dataurl';
 
 export const revealImage = () => ({
   name: 'revealImage',
@@ -18,13 +20,13 @@ export const revealImage = () => ({
       finish();
     };
     img.style.clipPath = getClipPath(config.percent, config.origin);
-    img.src = config.image;
+    img.src = isValid(config.image) ? config.image : elasticOutline;
     handlers.onResize(img.onload);
 
     // set up the underlay, "empty" image
     aligner.className = 'revealImageAligner';
     aligner.appendChild(img);
-    if (config.emptyImage) {
+    if (isValid(config.emptyImage)) {
       // only use empty image if one is provided
       aligner.style.backgroundImage = `url(${config.emptyImage})`;
     }

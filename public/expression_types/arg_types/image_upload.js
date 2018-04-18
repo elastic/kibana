@@ -40,9 +40,11 @@ const ImageUploadArgInput = ({
 
   return (
     <FormGroup key={name} controlId="formControlsSelect">
-      <ControlLabel>
-        Image Upload {isLoading ? <span className="fa fa-spinner fa-pulse" /> : null}
-      </ControlLabel>
+      {isLoading && (
+        <ControlLabel>
+          Image uploading <span className="fa fa-spinner fa-pulse" />
+        </ControlLabel>
+      )}
       <div className="canvas__argtype--image">
         <input type="file" onChange={handleUpload} disabled={isLoading} />
       </div>
