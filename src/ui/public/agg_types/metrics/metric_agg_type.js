@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { fieldFormats } from 'ui/registry/field_formats';
+import { createLegacyClass } from '../../utils/legacy_class';
 
 export function AggTypesMetricsMetricAggTypeProvider(Private) {
   const AggType = Private(AggTypesAggTypeProvider);
 
 
-  _.class(MetricAggType).inherits(AggType);
+  createLegacyClass(MetricAggType).inherits(AggType);
   function MetricAggType(config) {
     MetricAggType.Super.call(this, config);
 
