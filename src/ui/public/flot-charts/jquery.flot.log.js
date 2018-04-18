@@ -1,20 +1,22 @@
-/* Pretty handling of logarithmic axes.
-Copyright (c) 2007-2014 IOLA and Ole Laursen.
-Licensed under the MIT license.
+/*@notice
+ * Pretty handling of logarithmic axes.
+ * Copyright (c) 2007-2014 IOLA and Ole Laursen.
+ * Licensed under the MIT license.
  * Created by Arne de Laat
-Set axis.mode to "log" and make the axis logarithmic using transform:
-    axis: {
-        mode: 'log',
-        transform: function(v) {v <= 0 ? Math.log(v) / Math.LN10 : null},
-        inverseTransform: function(v) {Math.pow(10, v)}
-    }
-The transform filters negative and zero values, because those are
-invalid on logarithmic scales.
-This plugin tries to create good looking logarithmic ticks, using
-unicode superscript characters. If all data to be plotted is between two
-powers of ten then the default flot tick generator and renderer are
-used. Logarithmic ticks are places at powers of ten and at half those
-values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
+ * Set axis.mode to "log" and make the axis logarithmic using transform:
+ *     axis: {
+ *         mode: 'log',
+ *         transform: function(v) {v <= 0 ? Math.log(v) / Math.LN10 : null},
+ *         inverseTransform: function(v) {Math.pow(10, v)}
+ *     }
+ * The transform filters negative and zero values, because those are
+ * invalid on logarithmic scales.
+ * This plugin tries to create good looking logarithmic ticks, using
+ * unicode superscript characters. If all data to be plotted is between two
+ * powers of ten then the default flot tick generator and renderer are
+ * used. Logarithmic ticks are places at powers of ten and at half those
+ * values if there are not to many ticks already (e.g. [1, 5, 10, 50, 100]).
+ * For details,  see https://github.com/flot/flot/pull/1328
 */
 
 (function($) {
