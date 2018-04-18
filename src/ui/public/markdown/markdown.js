@@ -12,6 +12,10 @@ import MarkdownIt from 'markdown-it';
  */
 export function markdownFactory(whiteListedRules, openLinksInNewTab = false) {
   let markdownIt;
+
+  // It is imperitive that the html config property be set to false, to mitigate XSS: the output of markdown-it is
+  // fed directly to the DOM via React's dangerouslySetInnerHTML below.
+
   if (whiteListedRules && whiteListedRules.length > 0) {
     markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
     markdownIt.enable(whiteListedRules);
@@ -85,6 +89,11 @@ export class Markdown extends Component {
       className
     );
 
+    /*
+     * Justification for dangerouslySetInnerHTML:
+     * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
+     * This relies on `markdown-it` to produce safe and correct HTML.
+     */
     return (
       <div
         className={classes}

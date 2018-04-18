@@ -344,6 +344,10 @@ Notifier.prototype.banner = function (content = '') {
     linkify: true
   });
 
+  /*
+   * Justification for dangerouslySetInnerHTML:
+   * The notifier relies on `markdown-it` to produce safe and correct HTML.
+   */
   const banner = (
     <EuiCallOut
       title="Attention"

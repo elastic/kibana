@@ -26,6 +26,11 @@ class MetricVisValue extends Component {
       'metric-container--filterable': hasFilter
     });
 
+    /*
+     * Justification for dangerouslySetInnerHTML:
+     * This is one of the visualizations which makes use of the HTML field formatters.
+     * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is.
+     */
     const metricComponent = (
       <div
         className={containerClassName}
