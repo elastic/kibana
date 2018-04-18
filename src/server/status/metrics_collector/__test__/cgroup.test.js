@@ -1,6 +1,6 @@
 import mockFs from 'mock-fs';
 import { cGroups as cGroupsFsStub } from './_fs_stubs';
-import { getAllStats, readControlGroups, readCPUStat } from './cgroup';
+import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
 
 describe('Control Group', function () {
   const fsStub = cGroupsFsStub();

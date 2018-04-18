@@ -1,4 +1,4 @@
-import { wrapAuthConfig } from './wrap_auth_config';
+import { wrapAuthConfig } from '../wrap_auth_config';
 
 describe('Status wrapAuthConfig', () => {
   let options;

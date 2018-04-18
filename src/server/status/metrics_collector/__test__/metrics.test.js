@@ -2,8 +2,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
 import { cGroups as cGroupsFsStub } from './_fs_stubs';
-
-import { Metrics } from './metrics';
+import { Metrics } from '../metrics';
 
 describe('Metrics', function () {
   const sampleConfig = {
