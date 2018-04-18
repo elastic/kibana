@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
+import { savedObjectManagementRegistry } from '../../saved_object_registry';
+import objectViewHTML from './_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
