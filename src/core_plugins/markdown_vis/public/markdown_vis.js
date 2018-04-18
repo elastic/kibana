@@ -39,6 +39,9 @@ function MarkdownVisProvider(Private) {
     },
     options: {
       showTimePicker: false,
+      showIndexSelection: false,
+      showQueryBar: false,
+      showFilterBar: false,
     },
     requestHandler: 'none',
     responseHandler: 'none',

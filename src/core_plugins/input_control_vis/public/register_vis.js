@@ -48,6 +48,11 @@ function InputControlVisProvider(Private) {
     },
     requestHandler: 'none',
     responseHandler: 'none',
+    options: {
+      showIndexSelection: false,
+      showQueryBar: false,
+      showFilterBar: false,
+    }
   });
 }
 
