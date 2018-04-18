@@ -5,39 +5,52 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 import {
-  renderEmbeddable,
-  destroyEmbeddable
+  deletePanel, embeddableError, embeddableIsInitialized, embeddableIsInitializing, embeddableStateChanged,
 } from '../actions';
 
 import {
-  getPanel,
   getEmbeddable,
   getFullScreenMode,
   getViewMode,
-  getEmbeddableTitle,
-  getEmbeddableEditUrl,
-  getMaximizedPanelId,
   getEmbeddableError,
+  getPanelType, getContainerState, getPanel, getEmbeddableInitialized,
 } from '../selectors';
 
-const mapStateToProps = ({ dashboard }, { panelId }) => {
+const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
+  let error = null;
+  if (!embeddableFactory) {
+    const panelType = getPanelType(dashboard, panelId);
+    error = `No embeddable factory found for panel type ${panelType}`;
+  } else {
+    error = (embeddable && getEmbeddableError(dashboard, panelId)) || '';
+  }
+  const initialized = embeddable ? getEmbeddableInitialized(dashboard, panelId) : false;
   return {
-    title: embeddable ? getEmbeddableTitle(dashboard, panelId) : '',
-    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
-    error: embeddable ? getEmbeddableError(dashboard, panelId) : '',
-
+    error,
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
-    isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    panel: getPanel(dashboard, panelId),
+    containerState: getContainerState(dashboard, panelId),
+    initialized,
+    panel: getPanel(dashboard, panelId)
   };
 };
 
-const mapDispatchToProps = (dispatch, { embeddableFactory, panelId, getContainerApi }) => ({
-  renderEmbeddable: (panelElement, panel) => (
-    dispatch(renderEmbeddable(embeddableFactory, panelElement, panel, getContainerApi()))
+const mapDispatchToProps = (dispatch, { panelId }) => ({
+  destroy: () => (
+    dispatch(deletePanel(panelId))
   ),
-  onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableFactory)),
+  embeddableIsInitializing: () => (
+    dispatch(embeddableIsInitializing(panelId))
+  ),
+  embeddableIsInitialized: (metadata) => (
+    dispatch(embeddableIsInitialized({ panelId, metadata }))
+  ),
+  embeddableStateChanged: (embeddableState) => (
+    dispatch(embeddableStateChanged({ panelId, embeddableState }))
+  ),
+  embeddableError: (errorMessage) => (
+    dispatch(embeddableError({ panelId, error: errorMessage }))
+  )
 });
 
 export const DashboardPanelContainer = connect(
@@ -51,9 +64,6 @@ DashboardPanelContainer.propTypes = {
    * @type {EmbeddableFactory}
    */
   embeddableFactory: PropTypes.shape({
-    destroy: PropTypes.func.isRequired,
-    render: PropTypes.func.isRequired,
-    addDestroyEmeddable: PropTypes.func.isRequired,
+    create: PropTypes.func.isRequired,
   }).isRequired,
-  getContainerApi: PropTypes.func.isRequired,
 };

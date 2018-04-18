@@ -445,26 +445,22 @@ var rules = {
     },
     "bucket_script": {
       __template: {
-        buckets_path: "",
-        script: {}
+        buckets_path: {},
+        script: ""
       },
-      buckets_path: "",
+      buckets_path: {},
       format: "",
       gap_policy: gap_policy,
-      script: {
-        // populated by a global rule
-      }
+      script: ""
     },
     "bucket_selector": {
       __template: {
-        buckets_path: "",
-        script: {}
+        buckets_path: {},
+        script: ""
       },
-      buckets_path: "",
+      buckets_path: {},
       gap_policy: gap_policy,
-      script: {
-        // populated by a global rule
-      }
+      script: ""
     },
     "matrix_stats": {
       __template: {

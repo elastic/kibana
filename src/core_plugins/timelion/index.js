@@ -8,14 +8,6 @@ export default function (kibana) {
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: 'plugins/timelion/app',
-        injectVars: function (server) {
-          const config = server.config();
-          return {
-            kbnIndex: config.get('kibana.index'),
-            esShardTimeout: config.get('elasticsearch.shardTimeout'),
-            esApiVersion: config.get('elasticsearch.apiVersion')
-          };
-        },
         uses: [
           'fieldFormats',
           'savedObjectTypes'

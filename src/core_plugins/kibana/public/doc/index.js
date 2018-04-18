@@ -1,1 +1,1 @@
-import 'plugins/kibana/doc/controllers/doc';
+import './controllers/doc';

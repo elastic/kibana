@@ -18,10 +18,8 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
 import { queryManagerFactory } from '../query_manager';
-import * as kueryAPI from 'ui/kuery';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { FilterManagerProvider } from 'ui/filter_manager';
 
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -31,7 +29,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -57,10 +54,8 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
-        filterManager: filterManager,
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
-        kuery: kueryAPI,
         events: {
           filter: (event) => {
             const appState = getAppState();
@@ -69,6 +64,12 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
             const appState = getAppState();
             brushEvent(appState)(event);
           }
+        },
+        createInheritedSearchSource: (parentSearchSource) => {
+          if (!parentSearchSource) {
+            throw new Error('Unable to inherit search source, visualize saved object does not have search source.');
+          }
+          return new SearchSource().inherits(parentSearchSource);
         }
       };
     }

@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const createBulkGetRoute = (prereqs) => ({
-  path: '/api/saved_objects/bulk_get',
+  path: '/api/saved_objects/_bulk_get',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],

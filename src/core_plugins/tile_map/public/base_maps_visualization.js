@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { KibanaMap } from './kibana_map';
+import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { Observable } from 'rxjs/Rx';
 import 'ui/vis/map/service_settings';
 

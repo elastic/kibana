@@ -1,5 +1,4 @@
 import { spawn, spawnStreaming } from './child_process';
-import { yarnPath } from '../paths';
 import { Project } from './project';
 
 /**
@@ -18,7 +17,7 @@ export async function installInDir(
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
-  await spawn(yarnPath, options, {
+  await spawn('yarn', options, {
     cwd: directory,
   });
 }
@@ -35,7 +34,7 @@ export async function runScriptInPackage(
     cwd: pkg.path,
   };
 
-  await spawn(yarnPath, ['run', script, ...args], execOpts);
+  await spawn('yarn', ['run', script, ...args], execOpts);
 }
 
 /**
@@ -50,7 +49,7 @@ export function runScriptInPackageStreaming(
     cwd: pkg.path,
   };
 
-  return spawnStreaming(yarnPath, ['run', script, ...args], execOpts, {
+  return spawnStreaming('yarn', ['run', script, ...args], execOpts, {
     prefix: pkg.name,
   });
 }
