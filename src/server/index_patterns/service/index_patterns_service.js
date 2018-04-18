@@ -32,7 +32,7 @@ export class IndexPatternsService {
    *  Get a list of field objects for an index pattern that may contain wildcards
    *
    *  @param {Object} [options={}]
-   *  @property {String} options.pattern The moment compatible time pattern
+   *  @property {String} options.pattern The index pattern
    *  @property {Number} options.metaFields The list of underscore prefixed fields that should
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
