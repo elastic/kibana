@@ -26,14 +26,6 @@ class MetricVisValue extends Component {
       'metric-container--filterable': hasFilter
     });
 
-    /*
-     * Justification for dangerouslySetInnerHTML:
-     * This is one of the visualizations which makes use of the HTML field formatters.
-     * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is, relying
-     * on the field formatter to only produce safe HTML.
-     * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
-     * any unsafe HTML (e.g. by bypassing the field formatter).
-     */
     const metricComponent = (
       <div
         className={containerClassName}
@@ -45,6 +37,14 @@ class MetricVisValue extends Component {
         <div
           className="metric-value"
           style={metricValueStyle}
+          /*
+           * Justification for dangerouslySetInnerHTML:
+           * This is one of the visualizations which makes use of the HTML field formatters.
+           * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is, relying
+           * on the field formatter to only produce safe HTML.
+           * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
+           * any unsafe HTML (e.g. by bypassing the field formatter).
+           */
           dangerouslySetInnerHTML={{ __html: metric.value }} //eslint-disable-line react/no-danger
         />
         { showLabel &&

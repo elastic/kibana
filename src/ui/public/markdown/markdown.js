@@ -89,15 +89,15 @@ export class Markdown extends Component {
       className
     );
 
-    /*
-     * Justification for dangerouslySetInnerHTML:
-     * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
-     * This relies on `markdown-it` to produce safe and correct HTML.
-     */
     return (
       <div
         className={classes}
         {...rest}
+        /*
+         * Justification for dangerouslySetInnerHTML:
+         * The Markdown Visulization is, believe it or not, responsible for rendering Markdown.
+         * This relies on `markdown-it` to produce safe and correct HTML.
+         */
         dangerouslySetInnerHTML={this.state.renderedMarkdown} //eslint-disable-line react/no-danger
       />
     );
