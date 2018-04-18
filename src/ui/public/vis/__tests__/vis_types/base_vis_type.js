@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VisTypeProvider } from 'ui/vis/vis_types/base_vis_type';
+import { VisTypeProvider } from '../../vis_types/base_vis_type';
 
 describe('Base Vis Type', function () {
   let BaseVisType;

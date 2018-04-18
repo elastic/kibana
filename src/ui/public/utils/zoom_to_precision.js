@@ -1,4 +1,4 @@
-import { geohashColumns } from 'ui/utils/decode_geo_hash';
+import { geohashColumns } from './decode_geo_hash';
 
 const maxPrecision = 12;
 /**

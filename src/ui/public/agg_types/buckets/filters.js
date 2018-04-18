@@ -2,12 +2,12 @@ import _ from 'lodash';
 import angular from 'angular';
 import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterFilters } from 'ui/agg_types/buckets/create_filter/filters';
-import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
-import filtersTemplate from 'ui/agg_types/controls/filters.html';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterFilters } from './create_filter/filters';
+import { decorateQuery } from '../../courier/data_source/_decorate_query';
+import filtersTemplate from '../controls/filters.html';
 
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications } from '../../notify';
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',

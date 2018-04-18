@@ -1,8 +1,8 @@
-import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
-import percentsEditor from 'ui/agg_types/controls/percentiles.html';
-import 'ui/number_list';
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { getResponseAggConfigClass } from 'ui/agg_types/metrics/get_response_agg_config_class';
+import { ordinalSuffix } from '../../utils/ordinal_suffix';
+import percentsEditor from '../controls/percentiles.html';
+import '../../number_list';
+import { MetricAggType } from './metric_agg_type';
+import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 
 const valueProps = {

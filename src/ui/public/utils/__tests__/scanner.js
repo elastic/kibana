@@ -1,4 +1,4 @@
-import { Scanner } from 'ui/utils/scanner';
+import { Scanner } from '../scanner';
 import expect from 'expect.js';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';

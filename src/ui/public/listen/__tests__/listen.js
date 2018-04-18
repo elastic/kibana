@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/listen';
-import { EventsProvider } from 'ui/events';
+import '..';
+import { EventsProvider } from '../../events';
 
 describe('listen component', function () {
 

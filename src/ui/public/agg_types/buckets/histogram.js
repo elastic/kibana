@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
-import 'ui/validate_date_interval';
-import chrome from 'ui/chrome';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterHistogram } from 'ui/agg_types/buckets/create_filter/histogram';
-import intervalTemplate from 'ui/agg_types/controls/number_interval.html';
-import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
-import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
+import '../../validate_date_interval';
+import chrome from '../../chrome';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterHistogram } from './create_filter/histogram';
+import intervalTemplate from '../controls/number_interval.html';
+import minDocCountTemplate from '../controls/min_doc_count.html';
+import extendedBoundsTemplate from '../controls/extended_bounds.html';
 
 const config = chrome.getUiSettingsClient();
 export const histogramBucketAgg = new BucketAggType({

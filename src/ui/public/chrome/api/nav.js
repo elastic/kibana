@@ -1,7 +1,7 @@
 import { remove } from 'lodash';
-import { prependPath } from 'ui/url/prepend_path';
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
-import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+import { prependPath } from '../../url/prepend_path';
+import { relativeToAbsolute } from '../../url/relative_to_absolute';
+import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 
 export function initChromeNavApi(chrome, internals) {
   chrome.getNavLinks = function () {

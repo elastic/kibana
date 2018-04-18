@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import './table_header.less';
-import 'ui/filters/short_dots';
-import headerHtml from 'ui/doc_table/components/table_header.html';
-import { uiModules } from 'ui/modules';
+import '../../filters/short_dots';
+import headerHtml from './table_header.html';
+import { uiModules } from '../../modules';
 const module = uiModules.get('app/discover');
 
 

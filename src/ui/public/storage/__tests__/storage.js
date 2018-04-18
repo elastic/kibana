@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/storage';
+import '..';
 
 let storage;
 let $window;

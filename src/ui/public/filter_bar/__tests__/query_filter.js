@@ -6,8 +6,8 @@ import './_remove_filters';
 import './_toggle_filters';
 import './_invert_filters';
 import './_pin_filters';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { EventsProvider } from 'ui/events';
+import { FilterBarQueryFilterProvider } from '../query_filter';
+import { EventsProvider } from '../../events';
 let queryFilter;
 let EventEmitter;
 

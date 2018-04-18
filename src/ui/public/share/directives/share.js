@@ -6,13 +6,13 @@ import {
 import {
   getUnhashableStatesProvider,
   unhashUrl,
-} from 'ui/state_management/state_hashing';
-import { toastNotifications } from 'ui/notify';
+} from '../../state_management/state_hashing';
+import { toastNotifications } from '../../notify';
 
 import { UrlShortenerProvider } from '../lib/url_shortener';
 
-import { uiModules } from 'ui/modules';
-import shareTemplate from 'ui/share/views/share.html';
+import { uiModules } from '../../modules';
+import shareTemplate from '../views/share.html';
 const app = uiModules.get('kibana');
 
 app.directive('share', function (Private) {

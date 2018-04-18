@@ -1,4 +1,4 @@
-import { BoundToConfigObjProvider } from 'ui/bound_to_config_obj';
+import { BoundToConfigObjProvider } from '../bound_to_config_obj';
 
 export function IsUserAwareOfUnsupportedTimePatternProvider(Private, $injector) {
   const BoundToConfigObj = Private(BoundToConfigObjProvider);

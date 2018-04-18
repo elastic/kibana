@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/paginated_table';
+import '..';
 import $ from 'jquery';
 
 describe('paginated table', function () {

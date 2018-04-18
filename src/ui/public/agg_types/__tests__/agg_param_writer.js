@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { VisProvider } from 'ui/vis';
-import { aggTypes } from 'ui/agg_types/index';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisProvider } from '../../vis';
+import { aggTypes } from '..';
+import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggConfig } from 'ui/vis/agg_config';
+import { AggConfig } from '../../vis/agg_config';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {

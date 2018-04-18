@@ -1,4 +1,4 @@
-import { RequestFailure, SearchTimeout, ShardFailure } from 'ui/errors';
+import { RequestFailure, SearchTimeout, ShardFailure } from '../../errors';
 
 import { RequestStatus } from './req_status';
 import { courierNotifier } from './notifier';

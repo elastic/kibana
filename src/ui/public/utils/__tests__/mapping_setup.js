@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
+import UtilsMappingSetupProvider from '../mapping_setup';
 
 let mappingSetup;
 

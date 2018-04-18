@@ -1,4 +1,4 @@
-import { PersistedLog } from 'ui/persisted_log';
+import { PersistedLog } from './';
 
 class RecentlyAccessed {
   constructor() {

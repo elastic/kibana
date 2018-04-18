@@ -1,5 +1,5 @@
-import { CidrMask } from 'ui/utils/cidr_mask';
-import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { CidrMask } from '../../../utils/cidr_mask';
+import { buildRangeFilter } from '../../../filter_manager/lib/range';
 
 export function createFilterIpRange(aggConfig, key) {
   let range;

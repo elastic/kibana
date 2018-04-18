@@ -1,4 +1,4 @@
-import Ipv4Address from 'ui/utils/ipv4_address';
+import Ipv4Address from '../ipv4_address';
 import expect from 'expect.js';
 
 describe('Ipv4Address', function () {

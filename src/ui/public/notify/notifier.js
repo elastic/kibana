@@ -2,11 +2,11 @@ import React from 'react';
 import _ from 'lodash';
 import angular from 'angular';
 import MarkdownIt from 'markdown-it';
-import { metadata } from 'ui/metadata';
+import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
-import 'ui/render_directive';
+import '../render_directive';
 
 import {
   EuiCallOut,

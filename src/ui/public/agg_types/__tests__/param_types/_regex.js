@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { BaseParamType } from '../../param_types/base';
 import { RegexParamType } from '../../param_types/regex';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Regex', function () {
