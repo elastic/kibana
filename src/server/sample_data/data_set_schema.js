@@ -5,4 +5,5 @@ export const dataSetSchema = {
   name: Joi.string().required(),
   description: Joi.string().required(),
   dataPath: Joi.string().required(), // path to newline delimented JSON file containing data relative to KIBANA_HOME
+  fields: Joi.object().required(), // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
 };

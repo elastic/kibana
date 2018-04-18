@@ -15,17 +15,47 @@ export const createInstallRoute = () => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler: (request, reply) => {
-      const sampleDataSet = request.server.getSampleDataSets().find(sampleDataSet => {
+    handler: async (request, reply) => {
+      const server = request.server;
+      const sampleDataSet = server.getSampleDataSets().find(sampleDataSet => {
         return sampleDataSet.id === request.params.id;
       });
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const index = `${server.config().get('kibana.index')}_sample_data_${sampleDataSet.id}`;
 
       if (!sampleDataSet) {
         reply().code(404);
         return;
       }
 
-      const index = sampleDataSet.id;
+      try {
+        await callWithRequest(request, 'indices.delete', { index: index });
+      } catch (err) {
+        // ignore delete error. Happens if index does not exist.
+      }
+
+      try {
+        const createIndexParams = {
+          index: index,
+          body: {
+            settings: {
+              index: {
+                number_of_shards: 1,
+                number_of_replicas: 0
+              }
+            },
+            mappings: {
+              doc: {
+                properties: sampleDataSet.fields
+              }
+            }
+          }
+        };
+        await callWithRequest(request, 'indices.create', createIndexParams);
+      } catch (err) {
+        reply().code(500);
+      }
+
 
       loadData(sampleDataSet.dataPath, index, updateRow, (count) => {
         reply({ count });
