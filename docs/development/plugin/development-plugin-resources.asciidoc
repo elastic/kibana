@@ -37,5 +37,5 @@ The Kibana directory must be named `kibana`, and your plugin directory must be l
 
 [float]
 ==== References in the code
- - {repo}blob/{branch}/src/server/plugins/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
+ - {repo}blob/{branch}/src/server/plugins/lib/plugin.js[Plugin class]: What options does the `kibana.Plugin` class accept?
  - <<development-uiexports>>: What type of exports are available?
