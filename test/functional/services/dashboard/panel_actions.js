@@ -1,0 +1,126 @@
+const REMOVE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-deletePanel';
+const EDIT_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-editPanel';
+const TOGGLE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
+const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
+const CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
+
+export function DashboardPanelActionsProvider({ getService }) {
+  const log = getService('log');
+  const retry = getService('retry');
+  const remote = getService('remote');
+  const testSubjects = getService('testSubjects');
+
+  return new class DashboardPanelActions {
+
+    async isContextMenuOpen(parent) {
+      // Customize panel action chosen arbitrarily.
+      return this.customizePanelActionExists(parent);
+    }
+
+    async findContextMenu(parent) {
+      return parent ?
+        await testSubjects.findDescendant(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ, parent) :
+        await testSubjects.find(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ);
+    }
+
+    async isContextMenuToggleVisible() {
+      return await testSubjects.exists(CONTEXT_MENU_TOGGLE_DATA_TEST_SUBJ);
+    }
+
+    async openContextMenu(parent) {
+      log.debug('openContextMenu');
+      const panelOpen = await this.isContextMenuOpen(parent);
+      if (!panelOpen) {
+        await retry.try(async () => {
+          await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+          const toggleMenuItem = this.findContextMenu(parent);
+          await toggleMenuItem.click();
+          const panelOpen = await this.isContextMenuOpen(parent);
+          if (!panelOpen) { throw new Error('Context menu still not open'); }
+        });
+      }
+    }
+
+    async toggleExpandPanel(parent) {
+      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      const expandShown = await this.toggleExpandActionExists();
+      if (!expandShown) {
+        await this.openContextMenu(parent);
+      }
+      await this.toggleExpandPanel();
+    }
+
+    async clickEdit() {
+      log.debug('clickEdit');
+
+      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
+      await retry.try(async () => {
+        await this.openContextMenu();
+        await testSubjects.click(EDIT_PANEL_DATA_TEST_SUBJ);
+        const current = await remote.getCurrentUrl();
+        if (current.indexOf('visualize') < 0) {
+          throw new Error('not on visualize page');
+        }
+      });
+    }
+
+    async toggleExpandPanel() {
+      await this.openContextMenu();
+      await testSubjects.click(TOGGLE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async removePanel() {
+      await this.openContextMenu();
+      await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async customizePanel(parent) {
+      await this.openContextMenu(parent);
+      await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async removePanelActionExists() {
+      return await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async editPanelActionExists() {
+      return await testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async toggleExpandActionExists() {
+      return await testSubjects.exists(TOGGLE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async customizePanelActionExists(parent) {
+      return parent ?
+        await testSubjects.descendantExists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent) :
+        await testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async getPanelHeading(title) {
+      return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
+    }
+
+    /**
+     *
+     * @param customTitle
+     * @param originalTitle - optional to specify which panel to change the title on.
+     * @return {Promise<void>}
+     */
+    async setCustomPanelTitle(customTitle, originalTitle) {
+      log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
+      let panelOptions = null;
+      if (originalTitle) {
+        panelOptions = await this.getPanelHeading(originalTitle);
+      }
+      await this.customizePanel(panelOptions);
+      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+    }
+
+    async resetCustomPanelTitle(panel) {
+      log.debug('resetCustomPanelTitle');
+      await this.customizePanel(panel);
+      await testSubjects.click('resetCustomDashboardPanelTitle');
+    }
+  };
+}
