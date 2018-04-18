@@ -45,6 +45,7 @@ export {
   navbarExtensions,
   contextMenuActions,
   managementSections,
+  indexManagement,
   devTools,
   docViews,
   hacks,
