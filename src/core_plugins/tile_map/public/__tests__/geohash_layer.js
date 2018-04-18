@@ -7,7 +7,7 @@ import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 
-describe('kibana_map tests', function () {
+describe('geohash_layer', function () {
 
   let domNode;
   let expectCanvas;

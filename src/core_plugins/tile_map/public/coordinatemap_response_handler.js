@@ -1,12 +1,12 @@
 import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
-export function makeTabbedResponseHandler() {
+export function makeGeoJsonResponseHandler() {
 
   let lastEsResponse;
   let lastGeoJsonResponse;
 
-  return function makeIdentityResponseHandler(vis, esResponse) {
+  return function (vis, esResponse) {
     if (lastEsResponse === esResponse) {
       return lastGeoJsonResponse;
     }

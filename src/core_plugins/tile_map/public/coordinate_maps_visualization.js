@@ -62,6 +62,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     }
 
     async _updateData(geojsonFeatureCollectionAndMeta) {
+
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
       if (
