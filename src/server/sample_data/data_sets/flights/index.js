@@ -3,5 +3,6 @@ export function flightsSpecProvider() {
     id: 'flights',
     name: 'Flights',
     description: 'Fictional flight data.',
+    dataPath: './sample_data/flights.json',
   };
 }
