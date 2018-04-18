@@ -4,11 +4,10 @@ import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
 import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
-import { DecorateQueryProvider } from '../../_decorate_query';
+import { decorateQuery } from '../../_decorate_query';
 
 let indexPattern;
 let buildEsQuery;
-let decorateQuery;
 
 describe('build query', function () {
 
@@ -18,7 +17,6 @@ describe('build query', function () {
     beforeEach(ngMock.inject(function (Private) {
       indexPattern = Private(StubbedLogstashIndexPatternProvider);
       buildEsQuery = Private(BuildESQueryProvider);
-      decorateQuery = Private(DecorateQueryProvider);
     }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
