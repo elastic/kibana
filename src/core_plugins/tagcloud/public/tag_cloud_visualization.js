@@ -92,7 +92,7 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
-    this._bucketAgg = this._vis.aggs.find(agg => agg.type.name === 'terms');
+    this._bucketAgg = this._vis.aggs.bySchemaName.segment[0];
 
     const tags = data.rows.map(row => {
       const [tag, count] = row;

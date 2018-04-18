@@ -55,7 +55,7 @@ VisTypesRegistryProvider.register(function (Private) {
           title: 'Tags',
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: ['terms', 'significant_terms']
         }
       ])
     }
