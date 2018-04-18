@@ -5,6 +5,7 @@ import './nesting_indicator';
 
 import { uiModules } from 'ui/modules';
 import aggGroupTemplate from './agg_group.html';
+import { move } from '../../../utils/collection';
 
 uiModules
   .get('app/visualize')
@@ -48,7 +49,7 @@ uiModules
         //to apply that ordering to [vis.aggs]
           const indexOffset = $scope.vis.aggs.indexOf($scope.group[0]);
           _.forEach($scope.group, (agg, index) => {
-            _.move($scope.vis.aggs, agg, indexOffset + index);
+            move($scope.vis.aggs, agg, indexOffset + index);
           });
         }
 

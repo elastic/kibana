@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
-
+import { createLegacyClass } from 'ui/utils/legacy_class';
 
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify',
@@ -9,7 +8,7 @@ const module = uiModules.get('discover/saved_searches', [
 ]);
 
 module.factory('SavedSearch', function (courier) {
-  _.class(SavedSearch).inherits(courier.SavedObject);
+  createLegacyClass(SavedSearch).inherits(courier.SavedObject);
   function SavedSearch(id) {
     courier.SavedObject.call(this, {
       type: SavedSearch.type,

@@ -4,6 +4,8 @@ import { Direction } from './keyboard_move';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import aggTemplate from './agg.html';
+import { move } from '../../../utils/collection';
+
 uiModules
   .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, $filter, Private, Notifier) {
@@ -60,7 +62,7 @@ uiModules
 
           const currentPosition = $scope.group.indexOf($scope.agg);
           const newPosition = Math.max(0, Math.min(currentPosition + positionOffset, $scope.group.length - 1));
-          _.move($scope.group, currentPosition, newPosition);
+          move($scope.group, currentPosition, newPosition);
           $scope.$emit('agg-reorder');
         };
 
