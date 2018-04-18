@@ -15,12 +15,19 @@
         delete="removePattern()"
       ></kbn-management-index-header>
 
-      <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
-        <span class="label label-success">
-          <span class="kuiIcon fa-clock-o"></span>
-          <span>Time Filter field name</span>: {{indexPattern.timeFieldName}}
+      <p class="kuiText kuiVerticalRhythm">
+        <span ng-if="::indexPattern.timeFieldName">
+          <span class="label label-success">
+            <span class="kuiIcon fa-clock-o"></span>
+            <span>Time Filter field name</span>: {{::indexPattern.timeFieldName}}
+          </span>
+          &nbsp;
+        </span>
+        <span ng-repeat="tag in indexPattern.tags">
+          <span class="label label-info">{{tag.name}}</span>
         </span>
       </p>
+
 
       <p class="kuiText kuiVerticalRhythm">
         This page lists every field in the <strong>{{::indexPattern.title}}</strong> index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch

@@ -27,6 +27,7 @@ import {
 
 export const Header = ({
   indexPattern,
+  indexPatternName,
 }) => (
   <div>
     <EuiTitle size="s">
@@ -37,7 +38,7 @@ export const Header = ({
     <EuiSpacer size="m"/>
     <EuiText color="subdued">
       <span>
-        You&apos;ve defined <strong>{indexPattern}</strong> as your index pattern.
+        You&apos;ve defined <strong>{indexPattern}</strong> as your {indexPatternName}.
         Now you can specify some settings before we create it.
       </span>
     </EuiText>
