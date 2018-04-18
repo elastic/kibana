@@ -95,4 +95,95 @@ const testTable = {
   ],
 };
 
-export { emptyTable, testTable };
+const stringTable = {
+  type: 'datatable',
+  columns: [
+    {
+      name: 'name',
+      type: 'string',
+    },
+    {
+      name: 'time',
+      type: 'string',
+    },
+    {
+      name: 'price',
+      type: 'string',
+    },
+    {
+      name: 'quantity',
+      type: 'string',
+    },
+    {
+      name: 'in_stock',
+      type: 'string',
+    },
+  ],
+  rows: [
+    {
+      name: 'product1',
+      time: '2018-02-05T15:00:00.950Z',
+      price: '605',
+      quantity: '100',
+      in_stock: 'true',
+    },
+    {
+      name: 'product1',
+      time: '2018-02-06T15:00:00.950Z',
+      price: '583',
+      quantity: '200',
+      in_stock: 'true',
+    },
+    {
+      name: 'product1',
+      time: '2018-02-07T15:00:00.950Z',
+      price: '420',
+      quantity: '300',
+      in_stock: 'true',
+    },
+    {
+      name: 'product2',
+      time: '2018-02-05T15:00:00.950Z',
+      price: '216',
+      quantity: '350',
+      in_stock: 'false',
+    },
+    {
+      name: 'product2',
+      time: '2018-02-06T15:00:00.950Z',
+      price: '200',
+      quantity: '256',
+      in_stock: 'false',
+    },
+    {
+      name: 'product2',
+      time: '2018-02-07T15:00:00.950Z',
+      price: '190',
+      quantity: '231',
+      in_stock: 'false',
+    },
+    {
+      name: 'product3',
+      time: '2018-02-05T15:00:00.950Z',
+      price: '67',
+      quantity: '240',
+      in_stock: 'true',
+    },
+    {
+      name: 'product4',
+      time: '2018-02-05T15:00:00.950Z',
+      price: '311',
+      quantity: '447',
+      in_stock: 'false',
+    },
+    {
+      name: 'product5',
+      time: '2018-02-05T15:00:00.950Z',
+      price: '288',
+      quantity: '384',
+      in_stock: 'true',
+    },
+  ],
+};
+
+export { emptyTable, testTable, stringTable };

@@ -21,8 +21,10 @@ export const getCell = () => ({
     const row = context.rows[args.row];
 
     if (!row) throw new Error(`Row not found: ${args.row}`);
+    if (!args._) args._ = context.columns[0].name;
     const value = row[args._];
-    if (typeof value === 'undefined') `Column not found: ${args._}`;
+
+    if (typeof value === 'undefined') throw new Error(`Column not found: ${args._}`);
 
     return value;
   },

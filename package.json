@@ -46,7 +46,6 @@
     "history": "^4.7.2",
     "inline-style": "^2.0.0",
     "jquery": "^3.3.1",
-    "json-query": "^2.2.2",
     "lodash": "^3.10.1",
     "lodash.clone": "^4.5.0",
     "lodash.keyby": "^4.6.0",

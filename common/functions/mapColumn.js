@@ -17,27 +17,22 @@ export const mapColumn = () => ({
     expression: {
       types: ['function'],
       aliases: ['exp', 'fn'],
-      help:
-        'A canvas expression which will be passed each row as a single row datatable unless you set context=false',
-    },
-    context: {
-      types: ['boolean'],
-      default: 'true',
-      help: 'Should I pass context into `expression`?',
+      help: 'A canvas expression which will be passed each row as a single row datatable',
     },
   },
   fn: (context, args) => {
+    if (!args._) throw new Error('Must provide a column name');
+
+    args.expression = args.expression || (() => Promise.resolve(null));
+
+    const columns = [...context.columns];
     const rowPromises = context.rows.map(row => {
       return args
-        .expression(
-          !args.context
-            ? null
-            : {
-                type: 'datatable',
-                columns: context.columns,
-                rows: [row],
-              }
-        )
+        .expression({
+          type: 'datatable',
+          columns,
+          rows: [row],
+        })
         .then(val => {
           if (typeof val === 'object' && val !== null) {
             throw new Error('Expression must return a literal, eg a string, number, boolean, null');
@@ -51,13 +46,18 @@ export const mapColumn = () => ({
     });
 
     return Promise.all(rowPromises).then(rows => {
-      if (!context.columns.find(column => column.name === args._)) {
-        context.columns.push({ name: args._, type: getType(rows[0][args._]) });
+      const existingColumnIndex = columns.findIndex(({ name }) => name === args._);
+      const type = getType(rows[0][args._]);
+      const newColumn = { name: args._, type };
+      if (existingColumnIndex === -1) {
+        columns.push(newColumn);
+      } else {
+        columns[existingColumnIndex] = newColumn;
       }
 
       return {
         type: 'datatable',
-        columns: context.columns,
+        columns,
         rows,
       };
     });

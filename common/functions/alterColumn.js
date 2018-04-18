@@ -25,21 +25,29 @@ export const alterColumn = () => ({
     },
   },
   fn: (context, args) => {
-    const column = context.columns.find(column => column.name === args.column);
+    if (!args.column || (!args.type && !args.name)) return context;
+
+    const column = context.columns.find(col => col.name === args.column);
     if (!column) throw new Error(`Column not found: '${args.column}'`);
 
-    let destination = args.column;
-    if (args.name) {
-      destination = args.name;
-    }
-
+    const name = args.name || column.name;
     const type = args.type || column.type;
 
+    const columns = context.columns.reduce((all, col) => {
+      if (col.name !== args.name) {
+        if (col.name !== column.name) all.push(col);
+        else all.push({ name, type });
+      }
+      return all;
+    }, []);
+
     let handler = val => val;
+
     if (args.type) {
       handler = (function getHandler() {
         switch (type) {
           case 'string':
+            if (column.type === 'date') return v => new Date(v).toISOString();
             return String;
           case 'number':
             return Number;
@@ -48,21 +56,22 @@ export const alterColumn = () => ({
           case 'boolean':
             return Boolean;
           case 'null':
-            return null;
+            return () => null;
           default:
-            throw new Error(`can not convert to ${type}`);
+            throw new Error(`Cannot convert to ${type}`);
         }
       })();
     }
 
-    column.name = destination;
-    column.type = type;
-
-    context.rows = context.rows.map(row => ({
-      ...omit(row, args.column),
-      [destination]: handler(row[args.column]),
+    const rows = context.rows.map(row => ({
+      ...omit(row, column.name),
+      [name]: handler(row[column.name]),
     }));
 
-    return context;
+    return {
+      type: 'datatable',
+      columns,
+      rows,
+    };
   },
 });

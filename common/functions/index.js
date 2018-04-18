@@ -17,7 +17,6 @@ import { grid } from './grid';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
-import { jsonquery } from './jsonquery';
 import { mapColumn } from './mapColumn';
 import { markdown } from './markdown';
 import { math } from './math';
@@ -60,7 +59,6 @@ export const commonFunctions = [
   head,
   ifFn,
   image,
-  jsonquery,
   mapColumn,
   markdown,
   math,

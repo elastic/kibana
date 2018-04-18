@@ -12,6 +12,7 @@ export const head = () => ({
     _: {
       types: ['number'],
       help: 'Return this many rows from the beginning of the datatable',
+      default: 1,
     },
   },
   fn: (context, args) => ({

@@ -12,6 +12,7 @@ export const asFn = () => ({
       types: ['string'],
       aliases: ['name'],
       help: 'A name to give the column',
+      default: 'value',
     },
   },
   fn: (context, args) => {

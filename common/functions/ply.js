@@ -12,10 +12,11 @@ function checkDatatableType(datatable) {
 
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
-    columns.forEach(column => {
-      if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) return;
-      else resultingColumns.push(column);
-    });
+    if (columns)
+      columns.forEach(column => {
+        if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) return;
+        else resultingColumns.push(column);
+      });
 
     return resultingColumns;
   }, []);
@@ -83,22 +84,33 @@ export const ply = () => ({
     // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
-    const byColumns = args.by.map(by => {
-      const column = context.columns.find(column => column.name === by);
-      if (!column) throw new Error(`No such column: ${by}`);
-      return column;
-    });
+    if (!args) return context;
+    let byColumns;
+    let originalDatatables;
 
-    const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
-    const originalDatatables = Object.values(keyedDatatables).map(rows => ({
-      ...context,
-      rows,
-    }));
+    if (args.by) {
+      byColumns = args.by.map(by => {
+        const column = context.columns.find(column => column.name === by);
+        if (!column) throw new Error(`No such column: ${by}`);
+        return column;
+      });
+      const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
+      originalDatatables = Object.values(keyedDatatables).map(rows => ({
+        ...context,
+        rows,
+      }));
+    } else {
+      originalDatatables = [context];
+    }
 
     const datatablePromises = originalDatatables.map(originalDatatable => {
-      const expressionResultPromises = args.expression.map(expression =>
-        expression(originalDatatable)
-      );
+      let expressionResultPromises = [];
+
+      if (args.expression) {
+        expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
+      } else {
+        expressionResultPromises.push(Promise.resolve(originalDatatable));
+      }
       return Promise.all(expressionResultPromises).then(combineAcross);
     });
 
