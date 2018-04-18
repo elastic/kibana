@@ -24,6 +24,7 @@ import { consoleExtensions } from './plugins/console_extensions';
 import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
+import { rollup } from './plugins/rollup';
 
 module.exports = function (kibana) {
   return [
@@ -46,6 +47,7 @@ module.exports = function (kibana) {
     indexManagement(kibana),
     consoleExtensions(kibana),
     notifications(kibana),
-    kueryAutocomplete(kibana)
+    kueryAutocomplete(kibana),
+    rollup(kibana)
   ];
 };
