@@ -92,7 +92,11 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
-    this._bucketAgg = this._vis.aggs.bySchemaName.segment[0];
+    if (this._vis.aggs.bySchemaName.segment) {
+      this._bucketAgg = this._vis.aggs.bySchemaName.segment[0];
+    } else {
+      this._bucketAgg = null;
+    }
 
     const tags = data.rows.map(row => {
       const [tag, count] = row;
