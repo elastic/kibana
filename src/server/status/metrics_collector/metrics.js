@@ -1,3 +1,4 @@
+import os from 'os';
 import { get, isObject, merge } from 'lodash';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
@@ -7,6 +8,26 @@ export class Metrics {
     this.config = config;
     this.server = server;
     this.checkCGroupStats = true;
+  }
+
+  static getStubMetrics() {
+    return {
+      process: {
+        mem: {}
+      },
+      os: {
+        cpu: {},
+        mem: {}
+      },
+      response_times: {},
+      requests: {
+        status_codes: {}
+      },
+      sockets: {
+        http: {},
+        https: {}
+      }
+    };
   }
 
   async capture(hapiEvent) {
@@ -26,12 +47,19 @@ export class Metrics {
   captureEvent(hapiEvent) {
     const port = this.config.get('server.port');
 
+    const avgInMillis = get(hapiEvent, ['responseTimes', port, 'avg']); // sadly, it's possible for this to be NaN
+    const maxInMillis = get(hapiEvent, ['responseTimes', port, 'max']);
+
     return {
       process: {
         mem: {
+          // https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_memoryusage
           heap_max_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
-          heap_used_in_bytes: get(hapiEvent, 'psmem.heapUsed')
-        }
+          heap_used_in_bytes: get(hapiEvent, 'psmem.heapUsed'),
+          resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
+          external_in_bytes: get(hapiEvent, 'psmem.external')
+        },
+        pid: process.pid
       },
       os: {
         cpu: {
@@ -40,14 +68,20 @@ export class Metrics {
             '5m': get(hapiEvent, 'osload.1'),
             '15m': get(hapiEvent, 'osload.2')
           }
+        },
+        mem: {
+          free_in_bytes: os.freemem(),
+          total_in_bytes: os.totalmem()
         }
       },
       response_times: {
-        avg_in_millis: get(hapiEvent, ['responseTimes', port, 'avg']),
-        max_in_millis: get(hapiEvent, ['responseTimes', port, 'max'])
+        avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
+        max_in_millis: maxInMillis
       },
       requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
-      concurrent_connections: get(hapiEvent, ['concurrents', port])
+      concurrent_connections: get(hapiEvent, ['concurrents', port]),
+      sockets: get(hapiEvent, 'sockets'),
+      event_loop_delay: get(hapiEvent, 'psdelay')
     };
   }
 

@@ -1,10 +1,24 @@
+jest.mock('fs', () => ({
+  readFile: jest.fn()
+}));
+
+jest.mock('os', () => ({
+  freemem: jest.fn(),
+  totalmem: jest.fn()
+}));
+
+jest.mock('process');
+
+import fs from 'fs';
+import os from 'os';
 import _ from 'lodash';
 import sinon from 'sinon';
-import mockFs from 'mock-fs';
-import { cGroups as cGroupsFsStub } from './__mocks__/_fs_stubs';
+import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
 import { Metrics } from './metrics';
 
 describe('Metrics', function () {
+  fs.readFile.mockImplementation(readFileMock);
+
   const sampleConfig = {
     ops: {
       interval: 5000
@@ -24,13 +38,13 @@ describe('Metrics', function () {
   });
 
   afterEach(() => {
-    mockFs.restore();
+    setMockFiles();
   });
 
 
   describe('capture', () => {
     it('merges all metrics', async () => {
-      mockFs();
+      setMockFiles();
       sinon.stub(metrics, 'captureEvent').returns({ 'a': [{ 'b': 2 }, { 'd': 4 }] });
       sinon.stub(metrics, 'captureCGroupsIfAvailable').returns({ 'a': [{ 'c': 3 }, { 'e': 5 }] });
       sinon.stub(Date.prototype, 'toISOString').returns('2017-04-14T18:35:41.534Z');
@@ -48,6 +62,13 @@ describe('Metrics', function () {
 
   describe('captureEvent', () => {
     it('parses the hapi event', () => {
+      os.freemem.mockImplementation(() => 12);
+      os.totalmem.mockImplementation(() => 24);
+
+      const pidMock = jest.fn();
+      pidMock.mockReturnValue(8675309);
+      Object.defineProperty(process, 'pid', { get: pidMock }); //
+
       const hapiEvent = {
         'requests': { '5603': { 'total': 22, 'disconnects': 0, 'statusCodes': { '200': 22 } } },
         'responseTimes': { '5603': { 'avg': 1.8636363636363635, 'max': 4 } },
@@ -59,14 +80,15 @@ describe('Metrics', function () {
         'osmem': { 'total': 17179869184, 'free': 102318080 },
         'osup': 1008991,
         'psup': 7.168,
-        'psmem': { 'rss': 193716224, 'heapTotal': 168194048, 'heapUsed': 130553400 },
+        'psmem': { 'rss': 193716224, 'heapTotal': 168194048, 'heapUsed': 130553400, 'external': 1779619 },
         'concurrents': { '5603': 0 },
         'psdelay': 1.6091690063476562,
-        'host': '123'
+        'host': 'blahblah.local'
       };
 
       expect(metrics.captureEvent(hapiEvent)).toEqual({
         'concurrent_connections': 0,
+        'event_loop_delay': 1.6091690063476562,
         'os': {
           'cpu': {
             'load_average': {
@@ -74,13 +96,20 @@ describe('Metrics', function () {
               '1m': 2.20751953125,
               '5m': 2.02294921875
             }
-          }
+          },
+          'mem': {
+            'free_in_bytes': 12,
+            'total_in_bytes': 24,
+          },
         },
         'process': {
           'mem': {
+            'external_in_bytes': 1779619,
             'heap_max_in_bytes': 168194048,
-            'heap_used_in_bytes': 130553400
-          }
+            'heap_used_in_bytes': 130553400,
+            'resident_set_size_in_bytes': 193716224,
+          },
+          'pid': 8675309
         },
         'requests': {
           'disconnects': 0,
@@ -92,18 +121,46 @@ describe('Metrics', function () {
         'response_times': {
           'avg_in_millis': 1.8636363636363635,
           'max_in_millis': 4
+        },
+        'sockets': {
+          'http': {
+            'total': 0
+          },
+          'https': {
+            'total': 0
+          }
         }
+      });
+    });
+
+    it('parses event with missing fields / NaN for responseTimes.avg', () => {
+      const hapiEvent = {
+        requests: {
+          '5603': { total: 22, disconnects: 0, statusCodes: { '200': 22 } },
+        },
+        responseTimes: { '5603': { avg: NaN, max: 4 } },
+        host: 'blahblah.local',
+      };
+
+      expect(metrics.captureEvent(hapiEvent)).toEqual({
+        process: { mem: {}, pid: 8675309 },
+        os: {
+          cpu: { load_average: {} },
+          mem: { free_in_bytes: 12, total_in_bytes: 24 },
+        },
+        response_times: { max_in_millis: 4 },
+        requests: { total: 22, disconnects: 0, status_codes: { '200': 22 } },
       });
     });
   });
 
   describe('captureCGroups', () => {
     afterEach(() => {
-      mockFs.restore();
+      setMockFiles();
     });
 
     it('returns undefined if cgroups do not exist', async () => {
-      mockFs();
+      setMockFiles();
 
       const stats = await metrics.captureCGroups();
 
@@ -112,7 +169,7 @@ describe('Metrics', function () {
 
     it('returns cgroups', async () => {
       const fsStub = cGroupsFsStub();
-      mockFs(fsStub.files);
+      setMockFiles(fsStub.files);
 
       const capturedMetrics = await metrics.captureCGroups();
 
@@ -141,11 +198,11 @@ describe('Metrics', function () {
 
   describe('captureCGroupsIfAvailable', () => {
     afterEach(() => {
-      mockFs.restore();
+      setMockFiles();
     });
 
     it('marks cgroups as unavailable and prevents subsequent calls', async () => {
-      mockFs();
+      setMockFiles();
       sinon.spy(metrics, 'captureCGroups');
 
       expect(metrics.checkCGroupStats).toBe(true);
@@ -159,7 +216,7 @@ describe('Metrics', function () {
 
     it('allows subsequent calls if cgroups are available', async () => {
       const fsStub = cGroupsFsStub();
-      mockFs(fsStub.files);
+      setMockFiles(fsStub.files);
       sinon.spy(metrics, 'captureCGroups');
 
       expect(metrics.checkCGroupStats).toBe(true);

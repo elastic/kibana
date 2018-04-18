@@ -1,0 +1,265 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Metrics Collector collection should accumulate counter metrics 1`] = `
+Object {
+  "collection_interval_in_millis": "test-123",
+  "concurrent_connections": 0,
+  "event_loop_delay": 0.3764979839324951,
+  "last_updated": "2018-04-19T21:50:54.366Z",
+  "name": "test-123",
+  "os": Object {
+    "cpu": Object {
+      "load_average": Object {
+        "15m": 1.81201171875,
+        "1m": 1.97119140625,
+        "5m": 1.90283203125,
+      },
+    },
+    "mem": Object {
+      "free_in_bytes": 12,
+      "total_in_bytes": 24,
+    },
+  },
+  "process": Object {
+    "mem": Object {
+      "external_in_bytes": 25028,
+      "heap_max_in_bytes": 15548416,
+      "heap_used_in_bytes": 12996392,
+      "resident_set_size_in_bytes": 36085760,
+    },
+    "pid": 7777,
+  },
+  "requests": Object {
+    "disconnects": 0,
+    "status_codes": Object {
+      "200": 8,
+    },
+    "total": 8,
+  },
+  "response_times": Object {
+    "avg_in_millis": 19,
+    "max_in_millis": 19,
+  },
+  "sockets": Object {
+    "http": Object {
+      "total": 0,
+    },
+    "https": Object {
+      "total": 0,
+    },
+  },
+  "uptime_in_millis": 6666000,
+  "uuid": "test-123",
+  "version": Object {
+    "build_hash": "test-123",
+    "build_number": "test-123",
+    "build_snapshot": false,
+    "number": "test-123",
+  },
+}
+`;
+
+exports[`Metrics Collector collection should accumulate counter metrics 2`] = `
+Object {
+  "collection_interval_in_millis": "test-123",
+  "concurrent_connections": 0,
+  "event_loop_delay": 0.7529959678649902,
+  "last_updated": "2018-04-19T21:50:54.366Z",
+  "name": "test-123",
+  "os": Object {
+    "cpu": Object {
+      "load_average": Object {
+        "15m": 1.81201171875,
+        "1m": 1.97119140625,
+        "5m": 1.90283203125,
+      },
+    },
+    "mem": Object {
+      "free_in_bytes": 12,
+      "total_in_bytes": 24,
+    },
+  },
+  "process": Object {
+    "mem": Object {
+      "external_in_bytes": 25028,
+      "heap_max_in_bytes": 15548416,
+      "heap_used_in_bytes": 12996392,
+      "resident_set_size_in_bytes": 36085760,
+    },
+    "pid": 7777,
+  },
+  "requests": Object {
+    "disconnects": 0,
+    "status_codes": Object {
+      "200": 16,
+    },
+    "total": 16,
+  },
+  "response_times": Object {
+    "avg_in_millis": 38,
+    "max_in_millis": 38,
+  },
+  "sockets": Object {
+    "http": Object {
+      "total": 0,
+    },
+    "https": Object {
+      "total": 0,
+    },
+  },
+  "uptime_in_millis": 6666000,
+  "uuid": "test-123",
+  "version": Object {
+    "build_hash": "test-123",
+    "build_number": "test-123",
+    "build_snapshot": false,
+    "number": "test-123",
+  },
+}
+`;
+
+exports[`Metrics Collector collection should accumulate counter metrics 3`] = `
+Object {
+  "collection_interval_in_millis": "test-123",
+  "concurrent_connections": 0,
+  "event_loop_delay": 1.1294939517974854,
+  "last_updated": "2018-04-19T21:50:54.366Z",
+  "name": "test-123",
+  "os": Object {
+    "cpu": Object {
+      "load_average": Object {
+        "15m": 1.81201171875,
+        "1m": 1.97119140625,
+        "5m": 1.90283203125,
+      },
+    },
+    "mem": Object {
+      "free_in_bytes": 12,
+      "total_in_bytes": 24,
+    },
+  },
+  "process": Object {
+    "mem": Object {
+      "external_in_bytes": 25028,
+      "heap_max_in_bytes": 15548416,
+      "heap_used_in_bytes": 12996392,
+      "resident_set_size_in_bytes": 36085760,
+    },
+    "pid": 7777,
+  },
+  "requests": Object {
+    "disconnects": 0,
+    "status_codes": Object {
+      "200": 24,
+    },
+    "total": 24,
+  },
+  "response_times": Object {
+    "avg_in_millis": 57,
+    "max_in_millis": 57,
+  },
+  "sockets": Object {
+    "http": Object {
+      "total": 0,
+    },
+    "https": Object {
+      "total": 0,
+    },
+  },
+  "uptime_in_millis": 6666000,
+  "uuid": "test-123",
+  "version": Object {
+    "build_hash": "test-123",
+    "build_number": "test-123",
+    "build_snapshot": false,
+    "number": "test-123",
+  },
+}
+`;
+
+exports[`Metrics Collector collection should update stats with new data 1`] = `
+Object {
+  "collection_interval_in_millis": "test-123",
+  "concurrent_connections": 0,
+  "event_loop_delay": 0.33843398094177246,
+  "last_updated": "2018-04-19T21:50:54.366Z",
+  "name": "test-123",
+  "os": Object {
+    "cpu": Object {
+      "load_average": Object {
+        "15m": 1.8154296875,
+        "1m": 1.68017578125,
+        "5m": 1.7685546875,
+      },
+    },
+    "mem": Object {
+      "free_in_bytes": 12,
+      "total_in_bytes": 24,
+    },
+  },
+  "process": Object {
+    "mem": Object {
+      "external_in_bytes": 25028,
+      "heap_max_in_bytes": 15548416,
+      "heap_used_in_bytes": 12911128,
+      "resident_set_size_in_bytes": 35307520,
+    },
+    "pid": 7777,
+  },
+  "requests": Object {
+    "disconnects": 0,
+    "status_codes": Object {
+      "200": 4,
+    },
+    "total": 4,
+  },
+  "response_times": Object {
+    "avg_in_millis": 13,
+    "max_in_millis": 13,
+  },
+  "sockets": Object {
+    "http": Object {
+      "total": 0,
+    },
+    "https": Object {
+      "total": 0,
+    },
+  },
+  "uptime_in_millis": 6666000,
+  "uuid": "test-123",
+  "version": Object {
+    "build_hash": "test-123",
+    "build_number": "test-123",
+    "build_snapshot": false,
+    "number": "test-123",
+  },
+}
+`;
+
+exports[`Metrics Collector initialize should return stub metrics 1`] = `
+Object {
+  "name": "test-123",
+  "os": Object {
+    "cpu": Object {},
+    "mem": Object {},
+  },
+  "process": Object {
+    "mem": Object {},
+  },
+  "requests": Object {
+    "status_codes": Object {},
+  },
+  "response_times": Object {},
+  "sockets": Object {
+    "http": Object {},
+    "https": Object {},
+  },
+  "uuid": "test-123",
+  "version": Object {
+    "build_hash": "test-123",
+    "build_number": "test-123",
+    "build_snapshot": false,
+    "number": "test-123",
+  },
+}
+`;
