@@ -132,6 +132,7 @@ describe('ObjectsTable', () => {
     const component = shallow(
       <ObjectsTable
         {...defaultProps}
+        perPageConfig={15}
       />
     );
 

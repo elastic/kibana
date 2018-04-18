@@ -12,7 +12,16 @@ import { getInAppUrl } from './lib/get_in_app_url';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
-function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns, $http, kbnIndex, kbnUrl) {
+function updateObjectsTable($scope, $injector) {
+  const Private = $injector.get('Private');
+  const indexPatterns = $injector.get('indexPatterns');
+  const $http = $injector.get('$http');
+  const kbnIndex = $injector.get('kbnIndex');
+  const kbnUrl = $injector.get('kbnUrl');
+  const config = $injector.get('config');
+
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
   const allServices = savedObjectManagementRegistry.all();
   const typeToServiceName = type => allServices.reduce((serviceName, service) => {
     return service.title.includes(type) ? service.service : serviceName;
@@ -30,6 +39,7 @@ function updateObjectsTable($scope, savedObjectsClient, services, indexPatterns,
         services={services}
         indexPatterns={indexPatterns}
         $http={$http}
+        perPageConfig={config.get('savedObjects:perPage')}
         basePath={chrome.getBasePath()}
         kbnIndex={kbnIndex}
         newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
@@ -65,15 +75,12 @@ uiRoutes
   .when('/management/kibana/objects/:service', { redirectTo: '/management/kibana/objects' });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjects', function ($http, kbnIndex, kbnUrl, Private, indexPatterns) {
-    const savedObjectsClient = Private(SavedObjectsClientProvider);
-
+  .directive('kbnManagementObjects', function () {
     return {
       restrict: 'E',
       controllerAs: 'managementObjectsController',
       controller: function ($scope, $injector) {
-        const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
-        updateObjectsTable($scope, savedObjectsClient, services, indexPatterns, $http, kbnIndex, kbnUrl);
+        updateObjectsTable($scope, $injector);
         $scope.$on('$destroy', destroyObjectsTable);
       }
     };

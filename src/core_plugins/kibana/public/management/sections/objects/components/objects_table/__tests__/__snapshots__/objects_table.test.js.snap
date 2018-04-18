@@ -200,7 +200,7 @@ exports[`ObjectsTable should render normally 1`] = `
     onShowRelationships={[Function]}
     onTableChange={[Function]}
     pageIndex={0}
-    pageSize={10}
+    pageSize={15}
     selectedSavedObjects={Array []}
     selectionConfig={
       Object {

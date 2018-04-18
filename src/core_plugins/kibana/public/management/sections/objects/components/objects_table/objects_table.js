@@ -39,6 +39,7 @@ export class ObjectsTable extends Component {
     indexPatterns: PropTypes.object.isRequired,
     $http: PropTypes.func.isRequired,
     basePath: PropTypes.string.isRequired,
+    perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
     kbnIndex: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
@@ -52,7 +53,7 @@ export class ObjectsTable extends Component {
     this.state = {
       totalCount: 0,
       page: 0,
-      perPage: 10,
+      perPage: props.perPageConfig || 10,
       savedObjects: [],
       savedObjectCounts: INCLUDED_TYPES.reduce((accum, type) => {
         accum[type] = 0;
