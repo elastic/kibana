@@ -3,6 +3,7 @@ import $ from 'jquery';
 import { metadata } from 'ui/metadata';
 import { formatMsg, formatStack } from './lib';
 import fatalSplashScreen from './partials/fatal_splash_screen.html';
+import { callEach } from '../utils/function';
 
 const {
   version,
@@ -45,7 +46,7 @@ function formatInfo() {
 export const fatalErrorInternals = {
   show: (err, location) => {
     if (firstFatal) {
-      _.callEach(fatalCallbacks);
+      callEach(fatalCallbacks);
       firstFatal = false;
       window.addEventListener('hashchange', function () {
         window.location.reload();

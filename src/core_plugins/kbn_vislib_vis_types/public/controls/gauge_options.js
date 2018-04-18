@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import gaugeOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/gauge_options.html';
+import gaugeOptionsTemplate from './gauge_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 

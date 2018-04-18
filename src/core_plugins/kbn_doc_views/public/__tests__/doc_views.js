@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/render_directive';
-import 'plugins/kbn_doc_views/views/table';
+import '../views/table';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 import StubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 const hit = {

@@ -3,7 +3,7 @@ import 'ui/filters/markdown';
 import { uiModules } from 'ui/modules';
 import { fatalError } from 'ui/notify';
 import { keyCodes } from '@elastic/eui';
-import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
+import advancedRowTemplate from './advanced_row.html';
 
 uiModules.get('apps/management')
   .directive('advancedRow', function (config) {

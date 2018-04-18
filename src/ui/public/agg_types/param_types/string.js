@@ -1,8 +1,8 @@
-import _ from 'lodash';
 import editorHtml from '../controls/string.html';
 import { BaseParamType } from './base';
+import { createLegacyClass } from '../../utils/legacy_class';
 
-_.class(StringParamType).inherits(BaseParamType);
+createLegacyClass(StringParamType).inherits(BaseParamType);
 function StringParamType(config) {
   StringParamType.Super.call(this, config);
 }

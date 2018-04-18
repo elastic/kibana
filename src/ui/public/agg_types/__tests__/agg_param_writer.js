@@ -3,7 +3,7 @@ import { VisProvider } from 'ui/vis';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {
@@ -11,7 +11,6 @@ export default function AggParamWriterHelper(Private) {
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(VisTypesRegistryProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  const AggConfig = Private(VisAggConfigProvider);
 
   /**
    * Helper object for writing aggParams. Specify an aggType and it will find a vis & schema, and

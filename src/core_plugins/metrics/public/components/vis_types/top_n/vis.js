@@ -1,5 +1,5 @@
 import tickFormatter from '../../lib/tick_formatter';
-import TopN from 'plugins/metrics/visualizations/components/top_n';
+import TopN from '../../../visualizations/components/top_n';
 import getLastValue from '../../../../common/get_last_value';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';

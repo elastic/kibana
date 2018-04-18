@@ -1,5 +1,5 @@
-import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
+import { savedObjectManagementRegistry } from '../../saved_object_registry';
+import objectIndexHTML from './_objects.html';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';

@@ -1,14 +1,10 @@
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 import './styles/_tilemap.less';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
-
-  const AggConfig = Private(VisAggConfigProvider);
-  const SearchSource = Private(SearchSourceProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
@@ -142,8 +138,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = new SearchSource();
-        searchSource.index(this.vis.indexPattern);
+        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
         searchSource.size(0);
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
