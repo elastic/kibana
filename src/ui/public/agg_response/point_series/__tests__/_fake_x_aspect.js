@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
 
@@ -10,13 +10,11 @@ describe('makeFakeXAspect', function () {
   let makeFakeXAspect;
   let Vis;
   let AggType;
-  let AggConfig;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggConfig = Private(VisAggConfigProvider);
     AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(VisProvider);
     makeFakeXAspect = Private(PointSeriesFakeXAxisProvider);
