@@ -19,7 +19,6 @@ import { savedObjectsMixin } from './saved_objects';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { consoleMixin } from '../core_plugins/console/api_server/spec';
 
 const rootDir = fromRoot('.');
 
@@ -64,8 +63,6 @@ export default class KbnServer {
       // setup saved object routes
       savedObjectsMixin,
 
-      // setup extension point for console autocomplete endpoints
-      consoleMixin,
       // ensure that all bundles are built, or that the
       // watch bundle server is running
       optimizeMixin,

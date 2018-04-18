@@ -35,8 +35,6 @@ export function getSpec() {
   return result;
 }
 
-export function consoleMixin(kbnServer, server) {
-  server.decorate('server', 'addExtensionSpecFilePath', (extensionSpecFilePath) => {
-    extensionSpecFilePaths.push(extensionSpecFilePath);
-  });
+export function addExtensionSpecFilePath(extensionSpecFilePath) {
+  extensionSpecFilePaths.push(extensionSpecFilePath);
 }
