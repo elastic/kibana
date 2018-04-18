@@ -1,11 +1,12 @@
 import expect from 'expect.js';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
-import { GeoHashSampleData } from './geohash_sample_data';
+// import { GeoHashSampleData } from './geohash_sample_data';
 import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
+import GeoHashSampleData from './dummy_es_response.json';
 
 describe('geohash_layer', function () {
 
@@ -81,7 +82,7 @@ describe('geohash_layer', function () {
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(
           GeoHashSampleData.featureCollection,
-          GeoHashSampleData.featureCollection.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+          GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
 
         const elementList = domNode.querySelectorAll('canvas');
