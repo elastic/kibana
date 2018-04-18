@@ -2,12 +2,18 @@
 === Install Kibana with RPM
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
-or from our  <<rpm-repo,RPM repository>>. It can be used to install
+or from our <<rpm-repo,RPM repository>>. It can be used to install
 Kibana on any RPM-based system such as OpenSuSE, SLES, Centos, Red Hat,
 and Oracle Enterprise.
 
 NOTE: RPM install is not supported on distributions with old versions of RPM,
 such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
+
+This package contains both open source and commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial license] to enable all       
+of the available commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
@@ -105,6 +111,8 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 --------------------------------------------
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
+
+You can alternatively download the open source distribution of Kibana from: https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
 
 endif::[]
 

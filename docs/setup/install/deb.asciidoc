@@ -2,8 +2,14 @@
 === Install Kibana with Debian Package
 
 The Debian package for Kibana can be <<install-deb,downloaded from our website>>
-or from our  <<deb-repo,APT repository>>. It can be used to install
+or from our <<deb-repo,APT repository>>. It can be used to install
 Kibana on any Debian-based system such as Debian and Ubuntu.
+
+This package contains both open source and commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial license] to enable all       
+of the available commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
@@ -114,6 +120,8 @@ sudo dpkg -i kibana-{version}-amd64.deb
 --------------------------------------------
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-amd64.deb.sha512[published SHA].
+
+You can alternatively download the open source distribution of Kibana from: https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-amd64.deb    
 
 endif::[]
 

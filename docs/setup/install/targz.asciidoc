@@ -4,6 +4,12 @@
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
+These packages contain both open source and commercial features. 
+{xpack-ref}/license-management.html[Start a 30-day trial license] to enable all       
+of the available commercial features. See the 
+https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+Elastic license levels.
+
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
@@ -60,6 +66,8 @@ cd kibana-{version}-darwin-x86_64/ <2>
 <1> Compare the SHA produced by or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
+
+You can alternatively download the open source distribution of Kibana from: https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
 
 endif::[]
 
