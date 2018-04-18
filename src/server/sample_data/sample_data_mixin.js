@@ -5,6 +5,9 @@ import {
   createInstallRoute,
   createUninstallRoute,
 } from './routes';
+import {
+  flightsSpecProvider,
+} from './data_sets';
 
 export function sampleDataMixin(kbnServer, server) {
   server.route(createListRoute());
@@ -26,4 +29,6 @@ export function sampleDataMixin(kbnServer, server) {
 
     sampleDataSets.push(value);
   });
+
+  server.registerSampleDataSet(flightsSpecProvider);
 }

@@ -3,7 +3,14 @@ export const createListRoute = () => ({
   method: 'GET',
   config: {
     handler(request, reply) {
-      reply([]);
+      const sampleDataSets = request.server.getSampleDataSets().map(sampleDataSet => {
+        return {
+          id: sampleDataSet.id,
+          name: sampleDataSet.name,
+          description: sampleDataSet.description
+        };
+      });
+      reply(sampleDataSets);
     }
   }
 });

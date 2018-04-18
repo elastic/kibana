@@ -10,6 +10,15 @@ export const createUninstallRoute = () => ({
       }).required()
     },
     handler(request, reply) {
+      const sampleDataSet = request.server.getSampleDataSets().find(sampleDataSet => {
+        return sampleDataSet.id === request.params.id;
+      });
+
+      if (!sampleDataSet) {
+        reply().code(404);
+        return;
+      }
+
       reply();
     }
   }
