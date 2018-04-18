@@ -1,0 +1,16 @@
+{
+  "name": "@kbn/system-loader",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "target/index.js",
+  "typings": "target/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.2.2",
+    "typescript": "^2.8.1"
+  }
+}
