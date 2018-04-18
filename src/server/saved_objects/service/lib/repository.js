@@ -108,8 +108,7 @@ export class SavedObjectsRepository {
       overwrite = false
     } = options;
     const time = this._getCurrentTime();
-
-    const objectToBulkRequest = async (object) => {
+    const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
 
       return [
@@ -127,18 +126,13 @@ export class SavedObjectsRepository {
       ];
     };
 
-    const bulkRequestBody = await objects.reduce(async (acc, object) => {
-      const collection = await acc;
-
-      const objectRequestBody = await objectToBulkRequest(object);
-
-      return [...collection, ...objectRequestBody];
-    }, Promise.resolve([]));
-
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: bulkRequestBody
+      body: objects.reduce((acc, object) => ([
+        ...acc,
+        ...objectToBulkRequest(object)
+      ]), []),
     });
 
     return items.map((response, i) => {
@@ -182,7 +176,6 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id) {
-
     const response = await this._writeToCluster('delete', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -348,7 +341,6 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-
     const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -384,7 +376,6 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
