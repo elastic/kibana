@@ -40,6 +40,7 @@ export const HeaderComponent = ({
   onQueryChanged,
   goToNextStep,
   isNextStepDisabled,
+  allowWildcards,
   intl,
   ...rest
 }) => (
@@ -67,13 +68,17 @@ export const HeaderComponent = ({
             error={errors}
             helpText={
               <div>
-                <p>
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
-                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                    values={{ asterisk: <strong>*</strong> }}
-                  />
-                </p>
+                {
+                  allowWildcards ? (
+                    <p>
+                      <FormattedMessage
+                        id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                        defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                        values={{ asterisk: <strong>*</strong> }}
+                      />
+                    </p>
+                  ) : ''
+                }
                 <p>
                   <FormattedMessage
                     id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"

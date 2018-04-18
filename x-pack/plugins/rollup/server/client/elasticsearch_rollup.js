@@ -1,0 +1,30 @@
+/*
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License;
+* you may not use this file except in compliance with the Elastic License.
+*/
+
+export const elasticsearchJsPlugin = (Client, config, components) => {
+  const ca = components.clientAction.factory;
+
+  Client.prototype.rollup = components.clientAction.namespaceFactory();
+  const rollup = Client.prototype.rollup.prototype;
+
+  rollup.capabilities = ca({
+    urls: [
+      {
+        fmt: '/_xpack/rollup/data/<%=indices%>',
+        req: {
+          indices: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        fmt: '/_xpack/rollup/data/',
+      }
+    ],
+    method: 'GET'
+  });
+};
+
