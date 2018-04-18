@@ -2,20 +2,18 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
+import { createFilterTerms } from 'ui/agg_types/buckets/create_filter/terms';
 
 describe('AggConfig Filters', function () {
 
   describe('terms', function () {
     let indexPattern;
     let Vis;
-    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
     }));
 
     it('should return a match filter for terms', function () {
@@ -24,7 +22,7 @@ describe('AggConfig Filters', function () {
         aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
       });
       const aggConfig = vis.aggs.byTypeName.terms[0];
-      const filter = createFilter(aggConfig, 'apache');
+      const filter = createFilterTerms(aggConfig, 'apache');
       expect(filter).to.have.property('query');
       expect(filter.query).to.have.property('match');
       expect(filter.query.match).to.have.property('_type');
@@ -41,13 +39,13 @@ describe('AggConfig Filters', function () {
         aggs: [ { type: 'terms', schema: 'segment', params: { field: 'ssl' } } ]
       });
       const aggConfig = vis.aggs.byTypeName.terms[0];
-      const filterFalse = createFilter(aggConfig, 0);
+      const filterFalse = createFilterTerms(aggConfig, 0);
       expect(filterFalse).to.have.property('query');
       expect(filterFalse.query).to.have.property('match');
       expect(filterFalse.query.match).to.have.property('ssl');
       expect(filterFalse.query.match.ssl).to.have.property('query', false);
 
-      const filterTrue = createFilter(aggConfig, 1);
+      const filterTrue = createFilterTerms(aggConfig, 1);
       expect(filterTrue).to.have.property('query');
       expect(filterTrue.query).to.have.property('match');
       expect(filterTrue.query.match).to.have.property('ssl');

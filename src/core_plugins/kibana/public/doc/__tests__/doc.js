@@ -1,7 +1,7 @@
 // Load the kibana app dependencies.
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import 'plugins/kibana/doc/index';
+import '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 let $scope;

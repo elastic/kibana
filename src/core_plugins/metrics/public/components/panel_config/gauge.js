@@ -8,7 +8,7 @@ import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-import YesNo from 'plugins/metrics/components/yes_no';
+import YesNo from '../yes_no';
 import { htmlIdGenerator } from '@elastic/eui';
 
 class GaugePanelConfig extends Component {

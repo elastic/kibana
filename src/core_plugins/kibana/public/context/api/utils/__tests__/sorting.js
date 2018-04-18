@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import {
   reverseSortDirection,
   reverseSortDirective
-} from 'plugins/kibana/context/api/utils/sorting';
+} from '../sorting';
 
 
 describe('context app', function () {

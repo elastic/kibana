@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import editorHtml from '../controls/regular_expression.html';
 import { BaseParamType } from './base';
+import { createLegacyClass } from '../../utils/legacy_class';
 
-_.class(RegexParamType).inherits(BaseParamType);
+createLegacyClass(RegexParamType).inherits(BaseParamType);
 function RegexParamType(config) {
   _.defaults(config, { pattern: '' });
   RegexParamType.Super.call(this, config);
