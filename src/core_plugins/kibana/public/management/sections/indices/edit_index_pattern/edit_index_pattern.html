@@ -15,14 +15,21 @@
         delete="removePattern()"
       ></kbn-management-index-header>
 
-      <p ng-if="indexPattern.timeFieldName" class="kuiText kuiVerticalRhythm">
-        <span class="label label-success">
-          <span class="kuiIcon fa-clock-o"></span>
-          <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
-                i18n-default-message="Time Filter field name: {timeFieldName}"
-                i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
+      <p class="kuiText kuiVerticalRhythm" ng-if="::(indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length))">
+        <span ng-if="::indexPattern.timeFieldName">
+          <span class="label label-success">
+            <span class="kuiIcon fa-clock-o"></span>
+            <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+                  i18n-default-message="Time Filter field name: {timeFieldName}"
+                  i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
+          </span>
+          &nbsp;
+        </span>
+        <span ng-repeat="tag in indexPattern.tags">
+          <span class="label label-info">{{tag.name}}</span>
         </span>
       </p>
+
 
       <p class="kuiText kuiVerticalRhythm">
         <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"

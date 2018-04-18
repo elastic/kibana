@@ -19,7 +19,7 @@
 
 import { get, sortBy } from 'lodash';
 
-export async function getIndices(es, rawPattern, limit) {
+export async function getIndices(es, indexPatternCreationType, rawPattern, limit) {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -57,7 +57,8 @@ export async function getIndices(es, rawPattern, limit) {
             size: limit,
           }
         }
-      }
+      },
+      ...indexPatternCreationType.getIndexPatternCreationQuery(),
     }
   };
 
@@ -67,11 +68,18 @@ export async function getIndices(es, rawPattern, limit) {
       return [];
     }
 
-    return sortBy(response.aggregations.indices.buckets.map(bucket => {
-      return {
-        name: bucket.key
-      };
-    }), 'name');
+    return sortBy(
+      response.aggregations.indices.buckets.map(bucket => {
+        return bucket.key;
+      })
+        .map((index) => {
+          return {
+            name: index,
+            tags: indexPatternCreationType.getIndexTags(index)
+          };
+        })
+      , 'name'
+    );
   }
   catch (err) {
     const type = get(err, 'body.error.caused_by.type');

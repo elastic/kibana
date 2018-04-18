@@ -46,6 +46,7 @@ export const fieldFormatEditors = appExtension;
 export const chromeNavControls = appExtension;
 export const navbarExtensions = appExtension;
 export const managementSections = appExtension;
+export const indexManagement = appExtension;
 export const devTools = appExtension;
 export const docViews = appExtension;
 export const hacks = appExtension;
