@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiSpacer,
@@ -30,13 +30,16 @@ import {
 } from '@elastic/eui';
 
 export const Header = ({
+  prompt,
+  indexPatternName,
+  showSystemIndices,
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
 }) => (
   <div>
     <EuiSpacer size="m"/>
     <EuiTitle>
-      <h1>Create index pattern</h1>
+      <h1>Create a {indexPatternName}</h1>
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
@@ -48,14 +51,26 @@ export const Header = ({
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          label="Include system indices"
-          checked={isIncludingSystemIndices}
-          onChange={onChangeIncludingSystemIndices}
-        />
-      </EuiFlexItem>
+      {
+        showSystemIndices ? (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label="Include system indices"
+              checked={isIncludingSystemIndices}
+              onChange={onChangeIncludingSystemIndices}
+            />
+          </EuiFlexItem>
+        ) : ''
+      }
     </EuiFlexGroup>
+    {
+      prompt ? (
+        <Fragment>
+          <EuiSpacer size="s" />
+          {prompt}
+        </Fragment>
+      ) : ''
+    }
     <EuiSpacer size="m"/>
   </div>
 );

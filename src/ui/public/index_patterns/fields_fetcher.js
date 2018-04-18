@@ -25,7 +25,7 @@ export function createFieldsFetcher(apiClient, config) {
         return this.fetchForTimePattern(indexPattern.title, interval);
       }
 
-      return this.fetchForWildcard(indexPattern.title);
+      return this.fetchForWildcard(indexPattern.title, indexPattern.type);
     }
 
     fetchForTimePattern(indexPatternId) {
@@ -36,10 +36,11 @@ export function createFieldsFetcher(apiClient, config) {
       });
     }
 
-    fetchForWildcard(indexPatternId) {
+    fetchForWildcard(indexPatternId, indexPatternType) {
       return apiClient.getFieldsForWildcard({
         pattern: indexPatternId,
         metaFields: config.get('metaFields'),
+        type: indexPatternType,
       });
     }
   }
