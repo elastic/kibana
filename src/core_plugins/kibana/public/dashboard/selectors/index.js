@@ -5,6 +5,7 @@ import _ from 'lodash';
  * @property {DashboardViewMode} viewMode
  * @property {boolean} isFullScreenMode
  * @property {string|undefined} maximizedPanelId
+ * @property {string|undefined} getVisibleContextMenuPanelId
  */
 
 /**
@@ -102,6 +103,9 @@ export const getEmbeddableEditUrl = (dashboard, panelId) =>  {
   const embeddable = getEmbeddable(dashboard, panelId);
   return embeddable && embeddable.initialized ? embeddable.metadata.editUrl : '';
 };
+
+
+export const getVisibleContextMenuPanelId = dashboard => dashboard.view.visibleContextMenuPanelId;
 
 /**
  * @param dashboard {DashboardState}

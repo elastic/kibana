@@ -3,6 +3,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const remote = getService('remote');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
   describe('full screen mode', async () => {
@@ -40,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
-      await PageObjects.dashboard.toggleExpandPanel();
+      await dashboardPanelActions.toggleExpandPanel();
 
       const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
       expect(exists).to.be(true);
