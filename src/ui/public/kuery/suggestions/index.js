@@ -7,9 +7,9 @@ import { getSuggestionsProvider as conjunction } from './conjunction';
 
 const cursorSymbol = '@kuery-cursor@';
 
-export function getSuggestionsProvider({ $http, config, indexPatterns }) {
+export function getSuggestionsProvider({ $http, config, fields }) {
   const getSuggestionsByType = mapValues({ field, value, operator, conjunction }, provider => {
-    return provider({ $http, config, indexPatterns });
+    return provider({ $http, config, fields });
   });
 
   return function getSuggestions({ query, selectionStart, selectionEnd }) {

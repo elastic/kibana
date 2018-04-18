@@ -1,4 +1,4 @@
-import { escape, flatten } from 'lodash';
+import { escape } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from '../../utils/sort_prefix_first';
 
@@ -8,11 +8,10 @@ function getDescription(fieldName) {
   return `<p>Filter results that contain <span class="suggestionItem__callout">${escape(fieldName)}</span></p>`;
 }
 
-export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
+export function getSuggestionsProvider({ fields }) {
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
     const search = `${prefix}${suffix}`.toLowerCase();
-    const filterableFields = allFields.filter(field => field.filterable);
+    const filterableFields = fields.filter(field => field.filterable);
     const fieldNames = filterableFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);

@@ -5,14 +5,14 @@ import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index
 
 describe('Kuery field suggestions', function () {
   let indexPattern;
-  let indexPatterns;
+  let fields;
   let getSuggestions;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    indexPatterns = [indexPattern];
-    getSuggestions = getSuggestionsProvider({ indexPatterns });
+    fields = indexPattern.fields.raw;
+    getSuggestions = getSuggestionsProvider({ fields });
   }));
 
   it('should return a function', function () {
@@ -23,7 +23,7 @@ describe('Kuery field suggestions', function () {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
-    const filterableFields = indexPattern.fields.filter(field => field.filterable);
+    const filterableFields = fields.filter(field => field.filterable);
     expect(suggestions.length).to.be(filterableFields.length);
   });
 
