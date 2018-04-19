@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { TabifyTableGroup } from 'ui/agg_response/tabify/_table_group';
+import { TabifyTableGroup } from '../_table_group';
 
 describe('Table Group class', function () {
 

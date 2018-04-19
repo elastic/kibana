@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+import { getComputedFields } from '../_get_computed_fields';
 
 describe('get computed fields', function () {
 

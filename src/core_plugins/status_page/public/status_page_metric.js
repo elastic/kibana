@@ -1,6 +1,6 @@
 import formatNumber from './lib/format_number';
 import { uiModules } from 'ui/modules';
-import statusPageMetricTemplate from 'plugins/status_page/status_page_metric.html';
+import statusPageMetricTemplate from './status_page_metric.html';
 
 uiModules
   .get('kibana', [])

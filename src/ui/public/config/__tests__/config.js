@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import ngMock from 'ng_mock';
-import chrome from 'ui/chrome';
+import chrome from '../../chrome';
 
 describe('Config service', () => {
   let config;
@@ -24,6 +24,7 @@ describe('Config service', () => {
       config.getAll();
       sinon.assert.calledOnce(uiSettings.getAll);
       sinon.assert.calledWithExactly(uiSettings.getAll);
+      uiSettings.getAll.restore();
     });
   });
 
@@ -33,6 +34,7 @@ describe('Config service', () => {
       config.get('key', 'default');
       sinon.assert.calledOnce(uiSettings.get);
       sinon.assert.calledWithExactly(uiSettings.get, 'key', 'default');
+      uiSettings.get.restore();
     });
   });
 
@@ -42,6 +44,7 @@ describe('Config service', () => {
       config.isDeclared('key');
       sinon.assert.calledOnce(uiSettings.isDeclared);
       sinon.assert.calledWithExactly(uiSettings.isDeclared, 'key');
+      uiSettings.isDeclared.restore();
     });
   });
 
@@ -51,6 +54,7 @@ describe('Config service', () => {
       config.isDefault('key');
       sinon.assert.calledOnce(uiSettings.isDefault);
       sinon.assert.calledWithExactly(uiSettings.isDefault, 'key');
+      uiSettings.isDefault.restore();
     });
   });
 
@@ -69,6 +73,7 @@ describe('Config service', () => {
       config.remove('foobar');
       sinon.assert.calledOnce(uiSettings.remove);
       sinon.assert.calledWithExactly(uiSettings.remove, 'foobar');
+      uiSettings.remove.restore();
     });
 
     it('returns an angular promise', () => {

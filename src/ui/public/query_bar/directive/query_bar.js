@@ -1,6 +1,6 @@
 import { compact, get } from 'lodash';
-import { uiModules } from 'ui/modules';
-import { callAfterBindingsWorkaround } from 'ui/compat';
+import { uiModules } from '../../modules';
+import { callAfterBindingsWorkaround } from '../../compat';
 import template from './query_bar.html';
 import suggestionTemplate from './suggestion.html';
 import { getSuggestionsProvider } from '../../kuery';

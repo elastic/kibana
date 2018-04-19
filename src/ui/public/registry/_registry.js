@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../indexed_array';
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokeProviders');
 
 /**

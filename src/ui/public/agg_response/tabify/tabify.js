@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { TabbedAggResponseWriter } from 'ui/agg_response/tabify/_response_writer';
-import { TabifyBuckets } from 'ui/agg_response/tabify/_buckets';
+import { TabbedAggResponseWriter } from './_response_writer';
+import { TabifyBuckets } from './_buckets';
 
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
   const write = new TabbedAggResponseWriter(aggs, respOpts);

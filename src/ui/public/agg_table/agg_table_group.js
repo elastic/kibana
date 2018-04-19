@@ -1,8 +1,8 @@
 import 'angular';
 import 'angular-recursion';
-import 'ui/agg_table';
-import { uiModules } from 'ui/modules';
-import aggTableGroupTemplate from 'ui/agg_table/agg_table_group.html';
+import './';
+import { uiModules } from '../modules';
+import aggTableGroupTemplate from './agg_table_group.html';
 
 uiModules
   .get('kibana', ['RecursionHelper'])

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
+import { uiModules } from '../modules';
+import paginateControlsTemplate from '../partials/paginate_controls.html';
 
 uiModules.get('kibana')
   .directive('paginate', function ($parse, $compile) {

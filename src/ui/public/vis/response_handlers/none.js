@@ -3,7 +3,7 @@
 // returns a promise
 // promise returns response data when resolved
 
-import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
 const noneResponseHandler = function () {
   return {

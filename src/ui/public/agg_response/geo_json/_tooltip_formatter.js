@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from '../../registry/field_formats';
 
 export function TileMapTooltipFormatterProvider($compile, $rootScope) {
 

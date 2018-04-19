@@ -3,8 +3,8 @@ import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import { parse as parseUrl } from 'url';
 
-import { StateProvider } from 'ui/state_management/state';
-import { hashUrl } from 'ui/state_management/state_hashing';
+import { StateProvider } from '../../state';
+import { hashUrl } from '..';
 
 describe('hashUrl', function () {
   let State;

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { getConvertedValueForField } from 'ui/filter_manager/lib/phrase';
+import { getConvertedValueForField } from '../../filter_manager/lib/phrase';
 
 export function migrateFilter(filter, indexPattern) {
   if (filter.match) {

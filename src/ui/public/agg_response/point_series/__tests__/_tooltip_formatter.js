@@ -2,7 +2,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { PointSeriesTooltipFormatter } from 'ui/agg_response/point_series/_tooltip_formatter';
+import { PointSeriesTooltipFormatter } from '../_tooltip_formatter';
 
 describe('tooltipFormatter', function () {
 
