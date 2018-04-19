@@ -14,18 +14,17 @@ import {
 } from '../../actions';
 
 import {
-  getEmbeddable,
   getPanel,
   getMaximizedPanelId,
   getFullScreenMode,
   getViewMode,
   getHidePanelTitles,
+  getEmbeddableTitle
 } from '../../selectors';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
-  const embeddable = getEmbeddable(dashboard, panelId);
   const panel = getPanel(dashboard, panelId);
-  const embeddableTitle = embeddable ? embeddable.title : '';
+  const embeddableTitle = getEmbeddableTitle(dashboard, panelId);
   return {
     title: panel.title === undefined ? embeddableTitle : panel.title,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
@@ -42,7 +41,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { isExpanded, isViewOnlyMode, title, hidePanelTitles } = stateProps;
   const { onMaximizePanel, onMinimizePanel } = dispatchProps;
-  const { panelId, embeddableFactory } = ownProps;
+  const { panelId } = ownProps;
   let actions;
 
   if (isViewOnlyMode) {
@@ -50,12 +49,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       <PanelMinimizeIcon onMinimize={onMinimizePanel} /> :
       <PanelMaximizeIcon onMaximize={onMaximizePanel} />;
   } else {
-    actions = (
-      <PanelOptionsMenuContainer
-        panelId={panelId}
-        embeddableFactory={embeddableFactory}
-      />
-    );
+    actions = <PanelOptionsMenuContainer panelId={panelId} />;
   }
 
   return {
@@ -74,12 +68,4 @@ export const PanelHeaderContainer = connect(
 
 PanelHeaderContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
-  /**
-   * @type {EmbeddableFactory}
-   */
-  embeddableFactory: PropTypes.shape({
-    destroy: PropTypes.func.isRequired,
-    render: PropTypes.func.isRequired,
-    addDestroyEmeddable: PropTypes.func.isRequired,
-  }).isRequired,
 };

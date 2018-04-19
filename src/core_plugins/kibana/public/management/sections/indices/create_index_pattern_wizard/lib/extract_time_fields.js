@@ -10,10 +10,11 @@ export function extractTimeFields(fields) {
   const disabledDividerOption = {
     isDisabled: true,
     display: '───',
+    fieldName: '',
   };
   const noTimeFieldOption = {
     display: `I don't want to use the Time Filter`,
-    fieldName: '-1',
+    fieldName: undefined,
   };
 
   return [

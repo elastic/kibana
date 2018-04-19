@@ -208,7 +208,7 @@ module.exports = function (grunt) {
       options: {
         wait: false,
         ready: /Optimization .+ complete/,
-        quiet: true
+        quiet: false
       },
       cmd: optimizeScript,
       args: [
@@ -217,6 +217,32 @@ module.exports = function (grunt) {
         '--plugins.initialize=false',
         '--server.autoListen=false',
         ...kbnServerFlags,
+      ],
+    },
+
+    testEsServer: {
+      options: {
+        wait: false,
+        ready: /started/,
+        quiet: false,
+      },
+      cmd: process.execPath,
+      args: [
+        'scripts/es',
+        grunt.option('from') || 'snapshot',
+        '-E',
+        `http.port=${esTestConfig.getPort()}`,
+      ],
+    },
+
+    verifyNotice: {
+      options: {
+        wait: true,
+      },
+      cmd: process.execPath,
+      args: [
+        'scripts/notice',
+        '--validate'
       ]
     }
   };

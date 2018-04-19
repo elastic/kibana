@@ -94,6 +94,7 @@ exports[`Table should render normally 1`] = `
   loading={true}
   pagination={
     Object {
+      "initialPageSize": 10,
       "pageSizeOptions": Array [
         5,
         10,

@@ -1,4 +1,4 @@
-import { createToolingLog, pickLevelFromFlags } from '../tooling_log';
+import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { isFailError } from './fail';
 import { getFlags, getHelp } from './flags';
 

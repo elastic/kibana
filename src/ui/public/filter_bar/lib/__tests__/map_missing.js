@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { FilterBarLibMapMissingProvider } from 'ui/filter_bar/lib/map_missing';
+import { FilterBarLibMapMissingProvider } from '../map_missing';
 
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {

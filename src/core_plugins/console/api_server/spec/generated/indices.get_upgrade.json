@@ -1,0 +1,21 @@
+{
+  "_upgrade": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_upgrade",
+      "{indices}/_upgrade"
+    ]
+  }
+}

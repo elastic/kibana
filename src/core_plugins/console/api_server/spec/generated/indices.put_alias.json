@@ -1,0 +1,16 @@
+{
+  "{index}/_alias/{name}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_alias/{name}",
+      "{indices}/_aliases/{name}"
+    ]
+  }
+}

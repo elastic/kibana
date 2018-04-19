@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';
@@ -82,7 +82,7 @@ export class SavedObjectsClient {
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find(options = {}) {
-    const url = this._getUrl([], keysToSnakeCaseShallow(options));
+    const url = this._getUrl(['_find'], keysToSnakeCaseShallow(options));
 
     return this._request('GET', url).then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
@@ -121,7 +121,7 @@ export class SavedObjectsClient {
    * ])
    */
   bulkGet(objects = []) {
-    const url = this._getUrl(['bulk_get']);
+    const url = this._getUrl(['_bulk_get']);
     const filteredObjects = objects.map(obj => _.pick(obj, ['id', 'type']));
 
     return this._request('POST', url, filteredObjects).then(resp => {

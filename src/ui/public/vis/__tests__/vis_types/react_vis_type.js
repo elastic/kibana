@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { ReactVisTypeProvider } from 'ui/vis/vis_types/react_vis_type';
+import { ReactVisTypeProvider } from '../../vis_types/react_vis_type';
 
 describe('React Vis Type', function () {
   let ReactVisType;

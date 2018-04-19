@@ -1,5 +1,5 @@
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 
 uiModules.get('kibana')
   .service('globalNavState', (localStorage, $rootScope) => {

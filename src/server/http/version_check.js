@@ -1,6 +1,6 @@
 import { badRequest } from 'boom';
 
-export default function (kbnServer, server, config) {
+export function setupVersionCheck(server, config) {
   const versionHeader = 'kbn-version';
   const actualVersion = config.get('pkg.version');
 

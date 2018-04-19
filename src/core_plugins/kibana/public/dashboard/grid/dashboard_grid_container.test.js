@@ -4,19 +4,24 @@ import { Provider } from 'react-redux';
 import _ from 'lodash';
 import sizeMe from 'react-sizeme';
 
-import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+import { getEmbeddableFactoryMock } from '../__tests__';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
-import { updatePanels } from '../actions';
+import { updatePanels, updateTimeRange } from '../actions';
 
-jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
+jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
+
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
 
 function getProps(props = {}) {
   const defaultTestProps = {
     hidden: false,
     getEmbeddableFactory: () => getEmbeddableFactoryMock(),
-    getContainerApi: () => getContainerApiMock(),
   };
   return Object.assign(defaultTestProps, props);
 }
@@ -39,6 +44,7 @@ beforeAll(() => {
       removeAllRanges: () => {}
     };
   };
+  store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
 });
 
 afterAll(() => {
@@ -75,7 +81,7 @@ test('loads old panel data in the right order', () => {
 
   const foo8Panel = _.find(panels, panel => panel.id === 'foo8');
   expect(foo8Panel.row).toBe(undefined);
-  expect(foo8Panel.gridData.y).toBe(7);
+  expect(foo8Panel.gridData.y).toBe(35);
   expect(foo8Panel.gridData.x).toBe(0);
 
   grid.unmount();

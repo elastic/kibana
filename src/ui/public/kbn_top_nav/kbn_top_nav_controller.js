@@ -1,8 +1,8 @@
 import { capitalize, isArray, isFunction } from 'lodash';
 
-import chrome from 'ui/chrome';
-import filterTemplate from 'ui/chrome/config/filter.html';
-import intervalTemplate from 'ui/chrome/config/interval.html';
+import chrome from '../chrome';
+import filterTemplate from '../chrome/config/filter.html';
+import intervalTemplate from '../chrome/config/interval.html';
 
 export function KbnTopNavControllerProvider($compile) {
   return class KbnTopNavController {
@@ -43,29 +43,29 @@ export function KbnTopNavControllerProvider($compile) {
     }
 
     // change the current key and rerender
-    setCurrent(key) {
+    setCurrent = (key) => {
       if (key && !this.templates.hasOwnProperty(key)) {
         throw new TypeError(`KbnTopNav: unknown template key "${key}"`);
       }
 
       this.currentKey = key || null;
       this._render();
-    }
+    };
 
     // little usability helpers
-    getCurrent() { return this.currentKey; }
-    isCurrent(key) { return this.getCurrent() === key; }
-    open(key) { this.setCurrent(key); }
-    close(key) { (!key || this.isCurrent(key)) && this.setCurrent(null); }
-    toggle(key) { this.setCurrent(this.isCurrent(key) ? null : key); }
-    click(key) { this.handleClick(this.getItem(key)); }
-    getItem(key) { return this.menuItems.find(i => i.key === key); }
-    handleClick(menuItem) {
+    getCurrent = () => { return this.currentKey; };
+    isCurrent = (key) => { return this.getCurrent() === key; };
+    open = (key) => { this.setCurrent(key); };
+    close = (key) => { (!key || this.isCurrent(key)) && this.setCurrent(null); };
+    toggle = (key) => { this.setCurrent(this.isCurrent(key) ? null : key); };
+    click = (key) => { this.handleClick(this.getItem(key)); };
+    getItem = (key) => { return this.menuItems.find(i => i.key === key); };
+    handleClick = (menuItem) => {
       if (menuItem.disableButton()) {
         return false;
       }
       menuItem.run(menuItem, this);
-    }
+    };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
       const defaultedOpt = {

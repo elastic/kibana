@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectsClientProvider } from '../saved_objects';
 
 export function IndexPatternsGetProvider(Private) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);

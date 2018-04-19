@@ -18,15 +18,16 @@ export function getUiSettingDefaults() {
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">Options</a> for the lucene query string parser',
       type: 'json'
     },
+    'query:allowLeadingWildcards': {
+      value: true,
+      description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
+        features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
+    },
     'search:queryLanguage': {
       value: 'lucene',
       description: 'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
       type: 'select',
       options: ['lucene', 'kuery']
-    },
-    'search:queryLanguage:switcher:enable': {
-      value: false,
-      description: 'Show or hide the query language switcher in the query bar'
     },
     'sort:options': {
       value: '{ "unmapped_type": "boolean" }',
@@ -113,6 +114,27 @@ export function getUiSettingDefaults() {
         'When set to false, all filters are applied to all visualizations. ' +
         'When set to true, filter(s) will be ignored for a visualization ' +
         'when the visualization\'s index does not contain the filtering field.'
+    },
+    'courier:setRequestPreference': {
+      value: 'sessionId',
+      options: ['sessionId', 'custom', 'none'],
+      type: 'select',
+      description: 'Allows you to set which shards handle your search requests. ' +
+        '<ul>' +
+        '<li><strong>sessionId:</strong> restricts operations to execute all search requests on the same shards. ' +
+        'This has the benefit of reusing shard caches across requests. ' +
+        '<li><strong>custom:</strong> allows you to define a your own preference. ' +
+        'Use <strong>courier:customRequestPreference</strong> to customize your preference value. ' +
+        '<li><strong>none:</strong> means do not set a preference. ' +
+        'This might provide better performance because requests can be spread across all shard copies. ' +
+        'However, results might be inconsistent because different shards might be in different refresh states.' +
+        '</ul>'
+    },
+    'courier:customRequestPreference': {
+      value: '_local',
+      type: 'string',
+      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">Request Preference</a> ' +
+        ' used when <strong>courier:setRequestPreference</strong> is set to "custom".'
     },
     'fields:popularLimit': {
       value: 10,

@@ -1,9 +1,17 @@
+import React from 'react';
 import _ from 'lodash';
 import angular from 'angular';
-import { metadata } from 'ui/metadata';
+import MarkdownIt from 'markdown-it';
+import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
-import 'ui/render_directive';
+import { banners } from './banners';
+import '../render_directive';
+
+import {
+  EuiCallOut,
+  EuiButton,
+} from '@elastic/eui';
 
 const notifs = [];
 
@@ -81,7 +89,6 @@ const typeToButtonClassMap = {
   danger: 'kuiButton--danger', // NOTE: `error` type is internally named as `danger`
   warning: 'kuiButton--warning',
   info: 'kuiButton--primary',
-  banner: 'kuiButton--basic'
 };
 const buttonHierarchyClass = (index) => {
   if (index === 0) {
@@ -95,7 +102,6 @@ const typeToAlertClassMap = {
   danger: `alert-danger`,
   warning: `alert-warning`,
   info: `alert-info`,
-  banner: `alert-banner`,
 };
 
 function add(notif, cb) {
@@ -132,14 +138,10 @@ function add(notif, cb) {
   // decorate the notification with helper functions for the template
   notif.getButtonClass = () => typeToButtonClassMap[notif.type];
   notif.getAlertClassStack = () => `toast-stack alert ${typeToAlertClassMap[notif.type]}`;
-  notif.getIconClass = () => (notif.type === 'banner') ?  '' : `fa fa-${notif.icon}`;
-  notif.getToastMessageClass = ()  => (notif.type === 'banner') ?  'toast-message-banner' : 'toast-message';
-  notif.getAlertClass = () => (notif.type === 'banner') ?
-    `alert ${typeToAlertClassMap[notif.type]}` : // not including `.toast` class leaves out the flex properties for banner
-    `toast alert ${typeToAlertClassMap[notif.type]}`;
-  notif.getButtonGroupClass = () => (notif.type === 'banner') ?
-    'toast-controls-banner' :
-    'toast-controls';
+  notif.getIconClass = () => `fa fa-${notif.icon}`;
+  notif.getToastMessageClass = ()  => 'toast-message';
+  notif.getAlertClass = () => `toast alert ${typeToAlertClassMap[notif.type]}`;
+  notif.getButtonGroupClass = () => 'toast-controls';
 
   let dup = null;
   if (notif.content) {
@@ -164,21 +166,7 @@ function add(notif, cb) {
   return notif;
 }
 
-function set(opts, cb) {
-  if (!opts.content) {
-    return null;
-  }
-
-  if (this._sovereignNotif) {
-    this._sovereignNotif.clear();
-  }
-
-  this._sovereignNotif = add(opts, cb);
-  return this._sovereignNotif;
-}
-
 Notifier.prototype.add = add;
-Notifier.prototype.set = set;
 
 /**
  * Functionality to check that
@@ -196,7 +184,6 @@ export function Notifier(opts) {
     'timed',
     'error',
     'warning',
-    'banner',
   ];
 
   notificationLevels.forEach(function (m) {
@@ -342,14 +329,44 @@ Notifier.prototype.warning = function (msg, opts, cb) {
  * @param  {String} msg
  * @param  {Function} cb
  */
-Notifier.prototype.banner = function (msg, cb) {
-  return this.set({
-    type: 'banner',
-    title: 'Attention',
-    content: formatMsg(msg, this.from),
-    lifetime: Notifier.config.bannerLifetime,
-    actions: ['accept']
-  }, cb);
+let bannerId;
+let bannerTimeoutId;
+Notifier.prototype.banner = function (content = '') {
+  const BANNER_PRIORITY = 100;
+
+  const dismissBanner = () => {
+    banners.remove(bannerId);
+    clearTimeout(bannerTimeoutId);
+  };
+
+  const markdownIt = new MarkdownIt({
+    html: false,
+    linkify: true
+  });
+
+  const banner = (
+    <EuiCallOut
+      title="Attention"
+      iconType="help"
+    >
+      <div dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} />
+
+      <EuiButton type="primary" size="s" onClick={dismissBanner}>
+        Dismiss
+      </EuiButton>
+    </EuiCallOut>
+  );
+
+  bannerId = banners.set({
+    component: banner,
+    id: bannerId,
+    priority: BANNER_PRIORITY,
+  });
+
+  clearTimeout(bannerTimeoutId);
+  bannerTimeoutId = setTimeout(() => {
+    dismissBanner();
+  }, Notifier.config.bannerLifetime);
 };
 
 /**
@@ -371,8 +388,6 @@ function getDecoratedCustomConfig(config) {
 
   const getLifetime = (type) => {
     switch (type) {
-      case 'banner':
-        return Notifier.config.bannerLifetime;
       case 'warning':
         return Notifier.config.warningLifetime;
       case 'danger':

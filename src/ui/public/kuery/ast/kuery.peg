@@ -1,46 +1,63 @@
+/**
+ * To generate the parsing module (kuery.js), run `grunt peg`
+ * To watch changes and generate on file change, run `grunt watch:peg`
+ */
+
 // Initialization block
 {
-  const { nodeTypes } = options.helpers;
+  const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes, errors } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
   const buildNamedArgNode = nodeTypes.namedArg.buildNode;
-
-  function trimLeft(string) {
-    return string.replace(/^[\s\uFEFF\xA0]+/g, '');
-  }
-
-  function trimRight(string) {
-    return string.replace(/[\s\uFEFF\xA0]+$/g, '');
-  }
+  const { wildcardSymbol } = nodeTypes.wildcard;
 }
 
 start
-  = Space* query:OrQuery? Space* {
+  = Space* query:OrQuery? trailing:OptionalSpace {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
     if (query !== null) return query;
     return nodeTypes.function.buildNode('is', '*', '*');
   }
 
 OrQuery
   = left:AndQuery Or right:OrQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
   }
   / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery{
+  = left:NotQuery And right:AndQuery {
+    const cursor = [left, right].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildFunctionNode('and', [left, right]);
   }
   / NotQuery
 
 NotQuery
   = Not query:SubQuery {
+    if (query.type === 'cursor') return query;
     return buildFunctionNode('not', [query]);
   }
   / SubQuery
 
 SubQuery
-  = '(' Space* query:OrQuery Space* ')' { return query; }
+  = '(' Space* query:OrQuery trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return query;
+  }
   / Expression
 
 Expression
@@ -50,53 +67,105 @@ Expression
 
 FieldRangeExpression
   = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        suggestionTypes: ['conjunction']
+      };
+    }
     const range = buildNamedArgNode(operator, value);
     return buildFunctionNode('range', [field, range]);
   }
 
 FieldValueExpression
   = field:Literal Space* ':' Space* partial:ListOfValues {
+    if (partial.type === 'cursor') {
+      return {
+        ...partial,
+        fieldName: field.value,
+        suggestionTypes: ['value', 'conjunction']
+      };
+    }
     return partial(field);
   }
 
 ValueExpression
   = partial:Value {
+    if (partial.type === 'cursor') {
+      const fieldName = `${partial.prefix}${partial.suffix}`.trim();
+      return {
+        ...partial,
+        fieldName,
+        suggestionTypes: ['field', 'operator', 'conjunction']
+      };
+    }
     const field = buildLiteralNode(null);
     return partial(field);
   }
 
 ListOfValues
-  = '(' Space* partial:OrListOfValues Space* ')' { return partial; }
+  = '(' Space* partial:OrListOfValues trailing:OptionalSpace ')' {
+    if (trailing.type === 'cursor') {
+      return {
+        ...trailing,
+        suggestionTypes: ['conjunction']
+      };
+    }
+    return partial;
+  }
   / Value
 
 OrListOfValues
   = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
+    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
     return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
   }
   / AndListOfValues
 
 AndListOfValues
   = partialLeft:NotListOfValues And partialRight:AndListOfValues {
+    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggestionTypes: ['value']
+      };
+    }
     return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
   }
   / NotListOfValues
 
 NotListOfValues
   = Not partial:ListOfValues {
+    if (partial.type === 'cursor') {
+      return {
+        ...list,
+        suggestionTypes: ['value']
+      };
+    }
     return (field) => buildFunctionNode('not', [partial(field)]);
   }
   / ListOfValues
 
 Value
   = value:QuotedString {
+    if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
-  / value:WildcardString {
-    const isPhrase = buildLiteralNode(false);
-    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
-  }
   / value:UnquotedLiteral {
+    if (value.type === 'cursor') return value;
+
+    if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+      throw new errors.NoLeadingWildcardsError();
+    }
+
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
@@ -111,40 +180,46 @@ Not
   = 'not'i Space+
 
 Literal
-  = QuotedString / WildcardString / UnquotedLiteral
+  = QuotedString / UnquotedLiteral
 
 QuotedString
-  = '"' chars:(EscapedDoubleQuote / [^"])* '"' {
+  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / '"' chars:QuotedCharacter* '"' {
     return buildLiteralNode(chars.join(''));
   }
 
-WildcardString
-  = sequences:WildcardSequence+ {
-    const compactedSequences = sequences.reduce((acc, arr, i) => {
-      const compacted = arr.filter(value => value !== '');
-      return [...acc, ...compacted];
-    }, []);
-    if (typeof compactedSequences[0] === 'string') {
-      compactedSequences[0] = trimLeft(compactedSequences[0]);
-    }
-    const lastIndex = compactedSequences.length - 1;
-    if (typeof compactedSequences[lastIndex] === 'string') {
-      compactedSequences[lastIndex] = trimRight(compactedSequences[lastIndex]);
-    }
-    return buildWildcardNode(compactedSequences);
-  }
-
-WildcardSequence
-  = left:UnquotedCharacter* '*' right:UnquotedCharacter* {
-    return [left.join(''), nodeTypes.wildcard.wildcardSymbol, right.join('')];
-  }
+QuotedCharacter
+  = '\\' char:[\\"] { return char; }
+  / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
-  = chars:UnquotedCharacter+ {
+  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / chars:UnquotedCharacter+ {
     const sequence = chars.join('').trim();
     if (sequence === 'null') return buildLiteralNode(null);
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
+    if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
     const number = Number(sequence);
     const value = isNaN(number) ? sequence : number;
     return buildLiteralNode(value);
@@ -152,16 +227,32 @@ UnquotedLiteral
 
 UnquotedCharacter
   = EscapedSpecialCharacter
-  / !Separator char:. { return char; }
+  / EscapedKeyword
+  / Wildcard
+  / !SpecialCharacter !Keyword !Cursor char:. { return char; }
+
+Wildcard
+  = '*' { return wildcardSymbol; }
+
+OptionalSpace
+  = prefix:Space* cursor:Cursor suffix:Space* {
+    const { start, end } = location();
+    return {
+      type: 'cursor',
+      start: start.offset,
+      end: end.offset - cursor.length,
+      prefix: prefix.join(''),
+      suffix: suffix.join(''),
+      text: text().replace(cursor, '')
+    };
+  }
+  / Space*
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
 
-EscapedDoubleQuote
-  = '\\' char:'"' { return char; }
-
-Separator
-  = Keyword / SpecialCharacter
+EscapedKeyword
+  = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
 Keyword
   = Or / And / Not
@@ -177,3 +268,6 @@ RangeOperator
 
 Space
   = [\ \t\r\n]
+
+Cursor
+  = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }

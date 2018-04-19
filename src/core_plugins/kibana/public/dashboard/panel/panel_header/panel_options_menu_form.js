@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {
   KuiButton,
-} from 'ui_framework/components';
+} from '@kbn/ui-framework/components';
 
 import {
   keyCodes,
@@ -28,6 +28,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
       <label className="kuiFormLabel" htmlFor="panelTitleInput">Panel title</label>
       <input
         id="panelTitleInput"
+        data-test-subj="customDashboardPanelTitleInput"
         name="min"
         type="text"
         className="kuiTextInput"
@@ -37,6 +38,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClo
       />
       <KuiButton
         buttonType="hollow"
+        data-test-subj="resetCustomDashboardPanelTitle"
         onClick={onReset}
       >
         Reset title

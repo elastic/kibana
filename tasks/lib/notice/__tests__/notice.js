@@ -48,8 +48,8 @@ describe('tasks/lib/notice', () => {
       expect(notice).to.contain(readFileSync(resolve(NODE_DIR, 'LICENSE'), 'utf8'));
     });
 
-    it('includes the base_notice.txt file', () => {
-      expect(notice).to.contain(readFileSync(resolve(__dirname, '../base_notice.txt'), 'utf8'));
+    it('includes the NOTICE.txt file', () => {
+      expect(notice).to.contain(readFileSync(resolve(__dirname, '../../../../NOTICE.txt'), 'utf8'));
     });
   });
 });

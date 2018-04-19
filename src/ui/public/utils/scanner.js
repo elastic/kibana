@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 
 export const Scanner = function ($http, { index, type } = {}) {
   if (!index) throw new Error('Expected index');

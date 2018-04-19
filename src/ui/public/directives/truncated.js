@@ -1,7 +1,7 @@
 import truncText from 'trunc-text';
 import truncHTML from 'trunc-html';
-import { uiModules } from 'ui/modules';
-import truncatedTemplate from 'ui/directives/partials/truncated.html';
+import { uiModules } from '../modules';
+import truncatedTemplate from './partials/truncated.html';
 import 'angular-sanitize';
 
 const module = uiModules.get('kibana', ['ngSanitize']);

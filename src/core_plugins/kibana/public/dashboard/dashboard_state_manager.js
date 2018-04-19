@@ -14,6 +14,8 @@ import {
   updateTitle,
   updateDescription,
   updateHidePanelTitles,
+  updateTimeRange,
+  clearStagedFilters,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -27,41 +29,29 @@ import {
   getDescription,
   getUseMargins,
   getHidePanelTitles,
+  getStagedFilters,
+  getEmbeddables,
+  getEmbeddableMetadata
 } from '../selectors';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
- * app. There are two "sources of truth" that need to stay in sync - AppState and the Store. They aren't complete
- * duplicates of each other as AppState has state that the Store doesn't, and vice versa.
- *
- * State that is only stored in AppState:
- *  - title
- *  - description
- *  - timeRestore
- *  - query
- *  - filters
- *
- * State that is only stored in the Store:
- *  - embeddables
- *  - maximizedPanelId
- *
- * State that is shared and needs to be synced:
- * - fullScreenMode - changes propagate from AppState -> Store and from Store -> AppState.
- * - viewMode - changes only propagate from AppState -> Store
- * - panels - changes propagate from AppState -> Store and from Store -> AppState.
- *
- *
+ * app. There are two "sources of truth" that need to stay in sync - AppState (aka the `_a` portion of the url) and
+ * the Store. They aren't complete duplicates of each other as AppState has state that the Store doesn't, and vice
+ * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
   /**
    *
-   * @param savedDashboard {SavedDashboard}
-   * @param AppState {AppState} The AppState class to use when instantiating a new AppState instance.
-   * @param hideWriteControls {boolean} true if write controls should be hidden.
+   * @param {SavedDashboard} savedDashboard
+   * @param {AppState} AppState The AppState class to use when instantiating a new AppState instance.
+   * @param {boolean} hideWriteControls true if write controls should be hidden.
+   * @param {function} addFilter a function that can be used to add a filter bar filter
    */
-  constructor(savedDashboard, AppState, hideWriteControls) {
+  constructor({ savedDashboard, AppState, hideWriteControls, addFilter }) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
+    this.addFilter = addFilter;
 
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
@@ -85,19 +75,13 @@ export class DashboardStateManager {
     this.panelIndexPatternMapping = {};
 
     PanelUtils.initPanelIndexes(this.getPanels());
+
     this.createStateMonitor();
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(setPanels(this.getPanels()));
-    store.dispatch(updateViewMode(this.getViewMode()));
-    store.dispatch(updateUseMargins(this.getUseMargins()));
-    store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
-    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
-    store.dispatch(updateTitle(this.getTitle()));
-    store.dispatch(updateDescription(this.getDescription()));
+    this._pushAppStateChangesToStore();
 
-    this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
 
     this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
@@ -107,55 +91,31 @@ export class DashboardStateManager {
     });
   }
 
-  registerEmbeddableConfigChangeListener(panelIndex, callback) {
-    let panelListeners = this.embeddableConfigChangeListeners[panelIndex];
-    if (!panelListeners) {
-      panelListeners = this.embeddableConfigChangeListeners[panelIndex] = [];
-    }
-    panelListeners.push(callback);
-  }
-
   registerChangeListener(callback) {
     this.changeListeners.push(callback);
   }
 
   _areStoreAndAppStatePanelsEqual() {
     const state = store.getState();
-    // We need to run this comparison check or we can enter an infinite loop.
-    let differencesFound = false;
-    for (let i = 0; i < this.appState.panels.length; i++) {
-      const appStatePanel = this.appState.panels[i];
-      const storePanel = getPanel(state, appStatePanel.panelIndex);
-      if (!_.isEqual(appStatePanel, storePanel)) {
-        differencesFound = true;
-        break;
-      }
+    const storePanels = getPanels(store.getState());
+    const appStatePanels = this.getPanels();
+
+    if (Object.values(storePanels).length !== appStatePanels.length) {
+      return false;
     }
 
-    return !differencesFound;
+    return appStatePanels.every((appStatePanel) => {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      return _.isEqual(appStatePanel, storePanel);
+    });
   }
 
   /**
-   * For each embeddable config in appState that differs from that in the redux store, trigger the change listeners
-   * using the appState version as the "source of truth". This is because currently the only way to update an embeddable
-   * config from the dashboard side is via the url. Eventually we want to let users modify it via a "reset link" in
-   * the panel config, or even a way to modify it in the panel config. When this is introduced it would go through
-   * redux and we'd have to update appState. At that point, we'll need to handle changes coming from both directions.
-   * Ideally we can introduce react-redux-router for a more seamless way to keep url changes and ui changes in sync.
-   * ... until then... we are stuck with this manual crap. :(
-   * Fixes https://github.com/elastic/kibana/issues/15720
+   * Time is part of global state so we need to deal with it outside of _pushAppStateChangesToStore.
+   * @param {Object} newTimeFilter
    */
-  triggerEmbeddableConfigUpdateListeners() {
-    const state = store.getState();
-    for(const appStatePanel of this.appState.panels) {
-      const storePanel = getPanel(state, appStatePanel.panelIndex);
-      if (storePanel && !_.isEqual(appStatePanel.embeddableConfig, storePanel.embeddableConfig)) {
-        const panelListeners = this.embeddableConfigChangeListeners[appStatePanel.panelIndex];
-        if (panelListeners) {
-          panelListeners.forEach(listener => listener(appStatePanel.embeddableConfig));
-        }
-      }
-    }
+  handleTimeChange(newTimeFilter) {
+    store.dispatch(updateTimeRange(newTimeFilter));
   }
 
   /**
@@ -166,11 +126,25 @@ export class DashboardStateManager {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
-      this.triggerEmbeddableConfigUpdateListeners();
-      store.dispatch(setPanels(this.getPanels()));
+      // Translate appState panels data into the data expected by redux, copying the panel objects as we do so
+      // because the panels inside appState can be mutated, while redux state should never be mutated directly.
+      const panelsMap = this.getPanels().reduce((acc, panel) => {
+        acc[panel.panelIndex] = _.cloneDeep(panel);
+        return acc;
+      }, {});
+      store.dispatch(setPanels(panelsMap));
     }
 
     const state = store.getState();
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
+    }
+
     if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
@@ -201,10 +175,30 @@ export class DashboardStateManager {
     if (!this._areStoreAndAppStatePanelsEqual()) {
       const panels = getPanels(store.getState());
       this.appState.panels = [];
+      this.panelIndexPatternMapping = {};
       Object.values(panels).map(panel => {
-        this.appState.panels.push(panel);
+        this.appState.panels.push(_.cloneDeep(panel));
       });
       dirty = true;
+    }
+
+    _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
+      if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
+        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
+        if (indexPattern) {
+          this.panelIndexPatternMapping[panelId] = indexPattern;
+          this.dirty = true;
+        }
+      }
+    });
+
+    const stagedFilters = getStagedFilters(store.getState());
+    stagedFilters.forEach(filter => {
+      this.addFilter(filter);
+    });
+    if (stagedFilters.length > 0) {
+      this.saveState();
+      store.dispatch(clearStagedFilters());
     }
 
     const fullScreen = getFullScreenMode(store.getState());
@@ -223,12 +217,6 @@ export class DashboardStateManager {
   setFullScreenMode(fullScreenMode) {
     this.appState.fullScreenMode = fullScreenMode;
     this.saveState();
-  }
-
-  registerPanelIndexPatternMap(panelIndex, indexPattern) {
-    if (indexPattern) {
-      this.panelIndexPatternMapping[panelIndex] = indexPattern;
-    }
   }
 
   getPanelIndexPatterns() {
@@ -504,7 +492,8 @@ export class DashboardStateManager {
 
   /**
    * Updates timeFilter to match the time saved with the dashboard.
-   * @param timeFilter
+   * @param {Object} timeFilter
+   * @param {Object} timeFilter.time
    * @param quickTimeRanges
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {

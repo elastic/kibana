@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
+import '../saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
-import 'plugins/kibana/visualize/editor/agg_filter';
+import './agg_filter';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
@@ -15,8 +15,8 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
-import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
+import editorTemplate from './editor.html';
+import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
@@ -78,7 +78,7 @@ uiModules
     };
   });
 
-function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl) {
+function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl, localStorage) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
@@ -144,7 +144,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
     linked: !!savedVis.savedSearchId,
-    query: searchSource.getOwn('query') || { query: '', language: config.get('search:queryLanguage') },
+    query: searchSource.getOwn('query') || {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+    },
     filters: searchSource.getOwn('filter') || [],
     vis: savedVisState
   };
@@ -186,6 +189,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.timefilter = timefilter;
+    $scope.timeRange = timefilter.time;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
@@ -208,13 +212,18 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
       if (showTimeFilter) {
-        timefilter.enableAutoRefreshSelector();
         timefilter.enableTimeRangeSelector();
       } else {
-        timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
       }
     });
+
+    const updateTimeRange = () => {
+      $scope.timeRange = timefilter.time;
+    };
+
+    timefilter.enableAutoRefreshSelector();
+    timefilter.on('update', updateTimeRange);
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
@@ -230,15 +239,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
+      timefilter.off('update', updateTimeRange);
     });
   }
 
   $scope.updateQueryAndFetch = function (query) {
-    // reset state if language changes
-    if ($state.query.language && $state.query.language !== query.language) {
-      $state.filters = [];
-      $state.$newFilters = [];
-    }
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };

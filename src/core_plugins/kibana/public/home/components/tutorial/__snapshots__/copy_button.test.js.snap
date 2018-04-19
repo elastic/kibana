@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiToolTip
+  content="Copy to clipboard"
+  position="top"
+>
+  <EuiButton
+    color="primary"
+    fill={false}
+    iconSide="left"
+    onClick={[Function]}
+    onMouseOut={[Function]}
+    size="s"
+    type="button"
+  >
+    Copy snippet
+  </EuiButton>
+</EuiToolTip>
+`;

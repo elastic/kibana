@@ -4,8 +4,8 @@ import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object/saved_object';
-import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
+import { SavedObjectsClientProvider } from '../../saved_objects';
 
 import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
 

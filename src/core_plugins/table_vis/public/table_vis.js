@@ -1,12 +1,12 @@
-import 'plugins/table_vis/table_vis.less';
-import 'plugins/table_vis/table_vis_controller';
-import 'plugins/table_vis/table_vis_params';
+import './table_vis.less';
+import './table_vis_controller';
+import './table_vis_params';
 import 'ui/agg_table';
 import 'ui/agg_table/agg_table_group';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import tableVisTemplate from 'plugins/table_vis/table_vis.html';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-table.svg';
 // we need to load the css ourselves
@@ -23,7 +23,6 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive

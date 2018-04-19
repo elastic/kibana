@@ -22,7 +22,7 @@ import {
   accessibleClickKeys,
   keyCodes,
 } from '@elastic/eui';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules.get('kibana')
   .directive('kbnAccessibleClick', function () {

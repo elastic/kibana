@@ -1,5 +1,5 @@
 import 'angular-aria';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 /**
  * This module will take care of attaching appropriate aria tags related to some angular stuff,

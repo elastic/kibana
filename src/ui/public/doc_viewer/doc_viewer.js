@@ -1,9 +1,9 @@
 import $ from 'jquery';
-import { uiModules } from 'ui/modules';
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { uiModules } from '../modules';
+import { DocViewsRegistryProvider } from '../registry/doc_views';
 
-import 'ui/render_directive';
-import 'ui/doc_viewer/doc_viewer.less';
+import '../render_directive';
+import './doc_viewer.less';
 
 uiModules.get('kibana')
   .directive('docViewer', function (config, Private) {

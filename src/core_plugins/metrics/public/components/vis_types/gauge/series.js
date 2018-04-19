@@ -5,7 +5,7 @@ import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
-import Tooltip from '../../tooltip';
+import { EuiToolTip } from '@elastic/eui';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
@@ -112,7 +112,7 @@ function GaugeSeries(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <Tooltip text="Sort">
+      <EuiToolTip content="Sort">
         <button
           className="vis_editor__sort thor__button-outlined-default sm"
           aria-label="Sort series by pressing up/down"
@@ -120,7 +120,7 @@ function GaugeSeries(props) {
         >
           <i className="fa fa-sort" />
         </button>
-      </Tooltip>
+      </EuiToolTip>
     );
   }
 

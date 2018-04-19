@@ -28,6 +28,7 @@
           query="model.query"
           app-name="'dashboard'"
           on-submit="updateQueryAndFetch($query)"
+          index-patterns="indexPatterns"
         >
         </query-bar>
       </div>
@@ -65,7 +66,6 @@
   </div>
 
   <dashboard-viewport-provider
-    get-container-api="getContainerApi"
     get-embeddable-factory="getEmbeddableFactory"
   >
   </dashboard-viewport-provider>

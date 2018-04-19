@@ -4,7 +4,7 @@ import Hapi from 'hapi';
 
 // If a redirect port is specified, we start an http server at this port and
 // redirect all requests to the ssl port.
-export default async function (kbnServer, server, config) {
+export async function setupRedirectServer(config) {
   const isSslEnabled = config.get('server.ssl.enabled');
   const portToRedirectFrom = config.get('server.ssl.redirectHttpFromPort');
 

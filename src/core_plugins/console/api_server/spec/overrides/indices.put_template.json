@@ -1,0 +1,10 @@
+{
+  "_template/{name}": {
+    "data_autocomplete_rules": {
+      "template": "index*",
+      "warmers": { "__scope_link": "_warmer" },
+      "mappings": { "__scope_link": "_mapping" },
+      "settings": { "__scope_link": "_settings_autocomplete" }
+    }
+  }
+}

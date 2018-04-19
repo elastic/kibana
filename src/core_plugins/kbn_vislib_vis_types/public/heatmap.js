@@ -1,13 +1,12 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import heatmapTemplate from 'plugins/kbn_vislib_vis_types/editors/heatmap.html';
+import heatmapTemplate from './editors/heatmap.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import image from './images/icon-heatmap.svg';
 
 export default function HeatmapVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'heatmap',

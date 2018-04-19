@@ -1,0 +1,23 @@
+{
+  "name": "@kbn/dev-utils",
+  "main": "./target/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "babel src --out-dir target",
+    "kbn:bootstrap": "yarn build"
+  },
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "execa": "^0.10.0",
+    "moment": "^2.20.1",
+    "tree-kill": "^1.2.0"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "babel-cli": "^6.26.0",
+    "chance": "1.0.6",
+    "expect.js": "0.3.1"
+  }
+}

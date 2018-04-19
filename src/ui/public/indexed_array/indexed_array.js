@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { inflector } from './inflector';
+import { organizeBy } from '../utils/collection';
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);
 const inflectIndex = inflector('by');
@@ -31,13 +32,16 @@ export class IndexedArray {
     Object.defineProperty(this, 'raw', { value: [] });
 
     this._indexNames = _.union(
-      this._setupIndex(config.group, inflectIndex, _.organizeBy),
+      this._setupIndex(config.group, inflectIndex, organizeBy),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
-          const a = String(pluckValue(itemA));
-          const b = String(pluckValue(itemB));
-          return a.toLowerCase().localeCompare(b.toLowerCase());
+          const a = pluckValue(itemA);
+          const b = pluckValue(itemB);
+          if (typeof a === 'number' && typeof b === 'number') {
+            return a - b;
+          }
+          return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
         });
       })
     );

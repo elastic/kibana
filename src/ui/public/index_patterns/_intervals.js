@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../indexed_array';
+import { isNumeric } from '../utils/numeric';
 
 export function IndexPatternsIntervalsProvider(timefilter) {
 
@@ -52,7 +53,7 @@ export function IndexPatternsIntervalsProvider(timefilter) {
         val = bounds[bound];
       }
 
-      if (_.isNumeric(val)) val = moment().add(val, interval.name);
+      if (isNumeric(val)) val = moment().add(val, interval.name);
       else if (!moment.isMoment(val)) val = moment(val);
 
       return val.clone().utc()[extend](interval.startOf);

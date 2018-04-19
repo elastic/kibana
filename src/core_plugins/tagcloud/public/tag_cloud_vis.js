@@ -1,19 +1,18 @@
-import 'plugins/tagcloud/tag_cloud.less';
-import 'plugins/tagcloud/tag_cloud_controller';
-import 'plugins/tagcloud/tag_cloud_vis_params';
+import './tag_cloud.less';
+import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import tagCloudTemplate from 'plugins/tagcloud/tag_cloud_controller.html';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
 import { Status } from 'ui/vis/update_status';
 
-VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
+VisTypesRegistryProvider.register(function (Private) {
 
-  return VisFactory.createAngularVisualization({
+  const VisFactory = Private(VisFactoryProvider);
+
+  return VisFactory.createBaseVisualization({
     name: 'tagcloud',
     title: 'Tag Cloud',
     image,
@@ -24,11 +23,12 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
         scale: 'linear',
         orientation: 'single',
         minFontSize: 18,
-        maxFontSize: 72
-      },
-      template: tagCloudTemplate,
+        maxFontSize: 72,
+        showLabel: true
+      }
     },
-    requiresUpdateStatus: [Status.PARAMS, Status.RESIZE],
+    requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
+    visualization: TagCloudVisualization,
     responseHandler: 'tabify',
     editorConfig: {
       collections: {

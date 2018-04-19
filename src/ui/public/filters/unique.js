@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 // Filters out all duplicate items in an array
 
 uiModules

@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import html from 'ui/visualize/visualize_legend.html';
-import { VislibLibDataProvider } from 'ui/vislib/lib/data';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
-import { uiModules } from 'ui/modules';
+import html from './visualize_legend.html';
+import { VislibLibDataProvider } from '../vislib/lib/data';
+import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
+import { uiModules } from '../modules';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 

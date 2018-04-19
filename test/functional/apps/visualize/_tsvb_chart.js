@@ -5,26 +5,11 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
   describe('visual builder', function describeIndexTests() {
-    before(function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-22 18:31:44.000';
-
-      log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new')
-        .then(function () {
-          log.debug('clickVisualBuilderChart');
-          return PageObjects.visualize.clickVisualBuilder();
-        })
-        .then(function setAbsoluteRange() {
-          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        })
-        .then(function () {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
-    });
 
     describe('Time Series', function () {
+      before(async () => {
+        await PageObjects.visualBuilder.resetPage();
+      });
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
@@ -51,8 +36,35 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
+    describe('Math Aggregation', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.createNewAgg();
+        await PageObjects.visualBuilder.selectAggType('math', 1);
+        await PageObjects.visualBuilder.fillInVariable();
+        await PageObjects.visualBuilder.fillInExpression('params.test + 1');
+      });
+
+      it('should not display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(false);
+      });
+
+      it('should show correct data', async function () {
+        const expectedMetricValue =  '157';
+        return PageObjects.visualBuilder.getMetricValue()
+          .then(function (value) {
+            log.debug(`metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+
+    });
+
     describe('metric', () => {
       before(async () => {
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
       });
 
@@ -63,18 +75,19 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
-
         return PageObjects.visualBuilder.getMetricValue()
           .then(function (value) {
             log.debug(`metric value: ${value}`);
             expect(value).to.eql(expectedMetricValue);
           });
       });
+
     });
 
     // add a gauge test
     describe('gauge', () => {
       before(async () => {
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickGauge();
         log.debug('clicked on Gauge');
       });
@@ -90,6 +103,7 @@ export default function ({ getService, getPageObjects }) {
     // add a top N test
     describe('topN', () => {
       before(async () => {
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTopN();
         log.debug('clicked on TopN');
       });
@@ -107,6 +121,7 @@ export default function ({ getService, getPageObjects }) {
     describe('markdown', () => {
 
       before(async () => {
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMarkdown();
         await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
@@ -151,6 +166,7 @@ export default function ({ getService, getPageObjects }) {
     // add a table sanity timestamp
     describe('table', () => {
       before(async () => {
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTable();
         await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
         log.debug('clicked on Table');

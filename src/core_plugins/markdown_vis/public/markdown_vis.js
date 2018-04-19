@@ -1,8 +1,8 @@
-import 'plugins/markdown_vis/markdown_vis.less';
+import './markdown_vis.less';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
+import markdownVisParamsTemplate from './markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-markdown.svg';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -28,7 +28,8 @@ function MarkdownVisProvider(Private) {
     visConfig: {
       component: MarkdownVisWrapper,
       defaults: {
-        fontSize: 12
+        fontSize: 12,
+        openLinksInNewTab: false
       }
     },
     editorConfig: {

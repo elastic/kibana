@@ -1,4 +1,4 @@
-import visDebugSpyPanelTemplate from 'plugins/dev_mode/vis_debug_spy_panel.html';
+import visDebugSpyPanelTemplate from './vis_debug_spy_panel.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 function VisDetailsSpyProvider() {

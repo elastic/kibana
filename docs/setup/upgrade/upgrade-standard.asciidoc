@@ -40,7 +40,14 @@ otherwise Kibana will fail to start.
 ==== Upgrading using a `zip` or `tar.gz` archive
 
 . Extract the `zip` or `tar.gz` archive to a new directory to be sure that you
-  don't overwrite the `config` or `data` directories.
+  don't overwrite the `config` or `data` directories. +
++
+--
+IMPORTANT: If you use {monitoring}, you must re-use the data directory when you
+upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
+and becomes a new instance in the monitoring data.
+
+--
 . Copy the files from the `config` directory from your old installation to your
   new installation. Make sure you remove or update any configurations that are
   indicated in the <<breaking-changes,breaking changes>> documentation

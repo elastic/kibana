@@ -37,6 +37,14 @@ import { buildProductionProjects } from '@kbn/pm';
  * will be located within the top-level `node_modules` folder, which means
  * normal module resolution will apply and you can `require(...)` any of these
  * packages when running Kibana in production.
+ *
+ * ## Known limitations
+ *
+ * - This process _only_ include packages that used by Kibana or any of its
+ *   transitive packages, as it depends on only running `yarn` at the top level.
+ *   That means a Kibana plugin can only depend on Kibana packages that are used
+ *   in some way by Kibana itself in production, as it won't otherwise be
+ *   included in the production build.
  */
 module.exports = function (grunt) {
   grunt.registerTask('_build:packages', async function () {

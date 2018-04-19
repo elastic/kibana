@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { get } from 'lodash';
 
-export default function (server) {
+export function shortUrlLookupProvider(server) {
   async function updateMetadata(doc, req) {
     try {
       await req.getSavedObjectsClient().update('url', doc.id, {
