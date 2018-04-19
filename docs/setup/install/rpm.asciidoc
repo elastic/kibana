@@ -9,9 +9,10 @@ and Oracle Enterprise.
 NOTE: RPM install is not supported on distributions with old versions of RPM,
 such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
 
-This package contains both open source and commercial features. 
-{xpack-ref}/license-management.html[Start a 30-day trial license] to enable all       
-of the available commercial features. See the 
+This package is free to use under the Elastic license. It contains open source, 
+free commercial, and paid commercial features.  
+{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+paid commercial features. See the 
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
 
@@ -112,7 +113,9 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
 
-You can alternatively download the open source distribution of Kibana from: https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
+Alternatively, you can download the following package, which includes only 
+Apache 2.0 licensed code: 
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
 
 endif::[]
 
