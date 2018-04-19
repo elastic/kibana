@@ -9,14 +9,15 @@ found on https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
 
 === Image types
 
-By default, the images contain both open source and commercial features. 
-{xpack-ref}/license-management.html[Start a 30-day trial license] to enable all 
-of the available commercial features. See the 
+These images are free to use under the Elastic license. They contain open source, 
+free commercial, and paid commercial features.  
+{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+paid commercial features. See the 
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
 
-You can alternatively obtain open source images, which contain only open-source 
-{kib}.
+Alternatively, you can download `-oss` images that include only Apache 2.0 
+licensed code. 
 
 === Pulling the image
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
