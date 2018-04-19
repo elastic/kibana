@@ -101,6 +101,12 @@ Often, reviewers have an opinion about whether the feedback they are about to gi
 
 
 [float]
+=== Handling disagreements
+
+Conflicting opinions between reviewers and authors happen, and sometimes it is hard to reconcile those opinions. Ideally folks can work together in the spirit of these guidelines toward a consensus, but if that doesn't work out it may be best to bring a third person into the discussion. Our pull requests generally have two reviewers, so an appropriate third person may already be obvious. Otherwise, reach out to the functional area that is most appropriate or to technical leadership if an area isn't obvious.
+
+
+[float]
 === Review feedback that is never appropriate
 
 Whether or not a bit of feedback is appropriate for a pull request is really dependent on the motivation for giving the feedback in the first place. Reviewers should not be reviewing code with the mindset of "how would I write this code?". The reviewer didn't write the code, and their goal isn't to craft the contribution into a form that is simply whatever they would have written if they had.
