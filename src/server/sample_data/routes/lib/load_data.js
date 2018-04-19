@@ -3,9 +3,9 @@ import fs from 'fs';
 
 const BULK_LOAD_SIZE = 500;
 
-export function loadData(path, bulkLoad, index, updateRow, callback) {
+export function loadData(path, bulkLoad, callback) {
   let count = 0;
-  let bulk = [];
+  let docs = [];
   let isPaused = false;
   const lineStream = readline.createInterface({
     input: fs.createReadStream(path, {
@@ -15,9 +15,9 @@ export function loadData(path, bulkLoad, index, updateRow, callback) {
   });
 
   const onClose = async () => {
-    if (bulk.length > 0) {
+    if (docs.length > 0) {
       try {
-        await bulkLoad(bulk);
+        await bulkLoad(docs);
       } catch (err) {
         callback(err);
         return;
@@ -27,29 +27,40 @@ export function loadData(path, bulkLoad, index, updateRow, callback) {
   };
   lineStream.on('close', onClose);
 
+  function closeWithError(err) {
+    lineStream.removeListener('close', onClose);
+    lineStream.close();
+    callback(err);
+  }
+
   lineStream.on('line', async (line) => {
+    if (line.length === 0 || line.charAt(0) === '#') {
+      return;
+    }
+
+    let doc;
+    try {
+      doc = JSON.parse(line);
+    } catch (err) {
+      closeWithError(new Error(`Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`));
+      return;
+    }
+
     count++;
-    const insertCmd = {
-      index: {
-        _index: index
-      }
-    };
-    bulk.push(insertCmd);
-    bulk.push(line);
-    if (bulk.length >= BULK_LOAD_SIZE * 2 && !isPaused) {
+    docs.push(doc);
+
+    if (docs.length >= BULK_LOAD_SIZE && !isPaused) {
       lineStream.pause();
 
       // readline pause is leaky and events in buffer still get sent after pause
       // need to clear buffer before async call
-      const bulktmp = bulk.slice();
-      bulk = [];
+      const docstmp = docs.slice();
+      docs = [];
       try {
-        await bulkLoad(bulktmp);
+        await bulkLoad(docstmp);
         lineStream.resume();
       } catch (err) {
-        lineStream.removeListener('close', onClose);
-        lineStream.close();
-        callback(err);
+        closeWithError(err);
       }
     }
   });

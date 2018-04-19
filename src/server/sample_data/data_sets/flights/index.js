@@ -9,8 +9,7 @@ export function flightsSpecProvider() {
         type: 'keyword'
       },
       timestamp: {
-        type: 'date',
-        format: 'yyyy-MM-dd HHmm'
+        type: 'date'
       },
       dest: {
         type: 'keyword'
@@ -21,6 +20,8 @@ export function flightsSpecProvider() {
       tailNum: {
         type: 'keyword'
       }
-    }
+    },
+    timeFields: ['timestamp'],
+    currentTimeMarker: '2018-01-02T00:00:00Z',
   };
 }

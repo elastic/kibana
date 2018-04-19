@@ -1,9 +1,4 @@
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+# twelve hours in past
+{ "airline" : "kibana air", "timestamp" : "2018-01-01T12:00:00Z", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+# one hour in future
+{ "airline" : "kibana air", "timestamp" : "2018-01-02T01:00:00Z", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
