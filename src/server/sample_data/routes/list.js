@@ -1,5 +1,5 @@
 export const createListRoute = () => ({
-  path: '/api/sample_data/list',
+  path: '/api/sample_data',
   method: 'GET',
   config: {
     handler(request, reply) {

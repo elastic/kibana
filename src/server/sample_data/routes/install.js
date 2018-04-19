@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
+import { createIndexName } from './lib/create_index_name';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
@@ -17,7 +18,7 @@ export const createInstallRoute = () => ({
         return sampleDataSet.id === request.params.id;
       });
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = `${server.config().get('kibana.index')}_sample_data_${sampleDataSet.id}`;
+      const index = createIndexName(server, sampleDataSet.id);
       const insertCmd = {
         index: {
           _index: index
