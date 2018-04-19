@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 const typeahead = uiModules.get('kibana/typeahead');
 
 typeahead.directive('kbnTypeaheadItem', function ($compile) {

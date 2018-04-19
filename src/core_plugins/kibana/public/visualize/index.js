@@ -1,12 +1,12 @@
-import 'plugins/kibana/visualize/styles/main.less';
-import 'plugins/kibana/visualize/editor/editor';
-import 'plugins/kibana/visualize/wizard/wizard';
-import 'plugins/kibana/visualize/editor/agg_filter';
+import './styles/main.less';
+import './editor/editor';
+import './wizard/wizard';
+import './editor/agg_filter';
 import 'ui/draggable/draggable_container';
 import 'ui/draggable/draggable_item';
 import 'ui/draggable/draggable_handle';
-import 'plugins/kibana/visualize/saved_visualizations/_saved_vis';
-import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
+import './saved_visualizations/_saved_vis';
+import './saved_visualizations/saved_visualizations';
 import 'ui/directives/scroll_bottom';
 import 'ui/filters/sort_prefix_first';
 import uiRoutes from 'ui/routes';

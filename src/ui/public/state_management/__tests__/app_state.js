@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AppStateProvider } from 'ui/state_management/app_state';
+import { AppStateProvider } from '../app_state';
 
 describe('State Management', function () {
   let $rootScope;

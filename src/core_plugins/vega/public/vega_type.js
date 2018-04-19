@@ -39,7 +39,11 @@ VisTypesRegistryProvider.register((Private) => {
     requiresUpdateStatus: [Status.DATA, Status.RESIZE],
     requestHandler: vegaRequestHandler,
     responseHandler: 'none',
-    options: { showIndexSelection: false },
+    options: {
+      showIndexSelection: false,
+      showQueryBar: false,
+      showFilterBar: false,
+    },
     stage: 'lab',
     feedbackMessage: defaultFeedbackMessage,
   });

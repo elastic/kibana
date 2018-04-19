@@ -1,4 +1,4 @@
-import 'plugins/kbn_vislib_vis_types/controls/point_series/value_axes.js';
-import 'plugins/kbn_vislib_vis_types/controls/point_series/category_axis.js';
-import 'plugins/kbn_vislib_vis_types/controls/point_series/series.js';
-import 'plugins/kbn_vislib_vis_types/controls/point_series/grid.js';
+import './value_axes.js';
+import './category_axis.js';
+import './series.js';
+import './grid.js';

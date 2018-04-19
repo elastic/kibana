@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
-import AggConfigResult from 'ui/vis/agg_config_result';
+import { extractBuckets } from './_extract_buckets';
+import AggConfigResult from '../../vis/agg_config_result';
 
 export function HierarchicalTransformAggregationProvider() {
   return function transformAggregation(agg, metric, aggData, parent) {

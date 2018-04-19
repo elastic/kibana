@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 import { decorateFormController } from './kbn_form_controller';
 import { decorateModelController } from './kbn_model_controller';

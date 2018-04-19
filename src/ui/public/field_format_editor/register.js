@@ -1,13 +1,13 @@
-import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { bytesEditor } from 'ui/field_format_editor/editors/numeral/bytes';
-import { colorEditor } from 'ui/field_format_editor/editors/color/color';
-import { dateEditor } from 'ui/field_format_editor/editors/date/date';
-import { durationEditor } from 'ui/field_format_editor/editors/duration/duration';
-import { numberEditor } from 'ui/field_format_editor/editors/numeral/number';
-import { percentEditor } from 'ui/field_format_editor/editors/numeral/percent';
-import { stringEditor } from 'ui/field_format_editor/editors/string/string';
-import { truncateEditor } from 'ui/field_format_editor/editors/truncate/truncate';
-import { urlEditor } from 'ui/field_format_editor/editors/url/url';
+import { RegistryFieldFormatEditorsProvider } from '../registry/field_format_editors';
+import { bytesEditor } from './editors/numeral/bytes';
+import { colorEditor } from './editors/color/color';
+import { dateEditor } from './editors/date/date';
+import { durationEditor } from './editors/duration/duration';
+import { numberEditor } from './editors/numeral/number';
+import { percentEditor } from './editors/numeral/percent';
+import { stringEditor } from './editors/string/string';
+import { truncateEditor } from './editors/truncate/truncate';
+import { urlEditor } from './editors/url/url';
 
 RegistryFieldFormatEditorsProvider.register(bytesEditor);
 RegistryFieldFormatEditorsProvider.register(colorEditor);

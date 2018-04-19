@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
-import 'ui/es';
-import 'ui/promises';
-import 'ui/index_patterns';
-import { uiModules } from 'ui/modules';
-import { addFatalErrorCallback } from 'ui/notify';
+import '../es';
+import '../promises';
+import '../index_patterns';
+import { uiModules } from '../modules';
+import { addFatalErrorCallback } from '../notify';
 
 import { SearchSourceProvider } from './data_source/search_source';
 import { requestQueue } from './_request_queue';

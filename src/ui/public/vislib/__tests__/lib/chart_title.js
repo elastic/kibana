@@ -2,9 +2,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VislibLibChartTitleProvider } from 'ui/vislib/lib/chart_title';
-import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
-import 'ui/persisted_state';
+import { VislibLibChartTitleProvider } from '../../lib/chart_title';
+import { VislibVisConfigProvider } from '../../lib/vis_config';
+import '../../../persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function () {
   let ChartTitle;

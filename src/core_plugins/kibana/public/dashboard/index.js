@@ -1,11 +1,11 @@
-import 'plugins/kibana/dashboard/dashboard_app';
-import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
-import 'plugins/kibana/dashboard/styles/index.less';
-import 'plugins/kibana/dashboard/dashboard_config';
+import './dashboard_app';
+import './saved_dashboard/saved_dashboards';
+import './styles/index.less';
+import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 
-import dashboardTemplate from 'plugins/kibana/dashboard/dashboard_app.html';
+import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing.html';
 
 import { DashboardListingController } from './listing/dashboard_listing';

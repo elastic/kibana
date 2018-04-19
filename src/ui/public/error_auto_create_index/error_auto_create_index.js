@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
-import uiRoutes from 'ui/routes';
-import { KbnUrlProvider } from 'ui/url';
+import uiRoutes from '../routes';
+import { KbnUrlProvider } from '../url';
 
 import './error_auto_create_index.less';
 import template from './error_auto_create_index.html';
@@ -12,7 +12,7 @@ uiRoutes
 export function ErrorAutoCreateIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);
 
-  return new class ErrorAutoCreateIndex {
+  return new (class ErrorAutoCreateIndex {
     test(error) {
       return (
         error.statusCode === 503 &&
@@ -24,5 +24,5 @@ export function ErrorAutoCreateIndexProvider(Private, Promise) {
       kbnUrl.change('/error/action.auto_create_index');
       return Promise.halt();
     }
-  };
+  });
 }

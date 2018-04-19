@@ -1,24 +1,20 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { VisProvider } from '..';
+import { AggType } from '../../agg_types/agg_type';
+import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from '../../registry/field_formats';
 
 describe('AggConfig', function () {
 
   let Vis;
-  let AggType;
-  let AggConfig;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    AggType = Private(AggTypesAggTypeProvider);
-    AggConfig = Private(VisAggConfigProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
@@ -155,6 +151,7 @@ describe('AggConfig', function () {
     it('uses ::nextId to get the starting value', function () {
       sinon.stub(AggConfig, 'nextId').returns(534);
       const objs = AggConfig.ensureIds([{}]);
+      AggConfig.nextId.restore();
       expect(objs[0]).to.have.property('id', '534');
     });
 
@@ -164,6 +161,8 @@ describe('AggConfig', function () {
       const objs = AggConfig.ensureIds([{}, {}, {}, {}, {}, {}, {}]);
 
       expect(AggConfig.nextId).to.have.property('callCount', 1);
+
+      AggConfig.nextId.restore();
       objs.forEach(function (obj, i) {
         expect(obj).to.have.property('id', String(start + i));
       });

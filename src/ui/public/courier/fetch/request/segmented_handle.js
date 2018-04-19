@@ -1,4 +1,4 @@
-import { EventsProvider } from 'ui/events';
+import { EventsProvider } from '../../../events';
 
 export function SegmentedHandleProvider(Private) {
   const Events = Private(EventsProvider);

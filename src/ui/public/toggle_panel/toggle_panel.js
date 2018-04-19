@@ -1,6 +1,6 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import template from './toggle_panel.html';
-import 'ui/toggle_button';
+import '../toggle_button';
 
 const app = uiModules.get('kibana');
 

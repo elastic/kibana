@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { DirtyPrompt } from './dirty_prompt';
 
 uiModules.get('kibana')

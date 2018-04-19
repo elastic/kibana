@@ -1,5 +1,5 @@
 import template from './typeahead.html';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { comboBoxKeyCodes } from '@elastic/eui';
 import '../directives/scroll_bottom';
 import './typeahead.less';
