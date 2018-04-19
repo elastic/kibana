@@ -206,7 +206,7 @@
     "vega-lib": "^3.3.1",
     "vega-lite": "^2.4.0",
     "vega-schema-url-parser": "1.0.0",
-    "vega-tooltip": "^0.7.0",
+    "vega-tooltip": "^0.8.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
     "webpack-merge": "4.1.0",
