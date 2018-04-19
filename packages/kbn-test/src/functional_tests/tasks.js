@@ -105,11 +105,9 @@ function resolveConfigPath(configPath) {
   // if this process was started in runWithConfig, parse argv
   if (originalCall === 'functional_tests_single') {
     const configOption = getopts(process.argv.slice(2)).config;
-    console.log('configOption', configOption);
     return resolve(KIBANA_ROOT, configOption || configPath);
   } else {
   // process was started in runTests or other method, so don't parse argv
-    console.log('configPath', configPath);
     return resolve(KIBANA_ROOT, configPath);
   }
 }
