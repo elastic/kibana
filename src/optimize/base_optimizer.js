@@ -154,6 +154,26 @@ export default class BaseOptimizer {
 
         new webpack.NoEmitOnErrorsPlugin(),
 
+        // replace imports for `uiExports/*` modules with dynamic
+        // imports for the extension_loader.js file. The request
+        // for extension_loader.js includes some JSON.stringified
+        // metadata that allows multiple imports of extension_loader
+        // to be included in the build, but ensures that only a single
+        // version for each uiExports type is included.
+        //
+        // the "val-loader" is used to execute the extension_loader at
+        // build time to generate the source for the module that will
+        // be included in the bundle. This allows us to bypass writing
+        // these modules to the file system
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+          const extensions = this.uiBundles.getAppExtensions();
+          const [, type] = resource.request.split('/');
+          resource.request = `val-loader!${require.resolve('./extension_loader')}?${JSON.stringify({
+            type,
+            modules: [].concat(extensions[type] || [])
+          })}`;
+        }),
+
         ...this.uiBundles.getWebpackPluginProviders()
           .map(provider => provider(webpack)),
       ],

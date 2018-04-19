@@ -14,7 +14,6 @@ export class UiApp {
       linkToLastSubUrl,
       listed,
       url = `/app/${id}`,
-      uses = []
     } = spec;
 
     if (!id) {
@@ -37,18 +36,6 @@ export class UiApp {
     if (this._pluginId && !this._getPlugin()) {
       throw new Error(`Unknown plugin id "${this._pluginId}"`);
     }
-
-    const { appExtensions = [] } = kbnServer.uiExports;
-    this._modules = [].concat(
-      this._main || [],
-      uses
-        // flatten appExtensions for used types
-        .reduce((acc, type) => acc.concat(appExtensions[type] || []), [])
-        // de-dupe app extension module ids
-        .reduce((acc, item) => !item || acc.includes(item) ? acc : acc.concat(item), [])
-        // sort app extension module ids alphabetically
-        .sort((a, b) => a.localeCompare(b))
-    );
 
     if (!this.isHidden()) {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
@@ -93,7 +80,7 @@ export class UiApp {
   }
 
   getModules() {
-    return this._modules;
+    return [this._main];
   }
 
   _getPlugin() {

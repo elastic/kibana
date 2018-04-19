@@ -1,5 +1,3 @@
-import { uniq } from 'lodash';
-
 import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
@@ -16,11 +14,16 @@ function applySpecDefaults(spec, type, pluginSpec) {
     linkToLastSubUrl = true,
     listed = !hidden,
     url = `/app/${id}`,
-    uses = [],
   } = spec;
 
   if (spec.injectVars) {
     throw new Error(`[plugin:${pluginId}] uiExports.app.injectVars has been removed. Use server.injectUiAppVars('${id}', () => { ... })`);
+  }
+
+  if (spec.uses) {
+    throw new Error(
+      `[plugin:${pluginId}] uiExports.app.uses has been removed. Import these uiExport types with "import 'uiExports/{type}'"`
+    );
   }
 
   return {
@@ -35,11 +38,6 @@ function applySpecDefaults(spec, type, pluginSpec) {
     linkToLastSubUrl,
     listed,
     url,
-    uses: uniq([
-      ...uses,
-      'chromeNavControls',
-      'hacks',
-    ]),
   };
 }
 
