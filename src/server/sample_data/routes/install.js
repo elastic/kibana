@@ -4,7 +4,7 @@ import { loadData } from './lib/load_data';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
-  method: 'GET', // TODO change to POST but GET is easier to test because it works in browser
+  method: 'POST',
   config: {
     validate: {
       params: Joi.object().keys({
