@@ -125,9 +125,9 @@ describe('Config schema', function () {
           set(config, 'server.ssl.enabled', true);
           set(config, 'server.ssl.key', '/path.key');
           const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.certificate');
+          expect(error).toBeInstanceOf(Object);
+          expect(error).toHaveProperty('details');
+          expect(error.details[0]).toHaveProperty('path', 'server.ssl.certificate');
         });
       });
 
@@ -144,9 +144,9 @@ describe('Config schema', function () {
           set(config, 'server.ssl.enabled', true);
           set(config, 'server.ssl.certificate', '/path.cert');
           const { error } = validate(config);
-          expect(error).to.be.an(Object);
-          expect(error).to.have.property('details');
-          expect(error.details[0]).to.have.property('path', 'server.ssl.key');
+          expect(error).toBeInstanceOf(Object);
+          expect(error).toHaveProperty('details');
+          expect(error.details[0]).toHaveProperty('path', 'server.ssl.key');
         });
       });
 
