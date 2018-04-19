@@ -5,6 +5,8 @@ Every change made to Kibana must be held to a high standard, and while the respo
 
 Frankly, it's impossible to build a concrete list of requirements that encompass all of the possible situations we'll encounter when reviewing pull requests, so instead this document tries to lay out a common set of the few obvious requirements while also outlining a general philosophy that we should have when approaching any PR review.
 
+It is not expected nor intended for a PR review to take the shape of this document, where the topmost guidelines are always applied first and the bottommost guidelines are always applied last. This entire document should be considered as a whole rather than as a series of consecutive todos that must be completed in order.
+
 While the review process is always done by Elastic staff members, these guidelines apply to all pull requests regardless of whether they are authored by community members or Elastic staff.
 
 
@@ -18,8 +20,6 @@ Pull request authors can benefit from reading this document as well because it'l
 
 [float]
 === Reject fast
-
-This document only seeks to describe the high level goals of the PR review process. It is not expected nor intended for a PR review to take the shape of this document, where the topmost guidelines are always applied first and the bottommost guidelines are always applied last. This entire document should be considered as a whole rather than as a series of consecutive todos that must be completed in order.
 
 Every pull request is different, and before reviewing any given PR, reviewers should consider the optimal way to approach the PR review so that if the change is ultimately rejected, it is done so as early in the process as possible.
 
