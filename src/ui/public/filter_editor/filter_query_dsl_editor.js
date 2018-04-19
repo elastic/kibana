@@ -1,8 +1,8 @@
 import 'ace';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import template from './filter_query_dsl_editor.html';
-import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
+import '../accessibility/kbn_ui_ace_keyboard_mode';
 
 const module = uiModules.get('kibana');
 module.directive('filterQueryDslEditor', function () {

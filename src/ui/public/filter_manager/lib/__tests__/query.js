@@ -1,4 +1,4 @@
-import { buildQueryFilter } from 'ui/filter_manager/lib/query';
+import { buildQueryFilter } from '../query';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';

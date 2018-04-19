@@ -1,6 +1,6 @@
 import { forOwn, noop } from 'lodash';
 
-import 'ui/bind';
+import '../bind';
 
 const bindingRE = /^(=|=\?|&|@)([a-zA-Z0-9_$]+)?$/;
 

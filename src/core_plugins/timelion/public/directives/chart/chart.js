@@ -1,4 +1,4 @@
-import panelRegistryProvider from 'plugins/timelion/lib/panel_registry';
+import panelRegistryProvider from '../../lib/panel_registry';
 
 require('ui/modules')
   .get('apps/timelion', [])

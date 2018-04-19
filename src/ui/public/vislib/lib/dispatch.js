@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { SimpleEmitter } from '../../utils/simple_emitter';
 
 export function VislibLibDispatchProvider(Private, config) {
 

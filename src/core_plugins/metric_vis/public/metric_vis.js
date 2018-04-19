@@ -1,5 +1,5 @@
-import 'plugins/metric_vis/metric_vis.less';
-import 'plugins/metric_vis/metric_vis_params';
+import './metric_vis.less';
+import './metric_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';

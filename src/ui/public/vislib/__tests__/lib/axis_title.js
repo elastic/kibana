@@ -3,11 +3,11 @@ import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VislibLibAxisTitleProvider } from 'ui/vislib/lib/axis/axis_title';
-import { VislibLibAxisConfigProvider } from 'ui/vislib/lib/axis/axis_config';
-import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
-import { VislibLibDataProvider } from 'ui/vislib/lib/data';
-import 'ui/persisted_state';
+import { VislibLibAxisTitleProvider } from '../../lib/axis/axis_title';
+import { VislibLibAxisConfigProvider } from '../../lib/axis/axis_config';
+import { VislibVisConfigProvider } from '../../lib/vis_config';
+import { VislibLibDataProvider } from '../../lib/data';
+import '../../../persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function () {
   let AxisTitle;

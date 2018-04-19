@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import 'ui/filters/short_dots';
+import '../filters/short_dots';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
 import conflictFieldNameIcon from './field_name_icons/conflict_field_name_icon.html';
 import dateFieldNameIcon from './field_name_icons/date_field_name_icon.html';
@@ -11,7 +11,7 @@ import sourceFieldNameIcon from './field_name_icons/source_field_name_icon.html'
 import stringFieldNameIcon from './field_name_icons/string_field_name_icon.html';
 import unknownFieldNameIcon from './field_name_icons/unknown_field_name_icon.html';
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
 
 module.directive('fieldName', function ($compile, $rootScope, $filter) {

@@ -5,7 +5,6 @@ import { readFileSync } from 'fs';
 import Bluebird from 'bluebird';
 
 const readFile = (file) => readFileSync(file, 'utf8');
-const readBinaryFile = (file) => readFileSync(file);
 
 export function parseConfig(serverConfig = {}) {
   const config = {
@@ -57,20 +56,8 @@ export function parseConfig(serverConfig = {}) {
   }
 
   // Add client certificate and key if required by elasticsearch
-  const keystoreConfig = get(serverConfig, 'ssl.keystore.path');
-  const pemConfig = get(serverConfig, 'ssl.certificate');
-
-  if (keystoreConfig && pemConfig) {
-    throw new Error(
-      `Invalid Configuration: please specify either "elasticsearch.ssl.keystore.path" or "elasticsearch.ssl.certificate", not both.`
-    );
-  }
-
-  if (keystoreConfig) {
-    config.ssl.pfx = readBinaryFile(keystoreConfig);
-    config.ssl.passphrase = get(serverConfig, 'ssl.keystore.password');
-  } else if (pemConfig && get(serverConfig, 'ssl.key')) {
-    config.ssl.cert = readFile(pemConfig);
+  if (get(serverConfig, 'ssl.certificate') && get(serverConfig, 'ssl.key')) {
+    config.ssl.cert = readFile(serverConfig.ssl.certificate);
     config.ssl.key = readFile(serverConfig.ssl.key);
     config.ssl.passphrase = serverConfig.ssl.keyPassphrase;
   }

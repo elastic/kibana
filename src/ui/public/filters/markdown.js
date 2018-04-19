@@ -1,5 +1,5 @@
 import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import 'angular-sanitize';
 
 const markdownIt = new MarkdownIt({

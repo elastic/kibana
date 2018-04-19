@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { AggParams } from 'ui/agg_types/agg_params';
+import { AggParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';

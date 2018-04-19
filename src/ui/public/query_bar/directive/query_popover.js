@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 import { documentationLinks } from '../../documentation_links/documentation_links';
 import {
   EuiPopover,

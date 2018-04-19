@@ -3,8 +3,8 @@ import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { PersistedStateError } from 'ui/errors';
-import 'ui/persisted_state';
+import { PersistedStateError } from '../../errors';
+import '..';
 
 let PersistedState;
 

@@ -2,9 +2,9 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { TabifyTable } from 'ui/agg_response/tabify/_table';
-import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
+import { TabifyTable } from '../../../agg_response/tabify/_table';
+import { AggResponseIndexProvider } from '../../../agg_response';
+import { BasicResponseHandlerProvider } from '../../response_handlers/basic';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
+import { uiModules } from '../../modules';
+import { Notifier } from '../../notify';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';

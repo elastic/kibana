@@ -1,5 +1,5 @@
 {
-  "_settings": {
+  "_settings_autocomplete": {
     "data_autocomplete_rules": {
       "refresh_interval": "1s",
       "number_of_shards": 5,
