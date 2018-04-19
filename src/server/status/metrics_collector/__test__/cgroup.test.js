@@ -1,17 +1,24 @@
-import mockFs from 'mock-fs';
-import { cGroups as cGroupsFsStub } from './_fs_stubs';
+jest.mock('fs', () => ({
+  readFile: jest.fn()
+}));
+import fs from 'fs';
+
+
+import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './_fs_stubs';
 import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
+
+fs.readFile.mockImplementation(readFileMock);
 
 describe('Control Group', function () {
   const fsStub = cGroupsFsStub();
 
   afterEach(() => {
-    mockFs.restore();
+    setMockFiles();
   });
 
   describe('readControlGroups', () => {
     it('parses the file', async () => {
-      mockFs({ '/proc/self/cgroup': fsStub.cGroupContents });
+      setMockFiles({ '/proc/self/cgroup': fsStub.cGroupContents });
       const cGroup = await readControlGroups();
 
       expect(cGroup).toEqual({
@@ -34,7 +41,7 @@ describe('Control Group', function () {
 
   describe('readCPUStat', () => {
     it('parses the file', async () => {
-      mockFs({ '/sys/fs/cgroup/cpu/fakeGroup/cpu.stat': fsStub.cpuStatContents });
+      setMockFiles({ '/sys/fs/cgroup/cpu/fakeGroup/cpu.stat': fsStub.cpuStatContents });
       const cpuStat = await readCPUStat('fakeGroup');
 
       expect(cpuStat).toEqual({
@@ -45,7 +52,7 @@ describe('Control Group', function () {
     });
 
     it('returns default stats for missing file', async () => {
-      mockFs();
+      setMockFiles();
       const cpuStat = await readCPUStat('fakeGroup');
 
       expect(cpuStat).toEqual({
@@ -58,7 +65,7 @@ describe('Control Group', function () {
 
   describe('getAllStats', () => {
     it('can override the cpu group path', async () => {
-      mockFs({
+      setMockFiles({
         '/proc/self/cgroup': fsStub.cGroupContents,
         [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         '/sys/fs/cgroup/cpu/docker/cpu.cfs_period_us': '100000',
@@ -87,7 +94,7 @@ describe('Control Group', function () {
     });
 
     it('handles an undefined control group', async () => {
-      mockFs({
+      setMockFiles({
         '/proc/self/cgroup': '',
         [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents,
@@ -101,7 +108,7 @@ describe('Control Group', function () {
     });
 
     it('can override the cpuacct group path', async () => {
-      mockFs({
+      setMockFiles({
         '/proc/self/cgroup': fsStub.cGroupContents,
         '/sys/fs/cgroup/cpuacct/docker/cpuacct.usage': '357753491408',
         [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
@@ -130,7 +137,7 @@ describe('Control Group', function () {
     });
 
     it('extracts control group stats', async () => {
-      mockFs(fsStub.files);
+      setMockFiles(fsStub.files);
       const stats = await getAllStats();
 
       expect(stats).toEqual({
@@ -152,13 +159,13 @@ describe('Control Group', function () {
     });
 
     it('returns null when all files are missing', async () => {
-      mockFs({});
+      setMockFiles();
       const stats = await getAllStats();
       expect(stats).toBeNull();
     });
 
     it('returns null if CPU accounting files are missing', async () => {
-      mockFs({
+      setMockFiles({
         '/proc/self/cgroup': fsStub.cGroupContents,
         [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents
       });
@@ -168,7 +175,7 @@ describe('Control Group', function () {
     });
 
     it('returns -1 stat values if cpuStat file is missing', async () => {
-      mockFs({
+      setMockFiles({
         '/proc/self/cgroup': fsStub.cGroupContents,
         [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
