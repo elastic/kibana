@@ -47,7 +47,7 @@ Making poor decisions around how a change is technically architected means we im
 
 There is no one-size-fits-all way to evaluate whether a given change is technically sound, so instead we must rely on our concrete knowledge and experience building software. This is an especially hard thing to do when two experienced developers have differing opinions about what is and is not architecturally sound, so it requires both the author and reviewer to show empathy, to go out of their way to understand each other, and to come to a consensus about a path forward.
 
-The goal here isn't finding the one best architecture as it's unlikely this could ever be qualified. There are usually many architecturally sound solutions to any problem, so reviewers should be focussed on that goal objectively rather than whether or not their own vision for how the change should be architected is "better".
+The goal here isn't finding the one best architecture as it's unlikely this could ever be qualified. There are usually many architecturally sound solutions to any problem, so reviewers should be focused on that goal objectively rather than whether or not their own vision for how the change should be architected is "better".
 --
 . *Are there sufficient tests to ensure this change doesn't break in the future?*
 +
