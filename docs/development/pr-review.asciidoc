@@ -107,11 +107,13 @@ Conflicting opinions between reviewers and authors happen, and sometimes it is h
 
 
 [float]
-=== Review feedback that is never appropriate
+=== Inappropriate review feedback
 
-Whether or not a bit of feedback is appropriate for a pull request is really dependent on the motivation for giving the feedback in the first place. Reviewers should not be reviewing code with the mindset of "how would I write this code?". The reviewer didn't write the code, and their goal isn't to craft the contribution into a form that is simply whatever they would have written if they had.
+Whether or not a bit of feedback is appropriate for a pull request is often dependent on the motivation for giving the feedback in the first place.
 
-Feedback such as "this is crap" isn't feedback at all. It's both mean and unhelpful, and it is never appropriate.
+_Demanding_ an author make changes based primarily on the mindset of "how would I write this code?" isn't appropriate. The reviewer didn't write the code, and their critical purpose in the review process is not to craft the contribution into a form that is simply whatever they would have written if they had. If a reviewer wants to provide this type of feedback, they should qualify it as a "nit" as mentioned in the nitpicking section above to make it clear that the author can take it or leave it.
+
+Inflammatory feedback such as "this is crap" isn't feedback at all. It's both mean and unhelpful, and it is never appropriate.
 
 
 [float]
