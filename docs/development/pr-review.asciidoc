@@ -124,7 +124,7 @@ Establishing a comprehensive checklist for all of the things that should happen 
 * Automated tests provide high confidence the change continues to work without manual verification
 * Appropriate product documentation is included (asciidocs)
 * Any new UI changes are accessible to differently abled persons, including but not limited to sufficient contrasts in colors, keyboard navigation, and aria tags
-* Includes APIs for new or changed functionality, either programmatically for plugins or as REST endpoints
+* Sufficient security protections are in place where appropriate, particularly when rendering API responses, parsing expressions, compiling URLs, loading external content, or redirecting
 * PR title summarizes the change (no "fixes bug number 123")
 * PR description includes:
 ** A detailed summary of what changed
