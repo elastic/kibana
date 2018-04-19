@@ -45,7 +45,7 @@ function readServerSettings(opts, extraCliOptions) {
       set('server.ssl.enabled', true);
     }
 
-    if (opts.ssl && !has('server.ssl.keystore.path') && !has('server.ssl.certificate') && !has('server.ssl.key')) {
+    if (opts.ssl && !has('server.ssl.certificate') && !has('server.ssl.key')) {
       set('server.ssl.certificate', DEV_SSL_CERT_PATH);
       set('server.ssl.key', DEV_SSL_KEY_PATH);
     }
