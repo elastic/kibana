@@ -5,7 +5,6 @@ module.exports = function (grunt) {
   // TODO: remove after migration to new CI is complete
   grunt.registerTask('jenkins', compact([
     'jenkins:env',
-    'rejectRejFiles',
     'test',
     process.env.JOB_NAME === 'kibana_core' ? 'build' : null
   ]));
@@ -27,7 +26,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('jenkins:unit', [
     'jenkins:env',
-    'rejectRejFiles',
 
     'run:eslint',
     'licenses',
@@ -44,7 +42,6 @@ module.exports = function (grunt) {
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
   grunt.registerTask('jenkins:selenium', [
     'jenkins:env',
-    'rejectRejFiles',
 
     'test:uiRelease'
   ]);
