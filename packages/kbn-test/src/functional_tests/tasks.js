@@ -99,16 +99,17 @@ export async function runWithConfig(
 }
 
 function resolveConfigPath(configPath) {
-  // TODO: when --config multiple_config.js is passed into runTests
-  // configPath is multiple_config.js, which is incorrectly passed here
-  const originalCall = process.argv[1].split('/').slice(-1);
-  // if this process was started in this method, parse argv
-  if (originalCall === 'functional_test_with_config') {
+  // NOTE: when --config is passed into runTests
+  // configPath gets incorrectly passed to runWithConfig
+  const originalCall = process.argv[1].split('/').slice(-1)[0];
+  // if this process was started in runWithConfig, parse argv
+  if (originalCall === 'functional_tests_single') {
     const configOption = getopts(process.argv.slice(2)).config;
-
+    console.log('configOption', configOption);
     return resolve(KIBANA_ROOT, configOption || configPath);
   } else {
-  // process was started in another method, so don't parse argv
+  // process was started in runTests or other method, so don't parse argv
+    console.log('configPath', configPath);
     return resolve(KIBANA_ROOT, configPath);
   }
 }
