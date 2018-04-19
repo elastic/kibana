@@ -73,13 +73,9 @@ Reviewers are not simply evaluating the code itself, they are also evaluating th
 [float]
 === Consistency, style, readability
 
-Having a relatively consistent codebase is an important part of us building a sustainable project. If 40+ different developers all wrote code in whatever style they personally desired, the resulting inconsistencies would make working across the codebase more challenging. We know this because it's happened before in the Kibana project with far fewer developers than we have contributing to the project today, and the process of retroactively getting the codebase into a consistent state was extremely time intensive and disruptive to all contributors.
+Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency - we enforce a comprehensive set of linting rules through CI. We're also rolling out prettier to make this even more automatic.
 
-On the other hand, improvements are being added to JavaScript, TypeScript, and our dependencies all the time, so we should be flexible about evolving our style and coding standards over time. Absolute consistency across the whole codebase is not our goal here - instead, we seek to move together with consensus as we evolve our codebase over time.
-
-As always, automation is the best way we can help ensure consistency, so we enforce a pretty comprehensive set of linting rules through CI. We're also rolling out prettier to make this even more automatic.
-
-For things that can't practically get caught by a linter, we maintain various styleguides that authors should adhere to and reviewers should keep in mind when they review a pull request.
+For things that can't be easily automated, we maintain various link:https://github.com/elastic/kibana/tree/master/style_guides[styleguides] that authors should adhere to and reviewers should keep in mind when they review a pull request.
 
 Beyond that, we're into subjective territory. Statements like "this isn't very readable" are hardly helpful since they can't be qualified, but that doesn't mean a reviewer should outright ignore code that is hard to understand due to how it is written. There isn't one definitively "best" way to write any particular code, so pursuing such shouldn't be our goal. Instead, reviewers and authors alike must accept that there are likely many different appropriate ways to accomplish the same thing with code, and so long as the contribution is utilizing one of those ways, then we're in good shape.
 
