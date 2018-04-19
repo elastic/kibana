@@ -13,11 +13,11 @@ describe('migrationContext', () => {
   });
 
   test('creates destIndex name', async () => {
+    const now = new Date('2020-01-20 7:06:07 AM');
+    jest.spyOn(Date, 'now').mockImplementation(() => now.getTime());
     const actual = await testMigrationContext({ index: 'dang' }, '2.0.4');
-    const year = new Date().getFullYear().toString();
-    const regexp = new RegExp(`^dang-2.0.4-${year}`);
     expect(actual.destIndex)
-      .toEqual(expect.stringMatching(regexp));
+      .toEqual('dang-20200120070607-2.0.4');
   });
 
   test('creates a logger that logs info', async () => {

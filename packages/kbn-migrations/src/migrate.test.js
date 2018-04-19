@@ -31,6 +31,8 @@ describe('migrate', () => {
   });
 
   test('generates the dest index if it is not provided', async () => {
+    const now = new Date('2021-02-03 4:05:06 AM');
+    jest.spyOn(Date, 'now').mockImplementation(() => now.getTime());
     const plugins = [{
       id: 'hoi',
       mappings: {
@@ -39,14 +41,11 @@ describe('migrate', () => {
     }];
     const index = '.mufasa';
     const callCluster = mockCluster({ [index]: { } }, {});
-    const minIndexName = `${index}-7.7.7-${new Date().getUTCFullYear()}`;
-    const maxIndexName = `${index}-7.7.7-${new Date().getUTCFullYear() + 1}`;
     const { destIndex } = await migrate({ callCluster, index, plugins, log, elasticVersion: '7.7.7' });
 
     expect(callCluster.state().data[destIndex]).toBeTruthy();
     expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
-    expect(destIndex > minIndexName).toBeTruthy();
-    expect(destIndex < maxIndexName).toBeTruthy();
+    expect(destIndex).toEqual('.mufasa-20210203040506-7.7.7');
   });
 
   test('existing indices are converted to aliases and migrated', async () => {

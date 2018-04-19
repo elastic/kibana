@@ -23,7 +23,7 @@ async function fetch(opts) {
     migrationPlan,
     force,
     plugins: sanitizedPlugins,
-    destIndex: destIndex || `${index}-${elasticVersion}-${moment().format('YYYYMMDDHHmmss')}`,
+    destIndex: destIndex || `${index}-${moment().format('YYYYMMDDHHmmss')}-${elasticVersion}`,
     initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
     log: migrationLogger(log),
   };
