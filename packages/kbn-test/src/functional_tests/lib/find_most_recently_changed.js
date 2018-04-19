@@ -16,7 +16,8 @@ export function findMostRecentlyChanged(pattern) {
 
   const ctime = path => statSync(path).ctime.getTime();
 
-  return glob.sync(pattern)
+  return glob
+    .sync(pattern)
     .sort((a, b) => ctime(a) - ctime(b))
     .pop();
 }

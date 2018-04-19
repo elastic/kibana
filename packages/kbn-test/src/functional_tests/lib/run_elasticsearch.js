@@ -33,10 +33,8 @@ export async function runElasticsearch({ tmpDir, procs, config }) {
 
   await procs.run('es', {
     cmd: RELATIVE_ES_BIN,
-    args: [
-      '-E', `http.port=${config.get('servers.elasticsearch.port')}`,
-    ],
+    args: ['-E', `http.port=${config.get('servers.elasticsearch.port')}`],
     cwd: esExtractPath,
-    wait: /^\[.+?\]\[.+?\]\[.+?\] \[.+?\] started$/
+    wait: /^\[.+?\]\[.+?\]\[.+?\] \[.+?\] started$/,
   });
 }

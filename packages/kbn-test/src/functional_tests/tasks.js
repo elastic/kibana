@@ -31,7 +31,7 @@ in another terminal session by running this command from this directory:
 export async function runTests(
   configPath = MULTIPLE_CONFIG_PATH,
   runEs = runElasticsearch,
-  runKbn = runKibanaServer,
+  runKbn = runKibanaServer
 ) {
   const configOption = getopts(process.argv.slice(2)).config;
 
@@ -52,9 +52,8 @@ export async function runTests(
 export async function startServers(
   configPath = 'test/functional/config.js',
   runEs = runElasticsearch,
-  runKbn = runKibanaServer,
+  runKbn = runKibanaServer
 ) {
-
   // TODO: make note about change to saml option
   const configOption = getopts(process.argv.slice(2)).config;
 
@@ -85,7 +84,7 @@ export async function startServers(
 export async function runWithConfig(
   configPath = 'test/functional/config.js',
   runEs = runElasticsearch,
-  runKbn = runKibanaServer,
+  runKbn = runKibanaServer
 ) {
   configPath = resolveConfigPath(configPath);
 

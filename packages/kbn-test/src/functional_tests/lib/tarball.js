@@ -16,7 +16,10 @@ export function extractTarball(archive, dirPath) {
   log.info('extracting %j', dirPath);
 
   const stripOne = header => {
-    header.name = header.name.split(/\/|\\/).slice(1).join(pathSeparator);
+    header.name = header.name
+      .split(/\/|\\/)
+      .slice(1)
+      .join(pathSeparator);
     return header;
   };
 

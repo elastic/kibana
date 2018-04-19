@@ -1,8 +1,4 @@
-import {
-  KIBANA_ROOT,
-  KIBANA_EXEC,
-  KIBANA_EXEC_PATH,
-} from './paths';
+import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
 
 export async function runKibanaServer({ procs, config }) {
   const cliArgs = config.get('kibanaServerArgs') || [];
@@ -10,10 +6,7 @@ export async function runKibanaServer({ procs, config }) {
   // start the kibana server and wait for it to log "Server running" before resolving
   await procs.run('kibana', {
     cmd: KIBANA_EXEC,
-    args: [
-      KIBANA_EXEC_PATH,
-      ...cliArgs,
-    ],
+    args: [KIBANA_EXEC_PATH, ...cliArgs],
     env: {
       FORCE_COLOR: 1,
       ...process.env,
