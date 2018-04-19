@@ -111,10 +111,10 @@ export function getAllStats(options = {}) {
       }
 
       return Promise.all([
-        readCPUAcctUsage(cpuAcctPath),
-        readCPUFsPeriod(cpuPath),
-        readCPUFsQuota(cpuPath),
-        readCPUStat(cpuPath)
+        readCPUAcctUsage(cpuAcctPath).catch(rejectUnlessFileNotFound),
+        readCPUFsPeriod(cpuPath).catch(rejectUnlessFileNotFound),
+        readCPUFsQuota(cpuPath).catch(rejectUnlessFileNotFound),
+        readCPUStat(cpuPath).catch(rejectUnlessFileNotFound)
       ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
         resolve({
           cpuacct: {
@@ -129,7 +129,7 @@ export function getAllStats(options = {}) {
             stat: cpuStat
           }
         });
-      }).catch(rejectUnlessFileNotFound);
+      });
     }).catch(rejectUnlessFileNotFound);
 
     function rejectUnlessFileNotFound(err) {
