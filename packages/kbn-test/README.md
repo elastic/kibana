@@ -31,6 +31,7 @@ export default function () {
 ```
 
 `runEs`: [optional] function that starts Elasticsearch server
+
 `runKbn`: [optional] function that starts Kibana server
 
 The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
@@ -43,6 +44,7 @@ _This method is going away in favor of `runTests` which will handle both cases._
 `configPath`: absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
 `runEs`: [optional] function that starts Elasticsearch server
+
 `runKbn`: [optional] function that starts Kibana server
 
 The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
@@ -53,6 +55,7 @@ Starts Elasticsearch and Kibana servers given a specified config.
 `configPath`: absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
 `runEs`: [optional] function that starts Elasticsearch server
+
 `runKbn`: [optional] function that starts Kibana server
 
 The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
