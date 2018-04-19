@@ -20,7 +20,6 @@ target
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
 /html_docs
-.htpasswd
 .eslintcache
 /plugins/
 /data
@@ -41,3 +40,4 @@ package-lock.json
 .yo-rc.json
 /.vscode
 npm-debug.log*
+.tern-project
