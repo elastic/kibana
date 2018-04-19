@@ -45,7 +45,7 @@ export const createInstallRoute = () => ({
               }
             },
             mappings: {
-              doc: {
+              _doc: {
                 properties: sampleDataSet.fields
               }
             }
@@ -53,11 +53,23 @@ export const createInstallRoute = () => ({
         };
         await callWithRequest(request, 'indices.create', createIndexParams);
       } catch (err) {
-        reply().code(500);
+        console.warn(`sample_data install errors while creating index. Error: ${err.message}`);
+        reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
+        return;
       }
 
-
-      loadData(sampleDataSet.dataPath, index, updateRow, (count) => {
+      const bulkLoad = async (bulk) => {
+        const resp = await callWithRequest(request, 'bulk', { body: bulk });
+        if (resp.errors) {
+          console.warn(`sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, ' ')}`);
+          return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
+        }
+      };
+      loadData(sampleDataSet.dataPath, bulkLoad, index, updateRow, (err, count) => {
+        if (err) {
+          reply(err.message).code(500);
+          return;
+        }
         reply({ count });
       });
     }

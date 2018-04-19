@@ -1,9 +1,9 @@
-hello
-world
-reading
-this
-one
-line
-at
-a
-time
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
+{ "airline" : "kibana air", "timestamp" : "2018-04-19 0000", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
