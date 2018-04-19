@@ -13,6 +13,6 @@ export async function runFtr({ procs, configPath, cwd = PROJECT_ROOT }) {
     cmd: 'node',
     args,
     cwd,
-    wait: true
+    wait: true,
   });
 }

@@ -88,7 +88,7 @@ export const schema = Joi.object().keys({
     elasticsearch: urlPartsSchema(),
   }).default(),
 
-  kibanaServerArgs: Joi.any(),
+  kibanaServerArgs: Joi.array(),
 
   // env allows generic data, e.g. for fields unrelated to URLs
   env: Joi.object().default(),
