@@ -2,9 +2,9 @@ import { groupBy, zipObject, omit, values } from 'lodash';
 import uniqBy from 'lodash.uniqby';
 import moment from 'moment';
 import { evaluate } from 'tinymath';
-import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
-import { unquoteString } from '../../../common/lib/unquote_string.js';
-import { isColumnReference } from './lib/is_column_reference.js';
+import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
+import { unquoteString } from '../../../common/lib/unquote_string';
+import { isColumnReference } from './lib/is_column_reference';
 import { getExpressionType } from './lib/get_expression_type';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.

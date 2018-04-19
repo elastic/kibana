@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { ifFn } from '../if.js';
+import { ifFn } from '../if';
 
 describe('if', () => {
   const fn = ifFn().fn;

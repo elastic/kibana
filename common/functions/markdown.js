@@ -1,4 +1,4 @@
-import { Handlebars } from '../lib/handlebars.js';
+import { Handlebars } from '../lib/handlebars';
 
 export const markdown = () => ({
   name: 'markdown',

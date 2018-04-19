@@ -1,5 +1,5 @@
 import { parse } from 'tinymath';
-import { unquoteString } from '../../../../common/lib/unquote_string.js';
+import { unquoteString } from '../../../../common/lib/unquote_string';
 
 // break out into separate function, write unit tests first
 export function getFormObject(argValue) {

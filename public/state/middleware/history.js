@@ -3,7 +3,7 @@ import { routes } from '../../apps';
 import { historyProvider } from '../../lib/history_provider';
 import { routerProvider } from '../../lib/router_provider';
 import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
-import { initializeWorkpad } from '../actions/workpad.js';
+import { initializeWorkpad } from '../actions/workpad';
 import { isAppReady } from '../selectors/app';
 
 export const historyMiddleware = ({ dispatch, getState }) => {

@@ -1,5 +1,5 @@
 import { evaluate } from 'tinymath';
-import { pivotObjectArray } from '../lib/pivot_object_array.js';
+import { pivotObjectArray } from '../lib/pivot_object_array';
 
 export const math = () => ({
   name: 'math',

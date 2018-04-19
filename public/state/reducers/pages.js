@@ -1,6 +1,6 @@
 import { handleActions } from 'redux-actions';
 import { push, set, del, insert } from 'object-path-immutable';
-import { getId } from '../../lib/get_id.js';
+import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';

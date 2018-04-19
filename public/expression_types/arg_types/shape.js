@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ShapePicker } from '../../components/shape_picker/shape_picker.js';
-import { templateFromReactComponent } from '../../lib/template_from_react_component.js';
+import { ShapePicker } from '../../components/shape_picker/shape_picker';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const ShapeArgInput = ({ argValue, onValueChange }) => {
   const onChange = val => onValueChange(val);

@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { math } from '../math.js';
+import { math } from '../math';
 import { emptyTable, testTable } from './fixtures/test_tables';
 
 describe('math', () => {

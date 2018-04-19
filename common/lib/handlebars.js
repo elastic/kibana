@@ -1,6 +1,6 @@
 import Hbars from 'handlebars/dist/handlebars';
 import { evaluate } from 'tinymath';
-import { pivotObjectArray } from './pivot_object_array.js';
+import { pivotObjectArray } from './pivot_object_array';
 
 // example use: {{math rows 'mean(price - cost)' 2}}
 Hbars.registerHelper('math', (rows, expression, precision) => {

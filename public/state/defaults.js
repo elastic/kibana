@@ -1,4 +1,4 @@
-import { getId } from '../lib/get_id.js';
+import { getId } from '../lib/get_id';
 
 export const getDefaultElement = () => {
   return {
