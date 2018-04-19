@@ -1,5 +1,5 @@
-import { parseInterval } from 'ui/utils/parse_interval';
-import { uiModules } from 'ui/modules';
+import { parseInterval } from './utils/parse_interval';
+import { uiModules } from './modules';
 
 uiModules
   .get('kibana')

@@ -6,7 +6,7 @@ import { VislibLibAxisTitleProvider } from './axis_title';
 import { VislibAxisLabelsProvider } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
 import { VislibLibAxisConfigProvider } from './axis_config';
-import { VislibError } from 'ui/errors';
+import { VislibError } from '../../../errors';
 
 export function VislibLibAxisProvider(Private) {
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);
@@ -34,7 +34,7 @@ export function VislibLibAxisProvider(Private) {
           return d.x;
         })
         .y(d => {
-          if (this.axisConfig.get('scale.offset') === 'expand') {
+          if (typeof this.axisConfig.get('scale.offset') === 'function' && this.axisConfig.get('scale.offset').name === 'expand') {
             return Math.abs(d.y);
           }
           return d.y;

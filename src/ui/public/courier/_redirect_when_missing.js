@@ -1,4 +1,4 @@
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../errors';
 
 export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise) {
   const notify = new Notifier();

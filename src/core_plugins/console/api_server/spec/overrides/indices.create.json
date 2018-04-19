@@ -8,7 +8,7 @@
         "__scope_link": "_put_mapping"
       },
       "settings": {
-        "__scope_link": "_put_settings"
+        "__scope_link": "_settings_autocomplete"
       },
       "aliases": {
         "__template": {

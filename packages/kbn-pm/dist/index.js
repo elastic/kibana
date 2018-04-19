@@ -73,7 +73,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 753);
+/******/ 	return __webpack_require__(__webpack_require__.s = 752);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -2234,7 +2234,7 @@ function loadLocale(name) {
         try {
             oldLocale = globalLocale._abbr;
             var aliasedRequire = require;
-            __webpack_require__(697)("./" + name);
+            __webpack_require__(696)("./" + name);
             getSetGlobalLocale(oldLocale);
         } catch (e) {}
     }
@@ -5201,12 +5201,6 @@ var SafeSubscriber = (function (_super) {
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5291,7 +5285,7 @@ exports.subscribeToResult = subscribeToResult;
 //# sourceMappingURL=subscribeToResult.js.map
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5325,6 +5319,12 @@ var OuterSubscriber = (function (_super) {
 }(Subscriber_1.Subscriber));
 exports.OuterSubscriber = OuterSubscriber;
 //# sourceMappingURL=OuterSubscriber.js.map
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
 
 /***/ }),
 /* 6 */
@@ -5830,11 +5830,11 @@ module.exports = require("util");
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(749);
-const ansiStyles = __webpack_require__(748);
-const stdoutColor = __webpack_require__(744).stdout;
+const escapeStringRegexp = __webpack_require__(748);
+const ansiStyles = __webpack_require__(747);
+const stdoutColor = __webpack_require__(743).stdout;
 
-const template = __webpack_require__(741);
+const template = __webpack_require__(740);
 
 const isSimpleWindowsTerm = process.platform === 'win32' && !(process.env.TERM || '').toLowerCase().startsWith('xterm');
 
@@ -6895,8 +6895,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /* tslint:enable:max-line-length */
 /**
  * Projects each source value to an Observable which is merged in the output
@@ -7683,16 +7683,16 @@ var minimatch = __webpack_require__(75)
 var Minimatch = minimatch.Minimatch
 var inherits = __webpack_require__(321)
 var EE = __webpack_require__(51).EventEmitter
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var assert = __webpack_require__(33)
 var isAbsolute = __webpack_require__(74)
-var globSync = __webpack_require__(733)
+var globSync = __webpack_require__(732)
 var common = __webpack_require__(320)
 var alphasort = common.alphasort
 var alphasorti = common.alphasorti
 var setopts = common.setopts
 var ownProp = common.ownProp
-var inflight = __webpack_require__(732)
+var inflight = __webpack_require__(731)
 var util = __webpack_require__(13)
 var childrenIgnored = common.childrenIgnored
 var isIgnored = common.isIgnored
@@ -8444,7 +8444,7 @@ exports.includeTransitiveProjects = includeTransitiveProjects;
 
 var _glob = _interopRequireDefault(__webpack_require__(34));
 
-var _path = _interopRequireDefault(__webpack_require__(3));
+var _path = _interopRequireDefault(__webpack_require__(5));
 
 var _util = __webpack_require__(13);
 
@@ -8456,7 +8456,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const glob = (0, _util.promisify)(_glob.default);
 
-async function getProjects(rootPath, projectsPathsPatterns) {
+async function getProjects(rootPath, projectsPathsPatterns, {
+  include = [],
+  exclude = []
+} = {}) {
   const projects = new Map();
 
   for (const pattern of projectsPathsPatterns) {
@@ -8471,6 +8474,11 @@ async function getProjects(rootPath, projectsPathsPatterns) {
       const projectDir = _path.default.dirname(projectConfigPath);
 
       const project = await _project.Project.fromPath(projectDir);
+      const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
+
+      if (excludeProject) {
+        continue;
+      }
 
       if (projects.has(project.name)) {
         throw new _errors.CliError(`There are multiple projects with the same name [${project.name}]`, {
@@ -8532,39 +8540,36 @@ function buildProjectGraph(projects) {
 }
 
 function topologicallyBatchProjects(projectsToBatch, projectGraph) {
-  // We're going to be chopping stuff out of this array, so copy it.
-  const projects = [...projectsToBatch.values()]; // This maps project names to the number of projects that depend on them.
-  // As projects are completed their names will be removed from this object.
-
-  const refCounts = {};
-  projects.forEach(pkg => projectGraph.get(pkg.name).forEach(dep => {
-    if (!refCounts[dep.name]) refCounts[dep.name] = 0;
-    refCounts[dep.name]++;
-  }));
+  // We're going to be chopping stuff out of this list, so copy it.
+  const projectToBatchNames = new Set(projectsToBatch.keys());
   const batches = [];
 
-  while (projects.length > 0) {
+  while (projectToBatchNames.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
-    const batch = projects.filter(pkg => {
-      const projectDeps = projectGraph.get(pkg.name);
-      return projectDeps.filter(dep => refCounts[dep.name] > 0).length === 0;
-    }); // If we weren't able to find a project with no remaining dependencies,
+    const batch = [];
+
+    for (const projectName of projectToBatchNames) {
+      const projectDeps = projectGraph.get(projectName);
+      const hasNotBatchedDependencies = projectDeps.some(dep => projectToBatchNames.has(dep.name));
+
+      if (!hasNotBatchedDependencies) {
+        batch.push(projectsToBatch.get(projectName));
+      }
+    } // If we weren't able to find a project with no remaining dependencies,
     // then we've encountered a cycle in the dependency graph.
 
-    const hasCycles = projects.length > 0 && batch.length === 0;
+
+    const hasCycles = batch.length === 0;
 
     if (hasCycles) {
-      const cycleProjectNames = projects.map(p => p.name);
+      const cycleProjectNames = [...projectToBatchNames];
       const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
       throw new _errors.CliError(message);
     }
 
     batches.push(batch);
-    batch.forEach(pkg => {
-      delete refCounts[pkg.name];
-      projects.splice(projects.indexOf(pkg), 1);
-    });
+    batch.forEach(project => projectToBatchNames.delete(project.name));
   }
 
   return batches;
@@ -8602,8 +8607,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 exports.defaultThrottleConfig = {
     leading: true,
     trailing: false
@@ -8895,8 +8900,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ArrayObservable_1 = __webpack_require__(18);
 var isArray_1 = __webpack_require__(16);
 var Subscriber_1 = __webpack_require__(2);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 var iterator_1 = __webpack_require__(31);
 /* tslint:enable:max-line-length */
 /**
@@ -9469,8 +9474,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var ArrayObservable_1 = __webpack_require__(18);
 var isArray_1 = __webpack_require__(16);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 var none = {};
 /* tslint:enable:max-line-length */
 /**
@@ -9884,8 +9889,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Projects each source value to an Observable which is merged in the output
@@ -10367,8 +10372,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Ignores source values for a duration determined by another Observable, then
  * emits the most recent value from the source Observable, then repeats this
@@ -10967,8 +10972,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var FromObservable_1 = __webpack_require__(173);
 var isArray_1 = __webpack_require__(16);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * When any of the provided Observable emits an complete or error notification, it immediately subscribes to the next one
@@ -11110,8 +11115,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var isArray_1 = __webpack_require__(16);
 var ArrayObservable_1 = __webpack_require__(18);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 function race() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -11397,7 +11402,7 @@ exports.mkdirp = exports.readFile = exports.chmod = void 0;
 
 var _fs = _interopRequireDefault(__webpack_require__(8));
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
 var _util = __webpack_require__(13);
 
@@ -11494,7 +11499,7 @@ async function forceCreate(src, dest, type) {
 // that are in the direct sync flow of nyc's outputCoverage are
 // ignored, since we can never get coverage for them.
 var assert = __webpack_require__(33)
-var signals = __webpack_require__(705)
+var signals = __webpack_require__(704)
 
 var EE = __webpack_require__(51)
 /* istanbul ignore if */
@@ -11713,11 +11718,11 @@ minimatch.Minimatch = Minimatch
 
 var path = { sep: '/' }
 try {
-  path = __webpack_require__(3)
+  path = __webpack_require__(5)
 } catch (er) {}
 
 var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
-var expand = __webpack_require__(737)
+var expand = __webpack_require__(736)
 
 var plTypes = {
   '!': { open: '(?:(?!(?:', close: '))[^/]*?)'},
@@ -12746,19 +12751,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getProjectPaths = getProjectPaths;
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
 /**
  * Returns all the paths where plugins are located
  */
 function getProjectPaths(rootPath, options) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
-  const skipKibana = Boolean(options['skip-kibana']);
-  const projectPaths = [(0, _path.resolve)(rootPath, 'packages/*')];
-
-  if (!skipKibana) {
-    projectPaths.push(rootPath);
-  }
+  const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
 
   if (!skipKibanaExtra) {
     projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*'));
@@ -12984,8 +12984,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Combines the source Observable with other Observables to create an Observable
@@ -13125,8 +13125,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Subject_1 = __webpack_require__(10);
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Branch out the source Observable values as a nested Observable using a
  * factory function of closing Observables to determine when to start a new
@@ -13261,8 +13261,8 @@ var Subject_1 = __webpack_require__(10);
 var Subscription_1 = __webpack_require__(7);
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Branch out the source Observable values as a nested Observable starting from
  * an emission from `openings` and ending when the output of `closingSelector`
@@ -13752,8 +13752,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Subject_1 = __webpack_require__(10);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Branch out the source Observable values as a nested Observable whenever
  * `windowBoundaries` emits.
@@ -13891,8 +13891,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var async_1 = __webpack_require__(6);
 var isDate_1 = __webpack_require__(40);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  *
@@ -14502,8 +14502,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Emits the values emitted by the source Observable until a `notifier`
  * Observable emits a value.
@@ -14680,8 +14680,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Projects each source value to the same Observable which is flattened multiple
@@ -14996,8 +14996,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Returns an Observable that skips items emitted by the source Observable until a second Observable emits an item.
  *
@@ -15677,8 +15677,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Emits the most recently emitted value from the source Observable whenever
  * another Observable, the `notifier`, emits.
@@ -15774,8 +15774,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Subject_1 = __webpack_require__(10);
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Returns an Observable that mirrors the source Observable with the exception of an `error`. If the source Observable
  * calls `error`, this method will emit the Throwable that caused the error to the Observable returned from `notifier`.
@@ -15952,8 +15952,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Subject_1 = __webpack_require__(10);
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Returns an Observable that mirrors the source Observable with the exception of a `complete`. If the source
  * Observable calls `complete`, this method will emit to the Observable returned from `notifier`. If that Observable
@@ -16743,8 +16743,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * Applies an accumulator function over the source Observable where the
  * accumulator function itself returns an Observable, then each intermediate
@@ -16876,8 +16876,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Projects each source value to the same Observable which is merged multiple
@@ -18327,8 +18327,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Recursively projects each source value to an Observable which is merged in
@@ -18482,8 +18482,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /* tslint:enable:max-line-length */
 /**
  * Projects each source value to an Observable which is merged in the output
@@ -18626,8 +18626,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Converts a higher-order Observable into a first-order Observable by dropping
  * inner Observables while the previous inner Observable has not yet completed.
@@ -18911,8 +18911,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 var Set_1 = __webpack_require__(523);
 /**
  * Returns an Observable that emits all items emitted by the source Observable that are distinct by comparison from previous items.
@@ -19039,8 +19039,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Subscriber_1 = __webpack_require__(2);
 var Observable_1 = __webpack_require__(0);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Delays the emission of items from the source Observable by a given time span
  * determined by the emissions of another Observable.
@@ -19500,8 +19500,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Emits a value from the source Observable only after a particular time span
  * determined by another Observable has passed without another source emission.
@@ -19985,8 +19985,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Catches errors on the observable to be handled by returning a new observable or throwing an error.
  *
@@ -20110,8 +20110,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Subscription_1 = __webpack_require__(7);
 var tryCatch_1 = __webpack_require__(11);
 var errorObject_1 = __webpack_require__(9);
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Buffers the source Observable values, using a factory function of closing
  * Observables to determine when to close, emit, and reset the buffer.
@@ -20238,8 +20238,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Subscription_1 = __webpack_require__(7);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * Buffers the source Observable values starting from an emission from
  * `openings` and ending when the output of `closingSelector` emits.
@@ -20752,8 +20752,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var OuterSubscriber_1 = __webpack_require__(5);
-var subscribeToResult_1 = __webpack_require__(4);
+var OuterSubscriber_1 = __webpack_require__(4);
+var subscribeToResult_1 = __webpack_require__(3);
 /**
  * Buffers the source Observable values until `closingNotifier` emits.
  *
@@ -21876,7 +21876,7 @@ module.exports = typeof Promise === 'function' ? Promise : __webpack_require__(6
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const globby = __webpack_require__(657);
 const isPathCwd = __webpack_require__(653);
 const isPathInCwd = __webpack_require__(652);
@@ -21951,7 +21951,7 @@ module.exports.sync = (patterns, opts) => {
 /* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var path = __webpack_require__(3);
+var path = __webpack_require__(5);
 var fs = __webpack_require__(8);
 var _0777 = parseInt('0777', 8);
 
@@ -22058,7 +22058,7 @@ mkdirP.sync = function sync (p, opts, made) {
 "use strict";
 
 const fs = __webpack_require__(8);
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const pify = __webpack_require__(20);
 
 const defaults = {
@@ -33942,9 +33942,9 @@ var stream = __webpack_require__(21);
 var util = __webpack_require__(13);
 var fs = __webpack_require__(8);
 
-var byline = __webpack_require__(701);
-var through = __webpack_require__(699);
-var duplexer = __webpack_require__(698);
+var byline = __webpack_require__(700);
+var through = __webpack_require__(698);
+var duplexer = __webpack_require__(697);
 var moment = __webpack_require__(1);
 
 module.exports = Logger;
@@ -34153,11 +34153,11 @@ module.exports = LRUCache
 
 // This will be a proper iterable 'Map' in engines that support it,
 // or a fakey-fake PseudoMap in older versions.
-var Map = __webpack_require__(722)
+var Map = __webpack_require__(721)
 var util = __webpack_require__(13)
 
 // A linked list to keep track of recently-used-ness
-var Yallist = __webpack_require__(720)
+var Yallist = __webpack_require__(719)
 
 // use symbols if possible, otherwise just _props
 var hasSymbol = typeof Symbol === 'function'
@@ -34623,8 +34623,8 @@ function Entry (key, value, length, now, maxAge) {
 "use strict";
 
 
-var path = __webpack_require__(3);
-var which = __webpack_require__(726);
+var path = __webpack_require__(5);
+var which = __webpack_require__(725);
 var LRU = __webpack_require__(315);
 
 var commandCache = new LRU({ max: 50, maxAge: 30 * 1000 });  // Cache just for 30sec
@@ -34666,13 +34666,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Project = void 0;
 
-var _path = _interopRequireDefault(__webpack_require__(3));
+var _path = _interopRequireDefault(__webpack_require__(5));
 
 var _util = __webpack_require__(13);
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
-var _scripts = __webpack_require__(731);
+var _scripts = __webpack_require__(730);
 
 var _package_json = __webpack_require__(50);
 
@@ -34910,7 +34910,7 @@ function ownProp (obj, field) {
   return Object.prototype.hasOwnProperty.call(obj, field)
 }
 
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var minimatch = __webpack_require__(75)
 var isAbsolute = __webpack_require__(74)
 var Minimatch = minimatch.Minimatch
@@ -35147,7 +35147,7 @@ try {
   if (typeof util.inherits !== 'function') throw '';
   module.exports = util.inherits;
 } catch (e) {
-  module.exports = __webpack_require__(734);
+  module.exports = __webpack_require__(733);
 }
 
 
@@ -35168,7 +35168,7 @@ var origRealpathSync = fs.realpathSync
 
 var version = process.version
 var ok = /^v[0-5]\./.test(version)
-var old = __webpack_require__(738)
+var old = __webpack_require__(737)
 
 function newError (er) {
   return er && er.syscall === 'realpath' && (
@@ -35228,7 +35228,7 @@ function unmonkeypatch () {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* MIT license */
-var cssKeywords = __webpack_require__(746);
+var cssKeywords = __webpack_require__(745);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -36433,7 +36433,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const fsConstants = __webpack_require__(8).constants;
 const Buffer = __webpack_require__(329).Buffer;
 const CpFileError = __webpack_require__(78);
@@ -36779,7 +36779,7 @@ module.exports = function (val) {
 "use strict";
 
 const EventEmitter = __webpack_require__(51);
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const arrify = __webpack_require__(333);
 const globby = __webpack_require__(332);
 const cpFile = __webpack_require__(330);
@@ -36890,7 +36890,7 @@ exports.buildProductionProjects = buildProductionProjects;
 
 var _del = _interopRequireDefault(__webpack_require__(185));
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
 var _cpy = _interopRequireDefault(__webpack_require__(334));
 
@@ -37030,7 +37030,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.renderProjectsTree = renderProjectsTree;
 
-var _path = _interopRequireDefault(__webpack_require__(3));
+var _path = _interopRequireDefault(__webpack_require__(5));
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
@@ -37541,7 +37541,16 @@ async function runCommand(command, config) {
   try {
     console.log(_chalk.default.bold(`Running [${_chalk.default.green(command.name)}] command from [${_chalk.default.yellow(config.rootPath)}]:\n`));
     const projectPaths = (0, _config.getProjectPaths)(config.rootPath, config.options);
-    const projects = await (0, _projects.getProjects)(config.rootPath, projectPaths);
+    const projects = await (0, _projects.getProjects)(config.rootPath, projectPaths, {
+      exclude: toArray(config.options.exclude),
+      include: toArray(config.options.include)
+    });
+
+    if (projects.size === 0) {
+      console.log(_chalk.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
+      return process.exit(1);
+    }
+
     const projectGraph = (0, _projects.buildProjectGraph)(projects);
     console.log(_chalk.default.bold(`Found [${_chalk.default.green(projects.size.toString())}] projects:\n`));
     console.log((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
@@ -37569,6 +37578,14 @@ async function runCommand(command, config) {
 
     process.exit(1);
   }
+}
+
+function toArray(value) {
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
 }
 
 /***/ }),
@@ -45508,8 +45525,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Observable_1 = __webpack_require__(0);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * We need this JSDoc comment for affecting ESDoc.
  * @extends {Ignored}
@@ -46191,8 +46208,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Observable_1 = __webpack_require__(0);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * We need this JSDoc comment for affecting ESDoc.
  * @extends {Ignored}
@@ -46858,8 +46875,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Observable_1 = __webpack_require__(0);
 var EmptyObservable_1 = __webpack_require__(17);
 var isArray_1 = __webpack_require__(16);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * We need this JSDoc comment for affecting ESDoc.
  * @extends {Ignored}
@@ -47106,8 +47123,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Observable_1 = __webpack_require__(0);
-var subscribeToResult_1 = __webpack_require__(4);
-var OuterSubscriber_1 = __webpack_require__(5);
+var subscribeToResult_1 = __webpack_require__(3);
+var OuterSubscriber_1 = __webpack_require__(4);
 /**
  * We need this JSDoc comment for affecting ESDoc.
  * @extends {Ignored}
@@ -48621,22 +48638,28 @@ const WatchCommand = {
   description: 'Runs `kbn:watch` script for every project.',
 
   async run(projects, projectGraph) {
-    const projectsWithWatchScript = new Map();
+    const projectsToWatch = new Map();
 
     for (const project of projects.values()) {
+      // We can't watch project that doesn't have `kbn:watch` script.
       if (project.hasScript(watchScriptName)) {
-        projectsWithWatchScript.set(project.name, project);
+        projectsToWatch.set(project.name, project);
       }
     }
 
-    const projectNames = Array.from(projectsWithWatchScript.keys());
+    if (projectsToWatch.size === 0) {
+      console.log(_chalk.default.red(`\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`));
+      return;
+    }
+
+    const projectNames = Array.from(projectsToWatch.keys());
     console.log(_chalk.default.bold(_chalk.default.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`))); // Kibana should always be run the last, so we don't rely on automatic
     // topological batching and push it to the last one-entry batch manually.
 
-    projectsWithWatchScript.delete(kibanaProjectName);
-    const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsWithWatchScript, projectGraph);
+    const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
+    const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsToWatch, projectGraph);
 
-    if (projects.has(kibanaProjectName)) {
+    if (shouldWatchKibanaProject) {
       batchedProjects.push([projects.get(kibanaProjectName)]);
     }
 
@@ -49072,7 +49095,7 @@ module.exports = rimraf
 rimraf.sync = rimrafSync
 
 var assert = __webpack_require__(33)
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var fs = __webpack_require__(8)
 var glob = __webpack_require__(34)
 var _0666 = parseInt('666', 8)
@@ -49441,7 +49464,7 @@ function rmkidsSync (p, options) {
 "use strict";
 
 
-var path = __webpack_require__(3);
+var path = __webpack_require__(5);
 
 module.exports = function (thePath, potentialParent) {
     // For inside-directory checking, we want to allow trailing slashes, so normalize.
@@ -49475,7 +49498,7 @@ function stripTrailingSep(thePath) {
 
 "use strict";
 
-var path = __webpack_require__(3);
+var path = __webpack_require__(5);
 var pathIsInside = __webpack_require__(650);
 
 module.exports = function (a, b) {
@@ -49509,7 +49532,7 @@ module.exports = function (str) {
 
 "use strict";
 
-var path = __webpack_require__(3);
+var path = __webpack_require__(5);
 
 module.exports = function (str) {
 	return path.resolve(str) === path.resolve(process.cwd());
@@ -50070,7 +50093,7 @@ var _del = _interopRequireDefault(__webpack_require__(185));
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
 var _ora = _interopRequireDefault(__webpack_require__(647));
 
@@ -50137,7 +50160,7 @@ cmdShim.ifExists = cmdShimIfExists
 var fs = __webpack_require__(32)
 
 var mkdir = __webpack_require__(186)
-  , path = __webpack_require__(3)
+  , path = __webpack_require__(5)
   , shebangExpr = /^#\!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+)(.*)$/
 
 function cmdShimIfExists (from, to, cb) {
@@ -50315,7 +50338,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.linkProjectExecutables = linkProjectExecutables;
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
@@ -50658,7 +50681,7 @@ module.exports._cleanupOnExit = cleanupOnExit
 var fs = __webpack_require__(32)
 var MurmurHash3 = __webpack_require__(663)
 var onExit = __webpack_require__(71)
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var activeFiles = {}
 
 var invocations = 0
@@ -50856,7 +50879,7 @@ function writeFileSync (filename, data, options) {
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const fs = __webpack_require__(32);
 const writeFileAtomic = __webpack_require__(664);
 const sortKeys = __webpack_require__(188);
@@ -50936,7 +50959,7 @@ module.exports.sync = (fp, data, opts) => {
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const writeJsonFile = __webpack_require__(665);
 const sortKeys = __webpack_require__(188);
 
@@ -52937,7 +52960,7 @@ exports.main = function commonjsMain(args) {
         console.log('Usage: '+args[0]+' FILE');
         process.exit(1);
     }
-    var source = __webpack_require__(8).readFileSync(__webpack_require__(3).normalize(args[1]), "utf8");
+    var source = __webpack_require__(8).readFileSync(__webpack_require__(5).normalize(args[1]), "utf8");
     return exports.parser.parse(source);
 };
 if (typeof module !== 'undefined' && __webpack_require__.c[__webpack_require__.s] === module) {
@@ -55579,7 +55602,7 @@ function chownErOk (er) {
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const fs = __webpack_require__(32);
 const stripBom = __webpack_require__(687);
 const parseJson = __webpack_require__(686);
@@ -55597,7 +55620,7 @@ module.exports.sync = fp => parse(fs.readFileSync(fp, 'utf8'), fp);
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const loadJsonFile = __webpack_require__(691);
 const pathType = __webpack_require__(682);
 
@@ -55647,31 +55670,12 @@ module.exports.sync = (fp, opts) => {
 
 /***/ }),
 /* 693 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.yarnPath = void 0;
-
-var _path = __webpack_require__(3);
-
-// This is placed directly in `./src` to be consistent with the relative
-// location from `./dist` in the production build
-const yarnPath = (0, _path.join)(__dirname, '../vendor/yarn-1.3.2.js');
-exports.yarnPath = yarnPath;
-
-/***/ }),
-/* 694 */
 /***/ (function(module) {
 
 module.exports = {"name":"strong-log-transformer","version":"1.0.6","description":"Stream transformer that prefixes lines with timestamps and other things.","author":"Ryan Graham <ryan@strongloop.com>","license":"Artistic-2.0","repository":{"type":"git","url":"git://github.com/strongloop/strong-log-transformer"},"keywords":["logging","streams"],"bugs":{"url":"https://github.com/strongloop/strong-log-transformer/issues"},"homepage":"https://github.com/strongloop/strong-log-transformer","directories":{"test":"test"},"bin":{"sl-log-transformer":"bin/sl-log-transformer.js"},"main":"index.js","scripts":{"test":"tap --coverage --coverage-report=cobertura test/test-*"},"dependencies":{"byline":"^5.0.0","duplexer":"^0.1.1","minimist":"^0.1.0","moment":"^2.6.0","through":"^2.3.4"},"devDependencies":{"tap":"^1.3.2"}};
 
 /***/ }),
-/* 695 */
+/* 694 */
 /***/ (function(module, exports) {
 
 module.exports = function (args, opts) {
@@ -55872,7 +55876,7 @@ function isNumber (x) {
 
 
 /***/ }),
-/* 696 */
+/* 695 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55883,11 +55887,11 @@ function isNumber (x) {
 
 
 
-var minimist = __webpack_require__(695);
-var path = __webpack_require__(3);
+var minimist = __webpack_require__(694);
+var path = __webpack_require__(5);
 
 var Logger = __webpack_require__(313);
-var pkg = __webpack_require__(694);
+var pkg = __webpack_require__(693);
 
 module.exports = cli;
 
@@ -55940,7 +55944,7 @@ function usage($0, p) {
 
 
 /***/ }),
-/* 697 */
+/* 696 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -56204,10 +56208,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 697;
+webpackContext.id = 696;
 
 /***/ }),
-/* 698 */
+/* 697 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(21)
@@ -56300,7 +56304,7 @@ function duplex(writer, reader) {
 
 
 /***/ }),
-/* 699 */
+/* 698 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(21)
@@ -56414,13 +56418,13 @@ function through (write, end, opts) {
 
 
 /***/ }),
-/* 700 */
+/* 699 */
 /***/ (function(module, exports) {
 
 module.exports = require("timers");
 
 /***/ }),
-/* 701 */
+/* 700 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright (C) 2011-2015 John Hewson
@@ -56445,7 +56449,7 @@ module.exports = require("timers");
 
 var stream = __webpack_require__(21),
     util = __webpack_require__(13),
-    timers = __webpack_require__(700);
+    timers = __webpack_require__(699);
 
 // convinience API
 module.exports = function(readStream, options) {
@@ -56581,7 +56585,7 @@ LineStream.prototype._reencode = function(line, chunkEncoding) {
 
 
 /***/ }),
-/* 702 */
+/* 701 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright IBM Corp. 2014. All Rights Reserved.
@@ -56590,11 +56594,11 @@ LineStream.prototype._reencode = function(line, chunkEncoding) {
 // License text available at https://opensource.org/licenses/Artistic-2.0
 
 module.exports = __webpack_require__(313);
-module.exports.cli = __webpack_require__(696);
+module.exports.cli = __webpack_require__(695);
 
 
 /***/ }),
-/* 703 */
+/* 702 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56642,7 +56646,7 @@ module.exports = opts => {
 
 
 /***/ }),
-/* 704 */
+/* 703 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56686,7 +56690,7 @@ module.exports.__test__ = errname;
 
 
 /***/ }),
-/* 705 */
+/* 704 */
 /***/ (function(module, exports) {
 
 // This is not the set of all possible signals.
@@ -56745,7 +56749,7 @@ if (process.platform === 'linux') {
 
 
 /***/ }),
-/* 706 */
+/* 705 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56767,7 +56771,7 @@ module.exports = (promise, onFinally) => {
 
 
 /***/ }),
-/* 707 */
+/* 706 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56825,12 +56829,12 @@ module.exports = opts => {
 
 
 /***/ }),
-/* 708 */
+/* 707 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const bufferStream = __webpack_require__(707);
+const bufferStream = __webpack_require__(706);
 
 function getStream(inputStream, opts) {
 	if (!inputStream) {
@@ -56883,7 +56887,7 @@ module.exports.array = (stream, opts) => getStream(stream, Object.assign({}, opt
 
 
 /***/ }),
-/* 709 */
+/* 708 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56911,7 +56915,7 @@ isStream.transform = function (stream) {
 
 
 /***/ }),
-/* 710 */
+/* 709 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56931,13 +56935,13 @@ module.exports = opts => {
 
 
 /***/ }),
-/* 711 */
+/* 710 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const path = __webpack_require__(3);
-const pathKey = __webpack_require__(710);
+const path = __webpack_require__(5);
+const pathKey = __webpack_require__(709);
 
 module.exports = opts => {
 	opts = Object.assign({
@@ -56977,7 +56981,7 @@ module.exports.env = opts => {
 
 
 /***/ }),
-/* 712 */
+/* 711 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56999,7 +57003,7 @@ module.exports = function (x) {
 
 
 /***/ }),
-/* 713 */
+/* 712 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57009,7 +57013,7 @@ module.exports = __webpack_require__(72).spawnSync;
 
 
 /***/ }),
-/* 714 */
+/* 713 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57089,7 +57093,7 @@ module.exports.notFoundError = notFoundError;
 
 
 /***/ }),
-/* 715 */
+/* 714 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57098,12 +57102,12 @@ module.exports = /^#!.*/;
 
 
 /***/ }),
-/* 716 */
+/* 715 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var shebangRegex = __webpack_require__(715);
+var shebangRegex = __webpack_require__(714);
 
 module.exports = function (str) {
 	var match = str.match(shebangRegex);
@@ -57124,7 +57128,7 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 717 */
+/* 716 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57132,7 +57136,7 @@ module.exports = function (str) {
 
 var fs = __webpack_require__(8);
 var LRU = __webpack_require__(315);
-var shebangCommand = __webpack_require__(716);
+var shebangCommand = __webpack_require__(715);
 
 var shebangCache = new LRU({ max: 50, maxAge: 30 * 1000 });  // Cache just for 30sec
 
@@ -57168,7 +57172,7 @@ module.exports = readShebang;
 
 
 /***/ }),
-/* 718 */
+/* 717 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57187,7 +57191,7 @@ module.exports = escapeCommand;
 
 
 /***/ }),
-/* 719 */
+/* 718 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57212,7 +57216,7 @@ module.exports = hasEmptyArgumentBug();
 
 
 /***/ }),
-/* 720 */
+/* 719 */
 /***/ (function(module, exports) {
 
 module.exports = Yallist
@@ -57588,7 +57592,7 @@ function Node (value, prev, next, list) {
 
 
 /***/ }),
-/* 721 */
+/* 720 */
 /***/ (function(module, exports) {
 
 var hasOwnProperty = Object.prototype.hasOwnProperty
@@ -57707,7 +57711,7 @@ function set (data, k, v) {
 
 
 /***/ }),
-/* 722 */
+/* 721 */
 /***/ (function(module, exports, __webpack_require__) {
 
 if (process.env.npm_package_name === 'pseudomap' &&
@@ -57717,12 +57721,12 @@ if (process.env.npm_package_name === 'pseudomap' &&
 if (typeof Map === 'function' && !process.env.TEST_PSEUDOMAP) {
   module.exports = Map
 } else {
-  module.exports = __webpack_require__(721)
+  module.exports = __webpack_require__(720)
 }
 
 
 /***/ }),
-/* 723 */
+/* 722 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -57769,7 +57773,7 @@ function checkMode (stat, options) {
 
 
 /***/ }),
-/* 724 */
+/* 723 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -57817,15 +57821,15 @@ function sync (path, options) {
 
 
 /***/ }),
-/* 725 */
+/* 724 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(8)
 var core
 if (process.platform === 'win32' || global.TESTING_WINDOWS) {
-  core = __webpack_require__(724)
-} else {
   core = __webpack_require__(723)
+} else {
+  core = __webpack_require__(722)
 }
 
 module.exports = isexe
@@ -57880,7 +57884,7 @@ function sync (path, options) {
 
 
 /***/ }),
-/* 726 */
+/* 725 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = which
@@ -57890,9 +57894,9 @@ var isWindows = process.platform === 'win32' ||
     process.env.OSTYPE === 'cygwin' ||
     process.env.OSTYPE === 'msys'
 
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var COLON = isWindows ? ';' : ':'
-var isexe = __webpack_require__(725)
+var isexe = __webpack_require__(724)
 
 function getNotFoundError (cmd) {
   var er = new Error('not found: ' + cmd)
@@ -58021,17 +58025,17 @@ function whichSync (cmd, opt) {
 
 
 /***/ }),
-/* 727 */
+/* 726 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var resolveCommand = __webpack_require__(316);
-var hasEmptyArgumentBug = __webpack_require__(719);
+var hasEmptyArgumentBug = __webpack_require__(718);
 var escapeArgument = __webpack_require__(314);
-var escapeCommand = __webpack_require__(718);
-var readShebang = __webpack_require__(717);
+var escapeCommand = __webpack_require__(717);
+var readShebang = __webpack_require__(716);
 
 var isWin = process.platform === 'win32';
 var skipShellRegExp = /\.(?:com|exe)$/i;
@@ -58141,15 +58145,15 @@ module.exports = parse;
 
 
 /***/ }),
-/* 728 */
+/* 727 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var cp = __webpack_require__(72);
-var parse = __webpack_require__(727);
-var enoent = __webpack_require__(714);
+var parse = __webpack_require__(726);
+var enoent = __webpack_require__(713);
 
 var cpSpawnSync = cp.spawnSync;
 
@@ -58176,7 +58180,7 @@ function spawnSync(command, args, options) {
 
     if (!cpSpawnSync) {
         try {
-            cpSpawnSync = __webpack_require__(713);  // eslint-disable-line global-require
+            cpSpawnSync = __webpack_require__(712);  // eslint-disable-line global-require
         } catch (ex) {
             throw new Error(
                 'In order to use spawnSync on node 0.10 or older, you must ' +
@@ -58207,23 +58211,23 @@ module.exports._enoent = enoent;
 
 
 /***/ }),
-/* 729 */
+/* 728 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const path = __webpack_require__(3);
+const path = __webpack_require__(5);
 const childProcess = __webpack_require__(72);
 const util = __webpack_require__(13);
-const crossSpawn = __webpack_require__(728);
-const stripEof = __webpack_require__(712);
-const npmRunPath = __webpack_require__(711);
-const isStream = __webpack_require__(709);
-const _getStream = __webpack_require__(708);
-const pFinally = __webpack_require__(706);
+const crossSpawn = __webpack_require__(727);
+const stripEof = __webpack_require__(711);
+const npmRunPath = __webpack_require__(710);
+const isStream = __webpack_require__(708);
+const _getStream = __webpack_require__(707);
+const pFinally = __webpack_require__(705);
 const onExit = __webpack_require__(71);
-const errname = __webpack_require__(704);
-const stdio = __webpack_require__(703);
+const errname = __webpack_require__(703);
+const stdio = __webpack_require__(702);
 
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 
@@ -58577,7 +58581,7 @@ module.exports.spawn = util.deprecate(module.exports, 'execa.spawn() is deprecat
 
 
 /***/ }),
-/* 730 */
+/* 729 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58589,11 +58593,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.spawn = spawn;
 exports.spawnStreaming = spawnStreaming;
 
-var _execa = _interopRequireDefault(__webpack_require__(729));
+var _execa = _interopRequireDefault(__webpack_require__(728));
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
-var _strongLogTransformer = _interopRequireDefault(__webpack_require__(702));
+var _strongLogTransformer = _interopRequireDefault(__webpack_require__(701));
 
 var _logSymbols = _interopRequireDefault(__webpack_require__(193));
 
@@ -58638,7 +58642,7 @@ function spawnStreaming(command, args, opts, {
 }
 
 /***/ }),
-/* 731 */
+/* 730 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58651,9 +58655,7 @@ exports.installInDir = installInDir;
 exports.runScriptInPackage = runScriptInPackage;
 exports.runScriptInPackageStreaming = runScriptInPackageStreaming;
 
-var _child_process = __webpack_require__(730);
-
-var _paths = __webpack_require__(693);
+var _child_process = __webpack_require__(729);
 
 /**
  * Install all dependencies in the given directory
@@ -58662,7 +58664,7 @@ async function installInDir(directory, extraArgs = []) {
   const options = ['install', '--non-interactive', '--mutex file', ...extraArgs]; // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
 
-  await (0, _child_process.spawn)(_paths.yarnPath, options, {
+  await (0, _child_process.spawn)('yarn', options, {
     cwd: directory
   });
 }
@@ -58675,7 +58677,7 @@ async function runScriptInPackage(script, args, pkg) {
   const execOpts = {
     cwd: pkg.path
   };
-  await (0, _child_process.spawn)(_paths.yarnPath, ['run', script, ...args], execOpts);
+  await (0, _child_process.spawn)('yarn', ['run', script, ...args], execOpts);
 }
 /**
  * Run script in the given directory
@@ -58686,13 +58688,13 @@ function runScriptInPackageStreaming(script, args, pkg) {
   const execOpts = {
     cwd: pkg.path
   };
-  return (0, _child_process.spawnStreaming)(_paths.yarnPath, ['run', script, ...args], execOpts, {
+  return (0, _child_process.spawnStreaming)('yarn', ['run', script, ...args], execOpts, {
     prefix: pkg.name
   });
 }
 
 /***/ }),
-/* 732 */
+/* 731 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var wrappy = __webpack_require__(319)
@@ -58752,7 +58754,7 @@ function slice (args) {
 
 
 /***/ }),
-/* 733 */
+/* 732 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = globSync
@@ -58764,7 +58766,7 @@ var minimatch = __webpack_require__(75)
 var Minimatch = minimatch.Minimatch
 var Glob = __webpack_require__(34).Glob
 var util = __webpack_require__(13)
-var path = __webpack_require__(3)
+var path = __webpack_require__(5)
 var assert = __webpack_require__(33)
 var isAbsolute = __webpack_require__(74)
 var common = __webpack_require__(320)
@@ -59244,7 +59246,7 @@ GlobSync.prototype._makeAbs = function (f) {
 
 
 /***/ }),
-/* 734 */
+/* 733 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -59273,7 +59275,7 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 735 */
+/* 734 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59339,7 +59341,7 @@ function range(a, b, str) {
 
 
 /***/ }),
-/* 736 */
+/* 735 */
 /***/ (function(module, exports) {
 
 module.exports = function (xs, fn) {
@@ -59358,11 +59360,11 @@ var isArray = Array.isArray || function (xs) {
 
 
 /***/ }),
-/* 737 */
+/* 736 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var concatMap = __webpack_require__(736);
-var balanced = __webpack_require__(735);
+var concatMap = __webpack_require__(735);
+var balanced = __webpack_require__(734);
 
 module.exports = expandTop;
 
@@ -59565,7 +59567,7 @@ function expand(str, isTop) {
 
 
 /***/ }),
-/* 738 */
+/* 737 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -59589,7 +59591,7 @@ function expand(str, isTop) {
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var pathModule = __webpack_require__(3);
+var pathModule = __webpack_require__(5);
 var isWindows = process.platform === 'win32';
 var fs = __webpack_require__(8);
 
@@ -59874,7 +59876,7 @@ exports.realpath = function realpath(p, cache, cb) {
 
 
 /***/ }),
-/* 739 */
+/* 738 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59939,7 +59941,7 @@ const BootstrapCommand = {
 exports.BootstrapCommand = BootstrapCommand;
 
 /***/ }),
-/* 740 */
+/* 739 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59950,7 +59952,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.commands = void 0;
 
-var _bootstrap = __webpack_require__(739);
+var _bootstrap = __webpack_require__(738);
 
 var _clean = __webpack_require__(658);
 
@@ -59967,7 +59969,7 @@ const commands = {
 exports.commands = commands;
 
 /***/ }),
-/* 741 */
+/* 740 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60102,7 +60104,7 @@ module.exports = (chalk, tmp) => {
 
 
 /***/ }),
-/* 742 */
+/* 741 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60117,19 +60119,19 @@ module.exports = (flag, argv) => {
 
 
 /***/ }),
-/* 743 */
+/* 742 */
 /***/ (function(module, exports) {
 
 module.exports = require("os");
 
 /***/ }),
-/* 744 */
+/* 743 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const os = __webpack_require__(743);
-const hasFlag = __webpack_require__(742);
+const os = __webpack_require__(742);
+const hasFlag = __webpack_require__(741);
 
 const env = process.env;
 
@@ -60259,7 +60261,7 @@ module.exports = {
 
 
 /***/ }),
-/* 745 */
+/* 744 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var conversions = __webpack_require__(323);
@@ -60362,7 +60364,7 @@ module.exports = function (fromModel) {
 
 
 /***/ }),
-/* 746 */
+/* 745 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60521,11 +60523,11 @@ module.exports = {
 
 
 /***/ }),
-/* 747 */
+/* 746 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var conversions = __webpack_require__(323);
-var route = __webpack_require__(745);
+var route = __webpack_require__(744);
 
 var convert = {};
 
@@ -60605,12 +60607,12 @@ module.exports = convert;
 
 
 /***/ }),
-/* 748 */
+/* 747 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(747);
+const colorConvert = __webpack_require__(746);
 
 const wrapAnsi16 = (fn, offset) => function () {
 	const code = fn.apply(colorConvert, arguments);
@@ -60765,7 +60767,7 @@ Object.defineProperty(module, 'exports', {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(76)(module)))
 
 /***/ }),
-/* 749 */
+/* 748 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60783,7 +60785,7 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 750 */
+/* 749 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60849,7 +60851,7 @@ if (true) {
 
 
 /***/ }),
-/* 751 */
+/* 750 */
 /***/ (function(module, exports) {
 
 const SHORTSPLIT = /$|[!-@\[-`{-~].*/g
@@ -61017,7 +61019,7 @@ module.exports = function(argv, opts) {
 
 
 /***/ }),
-/* 752 */
+/* 751 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61028,15 +61030,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.run = run;
 
-var _getopts = _interopRequireDefault(__webpack_require__(751));
+var _getopts = _interopRequireDefault(__webpack_require__(750));
 
-var _dedent = _interopRequireDefault(__webpack_require__(750));
+var _dedent = _interopRequireDefault(__webpack_require__(749));
 
 var _chalk = _interopRequireDefault(__webpack_require__(14));
 
-var _path = __webpack_require__(3);
+var _path = __webpack_require__(5);
 
-var _commands = __webpack_require__(740);
+var _commands = __webpack_require__(739);
 
 var _run = __webpack_require__(343);
 
@@ -61056,7 +61058,8 @@ function help() {
 
     Global options:
 
-       --skip-kibana        Do not include the root Kibana project when running command.
+       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
 }
@@ -61072,7 +61075,9 @@ async function run(argv) {
 
   const options = (0, _getopts.default)(argv, {
     alias: {
-      h: 'help'
+      h: 'help',
+      i: 'include',
+      e: 'exclude'
     }
   });
   const args = options._;
@@ -61103,7 +61108,7 @@ async function run(argv) {
 }
 
 /***/ }),
-/* 753 */
+/* 752 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61137,7 +61142,7 @@ Object.defineProperty(exports, "transformDependencies", {
   }
 });
 
-var _cli = __webpack_require__(752);
+var _cli = __webpack_require__(751);
 
 var _production = __webpack_require__(336);
 

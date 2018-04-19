@@ -1,5 +1,5 @@
 import template from './kbn_timepicker_absolute_panel.html';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 
 const module = uiModules.get('ui/timepicker');
 

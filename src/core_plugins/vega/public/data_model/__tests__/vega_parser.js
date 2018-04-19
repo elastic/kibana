@@ -35,22 +35,22 @@ describe(`VegaParser._setDefaultColors`, () => {
   it(`vegalite`, test({}, true, {
     config: {
       range: { category: { scheme: 'elastic' } },
-      mark: { color: '#00A69B' }
+      mark: { color: '#00B3A4' }
     }
   }));
 
   it(`vega`, test({}, false, {
     config: {
       range: { category: { scheme: 'elastic' } },
-      arc: { fill: '#00A69B' },
-      area: { fill: '#00A69B' },
-      line: { stroke: '#00A69B' },
-      path: { stroke: '#00A69B' },
-      rect: { fill: '#00A69B' },
-      rule: { stroke: '#00A69B' },
-      shape: { stroke: '#00A69B' },
-      symbol: { fill: '#00A69B' },
-      trail: { fill: '#00A69B' }
+      arc: { fill: '#00B3A4' },
+      area: { fill: '#00B3A4' },
+      line: { stroke: '#00B3A4' },
+      path: { stroke: '#00B3A4' },
+      rect: { fill: '#00B3A4' },
+      rule: { stroke: '#00B3A4' },
+      shape: { stroke: '#00B3A4' },
+      symbol: { fill: '#00B3A4' },
+      trail: { fill: '#00B3A4' }
     }
   }));
 

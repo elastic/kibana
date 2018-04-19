@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version

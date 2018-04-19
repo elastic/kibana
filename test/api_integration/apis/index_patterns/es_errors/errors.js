@@ -117,6 +117,17 @@ export default function ({ getService }) {
 
         expect(converted.output.statusCode).to.be(401);
       });
+
+      it('preserves headers from Boom errors', () => {
+        const error = new Error();
+        error.statusCode = 401;
+        const boomError = Boom.boomify(error, { statusCode: error.statusCode });
+        const wwwAuthenticate = 'Basic realm="Authorization Required"';
+        boomError.output.headers['WWW-Authenticate'] = wwwAuthenticate;
+        const converted = convertEsError(indices, boomError);
+
+        expect(converted.output.headers['WWW-Authenticate']).to.be(wwwAuthenticate);
+      });
     });
   });
 }

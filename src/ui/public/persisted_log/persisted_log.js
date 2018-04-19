@@ -1,6 +1,6 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import _ from 'lodash';
-import { Storage } from 'ui/storage';
+import { Storage } from '../storage';
 
 const localStorage = new Storage(window.localStorage);
 

@@ -1,11 +1,11 @@
 
-import 'ui/field_format_editor';
+import '../field_format_editor';
 import _ from 'lodash';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
-import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import { uiModules } from 'ui/modules';
-import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-import { toastNotifications } from 'ui/notify';
+import { fieldFormats } from '../registry/field_formats';
+import { IndexPatternsFieldProvider } from '../index_patterns/_field';
+import { uiModules } from '../modules';
+import fieldEditorTemplate from './field_editor.html';
+import { toastNotifications } from '../notify';
 import '../directives/documentation_href';
 import './field_editor.less';
 import {
@@ -19,7 +19,7 @@ uiModules
   .get('kibana')
   .directive('fieldEditor', function (Private, $sce, confirmModal, config) {
     const getConfig = (...args) => config.get(...args);
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
+
     const Field = Private(IndexPatternsFieldProvider);
     const getEnabledScriptingLanguages = Private(GetEnabledScriptingLanguagesProvider);
 

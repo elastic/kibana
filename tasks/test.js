@@ -116,7 +116,7 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--skip-kibana', '--skip-kibana-extra'],
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--skip-kibana-extra'],
       opts: { stdio: 'inherit' }
     };
 

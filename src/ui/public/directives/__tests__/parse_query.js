@@ -14,9 +14,9 @@ let $elem;
 let cycleIndex = 0;
 const markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
 let fromUser;
-import { toUser } from 'ui/parse_query/lib/to_user';
-import 'ui/parse_query';
-import { ParseQueryLibFromUserProvider } from 'ui/parse_query/lib/from_user';
+import { toUser } from '../../parse_query/lib/to_user';
+import '../../parse_query';
+import { ParseQueryLibFromUserProvider } from '../../parse_query/lib/from_user';
 
 const init = function () {
   // Load the application

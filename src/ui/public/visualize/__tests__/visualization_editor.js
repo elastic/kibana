@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import MockState from 'fixtures/mock_state';
-import { AggResponseIndexProvider } from 'ui/agg_response';
+import { AggResponseIndexProvider } from '../../agg_response';
 
 describe('visualization_editor directive', function () {
   let $rootScope;
@@ -46,7 +46,9 @@ describe('visualization_editor directive', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
-    $rootScope.visData = aggResponse.tabify(vis, esResponse);
+    $rootScope.visData = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), esResponse, {
+      isHierarchical: vis.isHierarchical()
+    });
     $rootScope.uiState = require('fixtures/mock_ui_state');
     $rootScope.searchSource = searchSource;
     $el = $('<visualization-editor vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource">');

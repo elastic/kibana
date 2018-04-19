@@ -23,7 +23,8 @@ function help() {
 
     Global options:
 
-       --skip-kibana        Do not include the root Kibana project when running command.
+       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
 }
@@ -44,6 +45,8 @@ export async function run(argv: string[]) {
   const options = getopts(argv, {
     alias: {
       h: 'help',
+      i: 'include',
+      e: 'exclude',
     },
   });
 

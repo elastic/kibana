@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Timeseries from 'plugins/metrics/visualizations/components/timeseries';
+import Timeseries from '../../../visualizations/components/timeseries';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';

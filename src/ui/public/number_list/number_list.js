@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { parseRange } from 'ui/utils/range';
-import 'ui/number_list/number_list_input';
-import { uiModules } from 'ui/modules';
-import numberListTemplate from 'ui/number_list/number_list.html';
+import { parseRange } from '../utils/range';
+import './number_list_input';
+import { uiModules } from '../modules';
+import numberListTemplate from './number_list.html';
 
 uiModules
   .get('kibana')

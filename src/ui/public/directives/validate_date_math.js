@@ -1,5 +1,5 @@
 import dateMath from '@kbn/datemath';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules.get('kibana').directive('validateDateMath', function () {
   return {

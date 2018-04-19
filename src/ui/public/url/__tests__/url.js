@@ -4,8 +4,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import faker from 'faker';
 import _ from 'lodash';
-import { AppStateProvider } from 'ui/state_management/app_state';
-import 'ui/url';
+import { AppStateProvider } from '../../state_management/app_state';
+import '..';
 
 // global vars, injected and mocked in init()
 let kbnUrl;

@@ -1,16 +1,16 @@
 import 'angular';
 import 'angular-recursion';
-import 'ui/paginated_table';
-import 'ui/agg_table/agg_table.less';
+import '../paginated_table';
+import './agg_table.less';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import aggTableTemplate from 'ui/agg_table/agg_table.html';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { uiModules } from '../modules';
+import aggTableTemplate from './agg_table.html';
+import { fieldFormats } from '../registry/field_formats';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
   .directive('kbnAggTable', function ($filter, config, Private, RecursionHelper) {
-    const fieldFormats = Private(RegistryFieldFormatsProvider);
+
     const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
     return {

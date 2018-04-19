@@ -2,8 +2,8 @@ import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
-import VislibLibLayoutSplitsGaugeChartChartSplitProvider from 'ui/vislib/lib/layout/splits/gauge_chart/chart_split';
-import VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/gauge_chart/chart_title_split';
+import VislibLibLayoutSplitsGaugeChartChartSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_split';
+import VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider from '../../../../../lib/layout/splits/gauge_chart/chart_title_split';
 
 describe('Vislib Gauge Split Function Test Suite', function () {
   describe('Column Chart', function () {

@@ -1,8 +1,8 @@
 import $ from 'jquery';
-import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
-import { uiModules } from 'ui/modules';
-import spyTemplate from 'ui/visualize/spy.html';
-import { PersistedState } from 'ui/persisted_state';
+import { SpyModesRegistryProvider } from '../registry/spy_modes';
+import { uiModules } from '../modules';
+import spyTemplate from './spy.html';
+import { PersistedState } from '../persisted_state';
 
 uiModules
   .get('app/visualize')

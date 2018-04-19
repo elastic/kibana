@@ -1,11 +1,11 @@
-import { IndexedArray } from 'ui/indexed_array';
-import _ from 'lodash';
-import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { IndexedArray } from '../indexed_array';
+import { IndexPatternsFieldProvider } from './_field';
+import { createLegacyClass } from '../utils/legacy_class';
 
 export function IndexPatternsFieldListProvider(Private) {
   const Field = Private(IndexPatternsFieldProvider);
 
-  _.class(FieldList).inherits(IndexedArray);
+  createLegacyClass(FieldList).inherits(IndexedArray);
   function FieldList(indexPattern, specs) {
     FieldList.Super.call(this, {
       index: ['name'],

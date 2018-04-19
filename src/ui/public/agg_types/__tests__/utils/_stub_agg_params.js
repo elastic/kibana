@@ -3,12 +3,13 @@ import sinon from 'sinon';
 import { BaseParamType } from '../../param_types/base';
 import { FieldParamType } from '../../param_types/field';
 import { OptionedParamType } from '../../param_types/optioned';
+import { createLegacyClass } from '../../../utils/legacy_class';
 
 function ParamClassStub(parent, body) {
   const stub = sinon.spy(body || function () {
     stub.Super && stub.Super.call(this);
   });
-  if (parent) _.class(stub).inherits(parent);
+  if (parent) createLegacyClass(stub).inherits(parent);
   return stub;
 }
 
