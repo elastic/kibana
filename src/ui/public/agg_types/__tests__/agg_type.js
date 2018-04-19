@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/private';
-import { AggParams } from 'ui/agg_types/agg_params';
-import { VisProvider } from 'ui/vis';
-import { fieldFormats } from 'ui/registry/field_formats';
-import { AggType } from 'ui/agg_types/agg_type';
+import '../../private';
+import { AggParams } from '../agg_params';
+import { VisProvider } from '../../vis';
+import { fieldFormats } from '../../registry/field_formats';
+import { AggType } from '../agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggType Class', function () {

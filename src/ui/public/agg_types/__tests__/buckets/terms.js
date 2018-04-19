@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { aggTypes } from 'ui/agg_types/index';
+import { aggTypes } from '../..';
 
 describe('Terms Agg', function () {
   describe('order agg editor UI', function () {

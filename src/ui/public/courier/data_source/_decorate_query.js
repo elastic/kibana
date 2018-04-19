@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../chrome';
 
 const config = chrome.getUiSettingsClient();
 

@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggConfig } from 'ui/vis/agg_config';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { createFilterTerms } from 'ui/agg_types/buckets/create_filter/terms';
-import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
-import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
+import { BucketAggType } from './_bucket_agg_type';
+import { AggConfig } from '../../vis/agg_config';
+import { Schemas } from '../../vis/editors/default/schemas';
+import { createFilterTerms } from './create_filter/terms';
+import orderAggTemplate from '../controls/order_agg.html';
+import orderAndSizeTemplate from '../controls/order_and_size.html';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications } from '../../notify';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',

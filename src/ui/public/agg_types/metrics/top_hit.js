@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import topSortEditor from 'ui/agg_types/controls/top_sort.html';
-import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size.html';
+import { MetricAggType } from './metric_agg_type';
+import topSortEditor from '../controls/top_sort.html';
+import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 
 const isNumber = function (type) {
   return type === 'number';

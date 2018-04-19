@@ -3,11 +3,11 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import ngMock from 'ng_mock';
 import angular from 'angular';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import { uiRegistry } from 'ui/registry/_registry';
-import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
+import { uiRegistry } from '../../registry/_registry';
+import { SpyModesRegistryProvider } from '../../registry/spy_modes';
 import mockUiState from 'fixtures/mock_ui_state';
 
 describe('visualize spy panel', function () {

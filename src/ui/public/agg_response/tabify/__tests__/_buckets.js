@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { TabifyBuckets } from 'ui/agg_response/tabify/_buckets';
+import { TabifyBuckets } from '../_buckets';
 
 describe('Buckets wrapper', function () {
 

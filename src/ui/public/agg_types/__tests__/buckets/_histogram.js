@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { aggTypes } from 'ui/agg_types/index';
+import { aggTypes } from '../..';
 import AggParamWriterProvider from '../agg_param_writer';
 
 const histogram = aggTypes.byName.histogram;

@@ -1,9 +1,9 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { createFilterDateRange } from 'ui/agg_types/buckets/create_filter/date_range';
+import { createFilterDateRange } from '../../../buckets/create_filter/date_range';
 
 describe('AggConfig Filters', function () {
   describe('Date range', function () {

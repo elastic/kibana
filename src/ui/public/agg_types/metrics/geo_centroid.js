@@ -1,4 +1,4 @@
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 
 export const geoCentroidMetricAgg = new MetricAggType({
   name: 'geo_centroid',

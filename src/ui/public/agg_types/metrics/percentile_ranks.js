@@ -1,8 +1,8 @@
-import valuesEditor from 'ui/agg_types/controls/percentile_ranks.html';
-import 'ui/number_list';
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { getResponseAggConfigClass } from 'ui/agg_types/metrics/get_response_agg_config_class';
-import { fieldFormats } from 'ui/registry/field_formats';
+import valuesEditor from '../controls/percentile_ranks.html';
+import '../../number_list';
+import { MetricAggType } from './metric_agg_type';
+import { getResponseAggConfigClass } from './get_response_agg_config_class';
+import { fieldFormats } from '../../registry/field_formats';
 import { getPercentileValue } from './percentiles_get_value';
 
 

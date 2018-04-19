@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import './agg_group';
 import './vis_options';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
 
 uiModules

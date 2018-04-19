@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 
-import { ManagementSection } from 'ui/management/section';
-import { IndexedArray } from 'ui/indexed_array';
+import { ManagementSection } from '../section';
+import { IndexedArray } from '../../indexed_array';
 
 describe('ManagementSection', () => {
   describe('constructor', () => {

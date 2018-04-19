@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { AggType } from 'ui/agg_types/agg_type';
+import { AggType } from '../agg_type';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 createLegacyClass(BucketAggType).inherits(AggType);

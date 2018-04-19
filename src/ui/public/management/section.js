@@ -1,5 +1,5 @@
 import { assign } from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../indexed_array';
 
 export class ManagementSection {
 

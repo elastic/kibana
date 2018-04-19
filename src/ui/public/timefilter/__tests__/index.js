@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 
 uiModules.get('kibana').config(function ($provide) {
   $provide.decorator('timefilter', function ($delegate) {

@@ -15,7 +15,7 @@ import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_r
 import rowsWithZeros from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import 'ui/persisted_state';
+import '../../../persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

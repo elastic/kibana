@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { EventsProvider } from 'ui/events';
+import { EventsProvider } from '../events';
 
 describe('events', function () {
   require('test_utils/no_digest_promises').activateForSuite();

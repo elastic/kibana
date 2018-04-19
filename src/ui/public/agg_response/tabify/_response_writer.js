@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import { TabifyTable } from 'ui/agg_response/tabify/_table';
-import { TabifyTableGroup } from 'ui/agg_response/tabify/_table_group';
-import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
+import AggConfigResult from '../../vis/agg_config_result';
+import { TabifyTable } from './_table';
+import { TabifyTableGroup } from './_table_group';
+import { tabifyGetColumns } from './_get_columns';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 createLegacyClass(SplitAcr).inherits(AggConfigResult);

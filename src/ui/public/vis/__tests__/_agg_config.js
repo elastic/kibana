@@ -1,11 +1,11 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
-import { AggType } from 'ui/agg_types/agg_type';
-import { AggConfig } from 'ui/vis/agg_config';
+import { VisProvider } from '..';
+import { AggType } from '../../agg_types/agg_type';
+import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from '../../registry/field_formats';
 
 describe('AggConfig', function () {
 

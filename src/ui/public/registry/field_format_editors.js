@@ -1,4 +1,4 @@
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from './_registry';
 
 export const RegistryFieldFormatEditorsProvider = uiRegistry({
   name: 'fieldFormatEditors',

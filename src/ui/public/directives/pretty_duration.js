@@ -1,5 +1,5 @@
-import { uiModules } from 'ui/modules';
-import { prettyDuration } from 'ui/timepicker/pretty_duration';
+import { uiModules } from '../modules';
+import { prettyDuration } from '../timepicker/pretty_duration';
 const module = uiModules.get('kibana');
 
 module.directive('prettyDuration', function (config) {

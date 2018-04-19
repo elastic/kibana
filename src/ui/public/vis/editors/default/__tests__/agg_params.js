@@ -4,9 +4,9 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../agg_params';
-import { VisProvider } from 'ui/vis';
-import { AggConfig } from 'ui/vis/agg_config';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { VisProvider } from '../../..';
+import { AggConfig } from '../../../agg_config';
+import { Schemas } from '../schemas';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 

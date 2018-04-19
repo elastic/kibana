@@ -1,4 +1,4 @@
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from '../registry/_registry';
 
 /**
  * Registry of functions (EmbeddableFactoryProviders) which return an EmbeddableFactory.

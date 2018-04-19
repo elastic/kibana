@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from '../filter_manager/lib/range';
 
 export function UtilsBrushEventProvider(timefilter) {
   return $state => {
