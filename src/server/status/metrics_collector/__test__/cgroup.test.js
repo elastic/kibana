@@ -1,16 +1,17 @@
 jest.mock('fs', () => ({
   readFile: jest.fn()
 }));
+
 import fs from 'fs';
-
-
 import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './_fs_stubs';
 import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
 
-fs.readFile.mockImplementation(readFileMock);
-
 describe('Control Group', function () {
   const fsStub = cGroupsFsStub();
+
+  beforeAll(() => {
+    fs.readFile.mockImplementation(readFileMock);
+  });
 
   afterEach(() => {
     setMockFiles();
