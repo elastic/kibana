@@ -79,7 +79,7 @@ For things that can't be easily automated, we maintain various link:https://gith
 
 Beyond that, we're into subjective territory. Statements like "this isn't very readable" are hardly helpful since they can't be qualified, but that doesn't mean a reviewer should outright ignore code that is hard to understand due to how it is written. There isn't one definitively "best" way to write any particular code, so pursuing such shouldn't be our goal. Instead, reviewers and authors alike must accept that there are likely many different appropriate ways to accomplish the same thing with code, and so long as the contribution is utilizing one of those ways, then we're in good shape.
 
-On the other hand, if a reviewer calls out a specific chunk of code as being hard to understand, then one of the first people to look at the code is having a hard time understanding it. If the reviewer feels strongly that this is a problem, they should propose alternatives for the author's consideration.
+On the other hand, if a reviewer calls out a specific chunk of code as being hard to understand, then one of the first people to look at the code is having a hard time understanding it. If the reviewer feels strongly that this is a problem, they should raise the issue for the author's consideration and potentially propose alternatives. The reviewer must be pragmatic, and their goal should be to propel the discussion forward rather than simply throwing up obstacles.
 
 When in doubt, relying on "prior art" in the codebase, especially in and around the area of the codebase that is being contributed to, is generally a good idea.
 
