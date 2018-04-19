@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { fetchMigrationStatus } = require('./fetch_migration_status');
+const { fetchStatus } = require('./fetch_status');
 const { MigrationState, MigrationStatus } = require('./lib');
 const { mockCluster } = require('./test');
 
@@ -23,7 +23,7 @@ describe('fetchMigrationStatus', () => {
         },
       }
     });
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins });
+    const actual = await fetchStatus({ callCluster, index, plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -36,14 +36,14 @@ describe('fetchMigrationStatus', () => {
       },
     }];
     const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, plugins, index: '.amazemazing' });
+    const actual = await fetchStatus({ callCluster, plugins, index: '.amazemazing' });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('is migrated, if there is no stored state and no plugins with migrations', async () => {
     const plugins = [];
     const callCluster = mockCluster({});
-    const actual = await fetchMigrationStatus({ callCluster, plugins, index: '.amazemazing' });
+    const actual = await fetchStatus({ callCluster, plugins, index: '.amazemazing' });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -67,7 +67,7 @@ describe('fetchMigrationStatus', () => {
       },
     });
     plugins[0].mappings.shwank.type = 'integer';
-    const actual = await fetchMigrationStatus({ callCluster, index, plugins });
+    const actual = await fetchStatus({ callCluster, index, plugins });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
@@ -103,7 +103,7 @@ describe('fetchMigrationStatus', () => {
 });
 
 function testMigrationOpts(opts) {
-  return fetchMigrationStatus({
+  return fetchStatus({
     callCluster: _.noop,
     index: 'kibana',
     plugins: [],

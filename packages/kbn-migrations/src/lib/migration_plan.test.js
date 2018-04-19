@@ -62,6 +62,33 @@ describe('MigrationPlan.build', () => {
       });
   });
 
+  test('does not retain mappings from disabled plugins if includeDisabledPlugins: false', () => {
+    const plugins = [{
+      id: 'hello',
+      migrations: [],
+      mappings: { stuff: 'goes here' },
+    }, {
+      id: 'cartoons',
+      migrations: [],
+      mappings: {
+        bugs: { type: 'bunny' },
+        simba: { type: 'tiger' },
+      },
+    }];
+    const state = MigrationState.build(plugins);
+
+    expect(MigrationPlan.build([plugins[0]], state, false).mappings)
+      .toEqual({
+        doc: {
+          dynamic: 'strict',
+          properties: {
+            ...MigrationState.mappings,
+            stuff: 'goes here',
+          },
+        },
+      });
+  });
+
   test('disallows duplicate mappings', () => {
     const plugins = [{
       id: 'hello',
@@ -78,7 +105,18 @@ describe('MigrationPlan.build', () => {
     const state = MigrationState.build(plugins);
 
     expect(() => MigrationPlan.build([plugins[0]], state))
-      .toThrow(/Mapping \"stuff\" is defined more than once/);
+      .toThrow(/Plugin \"hello\" is attempting to redefine mapping \"stuff\"/);
+  });
+
+  test('disallows mappings with leading underscore', () => {
+    const plugins = [{
+      id: 'nadachance',
+      migrations: [],
+      mappings: { _hm: 'You shall not pass!' },
+    }];
+
+    expect(() => MigrationPlan.build(plugins, {}))
+      .toThrow(/Invalid mapping \"_hm\" in plugin \"nadachance\"\. Mappings cannot start with _/);
   });
 
   test('is empty if no migrations are defined', () => {

@@ -1,7 +1,7 @@
 const { MigrationState, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
-  fetchMigrationStatus,
+  fetchStatus,
 };
 
 const optsDefinition = {
@@ -16,7 +16,7 @@ const optsDefinition = {
  * @param {MigrationOpts} opts
  * @returns {Promise<MigrationStatus>}
  */
-async function fetchMigrationStatus(opts) {
+async function fetchStatus(opts) {
   const { plugins, migrationState } = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
   return MigrationState.status(plugins, migrationState);
 }

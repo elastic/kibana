@@ -11,10 +11,10 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force } = opts;
+  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force, includeDisabledPlugins } = opts;
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
-  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
+  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState, includeDisabledPlugins);
   return {
     index,
     callCluster,

@@ -55,12 +55,12 @@ async function runMigrationIfOutOfDate(opts) {
   }
 }
 
-function skipMigration({ index, log }, status) {
-  log.info(() => `Skipping migration of "${index}" because the index has status ${status}.`);
+function skipMigration({ index }, status) {
   return {
     index,
     status,
     destIndex: index,
+    skippedMigration: true,
   };
 }
 

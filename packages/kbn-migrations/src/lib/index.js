@@ -6,4 +6,5 @@ module.exports = {
   MigrationState: require('./migration_state'),
   Persistence: require('./persistence'),
   Opts: require('./opts'),
+  MigrationPlan: require('./migration_plan'),
 };

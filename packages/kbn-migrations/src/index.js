@@ -1,10 +1,14 @@
-const { fetchMigrationStatus } = require('./fetch_migration_status');
+const { fetchStatus } = require('./fetch_status');
 const { migrate } = require('./migrate');
 const { importDocuments } = require('./import_documents');
 const { fetchMigrationState } = require('./fetch_migration_state');
+const { activeMappings } = require('./active_mappings');
+const { MigrationStatus } = require('./lib');
 
 module.exports = {
-  fetchMigrationStatus,
+  MigrationStatus,
+  activeMappings,
+  fetchStatus,
   fetchMigrationState,
   migrate,
   importDocuments,
