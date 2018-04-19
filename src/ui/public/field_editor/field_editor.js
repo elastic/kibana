@@ -1,11 +1,11 @@
 
-import 'ui/field_format_editor';
+import '../field_format_editor';
 import _ from 'lodash';
-import { fieldFormats } from 'ui/registry/field_formats';
-import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
-import { uiModules } from 'ui/modules';
-import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-import { toastNotifications } from 'ui/notify';
+import { fieldFormats } from '../registry/field_formats';
+import { IndexPatternsFieldProvider } from '../index_patterns/_field';
+import { uiModules } from '../modules';
+import fieldEditorTemplate from './field_editor.html';
+import { toastNotifications } from '../notify';
 import '../directives/documentation_href';
 import './field_editor.less';
 import {

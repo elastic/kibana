@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { AggConfig } from 'ui/vis/agg_config';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggConfig } from '../../../vis/agg_config';
+import { Schemas } from '../../../vis/editors/default/schemas';
 
 import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
-import metricAggTemplate from 'ui/agg_types/controls/sub_metric.html';
+import metricAggTemplate from '../../controls/sub_metric.html';
 
 
 const metricAggFilter = [

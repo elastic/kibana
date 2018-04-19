@@ -1,5 +1,5 @@
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { MetricAggType } from './metric_agg_type';
+import { fieldFormats } from '../../registry/field_formats';
 
 export const countMetricAgg = new MetricAggType({
   name: 'count',

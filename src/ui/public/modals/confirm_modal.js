@@ -1,6 +1,6 @@
 import angular from 'angular';
 import { noop } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import template from './confirm_modal.html';
 import { ModalOverlay } from './modal_overlay';
 

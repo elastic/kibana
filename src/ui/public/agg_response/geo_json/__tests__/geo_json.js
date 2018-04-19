@@ -2,11 +2,11 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
-import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
-import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
+import { tabifyAggResponse } from '../../tabify/tabify';
+import { AggResponseGeoJsonProvider } from '../geo_json';
 
 describe('GeoJson Agg Response Converter', function () {
   let vis;

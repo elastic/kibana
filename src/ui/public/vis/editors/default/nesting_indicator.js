@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import { createColorPalette } from 'ui/vis/components/color/color_palette';
-import { uiModules } from 'ui/modules';
+import { createColorPalette } from '../../components/color/color_palette';
+import { uiModules } from '../../../modules';
 
 uiModules
   .get('kibana')

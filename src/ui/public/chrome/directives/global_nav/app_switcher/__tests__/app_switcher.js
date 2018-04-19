@@ -2,10 +2,10 @@ import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import { DomLocationProvider } from 'ui/dom_location';
+import { DomLocationProvider } from '../../../../../dom_location';
 import { constant, cloneDeep } from 'lodash';
 import $ from 'jquery';
-import 'ui/chrome';
+import '../../../..';
 import '../app_switcher';
 
 describe('appSwitcher directive', function () {

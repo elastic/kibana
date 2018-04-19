@@ -1,6 +1,6 @@
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterTerms } from 'ui/agg_types/buckets/create_filter/terms';
-import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterTerms } from './create_filter/terms';
+import orderAndSizeTemplate from '../controls/order_and_size.html';
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',

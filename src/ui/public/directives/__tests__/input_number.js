@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/input_number';
+import '../input_number';
 
 describe('Number input directive', function () {
   let $compile;

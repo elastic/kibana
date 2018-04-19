@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
-import { VisProvider } from 'ui/vis';
+import { BasicResponseHandlerProvider } from '../../response_handlers/basic';
+import { VisProvider } from '../..';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

@@ -1,10 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { bucketSumMetricAgg } from 'ui/agg_types/metrics/bucket_sum';
-import { bucketAvgMetricAgg } from 'ui/agg_types/metrics/bucket_avg';
-import { bucketMinMetricAgg } from 'ui/agg_types/metrics/bucket_min';
-import { bucketMaxMetricAgg } from 'ui/agg_types/metrics/bucket_max';
-import { VisProvider } from 'ui/vis';
+import { bucketSumMetricAgg } from '../../metrics/bucket_sum';
+import { bucketAvgMetricAgg } from '../../metrics/bucket_avg';
+import { bucketMinMetricAgg } from '../../metrics/bucket_min';
+import { bucketMaxMetricAgg } from '../../metrics/bucket_max';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { getResponseAggConfigClass } from 'ui/agg_types/metrics/get_response_agg_config_class';
+import { MetricAggType } from './metric_agg_type';
+import { getResponseAggConfigClass } from './get_response_agg_config_class';
 
 const responseAggConfigProps = {
   valProp: function () {

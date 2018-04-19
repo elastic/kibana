@@ -1,7 +1,7 @@
 
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { PersistedLog } from 'ui/persisted_log';
+import { PersistedLog } from './';
 
 const historyName = 'testHistory';
 const historyLimit = 10;

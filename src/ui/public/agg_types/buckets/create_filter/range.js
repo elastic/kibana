@@ -1,4 +1,4 @@
-import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from '../../../filter_manager/lib/range';
 
 export function createFilterRange(aggConfig, key) {
   return buildRangeFilter(

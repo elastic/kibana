@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import template from './filter_pill.html';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 

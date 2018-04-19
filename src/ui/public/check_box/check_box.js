@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import template from './check_box.html';
 
 const app = uiModules.get('kibana');

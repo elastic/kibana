@@ -1,10 +1,10 @@
-import { dateRange } from 'ui/utils/date_range';
-import 'ui/directives/validate_date_math';
-import 'ui/directives/documentation_href';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterDateRange } from 'ui/agg_types/buckets/create_filter/date_range';
-import { fieldFormats } from 'ui/registry/field_formats';
-import dateRangesTemplate from 'ui/agg_types/controls/date_ranges.html';
+import { dateRange } from '../../utils/date_range';
+import '../../directives/validate_date_math';
+import '../../directives/documentation_href';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterDateRange } from './create_filter/date_range';
+import { fieldFormats } from '../../registry/field_formats';
+import dateRangesTemplate from '../controls/date_ranges.html';
 
 export const dateRangeBucketAgg = new BucketAggType({
   name: 'date_range',

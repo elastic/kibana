@@ -1,10 +1,10 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { derivativeMetricAgg } from 'ui/agg_types/metrics/derivative';
-import { cumulativeSumMetricAgg } from 'ui/agg_types/metrics/cumulative_sum';
-import { movingAvgMetricAgg } from 'ui/agg_types/metrics/moving_avg';
-import { serialDiffMetricAgg } from 'ui/agg_types/metrics/serial_diff';
-import { VisProvider } from 'ui/vis';
+import { derivativeMetricAgg } from '../../metrics/derivative';
+import { cumulativeSumMetricAgg } from '../../metrics/cumulative_sum';
+import { movingAvgMetricAgg } from '../../metrics/moving_avg';
+import { serialDiffMetricAgg } from '../../metrics/serial_diff';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

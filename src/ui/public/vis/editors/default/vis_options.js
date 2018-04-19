@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../../modules';
 import visOptionsTemplate from './vis_options.html';
 
 /**

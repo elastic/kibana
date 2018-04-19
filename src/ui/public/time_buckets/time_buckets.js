@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from 'ui/chrome';
-import { parseInterval } from 'ui/utils/parse_interval';
-import { calcAutoInterval } from 'ui/time_buckets/calc_auto_interval';
-import { calcEsInterval } from 'ui/time_buckets/calc_es_interval';
-import { fieldFormats } from 'ui/registry/field_formats';
+import chrome from '../chrome';
+import { parseInterval } from '../utils/parse_interval';
+import { calcAutoInterval } from './calc_auto_interval';
+import { calcEsInterval } from './calc_es_interval';
+import { fieldFormats } from '../registry/field_formats';
 
 const config = chrome.getUiSettingsClient();
 

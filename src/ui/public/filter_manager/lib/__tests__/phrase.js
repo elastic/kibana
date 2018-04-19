@@ -1,5 +1,5 @@
 
-import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
+import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { PointSeriesAddToSiriProvider } from 'ui/agg_response/point_series/_add_to_siri';
+import { PointSeriesAddToSiriProvider } from '../_add_to_siri';
 
 describe('addToSiri', function () {
   let addToSiri;

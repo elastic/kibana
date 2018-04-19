@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from 'ui/agg_types/buckets/_terms_other_bucket_helper';
-import { VisProvider } from 'ui/vis';
+import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from '../../buckets/_terms_other_bucket_helper';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 const visConfigSingleTerm = {

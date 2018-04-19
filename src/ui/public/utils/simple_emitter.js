@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { BaseObject } from 'ui/utils/base_object';
+import { BaseObject } from './base_object';
 import { createLegacyClass } from './legacy_class';
 
 /**

@@ -1,8 +1,8 @@
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterRange } from 'ui/agg_types/buckets/create_filter/range';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterRange } from './create_filter/range';
 import { FieldFormat } from '../../../field_formats/field_format';
 import { RangeKey } from './range_key';
-import rangesTemplate from 'ui/agg_types/controls/ranges.html';
+import rangesTemplate from '../controls/ranges.html';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();

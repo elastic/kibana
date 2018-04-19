@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggConfig } from 'ui/vis/agg_config';
-import precisionTemplate from 'ui/agg_types/controls/precision.html';
-import { geohashColumns } from 'ui/utils/decode_geo_hash';
-import { geoContains, scaleBounds } from 'ui/utils/geo_utils';
+import chrome from '../../chrome';
+import { BucketAggType } from './_bucket_agg_type';
+import { AggConfig } from '../../vis/agg_config';
+import precisionTemplate from '../controls/precision.html';
+import { geohashColumns } from '../../utils/decode_geo_hash';
+import { geoContains, scaleBounds } from '../../utils/geo_utils';
 
 const config = chrome.getUiSettingsClient();
 

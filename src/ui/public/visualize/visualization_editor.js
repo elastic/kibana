@@ -1,10 +1,10 @@
-import 'ui/visualize/spy';
-import 'ui/visualize/visualize.less';
-import 'ui/visualize/visualize_legend';
-import { uiModules } from 'ui/modules';
+import './spy';
+import './visualize.less';
+import './visualize_legend';
+import { uiModules } from '../modules';
 import 'angular-sanitize';
-import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-import { getUpdateStatus } from 'ui/vis/update_status';
+import { VisEditorTypesRegistryProvider } from '../registry/vis_editor_types';
+import { getUpdateStatus } from '../vis/update_status';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])

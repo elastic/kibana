@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import { TabifyTable } from 'ui/agg_response/tabify/_table';
+import { TabifyTable } from '../_table';
 
 describe('TabifyTable class', function () {
   it('exposes rows array, but not the columns', function () {
