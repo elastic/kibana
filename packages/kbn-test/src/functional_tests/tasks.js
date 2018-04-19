@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 // import Rx from 'rxjs/Rx';
-import { Command } from 'commander';
+import getopts from 'getopts';
 import { withProcRunner } from '@kbn/dev-utils';
 
 import {
@@ -29,13 +29,9 @@ export async function runTests(
   runEs = runElasticsearch,
   runKbn = runKibanaServer,
 ) {
-  const cmd = new Command('node scripts/functional_test_with_configs');
+  const configOption = getopts(process.argv.slice(2)).config;
 
-  cmd
-    .option('--config [value]', 'Path to config file to specify options', null)
-    .parse(process.argv);
-
-  configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
+  configPath = await resolve(KIBANA_ROOT, configOption || configPath);
 
   try {
     const config = require(configPath)();
@@ -54,15 +50,11 @@ export async function startServers(
   runEs = runElasticsearch,
   runKbn = runKibanaServer,
 ) {
-  const cmd = new Command('start functional servers with config');
 
-  cmd
-    .option('--config [value]', 'Path to config file to specify options', null)
-    .option('--saml', 'Run Elasticsearch and Kibana with configured SAML security realm', false)
+  // TODO: make note about change to saml option
+  const configOption = getopts(process.argv.slice(2)).config;
 
-    .parse(process.argv);
-
-  configPath = await resolve(KIBANA_ROOT, cmd.config || configPath);
+  configPath = await resolve(KIBANA_ROOT, configOption || configPath);
 
   await withTmpDir(async tmpDir => {
     await withProcRunner(async procs => {
@@ -107,18 +99,14 @@ export async function runWithConfig(
 }
 
 function resolveConfigPath(configPath) {
-  const cmd = new Command('node scripts/functional_test_with_config');
   // TODO: when --config multiple_config.js is passed into runTests
   // configPath is multiple_config.js, which is incorrectly passed here
   const originalCall = process.argv[1].split('/').slice(-1);
   // if this process was started in this method, parse argv
   if (originalCall === 'functional_test_with_config') {
-    cmd
-      .option('--config [value]', 'Path to config file to specify options', null)
-      .option('--bail', 'stop tests after the first failure', false)
-      .parse(process.argv);
+    const configOption = getopts(process.argv.slice(2)).config;
 
-    return resolve(KIBANA_ROOT, cmd.config || configPath);
+    return resolve(KIBANA_ROOT, configOption || configPath);
   } else {
   // process was started in another method, so don't parse argv
     return resolve(KIBANA_ROOT, configPath);
