@@ -1,9 +1,9 @@
 const _ = require('lodash');
-const { importDocuments } = require('./import_documents');
+const { transformDocuments } = require('./transform_documents');
 const { MigrationState } = require('./lib');
 const { mockCluster } = require('./test');
 
-describe('importDocuments', () => {
+describe('transformDocuments', () => {
   const index = 'kibana';
   const log = _.noop;
   const elasticVersion = '9.8.7';
@@ -35,7 +35,7 @@ describe('importDocuments', () => {
       _id: 'dunnoes:hrm',
       _source: { type: 'dunnoes', dunnoes: 'This should get rejected, methinks.' },
     };
-    expect(importDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs: [doc] }))
+    expect(transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs: [doc] }))
       .rejects.toThrow(/unavailable plugin \"whatisit\"/);
   });
 
@@ -67,19 +67,27 @@ describe('importDocuments', () => {
       _id: 'space:enterprise',
       _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
     }];
-    await importDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
+    const transformed = await transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
 
-    expect(_.get(callCluster.state(), 'data.kibana.space:enterprise'))
-      .toMatchSnapshot();
+    expect(transformed)
+      .toEqual([{
+        _id: 'space:enterprise',
+        _source: { type: 'space', updated_at: 'today', space: 'SPACE THE FINAL FRONTIER!!!' },
+      }]);
   });
 
-  test('Transforms an old doc to a new doc', async () => {
+  test('Transforms old docs', async () => {
     const { data, meta } = clusterData(index, {
       plugins: [{
         id: 'jam',
         mappings: JSON.stringify({ space: { type: 'text' } }),
         mappingsChecksum: '2',
         migrationsChecksum: 'ahoy',
+      }, {
+        id: 'maican',
+        mappings: JSON.stringify({ book: { type: 'text' } }),
+        mappingsChecksum: '3',
+        migrationsChecksum: '4',
       }],
     });
     const callCluster = mockCluster(data, meta);
@@ -90,28 +98,54 @@ describe('importDocuments', () => {
         migrationIds: ['a'],
         mappingsChecksum: '1',
         migrationsChecksum: 'ahoy',
+      }, {
+        id: 'maican',
+        mappings: JSON.stringify({ book: { type: 'text' } }),
+        migrationIds: ['m1'],
+        mappingsChecksum: '3',
+        migrationsChecksum: '4',
       }],
     };
     const plugins = [{
       id: 'jam',
       migrations: [{
         id: 'a',
-        filter: () => true,
+        filter: ({ type }) => type === 'space',
         transform: () => { throw new Error('Should not run!'); },
       }, {
         id: 'b',
-        filter: () => true,
+        filter: ({ type }) => type === 'space',
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
+      }],
+    }, {
+      id: 'maican',
+      migrations: [{
+        id: 'm1',
+        filter: ({ type }) => type === 'book',
+        transform: () => { throw new Error('Should not run!'); },
+      }, {
+        id: 'm2',
+        filter: ({ type }) => type === 'book',
+        transform: (doc) => ({ ...doc, attributes: `Title: ${doc.attributes}` }),
       }],
     }];
     const docs = [{
       _id: 'space:enterprise',
       _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
+    }, {
+      _id: 'book:thetwotowers',
+      _source: { type: 'book', updated_at: 'today', book: 'The Two Towers' },
     }];
-    await importDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
+    const transformed = await transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
 
-    expect(_.get(callCluster.state(), 'data.kibana.space:enterprise'))
-      .toMatchSnapshot();
+    expect(transformed)
+      .toEqual([{
+        _id: 'space:enterprise',
+        _source: { type: 'space', updated_at: 'today', space: 'THE FINAL FRONTIER!!!' },
+      }, {
+        _id: 'book:thetwotowers',
+        _source: { type: 'book', updated_at: 'today', book: 'Title: The Two Towers' },
+      }]);
   });
 
   test('accepts if a disabled plugin is required, but doc is up to date', async () => {
@@ -137,9 +171,12 @@ describe('importDocuments', () => {
       _id: 'aha:123',
       _source: { type: 'aha', aha: 'Move along' },
     }];
-    await importDocuments({ callCluster, docs, exportedState, plugins, index, log, elasticVersion });
-    expect(_.get(callCluster.state(), 'data.kibana.aha:123'))
-      .toMatchSnapshot();
+    const transformed = await transformDocuments({ callCluster, docs, exportedState, plugins, index, log, elasticVersion });
+    expect(transformed)
+      .toEqual([{
+        _id: 'aha:123',
+        _source: { type: 'aha', aha: 'Move along' },
+      }]);
   });
 
   test('throws if migration requires a disabled plugin', () => {
@@ -158,7 +195,7 @@ describe('importDocuments', () => {
       _id: 'space:enterprise',
       _source: { type: 'space', space: 'The final frontier' },
     }];
-    expect(importDocuments({ docs, exportedState, plugins, callCluster, elasticVersion, index, log }))
+    expect(transformDocuments({ docs, exportedState, plugins, callCluster, elasticVersion, index, log }))
       .rejects.toThrow(/requires unavailable plugin \"jam\"/);
   });
 
@@ -224,7 +261,7 @@ describe('importDocuments', () => {
 });
 
 function testImportOpts(opts) {
-  return importDocuments({
+  return transformDocuments({
     callCluster: _.noop,
     log: _.noop,
     index: 'kibana',

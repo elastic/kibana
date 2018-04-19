@@ -18,15 +18,15 @@ function build(plugins, migrationState, includeDisabledPlugins = true) {
 }
 
 function unappliedMigrations(plugins, migrationState) {
-  const hash = _.indexBy(migrationState.plugins, 'id');
-  const result = plugins.reduce((acc, { id, migrations }) => {
-    const appliedMigrationIds = _.get(hash, [id, 'migrationIds'], []);
-    const newMigrations = migrations.slice(appliedMigrationIds.length)
-      .map(m => ({ ...m, pluginId: id }));
-    acc.push(newMigrations);
-    return acc;
-  }, []);
-  return _.compact(_.flatten(result));
+  const previousPlugins = _.indexBy(migrationState.plugins, 'id');
+  return _(plugins)
+    .map(({ id, migrations }) => {
+      const numApplied = _.get(previousPlugins, [id, 'migrationIds', 'length'], 0);
+      return _.slice(migrations, numApplied).map(m => ({ ...m, pluginId: id }));
+    })
+    .flatten()
+    .compact()
+    .value();
 }
 
 // Given a list of plugins and the current migration state of the index,

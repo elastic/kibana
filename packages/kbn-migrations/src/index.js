@@ -1,6 +1,6 @@
 const { fetchStatus } = require('./fetch_status');
 const { migrate } = require('./migrate');
-const { importDocuments } = require('./import_documents');
+const { transformDocuments } = require('./transform_documents');
 const { fetchMigrationState } = require('./fetch_migration_state');
 const { activeMappings } = require('./active_mappings');
 const { MigrationStatus } = require('./lib');
@@ -11,7 +11,7 @@ module.exports = {
   fetchStatus,
   fetchMigrationState,
   migrate,
-  importDocuments,
+  transformDocuments,
 };
 
 /**

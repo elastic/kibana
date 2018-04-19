@@ -1,8 +1,8 @@
 const _ = require('lodash');
-const { MigrationContext, Persistence, Plugins, Documents, Opts } = require('./lib');
+const { MigrationPlan, MigrationContext, Plugins, Documents, Opts } = require('./lib');
 
 module.exports = {
-  importDocuments,
+  transformDocuments,
 };
 
 const optsDefinition = {
@@ -15,26 +15,31 @@ const optsDefinition = {
 };
 
 /**
- * Imports one or more documents, migrating them to the latest version of the index,
- * if possible. If migration is not possible, this will throw an exception.
+ * Given a migration state (exportedState) and a set of documents (docs),
+ * transforms those documents to be the same version as the index. If such a
+ * transform is impossible, this will fail.
  * @param {ImportDocsOpts} opts
  */
-async function importDocuments(opts) {
+async function transformDocuments(opts) {
   const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
   const { exportedState, docs } = opts;
-  const { callCluster, log, index, plugins, migrationState } = context;
+  const { plugins, migrationState } = context;
   const transformDoc = buildImportFunction(plugins, exportedState, migrationState);
-  return await Persistence.bulkInsert(callCluster, log, index, docs.map(transformDoc));
+  return docs.map(transformDoc);
 }
 
 function buildImportFunction(plugins, exportedState, migrationState) {
-  const migrations = migrationsForImport(plugins, exportedState);
+  const { migrations } = MigrationPlan.build(plugins, exportedState);
   const validateDoc = buildValidationFunction(plugins, exportedState, migrationState);
   const transformDoc = Documents.buildTransformFunction(migrations);
 
   return (doc) => transformDoc(validateDoc(doc));
 }
 
+// Unlike with index migrations, when we are importing documents, exportedState
+// may contain plugins that the current system knows nothing about. Additionally,
+// the exportedState may contain outdated versions of plugins which are now disabled
+// and therefore the doc can't be migrated up to the state of the index.
 function buildValidationFunction(plugins, exportedState, migrationState) {
   const previousPlugins = _.indexBy(exportedState.plugins, 'id');
   const currentPlugins = _.indexBy(migrationState.plugins, 'id');
@@ -53,15 +58,6 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
 
     return doc;
   };
-}
-
-function migrationsForImport(plugins, exportedState) {
-  const previousPlugins = _.indexBy(exportedState.plugins, 'id');
-  return _(plugins)
-    .map(({ id, migrations }) => _.slice(migrations, _.get(previousPlugins, [id, 'migrationIds'], []).length))
-    .flatten()
-    .compact()
-    .value();
 }
 
 function isOutOfDate(prevPlugin, currentPlugin) {
