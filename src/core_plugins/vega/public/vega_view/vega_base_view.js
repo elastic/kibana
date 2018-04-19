@@ -145,7 +145,7 @@ export class VegaBaseView {
   setView(view) {
     this._view = view;
 
-    if (this._parser.tooltips) {
+    if (view && this._parser.tooltips) {
       const opts = typeof this._parser.tooltips === 'object' ? this._parser.tooltips : undefined;
 
       let tooltipObj;
