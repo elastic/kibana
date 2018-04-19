@@ -61,7 +61,7 @@
     "tempy": "^0.2.1",
     "ts-loader": "^4.2.0",
     "typescript": "^2.8.1",
-    "webpack": "^4.5.0",
+    "webpack": "^4.6.0",
     "webpack-cli": "^2.0.14",
     "wrap-ansi": "^3.0.1",
     "write-pkg": "^3.1.0"
