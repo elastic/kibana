@@ -1,28 +1,4 @@
-import { SavedObjectsClient } from '../saved_objects_client';
 import { PrioritizedCollection } from './prioritized_collection';
-
-/**
- * The base Saved Objects Client.
- *
- * @param {*} server
- * @param {*} request
- */
-function createBaseSavedObjectsClient(options) {
-
-  const {
-    server,
-    mappings,
-    callCluster,
-    onBeforeWrite,
-  } = options;
-
-  return new SavedObjectsClient({
-    index: server.config().get('kibana.index'),
-    mappings,
-    callCluster,
-    onBeforeWrite
-  });
-}
 
 /**
  * Provider for the Saved Object Client.
@@ -41,11 +17,11 @@ class ClientProvider {
     this._wrappers.add(wrapper, priority);
   }
 
-  createWrappedSavedObjectsClient(options) {
+  createSavedObjectsClient(baseClientFactory, options) {
     const orderedBuilders = this._optionBuilders.toArray();
     const clientOptions = orderedBuilders.reduce((acc, builder) => builder(acc), options);
 
-    const baseClient = createBaseSavedObjectsClient(clientOptions);
+    const baseClient = baseClientFactory(clientOptions);
 
     const orderedWrappers = this._wrappers.toArray();
     return orderedWrappers.reduce((client, wrapper) => wrapper(client, clientOptions), baseClient);
