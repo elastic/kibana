@@ -1,5 +1,5 @@
-import { resolve } from 'path';
-// import Rx from 'rxjs/Rx';
+import { relative, resolve } from 'path';
+import Rx from 'rxjs/Rx';
 import getopts from 'getopts';
 import { withProcRunner } from '@kbn/dev-utils';
 
@@ -11,19 +11,23 @@ import {
   log,
   isCliError,
   KIBANA_ROOT,
+  KIBANA_FTR_SCRIPT,
   MULTIPLE_CONFIG_PATH,
 } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
 
+const SUCCESS_MESSAGE = `
+
+Elasticsearch and Kibana are ready for functional testing. Start the functional tests
+in another terminal session by running this command from this directory:
+
+    node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}
+
+`;
+
 // Takes in a config listing multiple configs
-// [x] 'test/functional/config.js'
-// [x] 'test/api_integration/config.js'
-// [ ] 'test/integration/config.js' (http server tests)
-// from x-pack-kibana:
-// [x] 'test/functional/config.js'
-// [x] 'test/api_integration/config.js'
-// [x] 'test/saml_api_integration/config.js'
+// Runs servers and tests for each config
 export async function runTests(
   configPath = MULTIPLE_CONFIG_PATH,
   runEs = runElasticsearch,
@@ -63,15 +67,20 @@ export async function startServers(
       await runEs({ tmpDir, procs, config });
       await runKbn({ procs, config });
 
-      // Maybe log something here?
+      // wait for 5 seconds of silence before logging the success message
+      // so that it doesn't get burried
+      await Rx.Observable.fromEvent(log, 'data')
+        .switchMap(() => Rx.Observable.timer(5000))
+        .first()
+        .toPromise();
 
+      log.info(SUCCESS_MESSAGE);
       await procs.waitForAllToStop();
     });
   });
 }
 
 // Start servers and run tests for single config
-// TODO: doesn't work to pass in config via command line
 // TODO: don't export this--
 export async function runWithConfig(
   configPath = 'test/functional/config.js',
@@ -107,7 +116,7 @@ function resolveConfigPath(configPath) {
     const configOption = getopts(process.argv.slice(2)).config;
     return resolve(KIBANA_ROOT, configOption || configPath);
   } else {
-  // process was started in runTests or other method, so don't parse argv
+    // process was started in runTests or other method, so don't parse argv
     return resolve(KIBANA_ROOT, configPath);
   }
 }
