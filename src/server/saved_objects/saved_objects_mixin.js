@@ -10,6 +10,7 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
+  const mappings = server.migrations().getMappings();
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
@@ -26,48 +27,11 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  async function onBeforeWrite() {
-    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-
-    try {
-      const index = server.config().get('kibana.index');
-      await adminCluster.callWithInternalUser('indices.putTemplate', {
-        name: `kibana_index_template:${index}`,
-        body: {
-          template: index,
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-          mappings: server.getKibanaIndexMappingsDsl(),
-        },
-      });
-    } catch (error) {
-      server.log(['debug', 'savedObjects'], {
-        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
-        es: {
-          resp: error.body,
-          status: error.status,
-        },
-        err: {
-          message: error.message,
-          stack: error.stack,
-        },
-      });
-
-      // We reject with `es.ServiceUnavailable` because writing an index
-      // template is a very simple operation so if we get an error here
-      // then something must be very broken
-      throw new adminCluster.errors.ServiceUnavailable();
-    }
-  }
-
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient({
+      mappings,
       index: server.config().get('kibana.index'),
-      mappings: server.getKibanaIndexMappingsDsl(),
       callCluster,
-      onBeforeWrite,
     });
   });
 

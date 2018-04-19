@@ -4,11 +4,9 @@ import expect from 'expect.js';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
-import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestConfig } from '../../../../test_utils/es';
-import * as patchKibanaIndexNS from '../patch_kibana_index';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();
@@ -32,7 +30,6 @@ describe('plugins/elasticsearch', () => {
 
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
-      sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
 
       // setup the plugin stub
       plugin = {
@@ -78,9 +75,9 @@ describe('plugins/elasticsearch', () => {
             getCluster: sinon.stub().returns(cluster)
           }
         },
-        getKibanaIndexMappingsDsl() {
-          return mappings;
-        },
+        migrations: () => ({
+          migrate: () => Promise.resolve({ status: 'migrated' }),
+        }),
         ext: sinon.stub()
       };
 
@@ -122,6 +119,48 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
+          sinon.assert.calledOnce(plugin.status.green);
+          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
+        });
+    });
+
+    it('should set the cluster red if migrations fail', function () {
+      const stub = sinon.stub();
+      server.migrations = () => ({ migrate: stub });
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+      stub.onCall(0).returns(Promise.reject({ index: { error: { reason: 'très mal' } } }));
+      stub.onCall(1).returns(Promise.resolve({ status: 'migrated' }));
+
+      return health.run()
+        .then(function () {
+          sinon.assert.calledOnce(plugin.status.yellow);
+          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
+
+          sinon.assert.calledOnce(plugin.status.red);
+          sinon.assert.calledWithExactly(
+            plugin.status.red,
+            `Kibana index migration error: très mal`
+          );
+          sinon.assert.calledTwice(stub);
+          sinon.assert.calledOnce(plugin.status.green);
+          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
+        });
+    });
+
+    it('should set the cluster yellow if migrations are in progress', function () {
+      const stub = sinon.stub();
+      server.migrations = () => ({ migrate: stub });
+      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
+      stub.onCall(0).returns(Promise.resolve({ status: 'migrating' }));
+      stub.onCall(1).returns(Promise.resolve({ status: 'migrated' }));
+
+      return health.run()
+        .then(function () {
+          sinon.assert.calledTwice(plugin.status.yellow);
+          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
+          sinon.assert.calledWithExactly(plugin.status.yellow, 'Kibana index is migrating');
+
+          sinon.assert.calledTwice(stub);
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });

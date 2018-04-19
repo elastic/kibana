@@ -1,8 +1,9 @@
+import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
-import { patchKibanaIndex } from './patch_kibana_index';
+import { MigrationStatus } from '@kbn/migrations';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -34,6 +35,19 @@ export default function (plugin, server) {
     });
   }
 
+  function waitForIndexMigration() {
+    const errorDescription = (err) => `Kibana index migration error: ${_.get(err, 'index.error.reason', JSON.stringify(err))}`;
+    const retryMigration = (color, message) => {
+      plugin.status[color](message);
+      return Promise.delay(REQUEST_DELAY).then(waitForIndexMigration);
+    };
+
+    return server.migrations()
+      .migrate()
+      .then(({ status }) => status === MigrationStatus.migrated ? true : retryMigration('yellow', `Kibana index is ${status}`))
+      .catch(err => retryMigration('red', errorDescription(err)));
+  }
+
   function setGreenStatus() {
     return plugin.status.green('Ready');
   }
@@ -42,12 +56,7 @@ export default function (plugin, server) {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
         .then(waitForEsVersion)
-        .then(() => patchKibanaIndex({
-          callCluster: callAdminAsKibanaUser,
-          log: (...args) => server.log(...args),
-          indexName: config.get('kibana.index'),
-          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-        }));
+        .then(waitForIndexMigration);
 
     return healthCheck
       .then(setGreenStatus)

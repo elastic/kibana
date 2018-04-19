@@ -16,9 +16,9 @@ import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
-import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
+import { migrationsMixin } from './migrations';
 
 const rootDir = fromRoot('.');
 
@@ -35,8 +35,10 @@ export default class KbnServer {
 
       // sets this.config, reads this.settings
       configSetupMixin,
+
       // sets this.server
       httpMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
@@ -57,8 +59,8 @@ export default class KbnServer {
       uiMixin,
       indexPatternsMixin,
 
-      // setup server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
+      // Add Kibana index migration support to kbnServer
+      migrationsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
