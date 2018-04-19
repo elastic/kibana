@@ -1,5 +1,5 @@
 import { SavedObjectsClientProvider } from './client/lib';
-
+import { SavedObjectsClient } from './client';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -63,7 +63,23 @@ export function savedObjectsMixin(kbnServer, server) {
   }
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster, request }) => {
-    return SavedObjectsClientProvider.createWrappedSavedObjectsClient({
+    const createBaseClient = (options) => {
+      const {
+        server,
+        mappings,
+        callCluster,
+        onBeforeWrite,
+      } = options;
+
+      return new SavedObjectsClient({
+        index: server.config().get('kibana.index'),
+        mappings,
+        callCluster,
+        onBeforeWrite
+      });
+    };
+
+    return SavedObjectsClientProvider.createSavedObjectsClient(createBaseClient, {
       server,
       request,
       mappings: server.getKibanaIndexMappingsDsl(),
