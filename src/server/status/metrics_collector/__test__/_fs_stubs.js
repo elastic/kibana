@@ -42,13 +42,9 @@ export function cGroups(hierarchy) {
 }
 
 class FSError extends Error {
-  constructor(fileName) {
+  constructor(fileName, code) {
     super('Stub File Sytem Stub Error: ' + fileName);
-  }
-
-  getENOENT() {
-    this.code = 'ENOENT';
-    return this;
+    this.code = code;
   }
 }
 
@@ -68,7 +64,7 @@ export const readFileMock = (fileName, callback) => {
   if (_mockFiles.hasOwnProperty(fileName)) {
     callback(null, _mockFiles[fileName]);
   } else {
-    const err = new FSError(fileName);
-    callback(err.getENOENT(), null);
+    const err = new FSError(fileName, 'ENOENT');
+    callback(err, null);
   }
 };
