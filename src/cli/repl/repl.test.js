@@ -18,7 +18,7 @@ describe('repl', () => {
   });
 
   test('it exposes the server object', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const testServer = {
       server: { },
     };
@@ -28,26 +28,26 @@ describe('repl', () => {
   });
 
   test('it prompts with Kibana>', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     expect(startRepl({}).opts.prompt).toBe('Kibana> ');
   });
 
   test('it colorizes raw values', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     expect(replServer.opts.writer({ meaning: 42 }))
       .toMatchSnapshot();
   });
 
   test('it handles undefined', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     expect(replServer.opts.writer())
       .toMatchSnapshot();
   });
 
   test('it handles deep and recursive objects', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const splosion = {};
     let child = splosion;
@@ -61,7 +61,7 @@ describe('repl', () => {
   });
 
   test('it prints promise resolves', async () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const calls = await waitForPrompt(
       replServer,
@@ -72,7 +72,7 @@ describe('repl', () => {
   });
 
   test('it prints promise rejects', async () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const calls = await waitForPrompt(
       replServer,
@@ -83,7 +83,7 @@ describe('repl', () => {
   });
 
   test('promises resolves only write to a specific depth', async () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const splosion = {};
     let child = splosion;
@@ -101,7 +101,7 @@ describe('repl', () => {
   });
 
   test('promises rejects only write to a specific depth', async () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const splosion = {};
     let child = splosion;
@@ -119,7 +119,7 @@ describe('repl', () => {
   });
 
   test('repl exposes a print object that lets you tailor depth', () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     replServer.context.repl.print({ hello: { world: { nstuff: 'yo' } } }, 1);
     expect(global.console.log.mock.calls)
@@ -127,7 +127,7 @@ describe('repl', () => {
   });
 
   test('repl exposes a print object that prints promises', async () => {
-    const { startRepl } = require('./repl');
+    const { startRepl } = require('.');
     const replServer = startRepl({});
     const promise = Promise.resolve({ hello: { world: { nstuff: 'yo' } } });
     const calls = await waitForPrompt(

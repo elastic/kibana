@@ -5,19 +5,13 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
-import { startRepl } from '../../server/utils';
 import { readYamlConfig } from './read_yaml_config';
 import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
-let canCluster;
-try {
-  require.resolve('../cluster/cluster_manager');
-  canCluster = true;
-} catch (e) {
-  canCluster = false;
-}
+const canCluster = canRequire('../cluster/cluster_manager');
+const { startRepl } = canRequire('../repl') ? require('../repl') : { };
 
 const pathCollector = function () {
   const paths = [];
@@ -96,7 +90,6 @@ export default function (program) {
     .option('--verbose', 'Turns on verbose logging')
     .option('-H, --host <host>', 'The host to bind to')
     .option('-l, --log-file <path>', 'The file to log to')
-    .option('--repl', 'Run the server with a REPL prompt and access to the server object')
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +
@@ -115,6 +108,10 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+
+  if (!!startRepl) {
+    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
+  }
 
   if (canCluster) {
     command
@@ -191,10 +188,7 @@ export default function (program) {
 }
 
 function shouldStartRepl(opts) {
-  const DEV_ENV = 'dev';
-  const env = process.env.NODE_ENV || DEV_ENV;
-
-  if (opts.repl && env !== DEV_ENV) {
+  if (opts.repl && !startRepl) {
     throw new Error('Kibana REPL mode can only be run in development mode.');
   }
 
@@ -211,4 +205,13 @@ function logFatal(message, server) {
 
   // It's possible for the Hapi logger to not be setup
   console.error('FATAL', message);
+}
+
+function canRequire(path) {
+  try {
+    require.resolve(path);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
