@@ -24,8 +24,7 @@ export const createInstallRoute = () => ({
       const index = `${server.config().get('kibana.index')}_sample_data_${sampleDataSet.id}`;
 
       if (!sampleDataSet) {
-        reply().code(404);
-        return;
+        return reply().code(404);
       }
 
       try {
@@ -54,8 +53,7 @@ export const createInstallRoute = () => ({
         await callWithRequest(request, 'indices.create', createIndexParams);
       } catch (err) {
         console.warn(`sample_data install errors while creating index. Error: ${err.message}`);
-        reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
-        return;
+        return reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
       }
 
       const bulkLoad = async (bulk) => {
@@ -67,10 +65,10 @@ export const createInstallRoute = () => ({
       };
       loadData(sampleDataSet.dataPath, bulkLoad, index, updateRow, (err, count) => {
         if (err) {
-          reply(err.message).code(500);
-          return;
+          return reply(err.message).code(500);
         }
-        reply({ count });
+
+        return reply({ count });
       });
     }
   }
