@@ -1,6 +1,5 @@
 import {
   KibanaSupertestProvider,
-  KibanaSupertestWithoutAuthProvider,
   ElasticsearchSupertestProvider,
   ChanceProvider,
 } from './services';
@@ -17,7 +16,6 @@ export default async function ({ readConfigFile }) {
       esArchiver: commonConfig.get('services.esArchiver'),
       retry: commonConfig.get('services.retry'),
       supertest: KibanaSupertestProvider,
-      supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
       chance: ChanceProvider,
     },

@@ -8,16 +8,6 @@ export function KibanaSupertestProvider({ getService }) {
   return supertestAsPromised(kibanaServerUrl);
 }
 
-export function KibanaSupertestWithoutAuthProvider({ getService }) {
-  const config = getService('config');
-  const kibanaServerConfig = config.get('servers.kibana');
-
-  return supertestAsPromised(formatUrl({
-    ...kibanaServerConfig,
-    auth: false
-  }));
-}
-
 export function ElasticsearchSupertestProvider({ getService }) {
   const config = getService('config');
   const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
