@@ -1,7 +1,7 @@
 import angular from 'angular';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 import { isPlainObject } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 const module = uiModules.get('kibana/config');
 

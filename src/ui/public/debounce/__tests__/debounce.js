@@ -2,7 +2,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { DebounceProvider } from 'ui/debounce';
+import { DebounceProvider } from '..';
 
 let debounce;
 let debounceFromProvider;

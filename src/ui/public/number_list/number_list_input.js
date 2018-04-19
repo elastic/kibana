@@ -1,5 +1,5 @@
-import { keyMap } from 'ui/utils/key_map';
-import { uiModules } from 'ui/modules';
+import { keyMap } from '../utils/key_map';
+import { uiModules } from '../modules';
 
 const INVALID = {}; // invalid flag
 const FLOATABLE = /^[\d\.e\-\+]+$/i;

@@ -1,4 +1,4 @@
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from './metric_agg_type';
 
 export function AggTypesMetricsMinProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);

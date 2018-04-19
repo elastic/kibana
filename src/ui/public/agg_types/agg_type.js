@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { AggParams } from 'ui/agg_types/agg_params';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { AggParams } from './agg_params';
+import { fieldFormats } from '../registry/field_formats';
 
 export function AggTypesAggTypeProvider() {
 

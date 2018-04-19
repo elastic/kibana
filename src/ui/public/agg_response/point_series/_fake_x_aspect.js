@@ -1,5 +1,5 @@
-import { AggConfig } from 'ui/vis/agg_config';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import { AggConfig } from '../../vis/agg_config';
+import { AggTypesAggTypeProvider } from '../../agg_types/agg_type';
 
 export function PointSeriesFakeXAxisProvider(Private) {
   const AggType = Private(AggTypesAggTypeProvider);

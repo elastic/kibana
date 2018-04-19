@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import AggConfigResult from 'ui/vis/agg_config_result';
+import AggConfigResult from '../vis/agg_config_result';
 
-import { uiModules } from 'ui/modules';
-import paginatedTableTemplate from 'ui/paginated_table/paginated_table.html';
+import { uiModules } from '../modules';
+import paginatedTableTemplate from './paginated_table.html';
 uiModules
   .get('kibana')
   .directive('paginatedTable', function ($filter) {

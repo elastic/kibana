@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
+import { PointSeriesFakeXAxisProvider } from './_fake_x_aspect';
 
 export function PointSeriesGetAspectsProvider(Private) {
   const fakeXAspect = Private(PointSeriesFakeXAxisProvider);

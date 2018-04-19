@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import { KibanaMap } from 'ui/vis/map/kibana_map';
-import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
+import { KibanaMap } from '../../map/kibana_map';
+import { KibanaMapLayer } from '../../map/kibana_map_layer';
 import L from 'leaflet';
 
 describe('kibana_map tests', function () {

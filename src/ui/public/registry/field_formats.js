@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 import { FieldFormat } from '../../field_formats/field_format';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../indexed_array';
 
 class FieldFormatRegistry extends IndexedArray {
   constructor() {

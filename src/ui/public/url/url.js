@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import 'ui/filters/uriescape';
-import 'ui/filters/rison';
-import { uiModules } from 'ui/modules';
-import { AppStateProvider } from 'ui/state_management/app_state';
+import '../filters/uriescape';
+import '../filters/rison';
+import { uiModules } from '../modules';
+import { AppStateProvider } from '../state_management/app_state';
 
 uiModules.get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });

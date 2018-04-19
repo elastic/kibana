@@ -1,4 +1,4 @@
-import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from '../range';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';

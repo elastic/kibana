@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
-import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
+import { getHeatmapColors } from '../../components/color/heatmap_color';
 import {
   isColorDark
 } from '@elastic/eui';

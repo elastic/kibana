@@ -1,5 +1,5 @@
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
-import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
+import { AggTypesMetricsMetricAggTypeProvider } from './metric_agg_type';
+import { AggTypesMetricsPercentilesProvider } from './percentiles';
 
 export function AggTypesMetricsMedianProvider(Private) {
 

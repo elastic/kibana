@@ -1,4 +1,4 @@
-import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
+import { buildPhraseFilter } from '../../../filter_manager/lib/phrase';
 
 export function AggTypesBucketsCreateFilterTermsProvider() {
   return function (aggConfig, key) {

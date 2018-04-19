@@ -1,17 +1,17 @@
 import _ from 'lodash';
-import template from 'ui/filter_bar/filter_bar.html';
-import 'ui/directives/json_input';
+import template from './filter_bar.html';
+import '../directives/json_input';
 import '../filter_editor';
 import './filter_pill/filter_pill';
-import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
-import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
-import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
-import { FilterBarLibExtractTimeFilterProvider } from 'ui/filter_bar/lib/extract_time_filter';
-import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/filter_out_time_based_filter';
-import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { filterAppliedAndUnwrap } from './lib/filter_applied_and_unwrap';
+import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
+import { FilterBarLibMapFlattenAndWrapFiltersProvider } from './lib/map_flatten_and_wrap_filters';
+import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
+import { FilterBarLibFilterOutTimeBasedFilterProvider } from './lib/filter_out_time_based_filter';
+import { FilterBarLibChangeTimeFilterProvider } from './lib/change_time_filter';
+import { FilterBarQueryFilterProvider } from './query_filter';
 import { compareFilters } from './lib/compare_filters';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
 

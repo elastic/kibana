@@ -1,5 +1,5 @@
 import 'angular-ui-select';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { getFieldOptions } from './lib/filter_editor_utils';
 import template from './filter_field_select.html';
 import '../directives/ui_select_focus_on';

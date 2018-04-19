@@ -1,8 +1,8 @@
 import { capitalize, isArray, isFunction } from 'lodash';
 
-import chrome from 'ui/chrome';
-import filterTemplate from 'ui/chrome/config/filter.html';
-import intervalTemplate from 'ui/chrome/config/interval.html';
+import chrome from '../chrome';
+import filterTemplate from '../chrome/config/filter.html';
+import intervalTemplate from '../chrome/config/interval.html';
 
 export function KbnTopNavControllerProvider($compile) {
   return class KbnTopNavController {

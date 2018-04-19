@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { once, clone } from 'lodash';
 
 import toggleHtml from './kbn_global_timepicker.html';

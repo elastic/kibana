@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import { metadata } from 'ui/metadata';
+import { metadata } from '../metadata';
 import 'babel-polyfill';
 import 'whatwg-fetch';
 import 'custom-event-polyfill';
-import 'ui/timefilter';
-import 'ui/notify';
-import 'ui/private';
-import 'ui/promises';
-import 'ui/storage';
-import 'ui/directives/kbn_src';
-import 'ui/watch_multi';
+import '../timefilter';
+import '../notify';
+import '../private';
+import '../promises';
+import '../storage';
+import '../directives/kbn_src';
+import '../watch_multi';
 import './services';
 
 import { initAngularApi } from './api/angular';

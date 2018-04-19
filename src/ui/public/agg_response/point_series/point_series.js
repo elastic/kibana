@@ -1,9 +1,9 @@
-import { PointSeriesGetSeriesProvider } from 'ui/agg_response/point_series/_get_series';
-import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
-import { PointSeriesInitYAxisProvider } from 'ui/agg_response/point_series/_init_y_axis';
-import { PointSeriesInitXAxisProvider } from 'ui/agg_response/point_series/_init_x_axis';
-import { PointSeriesOrderedDateAxisProvider } from 'ui/agg_response/point_series/_ordered_date_axis';
-import { PointSeriesTooltipFormatter } from 'ui/agg_response/point_series/_tooltip_formatter';
+import { PointSeriesGetSeriesProvider } from './_get_series';
+import { PointSeriesGetAspectsProvider } from './_get_aspects';
+import { PointSeriesInitYAxisProvider } from './_init_y_axis';
+import { PointSeriesInitXAxisProvider } from './_init_x_axis';
+import { PointSeriesOrderedDateAxisProvider } from './_ordered_date_axis';
+import { PointSeriesTooltipFormatter } from './_tooltip_formatter';
 
 export function AggResponsePointSeriesProvider(Private) {
 

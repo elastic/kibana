@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { AggConfig } from 'ui/vis/agg_config';
-import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
-import { buildExistsFilter } from 'ui/filter_manager/lib/exists';
-import { buildQueryFromFilters } from 'ui/courier/data_source/build_query/from_filters';
+import { AggConfig } from '../../vis/agg_config';
+import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
+import { buildExistsFilter } from '../../filter_manager/lib/exists';
+import { buildQueryFromFilters } from '../../courier/data_source/build_query/from_filters';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

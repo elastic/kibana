@@ -1,6 +1,6 @@
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
-import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
+import { AggTypesBucketsCreateFilterTermsProvider } from './create_filter/terms';
+import orderAndSizeTemplate from '../controls/order_and_size.html';
 
 export function AggTypesBucketsSignificantTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);

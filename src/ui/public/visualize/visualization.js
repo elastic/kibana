@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs/Rx';
-import 'ui/visualize/spy';
-import 'ui/visualize/visualize.less';
+import './spy';
+import './visualize.less';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { ResizeChecker } from 'ui/resize_checker';
-import visualizationTemplate from 'ui/visualize/visualization.html';
-import { getUpdateStatus } from 'ui/vis/update_status';
+import { uiModules } from '../modules';
+import { ResizeChecker } from '../resize_checker';
+import visualizationTemplate from './visualization.html';
+import { getUpdateStatus } from '../vis/update_status';
 import 'angular-sanitize';
-import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete';
+import { dispatchRenderComplete, dispatchRenderStart } from '../render_complete';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])

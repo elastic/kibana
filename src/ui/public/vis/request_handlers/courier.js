@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+import { SearchSourceProvider } from '../../courier/data_source/search_source';
+import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);

@@ -8,9 +8,9 @@ import './buckets/_range';
 import './buckets/_terms_other_bucket_helper';
 import './buckets/date_histogram/_editor';
 import './buckets/date_histogram/_params';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
+import { AggTypesIndexProvider } from '..';
+import { AggTypesBucketsBucketAggTypeProvider } from '../buckets/_bucket_agg_type';
+import { AggTypesMetricsMetricAggTypeProvider } from '../metrics/metric_agg_type';
 
 describe('AggTypesComponent', function () {
 

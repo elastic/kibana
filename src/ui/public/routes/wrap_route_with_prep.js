@@ -1,6 +1,6 @@
 import angular from 'angular';
 import _ from 'lodash';
-import { WorkQueue } from 'ui/routes/work_queue';
+import { WorkQueue } from './work_queue';
 
 export function wrapRouteWithPrep(route, setup) {
   if (!route.resolve && route.redirectTo) return;
