@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { TooltipProvider } from '../../vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
 import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';

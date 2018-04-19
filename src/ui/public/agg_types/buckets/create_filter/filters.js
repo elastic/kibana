@@ -1,4 +1,4 @@
-import { buildQueryFilter } from 'ui/filter_manager/lib/query';
+import { buildQueryFilter } from '../../../filter_manager/lib/query';
 import _ from 'lodash';
 
 export function AggTypesBucketsCreateFilterFiltersProvider() {

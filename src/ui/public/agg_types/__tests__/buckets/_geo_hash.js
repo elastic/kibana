@@ -1,9 +1,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
-import * as AggConfigModule from 'ui/vis/agg_config';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { AggTypesBucketsGeoHashProvider } from '../../buckets/geo_hash';
+import * as AggConfigModule from '../../../vis/agg_config';
+import { AggTypesIndexProvider } from '../..';
 
 describe('Geohash Agg', () => {
 

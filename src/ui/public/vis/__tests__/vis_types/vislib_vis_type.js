@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VislibVisTypeProvider } from 'ui/vis/vis_types/vislib_vis_type';
+import { VislibVisTypeProvider } from '../../vis_types/vislib_vis_type';
 
 describe('Vislib Vis Type', function () {
   let VislibVisType;

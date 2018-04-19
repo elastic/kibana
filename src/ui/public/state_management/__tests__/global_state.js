@@ -1,7 +1,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/state_management/global_state';
+import '../global_state';
 
 describe('State Management', function () {
   let $location;

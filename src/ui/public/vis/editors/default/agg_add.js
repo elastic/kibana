@@ -1,5 +1,5 @@
-import { AggConfig } from 'ui/vis/agg_config';
-import { uiModules } from 'ui/modules';
+import { AggConfig } from '../../agg_config';
+import { uiModules } from '../../../modules';
 import aggAddTemplate from './agg_add.html';
 
 uiModules

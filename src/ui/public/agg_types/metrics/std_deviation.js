@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
-import { AggTypesMetricsGetResponseAggConfigClassProvider } from 'ui/agg_types/metrics/get_response_agg_config_class';
+import { AggTypesMetricsMetricAggTypeProvider } from './metric_agg_type';
+import { AggTypesMetricsGetResponseAggConfigClassProvider } from './get_response_agg_config_class';
 
 export function AggTypesMetricsStdDeviationProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);

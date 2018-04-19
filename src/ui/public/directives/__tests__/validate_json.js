@@ -1,7 +1,7 @@
 import angular from 'angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/validate_json';
+import '../validate_json';
 
 // Load the kibana app dependencies.
 

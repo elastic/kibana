@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggConfig } from 'ui/vis/agg_config';
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
-import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
-import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
-import { RouteBasedNotifierProvider } from 'ui/route_based_notifier';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
+import { AggConfig } from '../../vis/agg_config';
+import { Schemas } from '../../vis/editors/default/schemas';
+import { AggTypesBucketsCreateFilterTermsProvider } from './create_filter/terms';
+import orderAggTemplate from '../controls/order_agg.html';
+import orderAndSizeTemplate from '../controls/order_and_size.html';
+import { RouteBasedNotifierProvider } from '../../route_based_notifier';
 import { OtherBucketHelperProvider } from './_terms_other_bucket_helper';
 
 export function AggTypesBucketsTermsProvider(Private) {

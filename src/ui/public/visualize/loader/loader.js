@@ -4,8 +4,8 @@
  * are up to date.
  */
 import angular from 'angular';
-import chrome from 'ui/chrome';
-import 'ui/visualize';
+import chrome from '../../chrome';
+import '..';
 import visTemplate from './loader_template.html';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 

@@ -1,5 +1,5 @@
-import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
-import AggConfigResult from 'ui/vis/agg_config_result';
+import { decodeGeoHash } from '../../utils/decode_geo_hash';
+import AggConfigResult from '../../vis/agg_config_result';
 import _ from 'lodash';
 
 function getAcr(val) {

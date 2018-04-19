@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsStdDeviationProvider } from 'ui/agg_types/metrics/std_deviation';
-import { VisProvider } from 'ui/vis';
+import { AggTypesMetricsStdDeviationProvider } from '../../metrics/std_deviation';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggTypeMetricStandardDeviationProvider class', function () {

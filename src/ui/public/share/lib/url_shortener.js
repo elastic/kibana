@@ -1,4 +1,4 @@
-import chrome from 'ui/chrome';
+import chrome from '../../chrome';
 import url from 'url';
 
 export function UrlShortenerProvider(Notifier, $http) {

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import { AggTypesAggTypeProvider } from '../agg_type';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 export function AggTypesBucketsBucketAggTypeProvider(Private) {

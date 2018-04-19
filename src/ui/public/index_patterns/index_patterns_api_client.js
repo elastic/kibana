@@ -2,8 +2,8 @@ import { resolve as resolveUrl, format as formatUrl } from 'url';
 
 import { pick, mapValues } from 'lodash';
 
-import { IndexPatternMissingIndices } from 'ui/errors';
-import { Notifier } from 'ui/notify';
+import { IndexPatternMissingIndices } from '../errors';
+import { Notifier } from '../notify';
 
 export function createIndexPatternsApiClient($http, basePath) {
   const apiBaseUrl = `${basePath}/api/index_patterns/`;

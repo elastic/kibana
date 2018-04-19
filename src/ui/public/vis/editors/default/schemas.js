@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
-import { AggParams } from 'ui/agg_types/agg_params';
+import { IndexedArray } from '../../../indexed_array';
+import { AggParams } from '../../../agg_types/agg_params';
 
 class Schemas {
   constructor(schemas) {

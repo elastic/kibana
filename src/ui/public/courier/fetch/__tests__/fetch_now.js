@@ -2,9 +2,9 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import { CallClientProvider } from 'ui/courier/fetch/call_client';
-import { CallResponseHandlersProvider } from 'ui/courier/fetch/call_response_handlers';
-import { ContinueIncompleteProvider } from 'ui/courier/fetch/continue_incomplete';
+import { CallClientProvider } from '../call_client';
+import { CallResponseHandlersProvider } from '../call_response_handlers';
+import { ContinueIncompleteProvider } from '../continue_incomplete';
 import { FetchNowProvider } from '../fetch_now';
 
 describe('FetchNowProvider', () => {

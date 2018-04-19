@@ -1,13 +1,13 @@
 import _ from 'lodash';
-import html from 'ui/doc_table/doc_table.html';
-import { getSort } from 'ui/doc_table/lib/get_sort';
-import 'ui/doc_table/doc_table.less';
-import 'ui/directives/truncated';
-import 'ui/directives/infinite_scroll';
-import 'ui/doc_table/components/table_header';
-import 'ui/doc_table/components/table_row';
-import { dispatchRenderComplete } from 'ui/render_complete';
-import { uiModules } from 'ui/modules';
+import html from './doc_table.html';
+import { getSort } from './lib/get_sort';
+import './doc_table.less';
+import '../directives/truncated';
+import '../directives/infinite_scroll';
+import './components/table_header';
+import './components/table_row';
+import { dispatchRenderComplete } from '../render_complete';
+import { uiModules } from '../modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
