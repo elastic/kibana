@@ -12901,9 +12901,9 @@ vega-hierarchy@^2.1:
     vega-dataflow "3"
     vega-util "1"
 
-vega-lib@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.2.1.tgz#feca4b054a0db492f92fd555e6c20be3f3c117d0"
+vega-lib@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.3.0.tgz#ebfa32c1fefec9d71c1e4b58d3775be027aeb312"
   dependencies:
     vega-crossfilter "2"
     vega-dataflow "3"
