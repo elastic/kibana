@@ -1,0 +1,20 @@
+<monitoring-main
+  product="elasticsearch"
+  name="indices"
+  data-test-subj="elasticsearchIndicesListingPage"
+>
+  <monitoring-cluster-status-elasticsearch status="esIndices.data.clusterStatus"></monitoring-cluster-status-elasticsearch>
+  <div class="page-row">
+    <h3 class="kuiScreenReaderOnly">Indices</h3>
+    <monitoring-index-listing
+      page-index="esIndices.pageIndex"
+      filter-text="esIndices.filterText"
+      sort-key="esIndices.sortKey"
+      sort-order="esIndices.sortOrder"
+      on-new-state="esIndices.onNewState"
+      indices="esIndices.data.rows"
+      show-system-indices="esIndices.showSystemIndices"
+      toggle-show-system-indices="esIndices.toggleShowSystemIndices"
+    ></monitoring-index-listing>
+  </div>
+</monitoring-main>

@@ -1,0 +1,175 @@
+<ml-nav-menu name="datavisualizer"></ml-nav-menu>
+<ml-chart-tooltip></ml-chart-tooltip>
+<ml-datavisualizer class="data-visualizer-container">
+  <div ng-controller="MlDataVisualizerViewFields" >
+    <div class="title-container euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
+      <div class="euiFlexItem euiFlexItem--flexGrowZero euiText">
+        <h1>{{indexPattern.title}}</h1>
+      </div>
+      <div class="euiFlexItem euiFlexItem--flexGrowZero">
+          <ml-full-time-range-selector index-pattern='indexPattern' query='searchQuery' />
+      </div>
+    </div>
+
+    <div class="main-container">
+
+      <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel">
+
+        <form
+          ng-submit="submitSearchQuery()"
+          name="querybarform"
+          class="flexGroup__filler query-bar-form"
+          style="width: 100%"
+        >
+          <div class="kuiLocalSearch">
+            <input
+              type="text"
+              class="kuiLocalSearchInput"
+              ng-model="searchQueryText"
+              placeholder="Search... (e.g. status:200 AND extension:PHP)"
+              aria-label="Search input"
+              autocomplete="off"
+            >
+            <button
+              class="kuiLocalSearchButton"
+              type="submit"
+              aria-label="Search"
+            >
+              <span aria-hidden="true" class="kuiIcon fa-search"></span>
+            </button>
+          </div>
+        </form>
+
+        <div class="document-count-container">
+          <label for="sampleShardSize">Sample</label>
+          <select id="sampleShardSize" class="kuiSelect type-input" ng-model="samplerShardSize" ng-change="samplerShardSizeChanged(samplerShardSize)">
+            <option ng-value="1000">1000</option>
+            <option ng-value="5000">5000</option>
+            <option ng-value="10000">10000</option>
+            <option ng-value="100000">100000</option>
+            <option ng-value="-1">all</option>
+          </select>
+          <span>documents per shard from a total of</span>
+          <span class="field-emphasis">{{ overallStats.totalCount }}</span>
+          <ng-pluralize count="overallStats.totalCount" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+          <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="right"
+            tooltip="Selecting a smaller sample size will reduce query run times and the load on the cluster."></i>
+        </div>
+
+      </div>
+
+      <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
+      	<div class="euiText">
+          <h2 class="kuiSubTitle kuiVerticalRhythm">Metrics</h2>
+        </div>
+
+        <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive euiFlexGroup--wrap">
+          <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
+            <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+              <div ng-if="showAllMetrics === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
+                <span class="field-emphasis">{{ metricCards.length }}</span>
+                <ng-pluralize count="metricCards.length" when="{'1':'field exists', 'other':'fields exist'}">fields exist</ng-pluralize> in documents (
+                <span class="field-emphasis">{{ totalMetricFieldCount }}</span> in total)
+              </div>
+              
+              <div ng-if="showAllMetrics === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
+                <span class="field-emphasis">{{ metricCards.length }}</span>
+                <ng-pluralize count="metricCards.length" when="{'1':'field', 'other':'fields'}">fields</ng-pluralize>
+                (
+                <span class="field-emphasis">{{ populatedMetricFieldCount }}</span>
+                <ng-pluralize count="populatedMetricFieldCount" when="{'1':'exists', 'other':'exist'}">exist</ng-pluralize> in documents)
+              </div>
+              
+              <div ng-hide="populatedMetricFieldCount === totalMetricFieldCount" class="field-group-input euiFlexItem euiFlexItem--flexGrowZero">
+                <input id="toggleAllMetricsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllMetrics()" ng-checked="showAllMetrics === true">
+                <label for="toggleAllMetricsCheckbox">show empty fields</label>
+              </div>
+            </div>
+          </div>
+          <div class="field-filter-controls euiFlexItem euiFlexItem--flexGrowZero">
+            <ml-form-filter-input
+              filter="metricFieldFilter"
+              filter-icon="metricFilterIcon"
+              filter-changed="metricFieldFilterChanged"
+              clear-filter="clearMetricFilter" />
+          </div>
+        </div>
+
+        <div class="card-container" ng-repeat="card in metricCards">
+          <ml-field-data-card
+            index-pattern="indexPattern"
+            query="searchQuery"
+            earliest="earliest"
+            latest="latest"
+            card="card">
+          </ml-field-data-card>
+        </div>
+
+      </div>
+
+      <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
+        <div class="euiText">
+          <h2 class="kuiSubTitle kuiVerticalRhythm">Fields</h2>
+        </div>
+
+        <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive euiFlexGroup--wrap">
+          <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
+            <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+              <div ng-if="showAllFields === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
+                <span class="field-emphasis">{{ fieldCards.length }}</span>
+                <ng-pluralize count="fieldCards.length" when="{'1':'field exists', 'other':'fields exist'}">fields exist</ng-pluralize> in documents
+                (<span class="field-emphasis">{{ totalNonMetricFieldCount }}</span> in total)
+              </div>
+
+              <div ng-if="showAllFields === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
+                <span class="field-emphasis">{{ fieldCards.length }}</span>
+                <ng-pluralize count="fieldCards.length" when="{'1':'field', 'other':'fields'}">fields</ng-pluralize>
+                (<span class="field-emphasis">{{ populatedNonMetricFieldCount }}</span>
+                <ng-pluralize count="populatedNonMetricFieldCount" when="{'1':'exists', 'other':'exist'}">exist</ng-pluralize> in documents)
+              </div>
+
+              <div ng-hide="populatedNonMetricFieldCount === totalNonMetricFieldCount" class="field-group-input euiFlexItem euiFlexItem--flexGrowZero">
+                <input id="toggleAllFieldsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllFields()" ng-checked="showAllFields === true">
+                <label for="toggleAllFieldsCheckbox">show empty fields</label>
+              </div>
+            </div>
+          </div>
+          <div class="field-filter-controls euiFlexItem euiFlexItem--flexGrowZero">
+            <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--responsive">
+              <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                <select class="kuiSelect type-input" ng-model="filterFieldType" ng-change="filterFieldTypeChanged(filterFieldType)">
+                  <option value="*">All field types</option>
+                  <option ng-repeat="type in indexedFieldTypes" value="{{type}}">{{type}} types</option>
+                </select>
+              </div>
+              <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                <ml-form-filter-input
+                  filter="fieldFilter"
+                  filter-icon="fieldFilterIcon"
+                  filter-changed="fieldFilterChanged"
+                  clear-filter="clearFieldFilter" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-container" ng-repeat="card in fieldCards">
+          <ml-field-data-card
+            index-pattern="indexPattern"
+            query="searchQuery"
+            earliest="earliest"
+            latest="latest"
+            card="card">
+          </ml-field-data-card>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="datavisualizer-sidebar">
+      <ng-include src="urlBasePath+'/plugins/ml/datavisualizer/datavisualizer_sidebar.html'"></ng-include>
+    </div>
+
+  </div>
+</ml-datavisualizer>

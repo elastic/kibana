@@ -1,0 +1,48 @@
+[role="xpack"]
+[[xpack-ml]]
+= Machine Learning
+
+[partintro]
+--
+
+As datasets increase in size and complexity, the human effort required to
+inspect dashboards or maintain rules for spotting infrastructure problems,
+cyber attacks, or business issues becomes impractical. The {xpackml} features
+automatically model the normal behavior of your time series data — learning
+trends, periodicity, and more — in real time to identify anomalies, streamline
+root cause analysis, and reduce false positives.
+
+{xpackml} runs in and scales with {es}, and includes an
+intuitive UI on the {kib} *Machine Learning* page for creating anomaly detection
+jobs and understanding results.
+
+You can use the *Job Management* pane to create and manage jobs and their
+associated {dfeeds}:
+
+[role="screenshot"]
+image::ml/images/ml-job-management.jpg[Job Management]
+
+You can use the *Settings* pane to add scheduled events to calendars and to
+associate these calendars with your jobs:
+
+[role="screenshot"]
+image::ml/images/ml-calendar-management.jpg[Calendar Management]
+
+The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
+{ml} jobs.  For example:
+
+[role="screenshot"]
+image::ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
+
+NOTE: The {xpack} {ml} features in {kib} use pop-ups. You must configure your
+web browser so that it does not block pop-up windows or create an exception for
+your Kibana URL.
+
+For more information about {ml}, see
+{xpack-ref}/xpack-ml.html[Machine Learning in the Elastic Stack].
+
+--
+
+include::creating-jobs.asciidoc[]
+include::job-tips.asciidoc[]
+//TO-DO: Add info about creating watch

@@ -1,0 +1,23 @@
+<kbn-management-app
+  section="elasticsearch/watcher/watch"
+  omit-breadcrumb-pages="{{ watchHistoryItem.omitBreadcrumbPages }}"
+  page-title="watchHistoryItem.breadcrumb"
+>
+  <div class="kuiViewContent kuiViewContent--constrainedWidth">
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <watch-history-item-watch-summary
+        watch-history-item="watchHistoryItem.watchHistoryItem"
+      ></watch-history-item-watch-summary>
+    </div>
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <watch-history-item-actions-summary
+        xpack-watch="watchHistoryItem.watch"
+        watch-history-item="watchHistoryItem.watchHistoryItem"
+      ></watch-history-item-actions-summary>
+    </div>
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <label>Execution Output:</label>
+      <watch-history-item-detail watch-history-item="watchHistoryItem.watchHistoryItem"></watch-history-item-detail>
+    </div>
+  </div>
+</kbn-management-app>

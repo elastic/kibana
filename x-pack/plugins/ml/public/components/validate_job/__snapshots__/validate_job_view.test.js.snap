@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ValidateJob renders button and modal with a messsage 1`] = `
+<div>
+  <EuiButton
+    color="primary"
+    fill={true}
+    iconSide="right"
+    iconType="questionInCircle"
+    isDisabled={false}
+    isLoading={false}
+    onClick={[Function]}
+    size="s"
+    type="button"
+  >
+    Validate Job
+  </EuiButton>
+  <Modal
+    close={[Function]}
+    title="Validate job test-id"
+  >
+    <Callout
+      key="over_field_low_cardinality_0"
+      message={
+        Object {
+          "fieldName": "airline",
+          "id": "over_field_low_cardinality",
+          "status": "warning",
+          "text": "Cardinality of over_field \\"airline\\" is low and therefore less suitable for population analysis.",
+          "url": "https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch",
+        }
+      }
+    />
+  </Modal>
+</div>
+`;
+
+exports[`ValidateJob renders the button 1`] = `
+<div>
+  <EuiButton
+    color="primary"
+    fill={true}
+    iconSide="right"
+    iconType="questionInCircle"
+    isDisabled={false}
+    isLoading={false}
+    onClick={[Function]}
+    size="s"
+    type="button"
+  >
+    Validate Job
+  </EuiButton>
+</div>
+`;
+
+exports[`ValidateJob renders the button and modal with a success message 1`] = `
+<div>
+  <EuiButton
+    color="primary"
+    fill={true}
+    iconSide="right"
+    iconType="questionInCircle"
+    isDisabled={false}
+    isLoading={false}
+    onClick={[Function]}
+    size="s"
+    type="button"
+  >
+    Validate Job
+  </EuiButton>
+  <Modal
+    close={[Function]}
+    title="Validate job test-id"
+  />
+</div>
+`;

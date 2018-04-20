@@ -1,0 +1,36 @@
+<form novalidate>
+  <toggle-panel
+    toggle-panel-id="action"
+    button-text="Custom Patterns"
+    is-collapsed="customPatternsInput.isSectionCollapsed('action')"
+    on-toggle="customPatternsInput.onSectionToggle"
+    data-test-subj="btnToggleCustomPatternsInput"
+  >
+    <div class="kuiFormSection">
+      <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"></span>
+          <span class="kuiInfoPanelHeader__title">
+            Enter one custom pattern per line. For example:
+          </span>
+        </div>
+
+        <div class="kuiInfoPanelBody">
+          <div class="kuiInfoPanelBody__message">
+            <pre><code>POSTFIX_QUEUEID [0-9A-F]{10,11}
+MSG message-id=<%{GREEDYDATA}></code></pre>
+          </div>
+        </div>
+      </div>
+      <div
+        class="custom-patterns-input-editor grokdebugger-ace-editor kuiVerticalRhythm"
+        require-keys="true"
+        ui-ace="{
+          onLoad: aceLoaded
+        }"
+        ng-model="customPatternsInput.customPatterns"
+        data-test-subj="aceCustomPatternsInput"
+        ></div>
+    </div>
+  </toggle-panel>
+</form>

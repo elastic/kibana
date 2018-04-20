@@ -1,0 +1,48 @@
+<div class="delete-job-modal">
+  <h1 tooltip="Delete job {{ui.jobId}}" class="euiTitle euiTitle--small">Delete job {{ui.jobId}}</h1>
+  <div ng-show="ui.stage===1" class="status-item-list">
+    <div class="status-item" ng-show="ui.isDatafeed">Deleting datafeed...
+      <i ng-show="ui.status.deleteDatafeed === -1" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+      <i ng-show="ui.status.deleteDatafeed === 0" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+      <i ng-show="ui.status.deleteDatafeed === 1" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+    </div>
+
+    <div class="status-item">Deleting job...
+      <i ng-show="ui.status.deleteJob === -1" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+      <i ng-show="ui.status.deleteJob === 0" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+      <i ng-show="ui.status.deleteJob === 1" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+    </div>
+  </div>
+  <div ng-if="ui.status.errorMessage!==''" class="validation-error">
+    {{ui.status.errorMessage}} request may have timed out and may still be running in the background.<br />
+    Please check status and retry in a few minutes.
+  </div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <div ng-show= "ui.stage===0">
+    <button
+      ng-disabled="ui.status.deleteLock"
+      ng-click="delete();"
+      class="kuiButton kuiButton--danger"
+      aria-label="delete">
+        Delete job
+    </button>
+
+    <button
+      ng-disabled="ui.status.deleteLock"
+      ng-click="close();"
+      class="kuiButton kuiButton--primary"
+      aria-label="cancel">
+        Cancel
+    </button>
+  </div>
+  <div ng-show= "ui.stage===1">
+    <button
+      ng-click="close();"
+      class="kuiButton kuiButton--primary"
+      aria-label="close">
+        Close
+    </button>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+{
+  "visState": "{\"title\":\"ML Nginx Access Top Remote IPs Table\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"nginx.access.remote_ip\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}", 
+  "description": "", 
+  "title": "ML Nginx Access Top Remote IPs Table", 
+  "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}", 
+  "version": 1, 
+  "savedSearchId": "ML-Filebeat-Nginx-Access", 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

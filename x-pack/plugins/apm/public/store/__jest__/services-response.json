@@ -1,0 +1,20 @@
+[
+  {
+    "serviceName": "opbeans-python",
+    "overallAvg": 163335.74660633484,
+    "types": ["request"],
+    "chart": {}
+  },
+  {
+    "serviceName": "opbeans-backend",
+    "overallAvg": 370627.24742268043,
+    "types": ["request", "Brewing Bot"],
+    "chart": {}
+  },
+  {
+    "serviceName": "opbeat-stage",
+    "overallAvg": 6740834.058047493,
+    "types": ["transaction.celery", "request"],
+    "chart": {}
+  }
+]

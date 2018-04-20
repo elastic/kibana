@@ -1,0 +1,114 @@
+.monitoring-summary-status {
+  border-bottom: 1px solid #d4d4d4;
+}
+
+.lspvContainer {
+  // Same color as the sidebar. Needed to fill in the Y axis of the sidebar
+  // TODO: Do we have a color lookup variable that should be used here?
+  background-color: #F6F6F6;
+  cursor: grab;
+}
+
+.lspvVertexTitle {
+  fill: black;
+  font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+  font-weight: bold;
+  font-size: 13px;
+  stroke: none;
+}
+
+.lspvVertexSubtitle {
+  fill: black;
+  font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+  font-weight: normal;
+  font-size: 13px;
+  stroke: none;
+}
+
+.lspvHeader {
+  fill: black;
+  font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+  font-size: 13px;
+  stroke: none;
+}
+
+.lspvVertex {
+  cursor: pointer;
+
+  &.lspvVertex-grayed {
+    opacity: 0.3;
+  }
+}
+
+.lspvVertexBounding {
+  fill: #fff;
+  stroke: #d4d4d4;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+
+  &.lspvVertexBounding-highlighted {
+    stroke: #6badbf;
+  }
+}
+
+.lspvStat {
+  fill: black;
+  font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+  font-weight: normal;
+  font-size: 13px;
+  stroke: none;
+}
+
+.lspvEdge {
+  stroke: #000;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  opacity: 0.5;
+  marker-end: url(#lspvPlainMarker);
+  fill: none;
+
+  &.lspvEdge-grayed {
+    opacity: 0.1;
+  }
+}
+
+.lspvEdgeBoolean {
+  text {
+    font-size: 14px;
+    font-weight: bold;
+    fill: #fff;
+    stroke: none;
+  }
+}
+
+@trueBooleanFill: #1BAFD2;
+@falseBooleanFill: #EE408A;
+
+.lspvEdgeBoolean--true {
+  stroke: @trueBooleanFill;
+  marker-end: url(#lspvTrueMarker);
+
+  circle {
+    fill: @trueBooleanFill;
+  }
+}
+
+.lspvEdgeBoolean--false {
+  stroke: @falseBooleanFill;
+  marker-end: url(#lspvFalseMarker);
+
+  circle {
+    fill: @falseBooleanFill;
+  }
+}
+
+img.lspvDetailDrawerIcon {
+  display: inline;
+  margin: 0 5px 0 0;
+  width: auto;
+  vertical-align: middle;
+}
+
+.lspvDetailDrawerSparklineContainer {
+  width: 7vw;
+}

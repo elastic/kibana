@@ -8,29 +8,39 @@ import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 
 export function createTestCluster(options = {}) {
-  const { port = esTestConfig.getPort(), log } = options;
+  const {
+    port = esTestConfig.getPort(),
+    password = 'changeme',
+    license = 'oss',
+    log,
+    basePath = resolve(__dirname, '../../../.es'),
+  } = options;
+
   const randomHash = Math.random().toString(36).substring(2);
   const clusterName = `test-${randomHash}`;
-  const basePath = resolve(__dirname, '../../../.es');
   const config = {
     version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
     sourcePath: resolve(__dirname, '../../../../elasticsearch'),
+    password,
+    license,
     basePath,
   };
 
   const cluster = new Cluster(log);
-  const from = esTestConfig.getBuildFrom();
+
+  // Use source when running on CI
+  const from = options.from || esTestConfig.getBuildFrom();
 
   return new class EsTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
 
-      return from === 'snapshot' ? minute : minute * 3;
+      return from === 'snapshot' ? minute : minute * 6;
     }
 
-    async start() {
+    async start(esArgs = []) {
       const { installPath } =
         from === 'source'
           ? await cluster.installSource(config)
@@ -41,6 +51,7 @@ export function createTestCluster(options = {}) {
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          ...esArgs
         ],
       });
     }

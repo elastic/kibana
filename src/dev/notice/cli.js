@@ -1,14 +1,12 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { resolve, relative } from 'path';
+import { resolve } from 'path';
 
 import getopts from 'getopts';
 import dedent from 'dedent';
 import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
 import { REPO_ROOT } from '../constants';
-import { generateNoticeText } from './generate_notice_text';
-
-const NOTICE_PATH = resolve(REPO_ROOT, 'NOTICE.txt');
+import { generateNoticeFromSource } from './generate_notice_from_source';
 
 const unknownFlags = [];
 const opts = getopts(process.argv.slice(2), {
@@ -34,11 +32,10 @@ if (unknownFlags.length) {
 
 if (opts.help) {
   process.stdout.write('\n' + dedent`
-    Regenerate or validate NOTICE.txt.
+    Generate or validate NOTICE.txt.
 
-      Entries in NOTICE.txt are collected by finding all multi-line comments
-      that start with a "@notice" tag and copying their text content into
-      NOTICE.txt at the root of the repository.
+      Entries are collected by finding all multi-line comments that start
+      with a "@notice" tag and copying their text content into NOTICE.txt.
 
     Options:
       --help      Show this help info
@@ -50,23 +47,26 @@ if (opts.help) {
 }
 
 (async function run() {
-  log.info('Searching source files for multi-line comments starting with @notify');
-  const newText = await generateNoticeText(log);
+  const path = resolve(REPO_ROOT, 'NOTICE.txt');
+  const newContent = await generateNoticeFromSource({
+    productName: 'Kibana source code with Kibana X-Pack source code',
+    directory: REPO_ROOT,
+    log,
+  });
+
+  const currentContent = readFileSync(path, 'utf8');
+  if (currentContent === newContent) {
+    log.success('NOTICE.txt is up to date');
+    return;
+  }
+
   if (!opts.validate) {
-    log.info('Wrote notice text to', NOTICE_PATH);
-    writeFileSync(NOTICE_PATH, newText, 'utf8');
+    log.success('Wrote notice text to NOTICE.txt');
+    writeFileSync(path, newContent, 'utf8');
     return;
   }
 
-  const currentText = readFileSync(NOTICE_PATH, 'utf8');
-  if (currentText === newText) {
-    log.success(NOTICE_PATH, 'is up to date');
-    return;
-  }
-
-  log.error(
-    `${relative(process.cwd(), NOTICE_PATH)} is out of date, run \`node scripts/notice\` to update the file and commit the results.`
-  );
+  log.error('NOTICE.txt is out of date, run `node scripts/notice` to update and commit the results.');
   process.exit(1);
 }()).catch(error => {
   log.error(error);

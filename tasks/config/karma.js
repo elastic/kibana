@@ -1,10 +1,24 @@
-import { times } from 'lodash';
 import { resolve, dirname } from 'path';
+import { platform as getOsPlatform } from 'os';
+import { times } from 'lodash';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
 
 module.exports = function (grunt) {
+  function pickBrowser() {
+    if (grunt.option('browser')) {
+      return grunt.option('browser');
+    }
+
+    switch (getOsPlatform()) {
+      case 'win32':
+        return 'IE';
+      default:
+        return 'Chrome';
+    }
+  }
+
   const config = {
     options: {
       // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -17,7 +31,7 @@ module.exports = function (grunt) {
       colors: true,
       logLevel: grunt.option('debug') || grunt.option('verbose') ? 'DEBUG' : 'INFO',
       autoWatch: false,
-      browsers: ['<%= karmaBrowser %>'],
+      browsers: [pickBrowser()],
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
       reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],

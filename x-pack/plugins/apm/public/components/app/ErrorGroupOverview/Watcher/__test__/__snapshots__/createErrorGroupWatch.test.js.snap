@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createErrorGroupWatch should call createWatch with correct args 1`] = `
+Object {
+  "actions": Object {
+    "email": Object {
+      "email": Object {
+        "body": Object {
+          "html": "Your service \\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within \\"{{ctx.metadata.timeRangeHumanReadable}}\\"<br/><br/>{{#ctx.payload.aggregations.error_groups.buckets}}<br/><strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong><br/>{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}<br/>{{doc_count}} occurrences<br/>{{/ctx.payload.aggregations.error_groups.buckets}}",
+        },
+        "subject": "\\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds the threshold",
+        "to": "{{ctx.metadata.emails}}",
+      },
+    },
+    "log_error": Object {
+      "logging": Object {
+        "text": "Your service \\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within \\"{{ctx.metadata.timeRangeHumanReadable}}\\"<br/><br/>{{#ctx.payload.aggregations.error_groups.buckets}}<br/><strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong><br/>{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}<br/>{{doc_count}} occurrences<br/>{{/ctx.payload.aggregations.error_groups.buckets}}",
+      },
+    },
+    "slack_webhook": Object {
+      "webhook": Object {
+        "body": "{\\"text\\":\\"Your service \\\\\\"{{ctx.metadata.serviceName}}\\\\\\" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within \\\\\\"{{ctx.metadata.timeRangeHumanReadable}}\\\\\\"\\\\n{{#ctx.payload.aggregations.error_groups.buckets}}\\\\n>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*\\\\n>{{#sample.hits.hits.0._source.error.culprit}}\`{{sample.hits.hits.0._source.error.culprit}}\`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}\\\\n>{{doc_count}} occurrences\\\\n{{/ctx.payload.aggregations.error_groups.buckets}}\\"}",
+        "headers": Object {
+          "Content-Type": "application/json",
+        },
+        "host": "hooks.slack.com",
+        "method": "POST",
+        "path": "{{ctx.metadata.slackUrlPath}}",
+        "port": 443,
+        "scheme": "https",
+      },
+    },
+  },
+  "condition": Object {
+    "script": Object {
+      "source": "return ctx.payload.aggregations.error_groups.buckets.length > 0",
+    },
+  },
+  "input": Object {
+    "search": Object {
+      "request": Object {
+        "body": Object {
+          "aggs": Object {
+            "error_groups": Object {
+              "aggs": Object {
+                "sample": Object {
+                  "top_hits": Object {
+                    "_source": Array [
+                      "error.log.message",
+                      "error.exception.message",
+                      "error.exception.handled",
+                      "error.culprit",
+                      "error.grouping_key",
+                      "@timestamp",
+                    ],
+                    "size": 1,
+                    "sort": Array [
+                      Object {
+                        "@timestamp": "desc",
+                      },
+                    ],
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "error.grouping_key",
+                "min_doc_count": "{{ctx.metadata.threshold}}",
+                "order": Object {
+                  "_count": "desc",
+                },
+                "size": 10,
+              },
+            },
+          },
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "context.service.name": "{{ctx.metadata.serviceName}}",
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "processor.event": "error",
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "{{ctx.metadata.timeRange}}",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 0,
+        },
+        "indices": Array [
+          "myIndexPattern",
+        ],
+      },
+    },
+  },
+  "metadata": Object {
+    "emails": Array [
+      "my@email.dk",
+    ],
+    "serviceName": "opbeans-node",
+    "slackUrlPath": "/services/slackid1/slackid2/slackid3",
+    "threshold": 10,
+    "timeRange": "now-24h",
+    "timeRangeHumanReadable": "24h",
+    "trigger": "This value must be changed in trigger section",
+  },
+  "trigger": Object {
+    "schedule": Object {
+      "daily": Object {
+        "at": "08:00",
+      },
+    },
+  },
+}
+`;
+
+exports[`createErrorGroupWatch should format slack message correctly 1`] = `
+"Your service \\"{{ctx.metadata.serviceName}}\\" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within \\"{{ctx.metadata.timeRangeHumanReadable}}\\"
+{{#ctx.payload.aggregations.error_groups.buckets}}
+>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*
+>{{#sample.hits.hits.0._source.error.culprit}}\`{{sample.hits.hits.0._source.error.culprit}}\`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}
+>{{doc_count}} occurrences
+{{/ctx.payload.aggregations.error_groups.buckets}}"
+`;

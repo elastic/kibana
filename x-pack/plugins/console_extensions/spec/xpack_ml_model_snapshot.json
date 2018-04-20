@@ -1,0 +1,36 @@
+{
+  "DELETE _xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}": {
+    "methods": ["DELETE"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}"]
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots",
+      "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}"
+    ],
+    "data_autocomplete_rules": {
+      "desc": [true, false],
+      "end": "",
+      "from": 0,
+      "size": 1000,
+      "sort": "",
+      "start": ""
+    }
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert": {
+    "methods": ["POST"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_revert"],
+    "data_autocomplete_rules": {
+      "delete_intervening_results": [true, false]
+    }
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_update": {
+    "methods": ["POST"],
+    "patterns": ["_xpack/ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_update"],
+    "data_autocomplete_rules": {
+      "description": "",
+      "retain": [true, false]
+    }
+  }
+}
