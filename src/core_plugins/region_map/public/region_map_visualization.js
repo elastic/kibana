@@ -30,6 +30,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
 
     async _updateData(tableGroup) {
+      this._chartData = tableGroup;
       let results;
       if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
         results = [];
