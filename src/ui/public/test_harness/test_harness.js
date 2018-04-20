@@ -67,5 +67,6 @@ afterEach(function () {
 
 // Kick off mocha, called at the end of test entry files
 export function bootstrap() {
+  require('uiExports/hacks');
   chrome.setupAngular();
 }
