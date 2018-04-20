@@ -60,6 +60,8 @@ describe('Server logging configuration', function () {
     });
   } else {
     it('should be reloadable via SIGHUP process signaling', function (done) {
+      expect.assertions(1);
+
       child = spawn('node', [kibanaPath, '--config', testConfigFile]);
 
       child.on('error', err => {
@@ -112,8 +114,11 @@ describe('Server logging configuration', function () {
         isJson = false;
         setLoggingJson(false);
 
-        // reload logging config
-        child.kill('SIGHUP');
+        // Reload logging config. We give it a little bit of time to just make
+        // sure the process sighup handler is registered.
+        setTimeout(() => {
+          child.kill('SIGHUP');
+        }, 100);
       }
     }, 60000);
   }
