@@ -12,10 +12,13 @@ export default function () {
 
   const { type, modules } = JSON.parse(module.id.slice(module.id.indexOf('?') + 1));
 
-  const requires = modules.map(m => {
-    const req = normalizePath(m);
-    return `{ req: '${req}', module: require('${req}') },`;
-  }).join('        \n');
+  const requires = modules
+    .sort((a, b) => a.localeCompare(b))
+    .map(m => {
+      const req = normalizePath(m);
+      return `{ req: '${req}', module: require('${req}') },`;
+    })
+    .join('\n        ');
 
   return {
     code: dedent`
