@@ -1,0 +1,184 @@
+[role="xpack"]
+[[xkb-6.2.0]]
+== {kib} {xpack} 6.2.0 Release Notes
+++++
+<titleabbrev>6.2.0 Release Notes</titleabbrev>
+++++
+
+[float]
+[[xkb-features-6.2.0]]
+=== New Features
+
+APM::
+* The Elastic APM is generally available as part of the 6.2.0 release of the
+Elastic Stack. For more information about the APM functionality in {kib}, see
+<<xpack-apm>>.
+
+Machine Learning::
+* Added the ability to create
+{xpack-ref}/ml-calendars.html[calendars and scheduled events].
+// Repo: x-pack-kibana
+// Pull: 3817, 3966, 4070, 4256, 4326, 3850, 3949, 3986, 4041, 4075, 4084, 4116,
+// 4137, 3937, 4002, 4077
+
+Monitoring::
+* Added monitoring information for Beats in {kib}. See <<beats-page>>.
+// Repo: x-pack-kibana
+// Pull: 4049, 3993, 4246
+
+[float]
+[[xkb-enhancements-6.2.0]]
+=== Enhancements
+
+Machine Learning::
+* Enhanced the creation of custom URLs for existing jobs. When you edit jobs,
+there is a new *Custom URLs* tab, which provides options for creating a link to
+a {kib} dashboard or a different URL.
+// Repo: x-pack-kibana
+// Pull: 4130
+
+Management::
+* Renamed the *Save* button *Save &amp; Deploy*. This change makes it clearer
+that when you click the button the pipeline is saved to an {es} index and
+deployed to any Logstash instances that are configured to run it.
+// Repo: x-pack-kibana
+// Pull: 3599
+* Added the ability to clone pipelines in {kib}. When you click the *Clone*
+button, data from the original pipeline is used to pre-populate the new pipeline
+form.
+// Repo: x-pack-kibana
+// Pull: 3786
+* Enabled auto-sizing of the pipeline configuration text area. The text area
+automatically grows or shrinks as you type out a pipeline definition.
+// Repo: x-pack-kibana
+// Pull: 4026
+
+Monitoring::
+* Added resolved alerts to the list of alerts that are visible during a selected
+time frame in {kib}.
+// Repo: x-pack-kibana
+// Pull: 4064
+* Added the interval size for aggregated metrics in the tooltip for each chart.
+// Repo: x-pack-kibana
+// Pull: 3540, 3632
+* Improved error handling such that generic `500` errors provide better messages.
+// Repo: x-pack-kibana
+// Pull: 3744
+* Redesigned the Logstash Pipelines view to provide more actionable information
+in a tabular format.
+// Repo: x-pack-kibana
+// Pull: 3661
+* Added a basic detail drawer to the Logstash Pipeline Viewer. When you click on
+any vertex in the Pipeline Viewer, the drawer slides open. It shows basic
+information about the vertex that was clicked and any metrics, if available.
+// Repo: x-pack-kibana
+// Pull: 3738
+
+Reporting::
+* By default, weekly `.reporting` indices created after upgrading to 6.2 use a
+single primary shard and have the `auto_expand_replicas: 0-1` setting rather
+than a fixed setting of 1 replica. As a result, these indices can have a green
+status on single node clusters. There is no impact in multi-node clusters.
+// Repo: x-pack-kibana
+// Pull: 3781
+
+[float]
+[[xkb-bug-6.2.0]]
+=== Bug fixes
+
+////
+Discovery::
+* Updating datemath to 4.0.2, fixing bug with IE11
+// Repo: x-pack-kibana
+// Pull: 4241
+////
+////
+Licensing::
+* Show notification for all users after login if license is expired
+// Repo: x-pack-kibana
+// Pull: 3364
+////
+Machine Learning::
+* The job selection control now remembers the state of the `Also apply time range`
+checkbox, such that the previous selection is restored when the control is
+re-opened.
+// Repo: x-pack-kibana
+// Pull: 3508
+* Fixed issues where lines were drawn over the Y-axis in the event rate charts
+for multimetric and population jobs.
+// Repo: x-pack-kibana
+// Pull: 3605
+* Removed scripted fields from job wizards.
+// Repo: x-pack-kibana
+// Pull: 3607
+* Added type-ahead filtering to the job group and influencer selection controls
+in the job wizards.
+// Repo: x-pack-kibana
+// Pull: 3689
+* Updated the data preview to use the index pattern or the list of indices that
+were selected.
+// Repo: x-pack-kibana
+// Pull: 3726
+* Disabled the start button for jobs that do not have {dfeeds}.
+// Repo: x-pack-kibana
+// Pull: 4232
+* Fixed issue where jobs created by the data recognizer used the default job
+groups instead of the specified job groups.
+// Repo: x-pack-kibana
+// Pull: 4277
+* Updated the actual and typical values for anomalies in {kib}, such that they
+are formatted according to their magnitude.
+// Repo: x-pack-kibana
+// Pull: 3470
+* Fixed the handling of anomalies when field values contain backslashes.
+// Repo: x-pack-kibana
+// Pull: 3666
+* Ensured Anomaly Explorer swimlane rows are sorted by score.
+// Repo: x-pack-kibana
+// Pull: 3670
+* Disabled the Forecast button for jobs that were created before 6.1.0 and for
+jobs that contain an `over_field_name` property.
+// Repo: x-pack-kibana
+// Pull: 3783
+* Added support for field names with non-alphanumeric characters in the
+*Data Visualizer*.
+// Repo: x-pack-kibana
+// Pull: 4157
+* Fixed problems creating jobs from saved searches that have `exists` filters.
+// Repo: x-pack-kibana
+// Pull: 4221
+
+Monitoring::
+* Added the ability to navigate between the pipeline versions in the Logstash
+Pipeline Viewer.
+// Repo: x-pack-kibana
+// Pull: 3355
+* Updated the Logstash Pipeline Viewer such that you can change the refresh
+interval but you cannot select the time range.
+// Repo: x-pack-kibana
+// Pull: 3555, 3303
+* Added Logstash version information back in the node list.
+// Repo: x-pack-kibana
+// Pull: 3523
+* Improved logging when the {kib} monitoring collectors stop or resume and
+downgraded the log level for these log messages to `info`.
+// Repo: x-pack-kibana
+// Pull: 3717, 3650
+
+Reporting::
+* Resolved issue with horizontal metric visualizations being displayed
+incorrectly in PDF reports.
+// Repo: x-pack-kibana
+// Pull: 4016
+* Fixed bug where the title of the Dashboard panels was hidden when creating
+PDFs with the preserve layout option.
+// Repo: x-pack-kibana
+// Pull: 3954
+* Fixed issue with certain characters in the job parameters which caused CSV
+reports to fail.
+// Repo: x-pack-kibana
+// Pull: 4176
+* Resolved issue with preserve layout PDF reports intermittently having blank
+visualizations.
+// Repo: x-pack-kibana
+// Pull: 3611

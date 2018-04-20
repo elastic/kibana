@@ -14,7 +14,10 @@ export const IGNORE_FILE_GLOBS = [
   '**/*.txt',
   '**/Gruntfile.js',
   'tasks/config/**/*',
-  'tasks/build/docker/docs/{Dockerfile,docker-compose.yml}',
+  '**/{Dockerfile,docker-compose.yml}',
+  'x-pack/plugins/apm/**/*',
+  '**/.*',
+  '**/{webpackShims,__mocks__}/**/*',
 ];
 
 
@@ -26,6 +29,7 @@ export const IGNORE_FILE_GLOBS = [
  */
 export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'packages/*',
+  'x-pack',
 ];
 
 
@@ -53,7 +57,8 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/ui/public/flot-charts',
   'src/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
-  'packages/kbn-pm/src/utils/__fixtures__/*'
+  'packages/kbn-pm/src/utils/__fixtures__/*',
+  'x-pack/dev-tools',
 ];
 
 
@@ -186,4 +191,34 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',
   'webpackShims/ui-bootstrap.js',
+  'x-pack/plugins/graph/public/graphClientWorkspace.js',
+  'x-pack/plugins/graph/public/angular-venn-simple.js',
+  'x-pack/plugins/index_management/public/lib/editSettings.js',
+  'x-pack/plugins/license_management/public/store/reducers/licenseManagement.js',
+  'x-pack/plugins/ml/server/client/__tests__/elasticsearch-ml.js',
+  'x-pack/plugins/ml/server/client/elasticsearch-ml.js',
+  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/jquery-flot.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/clusterView.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/tableBody.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/components/tableHead.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/directives/clusterView.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/__tests__/decorateShards.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/calculateClass.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/decorateShards.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/generateQueryAndLink.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/hasPrimaryChildren.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/lib/hasUnassigned.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/transformers/indicesByNodes.js',
+  'x-pack/plugins/monitoring/public/directives/elasticsearch/shard_allocation/transformers/nodesByIndices.js',
+  'x-pack/server/lib/elasticsearch-shield-js/elasticsearch-shield.js',
+  'x-pack/server/lib/elasticsearch-shield-js/generate/Method.js',
+  'x-pack/server/lib/elasticsearch-shield-js/generate/ParamList.js',
+  'x-pack/server/lib/elasticsearch-shield-js/generate/index.js',
+  'x-pack/server/lib/elasticsearch-shield-js/generate/templateHelpers.js',
+  'x-pack/server/lib/elasticsearch-shield-js/test/Catcher.js',
+  'x-pack/server/lib/elasticsearch-shield-js/test/YamlDoc.js',
+  'x-pack/server/lib/elasticsearch-shield-js/test/YamlFile.js',
+  'x-pack/server/lib/elasticsearch-shield-js/test/client.js',
+  'x-pack/server/lib/elasticsearch-shield-js/test/read.js',
+  'x-pack/test/api_integration/apis/monitoring/elasticsearch/nodes-listing.js',
 ];

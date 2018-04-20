@@ -1,0 +1,126 @@
+<div class="forecasting-modal euiModal">
+  <ml-message-bar ></ml-message-bar>
+  <div class="euiModalHeader">
+    <div class="euiModalHeader__title">Forecasting</div>
+  </div>
+
+  <div class="euiModalBody euiText">
+    <div ng-if="previousForecasts.length > 0">
+      <h3 aria-describedby="ml_aria_description_forecasting_modal_view_list" class="view-forecast-title">View a previous forecast</h3><i ml-info-icon="forecasting_modal_view_list" />
+
+      <div class="previous-forecast-list">
+        <table class="euiTable euiTable--compressed">
+          <thead>
+            <tr>
+              <th class="euiTableHeaderCell" scope="col">
+                <div class="euiTableCellContent">Created</div>
+              </th>
+              <th class="euiTableHeaderCell" scope="col">
+                <div class="euiTableCellContent">From</div>
+              </th>
+              <th class="euiTableHeaderCell" scope="col">
+                <div class="euiTableCellContent">To</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="forecast in previousForecasts" class="euiTableRow">
+              <td class="euiTableRowCell">
+                <div class="euiTableCellContent">
+                  <span class="euiTableCellContent__text">
+                    <a class="euiLink" href="" ng-click="viewForecast(forecast.forecast_id)">{{forecast.runTime}}</a>
+                  </span>
+                </div>
+              </td>
+              <td class="euiTableRowCell">
+                <div class="euiTableCellContent">
+                  <span class="euiTableCellContent__text">{{forecast.earliestTime}}</span>
+                </div>
+              </td>
+              <td class="euiTableRowCell">
+                <div class="euiTableCellContent">
+                  <span class="euiTableCellContent__text">{{forecast.latestTime}}</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>Run a new forecast</h3>
+    <div ng-show="showNumPartitionsWarning" class="warning-text">
+      Note that this data contains more than {{partitionsWarningNumber}} partitions
+      so running a forecast may take a long time and consume a high amount of resource.
+    </div>
+    <div class="form-group">
+      <label id="ml_aria_label_forecasting_modal_run_duration" for="forecastDuration" class="kuiLabel">Duration</label><i ml-info-icon="forecasting_modal_run_duration" />
+      <div ng-class="permissions.canForecastJob && invalidJobState === undefined ? 'control-wrapper' : ['control-wrapper', 'disabled']"
+        data-toggle="tooltip"
+        ng-attr-tooltip="{{permissions.canForecastJob === false ? createPermissionFailureMessage('canForecastJob') :
+          invalidJobState !== undefined ? 'Forecasts cannot be run on ' + invalidJobState + ' jobs' : undefined}}"
+        tooltip-placement="bottom">
+        <input
+          id="forecastDuration"
+          aria-labelledby="ml_aria_label_forecasting_modal_run_duration"
+          aria-describedby="ml_aria_description_forecasting_modal_run_duration"
+          ng-model="newForecastDuration"
+          ng-change="newForecastDurationChange()"
+          ng-disabled="isForecastRunning === true || permissions.canForecastJob === false || invalidJobState !== undefined || mlNodesAvailable === false"
+          required
+          type="text"
+          class="form-control" />
+      </div>
+      <div ng-class="permissions.canForecastJob && invalidJobState === undefined ? 'control-wrapper' : ['control-wrapper', 'disabled']"
+        data-toggle="tooltip"
+        ng-attr-tooltip="{{permissions.canForecastJob === false ? createPermissionFailureMessage('canForecastJob') :
+          invalidJobState !== undefined ? 'Forecasts cannot be run on ' + invalidJobState + ' jobs' : undefined}}"
+        tooltip-placement="left">
+        <button
+          class="kuiButton kuiButton--primary run-button"
+          ng-click="checkJobStateAndRunForecast()"
+          ng-disabled="newForecastDurationError !== null || isForecastRunning === true ||
+            permissions.canForecastJob === false || invalidJobState !== undefined || mlNodesAvailable === false" >
+          <i ng-if="isForecastRunning === false" class="fa fa-play" ></i>
+          <i ng-if="isForecastRunning === true" class="fa fa-spinner fa-spin" ></i>
+        </button>
+      </div>
+      <div ng-show="newForecastDurationError !== null" class="validation-error">{{newForecastDurationError}}</div>
+
+      <div ng-show="runStatus.forecastRequested === true" class="status-item-list">
+        <div class="status-item" ng-show="runStatus.jobOpening !== undefined">Opening job...
+          <i ng-show="runStatus.jobOpening === REQUEST_STATES.ERROR" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+          <i ng-show="runStatus.jobOpening === REQUEST_STATES.WAITING" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+          <i ng-show="runStatus.jobOpening === REQUEST_STATES.DONE" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+        </div>
+
+        <div class="status-item" ng-show="runStatus.forecastProgress !== undefined">Running forecast...
+          <progressbar
+              ng-show="runStatus.forecastProgress >= 0"
+              ng-class="runStatus.forecastProgress < 3 ? 'empty-progress' : ''"
+              animate="false"
+              value="runStatus.forecastProgress"
+              type="success">
+            <b>{{runStatus.forecastProgress}}%</b>
+          </progressbar>
+          <i ng-show="runStatus.forecastProgress === REQUEST_STATES.ERROR" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+        </div>
+
+        <div class="status-item" ng-show="runStatus.jobClosing !== undefined">Closing job...
+          <i ng-show="runStatus.jobClosing === REQUEST_STATES.ERROR" aria-hidden="true" style="color:red;" class="fa fa-remove"></i>
+          <i ng-show="runStatus.jobClosing === REQUEST_STATES.WAITING" aria-hidden="true" class="fa fa-spinner fa-spin"></i>
+          <i ng-show="runStatus.jobClosing === REQUEST_STATES.DONE" aria-hidden="true" style="color:green;" class="fa fa-check"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="euiModalFooter">
+    <button
+      ng-click="close()"
+      class="euiButton euiButton--primary euiButton--small euiButton--fill"
+      type="button">
+      <span class="euiButton__content">Close</span>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<div ng-controller="securityNavController" ng-show="!!user">
+  <global-nav-link
+    kbn-route="route"
+    icon="'plugins/security/images/person.svg'"
+    tooltip-content="accountTooltip(user.full_name || user.username)"
+    label="user.full_name || user.username"
+    is-disabled="accountDisabled"
+    on-click="onClick($event, accountDisabled)"
+  ></global-nav-link>
+
+  <global-nav-link
+    kbn-route="'/logout'"
+    icon="'plugins/security/images/logout.svg'"
+    tooltip-content="formatTooltip('Logout')"
+    label="'Logout'"
+  ></global-nav-link>
+</div>

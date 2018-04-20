@@ -1,0 +1,31 @@
+{
+  "_xpack/security/role": {
+    "methods": ["GET"],
+    "patterns": ["_xpack/security/role", "_xpack/security/role/{name}"]
+  },
+  "_xpack/security/role/{name}": {
+    "methods": ["PUT", "POST"],
+    "patterns": ["_xpack/security/role/{name}"],
+    "data_autocomplete_rules": {
+      "cluster": [],
+      "indices": [
+        {
+          "field_security": {},
+          "names": [],
+          "privileges": [],
+          "query": ""
+        }
+      ],
+      "run_as": [],
+      "metadata": {}
+    }
+  },
+  "_xpack/security/role/{name}/_clear_cache": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/security/role/{name}/_clear_cache"
+    ]
+  }
+}

@@ -1,0 +1,184 @@
+<kbn-management-app section="security" omit-breadcrumb-pages="['edit']">
+  <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+    <!-- Subheader -->
+    <div class="kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <!-- Title -->
+        <h1 class="kuiTitle">
+          <span ng-if="editUser.isNewUser">
+            New User
+          </span>
+          <span ng-if="!editUser.isNewUser">
+            &ldquo;{{ user.username }}&rdquo; User
+          </span>
+        </h1>
+      </div>
+
+      <div class="kuiBarSection">
+        <!-- Delete button -->
+        <button
+          ng-if="!editUser.isNewUser && !user.metadata._reserved"
+          class="kuiButton kuiButton--danger kuiButton--iconText"
+          ng-click="deleteUser(user)"
+          tooltip="Delete User"
+          data-test-subj="userFormDeleteButton"
+        >
+          <span class="kuiButton__inner">
+            <span class="kuiButton__icon kuiIcon fa-trash"></span>
+            <span>Delete user</span>
+          </span>
+        </button>
+        <div
+          ng-if="user.metadata._reserved"
+          class="kuiBadge kuiBadge--default"
+          tooltip="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
+        >
+          <span class="kuiIcon fa-lock"></span>
+          Reserved
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form name="form" novalidate class="kuiVerticalRhythm">
+      <!-- Username -->
+      <div class="kuiFormSection">
+        <label for="username" class="kuiFormLabel">
+          Username
+        </label>
+        <input
+          type="text"
+          ng-class="::editUser.isNewUser ? 'kuiTextInput fullWidth' : 'kuiStaticInput'"
+          ng-disabled="!editUser.isNewUser"
+          id="username"
+          name="username"
+          ng-model="user.username"
+          required pattern="[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*"
+          maxlength="30"
+          ng-disabled="!editUser.isNewUser"
+          data-test-subj="userFormUserNameInput"
+        />
+
+        <!-- Errors -->
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.username.$error.pattern"
+        >
+          Username must begin with a letter or underscore and contain only letters, underscores, and numbers.
+        </div>
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.username.$touched && form.username.$error.required"
+        >
+          Username is required.
+        </div>
+      </div>
+
+      <!-- New user password -->
+      <kbn-password-form
+        ng-if="editUser.isNewUser"
+        password="user.password"
+      ></kbn-password-form>
+
+      <!-- Full name -->
+      <div class="kuiFormSection" ng-if="!user.metadata._reserved">
+        <label for="fullname" class="kuiFormLabel">
+          Full Name
+        </label>
+        <input
+          type="text"
+          class="kuiTextInput fullWidth"
+          id="fullname"
+          name="fullname"
+          ng-model="user.full_name"
+          required
+          ng-disabled="editUser.changePasswordMode"
+          data-test-subj="userFormFullNameInput"
+        />
+
+        <!-- Errors -->
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.fullname.$touched && form.fullname.$error.required"
+        >
+          Full Name is required.
+        </div>
+      </div>
+
+      <!-- Email-->
+      <div class="kuiFormSection" ng-if="!user.metadata._reserved">
+        <label for="email" class="kuiFormLabel">
+          Email
+        </label>
+        <input
+          type="email"
+          class="kuiTextInput fullWidth"
+          id="email"
+          name="email"
+          ng-model="user.email"
+          required
+          ng-disabled="editUser.changePasswordMode"
+          data-test-subj="userFormEmailInput"
+        />
+
+        <!-- Errors -->
+        <div
+          class="kuiInputNote kuiInputNote--danger"
+          ng-show="form.email.$touched && form.email.$error.required"
+        >
+          Email is required.
+        </div>
+      </div>
+
+      <!-- Roles-->
+      <div class="kuiFormSection">
+        <label class="kuiFormLabel">
+          Roles
+        </label>
+        <ui-select
+          multiple
+          ng-model="user.roles"
+          ng-disabled="user.metadata._reserved"
+          data-test-subj="userFormRolesDropdown"
+        >
+          <ui-select-match placeholder="Add a role...">
+            <span data-test-subj="userRole userRole-{{$item}}">{{$item}}</span>
+          </ui-select-match>
+          <ui-select-choices repeat="role as role in availableRoles | filter:$select.search">
+            <div ng-bind-html="role" data-test-subj="addRoleOption addRoleOption-{{role}}" ></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+    </form>
+
+    <!-- Form actions -->
+    <div class="kuiFormSection kuiFormFooter">
+      <button
+        class="kuiButton kuiButton--primary"
+        ng-if="!user.metadata._reserved"
+        ng-disabled="form.$invalid"
+        ng-click="saveUser(user)"
+        data-test-subj="userFormSaveButton"
+      >
+        Save
+      </button>
+
+      <a
+        class="kuiButton kuiButton--basic"
+        ng-if="!user.metadata._reserved"
+        ng-href="{{usersHref}}"
+        data-test-subj="userFormCancelButton"
+      >
+        Cancel
+      </a>
+    </div>
+
+    <!-- Existing user password -->
+    <kbn-change-password-form
+      ng-if="!editUser.isNewUser"
+      require-current-password="me.username === user.username"
+      show-kibana-warning="user.metadata._reserved && user.username === 'kibana'"
+      on-change-password="saveNewPassword(newPassword, currentPassword, onSuccess, onIncorrectPassword)"
+    ></kbn-change-password-form>
+  </div>
+</kbn-management-app>

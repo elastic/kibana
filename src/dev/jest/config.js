@@ -7,6 +7,7 @@ export default {
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
+    '<rootDir>/src/dev',
     '<rootDir>/packages',
   ],
   collectCoverageFrom: [

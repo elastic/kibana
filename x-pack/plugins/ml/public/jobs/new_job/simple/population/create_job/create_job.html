@@ -1,0 +1,301 @@
+<ml-nav-menu name="new_job_population"></ml-nav-menu>
+<ml-chart-tooltip></ml-chart-tooltip>
+<ml-new-job-population>
+  <ml-message-bar></ml-message-bar>
+  <div ng-controller="MlCreatePopulationJob" class="population-job-container">
+    <div class="row">
+      <div class="col-md-6">
+        <h3 class="euiTitle euiTitle--large">New job from {{ui.pageTitle}}</h3>
+      </div>
+      <div class="col-md-6">
+        <div class="pull-right">
+          <span style="font-size:10px;" ng-show="formConfig.chartInterval !== undefined">Chart interval: {{formConfig.chartInterval.getInterval().expression}}</span>
+          <ml-full-time-range-selector
+            disabled='(jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)'
+            index-pattern='ui.indexPattern'
+            query='formConfig.combinedQuery'
+          ></ml-full-time-range-selector>
+        </div>
+      </div>
+    </div>
+
+    <div class="euiSpacer euiSpacer--s"></div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="row form-controls">
+          <h4 class="euiTitle euiTitle--small">Job settings</h4>
+          <div>
+            <div class='form-section form-section-overflow' >
+              <h4 class="euiTitle euiTitle--small">Population</h4>
+              <div class="euiSpacer euiSpacer--s"></div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <ui-select
+                      ng-model="formConfig.overField"
+                      on-select="overChange()"
+                      ng-disabled="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+                      append-to-body=true>
+                      <ui-select-match placeholder="Select population field">
+                        <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
+                      </ui-select-match>
+                      <ui-select-choices repeat="field in ui.overFields | filter: { name: $select.search }" group-by="'mlType'">
+                        <div>
+                          <ml-field-type-icon type="field.mlType"></ml-field-type-icon>
+                          <span
+                            class="select-item"
+                            ng-bind-html="field.name | highlight: $select.search">
+                          </span>
+                        </div>
+                      </ui-select-choices>
+                    </ui-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class='form-section form-section-overflow'>
+              <ml-fields-selection-population></ml-fields-selection-population>
+              <div ng-hide="ui.validation.checks.duplicateDetectors.valid" class="validation-error">{{ ui.validation.checks.duplicateDetectors.message }}</div>
+            </div>
+
+            <!-- <div class='form-section' >
+              <h4 class="euiTitle euiTitle--small">Split Data</h4>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <select
+                      ng-model="formConfig.splitField"
+                      ng-change="splitChange()"
+                      ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+                      class="form-control">
+                        <option value='{{undefined}}'>--No split--</option>
+                        <option ng-repeat="field in ui.splitFields" value='{{field}}'>{{field}}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+
+            <div class='form-section' >
+              <ml-influencers-selection></ml-influencers-selection>
+            </div>
+
+            <div class='form-section' >
+              <ml-bucket-span-selection></ml-bucket-span-selection>
+            </div>
+
+            <div class='form-section' >
+              <div ng-show="jobState !== JOB_STATE.FINISHED">
+                <h4 class="euiTitle euiTitle--small">Job Details</h4>
+                <div class="euiSpacer euiSpacer--s"></div>
+              </div>
+
+              <div class="form-group">
+                <div ng-show="ui.showJobInput && (jobState === JOB_STATE.NOT_STARTED || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING)">
+                  <ml-general-job-details></ml-general-job-details>
+
+                  <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
+                    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                      <ml-validate-job
+                        get-duration="getDuration"
+                        get-job-config="getJobConfig"
+                        fill="false"
+                        is-current-job-config="isCurrentJobConfig"
+                        is-disabled="!ui.formValid"
+                        ng-show="jobState === JOB_STATE.NOT_STARTED"
+                      />
+                    </div>
+                    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                      <button
+                        aria-label="Create Job"
+                        ng-click="createJob()"
+                        type="button"
+                        ng-show="jobState === JOB_STATE.NOT_STARTED"
+                        ng-disabled="!ui.formValid"
+                        class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                        <span class="euiButton__content">
+                          Create Job
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class='job-state-info' ng-show="jobState === JOB_STATE.RUNNING">Analysis running <i class='fa fa-spinner fa-spin'></i></div>
+                  <div class='job-state-info' ng-show="jobState === JOB_STATE.STOPPING">Analysis stopping <i class='fa fa-spinner fa-spin'></i></div>
+
+                  <div class="euiSpacer euiSpacer--s"></div>
+
+                  <button
+                    aria-label="Stop Job"
+                    ng-click="stopJob()"
+                    type="button"
+                    ng-show="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING"
+                    ng-disabled="jobState === JOB_STATE.STOPPING"
+                    class="euiButton euiButton--danger euiButton--small">
+                    <span class="euiButton__content">
+                      {{(jobState === JOB_STATE.STOPPING) ? 'Analysis stopping' : 'Stop analysis' }}
+                    </span>
+                  </button>
+
+                  <a
+                    href='{{resultsUrl}}'
+                    ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
+                    aria-label="View Results"
+                    ng-show="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      View Results
+                    </span>
+                  </a>
+                </div>
+                <div ng-show="jobState === JOB_STATE.FINISHED">
+                  <h3 class="euiTitle euiTitle--large">Job {{formConfig.jobId }} created
+                    <i style="color:green;" class="fa fa-check" aria-label="Saved"></i>
+                  </h3>
+                  <div class="euiSpacer euiSpacer--m"></div>
+
+                  <button
+                    aria-label="Reset"
+                    ng-click="resetJob()"
+                    type="button"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      Reset
+                    </span>
+                  </button>
+                  <a
+                    href='{{resultsUrl}}'
+                    ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
+                    aria-label="View Results"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      View Results
+                    </span>
+                  </a>
+                </div>
+
+                <div ng-if='jobState === JOB_STATE.FINISHED'>
+                  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+                  <ml-post-save-options
+                    job-id='formConfig.jobId'
+                    bucket-span='formConfig.bucketSpan'
+                    include-influencers='true'
+                    ></ml-post-save-options>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="row charts-container">
+          <h4 class="euiTitle euiTitle--small">Results</h4>
+          <div>
+            <div class='chart-list-panel event-rate-container' style='height: {{ui.eventRateChartHeight + 70}}px;'>
+              <label class="kuiFormLabel">Document count</label>
+
+              <div class='chart-container'>
+                <div style='height: {{ui.eventRateChartHeight + 25}}px;'>
+                  <ml-event-rate-chart
+                    chart-data="chartData.job"
+                    event-rate-chart-height='ui.eventRateChartHeight'
+                    chart-ticks-margin="chartData.chartTicksMargin">
+                  </ml-event-rate-chart>
+                </div>
+
+                <div ng-show="chartStates.eventRate === CHART_STATE.NOT_STARTED || chartStates.eventRate === CHART_STATE.LOADING || chartStates.eventRate === CHART_STATE.NO_RESULTS"
+                  class='chart-loader event-rate-chart-loader'
+                  style='height: {{ui.eventRateChartHeight}}px; margin-top: -{{ui.eventRateChartHeight + 30}}px;'>
+                    <div class='status-label' ng-if="chartStates.eventRate === CHART_STATE.NOT_STARTED"></div>
+                    <div class='status-label' ng-if="chartStates.eventRate === CHART_STATE.LOADING">
+                      <h2 class="euiTitle euiTitle"><i class='fa fa-spinner fa-spin'></i></h2>
+                    </div>
+                    <div class='status-label' ng-if="chartStates.eventRate === CHART_STATE.NO_RESULTS">
+                      <div class='no-results'>
+                        <h4 class="euiTitle euiTitle--small"><i class="fa fa-info-circle"></i> No results found</h4>
+                        <span>Consider using the <a ng-click="setFullTimeRange()">full {{ui.indexPattern.title}} data</a></span>
+                      </div>
+                    </div>
+                </div>
+
+              </div>
+
+            </div>
+            <div ng-repeat='(id, chart) in chartData.detectors track by id'>
+              <div class='chart-list-panel detector-container card-{{id}}' ng-show='ui.showFieldCharts'>
+                <div class='card-front'>
+                  <div class="card-title"></div>
+                  <div class='chart' style='height: {{ui.chartHeight + 90}}px;'>
+                    <label class="kuiFormLabel">{{formConfig.fields[id].agg.type.title}} {{formConfig.fields[id].name}} over {{formConfig.overField.name}} <span ng-if="formConfig.fields[id].splitField!==undefined"> split by {{formConfig.fields[id].splitField.name}}</span></label>
+                    <div class="split-controls">
+                      <div class="split-align">Split data: </div>
+                      <div class="split-field-container">
+                        <ui-select
+                          class="split-field-select"
+                          ng-model="formConfig.fields[id].splitField"
+                          ng-change="splitChange(id, $select.selected)"
+                          append-to-body="true"
+                          ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+                        >
+                            <ui-select-match placeholder="Select a field">
+                              <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
+                            </ui-select-match>
+                            <ui-select-choices repeat="field in ui.splitFields | filter: { name: $select.search } | filter: ui.isOverField" group-by="'mlType'">
+                              <div>
+                                <ml-field-type-icon type="field.mlType"></ml-field-type-icon>
+                                <span
+                                  class="select-item"
+                                  ng-bind-html="field.name | highlight: $select.search">
+                                </span>
+                              </div>
+                            </ui-select-choices>
+                        </ui-select>
+                      </div>
+                      <button
+                        ng-if="formConfig.fields[id].splitField !== undefined && (!ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)"
+                        ng-click="splitReset(id)"
+                        aria-label="Remove split"
+                        ng-disabled="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+                        class="euiButton euiButton--primary euiButton--small split-align remove-split"
+                      >
+                        Remove split
+                      </button>
+                    </div>
+
+                    <div class='chart-container'>
+                      <div style='height: {{ui.chartHeight + 25}}px;'>
+                        <ml-population-job-chart
+                          chart-data="chart"
+                          chart-height='ui.chartHeight'
+                          chart-ticks-margin="chartData.chartTicksMargin"
+                          over-field-name="formConfig.overField.name">
+                        </ml-population-job-chart>
+                      </div>
+
+                      <div ng-show="chartStates.fields[id] === CHART_STATE.NOT_STARTED || chartStates.fields[id] === CHART_STATE.LOADING || chartStates.fields[id] === CHART_STATE.NO_RESULTS"
+                        class='chart-loader fields-chart-loader'
+                        style='height: {{ui.chartHeight}}px; margin-top: -{{ui.chartHeight + 30}}px; margin-left: {{chartData.chartTicksMargin.width - 1}}px;'>
+                          <div class='status-label' ng-show="chartStates.fields[id] === CHART_STATE.NOT_STARTED"></div>
+                          <div class='status-label' ng-show="chartStates.fields[id] === CHART_STATE.LOADING">
+                            <h2 class="euiTitle euiTitle"><i class='fa fa-spinner fa-spin'></i></h2>
+                          </div>
+                          <div class='status-label' ng-show="chartStates.fields[id] === CHART_STATE.NO_RESULTS">
+                            <div class='no-results'>
+                              <h4 class="euiTitle euiTitle--small"><i class="fa fa-info-circle"></i> No results found</h4>
+                            </div>
+                          </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ml-new-job-population>

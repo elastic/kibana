@@ -1,0 +1,642 @@
+<div id="graphBasic" ng-controller="graphuiPlugin">
+  <!-- Local nav. -->
+  <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+      <div data-transclude-slot="topLeftCorner" class="kuiLocalTitle">
+        <strong>{{ savedWorkspace.lastSavedTitle || 'New Graph Workspace' }}</strong>
+      </div>
+
+      <div data-transclude-slot="bottomRow" class="flexGroup">
+        <!-- Select index pattern. -->
+        <select
+          class="form-control indexDropDown"
+          name="mySelect"
+          ng-change="uiSelectIndex()"
+          ng-class="{pulseControl:selectedIndex === null}"
+          ng-options="option.attributes.title for option in indices"
+          ng-model="grr.proposedIndex"
+        >
+          <option value="">Select index pattern...</option>
+        </select>
+
+        <!-- Added fields. -->
+        <span
+          class="noUserSelect"
+          ng-repeat="f in selectedFields"
+          ng-attr-tooltip="Shift + click to toggle if search returns {{f.name}}"
+        >
+          <svg
+            width="30"
+            height="30"
+            ng-click="clickVertexFieldIcon(f, $event)"
+            ng-class="{disabledField:f.hopSize<=0}"
+          >
+            <circle
+              class="nodeCircle"
+              r="13"
+              cx="15"
+              cy="15"
+              ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
+              ng-attr-style="fill:{{f.color}}"
+            />
+            <text ng-if="f.icon" class="SvgIconFont" text-anchor="middle" x="15" y="20">
+              {{f.icon.code}}
+            </text>
+          </svg>
+        </span>
+
+        <!-- Add field button. -->
+        <span class="noUserSelect" ng-attr-tooltip="Add a field source for vertices">
+          <button
+            class="graphPlusButton"
+            ng-disabled="selectedIndex === null"
+            aria-label="Add a field"
+            id="addVertexFieldButton"
+            ng-class="{pulseControl:selectedIndex !== null&&selectedFields.length === 0}"
+            ng-click="toggleShowAdvancedFieldsConfig()"
+          >
+            <span aria-hidden="true" class="kuiIcon fa-plus"></span>
+          </button>
+        </span>
+
+        <!-- Search. -->
+        <form
+          ng-submit="submit()"
+          name="graphBasicSearch"
+          class="flexGroup__filler"
+          style="width: 100%"
+        >
+          <div class="kuiLocalSearch">
+            <input
+              name="searchTerm"
+              type="text"
+              class="kuiLocalSearchInput"
+              ng-model="grr.searchTerm"
+              ng-disabled="liveResponseFields.length === 0"
+              ng-focus="kbnTopNav.close()"
+              placeholder="foo AND bar NOT baz"
+              autocomplete="off"
+            >
+            <button
+              class="kuiLocalSearchButton"
+              type="submit"
+              ng-disabled="liveResponseFields.length === 0"
+              aria-label="Search"
+            >
+              <span aria-hidden="true" class="kuiIcon fa-search"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="config" ng-show="kbnTopNav.currentKey === 'fields'" data-test-subj="fieldSelectionList">
+    <div class="config">
+      <div class="container-fluid no-margin-bottom">
+        <label >Add a field source for vertices</label>
+              <form>
+                <div class="input-group form-group finder-form " style="width:100%">
+                  <span class="input-group-addon "
+                    id="fieldFinderIcon">
+                    <span class="kuiIcon fa-search"></span>
+                  </span>
+                    <input
+                      id="fieldFinderInput"
+                      input-focus
+                      ng-model="fieldNamesFilterString"
+                      placeholder="Filter..."
+                      ng-change="filterFieldsKeyDown()"
+                      class="form-control"
+                      name="filter"
+                      type="text"
+                      autocomplete="off" />
+                </div>
+            </form>
+
+             <select
+              class="kuiVerticalRhythm"
+              id="fieldList"
+              size="7"
+              ng-options="item as item.name for item in filteredFields"
+              ng-dblclick="addFieldToSelection()"
+              ng-model="selectedField"
+            ></select>
+
+             <div class="kuiVerticalRhythm">
+              <!-- TODO look at the field chooser directive in Discover to give type icons etc to
+              field types. This may filter out indexed-only fields though? -->
+              <button
+                ng-disabled="!selectedField"
+                ng-click="addFieldToSelection()"
+                class="kuiButton kuiButton--primary"
+              >
+                Add
+              </button>
+            </div>
+      </div>
+
+       <button
+        class="kuiLocalDropdownCloseButton"
+        ng-click="kbnTopNav.close()"
+        aria-label="Close"
+      >
+        <span class="kuiIcon fa-chevron-circle-up"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="config"  ng-show="kbnTopNav.currentKey === 'fieldConfig'">
+    <div class="config">
+      <div class="container-fluid no-margin-bottom">
+
+              <div >
+                <form class="form-horizontal" >
+
+                  <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                      <strong>{{selectedFieldConfig.name}}</strong>
+                    </div>
+                  </div>
+
+                  <div class="form-group form-group-sm small-graph-form">
+                    <label for="colorPicker" class="col-sm-4 control-label"> Color</label>
+                    <div class="col-sm-6">
+                      <span class="legend-value-container" id="colorPicker">
+                        <span class="legend-value-color-picker">
+                          <span ng-repeat="c in colors"  ng-click="applyColor(selectedFieldConfig,c)" ng-class="c === selectedFieldConfig.color ? 'fa-circle-o' : 'fa-circle'" ng-style="{color: c}" class="kuiIcon dot">
+                                                </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="form-group form-group-sm small-graph-form">
+                    <label for="iconPicker" class="col-sm-4 control-label"> Icon</label>
+                    <div class="col-sm-5">
+                      <span class="legend-value-icon-picker">
+                        <span ng-repeat="i in iconChoices"  ng-click="applyIcon(selectedFieldConfig,i)" ng-class="{selectedNode:i==selectedFieldConfig.icon}" class="kuiIcon icon noUserSelect">
+                                            {{i.code}}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="form-group form-group-sm small-graph-form">
+                    <label for="qHopSize" class="col-sm-4 control-label">Max terms per hop</label>
+                    <div class="col-sm-6">
+                      <input
+                             ng-change="selectedFieldConfigHopSizeChanged()"
+                              type="number" class="input-sm" min="0" max="100" step="1" id="qHopSize" ng-model="selectedFieldConfig.hopSize">
+                      <div class="help-block">
+                        <div class="euiText">
+                          <p>Controls the number of terms returned each search step.</p>
+                        </div>
+
+                        <div class="hintbox">
+                          <span class="kuiIcon fa-info text-info"></span> Shift-clicking the field icons in the menu bar provides a quick way to toggle this number to zero and back
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8">
+                      <div>
+                         <button
+                           ng-click="removeVertexFieldSelection()"
+                           class="kuiButton kuiButton--danger"
+                          >
+                            Remove
+                          </button>
+                       </div>
+                    </div>
+                  </div>
+
+                </form>
+
+              </div>
+
+
+      </div>
+
+      <div class="config-close remove" ng-click="kbnTopNav.close()">
+        <span class="kuiIcon fa-chevron-circle-up"></span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="GraphSvgContainer">
+    <svg width="100%" height="100%" pointer-events="all" id="graphSvg" ng-click="hideAllConfigPanels()">
+      <g id="svgRootGroup">
+        <g>
+          <line ng-repeat="edge in workspace.edges" class="edge" ng-attr-x1="{{edge.topSrc.kx}}" ng-attr-y1="{{edge.topSrc.ky}}" ng-attr-x2="{{edge.topTarget.kx}}" ng-attr-y2="{{edge.topTarget.ky}}" ng-click="clickEdge(edge)"
+          ng-class="{selectedEdge:edge.isSelected, inferredEdge:edge.inferred}" , ng-attr-style="stroke-width:{{edge.width}}px" stroke-linecap="round" />
+        </g>
+        <g ng-repeat="n in workspace.nodes" ng-if="!n.parent">
+          <circle class="nodeCircle" ng-attr-r="{{n.scaledSize}}" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}" ng-click="nodeClick(n, $event)"
+           ng-class="{selectedNode:n.isSelected}"
+           ng-attr-style="fill:{{n.color}}"
+          />
+          <text class="SvgIconFont lowOpacitySvgText" transform="translate(0,5)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-if="n.icon" ng-click="nodeClick(n, $event)">{{n.icon.code}}</text>
+
+          <!-- Using 2 strategies for rendering labels - small text uses SVG for performance,
+            larger text uses HTML for word-wrapping capabilities but can be jittery.
+          -->
+
+          <text ng-if="n.label.length<30" class="nodeSvgText" text-anchor="middle" transform="translate(0,22)" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">
+            {{n.label}}
+          </text>
+          <foreignObject ng-if="n.label.length>=30" width="100" height="20" transform="translate(-50,15)" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}"
+            ng-click="nodeClick(n, $event)">
+                <body xmlns="http://www.w3.org/1999/xhtml">
+                  <p class="nodeHtmlLabel noUserSelect">{{n.label}}</p>
+                </body>
+          </foreignObject>
+
+          <g ng-if="n.numChildren>0">
+            <circle r="5" class="nodeMarkerCircle" transform="translate(10,10)" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}" ng-click="nodeClick(n, $event)" />
+            <text class="nodeMarkerText" text-anchor="middle" transform="translate(10,11)" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">{{n.numChildren}}
+            </text>
+
+          </g>
+        </g>
+      </g>
+    </svg>
+
+    <!--
+            Experiment with group/ungroup buttons that reveal-on-zoom on nodes.
+
+     <g ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== n)">
+      <g ng-if="zoomLevel>10" transform="translate(-1,-7)">
+        <rect class="SvgZoomedIconButton" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" transform="translate(-1.5,-1.2)" ng-click="workspace.groupSelections(n)" width="6.5" height="2.2" rx="0.2" ry="0.2" />
+        <text class="SvgZoomedButtonText" transform="translate(3,0.3)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.groupSelections(n)">group</text>
+        <text class="SvgZoomedIconButtonText" transform="translate(-0.2,0.6)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.groupSelections(n)">&#xf247</text>
+      </g>
+    </g>
+    <g ng-if="zoomLevel>10" transform="translate(8,12.5)">
+      <rect class="SvgZoomedIconButton" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" transform="translate(-1.5,-1.2)" ng-click="workspace.ungroup(n)" width="7" height="2" rx="0.2" ry="0.2" />
+      <text class="SvgZoomedButtonText" transform="translate(3,0.3)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.ungroup(n)">ungroup</text>
+      <text class="SvgZoomedIconButtonText" transform="translate(-0.4,0.6)" text-anchor="middle" ng-attr-x="{{n.kx}}" ng-attr-y="{{n.ky}}" ng-click="workspace.ungroup(n)">&#xf09c</text>
+    </g>
+
+  -->
+
+    <div id="sidebar" ng-if="workspace !== null">
+      <div class="sidebarPanel">
+
+        <div class="vertexSelectionActionBar">
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            tooltip="Undo"
+            type="button"
+            ng-click="workspace.undo()"
+            ng-disabled="workspace === null||workspace.undoLog.length <1"
+          >
+            <span class="kuiIcon fa-history"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            tooltip="Redo"
+            type="button"
+            ng-disabled="workspace === null ||workspace.redoLog.length === 0" ng-click="workspace.redo()"
+          >
+            <span class="kuiIcon fa-repeat"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null ||liveResponseFields.length === 0||workspace.nodes.length === 0"
+            tooltip="Expand selection"
+            ng-click="setDetail(null);workspace.expandSelecteds({toFields:liveResponseFields});"
+          >
+            <span class="kuiIcon fa-plus"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null ||workspace.nodes.length === 0"
+            tooltip="Add links between existing terms"
+            ng-click="workspace.fillInGraph();"
+          >
+            <span class="kuiIcon fa-link"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null ||workspace.nodes.length === 0"
+            tooltip="Remove vertices from workspace"
+            ng-click="setDetail(null);workspace.deleteSelection();"
+          >
+            <span class="kuiIcon fa-trash"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
+            tooltip="Blacklist selection from return to workspace"
+            ng-click="workspace.blacklistSelection();"
+            >
+              <span class="kuiIcon fa-ban"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
+            tooltip="Custom style selected vertices"
+            ng-click="setDetail({showStyle:true})"
+          >
+            <span class="kuiIcon fa-paint-brush"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace === null||workspace.nodes.length === 0"
+            tooltip="Drill down"
+            ng-click="setDetail({showDrillDowns:true})"
+          >
+            <span class="kuiIcon fa-info"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-disabled="workspace.nodes.length === 0"
+            ng-if="workspace.nodes.length === 0||workspace.force === null"
+            tooltip="Run layout"
+            ng-click="workspace.runLayout()"
+          >
+            <span class="kuiIcon fa-play"></span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--small"
+            ng-if="workspace.force !== null&&workspace.nodes.length>0"
+            tooltip="Pause layout"
+            ng-click="workspace.stopLayout()"
+          >
+            <span class="kuiIcon fa-pause"></span>
+          </button>
+        </div>
+
+
+      <div>
+            <div class="detailHeader">
+              <span class="kuiIcon fa-shopping-cart"></span> Selections
+            </div>
+
+            <div id="vertexSelectionTypesBar">
+              <button
+                tooltip="Select all"
+                type="button"
+                class="kuiButton kuiButton--basic kuiButton--small selButton"
+                ng-disabled="workspace.nodes.length === 0"
+                ng-click="setDetail(null);workspace.selectAll()"
+              >
+                all
+              </button>
+
+              <button
+                tooltip="Select none"
+                type="button"
+                class="kuiButton kuiButton--basic kuiButton--small selButton"
+                ng-disabled="workspace.nodes.length === 0"
+                ng-click="setDetail(null);workspace.selectNone()"
+              >
+                none
+              </button>
+
+              <button
+                tooltip="Invert selection"
+                type="button"
+                class="kuiButton kuiButton--basic kuiButton--small selButton"
+                ng-disabled="workspace.nodes.length === 0"
+                ng-click="setDetail(null);workspace.selectInvert()"
+              >
+                invert
+              </button>
+
+              <button
+                tooltip="Select neighbours"
+                type="button"
+                class="kuiButton kuiButton--basic kuiButton--small selButton"
+                ng-disabled="workspace.selectedNodes.length === 0"
+                ng-click="setDetail(null);workspace.selectNeighbours()"
+              >
+                linked
+              </button>
+            </div>
+
+            <div class="selectionList">
+              <p ng-if="workspace.selectedNodes.length === 0" class="help-block">No selections. Click on vertices to add</p>
+
+              <div ng-repeat="n in workspace.selectedNodes" ng-class="{'selectedFieldLine': isSelectedSelected(n)}" ng-click="selectSelected(n)" style="line-height: 24px;">
+                <svg width="24" height="24">
+                  <circle class="nodeCircle " r="10" cx="12" cy="12" ng-class="{selectedNode:n.isSelected}"
+                  ng-attr-style="fill:{{n.color}}"
+                  ng-click="workspace.deselectNode(n)" />
+
+                  <text ng-if="n.icon" class="SvgIconFont" text-anchor="middle" x="12" y="16" ng-click="workspace.deselectNode(n)">{{n.icon.code}}</text>
+                </svg>
+                <span style="vertical-align: top;">{{n.label}}</span>
+                <span style="vertical-align: top;" ng-if="n.numChildren>0"> (+{{n.numChildren}})</span>
+
+              </div>
+            </div>
+        </div>
+
+        <!-- Any drill-downs with a choice of button icon appear here for quick access -->
+        <div ng-if="(urlTemplates | filter:{icon: {class:''}}).length > 0" >
+          <button
+            ng-repeat="urlTemplate in urlTemplates  | filter:{icon: {class:''}}"
+            class="kuiButton kuiButton--basic kuiButton--small selButton"
+            tooltip="{{urlTemplate.description}}"
+            type="button"
+            ng-disabled="workspace === null ||workspace.nodes.length === 0"
+            ng-click="openUrlTemplate(urlTemplate)"
+          >
+            <span class="kuiIcon" ng-class="urlTemplate.icon.class"></span>
+          </button>
+        </div>
+
+        <div ng-if="detail.showDrillDowns">
+          <div class="detailHeader">
+            <span class="kuiIcon fa-info"></span> Drill-downs
+          </div>
+
+          <div class="detailPanel">
+            <p ng-if="urlTemplates.length === 0" class="help-block">
+              Configure drill-downs from the settings menu
+            </p>
+
+            <ul ng-repeat="urlTemplate in urlTemplates" class="li-striped list-group list-group-menu">
+              <li class="list-group-item">
+                <span ng-if="urlTemplate.icon" class="kuiIcon icon noUserSelect">
+                                    {{urlTemplate.icon.code}}</span>
+                  <a ng-click="openUrlTemplate(urlTemplate)">{{urlTemplate.description}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="detailPanel" ng-if="(detail.showStyle)&&(workspace.selectedNodes.length>0)">
+          <div class="detailHeader">
+            <span class="kuiIcon fa-paint-brush"></span> Style selected vertices
+          </div>
+
+          <div class="form-group form-group-sm small-graph-form">
+            <div class="col-sm-10">
+              <span class="legend-value-container" >
+                <span class="legend-value-color-picker">
+                  <span ng-repeat="c in colors" ng-disabled="!selectedField.selected" ng-click="workspace.colorSelected(c)" ng-style="{color: c}" class="kuiIcon dot fa-circle">
+                        </span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detailPanel" ng-if="detail.latestNodeSelection">
+          <div class="detailHeader">
+            <span class="kuiIcon {{detail.latestNodeSelection.icon.class}}" ng-if="detail.latestNodeSelection.icon"></span> {{detail.latestNodeSelection.data.field}} {{detail.latestNodeSelection.data.term}}
+          </div>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
+            ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== detail.latestNodeSelection)"
+            tooltip="group the currently selected items into {{detail.latestNodeSelection.label}}"
+            ng-click="workspace.groupSelections(detail.latestNodeSelection)"
+          >
+            <span class="kuiButton__icon kuiIcon fa-object-group"></span>
+            <span>group</span>
+          </button>
+
+          <button
+            class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
+            ng-if="detail.latestNodeSelection.numChildren>0"
+            tooltip="ungroup {{detail.latestNodeSelection.label}}"
+            ng-click="workspace.ungroup(detail.latestNodeSelection)"
+          >
+            <span class="kuiIcon fa-object-ungroup"></span>
+            <span>ungroup</span>
+          </button>
+
+          <form class="form-horizontal">
+            <div class="form-group form-group-sm small-graph-form">
+              <label for="labelEdit" class="col-sm-3 control-label">Display label</label>
+              <div class="col-sm-9">
+                <input type="text" id="labelEdit" class="form-control input-sm" ng-model="detail.latestNodeSelection.label">
+                <div class="help-block">Change the label for this vertex</div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div ng-if="detail.mergeCandidates.length>0" class="detailPanel">
+          <div class="detailHeader">
+            <span class="kuiIcon fa-link"></span> Link summary
+          </div>
+          <div ng-repeat="mc in detail.mergeCandidates">
+            <span>
+              <button
+                tooltip="Merge {{mc.term1}} into {{mc.term2}}"
+                type="button"
+                ng-attr-style="opacity:{{0.2+(mc.overlap/mc.v1)}};"
+                class="kuiButton kuiButton--basic kuiButton--small"
+                ng-click="performMerge(mc.id2, mc.id1)"
+              >
+                <span class="kuiIcon fa-chevron-circle-right"></span>
+              </button>
+
+              <span class="vennTerm1">{{mc.term1}}</span>
+              <span class="vennTerm2">{{mc.term2}}</span>
+
+              <button
+                tooltip="Merge {{mc.term2}} into {{mc.term1}}"
+                type="button"
+                class="kuiButton kuiButton--basic kuiButton--small"
+                ng-attr-style="opacity:{{0.2+(mc.overlap/mc.v2)}};"
+                ng-click="performMerge(mc.id1, mc.id2)"
+              >
+                <span class="kuiIcon fa-chevron-circle-left"></span>
+              </button>
+            </span>
+
+            <!-- Venn diagram of term/shared doc intersections -->
+            <div venn="mc"></div>
+
+            <small class="vennTerm1" tooltip="{{mc.v1}} documents have term {{mc.term1}}">{{mc.v1}}</small>
+            <small class="vennTerm12" tooltip="{{mc.overlap}} documents have both terms">&nbsp;({{mc.overlap}})&nbsp;</small>
+            <small class="vennTerm2" tooltip="{{mc.v2}} documents have term {{mc.term2}}">{{mc.v2}}</small>
+          </div>
+
+
+
+          <div class="detailPanel" ng-if="(detail.inferredEdge)">
+            <div class="detailHeader">
+              <span class="kuiIcon fa-cog"></span> Similar labels
+            </div>
+
+            <div class="form-group form-group-sm small-graph-form">
+                <div  style="line-height: 24px;">
+                  <button
+                    tooltip="Merge {{detail.inferredEdge.topTarget.label}} into {{detail.inferredEdge.topSrc.label}}"
+                    type="button"
+                    style="vertical-align: top;"
+                    class="kuiButton kuiButton--basic kuiButton--small"
+                    ng-click="performMerge(detail.inferredEdge.topTarget.id, detail.inferredEdge.topSrc.id)"
+                  >
+                    <span class="kui fa-chevron-circle-down"></span>
+                  </button>
+                  <svg width="24" height="24">
+                    <circle class="nodeCircle " r="10" cx="12" cy="12"
+                    ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}"/>
+
+                    <text ng-if="detail.inferredEdge.topSrc.icon" class="SvgIconFont" text-anchor="middle" x="12" y="16" >{{detail.inferredEdge.topSrc.icon.code}}</text>
+                  </svg>
+                  <span style="vertical-align: top;">{{detail.inferredEdge.topSrc.label}}</span>
+                </div>
+                <div  style="line-height: 24px;">
+                  <button
+                    tooltip="Merge {{detail.inferredEdge.topSrc.label}} into {{detail.inferredEdge.topTarget.label}}"
+                    type="button"
+                    style="vertical-align: top;"
+                    class="kuiButton kuiButton--basic kuiButton--small"
+                    ng-click="performMerge(detail.inferredEdge.topSrc.id, detail.inferredEdge.topTarget.id)"
+                  >
+                    <span class="kuiIcon fa-chevron-circle-up"></span>
+                  </button>
+
+                  <svg width="24" height="24">
+                    <circle class="nodeCircle " r="10" cx="12" cy="12"
+                    ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}"/>
+
+                    <text ng-if="detail.inferredEdge.topTarget.icon" class="SvgIconFont" text-anchor="middle" x="12" y="16" >{{detail.inferredEdge.topTarget.icon.code}}</text>
+                  </svg>
+                  <span style="vertical-align: top;">{{detail.inferredEdge.topTarget.label}}</span>
+
+                </div>
+
+              <div class="col-sm-10">
+                Key terms: <small> {{detail.inferredEdge.label}}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- end edge-merge detail panel -->
+
+      </div>
+
+
+
+    </div>
+    <!-- end sidebarPanel -->
+
+  </div>
+  <!--end svg container-->
+
+</div>

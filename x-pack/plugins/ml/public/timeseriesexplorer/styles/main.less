@@ -1,0 +1,351 @@
+.ml-time-series-explorer {
+  width: 100%;
+  display: inline-block;
+  color: #555;
+
+  .no-results-container {
+    text-align: center;
+    font-size: 17px;
+    padding-top: 60px;
+
+    .no-results {
+      background-color: aliceblue;
+      border: 1px solid #DDEFFF;
+      padding: 15px;
+      border-radius: 4px;
+      display: inline-block;
+
+      i {
+        color: #5a9bd6;
+        margin-right: 5px;
+      }
+
+      div:nth-child(2) {
+        margin-top: 10px;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .results-container {
+    padding: 15px;
+
+    .panel-title {
+      color: #7b8a8b;
+    }
+
+    .entity-count-text {
+      color: #7b8a8b;
+      font-size: 13px;
+    }
+  }
+
+  .series-controls {
+    padding: 15px 15px 0px 15px;
+
+    div.entity-controls {
+      display: inline-block;
+      padding-left: 10px;
+
+      input.entity-input-blank {
+        border-color: red;
+      }
+
+      .entity-input {
+        width: 300px;
+      }
+    }
+
+    button {
+      margin-left: 5px;
+    }
+  }
+
+  .show-model-controls {
+    float: right;
+    position: relative;
+    top: 18px;
+
+    div {
+      display: inline;
+      padding-left: 15px;
+    }
+
+    .kuiCheckBoxLabel {
+      display: inline-block;
+      font-size: 12px;
+    }
+  }
+
+  .forecast-controls {
+    display: inline-block;
+    float: right;
+  }
+
+  .forecast-controls.disabled {
+    cursor: not-allowed;
+  }
+
+  .forecast-controls.disabled .kuiButton[disabled] {
+    pointer-events: none;
+  }
+
+  .ml-timeseries-chart {
+    svg {
+      font-size: 12px;
+      font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+    }
+
+    .axis path, .axis line {
+      fill: none;
+      stroke: #cccccc;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text {
+      fill: #000;
+    }
+
+    .axis .tick line {
+      stroke: rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-border {
+      stroke: #cccccc;
+      fill: none;
+      stroke-width: 1;
+      shape-rendering: crispEdges;
+    }
+
+    .chart-border-highlight {
+      stroke: #6A6A6A;
+      stroke-width: 2;
+    }
+    .chart-border-highlight:hover {
+      opacity: 1;
+    }
+
+    .area {
+      stroke-width: 1;
+    }
+
+    .area.bounds {
+      fill: rgba(50, 167, 194, 0.25);
+    }
+
+    .values-line {
+      fill: none;
+      stroke: #32a7c2;
+      stroke-width: 2;
+    }
+
+    .values-line.forecast {
+      stroke: #cca300;
+    }
+
+    .values-dots circle {
+      fill: #32a7c2;
+      stroke-width: 0;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    .area.forecast {
+      fill: rgba(204, 163, 0, 0.25);
+    }
+
+    circle.metric-value {
+      opacity: 1;
+      fill: transparent;
+      stroke: #32a7c2;
+      stroke-width: 0px;
+    }
+
+    circle.anomaly-marker {
+      stroke-width: 1px;
+      stroke: #aaaaaa;
+    }
+
+    circle.metric-value.critical {
+      fill: #fe5050;
+    }
+
+    circle.metric-value.major {
+      fill: #ff7e00;
+    }
+
+    circle.metric-value.minor {
+      fill: #ffdd00;
+    }
+
+    circle.metric-value.warning {
+      fill: #8bc8fb;
+    }
+
+    circle.metric-value.low {
+      fill: #d2e9f7;
+    }
+
+    circle.metric-value:hover,
+    circle.anomaly-marker.highlighted {
+      stroke-width: 6px;
+      stroke-opacity: 0.65;
+      stroke: #32a7c2;
+    }
+
+    rect.scheduled-event-marker {
+      stroke-width: 1px;
+      stroke: #999999;
+      fill: #cccccc;
+      pointer-events: none;
+    }
+
+    .forecast {
+      circle.metric-value,
+      circle.metric-value:hover {
+        stroke: #cca300;
+      }
+    }
+
+    .focus-chart {
+      .x-axis-background {
+        line {
+          fill: none;
+          shape-rendering: crispEdges;
+          stroke: #cccccc;
+        }
+
+        rect {
+          fill: #f1f1f1;
+        }
+      }
+
+      .focus-zoom {
+        fill: #555555;
+
+        a {
+          text {
+            fill: #328caa;
+            cursor: pointer;
+          }
+        }
+
+        a:hover, a:active, a:focus {
+          text-decoration: underline;
+        }
+
+      }
+    }
+
+    .context-chart {
+      .x.axis path {
+        display: none;
+      }
+
+      .axis text {
+        font-size: 10px;
+        fill: #333333;
+      }
+
+      .area.context {
+        fill: rgba(50, 167, 194, 0.25);
+      }
+
+      .values-line {
+        stroke-width: 1;
+      }
+
+      .area.context.forecast {
+        fill: rgba(204, 163, 0, 0.25);
+      }
+
+      .mask {
+        polygon {
+          fill-opacity: 0.1;
+        }
+
+        .area.bounds {
+          fill: #d6d6d6;
+        }
+
+        .values-line {
+          stroke-width: 1;
+          stroke: #b8b8b8;
+        }
+
+        .values-dots circle {
+          fill: #b8b8b8;
+          stroke-width: 0;
+        }
+      }
+
+    }
+
+    .swimlane .axis text {
+      display: none;
+    }
+
+    .swimlane rect.swimlane-cell-hidden {
+      display: none;
+    }
+
+    .brush .extent {
+      stroke: #aaaaaa;
+      fill-opacity: 0;
+      shape-rendering: crispEdges;
+    }
+
+    .brush .extent {
+      stroke: #6A6A6A;
+      stroke-width: 2;
+      cursor: move;
+    }
+
+    .brush .extent:hover {
+      opacity: 1;
+    }
+
+    .top-border {
+      fill: #FFFFFF;
+    }
+
+    foreignObject.brush-handle {
+      pointer-events: none;
+      padding-top: 1px;
+    }
+
+    div.brush-handle-inner {
+      border: 1px solid #6A6A6A;
+      background-color: #CCCCCC;
+      height: 70px;
+      width: 10px;
+      text-align: center;
+      cursor: ew-resize;
+      margin-top: 9px;
+
+      i.fa {
+        margin-top: 30px;
+      }
+    }
+
+    div.brush-handle-inner-left {
+      border-radius: 4px 0px 0px 4px;
+    }
+    div.brush-handle-inner-right {
+      border-radius: 0px 4px 4px 0px;
+    }
+
+    rect.brush-handle {
+      stroke-width: 1;
+      stroke: #6A6A6A;
+      fill: #CCCCCC;
+      pointer-events: none;
+    }
+
+    rect.brush-handle:hover {
+      opacity: 1;
+    }
+  }
+}

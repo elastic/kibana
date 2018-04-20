@@ -1,0 +1,143 @@
+<ml-nav-menu name="timeseriesexplorer"></ml-nav-menu>
+<ml-chart-tooltip></ml-chart-tooltip>
+<div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController">
+  <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
+    <job-select-button
+      timeseriesonly="true"
+      single-selection="true">
+    </job-select-button>
+  </navbar>
+
+  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
+    <div class="no-results">
+      <div><i class="fa fa-exclamation-triangle"></i>No single metric jobs found</div>
+      <div><a href="ml#/jobs">Create new single metric job</a></div>
+    </div>
+  </div>
+
+  <div class="series-controls" ng-show="jobs.length > 0">
+    <label for="selectDetector" class="kuiLabel">Detector:</label>
+    <select id="selectDetector" class="kuiSelect kuiSelect--large" ng-model="detectorId" ng-change="detectorIndexChanged()">
+      <option ng-repeat="detector in detectors track by detector.index" value="{{detector.index}}">{{detector.detector_description}}</option>
+    </select>
+
+    <div class="entity-controls" ng-repeat="entity in entities">
+      <datalist id="{{entity.fieldName}}_datalist">
+        <option ng-repeat="value in entity.fieldValues">{{value}}</option>
+      </datalist>
+
+      <label for="select{{entity.fieldName}}" class="kuiLabel">{{entity.fieldName}}:</label>
+      <input id="select{{entity.fieldName}}" class="kuiTextInput entity-input"
+        ng-class="{ 'entity-input-blank': entity.fieldValue.length === 0 }"
+        ng-model="entity.fieldValue" ng-model-options="{ updateOn: 'blur' }" placeholder="Enter value"
+        list='{{entity.fieldName}}_datalist' />
+    </div>
+
+    <button class="kuiButton kuiButton--primary" ng-click="saveSeriesPropertiesAndRefresh()" aria-label="refresh">
+      <i class="fa fa-play" ></i>
+    </button>
+
+    <div ng-class="forecastingDisabled === false ? 'forecast-controls' : ['forecast-controls', 'disabled']"
+      data-toggle="tooltip"
+      ng-attr-tooltip="{{forecastingDisabled === true ?  forecastingDisabledMessage : undefined}}"
+      tooltip-placement="left">
+      <button
+        ng-click='openForecastDialog()'
+        ng-disabled="forecastingDisabled === true"
+        class="kuiButton kuiButton--primary"
+        aria-label="Forecast">
+        Forecast
+      </button>
+    </div>
+
+  </div>
+
+  <ml-loading-indicator
+    label="Loading"
+    is-loading="loading === true"
+  />
+
+  <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
+    <div class="no-results">
+      <div><i class="fa fa-info-circle" ></i>No results found</div>
+      <div>Try widening the time selection or moving further back in time</div>
+    </div>
+  </div>
+
+  <div ng-show="jobs.length > 0 && loading === false && hasResults === true">
+    <div class="results-container">
+
+      <span class="panel-title euiText">
+        Single time series analysis of {{chartDetails.functionLabel}}
+      </span>
+      <span ng-if="chartDetails.entityData.count === 1" class="entity-count-text">
+        <span ng-repeat="entity in chartDetails.entityData.entities">
+          {{$first ? '(' : ''}}{{entity.fieldName}}: {{entity.fieldValue}}{{$last ? ')' : ', '}}
+        </span>
+      </span>
+      <span ng-if="chartDetails.entityData.count !== 1" class="entity-count-text">
+        <span ng-repeat="countData in chartDetails.entityData.entities">
+          {{$first ? '(' : ''}}{{countData.cardinality}} distinct {{countData.fieldName}}{{countData.cardinality > 1 ? ' values' : ''}}{{$last ? ')' : ', '}}
+        </span>
+      </span>
+
+      <div class="show-model-controls">
+        <div ng-show="showModelBoundsCheckbox === true">
+          <input id="toggleShowModelBoundsCheckbox"
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-click="toggleShowModelBounds()"
+            ng-checked="showModelBounds === true">
+          <label for="toggleShowModelBoundsCheckbox" class="kuiCheckBoxLabel">show model bounds</label>
+        </div>
+
+        <div ng-show="showForecastCheckbox === true">
+          <input id="toggleShowForecaseCheckbox"
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-click="toggleShowForecast()"
+            ng-checked="showForecast === true">
+          <label for="toggleShowForecaseCheckbox" class="kuiCheckBoxLabel">show forecast</label>
+        </div>
+      </div>
+
+      <div class="ml-timeseries-chart">
+
+        <ml-timeseries-chart  style="width: 1200px; height: 400px;"
+          selected-job="selectedJob"
+          detector-index="detectorId"
+          model-plot-enabled="modelPlotEnabled"
+          context-chart-data="contextChartData"
+          context-forecast-data="contextForecastData"
+          context-aggregation-interval="contextAggregationInterval"
+          swimlane-data="swimlaneData"
+          focus-chart-data="focusChartData"
+          focus-forecast-data="focusForecastData"
+          focus-aggregation-interval="focusAggregationInterval"
+          show-model-bounds="showModelBounds"
+          show-forecast="showForecast"
+          zoom-from="zoomFrom"
+          zoom-to="zoomTo"
+          auto-zoom-duration="autoZoomDuration">
+        </ml-timeseries-chart>
+      </div>
+
+      <span class="panel-title euiText">
+        Anomalies
+      </span>
+
+      <div class="ml-table-controls">
+        <ml-select-severity />
+        <ml-select-interval />
+      </div>
+
+      <ml-anomalies-table
+        anomaly-records="anomalyRecords"
+        time-field-name="timeFieldName"
+        filtering-enabled="true">
+      </ml-anomalies-table>
+
+    </div>
+  </div>
+
+</div>

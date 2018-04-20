@@ -1,0 +1,163 @@
+[role="xpack"]
+[[xkb-6.0.0]]
+== {kib} {xpack} 6.0.0 Release Notes
+++++
+<titleabbrev>6.0.0 Release Notes</titleabbrev>
+++++
+
+The lists below cover changes between 5.6.4 and 6.0.0 only.
+
+Also see <<breaking-changes>>.
+
+[float]
+[[xkb-breaking-6.0.0]]
+=== Breaking Changes
+
+Reporting::
+* When {security} is enabled, reports will only be accessible to the user that created them.
+* When {security} is enabled, user authorization is controlled by the
+`xpack.reporting.roles.allow` setting in the `kibana.yml` which defaults to
+`['reporting_user']`. Users will no longer have access to the underlying {reporting}
+indices in {es} when assigned to the built-in `reporting_user` role. If using
+custom reporting roles, the privileges to the indices will need to be removed, and the
+role will need to be added to the `xpack-reporting.roles.allow` setting.
+
+Security::
+* The built-in users (`elastic`, `kibana`, and `logstash_system`) no longer have
+default passwords. You must create passwords for these users and configure {kib}
+to use this information. For more information, see
+{xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+//https://github.com/elastic/x-pack-kibana/pull/1673
+
+Watcher::
+* The built-in HTTP client used in webhooks, the http input and the http email attachment has been replaced.
+This results in the need to always escape all parts of an URL.
+* The new built-in HTTP client also enforces a maximum request size, which defaults to 10mb.
+* The watch `_status` field has been renamed to `status`, as underscores in
+field names will not be allowed.
+
+[float]
+[[xkb-enhancements-6.0.0]]
+=== Enhancements
+
+Dashboard::
+*  If you had a chance to check out the new Dashboard Only Mode in 6.0.0-beta1,
+we've changed things up a bit for 6.0.0-beta2. Previously we required you to
+flag every role a user belonged to as being in the View dashboards only mode
+in order for that user to be flagged as a Dashboard only mode user. In this
+new set up, we created a reserved role, `kibana_dashboard_only_user`, that is
+already pre-configured with read only access to the .kibana index, and set up
+to be in Dashboard Only Mode. All you have to add is this one role to any user
+and they will now be a Dashboard Only Mode user. We also got rid of this new
+setting in the Roles UI, as this one role should suffice for most user's setups.
+If you have a more complicated setup, such as multi-tenancy with multiple
+`.kibana` indexes, you can create more dashboard only mode roles by adding
+role names to the `xpackDashboardMode:roles` advanced setting. For more
+information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
+// https://github.com/elastic/x-pack-kibana/pull/2262[#2262] (issue: https://github.com/elastic/x-pack-kibana/issues/2106[#2106])
+// https://github.com/elastic/x-pack-kibana/pull/2246[#2246] (issue: https://github.com/elastic/x-pack-kibana/issues/2245[#2245])
+
+Machine Learning::
+* Added a Datefeed Preview tab to expanded rows in the jobs list under
+Job Management. This displays the JSON response from the preview endpoint.
+* Added an option to create a watch when you start a {dfeed} in {kib}. After the
+{dfeed} starts, you are prompted to specify details such as the interval and the
+anomaly severity threshold. If {watcher} is disabled, this option does not appear.
+// https://github.com/elastic/x-pack-kibana/pull/1885
+* Updated the bucket span estimator, which suggests bucket span values when you
+create jobs in {kib}. The estimator now suggests a minimum bucket span value
+of 15 minutes.
+// https://github.com/elastic/x-pack-kibana/pull/1679
+
+Monitoring::
+* The Logstash Pipeline viewer in {kib} displays an information icon and a
+corresponding tip for every plugin that does not define an ID explicitly.
+Defining an ID for plugins enables you to track differences across pipeline
+changes. For more information, see
+{logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
+// https://github.com/elastic/x-pack-kibana/pull/2092[#2092]
+// https://github.com/elastic/x-pack-kibana/pull/2218(issue: https://github.com/elastic/x-pack-kibana/issues/2227[#2227])
+* Added an alert in clusters that have trial licenses and have enabled {security}
+but do not have TLS/SSL configured. The message provides information about the
+steps that are required to enable {security} when they obtain a non-trial license.
+// https://github.com/elastic/x-pack-kibana/pull/2980
+* Added support for cluster alerts, for example to provide information about
+license expiration.
+//https://github.com/elastic/x-pack-kibana/pull/1935
+* Added an advanced setting for a default admin e-mail, which is the recipient
+of {xpack} admin operations such as cluster alert e-mail notifications.
+// https://github.com/elastic/x-pack-kibana/pull/1846
+
+Reporting::
+* Enabled export as CSV.
+
+Security::
+* Added a View Dashboards Only setting to the roles section under
+Security management. If a user is assigned a role that has this setting
+enabled, when they access Kibana it presents Dashboard Only mode.
+* Added reserved `kibana_dashboard_only_user` role. For more information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
+// https://github.com/elastic/x-pack-elasticsearch/pull/2250[#2250]
+
+Watcher::
+* Watcher indices no longer use multiple types.
+
+[float]
+[[xkb-bugs-6.0.0]]
+=== Bug Fixes
+
+Dev Tools::
+* Clarified field labels in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2171[#2171] (issues: https://github.com/elastic/x-pack-kibana/issues/2096[#2096], https://github.com/elastic/x-pack-kibana/issues/2121[#2121])
+* Added auto-sizing to the input, pattern, and output text areas in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2174[#2174] (issues: https://github.com/elastic/x-pack-kibana/issues/1941[#1941], https://github.com/elastic/x-pack-kibana/issues/2102[#2102])
+* Added auto-sizing of the custom patterns text area in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2102[#2102] (issues: https://github.com/elastic/x-pack-kibana/issues/2089[#2089], https://github.com/elastic/x-pack-kibana/issues/2100[#2100])
+* Enabled users to specify custom patterns in a well-known format in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2100[#2100] (issue: https://github.com/elastic/x-pack-kibana/issues/2096[#2096])
+* Fixed issue with input not being accepted in the *Sample Data* or
+*Grok Pattern* fields in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2667[#2667] (issue: https://github.com/elastic/x-pack-kibana/issues/2646[#2646])
+
+Graph::
+* Reinstated `_xpack/graph/_explore` as the correct graph endpoint.
+`_xpack/_graph/_explore` is deprecated and will be removed in v7.0.
+
+Machine Learning::
+* Fixed the position of text that appears when you hover over anomalies in {ml}
+charts in a Safari web browser.
+// https://github.com/elastic/x-pack-kibana/pull/2825[#2825] (issue: https://github.com/elastic/x-pack-kibana/issues/2810[#2810])
+* Fixed {ml} charts so that they plot nulls as gaps rather than zeroes. This
+change provides a more accurate visual indication of gaps in the data.
+// https://github.com/elastic/x-pack-kibana/pull/2746[#2746]
+// https://github.com/elastic/x-pack-kibana/pull/2824[#2824] (issue: https://github.com/elastic/x-pack-kibana/issues/2746[#2746])
+* Added support for periods in field names when you create jobs or datafeeds in
+{kib}.
+// https://github.com/elastic/x-pack-kibana/pull/2821[#2821] (issue: https://github.com/elastic/x-pack-kibana/issues/2807[#2807])
+// https://github.com/elastic/x-pack-kibana/pull/2807[#2807] (issue: https://github.com/elastic/x-pack-kibana/issues/2800[#2800])
+* Fixed job creation failure that occurred when using saved searches with filters.
+// https://github.com/elastic/x-pack-kibana/pull/2648
+
+Reporting::
+* Fixed generated reports such that they show the time zone on the client, as
+specified in the `dateFormat` field in the Advanced Settings.
+// https://github.com/elastic/x-pack-kibana/pull/2403[#2403] (issues: https://github.com/elastic/x-pack-kibana/issues/2368[#2368], https://github.com/elastic/x-pack-kibana/issues/2377[#2377])
+* Resolved intermittent issue with Firefox logging users out of {kib} after
+they download a PDF report.
+// https://github.com/elastic/x-pack-kibana/pull/2826
+
+Security::
+* Ensured that privileged information does not appear in the error message when
+a {kib} login attempt fails.
+// https://github.com/elastic/x-pack-kibana/pull/2754[#2754] (issue: https://github.com/elastic/x-pack-kibana/issues/2751[#2751])
+
+Watcher::
+* Fixed problem related to creating a threshold-based alert in {kib} with a
+Safari web browser. For example, the dialogs related to choosing fields and
+aggregations were not shown in that browser.
+// https://github.com/elastic/x-pack-kibana/pull/2853[#2853] (issue: https://github.com/elastic/x-pack-kibana/issues/2372[#2372])
+* Fixed incorrect watch states in {kib}. In particular, the UI now respects the
+actual state of the watch when exceptions occur in its input or condition.
+// https://github.com/elastic/x-pack-kibana/pull/2394[#2394]
+* The HTTP client respects timeouts now and does not get stuck leading to stuck watches.

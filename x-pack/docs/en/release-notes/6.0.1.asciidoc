@@ -1,0 +1,32 @@
+[role="xpack"]
+[[xkb-6.0.1]]
+== {kib} {xpack} 6.0.1 Release Notes
+++++
+<titleabbrev>6.0.1 Release Notes</titleabbrev>
+++++
+
+[float]
+[[xkb-bugs-6.0.1]]
+=== Bug Fixes
+
+
+Machine Learning::
+* Fixed scenarios where clicking the "View examples" link in the Anomalies
+section of the Single Metric Viewer or Anomaly Explorer caused the browser to hang.
+// https://github.com/elastic/x-pack-kibana/pull/3308[#3308] (issues: https://github.com/elastic/x-pack-kibana/issues/2947[#2947], https://github.com/elastic/x-pack-kibana/issues/2976[#2976])
+* Fixed scenarios where the Anomaly Explorer or Single Metric Viewer failed to
+plot metric data in the charts due to a blank field name in a detector. This
+problem was specific to jobs that were originally created in 5.4.
+// https://github.com/elastic/x-pack-kibana/pull/3443[#3443] (issue: https://github.com/elastic/x-pack-kibana/issues/3419[#3419])
+
+Monitoring::
+* Fixed problems viewing pipelines in {kib} from a Firefox web browser.
+For more information, see
+{logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
+// https://github.com/elastic/x-pack-kibana/pull/3051[#3051] (issue: https://github.com/elastic/x-pack-kibana/issues/2808[#2808])
+* The `xpack.monitoring.node_resolver` setting, which was deprecated in 5.5.0,
+now allows only the `uuid` value to be used. This setting will be removed in 7.0. 
+//For more information about this setting, see
+//{kibana-ref}/monitoring-settings-kb.html[Monitor Settings in {kib}]
+//TBD: Was this setting intentionally removed from 6.0 documentation?
+// https://github.com/elastic/x-pack-kibana/pull/3085[#3085]

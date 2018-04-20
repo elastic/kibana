@@ -1,0 +1,27 @@
+<div class="monitoring-summary-status" role="status">
+  <div
+    class="monitoring-summary-status__content"
+    data-test-subj="kibanaInstanceStatus"
+  >
+    <div>
+      <strong data-test-subj="transportAddress">{{ kibana.transport_address }}</strong>
+    </div>
+    <div>OS Free Memory:
+      <strong data-test-subj="osFreeMemory">{{ kibana.os_memory_free|formatNumber:'byte' }}</strong>
+    </div>
+    <div>Version:
+      <strong data-test-subj="version">{{ kibana.version }}</strong>
+    </div>
+    <div>Uptime:
+      <strong data-test-subj="uptime">{{ kibana.uptime|formatNumber:'time_since' }}</strong>
+    </div>
+    <div class="monitoring-summary-status__status-indicator">
+      Health:
+      <monitoring-kibana-status-icon
+        status="kibana.status"
+        title="Status of this Kibana instance: {{ kibana.status }}"
+      ></monitoring-kibana-status-icon>
+      {{ kibana.status|capitalize }}
+    </div>
+  </div>
+</div>

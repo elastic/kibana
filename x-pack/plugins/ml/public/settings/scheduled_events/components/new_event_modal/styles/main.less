@@ -1,0 +1,57 @@
+.new-event-modal {
+  font-size: 14px;
+  padding:20px;
+  cursor: auto;
+
+  .date_container {
+    width: 200px;
+    display: inline-block;
+  }
+
+  .ml-new-event-contents {
+    margin-top: 5px;
+
+    .main-container {
+      display: flex;
+      .tabs-container {
+        ul {
+          padding: 0px;
+          li {
+            a {
+              border-radius: 4px 0px 0px 4px;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+
+      .calendar-container {
+        border: 2px solid #0079a5;
+        flex-grow: 1;
+        border-radius: 4px;
+
+        .calendar {
+          width: 235px;
+          margin: 20px;
+          float: left;
+          .calendar-input-container {
+            margin-right: -33px;
+          }
+          .partition {
+            border-right: 1px solid #0079a5;
+            position: absolute;
+            height: 275px;
+            left: 270px;
+            top: 0px;
+          }
+          .partition-large {
+            height: 325px;
+          }
+        }
+      }
+      .top-tab-selected {
+        border-radius: 0px 4px 4px 4px;
+      }
+    }
+  }
+}

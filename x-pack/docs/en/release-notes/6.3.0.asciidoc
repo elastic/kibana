@@ -1,0 +1,18 @@
+[role="xpack"]
+[[xkb-6.3.0]]
+== {kib} {xpack} 6.3.0 Release Notes
+++++
+<titleabbrev>6.3.0 Release Notes</titleabbrev>
+++++
+
+coming[6.3.0]
+
+[float]
+[[xkb-enhancements-6.3.0]]
+=== Enhancements
+
+Machine learning::
+* You can now use {ref}/modules-cross-cluster-search.html[cross cluster search]
+in the {ml} features in {kib}. If you have configured a cross cluster index
+pattern in {kib}, you can use that index pattern when you create jobs.
+// https://github.com/elastic/x-pack-kibana/issues/1020

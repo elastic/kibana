@@ -1,0 +1,168 @@
+[[monitoring-release-notes]]
+== Marvel Release Notes (Pre-5.0)
+
+This section summarizes the Monitoring changes in each release. 
+For information about upgrading X-Pack, see <<xpack-upgrading, Upgrading X-Pack>>.
+
+[float]
+[[monitoring-change-list]]
+=== Change List
+
+
+[float]
+==== 2.4.2
+November 22, 2016
+
+.Enhancements
+* Compatibility with Elasticsearch 2.4.2.
+
+[float]
+==== 2.4.0
+August 31, 2016
+
+.Enhancements
+* Node transport addresses are now consistently reported using only their IP address and port, rather than a subset reporting their resolved hostname, IP address, and port.
+
+.Bug Fixes
+* Using the time picker to select clusters now honors the full time range, rather than only clusters that sent updates within the last 10 minutes.
+
+
+[float]
+==== 2.3.5
+August 3, 2016
+
+.Bug Fixes
+* Fixed sorting by number of unassigned shards in the indices table.
+* Fixed the shard allocation tables to render when shards are relocating.
+* Fixed the tooltips that are supposed to show for relocating shards in the
+allocation table, and also added tooltips for shards of all states.
+* Removed Google Analytics beacon, and fix the optional phone-home call to not
+block page rendering.
+
+[float]
+==== 2.3.4
+July 7, 2016
+
+.Bug Fixes
+* Using the time picker to select clusters now honors the full time range, 
+rather than only clusters that sent updates within the last 10 minutes.
+* Phone home data omits `source_node` information that was being erroneously 
+picked up from the `cluster_info` field.
+* Shards in the Relocating state are no longer counted as Unassigned Shards.
+* Removed Google Analytics Tag from UI.
+* The UI rendering no longer blocks waiting for the phone home call to return.
+* Fixed the "no data" page to run an automatic refresh cycle to look for data.
+
+[float]
+==== 2.3.3
+May 18, 2016
+
+.Bug Fixes
+* Prevents exceptions from being logged if the node stats are temporarily empty.
+
+[float]
+==== 2.3.2
+April 26, 2016
+
+.Bug Fixes
+* Fixed a bug where non-elected master nodes all appeared as Offline in the node list.
++
+NOTE: You can workaround this in 2.3.0 and 2.3.1 by setting `marvel.node_resolver: name` in `kibana.yml`.
+* Introduced the timepicker controls in the clusters page so you can view snapshots Marvel data.
+* Added a link to go back to the previous page from the License page.
+
+[float]
+==== 2.3.1
+April 4, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.1
+
+[float]
+==== 2.3.0
+March 30, 2016
+
+.Bug Fixes
+* Minor UI improvements.
+
+.Enhancements
+* Adds support for Elasticssearch 2.3.0
+
+[float]
+==== 2.2.1
+March 15, 2016
+
+.Bug Fixes
+*  Fix a bug when Monitoring is configured to export data over HTTP on a monitoring cluster protected by Security (with SSL).
+
+[float]
+==== 2.2.0
+February 2, 2016
+
+.Enhancements
+* Enable access to the License page from the cluster status bar.
+* Allow configuration of a monthly interval for Monitoring indices instead of limiting it to daily.
+* Provide a sha1 hash for the Monitoring app download.
+
+.Bug Fixes
+* Minor UI improvements.
+
+[float]
+==== 2.1.2
+February 2, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.1.2
+
+[float]
+==== 2.1.1
+December 17, 2015
+
+.Bug Fixes
+
+* Check the Kibana version to ensure compatibility.
+* Respect opt-out for statistics reporting in all cases.
+* Fixed transport address not showing on the node detail page.
+* Fixed the table filtering on the node listing page.
+
+[float]
+==== 2.1.0
+November 24, 2015
+
+.Enhancements
+
+* Display a node type indicator on the Node Listing and Node Detail pages.
+* Show the online/offline status of nodes.
+* Remove the Time Picker from the Cluster Listing page. 
+
+.Bug Fixes
+
+* Multiple fixes for showing historical data.
+* Filter out derivative calculations where the start and end times are incomplete time buckets.
+* Cluster table sorting.
+* Use the new Elasticsearch `_field_stats` API  to determine which Monitoring indices are needed to generate the stats.
+
+[float]
+==== 2.0.1
+November 24, 2015
+
+.Enhancements
+* Adds support for Elasticsearch 2.0.1.
+
+[float]
+==== 2.0.0
+October 28, 2015
+
+.Breaking Changes
+
+Monitoring 2.0.0 is a complete rewrite from Monitoring 1.3. If you are upgrading from Monitoring 1.3, note that
+the Monitoring agent plugin only needs to be installed on the Elasticsearch nodes you are monitoring.
+If you need to stop collecting data from a node, remove the plugin or set the `xpack.monitoring.enabled`
+configuration parameter to `false`. (The `xpack.monitoring.agent.enabled` parameter is no longer supported.)
+
+.New Features
+* Fully-integrated with Kibana 4.2 as a Kibana plugin.
+* Supports Multiple clusters for Paid Subscriptions
+* Reduced data footprint for Monitoring indices
+* Simplified dashboards for Indices and Nodes
+* Better support for large clusters

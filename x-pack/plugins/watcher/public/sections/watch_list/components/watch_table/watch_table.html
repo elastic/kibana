@@ -1,0 +1,166 @@
+<table class="kuiTable">
+  <thead>
+    <tr>
+      <th scope="col" class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+        <check-box
+          is-selected="watchTable.allSelected"
+          on-select-change="watchTable.onAllSelectedChange"
+          ng-if="watchTable.areAnyEditable()"
+          data-test-subj="selectAllWatchesCheckBox"
+        ></check-box>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="id"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          ID
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="name"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          Name
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="watchStatus.state"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          State
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="watchStatus.comment"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          Comment
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="watchStatus.lastFired"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          Last Fired
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="watchStatus.lastChecked"
+          on-sort-change="watchTable.onSortChange"
+          sort-field="watchTable.sortField"
+          sort-reverse="watchTable.sortReverse"
+        >
+          Last Triggered
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr
+      ng-repeat="item in watchTable.items"
+      class="kuiTableRow"
+      ng-class="{ 'kuiTableRow-isBeingDeleted': item.isBeingDeleted }"
+      data-test-subj="watchRow-{{ item.watch.id }}"
+    >
+      <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+        <div class="kuiTableRowCell__liner">
+          <check-box
+            id="item.watch.id"
+            is-selected="item.selected"
+            on-select-change="watchTable.onWatchSelectedChange"
+            ng-if="watchTable.isEditable(item)"
+          ></check-box>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <a
+            class="kuiLink"
+            ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/status"
+            title="{{item.watch.id}}"
+            ng-if="watchTable.isEditable(item)"
+
+          >
+            {{item.watch.id}}
+          </a>
+          <span
+            title="{{item.watch.id}}"
+            ng-if="!watchTable.isEditable(item)"
+          >
+            {{item.watch.id}}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <span title="{{item.watch.name}}">
+            {{item.watch.name}}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <span title="{{item.watch.watchStatus.state}}">
+            <watch-state-icon watch-status="item.watch.watchStatus"></watch-state-icon>
+            {{ item.watch.watchStatus.state }}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <span title="{{item.watch.watchStatus.comment}}">
+            {{item.watch.watchStatus.comment}}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <span title="{{item.watch.watchStatus.lastFired | moment}}">
+            {{item.watch.watchStatus.lastFiredHumanized}}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <span title="{{item.watch.watchStatus.lastChecked | moment}}">
+            {{item.watch.watchStatus.lastCheckedHumanized}}
+          </span>
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+            <a
+              class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
+              title="Edit"
+              ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/edit"
+              ng-if="watchTable.isEditable(item)"
+              data-test-subj="lnkWatchEdit-{{ item.watch.id }}"
+            >
+              <span class="kuiMenuButton__icon kuiIcon fa-pencil"></span>
+              <span>Edit</span>
+            </a>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>

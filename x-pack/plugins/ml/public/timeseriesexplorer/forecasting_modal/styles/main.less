@@ -1,0 +1,90 @@
+@import (reference) "~ui/styles/theme";
+@import (reference) "~ui/styles/variables";
+
+.forecasting-modal {
+  .view-forecast-title {
+    display: inline-block;
+  }
+
+  #forecastDuration.form-control {
+    width: calc(~"100% - 45px");
+    display: inline;
+    vertical-align: middle;
+  }
+
+  .run-button {
+    width: 38px;
+    vertical-align: middle;
+  }
+
+  .validation-error {
+    color: #fe5050;
+    font-size: 12px;
+  }
+
+  .warning-text {
+    color: #555;
+    font-size: 12px;
+    padding-bottom: 10px;
+    font-style: italic;
+  }
+
+  .previous-forecast-list {
+    font-size: 13px;
+
+    table {
+      td, th {
+        padding:5px 8px 5px 2px;
+      }
+      tr {
+        td {
+          border-top: 1px solid #d9d9d9;
+        }
+      }
+    }
+  }
+
+  .status-item-list {
+    margin-bottom: 10px;
+
+    .status-item {
+      padding-top:8px;
+      font-weight: bold;
+    }
+  }
+
+  .progress {
+    background-color: @globalColorLightGray;
+    margin-bottom: 0px;
+
+    .progress-bar {
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .progress-bar-success {
+      background-color: #0079a5;
+    }
+  }
+
+  .progress.empty-progress .progress-bar {
+    color: #2d2d2d;
+  }
+
+  .control-wrapper {
+    display: inline;
+  }
+
+  .control-wrapper.disabled {
+    cursor: not-allowed;
+  }
+
+  .control-wrapper.disabled .kuiButton[disabled],
+  .control-wrapper.disabled input[disabled] {
+    pointer-events: none;
+  }
+
+  ml-message-bar > div {
+    padding: 10px 10px 0px 10px;
+  }
+}

@@ -1,0 +1,46 @@
+[role="xpack"]
+[[security-settings-kb]]
+=== Security Settings in Kibana
+++++
+<titleabbrev>Security Settings</titleabbrev>
+++++
+
+You do not need to configure any additional settings to use {security} in {kib}.
+It is enabled by default.
+
+[float]
+[[general-security-settings]]
+==== General Security Settings
+`xpack.security.enabled`::
+Set to `true` (default) to enable {security}. +
++
+If set to `false` in `kibana.yml`, the user and role management options are
+hidden in this {kib} instance. If `xpack.security.enabled` is set to `true` in
+`elasticsearch.yml`, however, you can still use the {security} APIs. To disable
+{security} entirely, see the
+{ref}/security-settings.html[{es} Security Settings].
+
+[float]
+[[security-ui-settings]]
+==== User Interface Security Settings
+
+You can configure the following settings in the `kibana.yml` file:
+
+`xpack.security.cookieName`::
+Sets the name of the cookie used for the session. The default value is `"sid"`
+
+`xpack.security.encryptionKey`::
+An arbitrary string of 32 characters or more that is used to encrypt credentials
+in a cookie. It is crucial that this key is not exposed to users of {kib}. By
+default, a value is automatically generated in memory. If you use that default
+behavior, all sessions are invalidated when {kib} restarts.
+
+`xpack.security.secureCookies`::
+Sets the `secure` flag of the session cookie. The default value is `false`. It
+is set to `true` if `server.ssl.certificate` and `server.ssl.key` are set. Set
+this to `true` if SSL is configured outside of {kib} (for example, you are
+routing requests through a load balancer or proxy).
+
+`xpack.security.sessionTimeout`::
+Sets the session duration (in milliseconds). By default, sessions stay active
+until the browser is closed.

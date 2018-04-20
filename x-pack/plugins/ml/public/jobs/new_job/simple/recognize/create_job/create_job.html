@@ -1,0 +1,226 @@
+<ml-nav-menu name="new_job_multi_metric"></ml-nav-menu>
+<ml-new-job-recognizer>
+  <ml-message-bar></ml-message-bar>
+  <div ng-controller="MlCreateRecognizerJobs" class="recognizer-job-container">
+    <div class="row">
+      <div class="col-md-6">
+        <h3 class="euiTitle euiTitle--large">New job from {{ui.pageTitle}}</h3>
+      </div>
+    </div>
+
+    <div class="euiSpacer euiSpacer--s"></div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="row form-controls">
+          <h4 class="euiTitle euiTitle--small">Job settings</h4>
+          <div>
+
+            <div class='form-section' >
+              <div ng-show="jobState !== SAVE_STATE.FINISHED">
+                <h4 class="euiTitle euiTitle--small">Job Details</h4>
+                <div class="euiSpacer euiSpacer--s"></div>
+              </div>
+
+              <div class="form-group">
+                <div ng-show="ui.showJobInput && (overallState === SAVE_STATE.NOT_SAVED || overallState === SAVE_STATE.SAVING)">
+                  <div class="form-group">
+                    <ml-form-label label-id="new_job_recognizer_job_prefix">Job ID prefix</ml-form-label>
+                    <input
+                      aria-labelledby="ml_aria_label_new_job_recognizer_job_prefix"
+                      aria-describedby="ml_aria_description_new_job_recognizer_job_prefix"
+                      ng-model="formConfig.jobLabel"
+                      placeholder="Job ID prefix"
+                      ng-change="changeJobLabelCase()"
+                      ng-disabled="overallState === SAVE_STATE.SAVING"
+                      class="form-control lowercase" />
+                      <div ng-hide="ui.validation.checks.jobLabel.valid" class="validation-error">{{ ui.validation.checks.jobLabel.message }}</div>
+                  </div>
+                  <div class="form-group">
+                    <ml-form-label label-id="new_job_group">Job groups</ml-form-label>
+                    <ml-job-group-select
+                      aria-labelledby="ml_aria_label_new_job_group"
+                      aria-describedby="ml_aria_description_new_job_group"
+                      job-groups='formConfig.jobGroups'
+                      disabled='(overallState === SAVE_STATE.SAVING)' />
+                    <div ng-hide="ui.validation.checks.groupIds.valid" class="validation-error">{{ ui.validation.checks.groupIds.message }}</div>
+                  </div>
+                  <div class="form-group">
+                    <div ng-click="ui.showAdvanced = (!ui.showAdvanced || formConfig.useDedicatedIndex)" class="advanced-button-container">
+                      <button
+                        aria-label="{{ ui.showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}"
+                        ng-disabled="formConfig.useDedicatedIndex"
+                        type="button"
+                        class="kuiButton kuiButton--small kuiButton--hollow advanced-button">
+                        <i ng-class="{ 'fa-caret-down': ui.showAdvanced, 'fa-caret-right': !ui.showAdvanced }" class="fa" aria-label="Show advanced" ></i>
+                      </button>
+                      <label class="kuiFormLabel" aria-describedby="ml_aria_description_new_job_advanced_settings">Advanced</label>
+                      <i ml-info-icon="new_job_advanced_settings" aria-label="Advanced settings" />
+                    </div>
+                    <div class='advanced-group' ng-show="ui.showAdvanced">
+                      <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+                        <input type="checkbox"
+                          aria-labelledby="ml_aria_label_new_job_dedicated_index"
+                          aria-describedby="ml_aria_description_new_job_dedicated_index"
+                          class='kuiCheckBox'
+                          ng-model="formConfig.useDedicatedIndex" />
+                        <span class='kuiCheckBoxLabel__text'>
+                          <span id="ml_aria_label_new_job_dedicated_index">Use dedicated index</span>
+                          <i ml-info-icon="new_job_dedicated_index" aria-label="Use dedicated index" />
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+                      <input type="checkbox"
+                        class='kuiCheckBox'
+                        ng-model="formConfig.startDatafeedAfterSave" />
+                        <span class='kuiCheckBoxLabel__text'>
+                          Start datafeed after save
+                        </span>
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+                      <input type="checkbox"
+                        class='kuiCheckBox'
+                        ng-change="changeUseFullIndexData()"
+                        ng-model="formConfig.useFullIndexData" />
+                        <span class='kuiCheckBoxLabel__text'>
+                          Use full {{formConfig.indexPattern.title}} data
+                        </span>
+                    </label>
+                  </div>
+
+                  <button
+                    aria-label="Create Job"
+                    ng-click="save()"
+                    type="button"
+                    ng-show="overallState === SAVE_STATE.NOT_SAVED"
+                    ng-disabled="!ui.formValid"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      Create Job{{((ui.numberOfJobs > 1)?'s':'')}}
+                    </span>
+                  </button>
+
+                  <div class='job-state-info' ng-show="overallState === SAVE_STATE.SAVING">Analysis running <i class='fa fa-spinner fa-spin' aria-label="Analysis running" ></i></div>
+                </div>
+                <div ng-show="overallState === SAVE_STATE.SAVED">
+                  <h3 class="euiTitle euiTitle--large">Jobs created
+                    <i style="color:green;" class="fa fa-check" aria-label="Saved"></i>
+                  </h3>
+                  <div class="euiSpacer euiSpacer--m"></div>
+
+                  <button
+                    aria-label="Reset"
+                    ng-click="resetJob()"
+                    type="button"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      Reset
+                    </span>
+                  </button>
+                  <a
+                    href='{{resultsUrl}}'
+                    ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
+                    aria-label="View Results"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      View Results
+                    </span>
+                  </a>
+                </div>
+
+                <div ng-show="overallState === SAVE_STATE.FAILED">
+                  <h3 class="euiTitle euiTitle--large">Jobs creation failed</h3>
+                  <div class="euiSpacer euiSpacer--m"></div>
+
+                  <button
+                    aria-label="Reset"
+                    ng-click="resetJob()"
+                    type="button"
+                    class="euiButton euiButton--primary euiButton--small euiButton--fill">
+                    <span class="euiButton__content">
+                      Reset
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="row charts-container">
+          <h4 class="euiTitle euiTitle--small">Jobs</h4>
+          <div class='jobs-list'>
+            <div ng-repeat='job in formConfig.jobs' class='job-container'>
+              <div class='labels'>
+                <div class='title'>{{formConfig.jobLabel}}{{job.id}}</div>
+                <div class='sub-title'>{{job.jobConfig.description}}</div>
+                <div class='validation-error' ng-repeat="error in job.errors">{{error}}</div>
+              </div>
+              <div class='results'>
+                <div class='result-box'>
+                  <div class='result-box-title'>Job</div>
+                  <div class='result-box-inner'>
+                    <i ng-show="job.jobState === SAVE_STATE.NOT_SAVED" aria-label="Not saved" ></i>
+                    <i ng-show="job.jobState === SAVE_STATE.FAILED" style="color:red;" class="fa fa-remove"aria-label="Save failed" ></i>
+                    <i ng-show="job.jobState === SAVE_STATE.SAVING" class="fa fa-spinner fa-spin"aria-label="Saving" ></i>
+                    <i ng-show="job.jobState === SAVE_STATE.SAVED" style="color:green;" class="fa fa-check"aria-label="Saved" ></i>
+                  </div>
+                </div>
+                <div class='result-box'>
+                  <div class='result-box-title'>Datafeed</div>
+                  <div class='result-box-inner'>
+                    <i ng-show="job.datafeedState === SAVE_STATE.NOT_SAVED" aria-label="Not saved" ></i>
+                    <i ng-show="job.datafeedState === SAVE_STATE.FAILED" style="color:red;" class="fa fa-remove"aria-label="Save failed" ></i>
+                    <i ng-show="job.datafeedState === SAVE_STATE.SAVING" class="fa fa-spinner fa-spin"aria-label="Saving" ></i>
+                    <i ng-show="job.datafeedState === SAVE_STATE.SAVED" style="color:green;" class="fa fa-check"aria-label="Saved" ></i>
+                  </div>
+                </div>
+                <div class='result-box' ng-if="formConfig.startDatafeedAfterSave">
+                  <div class='result-box-title'>Running</div>
+                  <div class='result-box-inner'>
+                    <i ng-show="job.runningState === DATAFEED_STATE.NOT_STARTED" aria-label="Not started" ></i>
+                    <i ng-show="job.runningState === DATAFEED_STATE.FAILED" style="color:red;" class="fa fa-remove"aria-label="Start failed" ></i>
+                    <i ng-show="job.runningState === DATAFEED_STATE.STARTING" class="fa fa-spinner fa-spin"aria-label="Starting" ></i>
+                    <i ng-show="job.runningState === DATAFEED_STATE.STARTED" style="color:green;" class="fa fa-check"aria-label="Started" ></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row charts-container" ng-repeat='(key, value) in formConfig.kibanaObjects'>
+          <h4 class="euiTitle euiTitle--small">{{ui.kibanaLabels[key]}}</h4>
+          <div class='save-objects-list'>
+            <div ng-repeat='obj in value' class='job-container'>
+              <div class='labels'>
+                <div class='title' ng-class="{exists: obj.exists}">
+                  {{obj.title}}
+                  <span ng-if="obj.exists">(already exists)</span>
+                </div>
+              </div>
+              <div class='results'>
+                <div class='result-box'>
+                  <div class='result-box-inner'>
+                    <i ng-show="obj.saveState === SAVE_STATE.NOT_SAVED" aria-label="Not saved" ></i>
+                    <i ng-show="obj.saveState === SAVE_STATE.FAILED" style="color:red;" class="fa fa-remove"aria-label="Save failed" ></i>
+                    <i ng-show="obj.saveState === SAVE_STATE.SAVING" class="fa fa-spinner fa-spin"aria-label="Saving" ></i>
+                    <i ng-show="obj.saveState === SAVE_STATE.SAVED  && !obj.exists" style="color:green;" class="fa fa-check"aria-label="Saved" ></i>
+                    <i ng-show="obj.saveState === SAVE_STATE.SAVED && obj.exists" style="color:#BBBBBB;" class="fa fa-check"aria-label="Already saved" ></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ml-new-job-recognizer>

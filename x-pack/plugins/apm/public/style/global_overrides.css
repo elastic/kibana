@@ -1,0 +1,25 @@
+/*
+Hide unused secondary Kibana navigation
+*/
+.kuiLocalNav {
+  min-height: initial;
+}
+
+.kuiLocalNavRow.kuiLocalNavRow--secondary {
+  display: none;
+}
+
+/*
+Remove unnecessary space below the navigation dropdown
+*/
+.kuiLocalDropdown {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* 
+Hide the "0-10 of 100" text in KUIPager component for all KUIControlledTable
+*/
+.kuiControlledTable .kuiPagerText {
+  display: none;
+}

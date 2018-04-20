@@ -1,0 +1,263 @@
+<div class="kuiLocalDropdownTitle">Settings</div>
+
+<!-- Tabs. -->
+<ul class="nav nav-tabs" ng-show="selectedIndex !== null">
+  <li ng-show="workspace" ng-class="{active: configPanel === 'lastRequest'}">
+    <a class="navbar-link" ng-click="configPanel='lastRequest'">Last request</a>
+  </li>
+  <li ng-show="workspace" ng-class="{active: configPanel ==='blacklist'}">
+    <a class="navbar-link" ng-click="configPanel='blacklist'">Blacklist</a>
+  </li>
+  <li ng-class="{active: configPanel === 'settings'}">
+    <a class="navbar-link" ng-click="configPanel='settings'">Advanced settings</a>
+  </li>
+  <li ng-show="canEditDrillDownUrls" ng-class="{active: configPanel === 'drillDowns'}">
+    <a class="navbar-link" ng-click="configPanel='drillDowns'">Drill-downs</a>
+  </li>
+</ul>
+
+<!--========= Begin config =========== -->
+
+    <!-- ====== start Spy ====== -->
+    <div class="list-group-item list-group-item--noBorder" ng-if="(workspace !== null)&&(configPanel === 'lastRequest')">
+      <div>
+        <small class="help-block">http://host:port/{{selectedIndex.name}}/_xpack/graph/_explore</small>
+        <ul class="nav nav-tabs">
+          <li ng-class="{active: spymode === 'request'}"><a ng-click="spymode='request'">Request</a></li>
+          <li ng-class="{active: spymode === 'response'}"><a ng-click="spymode='response'">Response</a></li>
+        </ul>
+
+        <div ng-show="spymode == 'request'" ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }" ng-model="workspace.lastRequest" class="requestJsonView"></div>
+        <div ng-show="spymode == 'response'" ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }" ng-model="workspace.lastResponse" class="requestJsonView"></div>
+      </div>
+    </div>
+    <div>
+      <!-- ====== end spy ======== -->
+
+
+
+      <!-- ====== start blacklist ====== -->
+      <div class="list-group-item list-group-item--noBorder" ng-if="(workspace!==null)&&(configPanel==='blacklist')">
+        <p class="help-block">These terms are currently blacklisted from re-appearing in the workspace</p>
+
+        <div class="selectionList kuiVerticalRhythm">
+          <div
+            ng-repeat="n in workspace.blacklistedNodes"
+            class="kuiFieldGroup"
+          >
+            <div class="kuiFieldGroupSection">
+              <button
+                class="kuiButton kuiButton--hollow"
+                ng-click="workspace.unblacklist(n)"
+              >
+                <span class="kuiIcon fa-times"></span>
+              </button>
+            </div>
+
+            <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+              <p class="kuiText">
+                {{n.label}}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="kuiButton kuiButton--danger kuiButton--iconText kuiVerticalRhythm"
+          ng-click="workspace.blacklistedNodes=[]"
+          ng-disabled="workspace.blacklistedNodes.length === 0"
+        >
+          <span class="kuiButton__icon kuiIcon fa-trash"></span>
+          <span>Clear</span>
+        </button>
+      </div>
+      <!-- ====== end blacklist ======== -->
+
+      <!-- ====== start drill-downs ====== -->
+      <div class="list-group-item list-group-item--noBorder" ng-if="configPanel==='drillDowns'">
+
+        <form ng-submit="saveUrlTemplate()" role="form" class="form-horizontal">
+          <div class="form-group">
+            <div class="col-sm-1 control-label">
+              <label for="urlTemplateUrl">URL</label>
+            </div>
+            <div class="col-sm-11">
+              <input id="urlTemplateUrl" ng-change="checkForKibanaUrl()" ng-paste="handleUrlTemplatePaste($event)" autocomplete="off" type="text" ng-model="newUrlTemplate.url" placeholder="{{'https://www.google.co.uk/#q={' + '{gquery}' + '}' }}"   class="form-control col-sm-12">
+              <span ng-if="suggestTemplateFix"><i tooltip="Kibana URL pasted" class="text-color-warning fa fa-warning"></i>This looks like a Kibana URL. Would you like us to convert it to a template for you? <a ng-click="replaceKibanaUrlParam()">yes</a> / <a ng-click="rejectKibanaUrlSuggestion()">no</a></span>
+              <p class="help-block" ng-non-bindable>Define template URLs using {{gquery}} where the selected vertex terms are inserted</p>
+            </div>
+          </div>
+          <div class="form-group" >
+            <div class="col-sm-1 control-label">
+              <label for="urlDescription">Title</label>
+            </div>
+            <div class="col-sm-5">
+              <input id="urlDescription" type="text" autocomplete="off" ng-model="newUrlTemplate.description" placeholder="Search on Google" class="form-control" >
+            </div>
+            <div class="col-sm-2 control-label">
+              <label for="encoder">URL parameter type</label>
+            </div>
+            <div class="col-sm-4">
+              <select class="form-control" name="encoder"
+                ng-options="option.title for option in outlinkEncoders"
+                ng-model="newUrlTemplate.encoder">
+              </select>
+              <p class="help-block">{{newUrlTemplate.encoder.description}}</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-1 control-label">
+              <label for="encoder">Toolbar icon</label>
+            </div>
+
+            <div class="col-sm-9">
+                <span class="legend-value-icon-picker">
+                  <i ng-repeat="i in drillDownIconChoices"  ng-click="toggleDrillDownIcon(newUrlTemplate,i)" ng-class="{selectedNode:i==newUrlTemplate.icon}" class="fa icon noUserSelect">
+                                      {{i.code}}</i>
+                </span>
+            </div>
+
+            <div class="col-sm-2">
+              <div class="pull-right kuiButtonGroup">
+                <button
+                  type="reset"
+                  ng-disabled="!newUrlTemplate.url&&!newUrlTemplate.description&&!newUrlTemplate.icon"
+                  class="kuiButton kuiButton--basic"
+                  ng-click="resetNewUrlTemplate()"
+                >
+                  Reset
+                </button>
+
+                <button
+                  type="submit"
+                  ng-disabled="!newUrlTemplate.url||!newUrlTemplate.description"
+                  class="kuiButton kuiButton--primary"
+                  aria-label="Save drill-down"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+
+        <div class="scrollable-list">
+          <ul  class="li-striped list-group list-group-menu">
+            <li class="list-group-item" ng-repeat="urlTemplate in urlTemplates">
+              <i ng-if="urlTemplate.icon"  class="fa icon noUserSelect">
+                                  {{urlTemplate.icon.code}}</i>
+
+                {{urlTemplate.description}}
+              <span class="pull-right">
+                <button
+                  ng-click="editUrlTemplate(urlTemplate)"
+                  class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
+                  aria-label="Edit"
+                >
+                  <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
+                </button>
+
+                <button
+                  ng-click="removeUrlTemplate(urlTemplate)"
+                  class="kuiButton kuiButton--danger kuiButton--iconText kuiButton--small"
+                  aria-label="Remove"
+                >
+                  <span aria-hidden="true" class="kuiIcon fa-trash"></span>
+                </button>
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- ====== end drilldowns ======== -->
+
+
+
+      <!-- ======== begin explore settings ======= -->
+      <div class="list-group-item list-group-item--noBorder" ng-if="(selectedIndex !== null)&&(configPanel === 'settings')">
+
+        <form class="form-horizontal">
+
+
+          <div class="form-group form-group-sm small-graph-form">
+            <label for="qIndexSampleSize" class="col-sm-4 control-label">Sample size</label>
+            <div class="col-sm-6">
+              <input type="number" class="form-control input-sm" min="1" max="500000" step="1000" id="qIndexSampleSize" ng-model="exploreControls.sampleSize">
+              <div class="help-block">Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant.
+              </div>
+            </div>
+          </div>
+
+
+          <div class="form-group">
+            <div class="col-sm-offset-4 col-sm-8">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="isSignifChk2" ng-model="exploreControls.useSignificance"> Significant links
+                </label>
+              </div>
+              <span class="help-block">Identify terms that are "significant" rather than simply popular</span>
+            </div>
+          </div>
+
+          <div class="form-group form-group-sm small-graph-form">
+            <label for="minDocCount" class="col-sm-4 control-label">Certainty</label>
+            <div class="col-sm-6 ">
+              <input type="number" class="form-control input-sm" min="1" max="500000" step="1" id="minDocCount" ng-model="exploreControls.minDocCount">
+              <div class="help-block">The min number of documents that are required as evidence before introducing a related term</div>
+            </div>
+          </div>
+
+          <div class="form-group form-group-sm small-graph-form">
+            <label for="qDiversityField" class="col-sm-4 control-label">Diversity field</label>
+            <div class="col-sm-6 ">
+              <select name="qDiversityField" id="qDiversityField" ng-options="field.name for field in allFields" ng-model="exploreControls.sampleDiversityField">
+                <option value="">[No diversification]</option>
+              </select>
+              <span class="help-block">To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.
+                <em>This must be a single-term field or searches will be rejected with an error</em>
+              </span>
+
+            </div>
+          </div>
+          <div class="form-group form-group-sm small-graph-form" ng-show="exploreControls.sampleDiversityField">
+            <label for="qMaxValuesPerDoc" class="col-sm-4 control-label">Max docs per field</label>
+            <div class="col-sm-6 ">
+              <input type="number" class="form-control input-sm" min="1" max="500000" step="1" id="qMaxValuesPerDoc" ng-model="exploreControls.maxValuesPerDoc">
+              <span class="help-block">Max number of documents in a sample that can contain the same value for the
+                <em>{{selectedDiversityField.name}}</em> field</span>
+            </div>
+          </div>
+
+
+          <div class="form-group form-group-sm small-graph-form">
+            <label for="qTimeoutMillis" class="col-sm-4 control-label">Timeout (ms)</label>
+            <div class="col-sm-6 ">
+              <input type="number" class="form-control input-sm" min="1" max="500000" step="1" id="qTimeoutMillis" ng-model="exploreControls.timeoutMillis">
+              <span class="help-block">Max time in milliseconds a request can run</span>
+            </div>
+          </div>
+
+          <!--
+                      TODO - could add a "guiding query" search term here - would, for example, allow
+                      exploration of weblog entries from selected IP addresses etc BUT always where
+                      status==404. There's usually a desire to allow exploration to expand and move
+                      away from the seed query but sometimes a guiding hand is needed across all
+                      expand steps to stay "on topic". The search term would be added to all graph
+                      explore calls automatically.
+                -->
+
+        </form>
+
+      </div>
+
+      <!-- ========== end explore settings =========== -->
+
+
+
+    </div>
+
+<!--========= End config =========== -->

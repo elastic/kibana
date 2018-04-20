@@ -1,0 +1,62 @@
+{
+  "_xpack/license": {
+    "methods": [
+      "GET"
+    ],
+    "url_params": {
+      "local": ["true", "false"]
+    },
+    "patterns": [
+      "_xpack/license"
+    ]
+  },
+  "DELETE _xpack/license": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/license"
+    ]
+  },
+  "PUT _xpack/license": {
+    "methods": [
+      "PUT"
+    ],
+    "url_params": {
+      "acknowledge": ["true", "false"]
+    },
+    "patterns": [
+      "_xpack/license"
+    ],
+    "data_autocomplete_rules": {
+      "licenses": []
+    }
+  },
+  "_xpack/license/trial_status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/license/trial_status"
+    ]
+  },
+  "_xpack/license/start_trial": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/license/start_trial"
+    ]
+  },
+  "_xpack/license/start_basic": {
+    "url_params": {
+      "acknowledge": ["true", "false"]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/license/start_basic"
+    ]
+  }
+}

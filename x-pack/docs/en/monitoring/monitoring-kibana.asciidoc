@@ -1,0 +1,5 @@
+[[monitoring-kibana]]
+== Monitoring Kibana
+
+See
+{kibana-ref}/monitoring-xpack-kibana.html[Monitoring {kib}].

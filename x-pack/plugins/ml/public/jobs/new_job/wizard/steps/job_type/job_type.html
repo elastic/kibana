@@ -1,0 +1,188 @@
+<ml-nav-menu name="new_job"></ml-nav-menu>
+<ml-new-job class="job-type-gallery">
+  <ml-message-bar></ml-message-bar>
+  <div ng-controller="MlNewJobStepJobType">
+    <!-- Presents the various options for creating a job -->
+    <div class="job-types-content">
+      <h1 class="euiTitle euiTitle--large">Create a job from the {{pageTitleLabel}}</h1>
+      <div class="euiSpacer euiSpacer--l"></div>
+
+      <div ng-if="isTimeBasedIndex===false">
+        <div class="index-warning">
+          <div class="euiCallOut euiCallOut--warning">
+            <div class="euiCallOutHeader">
+              <svg class="euiIcon euiCallOutHeader__icon euiIcon--medium" xmlns="http://www.w3.org/2000/svg"
+              width="16" height="16" viewBox="0 0 16 16">
+                <g fill-rule="evenodd">
+                  <path d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
+                  />
+                  <path d="M7 6h1v5H7zM7 12h1v1H7z" />
+                </g>
+              </svg>
+              <span class="euiCallOutHeader__title">{{indexWarningTitle}}</span>
+            </div>
+            <div class="euiText euiText--small">
+              <p>Anomaly detection can only be run over indices which are time based.<br/>
+                <a class="euiLink euiLink--primary" href="#jobs/new_job">Select a different index</a>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="euiSpacer euiSpacer--xxl"></div>
+      </div>
+
+      <div ng-show="recognizerResults.count!==0" class="recognizer-section">
+        <div class="euiText">
+          <h3 class="euiTitle euiTitle--small">Use a supplied configuration</h3>
+          <p>
+            The fields in your data have been recognized as matching known configurations.
+            Select to create a set of machine learning jobs and associated dashboards.
+          </p>
+        </div>
+        <div class="euiSpacer euiSpacer--m"></div>
+        <ml-data-recognizer
+          class-name='"euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths"'
+          item-class-name='""'
+          index-pattern='indexPattern'
+          results=recognizerResults/>
+        <div class="euiSpacer euiSpacer--xxl"></div>
+      </div>
+
+      <div class="euiText">
+        <h3 class="euiTitle euiTitle--small">Use a wizard</h3>
+        <p>
+          Use one of the wizards to create a machine learning job to find anomalies in your data.
+        </p>
+      </div>
+
+      <div class="euiSpacer euiSpacer--m"></div>
+
+      <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
+        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+          <a ng-href="{{getUrl('#jobs/new_job/simple/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
+              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+                <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                  <img class="synopsisIcon" src="{{assetsPath}}/ml_create_single_metric_job.svg" alt="Single metric job">
+                </div>
+                <div class="euiFlexItem synopsisContent">
+                  <h4 class="euiTitle euiTitle--small synopsisTitle">Single metric</h4>
+                  <div class="euiText synopsisBody">
+                    <p>
+                      <span class="euiTextColor euiTextColor--subdued">
+                      Detect anomalies in a single time series.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+          <a ng-href="{{getUrl('#jobs/new_job/simple/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
+              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+                <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                  <img class="synopsisIcon" src="{{assetsPath}}/ml_create_multi_metric_job.svg" alt="Multi metric job">
+                </div>
+                <div class="euiFlexItem synopsisContent">
+                  <h4 class="euiTitle euiTitle--small synopsisTitle">Multi metric</h4>
+                  <div class="euiText synopsisBody">
+                    <p>
+                      <span class="euiTextColor euiTextColor--subdued">
+                      Detect anomalies in multiple metrics by splitting a time series by a categorical field.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+          <a ng-href="{{getUrl('#jobs/new_job/simple/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
+              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+                <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                  <img class="synopsisIcon" src="{{assetsPath}}/ml_create_population_job.svg" alt="Population job">
+                </div>
+                <div class="euiFlexItem synopsisContent">
+                  <h4 class="euiTitle euiTitle--small synopsisTitle">Population</h4>
+                  <div class="euiText synopsisBody">
+                    <p>
+                      <span class="euiTextColor euiTextColor--subdued">
+                      Detect activity that is unusual compared to the behavior of the population.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+          <a ng-href="{{getUrl('#jobs/new_job/advanced')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
+              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+                <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                  <img class="synopsisIcon" src="{{assetsPath}}/ml_create_advanced_job.svg" alt="Advanced job">
+                </div>
+                <div class="euiFlexItem synopsisContent">
+                  <h4 class="euiTitle euiTitle--small synopsisTitle">Advanced</h4>
+                  <div class="euiText synopsisBody">
+                    <p>
+                      <span class="euiTextColor euiTextColor--subdued">
+                      Use the full range of options to create a job for more advanced use cases.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="euiSpacer euiSpacer--xxl"></div>
+
+      <div class="euiText">
+        <h3 class="euiTitle euiTitle--small">Learn more about your data</h3>
+        <p>
+          If you're not sure what type of job to create, first explore the fields and metrics in your data.
+        </p>
+      </div>
+      <div class="euiSpacer euiSpacer--m"></div>
+
+      <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
+        <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
+          <a
+            ng-href="{{getUrl('#jobs/new_job/datavisualizer')}}"
+            ng-click="addSelectionToRecentlyAccessed()"
+            ng-class='{disabled: isTimeBasedIndex===false}'
+            class="euiLink synopsis">
+            <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
+              <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
+                <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                  <img class="synopsisIcon" src="{{assetsPath}}/ml_data_visualizer.svg" alt="Single metric job">
+                </div>
+                <div class="euiFlexItem synopsisContent">
+                  <h4 class="euiTitle euiTitle--small synopsisTitle">Data Visualizer</h4>
+                  <div class="euiText synopsisBody">
+                    <p>
+                      <span class="euiTextColor euiTextColor--subdued">
+                      Learn more about the characteristics of your data and identify the fields for analysis with machine learning.
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ml-new-job>

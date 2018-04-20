@@ -1,0 +1,85 @@
+.job-timepicker-modal {
+  font-size: 14px;
+  padding:20px;
+  cursor: auto;
+
+  h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .date_container {
+    width: 200px;
+    display: inline-block;
+  }
+
+  .ml-timepicker-contents {
+    margin-top: 5px;
+
+    .btn-info.active, .kuiButton--primary.active {
+      color: #ffffff;
+      background-color: #154751;
+      border-color: #134049;
+      span {
+        color: #ffffff;
+      }
+    }
+
+    .btn-default, .kuiButton--basic {
+      background: transparent;
+      color: #444444;
+      border: 0px;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    [ml-time-input] {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+    }
+  }
+
+  .ml-timepicker-modes {
+    text-transform: capitalize;
+  }
+  .ml-timepicker-section {
+    float: left;
+    padding: 0px 15px;
+    min-width: 294px;
+    width: 294px;
+    border-left: 1px solid #FFFFFF;
+    border-right: 1px solid #FFFFFF;
+
+    .ml-timepicker {
+      padding: 13px;
+      padding-top: none;
+      border: 2px solid #ecf0f1;
+      border-radius: 4px;
+      border-radius: 4px;
+      border-top-left-radius: 0px;
+      border-top-right-radius: 0px;
+      border-top: none;
+
+      .btn, .kuiButton {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+    }
+
+    .ml-timepicker-radio-bottom {
+      border-bottom-left-radius: 0px;
+      border-bottom-right-radius: 0px;
+    }
+  }
+
+  .ml-timepicker-left-border {
+    border-left: 1px solid #ecf0f1;
+  }
+
+  .ml-timepicker-right-border {
+    border-right: 1px solid #ecf0f1;
+  }
+}

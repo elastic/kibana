@@ -174,7 +174,7 @@ Start elasticsearch from a nightly snapshot.
 yarn es snapshot
 ```
 
-Additional options are available, pass `--help` for more information.
+This will run Elasticsearch with a `trial` license and bootstraped with the user `elastic` and password `changeme`. Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
@@ -194,6 +194,20 @@ Start the development server.
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+#### Running Kibana in Open-Source mode
+
+If you're looking to only work with the open-source software, supply the license type to `yarn es`:
+
+```bash
+yarn es snapshot --license oss
+```
+
+And start Kibana with only open-source code:
+
+```bash
+yarn start --oss
+```
 
 #### Unsupported URL Type
 
@@ -326,12 +340,11 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 
 ### Building OS packages
 
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
 
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.24
 yarn build --skip-archives
 ```
 

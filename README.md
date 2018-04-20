@@ -1,8 +1,6 @@
 # Kibana 6.3.0
 
-Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's
-an open source ([Apache Licensed](LICENSE.md)),
-browser-based analytics and search dashboard for Elasticsearch.
+Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
@@ -43,11 +41,11 @@ out an open PR:
 
 For the daring, snapshot builds are available. These builds are created nightly and have undergone no formal QA, so they should never be run in production. All builds are 64 bit.
 
-| platform |  |
-| --- | --- |
-| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-x86_64.rpm) |
-| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-windows-x86_64.zip) |
+| platform | default | OSS |
+| --- | --- | --- |
+| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-darwin-x86_64.tar.gz) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-x86_64.rpm) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-x86_64.rpm) |
+| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.3.0-SNAPSHOT-windows-x86_64.zip) | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-windows-x86_64.zip) |
 
 ## Documentation
 
