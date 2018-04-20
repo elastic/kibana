@@ -1,12 +1,16 @@
-const dedent = require('dedent');
+import dedent from 'dedent';
 
 // We normalize all path separators to `/` in generated files
 function normalizePath(path) {
   return path.replace(/[\\\/]+/g, '/');
 }
 
-module.exports = function () {
-  const { type, modules } = JSON.parse(module.id.split('?').slice(1).join('?') || '{}');
+export default function () {
+  if (module.id.indexOf('?') === -1) {
+    throw new Error('create_ui_exports_module loaded without JSON args in module.id');
+  }
+
+  const { type, modules } = JSON.parse(module.id.slice(module.id.indexOf('?') + 1));
 
   const requires = modules.map(m => {
     const req = normalizePath(m);
@@ -22,4 +26,4 @@ module.exports = function () {
       ];
     `
   };
-};
+}
