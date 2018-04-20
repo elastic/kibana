@@ -40,7 +40,7 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td width="1*" className="rhythm_top_n__label">{ item.label }</td>
+          <td width="1*" nowrap className="rhythm_top_n__label">{ item.label }</td>
           <td width="100%" className="rhythm_top_n__bar">
             <div
               className="rhythm_top_n__inner-bar"
