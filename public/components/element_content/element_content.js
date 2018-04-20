@@ -1,20 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { pure, compose, branch, renderComponent } from 'recompose';
+import { pure, compose, branch, renderComponent, withProps } from 'recompose';
 import Style from 'style-it';
 import { Loading } from '../loading';
-import { RenderElement } from '../render_element';
+import { RenderWithFn } from '../render_with_fn';
 import { getType } from '../../../common/lib/get_type';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
-
-/*
-  This feels like a crummy hack but I need a way to make sure that Positionable is able to pass the
-  size property all the way down to RenderElement.
-
-  Positionable keeps size as local state because constantly pushing it through redux is too expensive,
-  thus size is coming in via a child clone in Positionable. Gross right?
-*/
 
 /*
   Branches
@@ -39,15 +31,23 @@ const branches = [
       !renderFunction // We can't find an element in the registry for this
     );
   }, renderComponent(InvalidExpression)),
+  withProps(({ handlers }) => ({
+    handlers: {
+      done() {},
+      onResize() {},
+      onDestroy() {},
+      ...handlers,
+    },
+  })),
 ];
 
 export const ElementContent = compose(pure, ...branches)(
-  ({ renderFunction, renderable, size, handlers }) => {
+  ({ renderable, renderFunction, size, handlers }) => {
     return Style.it(
       renderable.css,
       <div style={{ ...renderable.containerStyle, ...size }}>
         <div className="canvas__element--content">
-          <RenderElement
+          <RenderWithFn
             name={renderFunction.name}
             renderFn={renderFunction.render}
             reuseNode={renderFunction.reuseDomNode}
@@ -63,9 +63,9 @@ export const ElementContent = compose(pure, ...branches)(
 );
 
 ElementContent.propTypes = {
-  renderFunction: PropTypes.object,
   renderable: PropTypes.object,
-  state: PropTypes.string,
+  renderFunction: PropTypes.func,
   size: PropTypes.object,
   handlers: PropTypes.object,
+  state: PropTypes.string,
 };

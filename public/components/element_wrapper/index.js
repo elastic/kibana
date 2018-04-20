@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { get } from 'lodash';
 import { removeElement, setPosition } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
 import { getFullscreen, getEditing } from '../../state/selectors/app';
@@ -10,7 +9,6 @@ import {
   getSelectedPage,
 } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
-import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers } from './lib/handlers';
 
@@ -40,7 +38,6 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
     removeElement: dispatchProps.removeElement(selectedPage),
     handlers: dispatchProps.handlers(selectedPage),
     isSelected: isSelected,
-    renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
     state: getState(resolvedArg),
     error: getError(resolvedArg),
     renderable,

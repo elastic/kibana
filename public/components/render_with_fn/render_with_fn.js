@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
-import './render_element.less';
+import './render_with_fn.less';
 import { RenderToDom } from '../render_to_dom';
 
-export class RenderElement extends React.Component {
+export class RenderWithFn extends React.Component {
   static propTypes = {
     name: PropTypes.string,
     renderFn: PropTypes.func.isRequired,
@@ -13,7 +13,6 @@ export class RenderElement extends React.Component {
     destroyFn: PropTypes.func,
     config: PropTypes.object,
     size: PropTypes.object,
-    css: PropTypes.string,
     onError: PropTypes.func.isRequired,
   };
 
@@ -71,7 +70,7 @@ export class RenderElement extends React.Component {
   resetRenderTarget = domNode => {
     const { handlers } = this.props;
 
-    if (!domNode) throw new Error('RenderElement can not reset undefined target node');
+    if (!domNode) throw new Error('RenderWithFn can not reset undefined target node');
 
     // call destroy on existing element
     if (!this.firstRender) handlers.destroy();

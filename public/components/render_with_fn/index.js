@@ -1,9 +1,9 @@
 import { compose, withPropsOnChange, withProps } from 'recompose';
 import PropTypes from 'prop-types';
 import { notify } from '../../lib/notify';
-import { RenderElement as Component } from './render_element';
+import { RenderWithFn as Component } from './render_with_fn';
 import { ElementHandlers } from './lib/handlers';
-export const RenderElement = compose(
+export const RenderWithFn = compose(
   withPropsOnChange(
     () => false,
     () => ({
@@ -16,6 +16,6 @@ export const RenderElement = compose(
   }))
 )(Component);
 
-RenderElement.propTypes = {
+RenderWithFn.propTypes = {
   handlers: PropTypes.object,
 };
