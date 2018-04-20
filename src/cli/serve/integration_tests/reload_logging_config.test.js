@@ -60,16 +60,18 @@ describe('Server logging configuration', function () {
     });
   } else {
     it('should be reloadable via SIGHUP process signaling', function (done) {
-      expect.assertions(6);
-
       child = spawn('node', [kibanaPath, '--config', testConfigFile]);
 
       child.on('error', err => {
         done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));
       });
 
-      child.on('exit', code => {
-        expect([null, 0]).toContain(code);
+      const lines = [];
+
+      child.on('exit', _code => {
+        const code = _code === null ? 0 : _code;
+
+        expect({ code, lines }).toMatchSnapshot();
         done();
       });
 
@@ -83,7 +85,7 @@ describe('Server logging configuration', function () {
 
           if (isJson) {
             const data = JSON.parse(line);
-            expect(prepareJson(data)).toMatchSnapshot();
+            lines.push(prepareJson(data));
 
             if (data.tags.includes('listening')) {
               switchToPlainTextLog();
@@ -94,12 +96,12 @@ describe('Server logging configuration', function () {
             // switching over.
 
             const data = JSON.parse(line);
-            expect(prepareJson(data)).toMatchSnapshot();
+            lines.push(prepareJson(data));
           } else {
             // Kibana has successfully stopped logging json, so we verify the
             // log line and kill the server.
 
-            expect(prepareLogLine(line)).toMatchSnapshot();
+            lines.push(prepareLogLine(line));
 
             child.kill();
             child = undefined;
