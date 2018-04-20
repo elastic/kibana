@@ -1,0 +1,26 @@
+<div>
+  <b>{{detailRow.indexName}}</b>
+  <p>[{{detailRow.shardID}}][{{detailRow.shardNumber}}]</p>
+  <br/>
+  <b>Type</b>
+  <p>{{detailRow.query_type}}</p>
+  <b>Description</b>
+  <p>{{detailRow.lucene}}</p>
+  <b><span tooltip="The total time spent at this query component, inclusive of children" tooltip-placement="left">Total Time</span></b>
+  <p>{{detailRow.time | msToPretty:3 }}</p>
+  <b><span tooltip="The time spent by this query component alone, exclusive of children" tooltip-placement="left">Self Time</span></b>
+  <p>{{detailRow.selfTime | msToPretty:3 }}</p>
+  <b>Timing Breakdown</b>
+  <table class="breakdown">
+    <tr style="background-color:{{breakdown.color}}" ng-repeat="breakdown in detailRow.breakdown">
+      <td><span tooltip="{{breakdown.tip}}" tooltip-placement="left">{{breakdown.key}}</span></td>
+      <td>{{breakdown.time | nsToPretty: 1}}</td>
+      <td style="width:33%; background-color:white;">
+        <div class="graph progress">
+          <div class="bar" style="width:{{breakdown.relative}}%"></div>
+          <p>{{breakdown.relative}}%</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,27 @@
+<div class="page-row">
+  <div class="monitoring-cluster-view">
+    <h1 class="monitoring-cluster-view-title">Shard Legend</h1>
+    <div class="legend">
+      <span class="shard">&nbsp;</span>
+      <span class="shard-label">Primary</span>
+      <span class="shard replica">&nbsp;</span>
+      <span class="shard-label">Replica</span>
+      <span class="shard relocating">&nbsp;</span>
+      <span class="shard-label">Relocating</span>
+      <span class="shard initializing">&nbsp;</span>
+      <span class="shard-label">Initializing</span>
+      <span class="shard emergency" ng-if="isIndexView">&nbsp;</span>
+      <span class="shard-label" ng-if="isIndexView">Unassigned Primary</span>
+      <span class="shard unassigned replica" ng-if="isIndexView">&nbsp;</span>
+      <span class="shard-label" ng-if="isIndexView">Unassigned Replica</span>
+    </div>
+    <cluster-view
+      shard-stats="shardStats"
+      total-count="totalCount"
+      labels="labels"
+      showing="showing"
+      show-system-indices="showSystemIndices"
+      toggle-show-system-indices="toggleShowSystemIndices"
+    ></cluster-view>
+  </div>
+</div>

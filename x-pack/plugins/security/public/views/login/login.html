@@ -1,0 +1,47 @@
+<div class="container" ng-class="{error: !!login.error}">
+  <div class="logo-container">
+    <div class="kibanaWelcomeLogo"></div>
+  </div>
+
+  <div class="form-container">
+    <form class="login-form" ng-submit="login.submit(username, password)">
+      <div ng-show="login.error" class="form-group error-message">
+        <label class="control-label" data-test-subj="loginErrorMessage" >Oops! Error. Try again.</label>
+      </div>
+
+      <div ng-if="login.infoMessage" class="form-group error-message">
+        <label class="control-label">{{login.infoMessage}}</label>
+      </div>
+
+      <div ng-if="!login.allowLogin" class="form-group error-message">
+        <label class="control-label">{{login.loginMessage}}</label>
+      </div>
+
+      <div ng-if="login.isDisabled" class="form-group error-message">
+        <label class="control-label">Logging in requires a secure connection. Please contact your administrator.</label>
+      </div>
+
+      <div class="form-group inner-addon left-addon">
+        <i class="fa fa-user fa-lg fa-fw"></i>
+        <input type="text" ng-disabled="login.isDisabled || !login.allowLogin" ng-model="username" class="form-control" id="username" placeholder="Username" autofocus data-test-subj="loginUsername" />
+      </div>
+
+      <div class="form-group inner-addon left-addon">
+        <i class="fa fa-lock fa-lg fa-fw"></i>
+        <input type="password" ng-disabled="login.isDisabled|| !login.allowLogin" ng-model="password" class="form-control" id="password" placeholder="Password" data-test-subj="loginPassword"/>
+      </div>
+
+      <div class="form-group">
+        <button
+          type="submit"
+          ng-disabled="login.isDisabled || !login.allowLogin || !username || !password || login.isLoading"
+          class="kuiButton kuiButton--primary kuiButton--fullWidth"
+          data-test-subj="loginSubmit"
+        >
+          Log in
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`root reducer should return default data as state 1`] = `
+Object {
+  "data": Array [],
+}
+`;
+
+exports[`root reducer should return incoming data as state 1`] = `
+Object {
+  "data": Array [
+    "a",
+    "b",
+  ],
+}
+`;

@@ -1,0 +1,35 @@
+<div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+  <div class="kuiInfoPanel kuiInfoPanel--error">
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span class="kuiInfoPanelHeader__title" data-test-subj="accessDeniedTitle">
+        Access Denied
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        You are not authorized to access Monitoring. To use Monitoring, you
+        need the privileges granted by both the `kibana_user` and
+        `monitoring_user` roles.
+      </div>
+
+      <div class="kuiInfoPanelBody__message">
+        If you are attempting to access a dedicated monitoring cluster, this
+        might be because you are logged in as a user that is not configured on
+        the monitoring cluster.
+      </div>
+
+      <div class="kuiInfoPanelBody__message">
+        <div class="kuiButtonGroup">
+          <button
+            ng-click="accessDenied.goToKibana();"
+            class="kuiButton kuiButton--primary"
+          >
+            Back to Kibana
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

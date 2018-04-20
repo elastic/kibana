@@ -1,8 +1,12 @@
 import { statSync } from 'fs';
+import { errorIfXPackRemove } from '../lib/error_if_x_pack';
+
 import rimraf from 'rimraf';
 
 export default function remove(settings, logger) {
   try {
+    errorIfXPackRemove(settings, logger);
+
     let stat;
     try {
       stat = statSync(settings.pluginPath);

@@ -1,0 +1,60 @@
+<table class="kuiTable">
+  <thead>
+    <tr>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="id"
+          on-sort-change="actionStatusTable.onSortChange"
+          sort-field="actionStatusTable.sortField"
+          sort-reverse="actionStatusTable.sortReverse"
+        >
+          Action
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+        <sortable-column
+          field="state"
+          on-sort-change="actionStatusTable.onSortChange"
+          sort-field="actionStatusTable.sortField"
+          sort-reverse="actionStatusTable.sortReverse"
+        >
+          State
+        </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell">
+      </th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr ng-repeat="actionStatus in actionStatusTable.actionStatuses">
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          {{ actionStatus.id }}
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <action-state-icon action-status="actionStatus"></action-state-icon>
+          {{ actionStatus.state }}
+        </div>
+      </td>
+      <td class="kuiTableRowCell">
+        <div class="kuiTableRowCell__liner">
+          <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+            <button
+              class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
+              ng-click="actionStatusTable.onActionAcknowledge(actionStatus)"
+              title="Acknowledge"
+              ng-if="actionStatus.isAckable"
+              data-test-subj="btnActionAcknowledge-{{ actionStatus.id }}"
+            >
+              <span class="kuiMenuButton__icon kuiIcon fa-thumbs-up"></span>
+              <span>Acknowledge</span>
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>

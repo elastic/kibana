@@ -8,8 +8,19 @@ if (!process.env.BABEL_CACHE_PATH) {
 
 // paths that babel-register should ignore
 const ignore = [
-  /[\\\/](node_modules|bower_components)[\\\/]/,
-  /[\\\/](kbn-pm\/dist)[\\\/]/
+  /\/bower_components\//,
+  /\/kbn-pm\/dist\//,
+
+  // TODO: remove this and just transpile plugins at build time, but
+  // has tricky edge cases that will probably require better eslint
+  // restrictions to make sure that code destined for the server/browser
+  // follows respects the limitations of each environment.
+  //
+  // https://github.com/elastic/kibana/issues/14800#issuecomment-366130268
+
+  // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
+  // is `x-pack` and `b` is not `node_modules`
+  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/
 ];
 
 if (global.__BUILT_WITH_BABEL__) {

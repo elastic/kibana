@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-alert-blue</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="9" cy="9" r="9"></circle>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="18" height="18" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="UI-KIT" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="QuickSummary-NG" transform="translate(-180.000000, -4121.000000)">
+            <g id="Icons" transform="translate(150.000000, 3950.000000)">
+                <g id="Status-Icons" transform="translate(30.000000, 51.000000)">
+                    <g id="icon-alert-blue" transform="translate(0.000000, 120.000000)">
+                        <use id="Circle-BG" stroke="#008DBA" mask="url(#mask-2)" stroke-width="2" fill="#00A9E5" xlink:href="#path-1"></use>
+                        <path d="M11.6727212,12.5681818 C11.6727212,12.3071733 11.456457,12.0909091 11.1954484,12.0909091 L10.7181757,12.0909091 L10.7181757,7.79545455 C10.7181757,7.53444602 10.5019115,7.31818182 10.240903,7.31818182 L7.37726662,7.31818182 C7.1162581,7.31818182 6.8999939,7.53444602 6.8999939,7.79545455 L6.8999939,8.75 C6.8999939,9.01100852 7.1162581,9.22727273 7.37726662,9.22727273 L7.85453935,9.22727273 L7.85453935,12.0909091 L7.37726662,12.0909091 C7.1162581,12.0909091 6.8999939,12.3071733 6.8999939,12.5681818 L6.8999939,13.5227273 C6.8999939,13.7837358 7.1162581,14 7.37726662,14 L11.1954484,14 C11.456457,14 11.6727212,13.7837358 11.6727212,13.5227273 L11.6727212,12.5681818 Z M10.7181757,3.97727273 C10.7181757,3.7162642 10.5019115,3.5 10.240903,3.5 L8.33181208,3.5 C8.07080356,3.5 7.85453935,3.7162642 7.85453935,3.97727273 L7.85453935,5.40909091 C7.85453935,5.67009943 8.07080356,5.88636364 8.33181208,5.88636364 L10.240903,5.88636364 C10.5019115,5.88636364 10.7181757,5.67009943 10.7181757,5.40909091 L10.7181757,3.97727273 Z" id="" fill="#FFFFFF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

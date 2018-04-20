@@ -1,0 +1,37 @@
+<span class="field-type-icon-container">
+  <span
+    ng-if="type===ML_JOB_FIELD_TYPES.BOOLEAN"
+    aria-label="Boolean field"
+    class="field-type-icon kuiIcon fa-adjust">
+  </span>
+  <span
+    ng-if="type===ML_JOB_FIELD_TYPES.DATE"
+    aria-label="Date field"
+    class="field-type-icon kuiIcon fa-clock-o">
+  </span>
+  <span
+    ng-if="type===ML_JOB_FIELD_TYPES.NUMBER"
+    aria-label="Metric field"
+    class="field-type-icon">
+      <strong aria-hidden="true">#</strong>
+  </span>
+  <span
+    ng-if="type===ML_JOB_FIELD_TYPES.GEO_POINT"
+    aria-label="Geo-point field"
+    class="field-type-icon kuiIcon fa-globe">
+  </span>
+  <span
+    ng-if="type===ML_JOB_FIELD_TYPES.KEYWORD"
+    aria-label="Aggregatable string field"
+    class="field-type-icon">
+      <strong aria-hidden="true">t</strong>
+  </span>
+  <span ng-if="type===ML_JOB_FIELD_TYPES.TEXT"
+    aria-label="String field"
+    class="field-type-icon kuiIcon fa-file-text-o">
+  </span>
+  <span ng-if="type===ML_JOB_FIELD_TYPES.IP"
+    aria-label="IP address field"
+    class="field-type-icon kuiIcon fa-laptop">
+  </span>
+</span>
