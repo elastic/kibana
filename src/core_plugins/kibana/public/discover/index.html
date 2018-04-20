@@ -102,39 +102,42 @@
             </button>
 
             <section
-              ng-if="opts.timefield && opts.showViz"
+              ng-if="opts.timefield"
               aria-label="Histogram of found documents"
               class="discover-timechart"
             >
               <header>
                 <center class="small">
-                  <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
+                  <div ng-if="state.showViz">
+                    <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
 
-                  &mdash;
+                    &mdash;
 
-                  <span class="results-interval form-inline">
-                    <select
-                      class="form-control"
-                      ng-model="state.interval"
-                      ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
-                      ng-blur="toggleInterval()"
-                      data-test-subj="discoverIntervalSelect"
-                      >
-                    </select>
-                    <span ng-if="bucketInterval.scaled">
-                      <icon-tip
-                        content="getBucketIntervalToolTipText()"
-                        position="'top'"
-                      ></icon-tip>
-                      Scaled to {{ bucketInterval.description }}
+                    <span class="results-interval form-inline">
+                      <select
+                        class="form-control"
+                        ng-model="state.interval"
+                        ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                        ng-blur="toggleInterval()"
+                        data-test-subj="discoverIntervalSelect"
+                        >
+                      </select>
+                      <span ng-if="bucketInterval.scaled">
+                        <icon-tip
+                          content="getBucketIntervalToolTipText()"
+                          position="'top'"
+                        ></icon-tip>
+                        Scaled to {{ bucketInterval.description }}
+                      </span>
+
                     </span>
-                  </span>
+                  </div>
                 </center>
 
               </header>
 
               <visualization
-                 ng-if="vis && rows.length != 0"
+                 ng-if="state.showViz && vis && rows.length != 0"
                  vis="vis"
                  ui-state="uiState"
                  vis-data="visData"
@@ -143,6 +146,13 @@
                  style="height: 200px"
                 >
               </visualization>
+
+              <div>
+                  <center class="small">
+                    <a ng-if="!state.showViz" kbn-accessible-click ng-click="showViz()">Show visualization</a>
+                    <a ng-if="state.showViz" kbn-accessible-click ng-click="hideViz()">Hide visualization</a>
+                  </center>
+              </div>
             </section>
 
             <section class="discover-table" fixed-scroll aria-label="Documents">

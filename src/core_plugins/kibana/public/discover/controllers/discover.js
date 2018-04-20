@@ -274,7 +274,8 @@ function discoverController(
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.getOwn('filter'))
+      filters: _.cloneDeep($scope.searchSource.getOwn('filter')),
+      showViz: true
     };
   }
 
@@ -292,10 +293,11 @@ function discoverController(
     $state.save();
   });
 
+  $scope.$watch('state.showViz', () => $state.save());
+
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    showViz: config.get('discover:showDateHistogramVisualization'),
     timefield: $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
@@ -355,7 +357,7 @@ function discoverController(
 
         $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield || !$scope.opts.showViz) return;
+          if (!$scope.opts.timefield || !$scope.state.showViz) return;
 
           const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
 
@@ -410,7 +412,7 @@ function discoverController(
             };
           }()));
 
-        if ($scope.opts.timefield && $scope.opts.showViz) {
+        if ($scope.opts.timefield && $scope.state.showViz) {
           setupVisualization();
           $scope.updateTime();
         }
@@ -536,7 +538,7 @@ function discoverController(
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
 
-      if ($scope.opts.timefield && $scope.opts.showViz) {
+      if ($scope.opts.timefield && $scope.state.showViz) {
         $scope.searchSource.rawResponse = merged;
         Promise
           .resolve(responseHandler($scope.vis, merged))
@@ -666,10 +668,13 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
+  $scope.showViz = () => $scope.state.showViz = true;
+  $scope.hideViz = () => $scope.state.showViz = false;
+
   function setupVisualization() {
     // If no timefield has been specified or the visualization is disabled
     // we don't create a histogram of messages
-    if (!$scope.opts.timefield || !$scope.opts.showViz) return;
+    if (!$scope.opts.timefield || !$scope.state.showViz) return;
 
     const visStateAggs = [
       {
