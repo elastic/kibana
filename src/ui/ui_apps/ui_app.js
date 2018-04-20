@@ -80,7 +80,7 @@ export class UiApp {
   }
 
   getModules() {
-    return [this._main];
+    return this._main ? [this._main] : [];
   }
 
   _getPlugin() {
