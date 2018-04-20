@@ -10,10 +10,12 @@ import { createLegacyClass } from '../../utils/legacy_class';
 
 const notifier = new Notifier();
 
-createLegacyClass(FieldParamType).inherits(BaseParamType);
-function FieldParamType(config) {
+
+export function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
 }
+
+createLegacyClass(FieldParamType).inherits(BaseParamType);
 
 FieldParamType.prototype.editor = editorHtml;
 FieldParamType.prototype.scriptable = true;
@@ -111,5 +113,3 @@ FieldParamType.prototype.write = function (aggConfig, output) {
     output.params.field = field.name;
   }
 };
-
-export { FieldParamType };
