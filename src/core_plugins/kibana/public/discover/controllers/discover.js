@@ -293,7 +293,7 @@ function discoverController(
     $state.save();
   });
 
-  $scope.$watch('state.showViz', () => $state.save());
+  $scope.$watch('state.showViz', $state.save.bind($state));
 
   $scope.opts = {
     // number of records to fetch, then paginate through
