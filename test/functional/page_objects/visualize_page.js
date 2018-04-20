@@ -753,6 +753,21 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await dataTable.getVisibleText();
     }
 
+    async getDataTableRowData(row) {
+      const dataTable = await testSubjects.find('paginated-table-body');
+      const rows = await dataTable.findAllByTagName('tr');
+      if (rows[row]) {
+        const cells = await rows[row].findAllByTagName('td');
+        return await Promise.all(cells.map(cell => cell.getVisibleText()));
+      }
+    }
+
+    async getDataTableRowCount() {
+      const dataTable = await testSubjects.find('paginated-table-body');
+      const rows = await dataTable.findAllByTagName('tr');
+      return rows.length;
+    }
+
     async getDataTableHeaders() {
       const dataTableHeader = await retry.try(
         async () => testSubjects.find('paginated-table-header'));
