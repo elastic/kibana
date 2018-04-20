@@ -69,13 +69,15 @@ function MetricSelect(props) {
   });
 
   return (
-    <Select
-      aria-label="Select metric"
-      placeholder="Select metric..."
-      options={[...options, ...props.additionalOptions, ...percentileOptions]}
-      value={value}
-      onChange={onChange}
-    />
+    <div data-test-subj="metricSelector" className="vis_editor__row_item">
+      <Select
+        aria-label="Select metric"
+        placeholder="Select metric..."
+        options={[...options, ...props.additionalOptions, ...percentileOptions]}
+        value={value}
+        onChange={onChange}
+      />
+    </div>
   );
 }
 

@@ -167,6 +167,7 @@ class TimeseriesPanelConfig extends Component {
       <div>
         <div className="kbnTabs" role="tablist">
           <button
+            data-test-subj="tsvbDataPanel"
             role="tab"
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
@@ -174,6 +175,7 @@ class TimeseriesPanelConfig extends Component {
           >Data
           </button>
           <button
+            data-test-subj="panelOptions"
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
@@ -181,6 +183,7 @@ class TimeseriesPanelConfig extends Component {
           >Panel Options
           </button>
           <button
+            data-test-subj="annotationsPanel"
             role="tab"
             aria-selected={selectedTab === 'annotations'}
             className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}

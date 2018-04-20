@@ -141,6 +141,7 @@ class MarkdownPanelConfig extends Component {
       <div>
         <div className="kbnTabs" role="tablist">
           <button
+            data-test-subj="tsvbDataPanel"
             role="tab"
             aria-selected={selectedTab === 'markdown'}
             className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
@@ -156,6 +157,7 @@ class MarkdownPanelConfig extends Component {
           >Data
           </button>
           <button
+            data-test-subj="panelOptions"
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}

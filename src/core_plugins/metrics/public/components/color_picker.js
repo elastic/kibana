@@ -76,7 +76,7 @@ class ColorPicker extends Component {
       );
     }
     return (
-      <div className="vis_editor__color_picker">
+      <div data-test-subj="colorPicker" className="vis_editor__color_picker">
         { swatch }
         { clear }
         {

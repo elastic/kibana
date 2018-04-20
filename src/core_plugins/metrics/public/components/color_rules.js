@@ -76,6 +76,7 @@ class ColorRules extends Component {
         </div>
         <input
           aria-label="Value"
+          data-test-subj="colorRulesValue"
           className="color_rules__input"
           type="number"
           value={model.value}
@@ -97,7 +98,7 @@ class ColorRules extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="color_rules">
+      <div className="color_rules" data-test-subj="colorRules">
         { rows }
       </div>
     );

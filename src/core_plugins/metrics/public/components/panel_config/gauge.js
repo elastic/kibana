@@ -169,6 +169,7 @@ class GaugePanelConfig extends Component {
       <div>
         <div className="kbnTabs" role="tablist">
           <button
+            data-test-subj="tsvbDataPanel"
             role="tab"
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
@@ -176,6 +177,7 @@ class GaugePanelConfig extends Component {
           >Data
           </button>
           <button
+            data-test-subj="panelOptions"
             role="tab"
             aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}

@@ -130,12 +130,14 @@ class TablePanelConfig extends Component {
       <div>
         <div className="kbnTabs">
           <div
+            data-test-subj="tsvbDataPanel"
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
           >
             Columns
           </div>
           <div
+            data-test-subj="panelOptions"
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
           >

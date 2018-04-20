@@ -62,15 +62,48 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe('metric', () => {
+    describe('Sibling Aggregation', () => {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.createNewAgg();
+        await PageObjects.visualBuilder.selectAggType('overall average', 1);
+        await PageObjects.visualBuilder.selectMetric('count', 0);
+      });
+
+
+      it('should show correct data', async function () {
+        const expectedMetricValue =  '206.42';
+        return PageObjects.visualBuilder.getMetricValue()
+          .then(function (value) {
+            log.debug(`metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+
+    });
+
+    describe('Metric Visualization', () => {
+      before(async () => {
+        await PageObjects.visualBuilder.resetPage();
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.clickPanelOptions();
+        await PageObjects.visualBuilder.selectColor('#653292', 0);
+        await PageObjects.visualBuilder.selectColor('#DBDF00', 1);
+        await PageObjects.visualBuilder.selectColorRuleOp('>', 0);
       });
 
       it('should not display spy panel toggle button', async function () {
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(false);
+      });
+
+      it('should honor color rules', async function () {
+        const backgroundColor = await PageObjects.visualBuilder.getBackgroundColor();
+        console.log(backgroundColor);
+        expect(backgroundColor).to.be('background-color: rgb(101, 50, 146);');
+        const textColor = await PageObjects.visualBuilder.getForegroundColor();
+        expect(textColor).to.be('color: rgb(219, 223, 0);');
       });
 
       it('should show correct data', async function () {

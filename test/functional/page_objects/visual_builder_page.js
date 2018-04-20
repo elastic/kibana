@@ -1,4 +1,4 @@
-import Keys from 'leadfoot/keys';
+// import Keys from 'leadfoot/keys';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
@@ -28,6 +28,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickPanelOptions() {
+      const button = await testSubjects.find('panelOptions');
+      await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickData() {
+      const button = await testSubjects.find('tsvbDataPanel');
+      await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickMarkdown() {
       const button = await testSubjects.find('markdownTsvbTypeBtn');
       await button.click();
@@ -44,9 +56,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
-      await input.session.pressKeys(Keys.NULL); // Release modifier keys
-      await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
+      // await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
+      // await input.session.pressKeys(Keys.NULL); // Release modifier keys
+      // await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -133,13 +145,56 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async selectAggType(type, nth = 0) {
-      const elements = await testSubjects.findAll('aggSelector');
+    async selectColor(color, nth = 0) {
+      const elements = await testSubjects.findAll('colorPicker');
+      let swatch = await elements[nth].findByCssSelector('.vis_editor__color_picker-swatch-empty');
+      if (!swatch || swatch.length === 0) {
+        swatch = await elements[nth].findByCssSelector('.vis_editor__color_picker-swatch');
+      }
+      swatch.click();
+      const input = await elements[nth].findByCssSelector('.color_picker__body input');
+      await input.clearValue();
+      await input.type(color);
+      const cover = await elements[nth].findByCssSelector('.vis_editor__color_picker-cover');
+      await cover.click();
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getBackgroundColor() {
+      const element = await find.byCssSelector('.dashboard__visualization');
+      return await element.getAttribute('style');
+    }
+
+    async getForegroundColor() {
+      const element = await find.byCssSelector('.rhythm_metric__primary-value');
+      return await element.getAttribute('style');
+    }
+
+
+    async _selectByTestSubject(subject, type, nth = 0) {
+      const elements = await testSubjects.findAll(subject);
       const input = await elements[nth].findByCssSelector('.Select-input input');
       await input.type(type);
       const option = await elements[nth].findByCssSelector('.Select-option');
       await option.click();
       return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async selectColorRuleOp(op, nth = 0) {
+      return await this._selectByTestSubject('colorRules', op, nth);
+    }
+
+    async setColorRuleValue(value, nth = 0) {
+      const input = await testSubjects.findAll('colorRulesValue');
+      await input[nth].type(value);
+    }
+
+    async selectAggType(type, nth = 0) {
+      return await this._selectByTestSubject('aggSelector', type, nth);
+    }
+
+    async selectMetric(type, nth = 0) {
+      return await this._selectByTestSubject('metricSelector', type, nth);
     }
 
     async fillInExpression(expression, nth = 0) {
