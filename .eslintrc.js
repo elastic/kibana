@@ -19,10 +19,14 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/eslint-plugin-kibana-custom/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
-        'packages/kbn-datemath/**/*.js',
+        'packages/kbn-datemath/**/*',
+        'packages/kbn-dev-utils/**/*',
+        'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',
+        'packages/kbn-test-subj-selector/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'x-pack/plugins/apm/**/*',
       ],

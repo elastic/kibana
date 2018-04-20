@@ -3,7 +3,7 @@ const delimiter = require('path').delimiter;
 const execFileSync = require('child_process').execFileSync;
 const winCmd = require('../../../lib/win_cmd');
 
-module.exports = function (plugin, run, options) {
+module.exports = function(plugin, run, options) {
   options = options || {};
   const kibanaBins = resolve(plugin.kibanaRoot, 'node_modules/.bin');
   const mochaSetupJs = resolve(plugin.kibanaRoot, 'test/mocha_setup.js');
@@ -23,7 +23,7 @@ module.exports = function (plugin, run, options) {
     cwd: plugin.root,
     stdio: ['ignore', 1, 2],
     env: Object.assign({}, process.env, {
-      PATH: path
-    })
+      PATH: path,
+    }),
   });
 };

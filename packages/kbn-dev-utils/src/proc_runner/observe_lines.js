@@ -16,20 +16,22 @@ import { observeReadable } from './observe_readable';
 export function observeLines(readable) {
   const done$ = observeReadable(readable).share();
 
-  const scan$ = Rx.Observable
-    .fromEvent(readable, 'data')
-    .scan(({ buffer }, chunk) => {
-      buffer += chunk;
+  const scan$ = Rx.Observable.fromEvent(readable, 'data')
+    .scan(
+      ({ buffer }, chunk) => {
+        buffer += chunk;
 
-      let match;
-      const lines = [];
-      while (match = buffer.match(SEP)) {
-        lines.push(buffer.slice(0, match.index));
-        buffer = buffer.slice(match.index + match[0].length);
-      }
+        let match;
+        const lines = [];
+        while ((match = buffer.match(SEP))) {
+          lines.push(buffer.slice(0, match.index));
+          buffer = buffer.slice(match.index + match[0].length);
+        }
 
-      return { buffer, lines };
-    }, { buffer: '' })
+        return { buffer, lines };
+      },
+      { buffer: '' }
+    )
     // stop if done completes or errors
     .takeUntil(done$.materialize());
 
@@ -38,8 +40,7 @@ export function observeLines(readable) {
     done$,
 
     // merge in the "lines" from each step
-    scan$
-      .mergeMap(({ lines }) => lines),
+    scan$.mergeMap(({ lines }) => lines),
 
     // inject the "unsplit" data at the end
     scan$
