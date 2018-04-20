@@ -119,7 +119,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
           courier.fetch();
         } else {
-          resolve(_.cloneDeep(searchSource.finalResponse));
+          resolve(searchSource.finalResponse);
         }
       });
     }
