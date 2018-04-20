@@ -92,8 +92,9 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
-    if (this._vis.aggs.bySchemaName.segment) {
-      this._bucketAgg = this._vis.aggs.bySchemaName.segment[0];
+    const segmentAggs = this._vis.aggs.bySchemaName.segment;
+    if (segmentAggs && segmentAggs.length > 0) {
+      this._bucketAgg = segmentAggs[0];
     } else {
       this._bucketAgg = null;
     }
