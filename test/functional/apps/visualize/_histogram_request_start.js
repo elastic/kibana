@@ -32,11 +32,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const data = await PageObjects.visualize.getDataTableData();
-        const dataArray = data.replace(/,/g, '').split('\n');
-        expect(dataArray.length).to.eql(20);
-        const bucketStart = parseInt(dataArray[0], 10);
-        const bucketEnd = parseInt(dataArray[2], 10);
+        const rowCount = await PageObjects.visualize.getDataTableRowCount();
+        expect(rowCount).to.eql(10);
+        const firstRow = await PageObjects.visualize.getDataTableRowData(0);
+        const secondRow = await PageObjects.visualize.getDataTableRowData(1);
+        const bucketStart = parseInt(firstRow[0].replace(/,/g, ''), 10);
+        const bucketEnd = parseInt(secondRow[0].replace(/,/g, ''), 10);
         const actualInterval = bucketEnd - bucketStart;
         expect(actualInterval).to.eql(providedInterval);
       });
@@ -48,11 +49,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const data = await PageObjects.visualize.getDataTableData();
-        const dataArray = data.replace(/,/g, '').split('\n');
-        expect(dataArray.length).to.eql(20);
-        const bucketStart = parseInt(dataArray[0], 10);
-        const bucketEnd = parseInt(dataArray[2], 10);
+        const rowCount = await PageObjects.visualize.getDataTableRowCount();
+        expect(rowCount).to.eql(10);
+        const firstRow = await PageObjects.visualize.getDataTableRowData(0);
+        const secondRow = await PageObjects.visualize.getDataTableRowData(1);
+        const bucketStart = parseInt(firstRow[0].replace(/,/g, ''), 10);
+        const bucketEnd = parseInt(secondRow[0].replace(/,/g, ''), 10);
         const actualInterval = bucketEnd - bucketStart;
         expect(actualInterval).to.eql(1200000000);
       });
