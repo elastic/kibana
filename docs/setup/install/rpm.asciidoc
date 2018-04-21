@@ -113,8 +113,8 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
 
-Alternatively, you can download the following package, which includes only 
-Apache 2.0 licensed code: 
+Alternatively, you can download the following package, which contains only 
+features that are available under the Apache 2.0 license:
 https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
 
 endif::[]

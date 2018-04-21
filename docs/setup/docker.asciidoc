@@ -16,8 +16,8 @@ paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
 
-Alternatively, you can download `-oss` images that include only Apache 2.0 
-licensed code. 
+Alternatively, you can download `-oss` images, which contain only features that 
+are available under the Apache 2.0 license.
 
 === Pulling the image
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command

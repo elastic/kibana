@@ -68,8 +68,9 @@ cd kibana-{version}-darwin-x86_64/ <2>
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
 
-Alternatively, you can download the following package, which includes only 
-Apache 2.0 licensed code:  https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
+Alternatively, you can download the following package, which contains only 
+features that are available under the Apache 2.0 license:
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
 
 endif::[]
 
