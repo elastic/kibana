@@ -103,6 +103,7 @@ describe('Kuery value suggestions', function () {
           {
             method: 'POST',
             body: '{"query":"","field":"machine.os.raw"}',
+            headers: {}
           },
         ],
       ]);

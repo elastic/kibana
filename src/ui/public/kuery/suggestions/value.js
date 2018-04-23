@@ -10,6 +10,10 @@ const requestSuggestions = memoize(async (query, field) => {
   const response = await fetch(`${baseUrl}/${field.indexPattern.title}`, {
     method: 'POST',
     body: JSON.stringify({ query, field: field.name }),
+    headers: new Headers({
+      'Content-Type': 'application/json',
+      'kbn-xsrf': true
+    }),
   });
   return response.json();
 }, resolver);
