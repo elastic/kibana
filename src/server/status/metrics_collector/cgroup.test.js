@@ -3,8 +3,8 @@ jest.mock('fs', () => ({
 }));
 
 import fs from 'fs';
-import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './_fs_stubs';
-import { getAllStats, readControlGroups, readCPUStat } from '../cgroup';
+import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
+import { getAllStats, readControlGroups, readCPUStat } from './cgroup';
 
 describe('Control Group', function () {
   const fsStub = cGroupsFsStub();
