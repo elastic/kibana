@@ -1,3 +1,4 @@
+import 'isomorphic-fetch';
 import { flatten, memoize } from 'lodash';
 import chrome from '../../chrome';
 import { escapeQuotes } from './escape_kuery';
@@ -5,12 +6,17 @@ import { escapeQuotes } from './escape_kuery';
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
 
-export function getSuggestionsProvider({ $http, config, indexPatterns }) {
+const requestSuggestions = memoize(async (query, field) => {
+  const response = await fetch(`${baseUrl}/${field.indexPattern.title}`, {
+    method: 'POST',
+    body: JSON.stringify({ query, field: field.name }),
+  });
+  return response.json();
+}, resolver);
+
+
+export function getSuggestionsProvider({ config, indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields.raw));
-  const requestSuggestions = memoize((query, field) => {
-    const queryParams = { query, field: field.name };
-    return $http.post(`${baseUrl}/${field.indexPattern.title}`, queryParams);
-  }, resolver);
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
 
   return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
@@ -24,7 +30,7 @@ export function getSuggestionsProvider({ $http, config, indexPatterns }) {
         return [];
       }
 
-      return requestSuggestions(query, field).then(({ data }) => {
+      return requestSuggestions(query, field).then(data => {
         const quotedValues = data.map(value => `"${escapeQuotes(value)}"`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });

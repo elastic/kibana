@@ -1,25 +1,27 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
+import fetchMock from 'fetch-mock';
 import { getSuggestionsProvider } from '../value';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Kuery value suggestions', function () {
-  let $http;
   let config;
   let indexPatterns;
   let getSuggestions;
 
   const mockValues = ['foo', 'bar'];
+  const fetchUrlMatcher = /\/api\/kibana\/suggestions\/values\/*/;
 
   beforeEach(ngMock.module('kibana'));
+  beforeEach(() => fetchMock.post(fetchUrlMatcher, mockValues));
+  afterEach(() => fetchMock.restore());
 
   describe('with config setting turned off', () => {
     beforeEach(ngMock.inject(function (Private) {
-      $http = getHttpStub(false, mockValues);
       config = getConfigStub(false);
       indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
-      getSuggestions = getSuggestionsProvider({ $http, config, indexPatterns });
+      getSuggestions = getSuggestionsProvider({ config, indexPatterns });
     }));
 
     it('should return a function', function () {
@@ -31,17 +33,16 @@ describe('Kuery value suggestions', function () {
       const prefix = '';
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-      sinon.assert.notCalled($http.post);
+      expect(fetchMock.called(fetchUrlMatcher)).to.be(false);
       expect(suggestions).to.eql([]);
     });
   });
 
   describe('with config setting turned on', () => {
     beforeEach(ngMock.inject(function (Private) {
-      $http = getHttpStub(false, mockValues);
       config = getConfigStub(true);
       indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
-      getSuggestions = getSuggestionsProvider({ $http, config, indexPatterns });
+      getSuggestions = getSuggestionsProvider({ config, indexPatterns });
     }));
 
     it('should return a function', function () {
@@ -77,7 +78,7 @@ describe('Kuery value suggestions', function () {
       const prefix = '';
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-      sinon.assert.notCalled($http.post);
+      expect(fetchMock.called(fetchUrlMatcher)).to.be(false);
       expect(suggestions).to.eql([]);
     });
 
@@ -86,7 +87,7 @@ describe('Kuery value suggestions', function () {
       const prefix = '';
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-      sinon.assert.notCalled($http.post);
+      expect(fetchMock.called(fetchUrlMatcher)).to.be(false);
       expect(suggestions).to.eql([]);
     });
 
@@ -95,7 +96,16 @@ describe('Kuery value suggestions', function () {
       const prefix = '';
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-      sinon.assert.calledOnce($http.post);
+
+      expect(fetchMock.calls(fetchUrlMatcher, 'POST')).to.eql([
+        [
+          '/api/kibana/suggestions/values/logstash-*',
+          {
+            method: 'POST',
+            body: '{"query":"","field":"machine.os.raw"}',
+          },
+        ],
+      ]);
       expect(suggestions.map(({ text }) => text)).to.eql(['"foo" ', '"bar" ']);
     });
 
@@ -115,9 +125,4 @@ describe('Kuery value suggestions', function () {
 function getConfigStub(suggestValues) {
   const get = sinon.stub().returns(suggestValues);
   return { get };
-}
-
-function getHttpStub(reject, data) {
-  const post = sinon.stub().returns(reject ? Promise.reject() : Promise.resolve({ data }));
-  return { post };
 }
