@@ -19,13 +19,17 @@ export const dropdownControl = () => ({
     },
   },
   fn: (context, { valueColumn, filterColumn }) => {
-    const choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+    let choices = [];
+    if (context.rows[0][valueColumn])
+      choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+
+    const column = filterColumn || valueColumn;
 
     return {
       type: 'render',
       as: 'dropdown_filter',
       value: {
-        column: filterColumn,
+        column,
         choices,
       },
     };

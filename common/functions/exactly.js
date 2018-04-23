@@ -21,12 +21,12 @@ export const exactly = () => ({
   fn: (context, args) => {
     const { value, column } = args;
 
-    context.and.push({
+    const filter = {
       type: 'exactly',
       value,
       column,
-    });
+    };
 
-    return context;
+    return { ...context, and: [...context.and, filter] };
   },
 });

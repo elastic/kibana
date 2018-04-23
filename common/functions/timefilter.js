@@ -16,27 +16,28 @@ export const timefilter = () => ({
       help: 'The column or field to attach the filter to',
     },
     from: {
-      types: ['string'],
+      types: ['string', 'null'],
       aliases: ['f', 'start'],
       help: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
     },
     to: {
-      types: ['string'],
+      types: ['string', 'null'],
       aliases: ['t', 'end'],
       help: 'End of the range, in ISO8601 or Elasticsearch datemath format',
     },
   },
   fn: (context, args) => {
+    if (!args.from && !args.to) return context;
+
     const { from, to, column } = args;
     const filter = {
       type: 'time',
-      from: null,
-      to: null,
       column,
     };
 
     function parseAndValidate(str) {
       if (!str) return;
+
       const moment = dateMath.parse(str);
       if (!moment || !moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
       return moment.toISOString();
@@ -50,8 +51,6 @@ export const timefilter = () => ({
       filter.from = parseAndValidate(from);
     }
 
-    context.and.push(filter);
-
-    return context;
+    return { ...context, and: [...context.and, filter] };
   },
 });
