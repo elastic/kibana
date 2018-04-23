@@ -357,7 +357,7 @@ function discoverController(
 
         $scope.$watch('vis.aggs', function () {
         // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield || !$scope.state.showViz) return;
+          if (!$scope.opts.timefield) return;
 
           const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
 
@@ -412,7 +412,7 @@ function discoverController(
             };
           }()));
 
-        if ($scope.opts.timefield && $scope.state.showViz) {
+        if ($scope.opts.timefield) {
           setupVisualization();
           $scope.updateTime();
         }
@@ -538,7 +538,7 @@ function discoverController(
     segmented.on('mergedSegment', function (merged) {
       $scope.mergedEsResp = merged;
 
-      if ($scope.opts.timefield && $scope.state.showViz) {
+      if ($scope.opts.timefield) {
         $scope.searchSource.rawResponse = merged;
         Promise
           .resolve(responseHandler($scope.vis, merged))
@@ -672,9 +672,9 @@ function discoverController(
   $scope.hideViz = () => $scope.state.showViz = false;
 
   function setupVisualization() {
-    // If no timefield has been specified or the visualization is disabled
+    // If no timefield has been specified
     // we don't create a histogram of messages
-    if (!$scope.opts.timefield || !$scope.state.showViz) return;
+    if (!$scope.opts.timefield) return;
 
     const visStateAggs = [
       {
