@@ -26,17 +26,18 @@ class DatasourceWrapper extends React.PureComponent {
     this.props.handlers.destroy();
   }
 
-  callRenderFn = domNode => {
+  callRenderFn = () => {
     const { spec, datasourceProps, handlers } = this.props;
     const { template } = spec;
-    template(domNode, datasourceProps, handlers);
+    template(this.domNode, datasourceProps, handlers);
   };
 
   render() {
     return (
       <RenderToDom
         render={domNode => {
-          this.callRenderFn(domNode);
+          this.domNode = domNode;
+          this.callRenderFn();
         }}
       />
     );
@@ -50,8 +51,6 @@ export class Datasource extends BaseForm {
     this.template = props.template || defaultTemplate;
     this.image = props.image;
   }
-
-  static domNode = null;
 
   render(props = {}) {
     const expressionFormHandlers = new ExpressionFormHandlers();
