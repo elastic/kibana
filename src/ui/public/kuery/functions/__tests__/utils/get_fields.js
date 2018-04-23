@@ -34,13 +34,11 @@ describe('getFields', function () {
     it('should not match a wildcard in a literal node', function () {
       const indexPatternWithWildField = {
         title: 'wildIndex',
-        fields: {
-          byName: {
-            'foo*': {
-              name: 'foo*'
-            }
-          }
-        }
+        fields: [
+          {
+            name: 'foo*',
+          },
+        ],
       };
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
