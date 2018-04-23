@@ -30,6 +30,15 @@ export const createUninstallRoute = () => ({
         // ignore delete error. Happens if index does not exist.
       }
 
+      const deletePromises = sampleDataSet.savedObjects.map(async (savedObjectJson) => {
+        return request.getSavedObjectsClient().delete(savedObjectJson.type, savedObjectJson.id);
+      });
+      try {
+        await Promise.all(deletePromises);
+      } catch (err) {
+        // ignore delete error - may happen if saved objects are not loaded
+      }
+
       reply();
     }
   }

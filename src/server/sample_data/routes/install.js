@@ -81,12 +81,19 @@ export const createInstallRoute = () => ({
           return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
         }
       };
-      loadData(sampleDataSet.dataPath, bulkLoad, (err, count) => {
+      loadData(sampleDataSet.dataPath, bulkLoad, async (err, count) => {
         if (err) {
           return reply(err.message).code(500);
         }
 
-        return reply({ count });
+        try {
+          await request.getSavedObjectsClient().bulkCreate(sampleDataSet.savedObjects, { overwrite: true });
+        } catch (err) {
+          console.warn(`sample_data install errors while loading saved objects. Error: ${err.message}`);
+          return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(500);
+        }
+
+        return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataSet.savedObjects.length });
       });
     }
   }

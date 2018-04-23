@@ -21,4 +21,8 @@ export const dataSetSchema = {
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
+
+  // Kibana saved objects (index patter, visualizations, dashboard, ...)
+  // Should provide a nice demo of Kibana's functionallity with the sample data set
+  savedObjects: Joi.array().items(Joi.object()).required(),
 };

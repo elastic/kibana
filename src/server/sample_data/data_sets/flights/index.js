@@ -1,3 +1,5 @@
+import { savedObjects } from './saved_objects';
+
 export function flightsSpecProvider() {
   return {
     id: 'flights',
@@ -24,5 +26,6 @@ export function flightsSpecProvider() {
     timeFields: ['timestamp'],
     currentTimeMarker: '2018-01-02T00:00:00Z',
     preserveDayOfWeekTimeOfDay: true,
+    savedObjects: savedObjects,
   };
 }
