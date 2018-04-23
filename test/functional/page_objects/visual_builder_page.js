@@ -1,4 +1,4 @@
-// import Keys from 'leadfoot/keys';
+import Keys from 'leadfoot/keys';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
@@ -53,6 +53,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async enterMarkdown(markdown) {
       const input = await find.byCssSelector('.vis_editor__markdown-editor textarea');
+      // Since we use ACE editor and that isn't really storing its value inside
+      // a textarea we must really select all text and remove it, and cannot use
+      // clearValue().
+      await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all text
+      await input.session.pressKeys(Keys.NULL); // Release modifier keys
+      await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
