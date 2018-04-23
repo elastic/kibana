@@ -12,7 +12,7 @@ image:images/tsvb-screenshot.png["Time Series Visual Builder Interface"]
 
 === Featured Visualizations
 
-Time Series Visual Build comes with 5 different visualization types. You can
+Time Series Visual Build comes with 6 different visualization types. You can
 switch between each visualization type using the tabbed picker at the top of the
 interface.
 
@@ -63,6 +63,15 @@ This visualization allows you to enter Markdown text and embed Mustache
 template syntax to customize the Markdown with data based on a set of series.
 
 image:images/tsvb-markdown.png["Markdown Visualization"]
+
+
+==== Table
+
+The table visualization allows you to present data from multiple series in one
+table. You can define a grouping field to define rows in your table and add multiple
+columns via series to the table.
+
+image:images/tsvb-table.png["Table Visualization"]
 
 
 === Interface Overview
