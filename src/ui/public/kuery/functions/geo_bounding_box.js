@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
+import { getFieldByName } from '../../index_patterns/static_utils';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'topLeft', 'bottomRight');
@@ -18,7 +19,7 @@ export function buildNodeParams(fieldName, params) {
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...args ] = node.arguments;
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
+  const field = getFieldByName(indexPattern.fields, fieldName);
   const queryParams = args.reduce((acc, arg) => {
     const snakeArgName = _.snakeCase(arg.name);
     return {

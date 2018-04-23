@@ -1,9 +1,8 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import ngMock from 'ng_mock';
 import fetchMock from 'fetch-mock';
 import { getSuggestionsProvider } from '../value';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
 
 describe('Kuery value suggestions', function () {
   let config;
@@ -13,16 +12,15 @@ describe('Kuery value suggestions', function () {
   const mockValues = ['foo', 'bar'];
   const fetchUrlMatcher = /\/api\/kibana\/suggestions\/values\/*/;
 
-  beforeEach(ngMock.module('kibana'));
   beforeEach(() => fetchMock.post(fetchUrlMatcher, mockValues));
   afterEach(() => fetchMock.restore());
 
   describe('with config setting turned off', () => {
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(() => {
       config = getConfigStub(false);
-      indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
+      indexPatterns = [indexPatternResponse];
       getSuggestions = getSuggestionsProvider({ config, indexPatterns });
-    }));
+    });
 
     it('should return a function', function () {
       expect(typeof getSuggestions).to.be('function');
@@ -39,11 +37,11 @@ describe('Kuery value suggestions', function () {
   });
 
   describe('with config setting turned on', () => {
-    beforeEach(ngMock.inject(function (Private) {
+    beforeEach(() => {
       config = getConfigStub(true);
-      indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
+      indexPatterns = [indexPatternResponse];
       getSuggestions = getSuggestionsProvider({ config, indexPatterns });
-    }));
+    });
 
     it('should return a function', function () {
       expect(typeof getSuggestions).to.be('function');
@@ -63,14 +61,6 @@ describe('Kuery value suggestions', function () {
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
       expect(suggestions.map(({ text }) => text)).to.eql(['false ']);
-    });
-
-    it('should return boolean suggestions for boolean fields', async () => {
-      const fieldName = 'ssl';
-      const prefix = '';
-      const suffix = '';
-      const suggestions = await getSuggestions({ fieldName, prefix, suffix });
-      expect(suggestions.map(({ text }) => text)).to.eql(['true ', 'false ']);
     });
 
     it('should not make a request for non-aggregatable fields', async () => {

@@ -1,19 +1,18 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
 import { getSuggestionsProvider } from '../field';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+import { isFilterable } from '../../../index_patterns/static_utils';
 
 describe('Kuery field suggestions', function () {
   let indexPattern;
   let indexPatterns;
   let getSuggestions;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(StubbedLogstashIndexPatternProvider);
+  beforeEach(() => {
+    indexPattern = indexPatternResponse;
     indexPatterns = [indexPattern];
     getSuggestions = getSuggestionsProvider({ indexPatterns });
-  }));
+  });
 
   it('should return a function', function () {
     expect(typeof getSuggestions).to.be('function');
@@ -23,7 +22,7 @@ describe('Kuery field suggestions', function () {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
-    const filterableFields = indexPattern.fields.filter(field => field.filterable);
+    const filterableFields = indexPattern.fields.filter(isFilterable);
     expect(suggestions.length).to.be(filterableFields.length);
   });
 
