@@ -129,6 +129,7 @@ function MarkdownSeries(props) {
             />
           </div>
           <AddDeleteButtons
+            testSubj="addSeries"
             addTooltip="Add Series"
             deleteTooltip="Delete Series"
             cloneTooltip="Clone Series"

@@ -45,6 +45,7 @@ export const Static = props => {
               Static Value
             </label>
             <input
+              data-test-subj="staticValue"
               id={htmlId('staticValue')}
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('value')}

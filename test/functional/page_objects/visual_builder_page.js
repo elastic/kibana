@@ -127,14 +127,38 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async createNewAgg(nth = 0) {
+    async createNewMetric(nth = 0) {
       return await retry.try(async () => {
         const elements = await testSubjects.findAll('addMetricAddBtn');
         await elements[nth].click();
         await PageObjects.header.waitUntilLoadingHasFinished();
         const aggs = await testSubjects.findAll('aggSelector');
         if (aggs.length < 2) {
-          throw new Error('there should be atleast 2 aggSelectors');
+          throw new Error('there should be more then one aggSelectors');
+        }
+      });
+    }
+
+    async createNewSeries(nth = 0) {
+      return await retry.try(async () => {
+        const elements = await testSubjects.findAll('addSeriesAddBtn');
+        await elements[nth].click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const aggs = await testSubjects.findAll('aggSelector');
+        if (aggs.length < 2) {
+          throw new Error('there should be more then one aggSelectors');
+        }
+      });
+    }
+
+    async createNewColorRule(nth = 0) {
+      return await retry.try(async () => {
+        const elements = await testSubjects.findAll('colorRulesAddBtn');
+        await elements[nth].click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const aggs = await testSubjects.findAll('colorRule');
+        if (aggs.length < 2) {
+          throw new Error('there should be more then one color rules');
         }
       });
     }
@@ -175,12 +199,15 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async selectColorRuleOp(op, nth = 0) {
-      return await this._selectByTestSubject('colorRules', op, nth);
+      return await this._selectByTestSubject('colorRule', op, nth);
     }
 
     async setColorRuleValue(value, nth = 0) {
-      const input = await testSubjects.findAll('colorRulesValue');
-      await input[nth].type(value);
+      const rules = await testSubjects.findAll('colorRule');
+      const input = await rules[nth].findByCssSelector('.color_rules__input');
+      await input.clearValue();
+      await input.type(String(value));
+      return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectAggType(type, nth = 0) {
@@ -194,6 +221,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     async fillInExpression(expression, nth = 0) {
       const expressions = await testSubjects.findAll('mathExpression');
       await expressions[nth].type(expression);
+      return await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setStaticValue(value, nth = 0) {
+      const statics = await testSubjects.findAll('staticValue');
+      await statics[nth].type(String(value));
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

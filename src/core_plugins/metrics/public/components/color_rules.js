@@ -55,7 +55,7 @@ class ColorRules extends Component {
       );
     }
     return (
-      <div key={model.id} className="color_rules__rule">
+      <div data-test-subj="colorRule" key={model.id} className="color_rules__rule">
         <div className="color_rules__label">Set {this.props.primaryName} to</div>
         <ColorPicker
           onChange={handleColorChange}
@@ -84,6 +84,7 @@ class ColorRules extends Component {
         />
         <div className="color_rules__control">
           <AddDeleteButtons
+            testSubj="colorRules"
             onAdd={handleAdd}
             onDelete={handleDelete}
             disableDelete={items.length < 2}

@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.visualBuilder.createNewAgg();
+        await PageObjects.visualBuilder.createNewMetric();
         await PageObjects.visualBuilder.selectAggType('math', 1);
         await PageObjects.visualBuilder.fillInVariable();
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.visualBuilder.createNewAgg();
+        await PageObjects.visualBuilder.createNewMetric();
         await PageObjects.visualBuilder.selectAggType('overall average', 1);
         await PageObjects.visualBuilder.selectMetric('count', 0);
       });
@@ -146,6 +146,36 @@ export default function ({ getService, getPageObjects }) {
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
         expect(gaugeCount).to.be('156');
+      });
+
+      describe('color rules', () => {
+        before(async () => {
+          await PageObjects.visualBuilder.resetPage();
+          await PageObjects.visualBuilder.clickTopN();
+          await PageObjects.visualBuilder.selectAggType('static');
+          await PageObjects.visualBuilder.setStaticValue(0.9);
+          await PageObjects.visualBuilder.createNewSeries();
+          await PageObjects.visualBuilder.selectAggType('static', 1);
+          await PageObjects.visualBuilder.setStaticValue(0.6, 1);
+          await PageObjects.visualBuilder.createNewSeries();
+          await PageObjects.visualBuilder.selectAggType('static', 2);
+          await PageObjects.visualBuilder.setStaticValue(0.2, 2);
+          await PageObjects.visualBuilder.clickPanelOptions();
+          await PageObjects.visualBuilder.selectColor('#73D8FF', 1);
+          await PageObjects.visualBuilder.selectColorRuleOp('>=', 0);
+          await PageObjects.visualBuilder.createNewColorRule();
+          await PageObjects.visualBuilder.selectColor('#FE9200', 2);
+          await PageObjects.visualBuilder.selectColorRuleOp('>=', 1);
+          await PageObjects.visualBuilder.setColorRuleValue(0.5, 1);
+          await PageObjects.visualBuilder.createNewColorRule();
+          await PageObjects.visualBuilder.selectColor('#AB149E', 3);
+          await PageObjects.visualBuilder.selectColorRuleOp('>=', 2);
+          await PageObjects.visualBuilder.setColorRuleValue(0.7, 2);
+        });
+
+        it('should pass', () => {
+          expect(true).to.be(true);
+        });
       });
     });
 

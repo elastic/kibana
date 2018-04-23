@@ -152,6 +152,7 @@ function GaugeSeries(props) {
           </div>
           { dragHandle }
           <AddDeleteButtons
+            testSubj="addSeries"
             addTooltip="Add Series"
             deleteTooltip="Delete Series"
             cloneTooltip="Clone Series"
