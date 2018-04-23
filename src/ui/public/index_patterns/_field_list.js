@@ -1,5 +1,5 @@
-import { IndexedArray } from 'ui/indexed_array';
-import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { IndexedArray } from '../indexed_array';
+import { IndexPatternsFieldProvider } from './_field';
 import { createLegacyClass } from '../utils/legacy_class';
 
 export function IndexPatternsFieldListProvider(Private) {

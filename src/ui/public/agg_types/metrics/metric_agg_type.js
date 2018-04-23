@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { AggType } from 'ui/agg_types/agg_type';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { AggType } from '../agg_type';
+import { fieldFormats } from '../../registry/field_formats';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 createLegacyClass(MetricAggType).inherits(AggType);

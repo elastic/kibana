@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
+import { FilterBarLibMapFilterProvider } from './map_filter';
 
 export function FilterBarLibMapAndFlattenFiltersProvider(Private, Promise) {
   const mapFilter = Private(FilterBarLibMapFilterProvider);

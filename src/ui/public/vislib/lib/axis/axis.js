@@ -6,7 +6,7 @@ import { VislibLibAxisTitleProvider } from './axis_title';
 import { VislibAxisLabelsProvider } from './axis_labels';
 import { VislibAxisScaleProvider } from './axis_scale';
 import { VislibLibAxisConfigProvider } from './axis_config';
-import { VislibError } from 'ui/errors';
+import { VislibError } from '../../../errors';
 
 export function VislibLibAxisProvider(Private) {
   const ErrorHandler = Private(VislibLibErrorHandlerProvider);

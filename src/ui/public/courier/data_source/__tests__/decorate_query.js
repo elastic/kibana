@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import chrome from 'ui/chrome';
-import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
+import chrome from '../../../chrome';
+import { decorateQuery } from '../_decorate_query';
 
 const config = chrome.getUiSettingsClient();
 describe('Query decorator', function () {

@@ -8,9 +8,9 @@
  */
 
 import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
-import { AggConfig } from 'ui/vis/agg_config';
-import { aggTypes } from 'ui/agg_types/index';
+import { IndexedArray } from '../indexed_array';
+import { AggConfig } from './agg_config';
+import { aggTypes } from '../agg_types';
 import { createLegacyClass } from '../utils/legacy_class';
 
 export function VisAggConfigsProvider() {

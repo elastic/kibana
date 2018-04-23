@@ -1,19 +1,21 @@
-import { SavedObjectNotFound } from 'ui/errors';
+import { SavedObjectNotFound } from '../../errors';
 import _ from 'lodash';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
-import 'ui/filters/field_type';
-import { IndexedArray } from 'ui/indexed_array';
-import { Notifier } from 'ui/notify';
-import { propFilter } from 'ui/filters/_prop_filter';
+import '../../filters/field_type';
+import { IndexedArray } from '../../indexed_array';
+import { Notifier } from '../../notify';
+import { propFilter } from '../../filters/_prop_filter';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 const notifier = new Notifier();
 
-createLegacyClass(FieldParamType).inherits(BaseParamType);
-function FieldParamType(config) {
+
+export function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
 }
+
+createLegacyClass(FieldParamType).inherits(BaseParamType);
 
 FieldParamType.prototype.editor = editorHtml;
 FieldParamType.prototype.scriptable = true;
@@ -111,5 +113,3 @@ FieldParamType.prototype.write = function (aggConfig, output) {
     output.params.field = field.name;
   }
 };
-
-export { FieldParamType };

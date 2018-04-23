@@ -2,11 +2,11 @@ import React from 'react';
 import _ from 'lodash';
 import angular from 'angular';
 import MarkdownIt from 'markdown-it';
-import { metadata } from 'ui/metadata';
+import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
-import 'ui/render_directive';
+import '../render_directive';
 
 import {
   EuiCallOut,
@@ -349,7 +349,13 @@ Notifier.prototype.banner = function (content = '') {
       title="Attention"
       iconType="help"
     >
-      <div dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} />
+      <div
+        /*
+         * Justification for dangerouslySetInnerHTML:
+         * The notifier relies on `markdown-it` to produce safe and correct HTML.
+         */
+        dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} //eslint-disable-line react/no-danger
+      />
 
       <EuiButton type="primary" size="s" onClick={dismissBanner}>
         Dismiss

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 
 import ngMock from 'ng_mock';
-import chrome from 'ui/chrome';
+import chrome from '../../chrome';
 
 describe('Config service', () => {
   let config;

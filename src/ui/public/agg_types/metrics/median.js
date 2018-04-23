@@ -1,5 +1,5 @@
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { percentilesMetricAgg } from 'ui/agg_types/metrics/percentiles';
+import { MetricAggType } from './metric_agg_type';
+import { percentilesMetricAgg } from './percentiles';
 
 export const medianMetricAgg = new MetricAggType({
   name: 'median',

@@ -3,8 +3,8 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/private';
-import { EventsProvider } from 'ui/events';
+import '../../private';
+import { EventsProvider } from '../../events';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 describe('Events', function () {

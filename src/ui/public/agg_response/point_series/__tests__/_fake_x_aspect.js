@@ -1,9 +1,9 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
-import { AggConfig } from 'ui/vis/agg_config';
-import { AggType } from 'ui/agg_types/agg_type';
-import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
+import { VisProvider } from '../../../vis';
+import { AggConfig } from '../../../vis/agg_config';
+import { AggType } from '../../../agg_types/agg_type';
+import { PointSeriesFakeXAxisProvider } from '../_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {
 

@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import React from 'react';
-import { banners } from 'ui/notify';
-import { NoDefaultIndexPattern } from 'ui/errors';
+import { banners } from '../../notify';
+import { NoDefaultIndexPattern } from '../../errors';
 import { IndexPatternsGetProvider } from '../_get';
-import uiRoutes from 'ui/routes';
+import uiRoutes from '../../routes';
 import {
   EuiCallOut,
 } from '@elastic/eui';

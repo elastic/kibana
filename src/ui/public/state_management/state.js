@@ -9,10 +9,10 @@
 import _ from 'lodash';
 import angular from 'angular';
 import rison from 'rison-node';
-import { applyDiff } from 'ui/utils/diff_object';
-import { EventsProvider } from 'ui/events';
-import { fatalError, Notifier } from 'ui/notify';
-import 'ui/state_management/config_provider';
+import { applyDiff } from '../utils/diff_object';
+import { EventsProvider } from '../events';
+import { fatalError, Notifier } from '../notify';
+import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
 

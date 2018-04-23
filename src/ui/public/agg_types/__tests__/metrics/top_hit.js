@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { topHitMetricAgg } from 'ui/agg_types/metrics/top_hit';
-import { VisProvider } from 'ui/vis';
+import { topHitMetricAgg } from '../../metrics/top_hit';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Top hit metric', function () {

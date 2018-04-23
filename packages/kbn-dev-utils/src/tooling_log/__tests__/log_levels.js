@@ -89,8 +89,7 @@ describe('parseLogLevel(logLevel).flags', () => {
       // by specifying a long length
       const level = chance.word({ length: 10 });
 
-      expect(() => parseLogLevel(level))
-        .to.throwError(level);
+      expect(() => parseLogLevel(level)).to.throwError(level);
     });
   });
 });

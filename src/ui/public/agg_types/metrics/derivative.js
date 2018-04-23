@@ -1,4 +1,4 @@
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 

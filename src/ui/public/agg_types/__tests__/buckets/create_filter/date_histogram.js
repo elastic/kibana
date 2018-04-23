@@ -3,10 +3,10 @@ import moment from 'moment';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { createFilterDateHistogram } from 'ui/agg_types/buckets/create_filter/date_histogram';
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+import { createFilterDateHistogram } from '../../../buckets/create_filter/date_histogram';
+import { intervalOptions } from '../../../buckets/_interval_options';
 
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {

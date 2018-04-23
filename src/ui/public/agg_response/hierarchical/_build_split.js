@@ -1,5 +1,5 @@
-import { collectKeys } from 'ui/agg_response/hierarchical/_collect_keys';
-import { HierarchicalTransformAggregationProvider } from 'ui/agg_response/hierarchical/_transform_aggregation';
+import { collectKeys } from './_collect_keys';
+import { HierarchicalTransformAggregationProvider } from './_transform_aggregation';
 
 export function AggResponseHierarchicalBuildSplitProvider(Private) {
   const transformer = Private(HierarchicalTransformAggregationProvider);

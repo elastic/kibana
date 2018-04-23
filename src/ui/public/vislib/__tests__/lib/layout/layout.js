@@ -8,10 +8,10 @@ import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
 import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import { VislibLibLayoutLayoutProvider } from 'ui/vislib/lib/layout/layout';
+import { VislibLibLayoutLayoutProvider } from '../../../lib/layout/layout';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import 'ui/persisted_state';
-import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
+import '../../../../persisted_state';
+import { VislibVisConfigProvider } from '../../../lib/vis_config';
 
 const dateHistogramArray = [
   series,

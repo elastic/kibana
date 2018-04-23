@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
-import 'ui/filters/short_dots';
+import '../short_dots';
 
 
 let filter;

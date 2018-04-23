@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import moment from 'moment';
-import { InvalidLogScaleValues } from 'ui/errors';
+import { InvalidLogScaleValues } from '../../../errors';
 
 export function VislibAxisScaleProvider() {
   class AxisScale {

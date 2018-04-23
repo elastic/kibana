@@ -1,14 +1,14 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import visualizeTemplate from 'ui/visualize/visualize.html';
-import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
-import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { uiModules } from '../modules';
+import { stateMonitorFactory } from '../state_management/state_monitor_factory';
+import visualizeTemplate from './visualize.html';
+import { VisRequestHandlersRegistryProvider } from '../registry/vis_request_handlers';
+import { VisResponseHandlersRegistryProvider } from '../registry/vis_response_handlers';
 import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { ResizeChecker } from 'ui/resize_checker';
+import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
+import { ResizeChecker } from '../resize_checker';
 
 import {
   isTermSizeZeroError,

@@ -1,5 +1,5 @@
-import { metadata } from 'ui/metadata';
-import { Notifier } from 'ui/notify';
+import { metadata } from '../../metadata';
+import { Notifier } from '../../notify';
 import { UiSettingsClient } from '../../../ui_settings/public/ui_settings_client';
 
 export function initUiSettingsApi(chrome) {
