@@ -1,6 +1,3 @@
-# twelve hours in past relative to "currentTimeMarker"
 { "airline" : "kibana air", "timestamp" : "2018-01-01T12:00:00Z", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-# within 15 minutes relative to "currentTimeMarker"
 { "airline" : "kibana air", "timestamp" : "2018-01-01T23:50:00Z", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }
-# one hour in future relative to "currentTimeMarker"
 { "airline" : "kibana air", "timestamp" : "2018-01-02T01:00:00Z", "dest" : "IAD", "origin" : "DEN", "tailNum" : 1 }

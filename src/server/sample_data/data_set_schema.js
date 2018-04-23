@@ -14,7 +14,11 @@ export const dataSetSchema = {
   // When data is installed, timestamps are converted to the present time.
   // The distance between a timestamp and currentTimeMarker is preserved but the date and time will change.
   // For example:
-  //   sample data set:    timestamp: 2018-01-01T00:00:00, currentTimeMarker: 2018-01-01T12:00:00
-  //   installed data set: timestamp: 2018-04-18T20:33:14, currentTimeMarker: 2018-04-19T08:33:14
+  //   sample data set:    timestamp: 2018-01-01T00:00:00Z, currentTimeMarker: 2018-01-01T12:00:00Z
+  //   installed data set: timestamp: 2018-04-18T20:33:14Z, currentTimeMarker: 2018-04-19T08:33:14Z
   currentTimeMarker: Joi.string().isoDate().required(),
+
+  // Set to true to move timestamp to current week, preserving day of week and time of day
+  // Relative distance from timestamp to currentTimeMarker will not remain the same
+  preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
 };

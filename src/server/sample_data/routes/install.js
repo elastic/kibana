@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
+import { adjustTimestamp } from './lib/adjust_timestamp';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
@@ -58,14 +59,12 @@ export const createInstallRoute = () => ({
         return reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
       }
 
-      const now = (new Date()).getTime();
-      const currentTimeMarker = Date.parse(sampleDataSet.currentTimeMarker);
+      const now = new Date();
+      const currentTimeMarker = new Date(Date.parse(sampleDataSet.currentTimeMarker));
       function updateTimestamps(doc) {
         sampleDataSet.timeFields.forEach(timeFieldName => {
           if (doc[timeFieldName]) {
-            const timeFieldValue = Date.parse(doc[timeFieldName]);
-            const timeDelta = timeFieldValue - currentTimeMarker;
-            doc[timeFieldName] = (new Date(now + timeDelta)).toISOString();
+            doc[timeFieldName] = adjustTimestamp(doc[timeFieldName], currentTimeMarker, now, sampleDataSet.preserveDayOfWeekTimeOfDay);
           }
         });
         return doc;
