@@ -5,7 +5,6 @@ const { mockCluster } = require('./test');
 
 describe('transformDocuments', () => {
   const index = 'kibana';
-  const log = _.noop;
   const elasticVersion = '9.8.7';
 
   test('rejects docs with plugins we know nothing about', async () => {
@@ -18,7 +17,7 @@ describe('transformDocuments', () => {
       }],
     });
     const callCluster = mockCluster(data, meta);
-    const exportedState = {
+    const migrationState = {
       plugins: [{
         id: 'whatisit',
         mappings: JSON.stringify({ dunnoes: { type: 'text' } }),
@@ -35,12 +34,12 @@ describe('transformDocuments', () => {
       _id: 'dunnoes:hrm',
       _source: { type: 'dunnoes', dunnoes: 'This should get rejected, methinks.' },
     };
-    expect(transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs: [doc] }))
+    expect(transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs: [doc] }))
       .rejects.toThrow(/unavailable plugin \"whatisit\"/);
   });
 
   test('importing a doc w/ no exported migration state runs all transforms', async () => {
-    const exportedState = {};
+    const migrationState = {};
     const { data, meta } = clusterData(index, {
       plugins: [{
         id: 'jam',
@@ -67,7 +66,7 @@ describe('transformDocuments', () => {
       _id: 'space:enterprise',
       _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
     }];
-    const transformed = await transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
+    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
 
     expect(transformed)
       .toEqual([{
@@ -91,7 +90,7 @@ describe('transformDocuments', () => {
       }],
     });
     const callCluster = mockCluster(data, meta);
-    const exportedState = {
+    const migrationState = {
       plugins: [{
         id: 'jam',
         mappings: JSON.stringify({ space: { type: 'text' } }),
@@ -136,7 +135,7 @@ describe('transformDocuments', () => {
       _id: 'book:thetwotowers',
       _source: { type: 'book', updated_at: 'today', book: 'The Two Towers' },
     }];
-    const transformed = await transformDocuments({ callCluster, exportedState, plugins, elasticVersion, log, index, docs });
+    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
 
     expect(transformed)
       .toEqual([{
@@ -158,7 +157,7 @@ describe('transformDocuments', () => {
       }],
     });
     const callCluster = mockCluster(data, meta);
-    const exportedState = {
+    const migrationState = {
       plugins: [{
         id: 'jam',
         mappings: JSON.stringify({ aha: { type: 'text' } }),
@@ -171,7 +170,7 @@ describe('transformDocuments', () => {
       _id: 'aha:123',
       _source: { type: 'aha', aha: 'Move along' },
     }];
-    const transformed = await transformDocuments({ callCluster, docs, exportedState, plugins, index, log, elasticVersion });
+    const transformed = await transformDocuments({ callCluster, docs, migrationState, plugins, index, elasticVersion });
     expect(transformed)
       .toEqual([{
         _id: 'aha:123',
@@ -189,13 +188,13 @@ describe('transformDocuments', () => {
       }],
     });
     const callCluster = mockCluster(data, meta);
-    const exportedState = {};
+    const migrationState = {};
     const plugins = [];
     const docs = [{
       _id: 'space:enterprise',
       _source: { type: 'space', space: 'The final frontier' },
     }];
-    expect(transformDocuments({ docs, exportedState, plugins, callCluster, elasticVersion, index, log }))
+    expect(transformDocuments({ docs, migrationState, plugins, callCluster, elasticVersion, index }))
       .rejects.toThrow(/requires unavailable plugin \"jam\"/);
   });
 
@@ -214,29 +213,19 @@ describe('transformDocuments', () => {
       .rejects.toThrow(/Got string/);
   });
 
-  test('exportedState is required', () => {
-    expect(testImportOpts({ exportedState: undefined }))
+  test('migrationState is required', () => {
+    expect(testImportOpts({ migrationState: undefined }))
       .rejects.toThrow(/Got undefined/);
   });
 
-  test('exportedState should be an object', () => {
-    expect(testImportOpts({ exportedState: 'hrm' }))
+  test('migrationState should be an object', () => {
+    expect(testImportOpts({ migrationState: 'hrm' }))
       .rejects.toThrow(/Got string/);
   });
 
   test('callCluster is required', () => {
     expect(testImportOpts({ callCluster: undefined }))
       .rejects.toThrow(/Got undefined/);
-  });
-
-  test('log is required', () => {
-    expect(testImportOpts({ log: undefined }))
-      .rejects.toThrow(/Got undefined/);
-  });
-
-  test('log must be a function', () => {
-    expect(testImportOpts({ log: 'hello' }))
-      .rejects.toThrow(/Got string/);
   });
 
   test('plugins are required', () => {
@@ -266,7 +255,7 @@ function testImportOpts(opts) {
     log: _.noop,
     index: 'kibana',
     docs: [],
-    exportedState: {},
+    migrationState: {},
     plugins: [],
     ...opts,
   });

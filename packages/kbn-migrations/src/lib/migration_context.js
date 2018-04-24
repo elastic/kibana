@@ -1,6 +1,7 @@
 // The migration context object contains all of the data and functions
 // that are necessary to analyze and run migrations.
 
+const _ = require('lodash');
 const moment = require('moment');
 const Plugins = require('./plugins');
 const MigrationPlan = require('./migration_plan');
@@ -25,7 +26,7 @@ async function fetch(opts) {
     plugins: sanitizedPlugins,
     destIndex: destIndex || `${index}-${moment().format('YYYYMMDDHHmmss')}-${elasticVersion}`,
     initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
-    log: migrationLogger(log),
+    log: log ? migrationLogger(log) : _.noop,
   };
 }
 

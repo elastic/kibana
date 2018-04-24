@@ -22,10 +22,10 @@ export async function migrationsMixin(kbnServer, server) {
         return Migrations.fetchMigrationState(optsFromKbnServer(kbnServer, callCluster));
       },
 
-      importDocuments({ exportedState, docs }) {
-        return Migrations.importDocuments({
+      transformDocuments({ migrationState, docs }) {
+        return Migrations.transformDocuments({
           ...optsFromKbnServer(kbnServer, callCluster),
-          exportedState,
+          migrationState,
           docs,
         });
       },

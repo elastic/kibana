@@ -10,19 +10,18 @@ const optsDefinition = {
   index: 'string',
   docs: 'array',
   plugins: 'array',
-  exportedState: 'object',
-  log: 'function',
+  migrationState: 'object',
 };
 
 /**
- * Given a migration state (exportedState) and a set of documents (docs),
+ * Given a migration state (migrationState) and a set of documents (docs),
  * transforms those documents to be the same version as the index. If such a
  * transform is impossible, this will fail.
  * @param {ImportDocsOpts} opts
  */
 async function transformDocuments(opts) {
   const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
-  const { exportedState, docs } = opts;
+  const { migrationState: exportedState, docs } = opts;
   const { plugins, migrationState } = context;
   const transformDoc = buildImportFunction(plugins, exportedState, migrationState);
   return docs.map(transformDoc);
