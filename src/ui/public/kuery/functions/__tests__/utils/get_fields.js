@@ -1,7 +1,7 @@
 import { getFields } from '../../utils/get_fields';
 import expect from 'expect.js';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
+import indexPatternResponse from '../../../__tests__/index_pattern_response.json';
+
 import { nodeTypes } from '../../..';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
 
@@ -9,10 +9,10 @@ let indexPattern;
 
 describe('getFields', function () {
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(StubbedLogstashIndexPatternProvider);
-  }));
+
+  beforeEach(() => {
+    indexPattern = indexPatternResponse;
+  });
 
   describe('field names without a wildcard', function () {
 
