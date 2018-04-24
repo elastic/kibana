@@ -30,6 +30,8 @@ import {
   SingleIndexMemoryMetric,
   ThreadPoolQueueMetric,
   ThreadPoolRejectedMetric,
+  WriteThreadPoolQueueMetric,
+  WriteThreadPoolRejectedMetric,
 } from './classes';
 
 import {
@@ -653,29 +655,22 @@ const metricInstances = {
     label: 'Index Writer',
     description: 'Heap memory used by the Index Writer. This is NOT a part of Lucene Total.'
   }),
-  'node_index_threads_bulk_queue': new ElasticsearchMetric({
-    field: 'node_stats.thread_pool.bulk.queue',
+  'node_index_threads_write_queue': new WriteThreadPoolQueueMetric({
     title: 'Indexing Threads',
-    label: 'Bulk Queue',
-    description: 'Number of bulk operations in the queue.',
-    type: 'node',
-    derivative: true,
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-    min: 0
+    label: 'Write Queue',
+    description: (
+      'Number of index, bulk, and write operations in the queue. ' +
+      'The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
+    ),
   }),
-  'node_index_threads_bulk_rejected': new ElasticsearchMetric({
+  'node_index_threads_write_rejected': new WriteThreadPoolRejectedMetric({
     field: 'node_stats.thread_pool.bulk.rejected',
     title: 'Indexing Threads',
-    label: 'Bulk Rejections',
-    description: 'Number of bulk operations that have been rejected, which occurs when the queue is full.',
-    type: 'node',
-    derivative: true,
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-    min: 0
+    label: 'Write Rejections',
+    description: (
+      'Number of index, bulk, and write operations that have been rejected, which occurs when the queue is full. ' +
+      'The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
+    ),
   }),
   'node_index_threads_get_queue': new ElasticsearchMetric({
     field: 'node_stats.thread_pool.get.queue',
@@ -694,32 +689,6 @@ const metricInstances = {
     title: 'Read Threads',
     label: 'GET Rejections',
     description: 'Number of GET operations that have been rejected, which occurs when the queue is full.',
-    type: 'node',
-    derivative: true,
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-    min: 0
-  }),
-  'node_index_threads_index_queue': new ElasticsearchMetric({
-    field: 'node_stats.thread_pool.index.queue',
-    title: 'Indexing Threads',
-    label: 'Index Queue',
-    description: 'Number of non-bulk, index operations in the queue.',
-    type: 'node',
-    derivative: true,
-    format: LARGE_FLOAT,
-    metricAgg: 'max',
-    units: '',
-    min: 0
-  }),
-  'node_index_threads_index_rejected': new ElasticsearchMetric({
-    field: 'node_stats.thread_pool.index.rejected',
-    title: 'Indexing Threads',
-    label: 'Index Rejections',
-    description:
-      'Number of non-bulk, index operations that have been rejected, which occurs when the queue is full. ' +
-      'Generally indicates that bulk should be used.',
     type: 'node',
     derivative: true,
     format: LARGE_FLOAT,
