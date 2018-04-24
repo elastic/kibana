@@ -1,4 +1,41 @@
 /*eslint camelcase: 0*/
+const significantTermsArgs = {
+  __template: {
+    field: '',
+  },
+  field: '{field}',
+  size: 10,
+  shard_size: 10,
+  shard_min_doc_count: 10,
+  min_doc_count: 10,
+  include: { __one_of: ['*', { pattern: '', flags: '' }] },
+  exclude: { __one_of: ['*', { pattern: '', flags: '' }] },
+  execution_hint: {
+    __one_of: ['map', 'global_ordinals', 'global_ordinals_hash'],
+  },
+  background_filter: {
+    __scope_link: 'GLOBAL.filter',
+  },
+  mutual_information: {
+    include_negatives: { __one_of: [true, false] },
+  },
+  chi_square: {
+    include_negatives: { __one_of: [true, false] },
+    background_is_superset: { __one_of: [true, false] },
+  },
+  percentage: {},
+  gnd: {
+    background_is_superset: { __one_of: [true, false] },
+  },
+  script_heuristic: {
+    __template: {
+      script: '_subset_freq/(_superset_freq - _subset_freq + 1)',
+    },
+    script: {
+      // populated by a global rule
+    },
+  },
+};
 const simple_metric = {
   __template: { field: '' },
   field: '{field}',
@@ -31,6 +68,13 @@ const rules = {
           AGG_TYPE: {},
         },
       },
+    },
+    adjacency_matrix: {
+      filters: {}
+    },
+    diversified_sampler: {
+      shard_size: '',
+      field: ''
     },
     min: simple_metric,
     max: simple_metric,
@@ -108,43 +152,11 @@ const rules = {
       collect_mode: { __one_of: ['depth_first', 'breadth_first'] },
       missing: '',
     },
-    significant_terms: {
-      __template: {
-        field: '',
-      },
-      field: '{field}',
-      size: 10,
-      shard_size: 10,
-      shard_min_doc_count: 10,
-      min_doc_count: 10,
-      include: { __one_of: ['*', { pattern: '', flags: '' }] },
-      exclude: { __one_of: ['*', { pattern: '', flags: '' }] },
-      execution_hint: {
-        __one_of: ['map', 'global_ordinals', 'global_ordinals_hash'],
-      },
-      background_filter: {
-        __scope_link: 'GLOBAL.filter',
-      },
-      mutual_information: {
-        include_negatives: { __one_of: [true, false] },
-      },
-      chi_square: {
-        include_negatives: { __one_of: [true, false] },
-        background_is_superset: { __one_of: [true, false] },
-      },
-      percentage: {},
-      gnd: {
-        background_is_superset: { __one_of: [true, false] },
-      },
-      script_heuristic: {
-        __template: {
-          script: '_subset_freq/(_superset_freq - _subset_freq + 1)',
-        },
-        script: {
-          // populated by a global rule
-        },
-      },
+    significant_text: {
+      ...significantTermsArgs,
+      filter_duplicate_text: '__flag__'
     },
+    significant_terms: significantTermsArgs,
     range: {
       __template: {
         field: '',
@@ -415,6 +427,15 @@ const rules = {
     avg_bucket: simple_pipeline,
     max_bucket: simple_pipeline,
     min_bucket: simple_pipeline,
+    stats_bucket: simple_pipeline,
+    extended_stats_bucket: {
+      ...simple_pipeline,
+      sigma: ''
+    },
+    percentiles_bucket: {
+      ...simple_pipeline,
+      percents: []
+    },
     sum_bucket: simple_pipeline,
     moving_avg: {
       __template: {
@@ -468,6 +489,15 @@ const rules = {
       buckets_path: {},
       gap_policy: gap_policy,
       script: '',
+    },
+    bucket_sort: {
+      __template: {
+        sort: [],
+      },
+      sort: ['{field}'],
+      from: 0,
+      size: 0,
+      gap_policy: gap_policy,
     },
     matrix_stats: {
       __template: {
