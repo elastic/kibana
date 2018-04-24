@@ -31,7 +31,6 @@ export default function (kibana) {
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        namespace: Joi.string().default('kibana')
       }).default();
     },
 
