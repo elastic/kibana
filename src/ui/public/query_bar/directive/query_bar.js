@@ -114,7 +114,13 @@ module.directive('queryBar', function () {
 
       $scope.$watch('queryBar.indexPatterns', () => {
         this.getIndexPatterns().then(indexPatterns => {
-          this.getKuerySuggestions = getSuggestionsProvider({ config, indexPatterns });
+          this.getKuerySuggestions = getSuggestionsProvider({
+            config,
+            indexPatterns: indexPatterns.map(indexPattern => ({
+              fields: indexPattern.fields.raw,
+              title: indexPattern.title,
+            })),
+          });
           this.updateSuggestions();
         });
       });
