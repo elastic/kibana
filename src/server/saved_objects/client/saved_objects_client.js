@@ -16,10 +16,12 @@ export class SavedObjectsClient {
       index,
       mappings,
       callCluster,
+      transformDocuments,
       onBeforeWrite = () => {},
     } = options;
 
     this._index = index;
+    this._transformDocuments = transformDocuments;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
@@ -107,23 +109,26 @@ export class SavedObjectsClient {
   async create(type, attributes = {}, options = {}) {
     const {
       id,
+      migrationState,
       overwrite = false
     } = options;
 
-    const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
+    const method = id && !overwrite ? 'create' : 'index';
 
     try {
+      const [{ _id, _source }] = this._upgradeDocuments({
+        time,
+        migrationState,
+        docs: [{ id, type, attributes }],
+      });
+
       const response = await this._writeToCluster(method, {
-        id: this._generateEsId(type, id),
+        id: _id,
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: {
-          type,
-          updated_at: time,
-          [type]: attributes
-        },
+        body: _source,
       });
 
       return {
@@ -469,6 +474,29 @@ export class SavedObjectsClient {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  // Upgrades documents to the same version as the index, using
+  // the Migrations transformDocuments function that was passed into
+  // the constructor.
+  _upgradeDocuments({ time, migrationState, docs }) {
+    const rawDocs = docs.map(({ id, type, attributes }) => ({
+      _id: this._generateEsId(type, id),
+      _source: {
+        type,
+        updated_at: time,
+        [type]: attributes,
+      },
+    }));
+
+    if (!migrationState) {
+      return rawDocs;
+    }
+
+    return this._transformDocuments({
+      migrationState,
+      docs: rawDocs,
+    });
   }
 
   _generateEsId(type, id) {

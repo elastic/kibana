@@ -15,6 +15,7 @@ export const createCreateRoute = (prereqs) => {
           id: Joi.string()
         }).required(),
         payload: Joi.object({
+          migrationState: Joi.object().default(undefined),
           attributes: Joi.object().required()
         }).required()
       },
@@ -22,9 +23,10 @@ export const createCreateRoute = (prereqs) => {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
         const { overwrite } = request.query;
-        const options = { id, overwrite };
+        const { migrationState, attributes } = request.payload;
+        const options = { id, overwrite, migrationState };
 
-        reply(savedObjectsClient.create(type, request.payload.attributes, options));
+        reply(savedObjectsClient.create(type, attributes, options));
       }
     }
   };

@@ -147,6 +147,50 @@ describe('transformDocuments', () => {
       }]);
   });
 
+  test('Exported migration state does not need to specify mappings', async () => {
+    const { data, meta } = clusterData(index, {
+      plugins: [{
+        id: 'jam',
+        migrationIds: ['a', 'b'],
+        mappings: JSON.stringify({ space: { type: 'text' } }),
+        mappingsChecksum: '2',
+        migrationsChecksum: 'ahoy',
+      }],
+    });
+    const callCluster = mockCluster(data, meta);
+    const migrationState = {
+      plugins: [{
+        id: 'jam',
+        migrationIds: ['a'],
+        mappingsChecksum: '1',
+        migrationsChecksum: 'ahoy',
+      }],
+    };
+    const plugins = [{
+      id: 'jam',
+      migrations: [{
+        id: 'a',
+        filter: ({ type }) => type === 'space',
+        transform: () => { throw new Error('Should not run!'); },
+      }, {
+        id: 'b',
+        filter: ({ type }) => type === 'space',
+        transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
+      }],
+    }];
+    const docs = [{
+      _id: 'space:enterprise',
+      _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
+    }];
+    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
+
+    expect(transformed)
+      .toEqual([{
+        _id: 'space:enterprise',
+        _source: { type: 'space', updated_at: 'today', space: 'THE FINAL FRONTIER!!!' },
+      }]);
+  });
+
   test('accepts if a disabled plugin is required, but doc is up to date', async () => {
     const { data, meta } = clusterData(index, {
       plugins: [{

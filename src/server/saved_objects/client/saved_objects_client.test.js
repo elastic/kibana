@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import sinon from 'sinon';
 import { delay } from 'bluebird';
 import { SavedObjectsClient } from './saved_objects_client';
@@ -11,6 +12,7 @@ describe('SavedObjectsClient', () => {
   let callAdminCluster;
   let onBeforeWrite;
   let savedObjectsClient;
+  let transformDocuments;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
@@ -78,12 +80,14 @@ describe('SavedObjectsClient', () => {
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
     onBeforeWrite = sandbox.stub();
+    transformDocuments = sandbox.stub();
 
     savedObjectsClient = new SavedObjectsClient({
       index: '.kibana-test',
       mappings,
+      onBeforeWrite,
+      transformDocuments,
       callCluster: callAdminCluster,
-      onBeforeWrite
     });
 
     sandbox.stub(savedObjectsClient, '_getCurrentTime').returns(mockTimestamp);
@@ -129,6 +133,52 @@ describe('SavedObjectsClient', () => {
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWith(callAdminCluster, 'index');
       sinon.assert.calledOnce(onBeforeWrite);
+    });
+
+    it('should not transform docs if no migrationState is passed', async () => {
+      await savedObjectsClient.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash'
+      });
+
+      sinon.assert.notCalled(transformDocuments);
+    });
+
+    it('should transform docs if migrationState is passed', async () => {
+      const migrationState = { notReal: 'just a test' };
+      const doc = {
+        id: 'logstash-*',
+        title: 'Logstash'
+      };
+      const transformedDoc = {
+        _id: 'index-pattern:shazm',
+        _source: {
+          'index-pattern': {
+            title: 'LOGSTASHHHHH!!!',
+          },
+        },
+      };
+
+      transformDocuments.returns(_.cloneDeep([transformedDoc]));
+
+      await savedObjectsClient.create('index-pattern', { title: doc.title }, { migrationState, id: doc.id });
+
+      const opts = transformDocuments.getCall(0).args[0];
+
+      sinon.assert.calledOnce(transformDocuments);
+      expect(opts.migrationState)
+        .toEqual(migrationState);
+      expect(opts.docs.length)
+        .toEqual(1);
+      expect(opts.docs[0]._id)
+        .toEqual('index-pattern:logstash-*');
+      expect(opts.docs[0]._source['index-pattern'])
+        .toEqual({ title: 'Logstash' });
+
+      sinon.assert.calledWithExactly(callAdminCluster, 'create', sinon.match({
+        id: transformedDoc._id,
+        body: transformedDoc._source,
+      }));
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {

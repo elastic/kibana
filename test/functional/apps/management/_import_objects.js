@@ -32,6 +32,19 @@ export default function ({ getService, getPageObjects }) {
       expect(rowCount).to.be(2);
     });
 
+    it('should import new saved object files normally', async function () {
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_migration_state.json'));
+      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.settings.clickVisualizationsTab();
+      const rowCount = await retry.try(async () => {
+        const rows = await PageObjects.settings.getVisualizationRows();
+        return rows.length;
+      });
+      expect(rowCount).to.be(2);
+    });
+
     it('should import conflicts using a confirm modal', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));

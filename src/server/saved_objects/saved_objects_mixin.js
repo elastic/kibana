@@ -10,7 +10,8 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = server.migrations().getMappings();
+  const { getMappings, transformDocuments } = server.migrations();
+  const mappings = getMappings();
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
@@ -30,8 +31,9 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient({
       mappings,
-      index: server.config().get('kibana.index'),
       callCluster,
+      transformDocuments,
+      index: server.config().get('kibana.index'),
     });
   });
 

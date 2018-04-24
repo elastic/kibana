@@ -1,5 +1,5 @@
 import { saveAs } from '@elastic/filesaver';
-import { find, flattenDeep, pluck, sortBy } from 'lodash';
+import { find, flattenDeep, pluck, sortBy, partition, omit } from 'lodash';
 import angular from 'angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
@@ -161,15 +161,15 @@ uiModules.get('apps/management')
         function retrieveAndExportDocs(objs) {
           if (!objs.length) return notify.error('No saved objects to export.');
 
-          savedObjectsClient.bulkGet(objs)
-            .then(function (response) {
-              saveToFile(response.savedObjects.map(obj => {
-                return {
-                  _id: obj.id,
-                  _type: obj.type,
-                  _source: obj.attributes
-                };
-              }));
+          const migrationStateQuery = { type: 'migration', id: 'migration-state' };
+
+          savedObjectsClient.bulkGet([...objs, migrationStateQuery])
+            .then(function ({ savedObjects }) {
+              const [[migrationState], docs] = partition(savedObjects, migrationStateQuery);
+              saveToFile({
+                migrationState: minimizedMigrationState(migrationState.attributes),
+                docs: docs.map(({ id, type, attributes }) => ({ _id: id, _type: type, _source: attributes })),
+              });
             });
         }
 
@@ -180,17 +180,10 @@ uiModules.get('apps/management')
 
         // TODO: Migrate all scope methods to the controller.
         $scope.importAll = function (fileContents) {
-          let docs;
-          try {
-            docs = JSON.parse(fileContents);
-          } catch (e) {
-            notify.error('The file could not be processed.');
-            return;
-          }
+          const { migrationState, docs, error } = tryParse(fileContents);
 
-          // make sure we have an array, show an error otherwise
-          if (!Array.isArray(docs)) {
-            notify.error('Saved objects file format is invalid and cannot be imported.');
+          if (error) {
+            notify.error(error);
             return;
           }
 
@@ -238,7 +231,7 @@ uiModules.get('apps/management')
                     obj.id = doc._id;
                     return obj.applyESResp(doc)
                       .then(() => {
-                        return obj.save({ confirmOverwrite: !overwriteAll });
+                        return obj.save({ migrationState, confirmOverwrite: !overwriteAll });
                       })
                       .catch((err) => {
                         if (swallowErrors && err instanceof SavedObjectNotFound) {
@@ -293,7 +286,7 @@ uiModules.get('apps/management')
               }
 
               function saveObject(obj) {
-                return obj.save({ confirmOverwrite: !overwriteAll });
+                return obj.save({ migrationState, confirmOverwrite: !overwriteAll });
               }
 
               const docTypes = groupByType(docs);
@@ -336,3 +329,24 @@ uiModules.get('apps/management')
       }
     };
   });
+
+
+
+function minimizedMigrationState({ plugins }) {
+  return {
+    plugins: plugins.map(plugin => omit(plugin, 'mappings')),
+  };
+}
+
+function tryParse(fileContents) {
+  try {
+    const parsedResult = JSON.parse(fileContents);
+    const result = Array.isArray(parsedResult) ? { docs: parsedResult } : parsedResult;
+    if (!Array.isArray(result.docs)) {
+      return { error: 'Saved objects file format is invalid and cannot be imported.' };
+    }
+    return result;
+  } catch (e) {
+    return { error: 'The file could not be processed.' };
+  }
+}
