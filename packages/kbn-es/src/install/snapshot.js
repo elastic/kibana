@@ -97,9 +97,9 @@ function downloadFile(url, dest, log) {
 }
 
 function getFilename(license, version) {
-  const basename = `elasticsearch${
-    license === 'oss' ? '-oss-' : '-'
-  }${version}`;
+  if (license === 'oss') {
+    return `elasticsearch-oss/elasticsearch-oss-${version}-SNAPSHOT.tar.gz`;
+  }
 
-  return `${basename}-SNAPSHOT.tar.gz`;
+  return `elasticsearch-${version}-SNAPSHOT.tar.gz`;
 }
