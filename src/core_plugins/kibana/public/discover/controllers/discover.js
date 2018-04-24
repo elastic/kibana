@@ -275,7 +275,7 @@ function discoverController(
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwn('filter')),
-      showViz: true
+      isVisualizationVisible: true
     };
   }
 
@@ -293,7 +293,7 @@ function discoverController(
     $state.save();
   });
 
-  $scope.$watch('state.showViz', $state.save.bind($state));
+  $scope.$watch('state.isVisualizationVisible', $state.save.bind($state));
 
   $scope.opts = {
     // number of records to fetch, then paginate through
@@ -668,8 +668,8 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  $scope.showViz = () => $scope.state.showViz = true;
-  $scope.hideViz = () => $scope.state.showViz = false;
+  $scope.showViz = () => $scope.state.isVisualizationVisible = true;
+  $scope.hideViz = () => $scope.state.isVisualizationVisible = false;
 
   function setupVisualization() {
     // If no timefield has been specified

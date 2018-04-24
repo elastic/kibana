@@ -108,7 +108,7 @@
             >
               <header>
                 <center class="small">
-                  <div ng-if="state.showViz">
+                  <div ng-if="state.isVisualizationVisible">
                     <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
 
                     &mdash;
@@ -137,7 +137,7 @@
               </header>
 
               <visualization
-                 ng-if="state.showViz && vis && rows.length != 0"
+                 ng-if="state.isVisualizationVisible && vis && rows.length != 0"
                  vis="vis"
                  ui-state="uiState"
                  vis-data="visData"
@@ -149,8 +149,8 @@
 
               <div>
                   <center class="small">
-                    <a ng-if="!state.showViz" kbn-accessible-click ng-click="showViz()">Show visualization</a>
-                    <a ng-if="state.showViz" kbn-accessible-click ng-click="hideViz()">Hide visualization</a>
+                    <a ng-if="!state.isVisualizationVisible" kbn-accessible-click ng-click="showViz()">Show visualization</a>
+                    <a ng-if="state.isVisualizationVisible" kbn-accessible-click ng-click="hideViz()">Hide visualization</a>
                   </center>
               </div>
             </section>
