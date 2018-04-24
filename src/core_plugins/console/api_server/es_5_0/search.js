@@ -3,33 +3,33 @@ export default function (api) {
     methods: ['GET', 'POST'],
     priority: 10, // collides with get doc by id
     patterns: [
-      "{indices}/{types}/_search",
-      "{indices}/_search",
-      "_search"
+      '{indices}/{types}/_search',
+      '{indices}/_search',
+      '_search'
     ],
     url_params: {
-      q: "",
-      df: "",
-      analyzer: "",
-      default_operator: ["AND", "OR"],
-      explain: "__flag__",
-      _source: "",
-      _source_includes: "",
-      _source_excludes: "",
+      q: '',
+      df: '',
+      analyzer: '',
+      default_operator: ['AND', 'OR'],
+      explain: '__flag__',
+      _source: '',
+      _source_includes: '',
+      _source_excludes: '',
       stored_fields: [],
-      sort: "",
-      track_scores: "__flag__",
+      sort: '',
+      track_scores: '__flag__',
       timeout: 1,
       from: 0,
       size: 10,
-      search_type: ["dfs_query_then_fetch", "dfs_query_and_fetch", "query_then_fetch", "query_and_fetch"],
+      search_type: ['dfs_query_then_fetch', 'query_then_fetch', 'query_and_fetch'],
       terminate_after: 10,
-      analyze_wildcard: "__flag__",
-      preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
-      scroll: "5m",
-      scroll_id: "",
-      routing: "",
-      request_cache: ["true", "false"]
+      analyze_wildcard: '__flag__',
+      preference: ['_primary', '_primary_first', '_local', '_only_node:xyz', '_prefer_node:xyz', '_shards:2,3'],
+      scroll: '5m',
+      scroll_id: '',
+      routing: '',
+      request_cache: ['true', 'false']
     },
     data_autocomplete_rules: {
       query: {
@@ -37,8 +37,8 @@ export default function (api) {
       },
       aggs: {
         __template: {
-          "NAME": {
-            "AGG_TYPE": {}
+          'NAME': {
+            'AGG_TYPE': {}
           }
         }
       },
@@ -70,9 +70,9 @@ export default function (api) {
               mode: {
                 __one_of: ['min', 'max', 'avg', 'sum']
               },
-              nested_path: "",
+              nested_path: '',
               nested_filter: {
-                __scope_link: "GLOBAL.filter"
+                __scope_link: 'GLOBAL.filter'
               }
             }
           },
@@ -81,13 +81,13 @@ export default function (api) {
           {
             '_geo_distance': {
               __template: {
-                "FIELD": {
+                'FIELD': {
                   lat: 40,
                   lon: -70
                 },
-                order: "asc"
+                order: 'asc'
               },
-              "{field}": {
+              '{field}': {
                 __one_of: [
                   {
                     __template: {
@@ -107,20 +107,20 @@ export default function (api) {
                       lon: -70
                     }
                   ],
-                  [""],
-                  ""
+                  [''],
+                  ''
                 ]
               },
-              distance_type: { __one_of: ["sloppy_arc", "arc", "plane"] },
-              sort_mode: { __one_of: ["min", "max", "avg"] },
-              order: { __one_of: ["asc", "desc"] },
-              unit: "km"
+              distance_type: { __one_of: ['sloppy_arc', 'arc', 'plane'] },
+              sort_mode: { __one_of: ['min', 'max', 'avg'] },
+              order: { __one_of: ['asc', 'desc'] },
+              unit: 'km'
             }
           }
         ]
       },
       stored_fields: ['{field}'],
-      docvalue_fields: ["{field}"],
+      docvalue_fields: ['{field}'],
       script_fields: {
         __template: {
           'FIELD': {
@@ -149,19 +149,19 @@ export default function (api) {
       },
       _source: {
         __one_of: [
-          "{field}",
-          ["{field}"],
+          '{field}',
+          ['{field}'],
           {
-            "includes": {
+            'includes': {
               __one_of: [
-                "{field}",
-                ["{field}"]
+                '{field}',
+                ['{field}']
               ]
             },
-            "excludes": {
+            'excludes': {
               __one_of: [
-                "{field}",
-                ["{field}"]
+                '{field}',
+                ['{field}']
               ]
             }
           }
@@ -171,7 +171,7 @@ export default function (api) {
         __one_of: [true, false]
       },
       stats: [''],
-      timeout: "1s",
+      timeout: '1s',
       version: { __one_of: [true, false] }
     }
   });
@@ -179,60 +179,60 @@ export default function (api) {
   api.addEndpointDescription('_search_template', {
     methods: ['GET'],
     patterns: [
-      "{indices}/{types}/_search/template",
-      "{indices}/_search/template",
-      "_search/template"
+      '{indices}/{types}/_search/template',
+      '{indices}/_search/template',
+      '_search/template'
     ],
     data_autocomplete_rules: {
-      "template": {
+      'template': {
         __one_of: [
-          { __scope_link: "_search" },
-          { __scope_link: "GLOBAL.script" }
+          { __scope_link: '_search' },
+          { __scope_link: 'GLOBAL.script' }
         ]
       },
-      "params": {}
+      'params': {}
     }
   });
 
   api.addEndpointDescription('_render_search_template', {
     methods: ['GET'],
     patterns: [
-      "_render/template"
+      '_render/template'
     ],
     data_autocomplete_rules: {
       __one_of: [
-        { "inline": { __scope_link: "_search" } },
-        { __scope_link: "GLOBAL.script" }
+        { 'inline': { __scope_link: '_search' } },
+        { __scope_link: 'GLOBAL.script' }
       ],
-      "params": {}
+      'params': {}
     }
   });
 
   api.addEndpointDescription('_render_search_template_with_id', {
     methods: ['GET'],
     patterns: [
-      "_render/template/{id}"
+      '_render/template/{id}'
     ],
     data_autocomplete_rules: {
-      "params": {}
+      'params': {}
     }
   });
 
   api.addEndpointDescription('_get_delete_search_template', {
     methods: ['GET', 'DELETE'],
     patterns: [
-      "_search/template/{id}"
+      '_search/template/{id}'
     ]
   });
 
   api.addEndpointDescription('_put_search_template', {
     methods: ['PUT'],
     patterns: [
-      "_search/template/{id}"
+      '_search/template/{id}'
     ],
     data_autocomplete_rules: {
-      "template": {
-        __scope_link: "_search"
+      'template': {
+        __scope_link: '_search'
       }
     }
   });
@@ -241,14 +241,14 @@ export default function (api) {
     methods: ['GET'],
     priority: 10, // collides with get doc by id
     patterns: [
-      "{indices}/{types}/_search_shards",
-      "{indices}/_search_shards",
-      "_search_shards"
+      '{indices}/{types}/_search_shards',
+      '{indices}/_search_shards',
+      '_search_shards'
     ],
     url_params: {
-      preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
-      routing: "",
-      local: "__flag__"
+      preference: ['_primary', '_primary_first', '_local', '_only_node:xyz', '_prefer_node:xyz', '_shards:2,3'],
+      routing: '',
+      local: '__flag__'
     }
   });
 }

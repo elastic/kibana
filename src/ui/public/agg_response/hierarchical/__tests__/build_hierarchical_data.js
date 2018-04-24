@@ -4,9 +4,9 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
+import { BuildHierarchicalDataProvider } from '../build_hierarchical_data';
 
 let Vis;
 let Notifier;
@@ -47,7 +47,7 @@ describe('buildHierarchicalData', function () {
     });
 
     it('should set the slices with one child to a consistent label', function () {
-      const checkLabel = 'Count';
+      const checkLabel = 'Average bytes';
       expect(results).to.have.property('slices');
       expect(results.slices).to.have.property('children');
       expect(results.slices.children).to.have.length(1);

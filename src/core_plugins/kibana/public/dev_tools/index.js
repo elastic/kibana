@@ -1,7 +1,7 @@
 import uiRoutes from 'ui/routes';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import 'plugins/kibana/dev_tools/directives/dev_tools_app';
+import './directives/dev_tools_app';
 
 uiRoutes
   .when('/dev_tools', {

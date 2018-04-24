@@ -1,6 +1,6 @@
 import moment from 'moment';
-import { PersistedLog } from 'ui/persisted_log';
-import { TIME_MODES } from 'ui/timepicker/modes';
+import { PersistedLog } from '../persisted_log';
+import { TIME_MODES } from '../timepicker/modes';
 
 class TimeHistory {
   constructor() {

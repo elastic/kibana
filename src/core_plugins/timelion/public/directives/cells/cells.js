@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { move } from 'ui/utils/collection';
 
 require('angular-sortable-view');
 require('plugins/timelion/directives/chart/chart');
@@ -27,7 +28,7 @@ app.directive('timelionCells', function () {
 
       $scope.dropCell = function (item, partFrom, partTo, indexFrom, indexTo) {
         $scope.onSelect(indexTo);
-        _.move($scope.sheet, indexFrom, indexTo);
+        move($scope.sheet, indexFrom, indexTo);
       };
 
     }

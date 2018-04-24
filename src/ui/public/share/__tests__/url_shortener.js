@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import chrome from 'ui/chrome';
-import { UrlShortenerProvider } from 'ui/share/lib/url_shortener';
+import chrome from '../../chrome';
+import { UrlShortenerProvider } from '../lib/url_shortener';
 
 describe('Url shortener', () => {
   let urlShortener;

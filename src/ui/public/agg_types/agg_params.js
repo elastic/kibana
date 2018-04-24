@@ -1,12 +1,12 @@
-import 'ui/filters/label';
-import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
+import '../filters/label';
+import { IndexedArray } from '../indexed_array';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { RegexParamType } from './param_types/regex';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
+import { createLegacyClass } from '../utils/legacy_class';
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -30,7 +30,7 @@ const paramTypeMap = {
  * @extends IndexedArray
  * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
  */
-_.class(AggParams).inherits(IndexedArray);
+createLegacyClass(AggParams).inherits(IndexedArray);
 function AggParams(params) {
   AggParams.Super.call(this, {
     index: ['name'],

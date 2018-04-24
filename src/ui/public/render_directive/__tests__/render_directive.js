@@ -2,7 +2,7 @@ import angular from 'angular';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/render_directive';
+import '..';
 
 let init;
 let $rootScope;

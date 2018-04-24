@@ -1,14 +1,14 @@
-import _ from 'lodash';
-import { QueryString } from 'ui/utils/query_string';
-import { StateProvider } from 'ui/state_management/state';
-import { uiModules } from 'ui/modules';
+import { QueryString } from '../utils/query_string';
+import { StateProvider } from './state';
+import { uiModules } from '../modules';
+import { createLegacyClass } from '../utils/legacy_class';
 
 const module = uiModules.get('kibana/global_state');
 
 export function GlobalStateProvider(Private) {
   const State = Private(StateProvider);
 
-  _.class(GlobalState).inherits(State);
+  createLegacyClass(GlobalState).inherits(State);
   function GlobalState(defaults) {
     GlobalState.Super.call(this, '_g', defaults);
   }

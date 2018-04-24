@@ -9,16 +9,13 @@ import Rx from 'rxjs/Rx';
  *  @return {Rx.Observable}
  */
 export function observeReadable(readable) {
-  return Rx.Observable
-    .race(
-      Rx.Observable
-        .fromEvent(readable, 'end')
-        .first()
-        .ignoreElements(),
+  return Rx.Observable.race(
+    Rx.Observable.fromEvent(readable, 'end')
+      .first()
+      .ignoreElements(),
 
-      Rx.Observable
-        .fromEvent(readable, 'error')
-        .first()
-        .map(err => Rx.Observable.throw(err))
-    );
+    Rx.Observable.fromEvent(readable, 'error')
+      .first()
+      .map(err => Rx.Observable.throw(err))
+  );
 }

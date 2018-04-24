@@ -11,5 +11,5 @@ module.exports = {
   testAll: testAllTask,
   testBrowser: testBrowserTask,
   testServer: testServerTask,
-  postinstall: postinstallTask
+  postinstall: postinstallTask,
 };

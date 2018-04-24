@@ -3,7 +3,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { PointSeriesOrderedDateAxisProvider } from 'ui/agg_response/point_series/_ordered_date_axis';
+import { PointSeriesOrderedDateAxisProvider } from '../_ordered_date_axis';
 
 describe('orderedDateAxis', function () {
 

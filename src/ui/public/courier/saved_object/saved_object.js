@@ -12,13 +12,13 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-import { SavedObjectNotFound } from 'ui/errors';
-import MappingSetupProvider from 'ui/utils/mapping_setup';
+import { SavedObjectNotFound } from '../../errors';
+import MappingSetupProvider from '../../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../data_source/search_source';
-import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
 import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
-import { recentlyAccessed } from 'ui/persisted_log';
+import { recentlyAccessed } from '../../persisted_log';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.

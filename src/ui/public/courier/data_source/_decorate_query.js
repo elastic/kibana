@@ -1,18 +1,19 @@
 import _ from 'lodash';
+import chrome from '../../chrome';
 
-export function DecorateQueryProvider(config) {
-  /**
-   * Decorate queries with default parameters
-   * @param {query} query object
-   * @returns {object}
-   */
-  return function (query) {
-    const queryOptions = config.get('query:queryString:options');
+const config = chrome.getUiSettingsClient();
 
-    if (_.has(query, 'query_string.query')) {
-      _.extend(query.query_string, queryOptions);
-    }
+/**
+ * Decorate queries with default parameters
+ * @param {query} query object
+ * @returns {object}
+ */
+export function decorateQuery(query) {
+  const queryOptions = config.get('query:queryString:options');
 
-    return query;
-  };
+  if (_.has(query, 'query_string.query')) {
+    _.extend(query.query_string, queryOptions);
+  }
+
+  return query;
 }

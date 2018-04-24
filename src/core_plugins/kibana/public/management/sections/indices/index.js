@@ -3,7 +3,7 @@ import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
+import indexTemplate from './index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 

@@ -8,14 +8,15 @@
  */
 
 import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
-import { AggConfig } from 'ui/vis/agg_config';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { IndexedArray } from '../indexed_array';
+import { AggConfig } from './agg_config';
+import { aggTypes } from '../agg_types';
+import { createLegacyClass } from '../utils/legacy_class';
 
-export function VisAggConfigsProvider(Private) {
-  AggConfig.aggTypes = Private(AggTypesIndexProvider);
+export function VisAggConfigsProvider() {
+  AggConfig.aggTypes = aggTypes;
 
-  _.class(AggConfigs).inherits(IndexedArray);
+  createLegacyClass(AggConfigs).inherits(IndexedArray);
   function AggConfigs(vis, configStates) {
     const self = this;
     self.vis = vis;

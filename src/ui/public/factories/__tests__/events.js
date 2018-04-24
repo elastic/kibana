@@ -3,8 +3,9 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/private';
-import { EventsProvider } from 'ui/events';
+import '../../private';
+import { EventsProvider } from '../../events';
+import { createLegacyClass } from '../../utils/legacy_class';
 
 describe('Events', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -30,7 +31,7 @@ describe('Events', function () {
   });
 
   it('should work with inherited objects', function () {
-    _.class(MyEventedObject).inherits(Events);
+    createLegacyClass(MyEventedObject).inherits(Events);
     function MyEventedObject() {
       MyEventedObject.Super.call(this);
     }

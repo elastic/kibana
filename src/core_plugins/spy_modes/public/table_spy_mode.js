@@ -1,6 +1,6 @@
 // import 'ui/agg_table';
 import { tabifyAggResponse } from 'ui/agg_response/tabify/tabify';
-import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
+import tableSpyModeTemplate from './table_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 function VisSpyTableProvider(Notifier, $filter, $rootScope) {

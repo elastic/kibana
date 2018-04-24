@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { VisTypeProvider } from 'ui/vis/vis_types';
+import { VisTypeProvider } from './';
 
 export function ReactVisTypeProvider(Private, getAppState, config) {
   const VisType = Private(VisTypeProvider);
