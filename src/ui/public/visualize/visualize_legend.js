@@ -89,7 +89,7 @@ uiModules.get('kibana')
             case 'top':
               return 'legend-value-details-top';
             case 'bottom':
-              return 'legend-value-details';
+              return 'legend-value-details-bottom';
             case 'left':
               return 'legend-value-details';
             case 'right':
