@@ -146,13 +146,7 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_search_template', {
-    methods: ['GET'],
-    patterns: [
-      '{indices}/{types}/_search/template',
-      '{indices}/_search/template',
-      '_search/template'
-    ],
+  api.addEndpointDescription('search_template', {
     data_autocomplete_rules: {
       'template': {
         __one_of: [
@@ -164,36 +158,16 @@ export default function (api) {
     }
   });
 
-  api.addEndpointDescription('_render_search_template', {
-    methods: ['GET'],
-    patterns: [
-      '_render/template'
-    ],
+  api.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
       __one_of: [
-        { 'inline': { __scope_link: '_search' } },
+        { 'inline': { __scope_link: 'search' } },
         { __scope_link: 'GLOBAL.script' }
       ],
       'params': {}
     }
   });
 
-  api.addEndpointDescription('_render_search_template_with_id', {
-    methods: ['GET'],
-    patterns: [
-      '_render/template/{id}'
-    ],
-    data_autocomplete_rules: {
-      'params': {}
-    }
-  });
-
-  api.addEndpointDescription('_get_delete_search_template', {
-    methods: ['GET', 'DELETE'],
-    patterns: [
-      '_search/template/{id}'
-    ]
-  });
 
   api.addEndpointDescription('_search/template/{id}', {
     data_autocomplete_rules: {
