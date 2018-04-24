@@ -1,8 +1,12 @@
 const map = require('through2-map').obj;
 const gitInfo = require('./git_info');
 
-module.exports = function rewritePackage(buildSource, buildVersion, kibanaVersion) {
-  return map(function (file) {
+module.exports = function rewritePackage(
+  buildSource,
+  buildVersion,
+  kibanaVersion
+) {
+  return map(function(file) {
     if (file.basename === 'package.json' && file.dirname === buildSource) {
       const pkg = JSON.parse(file.contents.toString('utf8'));
 
@@ -15,7 +19,7 @@ module.exports = function rewritePackage(buildSource, buildVersion, kibanaVersio
       // append build info
       pkg.build = {
         git: gitInfo(buildSource),
-        date: new Date().toString()
+        date: new Date().toString(),
       };
 
       // remove development properties from the package file
