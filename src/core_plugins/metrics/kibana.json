@@ -1,0 +1,8 @@
+{
+  "id": "metrics",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch"
+  ]
+}

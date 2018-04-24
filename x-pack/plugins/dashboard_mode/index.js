@@ -18,12 +18,10 @@ import {
 // Copied largely from plugins/kibana/index.js. The dashboard viewer includes just the dashboard section of
 // the standard kibana plugin.  We don't want to include code for the other links (visualize, dev tools, etc)
 // since it's view only, but we want the urls to be the same, so we are using largely the same setup.
-export function dashboardMode(kibana) {
+export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
-    id: 'dashboard_mode',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {

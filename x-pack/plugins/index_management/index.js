@@ -10,13 +10,10 @@ import { registerMappingRoute } from './server/routes/api/mapping';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { PLUGIN } from './common/constants';
 
-export function indexManagement(kibana)  {
+export default function (kibana)  {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       managementSections: [
         'plugins/index_management',

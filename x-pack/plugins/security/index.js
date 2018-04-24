@@ -18,11 +18,9 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 
-export const security = (kibana) => new kibana.Plugin({
-  id: 'security',
+export default (kibana) => new kibana.Plugin({
   configPrefix: 'xpack.security',
   publicDir: resolve(__dirname, 'public'),
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
     return Joi.object({

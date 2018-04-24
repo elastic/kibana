@@ -24,12 +24,10 @@ const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
 
-export const reporting = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    id: 'reporting',
     configPrefix: 'xpack.reporting',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
       navbarExtensions: [

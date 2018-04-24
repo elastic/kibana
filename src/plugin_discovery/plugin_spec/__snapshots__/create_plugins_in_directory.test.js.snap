@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugin discovery/plugins in directory createPluginsInDirectory$() errors emitted as { error } results ./relative path 1`] = `[TypeError: path must be absolute]`;
+
+exports[`plugin discovery/plugins in directory createPluginsInDirectory$() errors emitted as { error } results non-existent path 1`] = `[Error: ENOENT: no such file or directory, scandir '<PLUGINS>/notreal']`;
+
+exports[`plugin discovery/plugins in directory createPluginsInDirectory$() errors emitted as { error } results path to a file 1`] = `[Error: ENOTDIR: not a directory, scandir '<PLUGINS>/index.js']`;
+
+exports[`plugin discovery/plugins in directory createPluginsInDirectory$() errors emitted as { error } results relative path 1`] = `[TypeError: path must be absolute]`;
+
+exports[`plugin discovery/plugins in directory createPluginsInDirectory$() errors emitted as { error } results undefined path 1`] = `[TypeError: path must be a string]`;

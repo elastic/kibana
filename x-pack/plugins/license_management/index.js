@@ -5,14 +5,11 @@
  */
 
 import { resolve } from 'path';
-import { PLUGIN } from './common/constants';
 import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from "./server/routes/api/license/";
 
-export function licenseManagement(kibana)  {
+export default function (kibana)  {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
     uiExports: {
       managementSections: [
         'plugins/license_management',

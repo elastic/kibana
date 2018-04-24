@@ -17,7 +17,6 @@ export class Plugin {
   constructor(kbnServer, spec) {
     this.kbnServer = kbnServer;
     this.spec = spec;
-    this.pkg = spec.getPkg();
     this.path = spec.getPath();
     this.id = spec.getId();
     this.version = spec.getVersion();
@@ -94,7 +93,10 @@ export class Plugin {
   }
 
   toJSON() {
-    return this.pkg;
+    return {
+      id: this.id,
+      version: this.version,
+    };
   }
 
   toString() {

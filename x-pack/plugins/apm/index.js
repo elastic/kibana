@@ -10,10 +10,8 @@ import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
 
-export function apm(kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-    id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),
 

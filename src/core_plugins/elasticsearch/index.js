@@ -14,7 +14,6 @@ const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana'],
     config(Joi) {
       const { array, boolean, number, object, string, ref } = Joi;
 

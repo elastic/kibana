@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const cloud = (kibana) => {
+export default function (kibana) {
   return new kibana.Plugin({
-    id: 'cloud',
     configPrefix: 'xpack.cloud',
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
       injectDefaultVars(server, options) {
@@ -27,4 +24,4 @@ export const cloud = (kibana) => {
       }).default();
     },
   });
-};
+}

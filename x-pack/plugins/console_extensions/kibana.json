@@ -1,0 +1,8 @@
+{
+  "id": "console_extensions",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch"
+  ]
+}

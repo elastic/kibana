@@ -1,0 +1,9 @@
+{
+  "id": "reporting",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch",
+    "xpack_main"
+  ]
+}

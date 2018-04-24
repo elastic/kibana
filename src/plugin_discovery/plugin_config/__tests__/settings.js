@@ -1,25 +1,19 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { PluginPack } from '../../plugin_pack';
+import { PluginSpec } from '../../plugin_spec';
 import { getSettings } from '../settings';
 
 describe('plugin_discovery/settings', () => {
-  const pluginSpec = new PluginPack({
-    path: '/dev/null',
-    pkg: {
-      name: 'test',
-      version: 'kibana',
-    },
-    provider: ({ Plugin }) => new Plugin({
-      configPrefix: 'a.b.c',
-      deprecations: ({ rename }) => [
-        rename('foo', 'bar')
-      ]
-    }),
-  })
-    .getPluginSpecs()
-    .pop();
+  const pluginSpec = new PluginSpec('/dev/null', {
+    id: 'test',
+    version: 'kibana',
+  }, {
+    configPrefix: 'a.b.c',
+    deprecations: ({ rename }) => [
+      rename('foo', 'bar')
+    ]
+  });
 
   describe('getSettings()', () => {
     it('reads settings from config prefix', async () => {

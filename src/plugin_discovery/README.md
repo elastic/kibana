@@ -1,6 +1,6 @@
 # Plugin Discovery
 
-The plugin discovery module defines the core plugin loading logic used by the Kibana server. It exports functions for
+The plugin discovery module defines the core plugin loading logic used by the Kibana server.
 
 
 ## `findPluginSpecs(settings, [config])`
@@ -17,9 +17,7 @@ Finds [`PluginSpec`][PluginSpec] objects
 
 If you *never* subscribe to any of the Observables then plugin discovery won't actually run.
 
- - `pack$`: emits every [`PluginPack`][PluginPack] found
  - `invalidDirectoryError$: Observable<Error>`: emits [`InvalidDirectoryError`][Errors]s caused by `settings.plugins.scanDirs` values that don't point to actual directories. `findPluginSpecs()` will not abort when this error is encountered.
- - `invalidPackError$: Observable<Error>`: emits [`InvalidPackError`][Errors]s caused by children of `settings.plugins.scanDirs` or `settings.plugins.paths` values which don't meet the requirements of a [`PluginPack`][PluginPack] (probably missing a `package.json`). `findPluginSpecs()` will not abort when this error is encountered.
  - `deprecation$: Observable<string>`: emits deprecation warnings that are produces when reading each [`PluginPack`][PluginPack]'s configuration
  - `extendedConfig$: Observable<Config>`: emits the [`Config`][Config] service that was passed to `findPluginSpecs()` (or created internally if none was passed) after it has been extended with the configuration from each plugin
  - `spec$: Observable<PluginSpec>`: emits every *enabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
@@ -42,27 +40,10 @@ for (const warning of await deprecation$.toArray().toPromise()) {
 }
 ```
 
-Get the packs but fail if any packs are invalid:
-```js
-const { pack$, invalidDirectoryError$ } = findPluginSpecs(settings);
-const packs = await Observable.merge(
-  pack$.toArray(),
-
-  // if we ever get an InvalidDirectoryError, throw it
-  // into the stream so that all streams are unsubscribed,
-  // the discovery process is aborted, and the promise rejects
-  invalidDirectoryError$.map(error => {
-    throw error
-  }),
-).toPromise()
-```
-
 Handle everything
 ```js
 const {
-  pack$,
   invalidDirectoryError$,
-  invalidPackError$,
   deprecation$,
   extendedConfig$,
   spec$,
@@ -71,14 +52,8 @@ const {
 } = findPluginSpecs(settings);
 
 Observable.merge(
-  pack$
-    .do(pluginPack => console.log('Found plugin pack', pluginPack)),
-
   invalidDirectoryError$
     .do(error => console.log('Invalid directory error', error)),
-
-  invalidPackError$
-    .do(error => console.log('Invalid plugin pack error', error)),
 
   deprecation$
     .do(msg => console.log('DEPRECATION:', msg)),
@@ -122,19 +97,3 @@ reducer(
   pluginSpec: PluginSpec
 )
 ```
-
-## `new PluginPack(options)` class
-
-Only exported so that `PluginPack` instances can be created in tests and used in place of on-disk plugin fixtures. Use `findPluginSpecs()`, or the cached result of a call to `findPluginSpecs()` (like `kbnServer.pluginSpecs`) any time you might need access to `PluginPack` objects in distributed code.
-
-### params
-
- - `options.path`: absolute path to where this plugin pack was found, this is normally a direct child of `./src/core_plugins` or `./plugins`
- - `options.pkg`: the parsed `package.json` for this pack, used for defaults in `PluginSpec` objects defined by this pack
- - `options.provider`: the default export of the pack, a function which is called with the `PluginSpec` class which should return one or more `PluginSpec` objects.
-
-[PluginPack]: ./plugin_pack/plugin_pack.js "PluginPath class definition"
-[PluginSpec]: ./plugin_spec/plugin_spec.js "PluginSpec class definition"
-[Errors]: ./errors.js "PluginDiscover specific error types"
-[KbnServer]: ../server/kbn_server.js "KbnServer class definition"
-[Config]: ../server/config/config.js "KbnServer/Config class definition"
