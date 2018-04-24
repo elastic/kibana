@@ -21,7 +21,8 @@ export class VegaView extends VegaBaseView {
       view.finalize();
     });
 
-    await view.runAsync();
     this.setView(view);
+
+    await view.runAsync();
   }
 }
