@@ -20,7 +20,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import Select from 'react-select';
+import {
+  EuiComboBox,
+} from '@elastic/eui';
 import calculateSiblings from '../lib/calculate_siblings';
 import calculateLabel from '../../../common/calculate_label';
 import basicAggs from '../../../common/basic_aggs';
@@ -86,14 +88,28 @@ function MetricSelect(props) {
     const label = calculateLabel(row, metrics);
     return { value: row.id, label };
   });
+  const allOptions = [...options, ...props.additionalOptions, ...percentileOptions];
+
+  const selectedOption = allOptions.find(option => {
+    return value === option.value;
+  });
+  const selectedOptions = selectedOption ? [selectedOption] : [];
+
+  const handleChange = (selectedOptions) => {
+    if (!selectedOptions || selectedOptions.length <= 0) {
+      onChange();
+      return;
+    }
+    onChange(selectedOptions[0]);
+  };
 
   return (
-    <Select
-      aria-label="Select metric"
+    <EuiComboBox
       placeholder="Select metric..."
-      options={[...options, ...props.additionalOptions, ...percentileOptions]}
-      value={value}
-      onChange={onChange}
+      options={allOptions}
+      selectedOptions={selectedOptions}
+      onChange={handleChange}
+      singleSelection={true}
     />
   );
 }

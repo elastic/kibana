@@ -41,7 +41,10 @@ function FieldSelect(props) {
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
   const handleChange = (selectedOptions) => {
-    if (!selectedOptions || selectedOptions.length <= 0) return;
+    if (!selectedOptions || selectedOptions.length <= 0) {
+      props.onChange();
+      return;
+    }
     props.onChange(selectedOptions[0]);
   };
 
