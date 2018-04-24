@@ -123,11 +123,24 @@ export class Config {
     return clone(value);
   }
 
+  getDefault(key) {
+    const schemaDescription = Joi.describe(this.getSchema());
+    const parts = key.split('.');
+    const path = `children.${parts.join('.children.')}`;
+    const description = _.get(schemaDescription, path);
+    if (!description) {
+      throw new Error('Unknown config key: ' + key);
+    }
+
+    return _.get(description, 'flags.default');
+  }
+
   has(key) {
     function has(key, schema, path) {
       path = path || [];
       // Catch the partial paths
       if (path.join('.') === key) return true;
+
       // Only go deep on inner objects with children
       if (_.size(schema._inner.children)) {
         for (let i = 0; i < schema._inner.children.length; i++) {
@@ -174,4 +187,6 @@ export class Config {
 
     return this[schema];
   }
+
+
 }
