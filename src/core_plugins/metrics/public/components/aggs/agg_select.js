@@ -120,7 +120,7 @@ function AggSelect(props) {
 
   const handleChange = selectedOptions => {
     if (!selectedOptions || selectedOptions.length <= 0) return;
-    if (selectedOptions[0].value) props.onChange(selectedOptions[0]);
+    props.onChange(selectedOptions);
   };
 
   return (

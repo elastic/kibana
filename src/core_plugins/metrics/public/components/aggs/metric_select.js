@@ -95,20 +95,12 @@ function MetricSelect(props) {
   });
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
-  const handleChange = (selectedOptions) => {
-    if (!selectedOptions || selectedOptions.length <= 0) {
-      onChange();
-      return;
-    }
-    onChange(selectedOptions[0]);
-  };
-
   return (
     <EuiComboBox
       placeholder="Select metric..."
       options={allOptions}
       selectedOptions={selectedOptions}
-      onChange={handleChange}
+      onChange={onChange}
       singleSelection={true}
     />
   );
