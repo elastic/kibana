@@ -109,7 +109,8 @@ describe('Metrics', function () {
             'heap_used_in_bytes': 130553400,
             'resident_set_size_in_bytes': 193716224,
           },
-          'pid': 8675309
+          'pid': 8675309,
+          'uptime_ms': 5000000
         },
         'requests': {
           'disconnects': 0,
@@ -143,7 +144,7 @@ describe('Metrics', function () {
       };
 
       expect(metrics.captureEvent(hapiEvent)).toEqual({
-        process: { mem: {}, pid: 8675309 },
+        process: { mem: {}, pid: 8675309, uptime_ms: 5000000 },
         os: {
           cpu: { load_average: {} },
           mem: { free_in_bytes: 12, total_in_bytes: 24 },

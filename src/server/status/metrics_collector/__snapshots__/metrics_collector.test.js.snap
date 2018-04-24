@@ -28,6 +28,7 @@ Object {
       "resident_set_size_in_bytes": 36085760,
     },
     "pid": 7777,
+    "uptime_ms": 6666000,
   },
   "requests": Object {
     "disconnects": 0,
@@ -87,6 +88,7 @@ Object {
       "resident_set_size_in_bytes": 36085760,
     },
     "pid": 7777,
+    "uptime_ms": 6666000,
   },
   "requests": Object {
     "disconnects": 0,
@@ -146,6 +148,7 @@ Object {
       "resident_set_size_in_bytes": 36085760,
     },
     "pid": 7777,
+    "uptime_ms": 6666000,
   },
   "requests": Object {
     "disconnects": 0,
@@ -205,6 +208,7 @@ Object {
       "resident_set_size_in_bytes": 35307520,
     },
     "pid": 7777,
+    "uptime_ms": 6666000,
   },
   "requests": Object {
     "disconnects": 0,

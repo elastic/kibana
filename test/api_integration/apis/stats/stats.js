@@ -10,7 +10,6 @@ const assertStatsAndMetrics = body => {
 
   expect(body.name).to.be.a('string');
   expect(body.uuid).to.be.a('string');
-  expect(body.uptime_in_millis).to.be.an('number');
 
   expect(body.version.number).to.be.a('string');
 
@@ -19,6 +18,7 @@ const assertStatsAndMetrics = body => {
   expect(body.process.mem.heap_used_in_bytes).to.be.an('number');
   expect(body.process.mem.resident_set_size_in_bytes).to.be.an('number');
   expect(body.process.pid).to.be.an('number');
+  expect(body.process.uptime_ms).to.be.an('number');
 
   expect(body.os.cpu.load_average['1m']).to.be.a('number');
 

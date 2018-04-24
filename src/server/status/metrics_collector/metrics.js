@@ -38,7 +38,7 @@ export class Metrics {
     const metrics = {
       last_updated: timestamp,
       collection_interval_in_millis: this.config.get('ops.interval'),
-      uptime_in_millis: process.uptime() * 1000,
+      uptime_in_millis: process.uptime() * 1000, // TODO: deprecate this field, should be process.uptime_ms
     };
 
     return merge(metrics, event, cgroup);
@@ -59,7 +59,8 @@ export class Metrics {
           resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
           external_in_bytes: get(hapiEvent, 'psmem.external')
         },
-        pid: process.pid
+        pid: process.pid,
+        uptime_ms: process.uptime() * 1000
       },
       os: {
         cpu: {
@@ -75,6 +76,7 @@ export class Metrics {
         }
       },
       response_times: {
+        // TODO: rename to use `_ms` suffix per beats naming conventions
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
         max_in_millis: maxInMillis
       },
