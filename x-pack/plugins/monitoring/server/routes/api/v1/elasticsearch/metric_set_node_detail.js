@@ -63,10 +63,8 @@ export const metricSets = {
     },
     {
       keys: [
-        'node_index_threads_bulk_queue',
-        'node_index_threads_bulk_rejected',
-        'node_index_threads_index_queue',
-        'node_index_threads_index_rejected'
+        'node_index_threads_write_queue',
+        'node_index_threads_write_rejected'
       ],
       name: 'node_index_threads'
     },
