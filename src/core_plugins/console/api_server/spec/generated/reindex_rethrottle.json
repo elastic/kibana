@@ -1,0 +1,15 @@
+{
+  "reindex_rethrottle": {
+    "url_params": {
+      "requests_per_second": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_reindex/{task_id}/_rethrottle",
+      "_update_by_query/{task_id}/_rethrottle",
+      "_delete_by_query/{task_id}/_rethrottle"
+    ]
+  }
+}

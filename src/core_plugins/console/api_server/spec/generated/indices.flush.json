@@ -1,5 +1,5 @@
 {
-  "_flush": {
+  "indices.flush": {
     "url_params": {
       "force": "__flag__",
       "wait_if_ongoing": "__flag__",

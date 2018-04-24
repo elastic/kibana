@@ -1,5 +1,5 @@
 {
-  "_validate/query": {
+  "indices.validate_query": {
     "url_params": {
       "explain": "__flag__",
       "ignore_unavailable": "__flag__",

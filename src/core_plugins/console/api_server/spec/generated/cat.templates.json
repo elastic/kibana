@@ -1,5 +1,5 @@
 {
-  "_cat/templates": {
+  "cat.templates": {
     "url_params": {
       "format": "",
       "local": "__flag__",

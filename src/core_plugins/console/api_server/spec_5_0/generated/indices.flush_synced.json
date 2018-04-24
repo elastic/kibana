@@ -1,0 +1,22 @@
+{
+  "_flush/synced": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_flush/synced",
+      "{indices}/_flush/synced"
+    ]
+  }
+}

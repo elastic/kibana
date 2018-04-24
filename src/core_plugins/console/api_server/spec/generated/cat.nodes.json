@@ -1,5 +1,5 @@
 {
-  "_cat/nodes": {
+  "cat.nodes": {
     "url_params": {
       "format": "",
       "full_id": "__flag__",

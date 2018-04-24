@@ -1,0 +1,18 @@
+{
+  "_cluster/reroute": {
+    "url_params": {
+      "dry_run": "__flag__",
+      "explain": "__flag__",
+      "retry_failed": "__flag__",
+      "metric": [],
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_cluster/reroute"
+    ]
+  }
+}

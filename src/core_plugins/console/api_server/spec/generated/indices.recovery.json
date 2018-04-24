@@ -1,5 +1,5 @@
 {
-  "_recovery": {
+  "indices.recovery": {
     "url_params": {
       "detailed": "__flag__",
       "active_only": "__flag__"

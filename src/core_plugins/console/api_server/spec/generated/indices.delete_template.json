@@ -1,5 +1,5 @@
 {
-  "_template/{name}": {
+  "indices.delete_template": {
     "url_params": {
       "timeout": "",
       "master_timeout": ""

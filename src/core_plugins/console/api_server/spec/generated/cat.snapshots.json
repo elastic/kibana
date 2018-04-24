@@ -1,5 +1,5 @@
 {
-  "_cat/snapshots": {
+  "cat.snapshots": {
     "url_params": {
       "format": "",
       "ignore_unavailable": "__flag__",

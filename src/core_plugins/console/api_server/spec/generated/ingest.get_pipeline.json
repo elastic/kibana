@@ -1,0 +1,14 @@
+{
+  "ingest.get_pipeline": {
+    "url_params": {
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/pipeline",
+      "_ingest/pipeline/{id}"
+    ]
+  }
+}

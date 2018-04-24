@@ -1,0 +1,20 @@
+{
+  "{index}": {
+    "patterns": [
+      "{index}"
+    ],
+    "data_autocomplete_rules": {
+      "mappings": {
+        "__scope_link": "_put_mapping"
+      },
+      "settings": {
+        "__scope_link": "_settings_autocomplete"
+      },
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      }
+    }
+  }
+}

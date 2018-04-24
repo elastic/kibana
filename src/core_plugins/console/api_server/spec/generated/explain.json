@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_explain": {
+  "explain": {
     "url_params": {
       "analyze_wildcard": "__flag__",
       "analyzer": "",

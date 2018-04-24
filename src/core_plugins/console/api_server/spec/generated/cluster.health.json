@@ -1,5 +1,5 @@
 {
-  "_cluster/health": {
+  "cluster.health": {
     "url_params": {
       "level": [
         "cluster",

@@ -186,7 +186,7 @@ export default function (api) {
     data_autocomplete_rules: {
       'template': {
         __one_of: [
-          { __scope_link: '_search' },
+          { __scope_link: 'search' },
           { __scope_link: 'GLOBAL.script' }
         ]
       },
@@ -232,7 +232,7 @@ export default function (api) {
     ],
     data_autocomplete_rules: {
       'template': {
-        __scope_link: '_search'
+        __scope_link: 'search'
       }
     }
   });

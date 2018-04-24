@@ -1,7 +1,8 @@
 {
-  "_settings": {
+  "indices.put_settings": {
     "url_params": {
       "master_timeout": "",
+      "timeout": "",
       "preserve_existing": "__flag__",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",

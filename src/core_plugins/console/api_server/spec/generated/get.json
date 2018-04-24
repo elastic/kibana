@@ -1,6 +1,7 @@
 {
-  "{index}/{type}/{id}": {
+  "get": {
     "url_params": {
+      "include_type_name": "",
       "stored_fields": [],
       "parent": "",
       "preference": "random",
@@ -22,7 +23,8 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/{type}/{id}"
+      "{indices}/{type}/{id}",
+      "{indices}/_doc/{id}"
     ]
   }
 }

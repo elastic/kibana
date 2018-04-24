@@ -1,5 +1,5 @@
 {
-  "{index}": {
+  "indices.delete": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",

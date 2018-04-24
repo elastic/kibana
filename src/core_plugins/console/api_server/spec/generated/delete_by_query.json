@@ -1,5 +1,5 @@
 {
-  "{index}/_delete_by_query": {
+  "delete_by_query": {
     "url_params": {
       "analyzer": "",
       "analyze_wildcard": "__flag__",

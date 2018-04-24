@@ -1,5 +1,5 @@
 {
-  "_cluster/stats": {
+  "cluster.stats": {
     "url_params": {
       "flat_settings": "__flag__",
       "timeout": ""

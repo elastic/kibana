@@ -1,5 +1,5 @@
 {
-  "{index}": {
+  "indices.exists": {
     "url_params": {
       "local": "__flag__",
       "ignore_unavailable": "__flag__",

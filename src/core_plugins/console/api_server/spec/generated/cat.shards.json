@@ -1,5 +1,5 @@
 {
-  "_cat/shards": {
+  "cat.shards": {
     "url_params": {
       "format": "",
       "bytes": [

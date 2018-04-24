@@ -1,7 +1,6 @@
 {
-  "_cache/clear": {
+  "indices.clear_cache": {
     "url_params": {
-      "field_data": "__flag__",
       "fielddata": "__flag__",
       "fields": [],
       "query": "__flag__",
@@ -14,8 +13,6 @@
         "all"
       ],
       "index": [],
-      "recycler": "__flag__",
-      "request_cache": "__flag__",
       "request": "__flag__"
     },
     "methods": [

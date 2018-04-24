@@ -1,5 +1,5 @@
 {
-  "_cat/repositories": {
+  "cat.repositories": {
     "url_params": {
       "format": "",
       "local": "__flag__",

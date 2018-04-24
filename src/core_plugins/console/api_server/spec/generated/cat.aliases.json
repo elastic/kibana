@@ -1,5 +1,5 @@
 {
-  "_cat/aliases": {
+  "cat.aliases": {
     "url_params": {
       "format": "",
       "local": "__flag__",

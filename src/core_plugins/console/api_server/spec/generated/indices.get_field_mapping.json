@@ -1,5 +1,5 @@
 {
-  "_mapping/field/{fields}": {
+  "indices.get_field_mapping": {
     "url_params": {
       "include_defaults": "__flag__",
       "ignore_unavailable": "__flag__",

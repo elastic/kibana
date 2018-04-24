@@ -1,0 +1,16 @@
+{
+  "scroll": {
+    "url_params": {
+      "scroll": "",
+      "scroll_id": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_search/scroll",
+      "_search/scroll/{scroll_id}"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "tasks.get": {
+    "url_params": {
+      "wait_for_completion": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_tasks/{task_id}"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ingest.delete_pipeline": {
+    "url_params": {
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ingest/pipeline/{id}"
+    ]
+  }
+}

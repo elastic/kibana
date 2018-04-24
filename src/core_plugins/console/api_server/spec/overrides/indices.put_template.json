@@ -1,5 +1,5 @@
 {
-  "_template/{name}": {
+  "indices.put_template": {
     "data_autocomplete_rules": {
       "template": "index*",
       "warmers": { "__scope_link": "_warmer" },

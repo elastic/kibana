@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_source": {
+  "exists_source": {
     "url_params": {
       "parent": "",
       "preference": "random",

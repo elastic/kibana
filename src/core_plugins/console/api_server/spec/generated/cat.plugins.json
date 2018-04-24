@@ -1,5 +1,5 @@
 {
-  "_cat/plugins": {
+  "cat.plugins": {
     "url_params": {
       "format": "",
       "local": "__flag__",

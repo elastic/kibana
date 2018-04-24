@@ -1,5 +1,5 @@
 {
-  "{index}/_alias/{name}": {
+  "indices.put_alias": {
     "url_params": {
       "timeout": "",
       "master_timeout": ""

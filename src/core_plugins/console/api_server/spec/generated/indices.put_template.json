@@ -1,5 +1,5 @@
 {
-  "_template/{name}": {
+  "indices.put_template": {
     "url_params": {
       "order": "",
       "create": "__flag__",

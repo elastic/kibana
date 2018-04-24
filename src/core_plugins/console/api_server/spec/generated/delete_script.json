@@ -1,5 +1,5 @@
 {
-  "_scripts/{id}": {
+  "delete_script": {
     "url_params": {
       "timeout": "",
       "master_timeout": ""

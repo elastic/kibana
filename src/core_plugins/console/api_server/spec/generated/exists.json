@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}": {
+  "exists": {
     "url_params": {
       "stored_fields": [],
       "parent": "",

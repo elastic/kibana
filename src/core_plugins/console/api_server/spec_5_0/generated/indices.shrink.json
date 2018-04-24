@@ -1,0 +1,16 @@
+{
+  "{index}/_shrink/{target}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": "",
+      "wait_for_active_shards": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_shrink/{target}"
+    ]
+  }
+}

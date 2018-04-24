@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_create": {
+  "create": {
     "url_params": {
       "wait_for_active_shards": "",
       "parent": "",
@@ -10,8 +10,6 @@
       ],
       "routing": "",
       "timeout": "",
-      "timestamp": "",
-      "ttl": "",
       "version": "",
       "version_type": [
         "internal",

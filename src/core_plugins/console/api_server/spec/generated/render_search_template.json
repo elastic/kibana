@@ -1,0 +1,12 @@
+{
+  "render_search_template": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_render/template",
+      "_render/template/{id}"
+    ]
+  }
+}

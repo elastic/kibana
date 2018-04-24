@@ -1,5 +1,5 @@
 {
-  "_stats": {
+  "indices.stats": {
     "url_params": {
       "completion_fields": [],
       "fielddata_fields": [],

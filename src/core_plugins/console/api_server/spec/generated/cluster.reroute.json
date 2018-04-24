@@ -1,5 +1,5 @@
 {
-  "_cluster/reroute": {
+  "cluster.reroute": {
     "url_params": {
       "dry_run": "__flag__",
       "explain": "__flag__",

@@ -1,6 +1,7 @@
 {
-  "{index}/{type}": {
+  "index": {
     "url_params": {
+      "include_type_name": "",
       "wait_for_active_shards": "",
       "op_type": [
         "index",
@@ -14,8 +15,6 @@
       ],
       "routing": "",
       "timeout": "",
-      "timestamp": "",
-      "ttl": "",
       "version": "",
       "version_type": [
         "internal",
@@ -31,7 +30,9 @@
     ],
     "patterns": [
       "{indices}/{type}",
-      "{indices}/{type}/{id}"
+      "{indices}/{type}/{id}",
+      "{indices}/_doc/{id}",
+      "{indices}/_doc"
     ]
   }
 }

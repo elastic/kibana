@@ -1,5 +1,5 @@
 {
-  "_cat/thread_pool": {
+  "cat.thread_pool": {
     "url_params": {
       "format": "",
       "size": [

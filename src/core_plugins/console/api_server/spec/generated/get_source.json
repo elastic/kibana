@@ -1,5 +1,5 @@
 {
-  "{index}/{type}/{id}/_source": {
+  "get_source": {
     "url_params": {
       "parent": "",
       "preference": "random",

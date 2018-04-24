@@ -1,0 +1,22 @@
+{
+  "rank_eval": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_rank_eval",
+      "{indices}/_rank_eval"
+    ]
+  }
+}

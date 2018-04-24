@@ -1,0 +1,14 @@
+{
+  "_template/{name}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_template/{name}"
+    ]
+  }
+}

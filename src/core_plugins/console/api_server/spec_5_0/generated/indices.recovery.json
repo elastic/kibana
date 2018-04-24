@@ -1,0 +1,15 @@
+{
+  "_recovery": {
+    "url_params": {
+      "detailed": "__flag__",
+      "active_only": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_recovery",
+      "{indices}/_recovery"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "{alias}/_rollover": {
+  "indices.rollover": {
     "url_params": {
       "timeout": "",
       "dry_run": "__flag__",

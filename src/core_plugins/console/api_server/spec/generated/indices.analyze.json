@@ -1,5 +1,5 @@
 {
-  "_analyze": {
+  "indices.analyze": {
     "url_params": {
       "index": "",
       "prefer_local": "__flag__",

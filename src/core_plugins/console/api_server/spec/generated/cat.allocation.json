@@ -1,5 +1,5 @@
 {
-  "_cat/allocation": {
+  "cat.allocation": {
     "url_params": {
       "format": "",
       "bytes": [

@@ -1,5 +1,5 @@
 {
-  "_cluster/state": {
+  "cluster.state": {
     "url_params": {
       "local": "__flag__",
       "master_timeout": "",

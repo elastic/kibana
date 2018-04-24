@@ -1,5 +1,5 @@
 {
-  "_cat": {
+  "cat.help": {
     "url_params": {
       "help": "__flag__",
       "s": []

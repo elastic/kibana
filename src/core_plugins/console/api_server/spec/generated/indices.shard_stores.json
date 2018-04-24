@@ -1,5 +1,5 @@
 {
-  "_shard_stores": {
+  "indices.shard_stores": {
     "url_params": {
       "status": [],
       "ignore_unavailable": "__flag__",

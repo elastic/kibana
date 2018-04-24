@@ -1,5 +1,5 @@
 {
-  "_aliases": {
+  "indices.update_aliases": {
     "url_params": {
       "timeout": "",
       "master_timeout": ""

@@ -1,6 +1,5 @@
 {
-  "_scripts/{id}": {
-    "url_params": {},
+  "get_script": {
     "methods": [
       "GET"
     ],

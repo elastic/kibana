@@ -1,0 +1,11 @@
+{
+  "scripts_painless_execute": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_scripts/painless/_execute"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "{index}/_split/{target}": {
+  "indices.split": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",

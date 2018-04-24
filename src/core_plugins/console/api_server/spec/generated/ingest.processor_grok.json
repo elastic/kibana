@@ -1,0 +1,10 @@
+{
+  "ingest.processor_grok": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/processor/grok"
+    ]
+  }
+}

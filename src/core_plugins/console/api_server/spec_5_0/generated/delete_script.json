@@ -1,0 +1,14 @@
+{
+  "_scripts/{id}": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_scripts/{id}"
+    ]
+  }
+}

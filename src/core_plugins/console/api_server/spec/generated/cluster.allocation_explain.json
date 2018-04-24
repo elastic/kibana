@@ -1,5 +1,5 @@
 {
-  "_cluster/allocation/explain": {
+  "cluster.allocation_explain": {
     "url_params": {
       "include_yes_decisions": "__flag__",
       "include_disk_info": "__flag__"

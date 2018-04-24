@@ -1,5 +1,5 @@
 {
-  "_cat/master": {
+  "cat.master": {
     "url_params": {
       "format": "",
       "local": "__flag__",

@@ -1,5 +1,5 @@
 {
-  "{index}/_close": {
+  "indices.close": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",

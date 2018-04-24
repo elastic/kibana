@@ -1,5 +1,5 @@
 {
-  "{index}/_mapping/{type}": {
+  "indices.exists_type": {
     "url_params": {
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",

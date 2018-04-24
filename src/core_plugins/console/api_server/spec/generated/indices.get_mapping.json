@@ -1,6 +1,7 @@
 {
-  "_mapping": {
+  "indices.get_mapping": {
     "url_params": {
+      "include_type_name": "",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [

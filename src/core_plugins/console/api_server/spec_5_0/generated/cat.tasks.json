@@ -1,0 +1,22 @@
+{
+  "_cat/tasks": {
+    "url_params": {
+      "format": "",
+      "node_id": [],
+      "actions": [],
+      "detailed": "__flag__",
+      "parent_node": "",
+      "parent_task": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/tasks"
+    ]
+  }
+}

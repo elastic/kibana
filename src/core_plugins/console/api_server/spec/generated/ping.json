@@ -1,0 +1,10 @@
+{
+  "ping": {
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      ""
+    ]
+  }
+}

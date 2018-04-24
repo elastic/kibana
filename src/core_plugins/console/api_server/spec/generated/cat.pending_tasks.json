@@ -1,5 +1,5 @@
 {
-  "_cat/pending_tasks": {
+  "cat.pending_tasks": {
     "url_params": {
       "format": "",
       "local": "__flag__",

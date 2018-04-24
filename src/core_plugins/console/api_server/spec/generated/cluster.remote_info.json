@@ -1,6 +1,5 @@
 {
-  "_remote/info": {
-    "url_params": {},
+  "cluster.remote_info": {
     "methods": [
       "GET"
     ],

@@ -1,5 +1,5 @@
 {
-  "{index}/_open": {
+  "indices.open": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",

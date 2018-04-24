@@ -1,5 +1,5 @@
 {
-  "_field_caps": {
+  "field_caps": {
     "url_params": {
       "fields": [],
       "ignore_unavailable": "__flag__",

@@ -1,5 +1,5 @@
 {
-  "{index}/_shrink/{target}": {
+  "indices.shrink": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",
