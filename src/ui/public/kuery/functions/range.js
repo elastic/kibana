@@ -3,6 +3,7 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from '../../filter_manager/lib/range';
 import { getFields } from './utils/get_fields';
+import { FieldFormat } from '../../../field_formats/field_format';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -39,7 +40,10 @@ export function toElasticsearchQuery(node, indexPattern) {
     if (field.scripted) {
       return {
         script: {
-          ...getRangeScript(field, queryParams)
+          ...getRangeScript(
+            { ...field, format: new FieldFormat() },
+            queryParams
+          ),
         }
       };
     }
