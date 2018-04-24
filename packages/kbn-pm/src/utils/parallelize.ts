@@ -5,21 +5,20 @@ export async function parallelizeBatches<T>(
   for (const batch of batches) {
     // We need to make sure the entire batch has completed before we can move on
     // to the next batch
-    await parallellize(batch, fn);
+    await parallelize(batch, fn);
   }
 }
 
-export function parallellize<T>(
+export async function parallelize<T>(
   items: T[],
   fn: (item: T) => Promise<void>,
   concurrency = 4
 ) {
-  return new Promise((resolve, reject) => {
-    if (items.length === 0) {
-      resolve();
-      return;
-    }
+  if (items.length === 0) {
+    return;
+  }
 
+  return new Promise<void>((resolve, reject) => {
     let activePromises = 0;
     const values = items.slice(0);
 
