@@ -2,46 +2,40 @@
 
 exports[`Server logging configuration should be reloadable via SIGHUP process signaling 1`] = `
 Object {
-  "@timestamp": "## @timestamp ##",
-  "message": "Plugin initialization disabled.",
-  "pid": "## PID ##",
-  "tags": Array [
-    "info",
-  ],
-  "type": "log",
-}
-`;
-
-exports[`Server logging configuration should be reloadable via SIGHUP process signaling 2`] = `
-Object {
-  "@timestamp": "## @timestamp ##",
-  "message": "Server running at http://localhost:8274",
-  "pid": "## PID ##",
-  "tags": Array [
-    "listening",
-    "info",
-  ],
-  "type": "log",
-}
-`;
-
-exports[`Server logging configuration should be reloadable via SIGHUP process signaling 3`] = `
-Object {
-  "@timestamp": "## @timestamp ##",
-  "message": "Reloading logging configuration due to SIGHUP.",
-  "pid": "## PID ##",
-  "tags": Array [
-    "info",
-    "config",
-  ],
-  "type": "log",
-}
-`;
-
-exports[`Server logging configuration should be reloadable via SIGHUP process signaling 4`] = `
-Object {
-  "@timestamp": "## @timestamp ##",
-  "message": "New logging configuration:
+  "code": 0,
+  "lines": Array [
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "Plugin initialization disabled.",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "Server running at http://localhost:8274",
+      "pid": "## PID ##",
+      "tags": Array [
+        "listening",
+        "info",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "Reloading logging configuration due to SIGHUP.",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "config",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "New logging configuration:
 {
   \\"ops\\": {
     \\"interval\\": 5000
@@ -57,13 +51,14 @@ Object {
     \\"useUTC\\": true
   }
 }",
-  "pid": "## PID ##",
-  "tags": Array [
-    "info",
-    "config",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "config",
+      ],
+      "type": "log",
+    },
+    "  log   [## timestamp ##] [info][config] Reloaded logging configuration due to SIGHUP.",
   ],
-  "type": "log",
 }
 `;
-
-exports[`Server logging configuration should be reloadable via SIGHUP process signaling 5`] = `"  log   [## timestamp ##] [info][config] Reloaded logging configuration due to SIGHUP."`;

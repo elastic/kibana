@@ -8,11 +8,15 @@ module.exports = function gitInfo(rootPath) {
       stdio: ['ignore', 'pipe', 'ignore'],
       encoding: 'utf8',
     });
-    const logLine = execFileSync('git', ['log', '--pretty=%h' + LOG_SEPARATOR + '%cD', '-n', '1'], {
-      cwd: rootPath,
-      stdio: ['ignore', 'pipe', 'ignore'],
-      encoding: 'utf8',
-    }).split(LOG_SEPARATOR);
+    const logLine = execFileSync(
+      'git',
+      ['log', '--pretty=%h' + LOG_SEPARATOR + '%cD', '-n', '1'],
+      {
+        cwd: rootPath,
+        stdio: ['ignore', 'pipe', 'ignore'],
+        encoding: 'utf8',
+      }
+    ).split(LOG_SEPARATOR);
 
     return {
       count: commitCount.trim(),
