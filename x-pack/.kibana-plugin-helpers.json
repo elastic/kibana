@@ -1,5 +1,4 @@
 {
-  "kibanaRoot": "../../kibana",
   "serverTestPatterns": [
     "server/**/__tests__/**/*.js",
     "plugins/**/__tests__/**/*.js",
