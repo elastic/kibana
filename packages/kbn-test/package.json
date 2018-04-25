@@ -10,6 +10,13 @@
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "babel-cli": "^6.26.0"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "babel-cli": "^6.26.0",
+    "getopts": "2.0.0",
+    "glob": "5.0.13",
+    "rxjs": "5.4.3",
+    "tar-fs": "1.13.0",
+    "tmp": "0.0.31",
+    "zlib": "^1.0.5"
   }
 }
