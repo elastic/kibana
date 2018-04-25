@@ -21,6 +21,7 @@ import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
 import { consoleExtensions } from './plugins/console_extensions';
+import { spaces } from './plugins/spaces';
 
 module.exports = function (kibana) {
   return [
@@ -40,6 +41,7 @@ module.exports = function (kibana) {
     licenseManagement(kibana),
     cloud(kibana),
     indexManagement(kibana),
-    consoleExtensions(kibana)
+    consoleExtensions(kibana),
+    spaces(kibana)
   ];
 };
