@@ -69,6 +69,9 @@ export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation
     vertex.stats = {};
   });
 
+  const queue = vertices.find(v => v.id === '__QUEUE__');
+  queue.typeStats = [];
+
   // The statsAggregation object buckets by time first, then by vertex ID. However, the logstashState object (which is part of the
   // stateDocument object) buckets by vertex ID first. The UI desires the latter structure so it can look up stats by vertex. So we
   // transpose statsAggregation to bucket by vertex ID first, then by time. This then allows us to stitch the per-vertex timeseries stats
@@ -82,6 +85,20 @@ export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation
     // Each timeseriesBucket contains a list of vertices and their stats for a single timeseries interval
     const timestamp = timeseriesBucket.key.time_bucket;
     const vertexStatsByIdBuckets = get(timeseriesBucket, 'pipelines.scoped.vertices.vertex_id.buckets', []);
+
+    const queueType = timeseriesBucket.pipelines.scoped.queue_type;
+
+    const queueTypesForTimestamp = queueType.buckets.map(queueTypeBucket => (
+      {
+        type: queueTypeBucket.key,
+        count: queueTypeBucket.doc_count
+      }
+    ));
+
+    queue.typeStats.push({
+      timestamp,
+      types: queueTypesForTimestamp
+    });
 
     vertexStatsByIdBuckets.forEach(vertexStatsBucket => {
       // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval

@@ -109,6 +109,12 @@ function createTimeseriesAggs(pipelineId, pipelineHash, maxBucketSize, timeserie
         }
       },
       aggs: createScopedAgg(pipelineId, pipelineHash, {
+        queue_type: {
+          terms: {
+            field: 'logstash_stats.pipelines.queue.type',
+            size: maxBucketSize
+          }
+        },
         vertices: nestedVertices(maxBucketSize),
         total_processor_duration_stats: {
           stats: {
@@ -128,6 +134,7 @@ function fetchPipelineTimeseriesStats(query, logstashIndexPattern, pipelineId, v
     ignoreUnavailable: true,
     filterPath: [
       'aggregations.by_time.buckets.key.time_bucket',
+      'aggregations.by_time.buckets.pipelines.scoped.queue_type',
       'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.key',
       'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.events_in_total',
       'aggregations.by_time.buckets.pipelines.scoped.vertices.vertex_id.buckets.events_out_total',
