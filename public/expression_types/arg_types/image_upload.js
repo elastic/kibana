@@ -1,28 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, ControlLabel } from 'react-bootstrap';
-import { withState } from 'recompose';
+import { FormGroup, Button } from 'react-bootstrap';
+import { FileUpload } from '../../components/file_upload';
 import { encode } from '../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-const ImageUploadArgInput = ({
-  typeInstance,
-  onAssetAdd,
-  onValueChange,
-  setLoading,
-  isLoading,
-}) => {
-  const { name } = typeInstance;
+class ImageUpload extends React.Component {
+  static propTypes = {
+    onAssetAdd: PropTypes.func.isRequired,
+    onValueChange: PropTypes.func.isRequired,
+    typeInstance: PropTypes.object.isRequired,
+  };
 
-  function handleUpload(ev) {
-    const [upload] = ev.target.files;
-    setLoading(true); // start loading indicator
+  state = {
+    loading: false,
+  };
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _isMounted = true;
+
+  handleUpload = ({ files }) => {
+    const { onAssetAdd, onValueChange } = this.props;
+    const [upload] = files;
+    this.setState({ loading: true }); // start loading indicator
 
     return encode(upload)
       .then(dataurl => onAssetAdd('dataurl', dataurl))
       .then(assetId => {
-        setLoading(false); // stop loading indicator
-
         onValueChange({
           type: 'expression',
           chain: [
@@ -35,36 +42,43 @@ const ImageUploadArgInput = ({
             },
           ],
         });
+
+        // this component can go away when onValueChange is called, check for _isMounted
+        this._isMounted && this.setState({ loading: false }); // set loading state back to false
       });
+  };
+
+  render() {
+    const { typeInstance } = this.props;
+    const isLoading = this.state.loading;
+
+    return (
+      <FormGroup key={typeInstance.name} controlId="formControlsSelect">
+        {isLoading ? (
+          <span>
+            Image uploading <span className="fa fa-spinner fa-pulse" />
+          </span>
+        ) : (
+          <FileUpload onUpload={this.handleUpload}>
+            {({ uploadPrompt, isHovered }) => (
+              <Button
+                bsStyle={isHovered ? 'info' : 'default'}
+                bsSize="small"
+                onClick={uploadPrompt}
+              >
+                {isHovered ? 'Drop to Upload Image' : 'Upload New Image'}
+              </Button>
+            )}
+          </FileUpload>
+        )}
+      </FormGroup>
+    );
   }
-
-  return (
-    <FormGroup key={name} controlId="formControlsSelect">
-      {isLoading && (
-        <ControlLabel>
-          Image uploading <span className="fa fa-spinner fa-pulse" />
-        </ControlLabel>
-      )}
-      <div className="canvas__argtype--image">
-        <input type="file" onChange={handleUpload} disabled={isLoading} />
-      </div>
-    </FormGroup>
-  );
-};
-
-ImageUploadArgInput.propTypes = {
-  onAssetAdd: PropTypes.func.isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  typeInstance: PropTypes.object.isRequired,
-  setLoading: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool,
-};
-
-const EnhancedImageUpload = withState('isLoading', 'setLoading', false)(ImageUploadArgInput);
+}
 
 export const imageUpload = () => ({
   name: 'imageUpload',
   displayName: 'Image Upload',
   help: 'Select or upload an image',
-  template: templateFromReactComponent(EnhancedImageUpload),
+  template: templateFromReactComponent(ImageUpload),
 });
