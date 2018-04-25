@@ -69,6 +69,7 @@ exports[`after fetch hideWriteControls 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={Array []}
     loading={false}
     noItemsMessage={
@@ -190,6 +191,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={Array []}
     loading={false}
     noItemsMessage={
@@ -324,6 +326,7 @@ exports[`after fetch renders table rows 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={
       Array [
         Object {
@@ -479,6 +482,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={
       Array [
         Object {
@@ -603,6 +607,7 @@ exports[`initialFilter 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={Array []}
     loading={true}
     noItemsMessage=""
@@ -714,6 +719,7 @@ exports[`renders table in loading state 1`] = `
         },
       ]
     }
+    itemIdToExpandedRowMap={Object {}}
     items={Array []}
     loading={true}
     noItemsMessage=""
