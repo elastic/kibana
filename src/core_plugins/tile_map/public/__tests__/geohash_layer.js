@@ -51,6 +51,7 @@ describe('geohash_layer', function () {
     });
 
     afterEach(function () {
+      // return;
       kibanaMap.destroy();
       teardownDOM();
       imageComparator.destroy();
@@ -58,11 +59,11 @@ describe('geohash_layer', function () {
 
     [
       {
-        options: { mapType: 'Scaled Circle Markers' },
+        options: { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
         expected: scaledCircleMarkersPng
       },
       {
-        options: { mapType: 'Shaded Circle Markers' },
+        options: { mapType: 'Shaded Circle Markers', colorRamp: 'Yellow to Red' },
         expected: shadedCircleMarkersPng
       },
       {
@@ -99,7 +100,7 @@ describe('geohash_layer', function () {
         {
           type: 'FeatureCollection',
           features: []
-        }, {}, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
+        }, {}, { 'mapType': 'Scaled Circle Markers', colorRamp: 'Yellow to Red' }, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
 
       expect(() => {

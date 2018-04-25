@@ -133,6 +133,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
+        colorRamp: newParams.colorSchema,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }
