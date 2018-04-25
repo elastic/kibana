@@ -10,6 +10,7 @@ import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { canRedirectRequest } from '../../server/lib/can_redirect_request';
 import mappings from './mappings.json';
 
 export const spaces = (kibana) => new kibana.Plugin({
@@ -31,6 +32,7 @@ export const spaces = (kibana) => new kibana.Plugin({
       id: 'space_selector',
       title: 'Spaces',
       main: 'plugins/spaces/views/space_selector',
+      url: 'space_selector',
       hidden: true,
     }],
     hacks: [],
@@ -54,6 +56,10 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
+
+    if (!config.get('xpack.spaces.enabled')) {
+      return;
+    }
 
     initSpacesApi(server);
 

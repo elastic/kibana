@@ -8,7 +8,7 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
 import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
-import { canRedirectRequest } from '../../../lib/can_redirect_request';
+import { canRedirectRequest } from '../../../../../../server/lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
   server.route({

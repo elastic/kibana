@@ -12,12 +12,10 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeaderSection,
-  EuiCard,
   EuiIcon,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import { SpaceCards } from '../components/space_cards';
 
 export class SpaceSelector extends Component {
   state = {
@@ -40,14 +38,13 @@ export class SpaceSelector extends Component {
 
   loadSpaces() {
     this.setState({ loading: true });
-    const { httpAgent, chrome } = this.props;
+    const { spacesManager } = this.props;
 
-    httpAgent
-      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
-      .then(response => {
+    spacesManager.getSpaces()
+      .then(spaces => {
         this.setState({
           loading: false,
-          spaces: response.data
+          spaces
         });
       });
   }
@@ -71,9 +68,7 @@ export class SpaceSelector extends Component {
               <p className="welcomeMedium">Select a space to begin.</p>
             </EuiText>
 
-            <EuiFlexGroup gutterSize="l" justifyContent="spaceEvenly" className="spacesGroup">
-              {spaces.map(this.renderSpace)}
-            </EuiFlexGroup>
+            <SpaceCards spaces={spaces} />
 
             <EuiText className="spaceProfileText">
               <p>You can change your workspace at anytime by accessing your profile within Kibana.</p>
@@ -83,35 +78,6 @@ export class SpaceSelector extends Component {
       </EuiPage>
     );
   }
-
-  renderSpace = (space) => {
-    return (
-      <EuiFlexItem key={space.id} grow={false} className="spaceCard">
-        <EuiCard
-          icon={<EuiIcon size="xxl" type={space.logo} />}
-          title={this.renderSpaceTitle(space)}
-          description={space.description}
-          onClick={this.createSpaceClickHandler(space)}
-        />
-      </EuiFlexItem>
-    );
-  };
-
-  renderSpaceTitle = (space) => {
-    return (
-      <div className="spaceCardTitle">
-        <span>{space.name}</span>
-        {/* <EuiIcon type={'starEmpty'} size="s" /> */}
-      </div>
-    );
-  };
-
-  createSpaceClickHandler = (space) => {
-    return () => {
-      window.location = this.props.chrome.addBasePath(`/s/${space.urlContext}`);
-    };
-  }
-
 }
 
 SpaceSelector.propTypes = {
