@@ -6,6 +6,11 @@
 
 const crypto = require('crypto');
 
+const isDefault = (config, key) => {
+  console.log(config.getDefault(key), config.get(key));
+  return config.getDefault(key) === config.get(key);
+};
+
 export function validateConfig(config, log) {
   if (config.get('xpack.security.encryptionKey') == null) {
     log('Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
@@ -26,5 +31,9 @@ export function validateConfig(config, log) {
     }
   } else {
     config.set('xpack.security.secureCookies', true);
+  }
+
+  if (!isDefault(config, 'kibana.index') && isDefault(config, 'xpack.security.rbac.application')) {
+    throw new Error('When setting kibana.index, xpack.security.rbac.application must be set as well.');
   }
 }
