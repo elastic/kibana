@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LatencyMetric } from '../';
+import { LatencyMetric } from '../classes';
 
 describe('LatencyMetric for Query/Index Metric derivatives', () => {
 
