@@ -96,6 +96,30 @@
           </div>
         </div>
 
+        <!-- Kibana custom privileges -->
+        <div class="kuiFormSection" ng-if="rbacEnabled">
+          <label class="kuiFormLabel">
+            Kibana Privileges
+          </label>
+
+          <div class="kuiInputNote kuiInputNote--warning" ng-if="role.hasUnsupportedCustomPrivileges">
+            Changes to this section are not supported: this role contains application privileges that do not belong to this instance of Kibana.
+          </div>
+
+          <div ng-repeat="privilege in kibanaPrivileges track by privilege.name">
+            <label>
+              <input
+                class="kuiCheckBox"
+                type="checkbox"
+                ng-checked="includesPermission(role, privilege)"
+                ng-click="togglePermission(role, privilege)"
+                ng-disabled="role.metadata._reserved || !isRoleEnabled(role) || role.hasUnsupportedCustomPrivileges"
+              />
+              <span class="kuiOptionLabel">{{privilege.metadata.displayName}}</span>
+            </label>
+          </div>
+        </div>
+
         <!-- Run-as privileges -->
         <div class="kuiFormSection">
           <label class="kuiFormLabel">

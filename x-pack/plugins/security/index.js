@@ -16,7 +16,12 @@ import { validateConfig } from './server/lib/validate_config';
 import { authenticateFactory } from './server/lib/auth_redirect';
 import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
-import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
+import { secureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
+import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objects_client/secure_options_builder';
+import { registerPrivilegesWithCluster } from './server/lib/privileges/privilege_action_registry';
+import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
+import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -36,6 +41,11 @@ export const security = (kibana) => new kibana.Plugin({
         protocol: Joi.string().valid(['http', 'https']),
         hostname: Joi.string().hostname(),
         port: Joi.number().integer().min(0).max(65535)
+      }).default(),
+      rbac: Joi.object({
+        enabled: Joi.boolean().default(false),
+        createDefaultRoles: Joi.boolean().default(true),
+        application: Joi.string().default('kibana'),
       }).default(),
     }).default();
   },
@@ -64,21 +74,29 @@ export const security = (kibana) => new kibana.Plugin({
 
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
-        sessionTimeout: config.get('xpack.security.sessionTimeout')
+        sessionTimeout: config.get('xpack.security.sessionTimeout'),
+        rbacEnabled: config.get('xpack.security.rbac.enabled')
       };
     }
   },
 
   async init(server) {
-    const thisPlugin = this;
+    const config = server.config();
     const xpackMainPlugin = server.plugins.xpack_main;
-    mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+
+    mirrorStatusAndInitialize(xpackMainPlugin.status, this.status, async () => {
+      if (!config.get('xpack.security.rbac.enabled')) {
+        return;
+      }
+
+      await registerPrivilegesWithCluster(server);
+      await createDefaultRoles(server);
+    });
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
 
-    const config = server.config();
     validateConfig(config, message => server.log(['security', 'warning'], message));
 
     // Create a Hapi auth scheme that should be applied to each request.
@@ -88,6 +106,12 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.strategy('session', 'login', 'required');
 
+    if (config.get('xpack.security.rbac.enabled')) {
+      const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
+      savedObjectsClientProvider.addClientOptionBuilder((options) => secureSavedObjectsClientOptionsBuilder(server, options));
+      savedObjectsClientProvider.addClientWrapper(secureSavedObjectsClientWrapper);
+    }
+
     getUserProvider(server);
 
     await initAuthenticator(server);
@@ -95,6 +119,7 @@ export const security = (kibana) => new kibana.Plugin({
     initUsersApi(server);
     initRolesApi(server);
     initIndicesApi(server);
+    initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
 

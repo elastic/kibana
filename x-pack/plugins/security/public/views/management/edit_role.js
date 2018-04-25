@@ -11,6 +11,7 @@ import { toggle } from 'plugins/security/lib/util';
 import { isRoleEnabled } from 'plugins/security/lib/role';
 import template from 'plugins/security/views/management/edit_role.html';
 import 'angular-ui-select';
+import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_privileges';
@@ -43,8 +44,13 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return new ShieldRole({
         cluster: [],
         indices: [],
-        run_as: []
+        run_as: [],
+        applications: []
       });
+    },
+    kibanaPrivileges(ApplicationPrivilege, kbnUrl, Promise, Private) {
+      return ApplicationPrivilege.query().$promise
+        .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
     users(ShieldUser, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
@@ -58,7 +64,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope) {
+  controller($injector, $scope, rbacEnabled) {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
@@ -71,6 +77,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.users = $route.current.locals.users;
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
+    $scope.kibanaPrivileges = $route.current.locals.kibanaPrivileges;
+    $scope.rbacEnabled = rbacEnabled;
     $scope.rolesHref = `#${ROLES_PATH}`;
 
     this.isNewRole = $route.current.params.name == null;
@@ -138,6 +146,22 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     $scope.toggle = toggle;
     $scope.includes = _.includes;
+    $scope.togglePermission = (role, permission) => {
+      const shouldRemove = $scope.hasPermission(role, permission);
+      const rolePermissions = role.applications || [];
+      if (shouldRemove) {
+        role.applications = rolePermissions.filter(rolePermission => rolePermission.name === permission.name);
+      } else {
+        role.applications = rolePermissions.concat([permission]);
+      }
+    };
+
+    $scope.hasPermission = (role, permission) => {
+      // TODO(legrego): faking until ES is implemented
+      const rolePermissions = role.applications || [];
+      return rolePermissions.find(rolePermission => permission.name === rolePermission.name);
+    };
+
     $scope.union = _.flow(_.union, _.compact);
   }
 });

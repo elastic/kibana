@@ -6,10 +6,11 @@
 
 import _ from 'lodash';
 import Boom from 'boom';
-import { getClient } from '../../../../../../server/lib/get_client_shield';
-import { roleSchema } from '../../../lib/role_schema';
-import { wrapError } from '../../../lib/errors';
-import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
+import { getClient } from '../../../../../../../server/lib/get_client_shield';
+import { roleSchema } from '../../../../lib/role_schema';
+import { wrapError } from '../../../../lib/errors';
+import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
+import { containsOtherApplications } from './contains_other_applications';
 
 export function initRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
@@ -19,9 +20,18 @@ export function initRolesApi(server) {
     method: 'GET',
     path: '/api/security/v1/roles',
     handler(request, reply) {
+      const config = server.config();
+
       return callWithRequest(request, 'shield.getRole').then(
         (response) => {
-          const roles = _.map(response, (role, name) => _.assign(role, { name }));
+          const application = config.get('xpack.security.rbac.application');
+
+          const roles = _.map(response, (role, name) => {
+            const hasUnsupportedCustomPrivileges = containsOtherApplications(role, application);
+
+            return _.assign(role, { name, hasUnsupportedCustomPrivileges });
+          });
+
           return reply(roles);
         },
         _.flow(wrapError, reply)
@@ -54,7 +64,9 @@ export function initRolesApi(server) {
     path: '/api/security/v1/roles/{name}',
     handler(request, reply) {
       const name = request.params.name;
-      const body = _.omit(request.payload, 'name');
+      // TODO(legrego) - temporarily remove applications from role until ES API is implemented
+      const body = _.omit(request.payload, ['name', 'applications', 'hasUnsupportedCustomPrivileges']);
+
       return callWithRequest(request, 'shield.putRole', { name, body }).then(
         () => reply(request.payload),
         _.flow(wrapError, reply));
