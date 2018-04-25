@@ -189,8 +189,17 @@ export default class BaseOptimizer {
             loader: 'file-loader'
           },
           {
-            test: /\.js$/,
-            exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+            resource: [
+              {
+                test: /\.js$/,
+                exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+              },
+              {
+                test: /\.js$/,
+                include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+                exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+              }
+            ],
             use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',

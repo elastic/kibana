@@ -1,0 +1,32 @@
+<div class="monitoring-summary-status" role="status">
+  <div class="monitoring-summary-status__content" data-test-subj="elasticsearchIndexSummaryStatus">
+    <div data-test-subj="dataSize">
+      Total:
+      <strong>{{ summary.dataSize.total|formatMetric:'0.0 b' }}</strong>
+    </div>
+    <div data-test-subj="dataSizePrimaries">
+      Primaries:
+      <strong>{{ summary.dataSize.primaries|formatMetric:'0.0 b' }}</strong>
+    </div>
+    <div data-test-subj="documentCount">
+      Documents:
+      <strong>{{ summary.documents|formatMetric:'0.[0]a' }}</strong>
+    </div>
+    <div data-test-subj="totalShards">
+      Total Shards:
+      <strong>{{ summary.totalShards|formatMetric:'0,0' }}</strong>
+    </div>
+    <div data-test-subj="unassignedShards">
+      Unassigned Shards:
+      <strong>{{ summary.unassignedShards|formatMetric:'0,0' }}</strong>
+    </div>
+    <div class="monitoring-summary-status__status-indicator">
+      Health:
+      <monitoring-elasticsearch-status-icon
+        status="summary.status"
+        title="Status of this index: {{ summary.status }}"
+      ></monitoring-elasticsearch-status-icon>
+      {{ summary.status|capitalize }}
+    </div>
+  </div>
+</div>

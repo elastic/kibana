@@ -1,0 +1,31 @@
+<div ng-repeat="value in card.stats.topValues" class="top-value">
+  <div class="field-label"
+    tooltip-html-unsafe="{{mlEscape(value.key) | formatField:card.fieldFormat}}"
+    tooltip-append-to-body="true"
+    tooltip-placement="right">
+    {{value.key | formatField:card.fieldFormat}}
+  </div>
+  <div class="top-value-bar-holder">
+    <div ng-if="card.stats.isTopValuesSampled === false"
+      class="top-value-bar {{card.type}}"
+      ng-attr-style="width: {{ 100 * value.doc_count/card.stats.count }}%;"
+      tooltip-html-unsafe="{{ 100 * value.doc_count/card.stats.count >= 0.1 ? (100 * value.doc_count/card.stats.count | number:1): '< 0.1' }}%"
+      tooltip-append-to-body="true"
+      tooltip-placement="right">
+    </div>
+    <div ng-if="card.stats.isTopValuesSampled === true"
+      class="top-value-bar {{card.type}}"
+      ng-attr-style="width: {{ 100 * value.doc_count/card.stats.topValuesSampleSize }}%;"
+      tooltip-html-unsafe="{{ 100 * value.doc_count/card.stats.topValuesSampleSize >= 0.1 ? (100 * value.doc_count/card.stats.topValuesSampleSize | number:1): '< 0.1' }}%"
+      tooltip-append-to-body="true"
+      tooltip-placement="right">
+    </div>
+  </div>
+  <div ng-if="card.stats.isTopValuesSampled === false" class="count-label">{{value.doc_count}}</div>
+  <div ng-if="card.stats.isTopValuesSampled === true" class="count-label">
+    {{ 100 * value.doc_count/card.stats.topValuesSampleSize >= 0.1 ? (100 * value.doc_count/card.stats.topValuesSampleSize | number:1): '< 0.1' }}%
+  </div>
+</div>
+<div ng-if="card.stats.isTopValuesSampled === true" class="sampled-message euiText">
+  Calculated from sample of {{ card.stats.topValuesSamplerShardSize }} documents per shard
+</div>

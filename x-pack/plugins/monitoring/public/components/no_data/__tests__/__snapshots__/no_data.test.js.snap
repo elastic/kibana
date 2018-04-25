@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoData should show a default message if reason is unknown 1`] = `
+<div
+  class="euiPage"
+>
+  <div
+    class="euiPageBody"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    >
+      <svg
+        class="euiIcon euiIcon--xxLarge"
+        height="32"
+        viewBox="0 0 32 32"
+        width="32"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          fill="none"
+        >
+          <path
+            d="M29.033 5.316c-3.491-3.549-9.193-3.607-12.8-.174-3.666-3.607-9.542-3.607-13.15 0a9.218 9.218 0 0 0 .059 13.09l3.083 3.084h2.91c.465 0 .814-.232.989-.64l1.512-2.792 2.27 6.225c.174.466.64.756 1.047.756.523 0 .93-.29 1.047-.814l3.724-11.171 3.141 7.738c.175.466.64.757 1.048.757h2.152l3.142-3.142c3.608-3.724 3.433-9.251-.174-12.917"
+            fill="#13A7DF"
+          />
+          <path
+            d="M24.727 18.93l-4.014-9.89a1.193 1.193 0 0 0-1.106-.756c-.465 0-.872.29-1.047.814l-3.665 10.938-2.037-5.469c-.116-.465-.582-.756-.989-.756-.465-.058-.873.174-1.105.64L8.32 18.989H3.782l10.356 10.415.058.058c.35.523.873.756 1.455.873H16.35c.523-.059.93-.233 1.337-.64l10.59-10.648h-3.608c.058 0 .058-.116.058-.116z"
+            fill="#00BFB3"
+          />
+          <path
+            d="M24.727 18.93l-4.014-9.89a1.193 1.193 0 0 0-1.106-.756c-.465 0-.872.29-1.047.814l-3.665 10.938-2.037-5.469c-.116-.465-.582-.756-.989-.756-.465-.058-.873.174-1.105.64L8.32 18.989H3.84l2.385 2.386h2.91c.465 0 .814-.233.989-.64l1.512-2.793 2.211 6.167c.175.466.64.756 1.048.756.523 0 .93-.29 1.047-.814l3.723-11.171 3.2 7.738c.175.466.64.757 1.048.757h2.152l2.386-2.386h-3.724v-.058z"
+            fill="#007D9D"
+          />
+        </g>
+      </svg>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText"
+      >
+        <p>
+          There is a 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              food
+            </code>
+          </span>
+           setting that has 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              xpack.monitoring.foo.bar
+            </code>
+          </span>
+           set to 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              taco
+            </code>
+          </span>
+          .
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoData should show text next to the spinner while checking a setting 1`] = `
+<div
+  class="euiPage"
+>
+  <div
+    class="euiPageBody"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    >
+      <svg
+        class="euiIcon euiIcon--xxLarge"
+        height="32"
+        viewBox="0 0 32 32"
+        width="32"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          fill="none"
+        >
+          <path
+            d="M29.033 5.316c-3.491-3.549-9.193-3.607-12.8-.174-3.666-3.607-9.542-3.607-13.15 0a9.218 9.218 0 0 0 .059 13.09l3.083 3.084h2.91c.465 0 .814-.232.989-.64l1.512-2.792 2.27 6.225c.174.466.64.756 1.047.756.523 0 .93-.29 1.047-.814l3.724-11.171 3.141 7.738c.175.466.64.757 1.048.757h2.152l3.142-3.142c3.608-3.724 3.433-9.251-.174-12.917"
+            fill="#13A7DF"
+          />
+          <path
+            d="M24.727 18.93l-4.014-9.89a1.193 1.193 0 0 0-1.106-.756c-.465 0-.872.29-1.047.814l-3.665 10.938-2.037-5.469c-.116-.465-.582-.756-.989-.756-.465-.058-.873.174-1.105.64L8.32 18.989H3.782l10.356 10.415.058.058c.35.523.873.756 1.455.873H16.35c.523-.059.93-.233 1.337-.64l10.59-10.648h-3.608c.058 0 .058-.116.058-.116z"
+            fill="#00BFB3"
+          />
+          <path
+            d="M24.727 18.93l-4.014-9.89a1.193 1.193 0 0 0-1.106-.756c-.465 0-.872.29-1.047.814l-3.665 10.938-2.037-5.469c-.116-.465-.582-.756-.989-.756-.465-.058-.873.174-1.105.64L8.32 18.989H3.84l2.385 2.386h2.91c.465 0 .814-.233.989-.64l1.512-2.793 2.211 6.167c.175.466.64.756 1.048.756.523 0 .93-.29 1.047-.814l3.723-11.171 3.2 7.738c.175.466.64.757 1.048.757h2.152l2.386-2.386h-3.724v-.058z"
+            fill="#007D9D"
+          />
+        </g>
+      </svg>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <h2
+        class="euiTitle euiTitle--large"
+      >
+        We're looking for your monitoring data
+      </h2>
+      <span
+        class="euiTextColor euiTextColor--subdued"
+      >
+        <div
+          class="euiText"
+        >
+          <p>
+            Monitoring provides insight to your hardware performance and load.
+          </p>
+        </div>
+      </span>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiLoadingSpinner euiLoadingSpinner--medium"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          checking something to test...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,0 +1,291 @@
+<kbn-management-app
+  section="logstash/pipelines/pipeline"
+  omit-breadcrumb-pages="['pipeline']"
+>
+  <div class="kuiViewContent kuiViewContent--constrainedWidth" data-test-subj="pipelineEdit pipelineEdit-{{pipelineEdit.pipeline.id}}">
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <div class="kuiBar">
+        <div class="kuiBarSection">
+          <div class="kuiButtonGroup">
+            <button
+              class="kuiButton kuiButton--primary"
+              ng-disabled="pipelineEdit.isReadOnly || !pipelineEdit.isSaveEnabled"
+              ng-click="pipelineEdit.onPipelineSave(user.username)"
+              data-test-subj="btnSavePipeline"
+            >
+              <span ng-if="pipelineEdit.isNewPipeline">Create</span>
+              <span ng-if="!pipelineEdit.isNewPipeline">Save</span>
+              and deploy
+            </button>
+            <button
+              class="kuiButton kuiButton--basic"
+              ng-click="pipelineEdit.onClose()"
+              data-test-subj="btnCancel"
+            >
+              Cancel
+            </button>
+            <button
+              ng-if="!pipelineEdit.isNewPipeline"
+              class="kuiButton kuiButton--danger kuiButton--iconText"
+              ng-click="pipelineEdit.onPipelineDelete(pipelineEdit.pipeline.id)"
+              ng-disabled="pipelineEdit.isReadOnly"
+              tooltip="Delete Pipeline"
+              data-test-subj="btnDeletePipeline"
+            >
+              Delete pipeline
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <form name="pipelineEdit.form" novalidate>
+        <div ng-show="pipelineEdit.isNewPipeline"
+          class="kuiFormSection">
+          <label
+            for="id"
+            class="kuiFormLabel"
+          >
+            Pipeline ID
+          </label>
+          <input
+            type="text"
+            ng-class="::pipelineEdit.isNewPipeline ? 'kuiTextInput fullWidth' : 'kuiStaticInput'"
+            ng-disabled="pipelineEdit.isReadOnly || !pipelineEdit.isNewPipeline"
+            id="id"
+            name="id"
+            ng-model="pipelineEdit.pipeline.id"
+            ng-trim="false"
+            pattern="[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*"
+            required
+            data-test-subj="inputId"
+          >
+          <div
+            class="kuiInputNote kuiInputNote--danger"
+            ng-show="pipelineEdit.form.id.$error.pattern"
+          >
+            Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers
+          </div>
+          <div
+            class="kuiInputNote kuiInputNote--danger"
+            ng-show="pipelineEdit.form.id.$touched && pipelineEdit.form.id.$error.required"
+          >
+            Pipeline ID is required
+          </div>
+        </div>
+        <div class="kuiFormSection">
+          <label
+            for="description"
+            class="kuiFormLabel"
+          >
+            Description
+          </label>
+          <input
+            type="text"
+            class="kuiTextInput fullWidth"
+            id="description"
+            name="description"
+            ng-disabled="pipelineEdit.isReadOnly"
+            ng-model="pipelineEdit.pipeline.description"
+            data-test-subj="inputDescription"
+          >
+        </div>
+      </form>
+      <form name="pipelineEdit.jsonForm" novalidate>
+        <div class="kuiFormSection">
+          <label class="kuiFormLabel"
+          >
+            Pipeline
+          </label>
+          <div
+            class="pipeline-editor"
+            ruby-input
+            require-keys="true"
+            ui-ace="{
+              onLoad: aceLoaded
+            }"
+            ng-model="pipelineEdit.pipeline.pipeline"
+            data-test-subj="acePipeline"
+          ></div>
+        </div>
+      </form>
+
+      <!-- Advanced Options: TODO: create toggle panel? -->
+      <form name="pipelineEdit.advancedOptionsForm" novalidate>
+        <div class="kuiFormSection">
+          <div class="kuiFieldGroup">
+            <div class="kuiFieldGroupSection">
+              <label
+                for="workers"
+                class="kuiFormLabel"
+              >
+                Pipeline workers
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['pipeline.workers']}}"></logstash-tooltip>
+              </label>
+              <input
+                type="number"
+                class="kuiTextInput kuiTextInput--small"
+                id="workers"
+                name="workers"
+                ng-model="pipelineEdit.pipeline.settings['pipeline.workers']"
+                data-test-subj="inputWorkers"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="kuiFormSection">
+          <div class="kuiFieldGroup">
+            <div class="kuiFieldGroupSection">
+              <label
+                for="batchSize"
+                class="kuiFormLabel"
+              >
+                Pipeline batch size
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['pipeline.batch.size']}}"></logstash-tooltip>
+              </label>
+              <input
+                type="number"
+                class="kuiTextInput"
+                id="batchSize"
+                name="batchSize"
+                ng-model="pipelineEdit.pipeline.settings['pipeline.batch.size']"
+                data-test-subj="inputBatchSize"
+              >
+            </div>
+            <div class="kuiFieldGroupSection">
+              <label
+                for="batchDelay"
+                class="kuiFormLabel"
+              >
+                Pipeline batch delay
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['pipeline.batch.delay']}}"></logstash-tooltip>
+              </label>
+              <input
+                type="number"
+                class="kuiTextInput"
+                id="batchDelay"
+                name="batchDelay"
+                ng-model="pipelineEdit.pipeline.settings['pipeline.batch.delay']"
+                data-test-subj="inputBatchDelay"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="kuiFormSection">
+          <div class="kuiFieldGroup">
+            <div class="kuiFieldGroupSection">
+              <label
+                for="queueType"
+                class="kuiFormLabel"
+              >
+                Queue type
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['queue.type']}}"></logstash-tooltip>
+              </label>
+              <select
+                class="kuiSelect"
+                id="queueType"
+                name="queueType"
+                ng-model="pipelineEdit.pipeline.settings['queue.type']"
+                data-test-subj="selectQueueType"
+              >
+                <option
+                  value="memory"
+                  data-test-subj="selectQueueType-memory"
+                >
+                  memory
+                </option>
+                <option
+                  value="persisted"
+                  data-test-subj="selectQueueType-persisted"
+                >
+                  persisted
+                </option>
+              </select>
+            </div>
+            <div class="kuiFieldGroupSection">
+              <label
+                for="queueMaxBytesNumber"
+                class="kuiFormLabel"
+              >
+                Queue max bytes
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['queue.max_bytes']}}"></logstash-tooltip>
+              </label>
+              <input
+                type="number"
+                class="kuiTextInput kuiTextInput--small"
+                id="queueMaxBytesNumber"
+                name="queueMaxBytesNumber"
+                ng-model="pipelineEdit.pipeline.settings['queue.max_bytes.number']"
+                data-test-subj="inputQueueMaxBytesNumber"
+              >
+              <select
+                class="kuiSelect"
+                id="queueMaxBytesUnits"
+                name="queueMaxBytesUnits"
+                ng-model="pipelineEdit.pipeline.settings['queue.max_bytes.units']"
+                data-test-subj="selectQueueMaxBytesUnits"
+              >
+                <option
+                  value="b"
+                  data-test-subj="selectQueueMaxBytesUnits-b"
+                >
+                  bytes
+                </option>
+                <option
+                  value="kb"
+                  data-test-subj="selectQueueMaxBytesUnits-kb"
+                >
+                  kilobytes
+                </option>
+                <option
+                  value="mb"
+                  data-test-subj="selectQueueMaxBytesUnits-mb"
+                >
+                  megabytes
+                </option>
+                <option
+                  value="gb"
+                  data-test-subj="selectQueueMaxBytesUnits-gb"
+                >
+                  gigabytes
+                </option>
+                <option
+                  value="tb"
+                  data-test-subj="selectQueueMaxBytesUnits-tb"
+                >
+                  terabytes
+                </option>
+                <option
+                  value="pb"
+                  data-test-subj="selectQueueMaxBytesUnits-pb"
+                >
+                  petabytes
+                </option>
+              </select>
+            </div>
+            <div class="kuiFieldGroupSection">
+              <label
+                for="queueCheckpointWrites"
+                class="kuiFormLabel"
+              >
+                Queue checkpoint writes
+                <logstash-tooltip text="{{pipelineEdit.tooltips.settings['queue.checkpoint.writes']}}"></logstash-tooltip>
+              </label>
+              <input
+                type="number"
+                class="kuiTextInput"
+                id="queueCheckpointWrites"
+                name="queueCheckpointWrites"
+                ng-model="pipelineEdit.pipeline.settings['queue.checkpoint.writes']"
+                data-test-subj="inputQueueCheckpointWrites"
+              >
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</kbn-management-app>

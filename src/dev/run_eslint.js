@@ -1,10 +1,10 @@
 import { parse } from 'eslint/lib/options';
-import { DEFAULT_ESLINT_PATHS } from './eslint';
 
 const options = parse(process.argv);
+process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 
 if (!options._.length && !options.printConfig) {
-  process.argv.push(...DEFAULT_ESLINT_PATHS);
+  process.argv.push('.');
 }
 
 if (!process.argv.includes('--no-cache')) {

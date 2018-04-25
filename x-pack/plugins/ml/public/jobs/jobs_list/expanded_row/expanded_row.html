@@ -1,0 +1,153 @@
+  <div >
+    <ul class="nav nav-tabs">
+      <li class="kbn-settings-tab" ng-class="{ active: ui.currentTab.index === tab.index }" ng-repeat="tab in ui.tabs">
+        <a ng-click="ui.changeTab(tab)">
+        {{ tab.title }}<i ng-show="tab.showIcon && jobAudit.jobWarningClass !== ''" class='job-tab-icon job-warning-small {{jobAudit.jobWarningClass}}'></i>
+      </a>
+      </li>
+    </ul>
+
+    <!-- tab 0 General-->
+    <ml-job-tab-0 ng-show="ui.currentTab.index === 0">
+      <div class="tab_contents">
+        <ng-include src="urlBasePath+'/plugins/ml/jobs/jobs_list/expanded_row/tabs/tab_general.html'"></ng-include>
+      </div>
+    </ml-job-tab-0>
+
+    <!-- tab 1 Config -->
+    <ml-job-tab-1 ng-show="ui.currentTab.index === 1">
+      <div class="tab_contents">
+        <ng-include src="urlBasePath+'/plugins/ml/jobs/jobs_list/expanded_row/tabs/tab_config.html'"></ng-include>
+      </div>
+    </ml-job-tab-1>
+
+    <!-- tab 2 Datafeed -->
+    <ml-job-tab-2 ng-show="ui.currentTab.index === 2" >
+      <div class="tab_contents">
+        <ng-include src="urlBasePath+'/plugins/ml/jobs/jobs_list/expanded_row/tabs/tab_datafeed.html'"></ng-include>
+      </div>
+    </ml-job-tab-2>
+
+  <!-- tab 3 Counts -->
+    <ml-job-tab-3 ng-show="ui.currentTab.index === 3" >
+      <div class="tab_contents">
+        <ng-include src="urlBasePath+'/plugins/ml/jobs/jobs_list/expanded_row/tabs/tab_counts.html'"></ng-include>
+      </div>
+    </ml-job-tab-3>
+
+    <!-- tab 4 JSON -->
+    <ml-job-tab-4 ng-show="ui.currentTab.index === 4" >
+      <div class="tab_contents">
+        <button ng-click="copyToClipboard(job)" class="kuiButton kuiButton--primary" aria-label="Copy JSON to clipboard">
+          Copy JSON to clipboard
+        </button>
+        <div class="ml-pre">{{jobJson}}</div>
+      </div>
+    </ml-job-tab-4>
+
+    <!-- tab 5 Job log -->
+    <ml-job-tab-5 ng-show="ui.currentTab.index === 5" >
+      <div class="tab_contents">
+        <button ng-click="jobAudit.update()" class="kuiButton kuiButton--primary">
+          Refresh
+        </button>
+        <div id="ml-job-audit-list-{{job.job_id}}" class="job-audit-list-container">
+
+          <table class="euiTable euiTable--compressed">
+            <thead>
+              <tr>
+                <th class="euiTableHeaderCell" scope="col" width="25px">
+                  <div class="euiTableCellContent"></div>
+                </th>
+                <th class="euiTableHeaderCell" scope="col">
+                  <div class="euiTableCellContent">Time</div>
+                </th>
+                <th class="euiTableHeaderCell" scope="col">
+                  <div class="euiTableCellContent">Node</div>
+                </th>
+                <th class="euiTableHeaderCell" scope="col" width="60%">
+                  <div class="euiTableCellContent">Message</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="msg in jobAudit.messages" class="euiTableRow">
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">
+                      <i ng-show="msg.level === 'system_info'" tooltip='System Info' class="job-system-info fa fa-cogs"></i>
+                      <i ng-show="msg.level === 'info'" tooltip='Info' class="job-info fa fa-info-circle"></i>
+                      <i ng-show="msg.level === 'warning'" tooltip='Warning' class="job-warning fa fa-exclamation-circle"></i>
+                      <i ng-show="msg.level === 'error'" tooltip='Error' class="job-error fa fa-exclamation-triangle"></i>
+                    </span>
+                  </div>
+                </td>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{msg.time}}</span>
+                  </div>
+                </td>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{msg.node_name}}</span>
+                  </div>
+                </td>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{msg.message}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </ml-job-tab-5>
+
+    <!-- tab 6 Datafeed Preview -->
+    <ml-job-tab-6 ng-show="ui.currentTab.index === 6" >
+      <div class="tab_contents" ng-if="permissions.canPreviewDatafeed===true">
+        <button ng-click="datafeedPreview.update()" class="kuiButton kuiButton--primary">
+          Refresh
+        </button>
+        <ml-loading-indicator
+          label="Loading datafeed preview"
+          is-loading="(datafeedPreview.json === '')"
+        />
+        <div ng-hide="(datafeedPreview.json === '')">
+          <div class="ml-pre">{{datafeedPreview.json}}</div>
+        </div>
+      </div>
+      <div class="tab_contents" ng-if="permissions.canPreviewDatafeed===false">
+        <div class="euiCallOut euiCallOut--warning">
+          <div class="euiCallOutHeader">
+            <svg class="euiIcon euiCallOutHeader__icon euiIcon--medium" xmlns="http://www.w3.org/2000/svg"
+              width="16" height="16" viewBox="0 0 16 16">
+              <g fill-rule="evenodd">
+                <path d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
+                />
+                <path d="M7 6h1v5H7zM7 12h1v1H7z" />
+              </g>
+            </svg>
+            <span class="euiCallOutHeader__title">You do not have permission to view the datafeed preview</span>
+          </div>
+          <div class="euiText euiText--small">
+            <p>
+              Please contact your administrator
+          </div>
+        </div>
+      </div>
+    </ml-job-tab-6>
+
+    <!-- tab 7 Forecasts -->
+    <ml-job-tab-6 ng-show="ui.currentTab.index === 7" >
+      <div class="tab_contents">
+        <div>
+          <ml-forecasts-table
+            job="job"
+          />
+        </div>
+      </div>
+    </ml-job-tab-6>
+
+  </div>

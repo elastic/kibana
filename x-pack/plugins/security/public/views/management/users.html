@@ -1,0 +1,251 @@
+<kbn-management-app section="security">
+  <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+    <div class="kuiInfoPanel kuiInfoPanel--error" ng-if="forbidden">
+      <div class="kuiInfoPanelHeader">
+        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+        <span class="kuiInfoPanelHeader__title">
+          You do not have permission to manage users.
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          Please contact your administrator.
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="!forbidden">
+      <!-- ControlledTable -->
+      <div class="kuiControlledTable">
+        <!-- ToolBar -->
+        <div class="kuiToolBar">
+          <div class="kuiToolBarSearch">
+            <div class="kuiToolBarSearchBox">
+              <div class="kuiToolBarSearchBox__icon kuiIcon fa-search"></div>
+              <input
+                class="kuiToolBarSearchBox__input"
+                type="text"
+                placeholder="Search..."
+                aria-label="Filter"
+                ng-model="query"
+              >
+            </div>
+          </div>
+
+          <div class="kuiToolBarSection">
+            <!-- Delete users button -->
+            <button
+              ng-click="deleteUsers()"
+              class="kuiButton kuiButton--danger kuiButton--iconText"
+              ng-if="selectedUsers.length"
+            >
+              <span class="kuiButton__inner">
+                <span class="kuiButton__icon kuiIcon fa-trash"></span>
+                <span>Delete</span>
+              <span class="kuiButton__inner">
+            </button>
+
+            <!-- Create user button -->
+            <a
+              ng-href="{{editUsersHref}}"
+              ng-click="newUser()"
+              class="kuiButton kuiButton--primary kuiButton--iconText"
+              ng-if="!selectedUsers.length"
+              data-test-subj="createUserButton"
+            >
+              <span class="kuiButton__inner">
+                <span class="kuiButton__icon kuiIcon fa-plus"></span>
+                <span>Create user</span>
+              </span>
+            </a>
+          </div>
+
+          <div class="kuiToolBarSection">
+            <!-- We need an empty section for the buttons to be positioned consistently. -->
+          </div>
+        </div>
+
+        <!-- NoResults -->
+        <div class="kuiPanel kuiPanel--centered" ng-show="!(users | filter:query).length">
+          <div class="kuiNoItems">
+            No <span ng-show="query">matching</span> users found.
+          </div>
+        </div>
+
+        <!-- Table -->
+        <table class="kuiTable" ng-show="(users | filter:query).length">
+          <thead>
+            <tr>
+              <th scope="col" class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+                <div class="kuiTableHeaderCell__liner">
+                  <input
+                    type="checkbox"
+                    class="kuiCheckBox"
+                    ng-checked="allSelected()"
+                    ng-click="toggleAll()"
+                    aria-label="{{allSelected() ? 'Deselect all rows' : 'Select all rows'}}"
+                  >
+                </div>
+              </th>
+
+              <th
+                scope="col"
+                class="kuiTableHeaderCell"
+              >
+                <button
+                  class="kuiTableHeaderCellButton"
+                  ng-class="{'kuiTableHeaderCellButton-isSorted': sort.orderBy == 'full_name'}"
+                  ng-click="toggleSort(sort, 'full_name')"
+                  aria-label="{{sort.reverse ? 'Sort full name ascending' : 'Sort full name descending'}}"
+                >
+                  <span class="kuiTableHeaderCell__liner">
+                    Full Name
+                    <span
+                      aria-hidden="true"
+                      class="kuiTableSortIcon kuiIcon"
+                      ng-class="getSortArrowClass('full_name')"
+                    ></span>
+                  </span>
+                </button>
+              </th>
+
+              <th
+                scope="col"
+                class="kuiTableHeaderCell"
+              >
+                <button
+                  class="kuiTableHeaderCellButton"
+                  ng-class="{'kuiTableHeaderCellButton-isSorted': sort.orderBy == 'username'}"
+                  ng-click="toggleSort(sort, 'username')"
+                  aria-label="{{sort.reverse ? 'Sort user name ascending' : 'Sort user name descending'}}"
+                >
+                  <span class="kuiTableHeaderCell__liner">
+                    Username
+                    <span
+                      aria-hidden="true"
+                      class="kuiTableSortIcon kuiIcon"
+                      ng-class="getSortArrowClass('username')"
+                    ></span>
+                  </span>
+                </button>
+              </th>
+
+              <th
+                scope="col"
+                class="kuiTableHeaderCell"
+              >
+                <button
+                  class="kuiTableHeaderCellButton"
+                  ng-class="{'kuiTableHeaderCellButton-isSorted': sort.orderBy == 'roles'}"
+                  ng-click="toggleSort(sort, 'roles')"
+                  aria-label="{{sort.reverse ? 'Sort roles ascending' : 'Sort roles descending'}}"
+                >
+                  <span class="kuiTableHeaderCell__liner">
+                    Roles
+                    <span
+                      aria-hidden="true"
+                      class="kuiTableSortIcon kuiIcon"
+                      ng-class="getSortArrowClass('roles')"
+                    ></span>
+                  </span>
+                </button>
+              </th>
+
+              <th scope="col" class="kuiTableHeaderCell">
+                <span class="kuiTableHeaderCell__liner">
+                  Reserved
+                  <span
+                    class="kuiIcon fa-question-circle"
+                    tooltip="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
+                    aria-label="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
+                  ></span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              ng-repeat="user in users | orderBy:'username' | filter:query | orderBy:sort.orderBy:sort.reverse"
+              data-test-subj="userRow"
+              class="kuiTableRow"
+            >
+              <td class="kuiTableRowCell kuiTableRowCell--checkBox">
+                <div class="kuiTableRowCell__liner">
+                  <input
+                    type="checkbox"
+                    class="kuiCheckBox"
+                    ng-click="toggle(selectedUsers, user)"
+                    ng-checked="includes(selectedUsers, user)"
+                    ng-disabled="user.metadata._reserved"
+                  >
+                </div>
+              </td>
+
+              <td class="kuiTableRowCell">
+                <div class="kuiTableRowCell__liner">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{getEditUrlHref(user.username)}}"
+                    data-test-subj="userRowFullName"
+                  >
+                    {{ user.full_name }}
+                  </a>
+                </div>
+              </td>
+
+              <td class="kuiTableRowCell">
+                <div class="kuiTableRowCell__liner">
+                  <a
+                    class="kuiLink"
+                    ng-href="{{getEditUrlHref(user.username)}}"
+                    data-test-subj="userRowUserName"
+                  >
+                    {{ user.username }}
+                  </a>
+                </div>
+              </td>
+
+              <td class="kuiTableRowCell" data-test-subj="userRowRoles">
+                <div class="kuiTableRowCell__liner">
+                  <span ng-repeat="role in user.roles">
+                    <a
+                      class="kuiLink"
+                      ng-href="{{getEditRoleHref(role)}}"
+                    >
+                      {{ role }}
+                    </a>
+                    <span ng-if="!$last">,</span>
+                  </span>
+                </div>
+              </td>
+
+              <td class="kuiTableRowCell">
+                <div class="kuiTableRowCell__liner">
+                  <div
+                    ng-if="user.metadata._reserved"
+                    class="kuiIcon fa-check"
+                    data-test-subj="userRowReserved"
+                  ></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ToolBarFooter -->
+        <div class="kuiToolBarFooter">
+          <div class="kuiToolBarFooterSection">
+            <div class="kuiToolBarText" ng-hide="selectedUsers.length === 0">
+              {{ selectedUsers.length }} users selected
+            </div>
+          </div>
+          <div class="kuiToolBarFooterSection">
+            <!-- We need an empty section for the buttons to be positioned consistently. -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</kbn-management-app>

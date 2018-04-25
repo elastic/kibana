@@ -1,0 +1,210 @@
+.single-metric-job-container {
+  font-size: 14px;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+
+
+  .job-state-info {
+    margin-bottom: 10px;
+  }
+
+  .validation-error {
+    color: #fe5050;
+    font-size: 12px;
+  }
+
+  .form-controls {
+    .bucket-span-container {
+      white-space: nowrap;
+
+      .bucket-span-input {
+        width: calc(~"100% - 40px");
+        display: inline-block;
+        background-color: transparent;
+        float: left;
+      }
+
+      .bucket-span-input:disabled {
+        background-color: #D9D9D9;
+      }
+
+      .bucket-span-estimator {
+        button {
+          margin-right: 45px;
+        }
+      }
+
+      .validation-error  {
+        margin-bottom: -25px;
+      }
+    }
+
+    .btn-load-vis {
+      border-radius: 4px !important;
+      margin-left: 5px;
+      min-width: 35px;
+    }
+  }
+
+  .advanced-button {
+    min-width: 23px;
+  }
+  .advanced-button-container {
+    label {
+      cursor: pointer;
+      display: inline-block;
+    }
+  }
+
+  .advanced-group {
+    padding: 10px;
+    background-color: #F9F9F9;
+    label {
+      font-weight: normal;
+      margin-bottom: 0px;
+    }
+  }
+
+  .chart-container {
+    margin-bottom: 20px;
+
+    .chart-loader {
+      border: 1px solid #e5e5e5;
+      margin-left: 49px;
+      display: flex;
+      margin-bottom: 52px;
+      position: relative;
+      background-color: rgba(255, 255, 255, 0.75);
+
+      .status-label {
+        width: 50%;
+        text-align: center;
+        margin: auto;
+
+
+        .no-results {
+          color: #555;
+          background-color: aliceblue;
+          border: 1px solid #DDEFFF;
+          padding: 25px;
+          border-radius: 4px;
+          display: inline-block;
+
+          i {
+            color: #5a9bd6
+          }
+          h2, h4 {
+            margin-top: 0px;
+          }
+        }
+      }
+    }
+
+    ml-single-metric-job-chart {
+      svg {
+        font-size: 12px;
+        font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+      }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: #cccccc;
+        shape-rendering: crispEdges;
+      }
+
+      .axis text {
+        fill: #000;
+      }
+
+      .axis .tick line {
+        stroke: rgba(0, 0, 0, 0.1);
+        stroke-width: 0px;
+      }
+
+      .area {
+        stroke-width: 1;
+      }
+
+      .area.bounds {
+        fill: rgba(50, 167, 194, 0.25);
+      }
+
+      .values-line {
+        fill: none;
+        stroke: #32a7c2;
+        stroke-width: 2;
+      }
+
+      .values-dots circle {
+        fill: #32a7c2;
+        stroke-width: 0;
+      }
+
+      .metric-value {
+        opacity: 1;
+        fill: #32a7c2;
+      }
+
+      .context-chart .axis text {
+        font-size: 10px;
+        fill: #333333;
+      }
+
+      .area.context {
+        fill: #e4e4e4;
+      }
+
+      .swimlane .axis text {
+        display: none;
+      }
+
+      .swimlane rect.swimlane-cell-hidden {
+        display: none;
+      }
+
+      .model-chart, .swimlane {
+        transition: opacity 0.5s ;
+      }
+
+      .bottom-swimlane .axis .tick line {
+        stroke-width: 1px;
+      }
+
+      .swimlane-cell:hover {
+        opacity: 1;
+      }
+
+      .brush .extent {
+        stroke: #fff;
+        fill-opacity: .125;
+        shape-rendering: crispEdges;
+      }
+
+      .progress {
+        display: inline-block;
+        min-width: 70px;
+        margin-bottom: -5px;
+        margin-left: 49px;
+        background-color: #FFFFFF;
+        height: 2px;
+        border-radius: 0px;
+      }
+
+      .progress-bar {
+        text-align: right;
+        line-height: 18px;
+        transition: none;
+        background-color: #32a7c2;
+      }
+    }
+  }
+}
+
+// hide the default es loading indicator bar as it can't be switched off
+// for standard es searches using the http header.
+.loadingIndicator__bar {
+  display: none;
+}

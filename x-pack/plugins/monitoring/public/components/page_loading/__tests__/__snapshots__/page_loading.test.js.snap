@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PageLoading should show a simple page loading component 1`] = `
+<div
+  class="euiPage"
+>
+  <div
+    class="euiPageBody"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPageContent noData__content euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+              />
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

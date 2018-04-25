@@ -1,0 +1,159 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
+<ExplainCollectionEnabled
+  context="cluster"
+  data="-1"
+  enabler={
+    Object {
+      "enableCollectionEnabled": [Function],
+    }
+  }
+  property="xpack.monitoring.collection.enabled"
+>
+  <Component>
+    <EuiTitle
+      size="l"
+    >
+      <h2
+        className="euiTitle euiTitle--large"
+      >
+        Monitoring is currently off
+      </h2>
+    </EuiTitle>
+    <EuiTextColor
+      color="subdued"
+    >
+      <span
+        className="euiTextColor euiTextColor--subdued"
+      >
+        <EuiText>
+          <div
+            className="euiText"
+          >
+            <p>
+              Monitoring provides insight to your hardware performance and load.
+            </p>
+          </div>
+        </EuiText>
+      </span>
+    </EuiTextColor>
+  </Component>
+  <EuiHorizontalRule
+    margin="l"
+    size="half"
+  >
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    />
+  </EuiHorizontalRule>
+  <EuiText>
+    <div
+      className="euiText"
+    >
+      <p>
+        We checked the 
+        cluster
+         settings and found that 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                xpack.monitoring.collection.enabled
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        is set to 
+        <EuiCode>
+          <EuiCodeBlockImpl
+            fontSize="s"
+            inline={true}
+            paddingSize="l"
+            transparentBackground={false}
+          >
+            <span
+              className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+              style={Object {}}
+            >
+              <code
+                className="euiCodeBlock__code"
+              >
+                -1
+              </code>
+            </span>
+          </EuiCodeBlockImpl>
+        </EuiCode>
+        .
+      </p>
+      <p>
+        Would you like to turn it on?
+      </p>
+    </div>
+  </EuiText>
+  <EuiSpacer
+    size="l"
+  >
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="s"
+    justifyContent="spaceAround"
+    responsive={true}
+    wrap={false}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="enableCollectionEnabled"
+            fill={true}
+            iconSide="left"
+            onClick={[Function]}
+            type="button"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="enableCollectionEnabled"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Turn on monitoring
+                </span>
+              </span>
+            </button>
+          </EuiButton>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</ExplainCollectionEnabled>
+`;

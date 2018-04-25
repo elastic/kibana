@@ -1,0 +1,27 @@
+@import "./icons";
+@import "./ui-select";
+
+// Hacks. These need to be removed when ML converts to EUI.
+.tab-jobs,
+.edit-job-modal,
+.create-watch-modal {
+  label {
+    display: inline-block;
+  }
+
+  .validation-error {
+    margin-top: 5px;
+  }
+}
+
+.button-wrapper {
+  display: inline;
+}
+
+.button-wrapper.disabled .kuiButton[disabled] {
+  pointer-events: none;
+}
+
+.button-wrapper.disabled {
+  cursor: not-allowed;
+}
