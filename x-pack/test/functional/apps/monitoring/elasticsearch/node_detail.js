@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
           indicesCount: 'Indices: 20',
           shardsCount: 'Shards: 38',
           nodeType: 'Type: Master Node',
-          status: 'Health: Online',
+          status: 'Status: Online',
         });
       });
 
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
           indicesCount: 'Indices: 4',
           shardsCount: 'Shards: 4',
           nodeType: 'Type: Node',
-          status: 'Health: Online',
+          status: 'Status: Online',
         });
       });
     });
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }) {
           indicesCount: 'Indices: N/A',
           shardsCount: 'Shards: N/A',
           nodeType: 'Type: Offline Node',
-          status: 'Health: Offline',
+          status: 'Status: Offline',
         });
       });
     });
