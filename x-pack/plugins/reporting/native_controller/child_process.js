@@ -7,7 +7,7 @@
 
 
 import { spawn } from 'child_process';
-import { safeChildProcess } from './safe_child_process';
+import { safeChildProcess } from '../../../../src/utils/child_process';
 
 export class NativeControllerChildProcess {
   constructor(processId, command, args) {
