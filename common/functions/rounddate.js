@@ -3,10 +3,9 @@ import moment from 'moment';
 export const rounddate = () => ({
   name: 'rounddate',
   type: 'number',
-  help:
-    'Round ms since epoch, or an ISO8601 formatted string, using a moment formatting string. Returns ms since epoch',
+  help: 'Round ms since epoch using a moment formatting string. Returns ms since epoch',
   context: {
-    types: ['number', 'string'],
+    types: ['number'],
   },
   args: {
     _: {
@@ -16,6 +15,7 @@ export const rounddate = () => ({
     },
   },
   fn: (context, args) => {
-    return moment(moment(context).format(args._), args._).valueOf();
+    if (!args._) return context;
+    return moment.utc(moment.utc(context).format(args._), args._).valueOf();
   },
 });

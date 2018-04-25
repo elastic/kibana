@@ -13,7 +13,6 @@ import { font } from './font';
 import { formatdate } from './formatdate';
 import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
-import { grid } from './grid';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
@@ -55,7 +54,6 @@ export const commonFunctions = [
   formatdate,
   formatnumber,
   getCell,
-  grid,
   head,
   ifFn,
   image,

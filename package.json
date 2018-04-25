@@ -130,7 +130,7 @@
     "run-sequence": "^2.2.0",
     "semver": "^5.4.1",
     "simple-git": "^1.70.0",
-    "sinon": "^2.3.2",
+    "sinon": "^4.5.0",
     "through2": "^2.0.3"
   }
 }

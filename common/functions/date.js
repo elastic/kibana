@@ -4,10 +4,6 @@ const getInputDate = input => {
   // return current date if no input
   if (!input) return new Date();
 
-  // attempt to cast to a number
-  const numInput = Number(input);
-  if (!isNaN(numInput)) return numInput;
-
   // return the input
   return input;
 };
@@ -24,10 +20,10 @@ export const date = () => ({
       types: ['string', 'null'],
       help:
         'An optional date string to parse into milliseconds since epoch. ' +
-        'Can be either a valid Javascript Date input or a string to parse using the format argument. ',
+        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
     },
     format: {
-      types: ['string', 'null'],
+      types: ['string'],
       help:
         'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/).',
     },
@@ -35,7 +31,7 @@ export const date = () => ({
   fn: (context, args) => {
     const { _: date, format } = args;
     const useMoment = date && format;
-    const outputDate = useMoment ? moment(date, format).toDate() : new Date(getInputDate(date));
+    const outputDate = useMoment ? moment.utc(date, format).toDate() : new Date(getInputDate(date));
 
     if (isNaN(outputDate.getTime())) throw new Error(`Invalid date input: ${args._}`);
 

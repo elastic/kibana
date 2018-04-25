@@ -1,10 +1,13 @@
 export const compare = () => ({
   name: 'compare',
   help:
-    'Compare the input to something else to determine true or false. Usually used in combination with `{if}`',
+    'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',
   aliases: ['condition'],
   example: 'math "random()" | compare gt this=0.5',
   type: 'boolean',
+  context: {
+    types: ['null', 'string', 'number', 'boolean'],
+  },
   args: {
     _: {
       aliases: ['op'],
@@ -23,6 +26,7 @@ export const compare = () => ({
     const a = context;
     const b = args.to;
     const op = args._;
+    const typesMatch = typeof a === typeof b;
 
     switch (op) {
       case 'eq':
@@ -30,13 +34,21 @@ export const compare = () => ({
       case 'ne':
         return a !== b;
       case 'lt':
-        return a < b;
+        if (typesMatch) return a < b;
+        return false;
       case 'lte':
-        return a <= b;
+        if (typesMatch) return a <= b;
+        return false;
       case 'gt':
-        return a > b;
+        if (typesMatch) return a > b;
+        return false;
       case 'gte':
-        return a >= b;
+        if (typesMatch) return a >= b;
+        return false;
+      default:
+        throw new Error('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
     }
+
+    return false;
   },
 });

@@ -1,11 +1,10 @@
 import moment from 'moment';
-
 export const formatdate = () => ({
   name: 'formatdate',
   type: 'string',
-  help: 'Output a ms since epoch number, or ISO8601, as a formatted string',
+  help: 'Output a ms since epoch number as a formatted string',
   context: {
-    types: ['number', 'string'],
+    types: ['number'],
   },
   args: {
     _: {
@@ -14,6 +13,7 @@ export const formatdate = () => ({
     },
   },
   fn: (context, args) => {
-    return moment(new Date(context)).format(args._);
+    if (!args._) return moment.utc(new Date(context)).toISOString();
+    return moment.utc(new Date(context)).format(args._);
   },
 });

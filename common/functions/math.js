@@ -18,7 +18,7 @@ export const math = () => ({
     },
   },
   fn: (context, args) => {
-    if (args._.trim() === '') {
+    if (!args._ || args._.trim() === '') {
       throw new Error('Empty expression');
     }
     const isDatatable = context && context.type === 'datatable';
