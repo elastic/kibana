@@ -3,7 +3,7 @@
 
 The Kibana server reads properties from the `kibana.yml` file on startup. The default settings configure Kibana to run
 on `localhost:5601`. To change the host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
+you'll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options. Finally, environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax.
 
 .Kibana Configuration Settings
 `console.enabled:`:: *Default: true* Set to false to disable Console.  Toggling this will cause the server to regenerate assets on the next startup, which may cause a delay before pages start being served.
