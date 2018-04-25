@@ -4723,6 +4723,13 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
+fetch-mock@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-6.3.0.tgz#4fcf710e49e6202c951d0d7ba8d4a862b6321cef"
+  dependencies:
+    glob-to-regexp "^0.4.0"
+    path-to-regexp "^2.1.0"
+
 figures@^1.3.5:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-1.7.0.tgz#cbe1e3affcf1cd44b80cadfed28dc793a9701d2e"
@@ -5250,6 +5257,10 @@ glob-stream@^6.1.0:
 glob-to-regexp@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.3.0.tgz#8c5a1494d2066c570cc3bfe4496175acc4d502ab"
+
+glob-to-regexp@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.0.tgz#49bd677b1671022bd10921c3788f23cdebf9c7e6"
 
 glob2base@^0.0.12:
   version "0.0.12"
@@ -9427,6 +9438,10 @@ path-to-regexp@^1.0.0, path-to-regexp@^1.7.0:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-1.7.0.tgz#59fde0f435badacba103a84e9d3bc64e96b9937d"
   dependencies:
     isarray "0.0.1"
+
+path-to-regexp@^2.1.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-2.2.1.tgz#90b617025a16381a879bc82a38d4e8bdeb2bcf45"
 
 path-type@3.0.0, path-type@^3.0.0:
   version "3.0.0"
