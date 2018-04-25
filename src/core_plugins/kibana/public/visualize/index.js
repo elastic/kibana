@@ -30,7 +30,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'visualize',
     title: 'Visualize',
     description: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
-    icon: '/plugins/kibana/assets/app_visualize.svg',
+    icon: 'visualizeApp',
     path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA
