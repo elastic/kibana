@@ -175,7 +175,6 @@ export class DashboardGrid extends React.Component {
   renderDOM() {
     const {
       panels,
-      getContainerApi,
       maximizedPanelId
     } = this.props;
     const { focusedPanelIndex } = this.state;
@@ -206,7 +205,6 @@ export class DashboardGrid extends React.Component {
         >
           <DashboardPanel
             panelId={panel.panelIndex}
-            getContainerApi={getContainerApi}
             embeddableFactory={this.embeddableFactoryMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
@@ -239,7 +237,6 @@ export class DashboardGrid extends React.Component {
 
 DashboardGrid.propTypes = {
   panels: PropTypes.object.isRequired,
-  getContainerApi: PropTypes.func.isRequired,
   getEmbeddableFactory: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelsUpdated: PropTypes.func.isRequired,

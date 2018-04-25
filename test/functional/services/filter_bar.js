@@ -47,6 +47,15 @@ export function FilterBarProvider({ getService }) {
       const spans = await testSubjects.findAll('filterEditorPhrases');
       return await Promise.all(spans.map(el => el.getVisibleText()));
     }
+
+    async getFilterFieldIndexPatterns() {
+      const indexPatterns = [];
+      const groups = await find.allByCssSelector('.ui-select-choices-group-label');
+      for (let i = 0; i < groups.length; i++) {
+        indexPatterns.push(await groups[i].getVisibleText());
+      }
+      return indexPatterns;
+    }
   }
 
   return new FilterBar();
