@@ -47,6 +47,8 @@ export function DataConfig({ onChange, model, fields }) {
     return option.value === model.timerange_mode;
   });
   const selectedOptions = selectedOption ? [selectedOption] : [];
+  const isTimeseries = model.type === 'timeseries';
+  const isLastValue = model.timerange_mode === 'last';
 
   return (
 
@@ -75,12 +77,12 @@ export function DataConfig({ onChange, model, fields }) {
             fields={fields}
           />
         </div>
-        {model.type === 'timeseries' ? (
+        {isTimeseries ? (
           <label className="vis_editor__label" htmlFor={htmlId('interval')}>
             Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
           </label>
         ) : null}
-        {model.type === 'timeseries' ? (
+        {isTimeseries ? (
           <input
             id={htmlId('interval')}
             className="vis_editor__input"
@@ -88,12 +90,12 @@ export function DataConfig({ onChange, model, fields }) {
             value={model.interval}
           />
         ) : null}
-        {model.type !== 'timeseries' ? (
+        {!isTimeseries ? (
           <label className="vis_editor__label" htmlFor={htmlId('timerange_mode')}>
             Timerange mode <Info message={timerangeModeHelp} />
           </label>
         ) : null}
-        {model.type !== 'timeseries' ? (
+        {!isTimeseries ? (
           <div className="vis_editor__row_item" data-test-subj="dataTimeRange">
             <EuiComboBox
               options={timerangeModes}
@@ -104,21 +106,18 @@ export function DataConfig({ onChange, model, fields }) {
             />
           </div>
         ) : null}
-        {model.type !== 'timeseries' && model.timerange_mode === 'last' && (
-          <label className="vis_editor__label" htmlFor={htmlId('timerange_mode_interval')}>
-            Interval (1s, 1m, 1h, 1d, &gt;=1m)
-          </label>
-        ) || null}
-        {model.type !== 'timeseries' && model.timerange_mode === 'last' && (
-          <input
-            id={htmlId('timerange_mode_interval')}
-            data-test-subj="timeRangeInterval"
-            className="vis_editor__input-grows"
-            type="text"
-            onChange={handleTextChange('timerange_mode_interval')}
-            value={model.timerange_mode_interval}
-          />
-        ) || null}
+        <label className="vis_editor__label" htmlFor={htmlId('timerange_mode_interval')}>
+          Interval (auto, 1s, 1m, 1h, 1d, &gt;=1m)
+        </label>
+        <input
+          disabled={!isTimeseries && !isLastValue}
+          id={htmlId('timerange_mode_interval')}
+          data-test-subj="timeRangeInterval"
+          className="vis_editor__input-grows"
+          type="text"
+          onChange={handleTextChange('timerange_mode_interval')}
+          value={model.timerange_mode_interval}
+        />
       </div>
     </div>
   );
