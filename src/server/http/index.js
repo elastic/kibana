@@ -86,7 +86,7 @@ export default async function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler(req, reply) {
-      const basePath = config.get('server.basePath');
+      const basePath = req.getBasePath();
       const defaultRoute = config.get('server.defaultRoute');
       reply.redirect(`${basePath}${defaultRoute}`);
     }
@@ -100,7 +100,7 @@ export default async function (kbnServer, server, config) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         return reply(Boom.notFound());
       }
-      const pathPrefix = config.get('server.basePath') ? `${config.get('server.basePath')}/` : '';
+      const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return reply.redirect(format({
         search: req.url.search,
         pathname: pathPrefix + path.slice(0, -1),
