@@ -5,4 +5,6 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
-require('../dev-tools/functional_tests').runFunctionalTestsServer();
+require('@kbn/test').startServers(
+  'x-pack/test/functional/config.js',
+);

@@ -38,7 +38,7 @@ Allows users to start another process to run just the tests while keeping the se
 
 ```sh
 # run from KIBANA_ROOT directory
-node scripts/functional_test_runner --config path/to/same/config
+node scripts/functional_test_runner --config path/to/the/same/config
 ```
 
 ## Rationale

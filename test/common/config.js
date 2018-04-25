@@ -1,5 +1,5 @@
 import { format as formatUrl } from 'url';
-import { OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
+import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
 import {
   KibanaServerProvider,
   EsProvider,
@@ -7,29 +7,35 @@ import {
   RetryProvider,
 } from './services';
 
-import { esTestConfig } from '../../src/test_utils/es';
-import { kibanaTestServerUrlParts } from '../kibana_test_server_url_parts';
-
 export default function () {
+  const servers = {
+    kibana: kbnTestConfig.getUrlParts(),
+    elasticsearch: esTestConfig.getUrlParts(),
+  };
+
   return {
-    servers: {
-      kibana: kibanaTestServerUrlParts,
-      elasticsearch: esTestConfig.getUrlParts(),
+    servers,
+
+    esTestCluster: {
+      license: 'oss',
+      from: 'snapshot',
+      serverArgs: [
+      ],
     },
 
     kibanaServerArgs: [
       '--env=development',
       '--logging.json=false',
       '--no-base-path',
-      `--server.port=${kibanaTestServerUrlParts.port}`,
-      `--optimize.watchPort=${kibanaTestServerUrlParts.port}`,
+      `--server.port=${kbnTestConfig.getPort()}`,
+      `--optimize.watchPort=${kbnTestConfig.getPort()}`,
       '--optimize.watchPrebuild=true',
       '--status.allowAnonymous=true',
       '--optimize.enabled=true',
       `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
-      `--elasticsearch.url=${formatUrl(esTestConfig.getUrlParts())}`,
-      `--elasticsearch.username=${esTestConfig.getUrlParts().username}`,
-      `--elasticsearch.password=${esTestConfig.getUrlParts().password}`,
+      `--elasticsearch.url=${formatUrl(servers.elasticsearch)}`,
+      `--elasticsearch.username=${servers.elasticsearch.username}`,
+      `--elasticsearch.password=${servers.elasticsearch.password}`,
     ],
 
     services: {

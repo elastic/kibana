@@ -1,40 +1,29 @@
-import fs from 'fs';
-import { resolve } from 'path';
-
 import { log } from './log';
-import { extractTarball } from './tarball';
-import { findMostRecentlyChanged } from './find_most_recently_changed';
-import {
-  RELATIVE_ES_BIN,
-  ES_GRADLE_WRAPPER_BIN,
-  ES_ARCHIVE_PATTERN,
-  ES_REPO_ROOT,
-} from './paths';
+import { resolve } from 'path';
+import { KIBANA_ROOT } from './paths';
+import { createEsTestCluster } from '../../es';
 
-async function setupElasticsearch({ esExtractPath, procs }) {
-  await procs.run('buildEs', {
-    cmd: ES_GRADLE_WRAPPER_BIN,
-    args: [':distribution:archives:tar:assemble'],
-    cwd: ES_REPO_ROOT,
-    wait: true,
+import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
+
+export async function runElasticsearch({ config }) {
+  const isOss = config.get('elasticsearchClusterArgs.license') === 'oss';
+
+  const cluster = createEsTestCluster({
+    port: config.get('servers.elasticsearch.port'),
+    password: !isOss ? DEFAULT_SUPERUSER_PASS : config.get('servers.elasticsearch.password'),
+    license: config.get('esTestCluster.license'),
+    log,
+    basePath: resolve(KIBANA_ROOT, '.es'),
+    from: config.get('esTestCluster.from'),
   });
 
-  const esTarballPath = findMostRecentlyChanged(ES_ARCHIVE_PATTERN);
-  log.debug('es build output %j', esTarballPath);
+  const esArgs = config.get('esTestCluster.serverArgs');
 
-  await extractTarball(esTarballPath, esExtractPath);
-}
+  await cluster.start(esArgs);
 
-export async function runElasticsearch({ tmpDir, procs, config }) {
-  const esExtractPath = resolve(tmpDir, 'es');
-  if (!fs.existsSync(esExtractPath)) {
-    await setupElasticsearch({ esExtractPath, procs });
+  if (!isOss) {
+    await setupUsers(log, config);
   }
 
-  await procs.run('es', {
-    cmd: RELATIVE_ES_BIN,
-    args: ['-E', `http.port=${config.get('servers.elasticsearch.port')}`],
-    cwd: esExtractPath,
-    wait: /^\[.+?\]\[.+?\]\[.+?\] \[.+?\] started$/,
-  });
+  return cluster;
 }

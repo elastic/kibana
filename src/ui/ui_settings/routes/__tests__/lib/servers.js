@@ -1,4 +1,4 @@
-import { createTestCluster } from '../../../../../test_utils/es';
+import { createEsTestCluster } from '@kbn/test';
 import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
@@ -6,7 +6,7 @@ let services;
 let es;
 
 export async function startServers() {
-  es = createTestCluster();
+  es = createEsTestCluster();
   this.timeout(es.getStartTimeout());
 
   await es.start();
@@ -35,7 +35,7 @@ export function getServices() {
     kbnServer,
     callCluster,
     savedObjectsClient,
-    uiSettings
+    uiSettings,
   };
 
   return services;

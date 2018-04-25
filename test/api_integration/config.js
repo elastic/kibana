@@ -23,6 +23,8 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'API Integration Tests'
     },
+    env: commonConfig.get('env'),
+    esTestCluster: commonConfig.get('esTestCluster'),
     kibanaServerArgs: [
       ...commonConfig.get('kibanaServerArgs'),
       '--optimize.enabled=false',

@@ -1,6 +1,6 @@
 import url, {  format as formatUrl } from 'url';
-import pkg from '../../../package.json';
-import { admin } from '../../../test/shield';
+import pkg from '../../../../package.json';
+import { adminTestUser } from '../kbn';
 
 export const esTestConfig = new class EsTestConfig {
   getVersion() {
@@ -34,11 +34,11 @@ export const esTestConfig = new class EsTestConfig {
       };
     }
 
-    const username = process.env.TEST_KIBANA_USERNAME || admin.username;
-    const password = process.env.TEST_KIBANA_PASSWORD || admin.password;
+    const username = process.env.TEST_KIBANA_USERNAME || adminTestUser.username;
+    const password = process.env.TEST_KIBANA_PASSWORD || adminTestUser.password;
     return {
       // Allow setting any individual component(s) of the URL,
-      // or use default values (username and password from shield.js)
+      // or use default values (username and password from ../kbn/users.js)
       protocol: process.env.TEST_ES_PROTOCOL || 'http',
       hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
       port: parseInt(process.env.TEST_ES_PORT, 10) || 9220,
@@ -46,6 +46,5 @@ export const esTestConfig = new class EsTestConfig {
       username: username,
       password: password,
     };
-
   }
 };

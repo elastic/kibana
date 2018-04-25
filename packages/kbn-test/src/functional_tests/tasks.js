@@ -26,86 +26,112 @@ in another terminal session by running this command from this directory:
 
 `;
 
-// Takes in multiple configs, comma separated
-// Runs servers and tests for each config
+
+/*
+ * With multiple configs, comma separated,
+ * run servers and tests for each config
+ */
 export async function runTests(
   configPaths = [FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH],
-  runEs = runElasticsearch,
-  runKbn = runKibanaServer
+  options = {
+    runEs: runElasticsearch,
+    runKbn: runKibanaServer,
+  }
 ) {
   const configs = [];
 
-  // Make a list of config paths based on --config or defaults
+  // Use list of config paths from --config or default
   try {
-    configs.push(...getopts(process.argv.slice(2)).config.split(','));
+    let configOptions = getopts(process.argv.slice(2)).config;
+    configOptions = typeof configOptions === 'string'
+      ? [configOptions]
+      : configOptions;
+    configs.push(...configOptions);
   } catch (err) {
     configs.push(...configPaths);
   }
 
   // Run servers and tests for each
-  try {
-    for (let configPath of configs) {
-      configPath = await resolve(KIBANA_ROOT, configPath);
-      await runWithConfig(configPath, runEs, runKbn);
+  for (const configPath of configs) {
+    try {
+      await runSingleConfig(resolve(KIBANA_ROOT, configPath), options);
+    } catch (err) {
+      fatalErrorHandler(err);
     }
-  } catch (err) {
-    fatalErrorHandler(err);
   }
 }
 
-// Start only servers using single config
+
+/*
+ * Start only servers using single config
+ */
 export async function startServers(
   configPath = FUNCTIONAL_CONFIG_PATH,
-  runEs = runElasticsearch,
-  runKbn = runKibanaServer
+  options = {
+    runEs: runElasticsearch,
+    runKbn: runKibanaServer,
+  }
 ) {
   const configOption = getopts(process.argv.slice(2)).config;
 
   configPath = await resolve(KIBANA_ROOT, configOption || configPath);
 
-  await withTmpDir(async tmpDir => {
-    await withProcRunner(async procs => {
-      const config = await readConfigFile(log, configPath);
-
-      await runEs({ tmpDir, procs, config });
-      await runKbn({ procs, config });
-
-      // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get buried
-      await Rx.Observable.fromEvent(log, 'data')
-        .switchMap(() => Rx.Observable.timer(5000))
-        .first()
-        .toPromise();
-
-      log.info(SUCCESS_MESSAGE);
-      await procs.waitForAllToStop();
-    });
-  });
-}
-
-// Start servers and run tests for single config
-async function runWithConfig(
-  configPath = FUNCTIONAL_CONFIG_PATH,
-  runEs = runElasticsearch,
-  runKbn = runKibanaServer
-) {
   try {
     await withTmpDir(async tmpDir => {
       await withProcRunner(async procs => {
         const config = await readConfigFile(log, configPath);
+        const { runEs, runKbn } = options;
 
-        await runEs({ tmpDir, procs, config });
+        const es = await runEs({ tmpDir, config });
         await runKbn({ procs, config });
-        await runFtr({ procs, configPath, cwd: process.cwd() });
 
-        await procs.stop('kibana');
-        await procs.stop('es');
+        // wait for 5 seconds of silence before logging the success message
+        // so that it doesn't get buried
+        await Rx.Observable.fromEvent(log, 'data')
+          .switchMap(() => Rx.Observable.timer(5000))
+          .first()
+          .toPromise();
+
+        log.info(SUCCESS_MESSAGE);
+        await procs.waitForAllToStop();
+        await es.cleanup();
       });
     });
   } catch (err) {
     fatalErrorHandler(err);
   }
 }
+
+
+/*
+ * Start servers and run tests for single config
+ */
+async function runSingleConfig(
+  configPath = FUNCTIONAL_CONFIG_PATH,
+  options = {
+    runEs: runElasticsearch,
+    runKbn: runKibanaServer,
+  }
+) {
+  try {
+    await withTmpDir(async tmpDir => {
+      await withProcRunner(async procs => {
+        const config = await readConfigFile(log, configPath);
+        const { runEs, runKbn } = options;
+
+        const es = await runEs({ tmpDir, config });
+        await runKbn({ procs, config });
+        await runFtr({ procs, configPath, cwd: process.cwd() });
+
+        await procs.stop('kibana');
+        await es.cleanup();
+      });
+    });
+  } catch (err) {
+    fatalErrorHandler(err);
+  }
+}
+
 
 function fatalErrorHandler(err) {
   log.error('FATAL ERROR');

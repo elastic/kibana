@@ -1,14 +1,9 @@
 import { resolve, relative } from 'path';
-import { platform as getPlatform } from 'os';
 
 // resolve() treats relative paths as relative to process.cwd(),
 // so to return a relative path we use relative()
 function resolveRelative(path) {
   return relative(process.cwd(), resolve(path));
-}
-
-function useBat(bin) {
-  return getPlatform().startsWith('win') ? `${bin}.bat` : bin;
 }
 
 export const KIBANA_EXEC = 'node';
@@ -25,11 +20,3 @@ export const API_CONFIG_PATH = resolve(
   'test/api_integration/config'
 );
 export const OPTIMIZE_BUNDLE_DIR = resolve(KIBANA_ROOT, 'optimize/bundles');
-export const ES_REPO_ROOT = resolve(PROJECT_ROOT, './elasticsearch');
-export const ES_ARCHIVE_PATTERN = resolve(
-  ES_REPO_ROOT,
-  'distribution/archives/tar/build/distributions/elasticsearch-*.tar.gz'
-);
-export const ES_GRADLE_WRAPPER_BIN = resolve(ES_REPO_ROOT, useBat('gradlew'));
-
-export const RELATIVE_ES_BIN = resolveRelative(useBat('bin/elasticsearch'));
