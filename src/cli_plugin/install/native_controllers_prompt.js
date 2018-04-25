@@ -14,8 +14,8 @@ export async function nativeControllersPrompt(settings) {
 @         WARNING: plugin forks a native controller          @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 This plugin launches a native controller that is not subject
-to the system call filters. This plugin is capable of spawning
-additional processes and running arbitrary system commands.
+to the system call filters and is explicitly allowed to spawn
+new processes.
 
 Continue with installation? [y/N]`;
 
