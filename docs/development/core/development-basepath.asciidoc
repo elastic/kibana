@@ -48,15 +48,15 @@ $http.get(chrome.addBasePath('/api/plugin/things'));
 [float]
 ==== Server side
 
-Append `config.get('server.basePath')` to any absolute URL path.
+Append `request.getBasePath()` to any absolute URL path.
 
 ["source","shell"]
 -----------
 const basePath = server.config().get('server.basePath');
 server.route({
   path: '/redirect',
-  handler(req, reply) {
-    reply.redirect(`${basePath}/otherLocation`);
+  handler(request, reply) {
+    reply.redirect(`${request.getBasePath()}/otherLocation`);
   }
 });
 -----------
