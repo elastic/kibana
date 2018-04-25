@@ -34,8 +34,7 @@ export default function ({ getService }) {
           expect(body.metrics.os.cpu.load_average['5m']).to.be.a('number');
           expect(body.metrics.os.cpu.load_average['15m']).to.be.a('number');
 
-          // TODO: fix this in the status/metrics_collector/metrics class so this is always defined as a number
-          // expect(body.metrics.response_times.avg_in_millis).not.to.be(undefined);
+          expect(body.metrics.response_times.avg_in_millis).not.toBeNull();
           expect(body.metrics.response_times.max_in_millis).to.be.a('number');
 
           expect(body.metrics.requests.total).to.be.a('number');
