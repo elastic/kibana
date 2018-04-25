@@ -29,7 +29,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmBreadCrumbTextContains('discover');
       await this.isGlobalLoadingIndicatorHidden();
     }
 
