@@ -16,10 +16,20 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => await remote.findByCssSelector(selector).click());
     }
 
+    async confirmBreadCrumbTextContains(text) {
+      await retry.try(async () => {
+        const breadCrumbText = await PageObjects.common.getBreadcrumbsText();
+        if (breadCrumbText.toLowerCase().indexOf(text.toLowerCase()) < 0) {
+          throw new Error(`Breadcrumb text ${breadCrumbText} does not contain ${text} (case insensitive)`);
+        }
+      });
+    }
+
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
       await PageObjects.common.waitForTopNavToBeVisible();
+      await this.confirmBreadCrumbTextContains('discover');
       await this.isGlobalLoadingIndicatorHidden();
     }
 
@@ -27,6 +37,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
+      await this.confirmBreadCrumbTextContains('visualize');
       await this.isGlobalLoadingIndicatorHidden();
     }
 
@@ -34,6 +45,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
       await PageObjects.common.waitForTopNavToBeVisible();
+      await this.confirmBreadCrumbTextContains('dashboard');
       await this.isGlobalLoadingIndicatorHidden();
     }
 
