@@ -1,8 +1,8 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import pieTemplate from './editors/pie.html';
 import image from './images/icon-donut.svg';
+import { PieOptionsTab } from './components/pie_editor';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -44,7 +44,7 @@ export default function HistogramVisType(Private) {
           text: 'bottom',
         }],
       },
-      optionsTemplate: pieTemplate,
+      optionsTemplate: PieOptionsTab,
       schemas: new Schemas([
         {
           group: 'metrics',
