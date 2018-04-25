@@ -62,6 +62,8 @@ export function savedObjectsMixin(kbnServer, server) {
     }
   }
 
+  server.decorate('server', 'getSavedObjectsClientProvider', () => SavedObjectsClientProvider);
+
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster, request }) => {
     const createBaseClient = (options) => {
       const {
