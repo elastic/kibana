@@ -38,7 +38,16 @@ export class GrokHighlightRules extends TextHighlightRules {
             "grokEnd"
           ],
           regex: "(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})"
-        }
+        },
+        {
+          token: (escapeToken, /* regexToken */) => {
+            if (escapeToken) {
+              return [ 'grokEscape', '' ];
+            }
+            return 'grokRegex';
+          },
+          regex: "(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])"
+        },
       ]
     };
   }
