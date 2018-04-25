@@ -45,23 +45,24 @@ describe('Metrics', function () {
   describe('capture', () => {
     it('merges all metrics', async () => {
       setMockFiles();
-      sinon.stub(metrics, 'captureEvent').returns({ 'a': [{ 'b': 2 }, { 'd': 4 }] });
+      sinon.stub(metrics, 'captureEvent').returns({ 'a': [{ 'b': 2 }, { 'd': 4 }], process: { uptime_ms: 1980 } });
       sinon.stub(metrics, 'captureCGroupsIfAvailable').returns({ 'a': [{ 'c': 3 }, { 'e': 5 }] });
       sinon.stub(Date.prototype, 'toISOString').returns('2017-04-14T18:35:41.534Z');
-      sinon.stub(process, 'uptime').returns(5000);
 
       const capturedMetrics = await metrics.capture();
       expect(capturedMetrics).toEqual({
         last_updated: '2017-04-14T18:35:41.534Z',
         collection_interval_in_millis: 5000,
-        uptime_in_millis: 5000000,
-        a: [ { b: 2, c: 3 }, { d: 4, e: 5 } ]
+        uptime_in_millis: 1980,
+        a: [ { b: 2, c: 3 }, { d: 4, e: 5 } ], process: { uptime_ms: 1980 }
       });
     });
   });
 
   describe('captureEvent', () => {
     it('parses the hapi event', () => {
+      sinon.stub(process, 'uptime').returns(5000);
+
       os.freemem.mockImplementation(() => 12);
       os.totalmem.mockImplementation(() => 24);
 

@@ -38,7 +38,7 @@ export class Metrics {
     const metrics = {
       last_updated: timestamp,
       collection_interval_in_millis: this.config.get('ops.interval'),
-      uptime_in_millis: process.uptime() * 1000, // TODO: deprecate this field, should be process.uptime_ms
+      uptime_in_millis: event.process.uptime_ms, // TODO: deprecate this field, data should only have process.uptime_ms
     };
 
     return merge(metrics, event, cgroup);
