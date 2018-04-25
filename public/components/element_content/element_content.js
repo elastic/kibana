@@ -34,8 +34,6 @@ const branches = [
   withProps(({ handlers }) => ({
     handlers: {
       done() {},
-      onResize() {},
-      onDestroy() {},
       ...handlers,
     },
   })),
@@ -64,7 +62,7 @@ export const ElementContent = compose(pure, ...branches)(
 
 ElementContent.propTypes = {
   renderable: PropTypes.object,
-  renderFunction: PropTypes.func,
+  renderFunction: PropTypes.object,
   size: PropTypes.object,
   handlers: PropTypes.object,
   state: PropTypes.string,
