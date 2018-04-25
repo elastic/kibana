@@ -1,0 +1,268 @@
+<div class="edit-job-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h1 tooltip="{{ui.title}}" class="euiTitle">{{ui.title}}</h1>
+
+  <div class="euiSpacer euiSpacer--m"></div>
+
+  <ul class="nav nav-tabs" >
+    <li
+      class="kbn-settings-tab"
+      ng-class="{ active: ui.currentTab === tab.index }"
+      ng-repeat="tab in ui.tabs"
+      ng-hide="ui.tabs[{{tab.index}}].hidden">
+
+      <a ng-click="ui.changeTab(tab)">
+        {{ tab.title }}
+      </a>
+    </li>
+  </ul>
+
+  <!-- Job Details -->
+  <div class="tab_contents" ng-show="ui.currentTab === 0">
+    <div class="form-group">
+      <ml-form-label label-id="new_job_description">Job description</ml-form-label>
+      <input
+        aria-labelledby="ml_aria_label_new_job_description"
+        aria-describedby="ml_aria_description_new_job_description"
+        ng-model="job.description"
+        class="form-control" />
+    </div>
+
+    <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+    <div class="form-group">
+      <ml-form-label label-id="new_job_group">Job Groups</ml-form-label>
+      <ml-job-group-select
+        aria-labelledby="ml_aria_label_new_job_group"
+        aria-describedby="ml_aria_description_new_job_group"
+        job-groups='job.groups' />
+    </div>
+
+    <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+    <div class="form-group">
+      <ml-form-label label-id="new_job_model_memory_limit">Model memory limit</ml-form-label>
+      <input
+        aria-labelledby="ml_aria_label_new_job_model_memory_limit"
+        aria-describedby="ml_aria_description_new_job_model_memory_limit"
+        placeholder="{{ui.modelMemoryLimitDefault}}"
+        type="text"
+        ng-model='job.analysis_limits.model_memory_limit'
+        class="form-control" />
+        <div ng-hide="ui.validation.tabs[0].checks.modelMemoryLimit.valid" class="validation-error">
+          {{ui.validation.tabs[0].checks.modelMemoryLimit.message}}
+        </div>
+    </div>
+
+    <div class="form-group"
+      ng-show="(job.analysis_config.categorization_field_name !== undefined && job.analysis_config.categorization_field_name !== '') ||
+               (job.analysis_config.categorization_filters && job.analysis_config.categorization_filters.length)">
+      <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+      <label aria-describedby="ml_aria_description_new_job_categorizationfilters">Categorization Filters</label>
+      <i ml-info-icon="new_job_categorizationfilters" />
+      <div ng-if="job.analysis_config && job.analysis_config.categorization_filters">
+        <div ng-repeat="item in job.analysis_config.categorization_filters track by $index" class="categorization-filter">
+          <div class="field-cols">
+            <div class="form-group">
+              <input
+                ng-model="job.analysis_config.categorization_filters[$index]"
+                type="text"
+                class="form-control" />
+            </div>
+          </div>
+
+          <button
+            ng-click="removeCategorizationFilter($index)"
+            tooltip-append-to-body="true"
+            type="button"
+            class="kuiButton kuiButton--danger kuiButton--small remove-button">
+              <i aria-hidden="true" class="fa fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div>
+        <button
+          aria-labelledby="ml_aria_label_add_categorization_filter"
+          ng-click="addCategorizationFilter()"
+          type="button"
+          ng-disabled="job.analysis_config.categorization_field_name === undefined || job.analysis_config.categorization_field_name === ''"
+          class="kuiButton kuiButton--primary kuiButton--small">
+          <i aria-hidden="true" class="fa fa-plus"></i>
+          <span id="ml_aria_label_add_categorization_filter">Add Categorization Filter</span>
+        </button>
+      </div>
+    </div>
+
+    <div ng-hide="ui.validation.tabs[0].checks.categorizationFilters.valid" class="validation-error">
+      {{ ( ui.validation.tabs[2].checks.categorizationFilters.message || "Categorization filters must all be valid regular expressions" ) }}
+    </div>
+
+  </div>
+
+  <!-- Detectors -->
+  <div class="tab_contents" ng-show="ui.currentTab === 1">
+    <label class="kuiFormLabel">Edit detector descriptions</label>
+    <div ml-job-detectors-list
+      ml-detectors="job.analysis_config.detectors"
+      ml-indices="indices"
+      ml-properties="properties"
+      ml-edit-mode="'EDIT'"
+      ></div>
+  </div>
+
+  <!-- Datafeed -->
+  <div class="tab_contents" ng-show="ui.currentTab === 2">
+
+    <div ng-show="ui.datafeedStopped" >
+      <div class="form-group" >
+        <ml-form-label label-id="new_job_datafeed_query">Query</ml-form-label>
+        <input
+          aria-labelledby="ml_aria_label_new_job_datafeed_query"
+          aria-describedby="ml_aria_description_new_job_datafeed_query"
+          ng-model="ui.datafeed.queryText"
+          placeholder='{ "match_all": {}}'
+          class="form-control" />
+
+      </div>
+      <div class="form-group" >
+        <ml-form-label label-id="new_job_datafeed_query_delay">Query delay</ml-form-label>
+        <input
+          aria-labelledby="ml_aria_label_new_job_datafeed_query_delay"
+          aria-describedby="ml_aria_description_new_job_datafeed_query_delay"
+          ng-model="ui.datafeed.queryDelayText"
+          placeholder="{{ui.datafeed.queryDelayDefault}}"
+          min="0"
+          class="form-control" />
+
+      </div>
+      <div class="form-group" >
+        <ml-form-label label-id="new_job_datafeed_frequency">Frequency</ml-form-label>
+        <input
+          aria-labelledby="ml_aria_label_new_job_datafeed_frequency"
+          aria-describedby="ml_aria_description_new_job_datafeed_frequency"
+          ng-model="ui.datafeed.frequencyText"
+          placeholder="{{ui.datafeed.frequencyDefault}}"
+          min="0"
+          class="form-control" />
+
+      </div>
+      <div class="form-group" >
+        <ml-form-label label-id="new_job_datafeed_scrollsize">scroll_size</ml-form-label>
+        <input
+          aria-labelledby="ml_aria_label_new_job_datafeed_scrollsize"
+          aria-describedby="ml_aria_description_new_job_datafeed_scrollsize"
+          ng-model="ui.datafeed.scrollSizeText"
+          placeholder="{{ui.datafeed.scrollSizeDefault}}"
+          type="number"
+          min="0"
+          class="form-control" />
+      </div>
+    </div>
+    <div ng-hide="ui.datafeedStopped" class="kuiText">
+      <div>Datafeed settings cannot be edited while the datafeed is running.</div>
+      <div ng-show="ui.stoppingDatafeed===false"><a ng-click="stopDatafeed()">Stop datafeed now</a></div>
+      <div ng-show="ui.stoppingDatafeed===true">Stopping...</div>
+    </div>
+  </div>
+
+  <!-- Custom URLs -->
+  <div class="tab_contents" ng-show="ui.currentTab === 3">
+    <div class="form-group">
+      <div ng-if="job.custom_settings && job.custom_settings.custom_urls">
+        <div ng-repeat="item in job.custom_settings.custom_urls track by $index" class="custom-url">
+
+            <div class="form-group label-input">
+              <label id="ml_aria_label_custom_url_label_{{$index}}" class="kuiFormLabel">Label</label>
+              <input
+                aria-labelledby="ml_aria_label_custom_url_label_{{$index}}"
+                ng-model="item.url_name"
+                type="text"
+                class="kuiTextInput form-control" />
+              <div ng-show="item.url_name === ''" class="validation-error">Enter a label</div>
+            </div>
+
+
+          <div class="field-cols">
+            <div class="form-group">
+              <label id="ml_aria_label_custom_url_{{$index}}" class="kuiFormLabel">URL</label>
+              <textarea
+                aria-labelledby="ml_aria_label_custom_url_{{$index}}"
+                ng-model="item.url_value"
+                type="text"
+                class="form-control" ></textarea>
+            </div>
+          </div>
+
+          <div class="form-group time-input">
+            <label id="ml_aria_label_custom_url_time_{{$index}}" class="kuiFormLabel">Time range</label>
+            <input
+              aria-labelledby="ml_aria_label_custom_url_time_{{$index}}"
+              ng-model="item.time_range"
+              ng-change="customUrlTimeRangeChanged($index)"
+              type="text"
+              class="form-control" />
+            <div ng-show="item.timeRangeError === true" class="validation-error">Invalid format</div>
+          </div>
+
+          <button
+            ng-if="showTestLinkForCustomUrl($index)"
+            ng-click="testCustomUrl($index)"
+            tooltip="Test custom URL"
+            tooltip-append-to-body="false"
+            aria-label="Test custom URL"
+            data-toggle="tooltip"
+            type="button"
+            class="kuiButton kuiButton--basic kuiButton--small test-url-button">
+              <i aria-hidden="true" class="fa fa-share-square-o"></i>
+          </button>
+
+          <button
+            ng-click="removeCustomUrl($index)"
+            tooltip="Delete custom URL"
+            tooltip-append-to-body="false"
+            aria-label="Delete custom URL"
+            data-toggle="tooltip"
+            type="button"
+            class="kuiButton kuiButton--danger kuiButton--small remove-button">
+              <i aria-hidden="true" class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div ng-hide="ui.editingNewCustomUrl === true">
+        <button
+          aria-labelledby="ml_aria_label_new_job_custom_urls"
+          aria-describedby="ml_aria_description_new_job_custom_urls"
+          ng-click="editNewCustomUrl()"
+          type="button"
+          class="kuiButton kuiButton--primary kuiButton--small">
+          <i aria-hidden="true" class="fa fa-plus" />
+          <span id="ml_aria_label_new_job_custom_urls">Add Custom URL</span>
+        </button>
+      </div>
+      <div ng-show="ui.editingNewCustomUrl === true" class="custom-url-editor">
+        <h3 class="euiTitle">Create new custom URL</h3>
+        <ml-custom-url-editor
+          add-custom-url="addCustomUrl"
+          job="job">
+        </ml-custom-url-editor>
+      </div>
+    </div>
+  </div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <button
+    ng-click="save()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary" >
+    Update
+  </button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary"
+    aria-label="Cancel">
+    Cancel
+  </button>
+</div>

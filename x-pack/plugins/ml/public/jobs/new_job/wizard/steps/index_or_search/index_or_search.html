@@ -1,0 +1,28 @@
+<ml-nav-menu name="new_job"></ml-nav-menu>
+<ml-new-job class="index-or-saved-search-selection">
+  <ml-message-bar></ml-message-bar>
+  <div class='kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem' >
+    <div ng-controller="MlNewJobStepIndexOrSearch" class="wizard">
+      <div class="wizard-column wizard-column--small">
+        <h3 class="kuiTitle kuiVerticalRhythm">From a New Search, Select Index</h3>
+        <paginated-selectable-list
+          per-page="20"
+          list="indexPatterns"
+          list-property="attributes.title"
+          user-make-url="withIndexPatternUrl"
+          class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
+        ></paginated-selectable-list>
+      </div>
+      <div class="wizard-column wizard-column--large">
+
+        <h3 class="kuiTitle kuiVerticalRhythm">Or, From a Saved Search</h3>
+        <saved-object-finder
+          title="Saved Searches"
+          type="searches"
+          class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
+          make-url="withSavedSearchUrl"
+        ></saved-object-finder>
+       </div>
+    </div>
+    </div>
+</ml-new-job>

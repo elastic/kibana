@@ -1,0 +1,137 @@
+<ml-nav-menu name="settings"></ml-nav-menu>
+<ml-calendars-list ng-controller="MlCalendarsList">
+  <ml-message-bar ></ml-message-bar>
+
+  <div class="calendars-list-container">
+    <div>
+      <div class="kuiViewContent kuiViewContent--constrainedWidth">
+        <div class="kuiViewContentItem kuiControlledTable kuiVerticalRhythm">
+          <div class="kuiToolBar">
+            <div class="kuiToolBarSearch">
+              <tool-bar-search-box
+                ng-disabled="true"
+                filter="query"
+                on-filter="onQueryChange">
+              </tool-bar-search-box>
+            </div>
+
+            <div class="kuiToolBarSection">
+              <div
+                ng-class="buttonChecks.newButtonWrapperClass()"
+                ng-attr-tooltip="{{buttonChecks.newButtonWrapperTooltip()}}"
+              >
+                <button class="kuiButton kuiButton--primary"
+                  ng-click="newCalendarClick()"
+                  aria-label="Create new dashboard"
+                  data-test-subj="newDashboardLink"
+                  tooltip="Create new calendar"
+                  ng-disabled='buttonChecks.newButtonDisabled()'
+                  tooltip-append-to-body="true">
+                  <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-plus"></span>
+                  New calendar
+                </button>
+              </div>
+            </div>
+
+            <div class="kuiToolBarSection">
+              <tool-bar-pager-text
+                start-item="pager.startItem"
+                end-item="pager.endItem"
+                total-items="pager.totalItems">
+              </tool-bar-pager-text>
+              <tool-bar-pager-buttons
+                has-previous-page="pager.hasPreviousPage"
+                has-next-page="pager.hasNextPage"
+                on-page-next="onPageNext"
+                on-page-previous="onPagePrevious">
+              </tool-bar-pager-buttons>
+            </div>
+          </div>
+
+          <table class="kuiTable">
+            <thead>
+              <tr>
+                <th scope="col" class="kuiTableHeaderCell">
+                  <sortable-column field="{{SORT_FIELD_LABELS.CALENDAR_ID}}" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+                    ID
+                  </sortable-column>
+                </th>
+                <th scope="col" class="kuiTableHeaderCell">
+                  <sortable-column field="{{SORT_FIELD_LABELS.JOB_IDS}}" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+                    Jobs
+                  </sortable-column>
+                </th>
+                <th scope="col" class="kuiTableHeaderCell">
+                  <sortable-column field="{{SORT_FIELD_LABELS.EVENT_COUNT}}" on-sort-change="onSortChange" sort-field="sortField" sort-reverse="sortReverse">
+                    Events
+                  </sortable-column>
+                </th>
+                <th scope="col" class="kuiTableHeaderCell actions-col"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr ng-repeat="calendar in displayCalendars" class="kuiTableRow" ng-class="{ 'kuiTableRow-isBeingDeleted': calendar.isBeingDeleted }">
+
+                <td class="kuiTableRowCell">
+                  <div class="kuiTableRowCell__liner">
+                    <span title="{{calendar.calendar_id}}">
+                      {{calendar.calendar_id}}
+                    </span>
+                  </div>
+                </td>
+
+                <td class="kuiTableRowCell">
+                  <div class="kuiTableRowCell__liner">
+                    <span title="{{calendar.job_ids.join(', ')}}">
+                      {{calendar.job_ids.join(', ')}}
+                    </span>
+                  </div>
+                </td>
+                <td class="kuiTableRowCell">
+                  <div class="kuiTableRowCell__liner">
+                    <span>
+                       {{calendar.events.length}} {{calendar.events.length === 1 ? 'event' : 'events'}}
+                    </span>
+                  </div>
+                </td>
+                <td class="kuiTableRowCell">
+                  <div class="kuiTableRowCell__liner">
+                    <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
+                      <div
+                        ng-class="buttonChecks.newButtonWrapperClass()"
+                        ng-attr-tooltip="{{buttonChecks.newButtonWrapperTooltip()}}">
+                        <button
+                          class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
+                          title="Edit"
+                          ng-disabled='buttonChecks.newButtonDisabled()'
+                          ng-click="editCalendarClick(calendar.calendar_id)">
+                          <span class="kuiMenuButton__icon kuiIcon fa-pencil"></span>
+                          <span>Edit</span>
+                        </button>
+                      </div>
+                      <div
+                        ng-class="buttonChecks.deleteButtonWrapperClass()"
+                        ng-attr-tooltip="{{buttonChecks.deleteButtonWrapperTooltip()}}">
+                        <button
+                          class="kuiMenuButton kuiMenuButton--danger kuiMenuButton--iconText"
+                          title="Edit"
+                          ng-disabled='buttonChecks.deleteButtonDisabled()'
+                          ng-click="deleteCalendarClick(calendar.calendar_id)"
+                          href="" >
+                          <span class="kuiMenuButton__icon kuiIcon fa-trash"></span>
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ml-calendars-list>

@@ -1,0 +1,141 @@
+ml-config-jobs {
+  font-size: 14px;
+
+  header {
+    margin: 15px 0;
+  }
+
+  .jobs-container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+
+    .euiCallOut--warning {
+      .fa-exclamation-triangle {
+        color: #fba740;
+      }
+    }
+  }
+
+  .jobs-stats-bar {
+
+    padding: 14px;
+    background-color: #EFF0F1;
+
+    .stat {
+      margin-right: 10px;
+      .stat-label {}
+      .stat-value {
+        font-weight: bold
+      }
+    }
+  }
+
+  ml-paginated-table {
+
+    .job-system-info, .job-info, .job-warning, .job-error {
+      text-shadow: 1px 1px 1px #BBBBBB;
+      font-size: 16px;
+    }
+
+    .job-warning-small {
+      font-size: inherit;
+      margin-left:2px;
+    }
+
+    .job-system-info {
+      color: gray;
+    }
+    .job-info {
+      color: dodgerblue;
+    }
+    .job-warning {
+      color: #fba740;
+    }
+    .job-error {
+      color: #fe5050;
+    }
+
+    .col-bucketspan {
+      width: 120px;
+    }
+
+    .col-info {
+      width: 24px;
+    }
+
+    .col-action {
+      width: 175px;
+    }
+    .actions {
+      white-space: nowrap;
+    }
+
+    .col-align-right {
+      text-align: right;
+      padding-right: 20px;
+    }
+
+    th.col-align-right {
+      padding-right: 25px !important;
+    }
+
+    i.job-tab-icon {
+      margin-left: 5px;
+    }
+  }
+
+  .ml-mark {
+    background-color: #fce571;
+  }
+
+  .no-jobs-warning {
+    text-align: center;
+    font-size: 17px;
+  }
+
+  .jobs-count {
+    margin-top: -50px;
+  }
+
+  .ml-pre, .job-audit-list-container {
+    max-height: 500px;
+    overflow: auto;
+    padding: 5px 15px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #444444;
+    background-color: #ffffff;
+    background-image: none;
+    border: 2px solid #ecf0f1;
+    border-radius: 4px;
+  }
+
+  .ml-pre {
+    display: block;
+    unicode-bidi: embed;
+    font-family: monospace;
+    white-space: pre;
+
+    @media (min-width: 830px) {
+      max-width: 650px;
+    }
+    @media (min-width: 1030px) {
+      max-width: 850px;
+    }
+    @media (min-width: 1230px) {
+      max-width: 1050px;
+    }
+    @media (min-width: 1430px) {
+      max-width: 1250px;
+    }
+    @media (min-width: 1630px) {
+      max-width: 1450px;
+    }
+    @media (min-width: 1830px) {
+      max-width: 1550px;
+    }
+  }
+}

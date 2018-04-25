@@ -176,7 +176,7 @@ Start elasticsearch from a nightly snapshot.
 yarn es snapshot
 ```
 
-Additional options are available, pass `--help` for more information.
+This will run Elasticsearch with a `trial` license and bootstraped with the user `elastic` and password `changeme`. Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
@@ -196,6 +196,20 @@ Start the development server.
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+#### Running Kibana in Open-Source mode
+
+If you're looking to only work with the open-source software, supply the license type to `yarn es`:
+
+```bash
+yarn es snapshot --license oss
+```
+
+And start Kibana with only open-source code:
+
+```bash
+yarn start --oss
+```
 
 #### Unsupported URL Type
 
@@ -386,20 +400,6 @@ After a pull is submitted, it needs to get to review. If you have commit permiss
 
 ### Reviewing Pull Requests
 
-So, you've been assigned a pull to review. What's that look like?
-
-Remember, someone is blocked by a pull awaiting review, make it count. Be thorough, the more action items you catch in the first review, the less back and forth will be required, and the better chance the pull has of being successful.
-
-1. **Understand the issue** that is being fixed, or the feature being added. Check the description on the pull, and check out the related issue. If you don't understand something, ask the submitter for clarification.
-1. **Reproduce the bug** (or the lack of feature I guess?) in the destination branch, usually `master`. The referenced issue will help you here. If you're unable to reproduce the issue, contact the issue submitter for clarification
-1. **Check out the pull** and test it. Is the issue fixed? Does it have nasty side effects? Try to create suspect inputs. If it operates on the value of a field try things like: strings (including an empty string), null, numbers, dates. Try to think of edge cases that might break the code.
-1. **Merge the target branch**. It is possible that tests or the linter have been updated in the target branch since the pull was submitted. Merging the pull could cause core to start failing.
-1. **Read the code**. Understanding the changes will help you find additional things to test. Contact the submitter if you don't understand something.
-1. **Go line-by-line**. Are there [style guide](https://github.com/elastic/kibana/blob/master/STYLEGUIDE.md) violations? Strangely named variables? Magic numbers? Do the abstractions make sense to you? Are things arranged in a testable way?
-1. **Speaking of tests** Are they there? If a new function was added does it have tests? Do the tests, well, TEST anything? Do they just run the function or do they properly check the output?
-1. **Suggest improvements** If there are changes needed, be explicit, comment on the lines in the code that you'd like changed. You might consider suggesting fixes. If you can't identify the problem, animated screenshots can help the review understand what's going on.
-1. **Hand it back** If you found issues, re-assign the submitter to the pull to address them. Repeat until mergable.
-1. **Hand it off** If you're the first reviewer and everything looks good but the changes are more than a few lines, hand the pull to someone else to take a second look. Again, try to find the right person to assign it to.
-1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
+So, you've been assigned a pull to review. Check out our [pull request review guidelines](https://www.elastic.co/guide/en/kibana/master/pr-review.html) for our general philosophy for pull request reviewers.
 
 Thank you so much for reading our guidelines! :tada:

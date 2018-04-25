@@ -1,0 +1,106 @@
+<kbn-dev-tools-app class="profilerDevTool">
+  <div class="profilerDevTool__container kuiViewContent kuiViewContentItem" ng-controller="profileViz">
+    <div class="wrapper">
+      <div class="main">
+        <tabset ng-show="profileResponse.length > 0">
+          <tab heading="Query Profile"
+            active="activeTab.search"
+            ng-click="activateTab('search')"
+            disabled="!hasSearch">
+              <profileTree data="profileResponse" target="searches"></profileTree>
+          </tab>
+          <tab heading="Aggregation Profile"
+            active="activeTab.aggregations"
+            ng-click="activateTab('aggregations')"
+            disabled="!hasAggregations">
+              <profileTree data="profileResponse" target="aggregations"></profileTree>
+          </tab>
+        </tabset>
+
+        <!-- License error notice -->
+        <div class="kuiNotice" ng-hide="licenseEnabled">
+          <h2 class="kuiTitle kuiVerticalRhythmSmall">
+            <span class="kuiIcon fa-warning kuiIcon--error"></span>
+            License error
+          </h1>
+
+          <p class="kuiText kuiVerticalRhythmSmall">
+            The Profiler Vizualization requires an active license (<code>Trial</code>,
+            <code>Basic</code>, <code>Gold</code> or <code>Platinum</code>), but none were found in your cluster.
+          </p>
+
+          <p class="kuiText kuiVerticalRhythmSmall">
+            Please <a class="kuiLink" href="https://www.elastic.co/subscriptions" rel="noopener noreferrer">register a license</a>
+            to continue using the Search Profiler.
+          </p>
+        </div>
+      </div>
+
+      <div class="aside sense">
+        <!-- Form -->
+        <div class="kuiFieldGroup">
+          <div class="kuiFieldGroupSection">
+            <div class="kuiVerticalRhythmSmall">
+              <label
+                class="kuiLabel"
+                for="searchProfilerIndexInput"
+              >
+                Index
+              </label>
+            </div>
+
+            <div class="kuiVerticalRhythmSmall">
+              <input
+                id="searchProfilerIndexInput"
+                class="kuiTextInput"
+                type="text"
+                ng-model="index"
+                placeholder="_all"
+                ng-disabled="!licenseEnabled"
+              ></input>
+            </div>
+          </div>
+
+          <div class="kuiFieldGroupSection">
+            <div class="kuiVerticalRhythmSmall">
+              <label
+                class="kuiLabel"
+                for="searchProfilerTypeInput"
+              >
+                Type
+              </label>
+            </div>
+
+            <div class="kuiVerticalRhythmSmall">
+              <input
+                id="searchProfilerTypeInput"
+                class="kuiTextInput"
+                type="text"
+                ng-model="type"
+                ng-disabled="!licenseEnabled"
+              ></input>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code editor -->
+        <div style="height:85%;margin-bottom:5px;padding-top:20px">
+          <div ui-ace="{ onLoad : aceLoaded, mode: 'json' }" ng-model="query" class="ace_editor"></div>
+        </div>
+
+        <!-- Actions -->
+        <button
+          class="kuiButton kuiButton--primary"
+          style="float:right;"
+          ng-click="profile()"
+          ng-disabled="!licenseEnabled || !query"
+        >
+          Profile
+        </button>
+      </div>
+      <aside class="aside details">
+        <highlightdetails ng-show="highlight.details && licenseEnabled"></highlightdetails>
+      </aside>
+    </div>
+  </div>
+</kbn-dev-tools-app>

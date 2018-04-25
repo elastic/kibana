@@ -1,0 +1,81 @@
+{
+  "POST _xpack/security/user/{name}": {
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/security/user/{name}"
+    ],
+    "data_autocomplete_rules": {
+      "metadata": {},
+      "password": "",
+      "fullname": "",
+      "roles": []
+    }
+  },
+  "_xpack/security/user/{name}/_enable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/security/user/{name}/_enable"
+    ]
+  },
+  "_xpack/security/user/{name}/_disable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/security/user/{name}/_disable"
+    ]
+  },
+  "_xpack/security/user/{name}/_password": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/security/user/{name}/_password"
+    ],
+    "data_autocomplete_rules": {
+      "password": ""
+    }
+  },
+  "DELETE _xpack/security/user/{name}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/security/user/{name}"
+    ]
+  },
+  "_xpack/security/user": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/security/user",
+      "_xpack/security/user/{name}"
+    ]
+  },
+  "_xpack/security/user/_password": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/security/user/_password",
+      "_xpack/security/user/{username}/_password"
+    ],
+    "data_autocomplete_rules": {
+      "password": ""
+    }
+  },
+  "_xpack/security/user/_has_privileges": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/security/user/_has_privileges"
+    ]
+  }
+}

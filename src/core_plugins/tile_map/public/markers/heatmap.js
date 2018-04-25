@@ -12,11 +12,11 @@ import { EventEmitter } from 'events';
  */
 export class HeatmapMarkers extends EventEmitter {
 
-  constructor(featureCollection, options, zoom) {
+  constructor(featureCollection, options, zoom, max) {
 
     super();
     this._geojsonFeatureCollection = featureCollection;
-    const points = dataToHeatArray(featureCollection);
+    const points = dataToHeatArray(featureCollection, max);
     this._leafletLayer = L.heatLayer(points, options);
     this._tooltipFormatter = options.tooltipFormatter;
     this._zoom = zoom;
@@ -170,8 +170,7 @@ export class HeatmapMarkers extends EventEmitter {
  * @param featureCollection {Array}
  * @return {Array}
  */
-function dataToHeatArray(featureCollection) {
-  const max = _.get(featureCollection, 'properties.max');
+function dataToHeatArray(featureCollection, max) {
 
   return featureCollection.features.map((feature) => {
     const lat = feature.geometry.coordinates[1];

@@ -1,0 +1,18 @@
+<monitoring-main
+  product="elasticsearch"
+  name="nodes"
+  data-test-subj="elasticsearchNodesListingPage"
+>
+  <monitoring-cluster-status-elasticsearch status="esNodes.data.clusterStatus"></monitoring-cluster-status-elasticsearch>
+  <div class="page-row">
+    <h3 class="kuiScreenReaderOnly">Elasticsearch Nodes</h3>
+    <monitoring-nodes-listing
+      page-index="esNodes.pageIndex"
+      filter-text="esNodes.filterText"
+      sort-key="esNodes.sortKey"
+      sort-order="esNodes.sortOrder"
+      on-new-state="esNodes.onNewState"
+      nodes="esNodes.data.nodes"
+    ></monitoring-nodes-listing>
+  </div>
+</monitoring-main>

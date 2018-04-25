@@ -20,10 +20,9 @@ async function withTimeout(attempt, ms, onTimeout) {
   try {
     await Promise.race([
       attempt(),
-      new Promise((resolve, reject) => setTimeout(
-        () => reject(TIMEOUT),
-        STOP_TIMEOUT
-      ))
+      new Promise((resolve, reject) =>
+        setTimeout(() => reject(TIMEOUT), STOP_TIMEOUT)
+      ),
     ]);
   } catch (error) {
     if (error === TIMEOUT) {
@@ -91,7 +90,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         .mergeMap(err => Rx.Observable.throw(err));
 
       return Rx.Observable.race(exit$, error$);
-    }).share()
+    }).share();
 
     outcomePromise = Rx.Observable.merge(
       this.lines$.ignoreElements(),
@@ -105,7 +104,9 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         },
         STOP_TIMEOUT,
         async () => {
-          log.warning(`Proc "${name}" was sent "${signal}" and didn't exit after ${STOP_TIMEOUT} ms, sending SIGKILL`);
+          log.warning(
+            `Proc "${name}" was sent "${signal}" and didn't exit after ${STOP_TIMEOUT} ms, sending SIGKILL`
+          );
           await treeKillAsync(childProcess.pid, 'SIGKILL');
         }
       );
@@ -120,7 +121,9 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
         },
         STOP_TIMEOUT,
         async () => {
-          throw new Error(`Proc "${name}" was stopped but never emiited either the "exit" or "error" event after ${STOP_TIMEOUT} ms`);
+          throw new Error(
+            `Proc "${name}" was stopped but never emiited either the "exit" or "error" event after ${STOP_TIMEOUT} ms`
+          );
         }
       );
     }

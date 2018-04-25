@@ -349,7 +349,13 @@ Notifier.prototype.banner = function (content = '') {
       title="Attention"
       iconType="help"
     >
-      <div dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} />
+      <div
+        /*
+         * Justification for dangerouslySetInnerHTML:
+         * The notifier relies on `markdown-it` to produce safe and correct HTML.
+         */
+        dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} //eslint-disable-line react/no-danger
+      />
 
       <EuiButton type="primary" size="s" onClick={dismissBanner}>
         Dismiss

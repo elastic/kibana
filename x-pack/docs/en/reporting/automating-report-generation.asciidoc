@@ -1,0 +1,58 @@
+[role="xpack"]
+[[automating-report-generation]]
+== Automating Report Generation
+You can automatically generate reports with a watch, or by submitting
+HTTP POST requests from a script.
+
+To automatically generate reports with a watch, you need to configure
+{watcher} to trust the Kibana server’s certificate. For more information,
+see <<securing-reporting, Securing Reporting>>.
+
+include::report-intervals.asciidoc[]
+
+To get the URL for triggering a report generation during a given time period:
+
+. Load the saved object.
+. Use the time-picker to specify a relative or absolute time period.
+. Click *Reporting* in the Kibana toolbar.
+. Copy the displayed **Generation URL**.
+
+NOTE: The response from this request with be JSON, and will contain a `path` property
+with a URL to use to download the generated report. When requesting that path,
+you will get a 503 response if it's not completed yet. In this case, retry after the
+number of seconds in the `Retry-After` header in the response until you get the PDF.
+
+To configure a watch to email reports, you use the `reporting` attachment type
+in an `email` action. For more information, see
+{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+
+include::watch-example.asciidoc[]
+
+For more information about configuring watches, see
+{xpack-ref}/how-watcher-works.html[How Watcher Works].
+
+== Deprecated Report URLs
+
+The following is deprecated in 6.0, and you should now use Kibana to get the URL for a
+particular report.
+
+You may request PDF reports optimized for printing through three {reporting} endpoints:
+
+* Dashboard Reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
+* Visualization Reports:  `/api/reporting/generate/visualization/<visualization-id>`
+* Saved Search Reports: `/api/reporting/generate/search/<saved-search-id>`
+
+[IMPORTANT]
+===================
+Previously there was a `&sync` parameter appended to generation URLs which would hold
+the request open until the document was fully generated. This feature has been removed.
+Existing use of the `&sync` parameter, in Watcher for example, will need to be updated.
+===================
+
+To specify the time period you want to include in the report, you use the `_g`
+parameter in the request. For example:
+
+[source,shell]
+---------------------------------------------------------
+http://0.0.0.0:5601/api/reporting/generate/dashboard/error-monitoring?_g=(time:(from:now-1d%2Fd,mode:quick,to:now-1d%2Fd))
+---------------------------------------------------------

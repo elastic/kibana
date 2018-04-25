@@ -1,0 +1,94 @@
+{
+  "_xpack/ml/datafeeds/{datafeed_id}": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/",
+      "_xpack/ml/datafeeds/{datafeed_id}",
+      "_xpack/ml/datafeeds/_all"
+    ]
+  },
+  "PUT _xpack/ml/datafeeds/{datafeed_id}": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}"
+    ],
+    "data_autocomplete_rules": {
+      "aggregations": {},
+      "chunking_config": {},
+      "frequency": "",
+      "indices": [""],
+      "job_id": "",
+      "query": {},
+      "query_delay": "",
+      "script_field": {},
+      "scroll_size": 1000,
+      "types": []
+    }
+  },
+  "DELETE _xpack/ml/datafeeds/{datafeed_id}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}"
+    ]
+  },
+  "_xpack/ml/datafeeds/{datafeed_id}/_start": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}/_start"
+    ]
+  },
+  "_xpack/ml/datafeeds/{datafeed_id}/_stop": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}/_stop"
+    ]
+  },
+  "_xpack/ml/datafeeds/{datafeed_id}/stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/stats",
+      "_xpack/ml/datafeeds/{datafeed_id}/stats",
+      "_xpack/ml/datafeeds/_all/stats"
+    ]
+  },
+  "_xpack/ml/datafeeds/{datafeed_id}/_preview": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}_preview"
+    ]
+  },
+  "_xpack/ml/datafeeds/{datafeed_id}/_update": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/ml/datafeeds/{datafeed_id}/_update"
+    ],
+    "data_autocomplete_rules": {
+      "aggregations": {},
+      "chunking_config": {},
+      "frequency": "",
+      "indices": [""],
+      "job_id": "",
+      "query": {},
+      "query_delay": "",
+      "script_field": {},
+      "scroll_size": 1000,
+      "types": []
+    }
+  }
+}
