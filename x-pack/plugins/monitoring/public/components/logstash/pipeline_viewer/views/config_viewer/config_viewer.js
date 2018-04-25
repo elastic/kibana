@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+
+
 import React from 'react';
-import { ColaGraph } from './views/cola_graph';
-import { DetailDrawer } from './views/detail_drawer';
-import { PropTypes } from 'prop-types';
+import { EuiPanel } from '@elastic/eui';
 
-export { ConfigViewer } from './views/config_viewer';
+import { DetailDrawer } from '../detail_drawer';
 
-export class PipelineViewer extends React.Component {
+import { renderSection } from './statement_section';
+import { getStatementListFromPipeline } from './statement_list';
+
+export class ConfigViewer extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -57,26 +60,19 @@ export class PipelineViewer extends React.Component {
   }
 
   render() {
-    const { graph } = this.props.pipelineState.config;
+    const {
+      pipeline
+    } = this.props;
 
     return (
-      <div className="lspvContainer">
-        <ColaGraph
-          graph={graph}
-          onShowVertexDetails={this.onShowVertexDetails}
-          detailVertex={this.state.detailDrawer.vertex}
-        />
+      <div>
+        <EuiPanel className="configViewer">
+          {
+            getStatementListFromPipeline(pipeline, this.onShowVertexDetails).map(section => renderSection(section))
+          }
+        </EuiPanel>
         { this.renderDetailDrawer() }
       </div>
     );
   }
 }
-
-PipelineViewer.propTypes = {
-  pipelineState: PropTypes.shape({
-    config: PropTypes.shape({
-      graph: PropTypes.object.isRequired
-    })
-  }),
-  timeseriesTooltipXValueFormatter: PropTypes.func.isRequired
-};
