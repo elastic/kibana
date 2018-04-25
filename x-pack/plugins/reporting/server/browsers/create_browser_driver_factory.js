@@ -7,9 +7,10 @@
 import { ExtractError } from './extract';
 import { ensureBrowserDownloaded } from './download';
 import { installBrowser } from './install';
+import { createSpawnBrowser } from '../native_controller_client';
 import { LevelLogger } from '../lib/level_logger';
 
-export async function createBrowserDriverFactory(server) {
+export async function createBrowserDriverFactory(server, nativeController) {
   const config = server.config();
   const logger = LevelLogger.createForServer(server, ['reporting']);
 
@@ -24,8 +25,10 @@ export async function createBrowserDriverFactory(server) {
   }
 
   try {
-    const browserDriverFactory = await installBrowser(logger, BROWSER_CONFIG, BROWSER_TYPE, DATA_DIR);
+    const spawnBrowser$ = createSpawnBrowser(BROWSER_TYPE, nativeController);
+    const browserDriverFactory = await installBrowser(BROWSER_TYPE, DATA_DIR, spawnBrowser$, logger, BROWSER_CONFIG);
     logger.debug(`Browser installed at ${browserDriverFactory.binaryPath}`);
+
     return browserDriverFactory;
   } catch (error) {
     if (error instanceof ExtractError) {

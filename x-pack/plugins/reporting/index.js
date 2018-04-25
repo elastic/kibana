@@ -136,7 +136,7 @@ export const reporting = (kibana) => {
       }).default();
     },
 
-    init: async function (server) {
+    init: async function (server, options, nativeController) {
       const exportTypesRegistry = await exportTypesRegistryFactory(server);
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
@@ -153,7 +153,13 @@ export const reporting = (kibana) => {
         xpackMainPlugin.info.feature(this.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
-      server.expose('browserDriverFactory', await createBrowserDriverFactory(server));
+      nativeController.on('message', message => {
+        if (message.error) {
+          server.log(['reporting', 'nativeController', 'error'], message.error);
+        }
+      });
+
+      server.expose('browserDriverFactory', await createBrowserDriverFactory(server, nativeController));
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes

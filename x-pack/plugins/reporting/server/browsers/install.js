@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'bluebird';
 import { extract } from './extract';
-import { BROWSERS_BY_TYPE } from './browsers';
+import { createDriverFactory, getArchivesPath, getPackage } from './browsers';
 
 const fsp = {
   access: promisify(fs.access, fs),
@@ -24,22 +24,18 @@ const fsp = {
  * @param  {String} installsPath
  * @return {Promise<undefined>}
  */
-export async function installBrowser(logger, browserConfig, browserType, installsPath) {
-  const browser = BROWSERS_BY_TYPE[browserType];
-  const pkg = browser.paths.packages.find(p => p.platforms.includes(process.platform));
-  if (!pkg) {
-    throw new Error('Unsupported platform: platform');
-  }
+export async function installBrowser(browserType, installsPath, spawnBrowser$, logger, browserConfig) {
+  const pkg = getPackage(browserType);
 
   const binaryPath = path.join(installsPath, pkg.binaryRelativePath);
   try {
     await fsp.access(binaryPath, fs.X_OK);
   } catch (accessErr) {
     // error here means the binary does not exist, so install it
-    const archive = path.join(browser.paths.archivesPath, pkg.archiveFilename);
+    const archive = path.join(getArchivesPath(browserType), pkg.archiveFilename);
     await extract(archive, installsPath);
     await fsp.chmod(binaryPath, '755');
   }
 
-  return browser.createDriverFactory(binaryPath, logger, browserConfig);
+  return createDriverFactory(browserType, spawnBrowser$, logger, browserConfig);
 }

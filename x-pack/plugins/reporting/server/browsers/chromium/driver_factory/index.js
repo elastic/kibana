@@ -7,21 +7,20 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { spawn } from 'child_process';
 import rimraf from 'rimraf';
 import Rx from 'rxjs/Rx';
 import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';
-import { args } from './args';
-import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
+import { exitCodeSuggestion } from '../../exit_code_suggestion';
 
 const compactWhitespace = (str) => {
   return str.replace(/\s+/, ' ');
 };
 
+
 export class HeadlessChromiumDriverFactory {
-  constructor(binaryPath, logger, browserConfig) {
-    this.binaryPath = binaryPath;
+  constructor(spawnChromium$, logger, browserConfig) {
+    this.spawnChromium$ = spawnChromium$;
     this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
   }
@@ -29,27 +28,30 @@ export class HeadlessChromiumDriverFactory {
   type = 'chromium';
 
   create({ bridgePort, viewport }) {
-    return Rx.Observable.create(async observer => {
-      const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
-      const chromiumArgs = args({
-        userDataDir,
-        bridgePort,
-        viewport,
-        disableSandbox: this.browserConfig.disableSandbox,
-        proxyConfig: this.browserConfig.proxy,
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
+
+    this.logger.debug(`spawning chromium process`);
+
+    const params = {
+      userDataDir,
+      bridgePort,
+      viewport,
+      disableSandbox: this.browserConfig.disableSandbox,
+      proxyConfig: this.browserConfig.proxy
+    };
+
+    const chromium$ = this.spawnChromium$(params, () => {
+      this.logger.debug(`deleting chromium user data directory at ${userDataDir}`);
+      // the unsubscribe function isn't `async` so we're going to make our best effort at
+      // deleting the userDataDir and if it fails log an error.
+      rimraf(userDataDir, (err) => {
+        if (err) {
+          return this.logger.error(`error deleting user data directory at ${userDataDir}: ${err}`);
+        }
       });
+    });
 
-      this.logger.debug(`spawning chromium process at ${this.binaryPath} with arguments ${chromiumArgs}`);
-      let chromium;
-      try {
-        chromium = spawn(this.binaryPath, chromiumArgs);
-      } catch (err) {
-        observer.error(new Error(`Caught error spawning Chromium`));
-        return;
-      }
-
-      safeChildProcess(chromium, observer);
-
+    return chromium$.map(chromium => {
       const stderr$ = Rx.Observable.fromEvent(chromium.stderr, 'data').map(line => line.toString()).share();
 
       const [ consoleMessage$, message$ ] = stderr$.partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/));
@@ -87,25 +89,12 @@ export class HeadlessChromiumDriverFactory {
 
       const exit$ = Rx.Observable.merge(processError$, processExit$, nssError$, fontError$, noUsableSandbox$);
 
-      observer.next({
+      return {
         driver$,
         consoleMessage$,
         message$,
         exit$
-      });
-
-      // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
-      return () => {
-        this.logger.debug(`deleting chromium user data directory at ${userDataDir}`);
-        // the unsubscribe function isn't `async` so we're going to make our best effort at
-        // deleting the userDataDir and if it fails log an error.
-        rimraf(userDataDir, (err) => {
-          if (err) {
-            return this.logger.error(`error deleting user data directory at ${userDataDir}: ${err}`);
-          }
-        });
       };
     });
-
   }
 }

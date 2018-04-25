@@ -20,7 +20,16 @@
   "kibana": {
     "build": {
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
-    }
+    },
+    "nativeControllers": [
+      {
+        "pluginId": "reporting",
+        "path": "plugins/reporting/native_controller/index.js",
+        "config": [
+          "path.data"
+        ]
+      }
+    ]
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
@@ -76,7 +85,6 @@
   "dependencies": {
     "@elastic/eui": "0.0.38",
     "@elastic/node-crypto": "0.1.2",
-    "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
     "@kbn/datemath": "link:../packages/kbn-datemath",
     "@kbn/ui-framework": "link:../packages/kbn-ui-framework",

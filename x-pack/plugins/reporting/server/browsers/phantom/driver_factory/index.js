@@ -5,65 +5,50 @@
  */
 
 import Rx from 'rxjs/Rx';
-import phantom from '@elastic/node-phantom-simple';
-import { getPhantomOptions } from './phantom_options';
+import phantom from '../node-phantom-simple/node-phantom-simple';
 import { PhantomDriver } from '../driver';
 import { promisify } from 'bluebird';
-import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
+import { exitCodeSuggestion } from '../../exit_code_suggestion';
 
 export class PhantomDriverFactory {
-  constructor(binaryPath) {
-    this.binaryPath = binaryPath;
+  constructor(spawnPhantom$) {
+    this.spawnPhantom$ = spawnPhantom$;
   }
 
   type = 'phantom';
 
   create({ bridgePort, viewport, zoom, logger }) {
-    return Rx.Observable.create(observer => {
-      let killed = false;
-      let browser;
-      let page;
+    const params = {
+      bridgePort
+    };
+    const phantomProcess$ = this.spawnPhantom$(params);
 
-      (async () => {
-        const phantomOptions = getPhantomOptions({
-          phantomPath: this.binaryPath,
-          bridgePort
-        });
+    return phantomProcess$
+      .mergeMap(phantomProcess => {
+        return promisify(phantom.create)(phantomProcess);
+      })
+      .mergeMap(async browser => {
+        const page = await promisify(browser.createPage)();
+        return { browser, page };
+      })
+      .mergeMap(async ({ browser, page }) => {
+        await promisify(page.set)('viewportSize', viewport);
+        return { browser, page };
+      })
+      .catch(err => {
+        const message = err.toString();
 
-        try {
-          browser = await promisify(phantom.create)(phantomOptions);
-          if (killed) {
-            return;
-          }
-
-          safeChildProcess(browser.process, observer);
-
-          page = await promisify(browser.createPage)();
-          if (killed) {
-            return;
-          }
-
-          await promisify(page.set)('viewportSize', viewport);
-          if (killed) {
-            return;
-          }
-        } catch (err) {
-          const message = err.toString();
-
-          if (message.includes('Phantom immediately exited with: 126')) {
-            observer.error(new Error('Cannot execute phantom binary, incorrect format'));
-            return;
-          }
-
-          if (message.includes('Phantom immediately exited with: 127')) {
-            observer.error(Error('You must install fontconfig and freetype for Reporting to work'));
-            return;
-          }
-
-          observer.error(err);
-          return;
+        if (message.includes('Phantom immediately exited with: 126')) {
+          throw new Error('Cannot execute phantom binary, incorrect format');
         }
 
+        if (message.includes('Phantom immediately exited with: 127')) {
+          throw new Error('You must install fontconfig and freetype for Reporting to work');
+        }
+
+        throw err;
+      })
+      .mergeMap(({ browser, page }) => {
         const exit$ = Rx.Observable.fromEvent(browser.process, 'exit')
           .mergeMap(code => Rx.Observable.throw(new Error(`Phantom exited with code: ${code}. ${exitCodeSuggestion(code)}`)));
 
@@ -83,17 +68,12 @@ export class PhantomDriverFactory {
 
         const message$ = Rx.Observable.never();
 
-        observer.next({
+        return Rx.Observable.of({
           driver$,
           message$,
           consoleMessage$,
           exit$
         });
-      })();
-
-      return () => {
-        killed = true;
-      };
-    });
+      });
   }
 }
