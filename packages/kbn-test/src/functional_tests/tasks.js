@@ -9,9 +9,9 @@ import {
   runElasticsearch,
   runFtr,
   log,
-  isCliError,
   KIBANA_ROOT,
   KIBANA_FTR_SCRIPT,
+  FTR_CONFIG_PATH,
   MULTIPLE_CONFIG_PATH,
 } from './lib';
 
@@ -50,7 +50,7 @@ export async function runTests(
 
 // Start only servers using single config
 export async function startServers(
-  configPath = 'test/functional/config.js',
+  configPath = FTR_CONFIG_PATH,
   runEs = runElasticsearch,
   runKbn = runKibanaServer
 ) {
@@ -67,7 +67,7 @@ export async function startServers(
       await runKbn({ procs, config });
 
       // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get burried
+      // so that it doesn't get buried
       await Rx.Observable.fromEvent(log, 'data')
         .switchMap(() => Rx.Observable.timer(5000))
         .first()
@@ -82,7 +82,7 @@ export async function startServers(
 // Start servers and run tests for single config
 // TODO: don't export this--
 export async function runWithConfig(
-  configPath = 'test/functional/config.js',
+  configPath = FTR_CONFIG_PATH,
   runEs = runElasticsearch,
   runKbn = runKibanaServer
 ) {
@@ -122,6 +122,6 @@ function resolveConfigPath(configPath) {
 
 function fatalErrorHandler(err) {
   log.error('FATAL ERROR');
-  log.error(isCliError(err) ? err.message : err);
+  log.error(err);
   process.exit(1);
 }

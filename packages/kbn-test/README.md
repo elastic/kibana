@@ -8,7 +8,7 @@ Integration Testing
 
 ### Dependencies
 
-Integration testing methods exist in the `src/functional_tests` directory. They depend on the Functional Test Runner, which is found in [`{KIBANA_ROOT}/src/functional_test_runner`](../../src/functional_test_runner). Ideally libraries provided by kibana packages such as this one should not depend on kibana source code that lives in [`{KIBANA_ROOT}/src`](../../src). The goal is to start pulling test and development utilities out into packages so they can be used across kibana and x-pack-kibana. Accordingly the Functional Test Runner itself will be pulled out into a package (or part of a package), and this package's dependence on it will not be an issue.
+Integration testing methods exist in the `src/functional_tests` directory. They depend on the Functional Test Runner, which is found in [`{KIBANA_ROOT}/src/functional_test_runner`](../../src/functional_test_runner). Ideally libraries provided by kibana packages such as this one should not depend on kibana source code that lives in [`{KIBANA_ROOT}/src`](../../src). The goal is to start pulling test and development utilities out into packages so they can be used across Kibana and plugins. Accordingly the Functional Test Runner itself will be pulled out into a package (or part of a package), and this package's dependence on it will not be an issue.
 
 ### Exposed methods
 
