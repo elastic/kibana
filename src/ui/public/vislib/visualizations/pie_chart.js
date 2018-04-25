@@ -12,6 +12,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
 
   const defaults = {
     isDonut: false,
+    showTotal: false,
     showTooltip: true,
     color: undefined,
     fillColor: undefined
@@ -343,7 +344,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
 
     addDonutDescriptor(svg, width, height) {
       const self = this;
-      svg.append('text')
+      const descriptor = svg.append('text')
         .style('text-anchor', 'middle')
         .attr('font-size', function (chartData) {
           const dividend = Math.min(width, height);
@@ -354,6 +355,27 @@ export function VislibVisualizationsPieChartProvider(Private) {
         .text(function (chartData) {
           return self.readableNumber(chartData.slices.sumOfChildren);
         });
+      let tooltip;
+      const mouseMove = function (data) {
+        if(tooltip === undefined) {
+          tooltip = d3.select('.vis-tooltip');
+        }
+        tooltip.style('visibility', 'visible');
+        const metric = data.raw.columns.find(function (element) {
+          return element.categoryName === 'metric';
+        });
+        tooltip.html('&nbsp&nbspTotal ' + metric.label + '&nbsp&nbsp')
+          .style('left', d3.event.pageX + 'px')
+          .style('top', (d3.event.pageY + 12) + 'px');
+      };
+      const mouseOut = function () {
+        if(tooltip === undefined) {
+          tooltip = d3.select('.vis-tooltip');
+        }
+        tooltip.style('visibility', 'hidden');
+      };
+      descriptor.on('mousemove', mouseMove);
+      descriptor.on('mouseout', mouseOut);
     }
 
     /**
@@ -382,7 +404,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
             .attr('height', height)
             .append('g')
             .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
-          if(self._attr.isDonut) {
+          if(self._attr.isDonut && self._attr.showTotal) {
             self.addDonutDescriptor(svg, width, height);
           }
           const path = self.addPath(width, height, svg, slices);

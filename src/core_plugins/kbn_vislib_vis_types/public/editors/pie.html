@@ -17,6 +17,17 @@
         >
       </div>
     </div>
+    <div class="kuiSideBarFormRow" ng-if="vis.params.isDonut">
+      <label class="kuiSideBarFormRow__label" for="showTotal">
+        Show Total
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input id="showTotal" name="showTotal" type="checkbox" value="{{showTotal}}"
+               ng-checked="vis.params.showTotal"
+               ng-model="vis.params.showTotal"
+        >
+      </div>
+    </div>
   </div>
 
   <vislib-basic-options></vislib-basic-options>
