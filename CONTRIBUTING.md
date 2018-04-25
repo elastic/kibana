@@ -174,7 +174,7 @@ Start elasticsearch from a nightly snapshot.
 yarn es snapshot
 ```
 
-This will run Elasticsearch with a `trial` license and bootstraped with the user `elastic` and password `changeme`. Additional options are available, pass `--help` for more information.
+This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
