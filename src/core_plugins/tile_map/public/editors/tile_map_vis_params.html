@@ -13,6 +13,21 @@
     </select>
   </div>
 
+
+  <div class="kuiSideBarFormRow" >
+    <label class="kuiSideBarFormRow__label" for="colorSchema">
+      Color Schema
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="colorSchema"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.colorSchema"
+        ng-options="mode for mode in vis.type.editorConfig.collections.colorSchemas"
+      ></select>
+    </div>
+  </div>
+
   <div ng-if="vis.params.mapType === 'Heatmap'" class="form-group">
     <div>
       <label>
