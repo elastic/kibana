@@ -22,8 +22,8 @@ const assertStatsAndMetrics = body => {
 
   expect(body.os.cpu.load_average['1m']).to.be.a('number');
 
-  expect(body.response_times.avg_in_millis).not.to.be.a('null'); // ok if is undefined
-  expect(body.response_times.max_in_millis).not.to.be.a('null'); // ok if is undefined
+  expect(body.response_times.avg_in_millis).not.toBeNull(); // ok if is undefined
+  expect(body.response_times.max_in_millis).not.toBeNull(); // ok if is undefined
 
   expect(body.requests.status_codes).to.be.an('object');
 
