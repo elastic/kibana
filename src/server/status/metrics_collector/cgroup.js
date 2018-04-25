@@ -135,9 +135,9 @@ export function getAllStats(options = {}) {
     function rejectUnlessFileNotFound(err) {
       if (err.code === 'ENOENT') {
         resolve(null);
+      } else {
+        reject(err);
       }
-
-      reject(err);
     }
   });
 }

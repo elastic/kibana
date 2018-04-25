@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
-import { cGroups as cGroupsFsStub } from './_fs_stubs';
-
+import { cGroups as cGroupsFsStub } from './__mocks__/_fs_stubs';
 import { Metrics } from './metrics';
 
 describe('Metrics', function () {
