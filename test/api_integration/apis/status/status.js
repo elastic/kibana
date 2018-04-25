@@ -34,8 +34,8 @@ export default function ({ getService }) {
           expect(body.metrics.os.cpu.load_average['5m']).to.be.a('number');
           expect(body.metrics.os.cpu.load_average['15m']).to.be.a('number');
 
-          expect(body.metrics.response_times.avg_in_millis).not.toBeNull(); // ok if undefined
-          expect(body.metrics.response_times.max_in_millis).not.toBeNull(); // ok if undefined
+          expect(body.metrics.response_times.avg_in_millis).not.to.be(null); // ok if undefined
+          expect(body.metrics.response_times.max_in_millis).not.to.be(null); // ok if undefined
 
           expect(body.metrics.requests.total).to.be.a('number');
           expect(body.metrics.requests.disconnects).to.be.a('number');
