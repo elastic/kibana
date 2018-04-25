@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
-import { VisProvider } from 'ui/vis';
+import { tabifyGetColumns } from '../_get_columns';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('get columns', function () {
   let Vis;

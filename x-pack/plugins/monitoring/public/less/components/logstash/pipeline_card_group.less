@@ -1,0 +1,30 @@
+@import (reference) '~ui/styles/variables';
+
+.monitoringLogstashPipelineCardGroup {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.monitoringLogstashPipelineCardGroup__card {
+  padding: 10px;
+  min-height: 232px;
+
+  flex-basis: 33.3%; // 3 cards across
+  @media (min-width: @screen-sm-min) {
+    flex-basis: 50%; // 2 cards across
+  }
+  @media (min-width: @screen-lg-min) {
+    flex-basis: 25%; // 4 cards across
+  }
+}
+
+.monitoringLogstashPipelineCardGroup__cardPanel {
+  height: 100%;
+}
+
+.monitoringLogstashPipelineCardGroup__cardMenu {
+  max-height: 110px;
+  overflow: scroll;
+}
+

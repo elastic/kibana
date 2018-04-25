@@ -8,9 +8,9 @@
  * ability to destroy those mappings.
  */
 
-import { uiModules } from 'ui/modules';
-import { StateProvider } from 'ui/state_management/state';
-import 'ui/persisted_state';
+import { uiModules } from '../modules';
+import { StateProvider } from './state';
+import '../persisted_state';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
 

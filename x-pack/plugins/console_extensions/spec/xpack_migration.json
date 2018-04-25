@@ -1,0 +1,31 @@
+{
+  "_xpack/migration/assistance": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/migration/assistance",
+      "_xpack/migration/assistance/{index_name}"
+    ]
+  },
+  "_xpack/migration/upgrade/{index_name}": {
+    "url_params": {
+      "wait_for_completion": ["true", "false"]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/migration/upgrade/{index_name}"
+    ]
+  },
+  "_xpack/migration/deprecations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/migration/deprecations",
+      "{index_name}/_xpack/migration/deprecations"
+    ]
+  }
+}

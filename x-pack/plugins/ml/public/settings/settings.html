@@ -1,0 +1,36 @@
+<ml-nav-menu name="settings"></ml-nav-menu>
+<ml-settings ng-controller="MlSettings">
+
+  <div class="page-row">
+
+    <div class="kuiPanel management-panel">
+      <div class="kuiPanelHeader">
+        <div class="kuiPanelHeaderSection">
+          <div class="management-panel__heading-icon management-panel__heading-icon--elasticsearch"></div>
+          <div class="kuiPanelHeader__title ng-binding">
+            Job Management
+          </div>
+        </div>
+      </div>
+
+      <div class="kuiPanelBody management-panel__body">
+        <div class="row">
+          <ul class="list-unstyled">
+            <li class="col-xs-4 col-md-3 ng-scope">
+              <a
+                data-test-subj=""
+                class="management-panel__link ng-binding"
+                tooltip=""
+                tooltip-placement="bottom"
+                tooltip-popup-delay="400"
+                tooltip-append-to-body="1"
+                href="ml#/settings/calendars_list">
+                 Calendar management
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</ml-settings>

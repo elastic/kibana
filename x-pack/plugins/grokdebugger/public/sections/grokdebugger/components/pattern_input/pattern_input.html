@@ -1,0 +1,16 @@
+<form novalidate>
+  <div class="kuiFormSection">
+    <label class="kuiLabel kuiVerticalRhythmSmall">
+      Grok Pattern
+    </label>
+    <div
+      class="pattern-input-editor grokdebugger-ace-editor kuiVerticalRhythmSmall"
+      require-keys="true"
+      ui-ace="{
+        onLoad: aceLoaded
+      }"
+      ng-model="patternInput.pattern"
+      data-test-subj="acePatternInput"
+    ></div>
+  </div>
+</form>

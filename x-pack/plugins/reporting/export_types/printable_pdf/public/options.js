@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { uiModules } from 'ui/modules';
+import template from './options.html';
+
+const module = uiModules.get('xpack/reporting');
+
+module.directive('pdfOptions', () => {
+  return {
+    restrict: 'E',
+    template,
+    link: function ($scope) {
+      if (!$scope.options.layoutId) {
+        $scope.options.layoutId = 'print';
+      }
+    }
+  };
+});

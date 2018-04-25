@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Breadcrumbs /:serviceName 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <span>
+    opbeans-node
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs /:serviceName/errors 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <a
+    href="#/opbeans-node?_g="
+  >
+    opbeans-node
+  </a>,
+  <span>
+    Errors
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs /:serviceName/errors/:groupId 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <a
+    href="#/opbeans-node?_g="
+  >
+    opbeans-node
+  </a>,
+  <a
+    href="#/opbeans-node/errors?_g="
+  >
+    Errors
+  </a>,
+  <span>
+    myGroupId
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs /:serviceName/transactions 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <a
+    href="#/opbeans-node?_g="
+  >
+    opbeans-node
+  </a>,
+  <span>
+    Transactions
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs /:serviceName/transactions/:transactionType 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <a
+    href="#/opbeans-node?_g="
+  >
+    opbeans-node
+  </a>,
+  <a
+    href="#/opbeans-node/transactions?_g="
+  >
+    Transactions
+  </a>,
+  <span>
+    request
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs /:serviceName/transactions/:transactionType/:transactionName 1`] = `
+Array [
+  <a
+    href="#/?_g="
+  >
+    APM
+  </a>,
+  <a
+    href="#/:serviceName?_g="
+  >
+    :serviceName
+  </a>,
+  <a
+    href="#/:serviceName/transactions?_g="
+  >
+    Transactions
+  </a>,
+  <a
+    href="#/:serviceName/transactions/request?_g="
+  >
+    request
+  </a>,
+  <span>
+    my-transaction-name
+  </span>,
+]
+`;
+
+exports[`Breadcrumbs Homepage 1`] = `
+<span>
+  APM
+</span>
+`;

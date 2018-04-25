@@ -4,6 +4,8 @@ const kbnEs = require('@kbn/es');
 
 kbnEs
   .run({
+    license: 'trial',
+    password: 'changeme',
     version: pkg.version,
     'source-path': path.resolve(__dirname, '../../elasticsearch'),
     'base-path': path.resolve(__dirname, '../.es'),

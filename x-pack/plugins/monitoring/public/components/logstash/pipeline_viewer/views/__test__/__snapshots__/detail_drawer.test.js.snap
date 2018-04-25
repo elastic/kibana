@@ -1,0 +1,736 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="center"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle>
+          <h2>
+            <img
+              className="lspvDetailDrawerIcon"
+              height={18}
+              width={18}
+            />
+            if
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="Close"
+          color="primary"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <div>
+        <p>
+          This is a conditional statement in your pipeline.
+        </p>
+        <EuiCodeBlock>
+          if ([type] == "apache_log") {
+  ...
+}
+        </EuiCodeBlock>
+        <EuiSpacer
+          size="l"
+        />
+      </div>
+      <p>
+        There are currently no metrics to show for this if condition.
+      </p>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="center"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle>
+          <h2>
+            <img
+              className="lspvDetailDrawerIcon"
+              height={18}
+              width={18}
+            />
+            grok filter
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="Close"
+          color="primary"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <div>
+        <p>
+          This 
+          plugin
+           does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:
+        </p>
+        <EuiCodeBlock>
+           
+          {
+  id =&gt; "mySpecialId"
+}
+        </EuiCodeBlock>
+        <EuiSpacer
+          size="l"
+        />
+      </div>
+      <EuiTable>
+        <EuiTableBody>
+          <EuiTableRow
+            key="events_latency"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Latency
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        0.21,
+                      ],
+                      Array [
+                        1516131180000,
+                        0.23,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              0.23 ms/e
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out_rate"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Emitted Rate
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        32,
+                      ],
+                      Array [
+                        1516131180000,
+                        36,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              N/A
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_in"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Received
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        200,
+                      ],
+                      Array [
+                        1516131180000,
+                        203,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              203 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Emitted
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        199,
+                      ],
+                      Array [
+                        1516131180000,
+                        200,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              200 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+        </EuiTableBody>
+      </EuiTable>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="center"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle>
+          <h2>
+            <img
+              className="lspvDetailDrawerIcon"
+              height={18}
+              width={18}
+            />
+            grok filter
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="Close"
+          color="primary"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <p>
+        This 
+        plugin
+        's ID is 
+        <strong>
+          parse_apache_logline
+        </strong>
+        .
+      </p>
+      <EuiTable>
+        <EuiTableBody>
+          <EuiTableRow
+            key="events_latency"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Latency
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        0.21,
+                      ],
+                      Array [
+                        1516131180000,
+                        0.23,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              0.23 ms/e
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out_rate"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Emitted Rate
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        32,
+                      ],
+                      Array [
+                        1516131180000,
+                        36,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              N/A
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_in"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Received
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        200,
+                      ],
+                      Array [
+                        1516131180000,
+                        203,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              203 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out"
+          >
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              Events Emitted
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        199,
+                      ],
+                      Array [
+                        1516131180000,
+                        200,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell
+              align="left"
+              textOnly={true}
+            >
+              200 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+        </EuiTableBody>
+      </EuiTable>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="center"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle>
+          <h2>
+            <img
+              className="lspvDetailDrawerIcon"
+              height={18}
+              width={18}
+            />
+            queue
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="Close"
+          color="primary"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <p>
+        This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline.
+      </p>
+      <p>
+        There are currently no metrics to show for the queue.
+      </p>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component shows vertex title 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="center"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
+    >
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiTitle>
+          <h2>
+            <img
+              className="lspvDetailDrawerIcon"
+              height={18}
+              width={18}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButtonIcon
+          aria-label="Close"
+          color="primary"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

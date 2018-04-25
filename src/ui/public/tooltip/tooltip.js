@@ -1,4 +1,4 @@
-import html from 'ui/tooltip/tooltip.html';
+import html from './tooltip.html';
 
 require('ui-bootstrap')
   .config(function ($tooltipProvider) {

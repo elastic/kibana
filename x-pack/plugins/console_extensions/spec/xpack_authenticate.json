@@ -1,0 +1,10 @@
+{
+  "_xpack/security/_authenticate": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/security/_authenticate"
+    ]
+  }
+}

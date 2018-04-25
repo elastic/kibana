@@ -1,6 +1,6 @@
-import { QueryString } from 'ui/utils/query_string';
-import { StateProvider } from 'ui/state_management/state';
-import { uiModules } from 'ui/modules';
+import { QueryString } from '../utils/query_string';
+import { StateProvider } from './state';
+import { uiModules } from '../modules';
 import { createLegacyClass } from '../utils/legacy_class';
 
 const module = uiModules.get('kibana/global_state');

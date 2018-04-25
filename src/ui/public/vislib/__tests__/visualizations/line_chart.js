@@ -12,7 +12,7 @@ import rangeRows from 'fixtures/vislib/mock_data/range/_rows';
 import termSeries from 'fixtures/vislib/mock_data/terms/_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import 'ui/persisted_state';
+import '../../../persisted_state';
 
 const dataTypes = [
   ['series pos', seriesPos],

@@ -1,0 +1,70 @@
+[role="xpack"]
+[[xpack-upgrade-assistant]]
+== Upgrade Assistant
+
+The Upgrade Assistant helps you prepare to upgrade from Elasticsearch 5.x to
+Elasticsearch 6.0. It identifies deprecated settings, simplifies reindexing
+your pre-5.x indices, and upgrades the internal indices used by Kibana and
+X-Pack to the format required in 6.0.
+
+To access the Upgrade Assistant, go to **Management** and click the **Upgrade
+Assistant** link in the Elasticsearch section.
+
+[float]
+[[cluster-checkup]]
+=== Cluster Checkup
+
+The first step in preparing to upgrade is to identify any deprecated settings
+or features you are using. The Cluster Checkup runs a series of checks
+against your cluster and indices and generates a report identifying
+any issues that you need to resolve.
+
+To run the Cluster Checkup, go to the **Cluster Checkup** tab in the
+Upgrade Assistant. Issues that **must** be resolved before you can upgrade to
+Elasticsearch 6.0 appear in red as errors.
+
+If the checkup finds indices that need to be reindexed, you can
+manage that process with the Reindex Helper. You can also manually reindex or
+simply delete old indices if you are sure you no longer need them.
+
+[float]
+[[reindex-helper]]
+=== Reindex Helper
+If you have indices created in 2.x, you must reindex them before
+upgrading to Elasticsearch 6.0. In addition, the internal Kibana and X-Pack
+indices must be reindexed to upgrade them to the format required in 6.0.
+
+To reindex indices with the Reindex Helper:
+
+. **Back up your indices using {ref}/modules-snapshots.html[Snapshot and Restore].**
+. Go to the **Reindex Helper** tab in the Upgrade Assistant.
+. Click the **Reindex** button to reindex an index.
+. Monitor the reindex task that is kicked off.
+
+You can run any number of reindex tasks simultaneously. The processing status
+is displayed for each index. You can stop a task by clicking **Cancel**. If
+any step in the reindex process fails, you can reset the index by clicking
+**Reset**.
+
+You can also click **Refresh Indices** to remove any indices that have been
+successfully reindexed from the list.
+
+Reindexing tasks continue to run when you leave the Reindex Helper. When you
+come back, click **Refresh Indices** to get the latest status of your indices.
+
+NOTE: When you come back to the Reindex Helper, it shows any tasks that are
+still running. You can cancel those tasks if you need to, but you won't have
+access to the task progress and are blocked from resetting indices that fail
+reindexing. This is because the index might have been modified outside of
+your Kibana instance.
+
+[float]
+[[toggle-deprecation-logger]]
+=== Toggle Deprecation Logger
+
+To see the current deprecation logging status, go to the **Toggle Deprecation
+Logging** tab in the Upgrade Assistant. Deprecation Logging is enabled by
+default from Elasticsearch 5.x onward. If you have disabled deprecation logging, you
+can click **Toggle Deprecation Logging** to re-enable it. This logs any
+deprecated actions to your log directory so you can see what changes you need
+to make to your code before upgrading.

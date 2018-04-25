@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { fieldFormats } from 'ui/registry/field_formats';
+import { fieldFormats } from '../registry/field_formats';
 
 
 function AggConfig(vis, opts) {

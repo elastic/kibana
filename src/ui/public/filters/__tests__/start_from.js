@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/filters/start_from';
+import '../start_from';
 
 
 let filter;

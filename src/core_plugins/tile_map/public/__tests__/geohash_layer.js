@@ -1,13 +1,13 @@
 import expect from 'expect.js';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
-import { GeoHashSampleData } from './geohash_sample_data';
 import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
+import GeoHashSampleData from './dummy_es_response.json';
 
-describe('kibana_map tests', function () {
+describe('geohash_layer', function () {
 
   let domNode;
   let expectCanvas;
@@ -79,7 +79,9 @@ describe('kibana_map tests', function () {
       it(test.options.mapType, async function () {
 
         const geohashGridOptions = test.options;
-        const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+        const geohashLayer = new GeohashLayer(
+          GeoHashSampleData.featureCollection,
+          GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
 
         const elementList = domNode.querySelectorAll('canvas');
@@ -93,10 +95,11 @@ describe('kibana_map tests', function () {
     });
 
     it('should not throw when fitting on empty-data layer', function () {
-      const geohashLayer = new GeohashLayer({
-        type: 'FeatureCollection',
-        features: []
-      }, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
+      const geohashLayer = new GeohashLayer(
+        {
+          type: 'FeatureCollection',
+          features: []
+        }, {}, { 'mapType': 'Scaled Circle Markers' }, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
 
       expect(() => {
@@ -113,7 +116,8 @@ describe('kibana_map tests', function () {
         }
       };
 
-      const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+      const geohashLayer = new GeohashLayer(GeoHashSampleData.featureCollection,
+        GeoHashSampleData.meta, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
       kibanaMap.addLayer(geohashLayer);
       domNode.style.width = 0;
       domNode.style.height = 0;
@@ -122,9 +126,6 @@ describe('kibana_map tests', function () {
       }).to.not.throwException();
 
     });
-
-
-
 
 
   });

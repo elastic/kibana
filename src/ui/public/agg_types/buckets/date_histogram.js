@@ -1,14 +1,14 @@
 import { jstz as tzDetect } from 'jstimezonedetect';
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../chrome';
 import moment from 'moment';
-import 'ui/filters/field_type';
-import 'ui/validate_date_interval';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { TimeBuckets } from 'ui/time_buckets';
-import { createFilterDateHistogram } from 'ui/agg_types/buckets/create_filter/date_histogram';
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
-import intervalTemplate from 'ui/agg_types/controls/time_interval.html';
+import '../../filters/field_type';
+import '../../validate_date_interval';
+import { BucketAggType } from './_bucket_agg_type';
+import { TimeBuckets } from '../../time_buckets';
+import { createFilterDateHistogram } from './create_filter/date_histogram';
+import { intervalOptions } from './_interval_options';
+import intervalTemplate from '../controls/time_interval.html';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = tzDetect.determine().name();

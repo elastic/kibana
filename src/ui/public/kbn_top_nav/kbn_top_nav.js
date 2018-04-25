@@ -35,12 +35,12 @@
 
 import _ from 'lodash';
 import angular from 'angular';
-import 'ui/watch_multi';
-import 'ui/directives/input_focus';
-import { uiModules } from 'ui/modules';
+import '../watch_multi';
+import '../directives/input_focus';
+import { uiModules } from '../modules';
 import template from './kbn_top_nav.html';
 import { KbnTopNavControllerProvider } from './kbn_top_nav_controller';
-import { NavBarExtensionsRegistryProvider } from 'ui/registry/navbar_extensions';
+import { NavBarExtensionsRegistryProvider } from '../registry/navbar_extensions';
 
 import './bread_crumbs/bread_crumbs';
 

@@ -22,8 +22,8 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
    * @return {Number}
    */
   _geohashMinDistance(feature) {
-    const centerPoint = _.get(feature, 'properties.center');
-    const geohashRect = _.get(feature, 'properties.rectangle');
+    const centerPoint = feature.properties.geohash_meta.center;
+    const geohashRect = feature.properties.geohash_meta.rectangle;
 
     // centerPoint is an array of [lat, lng]
     // geohashRect is the 4 corners of the geoHash rectangle

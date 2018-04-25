@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import 'ui/directives/validate_ip';
-import 'ui/directives/validate_cidr_mask';
-import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { createFilterIpRange } from 'ui/agg_types/buckets/create_filter/ip_range';
-import ipRangesTemplate from 'ui/agg_types/controls/ip_ranges.html';
+import '../../directives/validate_ip';
+import '../../directives/validate_cidr_mask';
+import { BucketAggType } from './_bucket_agg_type';
+import { createFilterIpRange } from './create_filter/ip_range';
+import ipRangesTemplate from '../controls/ip_ranges.html';
 
 export const ipRangeBucketAgg = new BucketAggType({
   name: 'ip_range',

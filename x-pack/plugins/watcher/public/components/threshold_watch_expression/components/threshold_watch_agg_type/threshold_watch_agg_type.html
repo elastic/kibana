@@ -1,0 +1,31 @@
+<expression-item
+  item-id="{{ thresholdWatchAggType.itemId }}"
+  description="thresholdWatchAggType.itemDescription"
+  value="thresholdWatchAggType.itemValue"
+  is-open="thresholdWatchAggType.isOpen"
+  is-visible="thresholdWatchAggType.isVisible"
+  on-open="thresholdWatchAggType.onOpen"
+  on-close="thresholdWatchAggType.onClose"
+  is-valid="thresholdWatchAggType.isValid"
+  is-dirty="thresholdWatchAggType.isDirty"
+  form="thresholdWatchAggType.form"
+>
+  <form name="thresholdWatchAggType.form" novalidate>
+    <div
+      id="{{thresholdWatchAggType.makeId(['aggType', 'required'])}}'"
+      xpack-aria-describes="{{thresholdWatchAggType.makeId('aggType')}}"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchAggType.isValidationMessageVisible('aggType', 'required')"
+    >
+      Please select an aggregration type.
+    </div>
+    <select
+      id="{{thresholdWatchAggType.makeId('aggType')}}"
+      class="kuiSelect"
+      name="aggType"
+      required
+      ng-model="thresholdWatchAggType.aggType"
+      ng-options="aggType as aggType.label for aggType in thresholdWatchAggType.aggTypes"
+    ></select>
+  </form>
+</expression-item>

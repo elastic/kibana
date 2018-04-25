@@ -1,0 +1,19 @@
+{
+  "_xpack/security/oauth2/token": {
+    "methods": ["POST"],
+    "patterns": ["_xpack/security/oauth2/token"],
+    "data_autocomplete_rules": {
+      "grant_type": "",
+      "password": "",
+      "scope": "",
+      "username": ""
+    }
+  },
+  "DELETE _xpack/security/oauth2/token": {
+    "methods": ["DELETE"],
+    "patterns": ["_xpack/security/oauth2/token"],
+    "data_autocomplete_rules": {
+      "token": ""
+    }
+  }
+}

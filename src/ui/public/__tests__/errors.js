@@ -23,7 +23,7 @@ import {
   StackedBarChartConfig,
   NoResults,
   KbnError
-} from 'ui/errors';
+} from '../errors';
 
 describe('ui/errors', () => {
   const errors = [

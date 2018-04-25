@@ -2,7 +2,7 @@ import './agg_params';
 import './agg_add';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../../modules';
 import aggTemplate from './agg.html';
 import { move } from '../../../utils/collection';
 

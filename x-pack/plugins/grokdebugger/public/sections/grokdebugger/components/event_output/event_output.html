@@ -1,0 +1,18 @@
+<form novalidate>
+  <div class="kuiFormSection">
+    <label class="kuiLabel kuiVerticalRhythmSmall">
+      Structured Data
+    </label>
+    <div
+      class="event-output-editor grokdebugger-ace-editor kuiVerticalRhythmSmall"
+      json-input
+      require-keys="true"
+      ui-ace="{
+        mode: 'json',
+        onLoad: aceLoaded
+      }"
+      ng-model="eventOutput.structuredEvent"
+      data-test-subj="aceEventOutput"
+    ></div>
+  </div>
+</form>

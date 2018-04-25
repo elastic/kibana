@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { buildRangeFilter } from 'ui/filter_manager/lib/range';
+import { buildRangeFilter } from '../../../filter_manager/lib/range';
 
 export function createFilterDateHistogram(agg, key) {
   const start = moment(key);

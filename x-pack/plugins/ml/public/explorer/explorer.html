@@ -1,0 +1,154 @@
+<ml-nav-menu name="explorer"></ml-nav-menu>
+<ml-chart-tooltip></ml-chart-tooltip>
+<div class="ml-explorer" ng-controller="MlExplorerController">
+  <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
+    <job-select-button></job-select-button>
+  </navbar>
+
+  <filter-bar
+    ng-show="queryFilters.length"
+    state="appState">
+  </filter-bar>
+
+  <ml-loading-indicator
+    label="Loading"
+    is-loading="loading === true"
+  />
+
+  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
+    <div class="no-results euiText">
+      <div><i class="fa fa-exclamation-triangle" ></i>No jobs found</div>
+      <div><a href="ml#/jobs">Create new job</a></div>
+    </div>
+  </div>
+
+  <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
+    <div class="no-results euiText">
+      <div><i class="fa fa-info-circle" ></i>No results found</div>
+      <div>Try widening the time selection or moving further back in time</div>
+    </div>
+  </div>
+
+  <div ng-if="jobs.length > 0 && loading === false && hasResults === true">
+    <div class="results-container">
+
+      <div class="influencers-list-container column col-xs-2 euiText">
+        <span class="panel-title">
+          Top Influencers
+        </span>
+        <ml-influencers-list
+          influencers-data="influencersData"
+          index-pattern-id="indexPatternId"
+          tooltip-placement="right">
+        </ml-influencers-list>
+      </div>
+
+      <div class="column col-xs-10">
+        <span class="panel-title euiText">
+          Anomaly timeline
+        </span>
+        <div
+          class="ml-explorer-swimlane euiText"
+          ng-mouseenter="setSwimlaneSelectActive(true)"
+          ng-mouseleave="setSwimlaneSelectActive(false)"
+        >
+          <ml-explorer-swimlane
+            swimlane-type="overall"
+            swimlane-data="overallSwimlaneData"
+            selected-job-ids="selectedJobIds"
+            chart-width="swimlaneWidth"
+            app-state="appState"
+            style="width: 100%; height: 250px;">
+          </ml-explorer-swimlane>
+        </div>
+
+        <div ng-if="viewBySwimlaneOptions.length > 0">
+          <div class="ml-controls">
+            <label for="selectViewBy" class="kuiLabel">View by:</label>
+            <div class="kuiButtonGroup" dropdown>
+              <button id="selectViewBy" type="button" class="form-control dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+                <span>{{swimlaneViewByFieldName}}</span> <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li ng-repeat="swimlaneOption in viewBySwimlaneOptions">
+                  <a href="" ng-click="setSwimlaneViewBy(swimlaneOption)">{{swimlaneOption}}</a>
+                </li>
+              </ul>
+            </div>
+
+            <ml-select-limit />
+
+            <span ng-if="viewByLoadedForTimeFormatted" class="panel-sub-title">
+              (Sorted by max anomaly score for {{viewByLoadedForTimeFormatted}})
+            </span>
+            <span ng-if="!viewByLoadedForTimeFormatted" class="panel-sub-title">
+              (Sorted by max anomaly score)
+            </span>
+          </div>
+
+          <div
+            class="ml-explorer-swimlane euiText"
+            ng-if="showViewBySwimlane()"
+            ng-mouseenter="setSwimlaneSelectActive(true)"
+            ng-mouseleave="setSwimlaneSelectActive(false)"
+          >
+            <ml-explorer-swimlane
+              swimlane-type="viewBy"
+              swimlane-data="viewBySwimlaneData"
+              selected-job-ids="selectedJobIds"
+              chart-width="swimlaneWidth"
+              app-state="appState"
+              style="width: 100%; height: 250px;">
+            </ml-explorer-swimlane>
+          </div>
+
+          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+            <div class="item top"></div>
+            <div class="item">
+              <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
+            </div>
+            <div class="item bottom"></div>
+          </div>
+
+        </div>
+
+        <span class="panel-title euiText">
+          Anomalies
+        </span>
+
+        <div class="ml-table-controls">
+          <ml-select-severity />
+          <ml-select-interval />
+          <ml-checkbox-show-charts
+            visible="anomalyChartRecords.length > 0"
+          />
+        </div>
+
+        <div ng-controller="MlExplorerChartsContainerController" class="euiText">
+          <ml-explorer-charts-container
+            series-to-plot="seriesToPlot"
+            time-field-name="timeFieldName"
+            plot-earliest="plotEarliest"
+            plot-latest="plotLatest"
+            selected-earliest="selectedEarliest"
+            selected-latest="selectedLatest"
+            charts-per-row="chartsPerRow"
+            layout-cells-per-chart="layoutCellsPerChart"
+            too-many-buckets="tooManyBuckets">
+          </ml-explorer-charts-container>
+        </div>
+
+        <div class="euiText">
+          <ml-anomalies-table
+            anomaly-records="anomalyRecords"
+            time-field-name="timeFieldName"
+            show-view-series-link="true">
+          </ml-anomalies-table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

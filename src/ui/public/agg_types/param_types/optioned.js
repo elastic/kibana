@@ -1,4 +1,4 @@
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexedArray } from '../../indexed_array';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
 

@@ -1,5 +1,5 @@
-import 'ui/filters/label';
-import { IndexedArray } from 'ui/indexed_array';
+import '../filters/label';
+import { IndexedArray } from '../indexed_array';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { RegexParamType } from './param_types/regex';

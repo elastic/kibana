@@ -1,3 +1,9 @@
+node_modules
+bower_components
+/data
+/build
+/.es
+/plugins
 /optimize
 /src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap
@@ -9,8 +15,6 @@
 /src/core_plugins/console/public/tests/webpackShims
 /src/ui/public/utils/decode_geo_hash.js
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
-/tasks/vendor
-/packages/*/node_modules
 /packages/*/target
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
@@ -21,5 +25,8 @@
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build
 /packages/kbn-ui-framework/generator-kui/*/templates/
-!/.eslintrc.js
+/x-pack/coverage
+/x-pack/build
+/x-pack/plugins/**/__tests__/fixtures/**
 **/*.js.snap
+!/.eslintrc.js

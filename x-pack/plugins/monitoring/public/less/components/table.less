@@ -1,0 +1,62 @@
+/*
+ * A table that stretches the full window width and columns size appropriately to content.
+ * The .monitoringTable class is on the KuiControlledTable instance.
+ * The table within it requires the shrinkToContent flag as well as width set to 100%
+ */
+.monitoringTable .kuiTable {
+  width: 100%;
+}
+
+.monitoringTableCell__ClusterCell__expired,
+.monitoringTableCell__offline {
+  color: @esDarkGray;
+}
+
+.monitoringTableCell__ClusterCell__license {
+  font-size: 16px;
+}
+.monitoringTableCell__ClusterCell__expiration {
+  color: #666977;
+  line-height: 14px;
+  font-size: 12px;
+}
+
+.monitoringTableCell__name,
+.monitoringTableCell__status,
+.monitoringTableCell__version {
+  font-size: 18px;
+}
+
+.monitoringTableCell__transportAddress {
+  color: #666977;
+  line-height: 14px;
+  font-size: 12px;
+}
+
+.monitoringTableCell__number {
+  font-size: 30px;
+}
+
+.monitoringTableCell__splitNumber {
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.monitoringTableCell__MetricCell__metric {
+  display: inline-block;
+  font-size: 30px;
+}
+
+.monitoringTableCell__MetricCell__slopeArrow {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 30px;
+}
+
+.monitoringTableCell__MetricCell__minMax {
+  display: inline-block;
+  text-align: right;
+  margin-left: 5px;
+  color: #666977;
+  font-size: 12px;
+}
