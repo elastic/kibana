@@ -213,6 +213,31 @@ describe('lib/config/config', function () {
 
     });
 
+    describe('#getDefault(key)', function () {
+      let config;
+
+      beforeEach(function () {
+        config = new Config(schema);
+        config.set(data);
+      });
+
+      it('should return undefined if there is no default', function () {
+        const hostDefault = config.getDefault('test.client.host');
+        expect(hostDefault).toBeUndefined();
+      });
+
+      it('should return default if specified', function () {
+        const typeDefault = config.getDefault('test.client.type');
+        expect(typeDefault).toBe('datastore');
+      });
+
+      it('should throw exception for unknown key', function () {
+        expect(() => {
+          config.getDefault('foo.bar');
+        }).toThrow();
+      });
+    });
+
     describe('#extendSchema(key, schema)', function () {
       let config;
       beforeEach(function () {
