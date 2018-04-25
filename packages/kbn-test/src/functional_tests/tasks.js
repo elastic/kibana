@@ -9,10 +9,10 @@ import {
   runElasticsearch,
   runFtr,
   log,
-  isCliError,
   KIBANA_ROOT,
   KIBANA_FTR_SCRIPT,
-  MULTIPLE_CONFIG_PATH,
+  FUNCTIONAL_CONFIG_PATH,
+  API_CONFIG_PATH,
 } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
@@ -26,22 +26,27 @@ in another terminal session by running this command from this directory:
 
 `;
 
-// Takes in a config listing multiple configs
+// Takes in multiple configs, comma separated
 // Runs servers and tests for each config
 export async function runTests(
-  configPath = MULTIPLE_CONFIG_PATH,
+  configPaths = [FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH],
   runEs = runElasticsearch,
   runKbn = runKibanaServer
 ) {
-  const configOption = getopts(process.argv.slice(2)).config;
+  const configs = [];
 
-  configPath = await resolve(KIBANA_ROOT, configOption || configPath);
-
+  // Make a list of config paths based on --config or defaults
   try {
-    const config = require(configPath)();
+    configs.push(...getopts(process.argv.slice(2)).config.split(','));
+  } catch (err) {
+    configs.push(...configPaths);
+  }
 
-    for (const configFile of config.configFiles) {
-      await runWithConfig(configFile, runEs, runKbn);
+  // Run servers and tests for each
+  try {
+    for (let configPath of configs) {
+      configPath = await resolve(KIBANA_ROOT, configPath);
+      await runWithConfig(configPath, runEs, runKbn);
     }
   } catch (err) {
     fatalErrorHandler(err);
@@ -50,11 +55,10 @@ export async function runTests(
 
 // Start only servers using single config
 export async function startServers(
-  configPath = 'test/functional/config.js',
+  configPath = FUNCTIONAL_CONFIG_PATH,
   runEs = runElasticsearch,
   runKbn = runKibanaServer
 ) {
-  // TODO: make note about change to saml option
   const configOption = getopts(process.argv.slice(2)).config;
 
   configPath = await resolve(KIBANA_ROOT, configOption || configPath);
@@ -67,7 +71,7 @@ export async function startServers(
       await runKbn({ procs, config });
 
       // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get burried
+      // so that it doesn't get buried
       await Rx.Observable.fromEvent(log, 'data')
         .switchMap(() => Rx.Observable.timer(5000))
         .first()
@@ -80,14 +84,11 @@ export async function startServers(
 }
 
 // Start servers and run tests for single config
-// TODO: don't export this--
-export async function runWithConfig(
-  configPath = 'test/functional/config.js',
+async function runWithConfig(
+  configPath = FUNCTIONAL_CONFIG_PATH,
   runEs = runElasticsearch,
   runKbn = runKibanaServer
 ) {
-  configPath = resolveConfigPath(configPath);
-
   try {
     await withTmpDir(async tmpDir => {
       await withProcRunner(async procs => {
@@ -106,22 +107,8 @@ export async function runWithConfig(
   }
 }
 
-function resolveConfigPath(configPath) {
-  // NOTE: when --config is passed into runTests
-  // configPath gets incorrectly passed to runWithConfig
-  const originalCall = process.argv[1].split('/').slice(-1)[0];
-  // if this process was started in runWithConfig, parse argv
-  if (originalCall === 'functional_tests_single') {
-    const configOption = getopts(process.argv.slice(2)).config;
-    return resolve(KIBANA_ROOT, configOption || configPath);
-  } else {
-    // process was started in runTests or other method, so don't parse argv
-    return resolve(KIBANA_ROOT, configPath);
-  }
-}
-
 function fatalErrorHandler(err) {
   log.error('FATAL ERROR');
-  log.error(isCliError(err) ? err.message : err);
+  log.error(err);
   process.exit(1);
 }
