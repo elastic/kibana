@@ -8,6 +8,10 @@ from files licensed under the Apache License 2.0.
 
 By default, Kibana will run with X-Pack installed as mentioned in the [contributing guide](../CONTRIBUTING.md).
 
+Elasticsearch will run with a basic license. To run with a trial license, including security, you can specifying that with the `yarn es` command.
+
+Example: `yarn es snapshot --license trial --password changeme`
+
 # Testing
 
 ## Running unit tests_bundle
