@@ -11,6 +11,6 @@
   "types": "./target/tsc-types/index.d.ts",
   "devDependencies": {
     "@kbn/types": "link:../../packages/kbn-types",
-    "typescript": "^2.7.1"
+    "typescript": "^2.8.3"
   }
 }

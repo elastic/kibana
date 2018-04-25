@@ -3,7 +3,7 @@ import supertest from 'supertest';
 import Chance from 'chance';
 
 import { Env } from '../../../config/env';
-import { Router } from '../Router';
+import { Router } from '../router';
 import { HttpServer } from '../http_server';
 import { HttpConfig } from '../http_config';
 import { logger } from '../../../logging/__mocks__';

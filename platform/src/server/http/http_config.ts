@@ -5,7 +5,7 @@ import { schema, ByteSizeValue } from '@kbn/utils';
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
-const { object, string, number, byteSize, maybe } = schema;
+const { arrayOf, boolean, object, string, number, byteSize, maybe, oneOf } = schema;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
@@ -18,8 +18,16 @@ const createHttpSchema = object({
   port: number({
     defaultValue: 5601,
   }),
+  cors: oneOf([
+    boolean({ defaultValue: false }),
+    object({
+      origin: arrayOf(
+        string({ defaultValue: '*://localhost:9876' })
+      )
+    }),
+  ]),
   maxPayload: byteSize({
-    defaultValue: '1mb',
+    defaultValue: '1048576b',
   }),
   basePath: maybe(
     string({
@@ -29,7 +37,14 @@ const createHttpSchema = object({
       ),
     })
   ),
+  rewriteBasePath: boolean( { defaultValue: false }),
   ssl: SslConfig.schema,
+}, {
+  validate: config => {
+    if (!config.basePath && config.rewriteBasePath) {
+      return 'can not use [rewriteBasePath] when [basePath] is not specified';
+    }
+  },
 });
 
 type HttpConfigType = schema.TypeOf<typeof createHttpSchema>;
@@ -42,8 +57,10 @@ export class HttpConfig {
 
   host: string;
   port: number;
+  cors: boolean | { origin: string[] };
   maxPayload: ByteSizeValue;
   basePath?: string;
+  rewriteBasePath: boolean;
   publicDir: string;
   ssl: SslConfig;
 
@@ -53,8 +70,10 @@ export class HttpConfig {
   constructor(config: HttpConfigType, env: Env) {
     this.host = config.host;
     this.port = config.port;
+    this.cors = config.cors;
     this.maxPayload = config.maxPayload;
     this.basePath = config.basePath;
+    this.rewriteBasePath = config.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(config.ssl);
   }

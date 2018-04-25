@@ -1,13 +1,18 @@
-import express from 'express';
-import bodyParser from 'body-parser';
+import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import { schema } from '@kbn/utils';
 
 import { RouteMethod, RouteSchemas, RouteConfig } from './route';
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
 
+export interface RouterRoute {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  path: string;
+  handler: (req: Request, h: ResponseToolkit) => Promise<ResponseObject>;
+}
+
 export class Router {
-  readonly router: express.Router = express.Router();
+  routes: Readonly<RouterRoute>[] = [];
 
   constructor(readonly path: string) {}
 
@@ -44,10 +49,11 @@ export class Router {
     B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
-    this.router.get(
-      route.path,
-      async (req, res) => await this.handle(routeSchemas, req, res, handler)
-    );
+    this.routes.push({
+      method: 'GET',
+      path: route.path,
+      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+    });
   }
 
   /**
@@ -59,11 +65,11 @@ export class Router {
     B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
-    this.router.post(
-      route.path,
-      ...Router.getBodyParsers(),
-      async (req, res) => await this.handle(routeSchemas, req, res, handler)
-    );
+    this.routes.push({
+      method: 'POST',
+      path: route.path,
+      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+    });
   }
 
   /**
@@ -75,11 +81,11 @@ export class Router {
     B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
-    this.router.put(
-      route.path,
-      ...Router.getBodyParsers(),
-      async (req, res) => await this.handle(routeSchemas, req, res, handler)
-    );
+    this.routes.push({
+      method: 'PUT',
+      path: route.path,
+      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+    });
   }
 
   /**
@@ -91,21 +97,19 @@ export class Router {
     B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
-    this.router.delete(
-      route.path,
-      async (req, res) => await this.handle(routeSchemas, req, res, handler)
-    );
+    this.routes.push({
+      method: 'DELETE',
+      path: route.path,
+      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+    });
   }
 
   /**
-   * Returns list of supported body parsers.
+   * Returns all routes registered with the this router.
+   * @returns List of registered routes.
    */
-  private static getBodyParsers() {
-    return [
-      bodyParser.json(),
-      bodyParser.raw({ type: 'application/x-ndjson' }),
-      bodyParser.urlencoded({ extended: false }),
-    ];
+  getRoutes() {
+    return [...this.routes];
   }
 
   private async handle<
@@ -114,8 +118,8 @@ export class Router {
     B extends schema.ObjectType
   >(
     routeSchemas: RouteSchemas<P, Q, B> | undefined,
-    request: express.Request,
-    response: express.Response,
+    request: Request,
+    helpers: ResponseToolkit,
     handler: RequestHandler<P, Q, B>
   ) {
     let kibanaRequest: KibanaRequest<
@@ -128,34 +132,30 @@ export class Router {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
     } catch (e) {
       // TODO Handle failed validation
-
-      response.status(400);
-      response.json({ error: e.message });
-      return;
+      return helpers.response({ error: e.message }).code(400);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, responseFactory);
 
       if (kibanaResponse instanceof KibanaResponse) {
-        response.status(kibanaResponse.status);
-
-        if (kibanaResponse.payload === undefined) {
-          response.send();
-        } else if (kibanaResponse.payload instanceof Error) {
+        let payload = null;
+        if (kibanaResponse.payload instanceof Error) {
           // TODO Design an error format
-          response.json({ error: kibanaResponse.payload.message });
-        } else {
-          response.json(kibanaResponse.payload);
+          payload = { error: kibanaResponse.payload.message };
+        } else if (kibanaResponse.payload !== undefined) {
+          payload = kibanaResponse.payload;
         }
-      } else {
-        response.json(kibanaResponse);
+
+        return helpers.response(payload).code(kibanaResponse.status);
       }
+
+      return helpers.response(kibanaResponse);
     } catch (e) {
       // TODO Handle `KibanaResponseError`
 
       // Otherwise we default to something along the lines of
-      response.status(500).json({ error: e.message });
+      return helpers.response({ error: e.message }).code(500);
     }
   }
 }

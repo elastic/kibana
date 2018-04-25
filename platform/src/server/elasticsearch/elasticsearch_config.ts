@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { noop } from 'lodash';
 
 import { ClusterSchema } from './schema';
-import { Headers, filterHeaders } from '../http/Router/headers';
+import { Headers, filterHeaders } from '../http/router/headers';
 import { pick, assertNever } from '../../lib/utils';
 
 // TODO This can't be specified like this

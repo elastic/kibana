@@ -1,6 +1,6 @@
 import { Client } from 'elasticsearch';
 import { callAPI } from './call_api';
-import { Headers } from '../http/Router/headers';
+import { Headers } from '../http/router/headers';
 
 export type CallAPIOptions = { wrap401Errors: boolean };
 export type CallAPIClientParams = { [key: string]: any };

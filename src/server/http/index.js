@@ -7,10 +7,8 @@ import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { setupConnection } from './setup_connection';
 import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
-import { setupBasePathRewrite } from './setup_base_path_rewrite';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -18,8 +16,12 @@ export default async function (kbnServer, server, config) {
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  setupConnection(server, config, kbnServer.newPlatform);
-  setupBasePathRewrite(server, config);
+  server.connection({
+    host: config.get('server.host'),
+    port: config.get('server.port'),
+    listener: kbnServer.newPlatform.proxyListener
+  });
+
   await setupRedirectServer(config);
   registerHapiPlugins(server);
 
