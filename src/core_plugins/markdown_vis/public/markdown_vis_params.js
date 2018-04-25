@@ -5,10 +5,12 @@ import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
+  EuiPanel,
   EuiRange,
   EuiSpacer,
   EuiSwitch,
   EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 
 export class MarkdownOptionsTab extends Component {
@@ -30,45 +32,49 @@ export class MarkdownOptionsTab extends Component {
 
     return (
       <EuiForm>
-        <EuiSpacer />
-        <EuiFormRow
-          id="fontSize"
-          label={`Font Size (${params.fontSize}pt)`}
-        >
-          <EuiRange
-            checked={params.fontSize}
-            min="8"
-            max="36"
-            onChange={this.handleUpdate('fontSize')}
-            data-test-subj="markdownEditorFontSize"
-          />
-        </EuiFormRow>
 
-        <EuiFormRow
-          id="openLinksInNewTab"
-        >
-          <EuiSwitch
-            label="Open links in new tab"
-            checked={params.openLinksInNewTab}
-            onChange={this.handleUpdate('openLinksInNewTab', 'checked')}
-            data-test-subj="markdownEditorOpenLinksInNewTab"
-          />
-        </EuiFormRow>
+        <EuiPanel>
+          <EuiTitle><h1>Markdown</h1></EuiTitle>
+          <EuiSpacer />
 
-        <EuiFormRow
-          id="markdown"
-          label="Markdown"
-          fullWidth={true}
-        >
-          <EuiTextArea
-            value={params.markdown}
+          <EuiFormRow
+            id="fontSize"
+            label={`Font Size (${params.fontSize}pt)`}
+          >
+            <EuiRange
+              checked={params.fontSize}
+              min={8}
+              max={36}
+              onChange={this.handleUpdate('fontSize')}
+              data-test-subj="markdownEditorFontSize"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            id="openLinksInNewTab"
+          >
+            <EuiSwitch
+              label="Open links in new tab"
+              checked={params.openLinksInNewTab}
+              onChange={this.handleUpdate('openLinksInNewTab', 'checked')}
+              data-test-subj="markdownEditorOpenLinksInNewTab"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            id="markdown"
+            label="Markdown"
             fullWidth={true}
-            rows="20"
-            onChange={this.handleUpdate('markdown')}
-            data-test-subj="markdownEditorMarkdown"
-          />
-        </EuiFormRow>
-
+          >
+            <EuiTextArea
+              value={params.markdown}
+              fullWidth={true}
+              rows="20"
+              onChange={this.handleUpdate('markdown')}
+              data-test-subj="markdownEditorMarkdown"
+            />
+          </EuiFormRow>
+        </EuiPanel>
       </EuiForm>
     );
   }
