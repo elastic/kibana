@@ -19,10 +19,10 @@ export const KIBANA_FTR_SCRIPT = resolve(
   'scripts/functional_test_runner'
 );
 export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
-export const FTR_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
-export const MULTIPLE_CONFIG_PATH = resolve(
+export const FUNCTIONAL_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
+export const API_CONFIG_PATH = resolve(
   KIBANA_ROOT,
-  'test/multiple_config'
+  'test/api_integration/config'
 );
 export const OPTIMIZE_BUNDLE_DIR = resolve(KIBANA_ROOT, 'optimize/bundles');
 export const ES_REPO_ROOT = resolve(PROJECT_ROOT, './elasticsearch');

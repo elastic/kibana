@@ -12,36 +12,10 @@ Integration testing methods exist in the `src/functional_tests` directory. They 
 
 ### Exposed methods
 
-#### runTests(configPath: string, runEs: function, runKbn: function)
-For each config file specified in configPath, starts Elasticsearch and Kibana once, runs tests specified in that config file, and shuts down Elasticsearch and Kibana once completed. (Repeats for every config file.)
+#### runTests(configPaths: Array<string>, runEs: function, runKbn: function)
+For each config file specified in configPaths, starts Elasticsearch and Kibana once, runs tests specified in that config file, and shuts down Elasticsearch and Kibana once completed. (Repeats for every config file.)
 
-`configPath`: absolute path to a config file that looks like [this](../../test/multiple_config.js):
-
-```js
-// example from test/multiple_config.js
-
-export default function () {
-  return {
-    configFiles: [
-      'test/functional/config.js',
-      'test/api_integration/config.js',
-    ],
-  };
-}
-```
-
-`runEs`: [optional] function that starts Elasticsearch server
-
-`runKbn`: [optional] function that starts Kibana server
-
-The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
-
-#### runWithConfig(configPath: string, runEs: function, runKbn: function)
-Starts Elasticsearch and Kibana once and runs tests against them, given a single config file that specifies how to start Elasticsearch and Kibana and what tests to run.
-
-_This method is going away in favor of `runTests` which will handle both cases._
-
-`configPath`: absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
+`configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
 `runEs`: [optional] function that starts Elasticsearch server
 
