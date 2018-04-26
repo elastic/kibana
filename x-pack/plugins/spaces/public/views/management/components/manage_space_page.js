@@ -133,7 +133,6 @@ export class ManageSpacePage extends React.Component {
       return (
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
-            $q={this.props.$q}
             spaces={[this.state.space]}
             httpAgent={this.props.httpAgent}
             chrome={this.props.chrome}
@@ -269,7 +268,6 @@ export class ManageSpacePage extends React.Component {
 }
 
 ManageSpacePage.propTypes = {
-  $q: PropTypes.func.isRequired,
   space: PropTypes.string,
   httpAgent: PropTypes.func.isRequired,
   chrome: PropTypes.object,

@@ -18,13 +18,12 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
-  controller: function ($scope, $http, $q, chrome) {
+  controller: function ($scope, $http, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
     render(<SpacesGridPage
       httpAgent={$http}
       chrome={chrome}
-      $q={$q}
       breadcrumbs={routes.getBreadcrumbs()}
     />, domNode);
 
@@ -37,13 +36,12 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
-  controller: function ($scope,  $http, $q, chrome) {
+  controller: function ($scope,  $http, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
     render(<ManageSpacePage
       httpAgent={$http}
       chrome={chrome}
-      $q={$q}
       breadcrumbs={routes.getBreadcrumbs()}
     />, domNode);
 
@@ -60,7 +58,7 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:space', {
   template,
-  controller: function ($scope, $http, $route, $q, chrome) {
+  controller: function ($scope, $http, $route, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
     const { space } = $route.current.params;
@@ -69,7 +67,6 @@ routes.when('/management/spaces/edit/:space', {
       httpAgent={$http}
       space={space}
       chrome={chrome}
-      $q={$q}
       breadcrumbs={routes.getBreadcrumbs()}
     />, domNode);
 

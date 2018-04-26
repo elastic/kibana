@@ -91,7 +91,6 @@ export class SpacesGridPage extends Component {
     if (this.state.selectedSpaces.length > 0) {
       return (
         <DeleteSpacesButton
-          $q={this.props.$q}
           spaces={this.state.selectedSpaces}
           httpAgent={this.props.httpAgent}
           chrome={this.props.chrome}
@@ -196,7 +195,6 @@ export class SpacesGridPage extends Component {
 }
 
 SpacesGridPage.propTypes = {
-  $q: PropTypes.func.isRequired,
   chrome: PropTypes.object.isRequired,
   httpAgent: PropTypes.func.isRequired,
   breadcrumbs: PropTypes.array.isRequired

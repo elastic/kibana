@@ -62,8 +62,7 @@ export class DeleteSpacesButton extends Component {
     const {
       httpAgent,
       chrome,
-      spaces,
-      $q
+      spaces
     } = this.props;
 
     console.log(this.props, spaces);
@@ -74,7 +73,7 @@ export class DeleteSpacesButton extends Component {
       );
     });
 
-    $q.all(deleteOperations)
+    Promise.all(deleteOperations)
       .then(() => {
         this.setState({
           showConfirmModal: false
@@ -101,7 +100,6 @@ export class DeleteSpacesButton extends Component {
 }
 
 DeleteSpacesButton.propTypes = {
-  $q: PropTypes.func.isRequired,
   spaces: PropTypes.array.isRequired,
   httpAgent: PropTypes.func.isRequired,
   chrome: PropTypes.object.isRequired,
