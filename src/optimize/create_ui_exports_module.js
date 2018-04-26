@@ -6,7 +6,7 @@ function normalizePath(path) {
 }
 
 export default function () {
-  if (module.id.indexOf('?') === -1) {
+  if (!module.id.includes('?')) {
     throw new Error('create_ui_exports_module loaded without JSON args in module.id');
   }
 
