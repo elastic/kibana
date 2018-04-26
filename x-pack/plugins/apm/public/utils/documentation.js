@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-const STACK_VERSION = '6.2';
+const STACK_VERSION = '6.3';
 const DOCS_ROOT = 'https://www.elastic.co/guide/en/apm';
 
 //
