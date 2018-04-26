@@ -23,7 +23,15 @@ export function FilterBarProvider({ getService }) {
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
     }
 
-    async addFilter(field, operator, value) {
+    /**
+     *
+     * @param field
+     * @param operator
+     * @param value
+     * @param inputType - defaults to ui-select-search but might be something else depending on field and operator.
+     * @return {Promise<void>}
+     */
+    async addFilter(field, operator, value, inputCssClass = 'ui-select-search') {
       await testSubjects.click('addFilter');
       let input = await find.byCssSelector(`filter-field-select input.ui-select-search`);
       await input.type(field);
@@ -31,7 +39,7 @@ export function FilterBarProvider({ getService }) {
       input = await find.byCssSelector(`filter-operator-select input.ui-select-search`);
       await input.type(operator);
       await remote.pressKeys('\uE006');
-      input = await find.byCssSelector(`filter-params-editor input.kuiTextInput`);
+      input = await find.byCssSelector(`filter-params-editor input.${inputCssClass}`);
       await input.type(value);
       await remote.pressKeys('\uE006');
       await testSubjects.click('saveFilter');
