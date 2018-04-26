@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { migrate } = require('./migrate');
 const { mockCluster } = require('./test');
-const { MigrationState, Plugins } = require('./lib');
+const { MigrationState, Plugins, MigrationContext } = require('./lib');
 
 describe('migrate', () => {
   const elasticVersion = '9.8.7';
@@ -28,24 +28,6 @@ describe('migrate', () => {
     await migrate({ callCluster, log, elasticVersion, index, plugins });
     expect(callCluster.state())
       .toMatchSnapshot();
-  });
-
-  test('generates the dest index if it is not provided', async () => {
-    const now = new Date('2021-02-03 4:05:06 AM');
-    jest.spyOn(Date, 'now').mockImplementation(() => now.getTime());
-    const plugins = [{
-      id: 'hoi',
-      mappings: {
-        stuff: { type: 'integer' },
-      },
-    }];
-    const index = '.mufasa';
-    const callCluster = mockCluster({ [index]: { } }, {});
-    const { destIndex } = await migrate({ callCluster, index, plugins, log, elasticVersion: '7.7.7' });
-
-    expect(callCluster.state().data[destIndex]).toBeTruthy();
-    expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
-    expect(destIndex).toEqual('.mufasa-7.7.7-a6d07838aa0355002cda60a39df578cf69a45414');
   });
 
   test('existing indices are converted to aliases and migrated', async () => {
@@ -87,6 +69,34 @@ describe('migrate', () => {
     ]);
     expect(results[0].status).toEqual('migrated');
     expect(results[1].status).toEqual(400);
+  });
+
+  test('if new index migration fails, subsequent migrations will not run', async () => {
+    const index = '.anindexname';
+    const plugins = [{
+      id: 'hoi',
+      mappings: {
+        stuff: { type: 'integer' },
+      },
+      migrations: [{
+        id: 'a',
+        seed: () => { throw new Error('This was a crappy migration.'); },
+      }],
+    }];
+    const callCluster = mockCluster({});
+    const opts = { callCluster, log, elasticVersion, index, plugins };
+    await expect(migrate(opts))
+      .rejects.toThrow();
+
+    plugins[0].migrations[0].seed = () => ({
+      id: 'fixed',
+      type: 'stuff',
+      attributes: 32,
+    });
+
+    const { status } = await migrate(opts);
+    expect(status)
+      .toEqual('migrating');
   });
 
   test('race-condition version is used for optimistic concurrency', async () => {
@@ -296,23 +306,34 @@ describe('migrate', () => {
   });
 
   test('migrations will run, if forced even if index is in migrating state', async () => {
+    // If migrations failed for some reason, we might have a state where there is
+    // an original index in the 'migrating' state, and an existing, partially
+    // migrated dest index. This tests that such a scenario can be recovered from via
+    // a forced migration.
     const index = 'skippy';
-    const pluginV1 = {
+    const plugins = [{
       id: 'fishes',
-      mappings: {
-        fish: { properties: { kind: { type: 'keyword' }, }, },
-      },
-      migrations: [],
-    };
-    const originalMigrationState = MigrationState.build([pluginV1]);
-    const pluginV2 = _.set(_.cloneDeep(pluginV1), 'mappings.fish.properties.freshWater.type', 'boolean');
-    const existingData = assocMigrationState({}, index, {
-      ...originalMigrationState,
+      mappings: _.set({}, 'fish.properties.kind.type', 'keyword'),
+      migrations: [{
+        id: 'makeafish',
+        seed: () => ({
+          id: 'bass',
+          type: 'fish',
+          attributes: {
+            kind: 'freshwater',
+          },
+        }),
+      }],
+    }];
+    const context = await MigrationContext.fetch({ callCluster: mockCluster({}, {}), index, elasticVersion, log, plugins });
+    const destIndex = _.set({}, [context.destIndex, 'fish:bass', '_source', 'fish', 'kind'], 'BLOW THIS AWAY!!!');
+    const existingData = assocMigrationState(destIndex, index, {
       status: 'migrating',
+      plugins: [],
     });
-    const existingMeta = assocMappings({}, index, pluginV1.mappings);
+    const existingMeta = assocMappings({}, index, plugins[0].mappings);
     const callCluster = mockCluster(existingData, existingMeta);
-    const result = await migrate({ callCluster, index, elasticVersion, log, force: true, plugins: [pluginV2] });
+    const result = await migrate({ force: true, callCluster, index, elasticVersion, log, plugins });
     expect(result.destIndex).not.toEqual(result.index);
     expect(result.status).toEqual('migrated');
     expect(callCluster.state())

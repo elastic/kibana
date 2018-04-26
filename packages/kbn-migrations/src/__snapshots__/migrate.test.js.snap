@@ -1337,17 +1337,28 @@ Object {
 exports[`migrate migrations will run, if forced even if index is in migrating state 1`] = `
 Object {
   "data": Object {
-    "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+    "skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
+      "fish:bass": Object {
+        "_source": Object {
+          "fish": Object {
+            "kind": "freshwater",
+          },
+          "type": "fish",
+          "updated_at": undefined,
+        },
+      },
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
                 "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"},\\"freshWater\\":{\\"type\\":\\"boolean\\"}}}}",
-                "mappingsChecksum": "cecff11fdfabe235b839cbfbfcfdf364829bcbc6",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
+                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "migrationIds": Array [
+                  "makeafish",
+                ],
+                "migrationsChecksum": "4820cce3d2954e10c2fe5cf4d1b19df403b51e43",
               },
             ],
             "status": "migrated",
@@ -1357,19 +1368,11 @@ Object {
         "_version": 1,
       },
     },
-    "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+    "skippy-original-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-            ],
+            "plugins": Array [],
             "status": "migrating",
           },
           "type": "migration",
@@ -1381,7 +1384,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       "skippy": Object {
-        "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+        "skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
           "aliases": Object {
             "skippy": Object {},
           },
@@ -1389,7 +1392,7 @@ Object {
       },
     },
     "mappings": Object {
-      "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+      "skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1403,9 +1406,6 @@ Object {
             },
             "fish": Object {
               "properties": Object {
-                "freshWater": Object {
-                  "type": "boolean",
-                },
                 "kind": Object {
                   "type": "keyword",
                 },
@@ -1447,7 +1447,7 @@ Object {
           },
         },
       },
-      "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+      "skippy-original-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1503,13 +1503,13 @@ Object {
       },
     },
     "settings": Object {
-      "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+      "skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
         "index": Object {
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
+      "skippy-original-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",

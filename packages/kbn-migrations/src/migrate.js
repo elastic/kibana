@@ -90,8 +90,7 @@ async function runMigration(context) {
   log.info(() => `Setting index ${index} to read-only`);
   await Persistence.setReadonly(callCluster, index, true);
 
-  log.info(() => `Creating index ${destIndex}`);
-  await Persistence.cloneIndexSettings(callCluster, index, destIndex, migrationPlan.mappings);
+  await createDestIndex(context);
 
   log.info(() => `Seeding ${destIndex}`);
   await Persistence.applySeeds(callCluster, log, destIndex, migrationPlan.migrations);
@@ -137,4 +136,17 @@ async function ensureIsAliased({ callCluster, index, initialIndex, log }) {
     log.info(() => `Converting index ${index} to an alias`);
     await Persistence.convertIndexToAlias(callCluster, index, initialIndex);
   }
+}
+
+async function createDestIndex({ callCluster, force, destIndex, index, migrationPlan, log }) {
+  const exists = await Persistence.indexExists(callCluster, destIndex);
+  if (exists) {
+    if (!force) {
+      throw new Error(`Destination index ${destIndex} already exists!`);
+    }
+    log.info(() => `Deleting destination index ${destIndex}`);
+    await callCluster('indices.delete', { index: destIndex });
+  }
+  log.info(() => `Creating destination index ${destIndex}`);
+  await Persistence.cloneIndexSettings(callCluster, index, destIndex, migrationPlan.mappings);
 }
