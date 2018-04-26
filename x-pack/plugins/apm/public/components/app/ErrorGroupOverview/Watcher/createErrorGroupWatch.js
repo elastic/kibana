@@ -38,7 +38,7 @@ export async function createErrorGroupWatch({
   const apmIndexPattern = chrome.getInjected('apmIndexPattern');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
-  const emailTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRange.value}}{{ctx.metadata.timeRange.unit}}"
+  const emailTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
 
 {{#ctx.payload.aggregations.error_groups.buckets}}
 <strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>
@@ -46,7 +46,7 @@ export async function createErrorGroupWatch({
 {{doc_count}} occurrences
 {{/ctx.payload.aggregations.error_groups.buckets}}`.replace(/\n/g, '<br/>');
 
-  const slackTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRange.value}}{{ctx.metadata.timeRange.unit}}"
+  const slackTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
 {{#ctx.payload.aggregations.error_groups.buckets}}
 >*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*
 >{{#sample.hits.hits.0._source.error.culprit}}\`{{sample.hits.hits.0._source.error.culprit}}\`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}
@@ -59,7 +59,8 @@ export async function createErrorGroupWatch({
       trigger: 'This value must be changed in trigger section',
       serviceName,
       threshold,
-      timeRange,
+      timeRangeValue: timeRange.value,
+      timeRangeUnit: timeRange.unit,
       slackUrlPath
     },
     trigger: {
@@ -80,7 +81,7 @@ export async function createErrorGroupWatch({
                     range: {
                       '@timestamp': {
                         gte:
-                          'now-{{ctx.metadata.timeRange.value}}{{ctx.metadata.timeRange.unit}}'
+                          'now-{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}'
                       }
                     }
                   }

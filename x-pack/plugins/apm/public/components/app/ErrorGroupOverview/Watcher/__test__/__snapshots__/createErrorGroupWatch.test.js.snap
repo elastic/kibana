@@ -1,6 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`createErrorGroupWatch should format  1`] = `
+exports[`createErrorGroupWatch should format email correctly 1`] = `
+"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
+
+
+<strong>this is a string</strong>
+N/A
+7761 occurrences
+
+<strong>foo</strong>
+<anonymous> (server/coffee.js)
+7752 occurrences
+
+<strong>socket hang up</strong>
+createHangUpError (_http_client.js)
+3887 occurrences
+
+<strong>this will not get captured by express</strong>
+<anonymous> (server/coffee.js)
+3886 occurrences
+"
+`;
+
+exports[`createErrorGroupWatch should format entire template correctly 1`] = `
 Object {
   "actions": Object {
     "email": Object {
@@ -110,10 +132,8 @@ Object {
     "serviceName": "opbeans-node",
     "slackUrlPath": "/services/slackid1/slackid2/slackid3",
     "threshold": 10,
-    "timeRange": Object {
-      "unit": "h",
-      "value": 24,
-    },
+    "timeRangeUnit": "h",
+    "timeRangeValue": 24,
     "trigger": "This value must be changed in trigger section",
   },
   "trigger": Object {
@@ -124,28 +144,6 @@ Object {
     },
   },
 }
-`;
-
-exports[`createErrorGroupWatch should format email correctly 1`] = `
-"Your service \\"opbeans-node\\" has error groups which exceeds 10 occurrences within \\"24h\\"
-
-
-<strong>this is a string</strong>
-N/A
-7761 occurrences
-
-<strong>foo</strong>
-<anonymous> (server/coffee.js)
-7752 occurrences
-
-<strong>socket hang up</strong>
-createHangUpError (_http_client.js)
-3887 occurrences
-
-<strong>this will not get captured by express</strong>
-<anonymous> (server/coffee.js)
-3886 occurrences
-"
 `;
 
 exports[`createErrorGroupWatch should format slack message correctly 1`] = `

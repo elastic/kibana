@@ -72,7 +72,7 @@ describe('createErrorGroupWatch', () => {
     ).toMatchSnapshot();
   });
 
-  it('should format ', () => {
+  it('should format entire template correctly', () => {
     expect(tmpl).toMatchSnapshot();
   });
 
