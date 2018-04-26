@@ -9,9 +9,10 @@ const tooltipId = 'vega-kibana-tooltip';
  * The tooltip handler class.
  */
 export class TooltipHandler {
-  constructor(view, position) {
+  constructor(view, opts) {
     view.tooltip(this.handler.bind(this));
-    this.position = position;
+    this.position = opts.position;
+    this.buffer = opts.padding;
   }
 
   /**
@@ -46,7 +47,7 @@ export class TooltipHandler {
       height: 0
     };
 
-    const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position);
+    const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position, this.buffer);
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
   }

@@ -146,7 +146,8 @@ export class VegaBaseView {
     this._view = view;
 
     if (view && this._parser.tooltips) {
-      // position can be specified with {config:{kibana:{tooltips: 'top' }}}
+      // position and padding can be specified with
+      // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
       new TooltipHandler(view, this._parser.tooltips);
     }
   }

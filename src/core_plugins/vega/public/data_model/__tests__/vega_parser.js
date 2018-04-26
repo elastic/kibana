@@ -103,22 +103,30 @@ describe('VegaParser._parseSchema', () => {
 });
 
 describe('VegaParser._parseTooltips', () => {
-  function test(tooltips, expected) {
+  function test(tooltips, position, padding) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
-      if (expected === undefined) {
+      if (position === undefined) {
         // error
         expect(() => vp._parseTooltips()).to.throw();
+      } else if (position === false) {
+        expect(vp._parseTooltips()).to.eql(false);
       } else {
-        expect(vp._parseTooltips()).to.be(expected);
+        expect(vp._parseTooltips()).to.eql({ position, padding });
       }
     };
   }
 
-  it('undefined', test(undefined, 'top'));
-  it('left', test('left', 'left'));
-  it('err1', test({}, undefined));
-  it('err2', test(true, undefined));
+  it('undefined', test(undefined, 'top', 16));
+  it('{}', test({}, 'top', 16));
+  it('false', test(false, false));
+  it('left', test({ position: 'left' }, 'left', 16));
+  it('padding', test({ position: 'bottom', padding: 60 }, 'bottom', 60));
+  it('padding2', test({ padding: 70 }, 'top', 70));
+
+  it('err1', test(true, undefined));
+  it('err2', test({ position: 'foo' }, undefined));
+  it('err3', test({ padding: 'foo' }, undefined));
 });
 
 describe('VegaParser._parseMapConfig', () => {

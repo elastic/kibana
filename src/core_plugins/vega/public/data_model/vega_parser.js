@@ -213,19 +213,25 @@ export class VegaParser {
   }
 
   _parseTooltips() {
-    switch (this._config.tooltips) {
-      case 'top':
-      case 'bottom':
-      case 'left':
-      case 'right':
-        return this._config.tooltips;
-      case undefined:
-        return 'top';
-      case false:
-        return false;
-      default:
-        throw new Error('Unexpected tooltips');
+    if (this._config.tooltips === false) {
+      return false;
     }
+
+    const result = this._config.tooltips || {};
+
+    if (result.position === undefined) {
+      result.position = 'top';
+    } else if (['top', 'right', 'bottom', 'left'].indexOf(result.position) === -1) {
+      throw new Error('Unexpected value for the result.position configuration');
+    }
+
+    if (result.padding === undefined) {
+      result.padding = 16;
+    } else if (typeof result.padding !== 'number') {
+      throw new Error('config.kibana.result.padding is expected to be a number');
+    }
+
+    return result;
   }
 
   /**
