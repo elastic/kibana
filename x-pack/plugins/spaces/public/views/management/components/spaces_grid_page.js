@@ -21,20 +21,26 @@ import {
 } from '@elastic/eui';
 
 import { PageHeader } from './page_header';
+import { SpacesDataStore } from '../lib/spaces_data_store';
 
-
-const pagination = {
-  pageIndex: 0,
-  pageSize: 10,
-  totalItemCount: 10000,
-  pageSizeOptions: [10, 25, 50]
-};
 
 export class SpacesGridPage extends React.Component {
   state = {
     selectedSpaces: [],
-    spaces: []
+    loading: true,
+    searchCriteria: '',
+    pagination: {
+      pageIndex: 0,
+      pageSize: 10,
+      totalItemCount: 0,
+      pageSizeOptions: [10, 25, 50]
+    }
   };
+
+  constructor(props) {
+    super(props);
+    this.dataStore = new SpacesDataStore();
+  }
 
   componentDidMount() {
     const {
@@ -45,21 +51,27 @@ export class SpacesGridPage extends React.Component {
     httpAgent
       .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
       .then(response => {
+        this.dataStore.loadSpaces(response.data);
         this.setState({
-          spaces: response.data
+          loading: false
         });
       })
       .catch(error => {
         this.setState({
+          loading: false,
           error
         });
       });
   }
 
   render() {
-    const {
-      spaces
-    } = this.state;
+    const filteredSpaces = this.dataStore.search(this.state.searchCriteria);
+    const pageOfFilteredSpaces = this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize);
+
+    const pagination = {
+      ...this.state.pagination,
+      totalItemCount: filteredSpaces.length
+    };
 
     return (
       <EuiPage>
@@ -75,16 +87,17 @@ export class SpacesGridPage extends React.Component {
           <EuiSearchBar
             box={{
               placeholder: 'Search for a space...',
+              incremental: true
             }}
-            onChange={() => {}}
+            onChange={this.onSearchChange}
           />
           <EuiSpacer size={'xl'} />
           <EuiBasicTable
-            items={spaces}
+            items={pageOfFilteredSpaces}
             columns={this.getColumnConfig()}
             selection={this.getSelectionConfig()}
             pagination={pagination}
-            onChange={() => {}}
+            onChange={this.onTableChange}
           />
         </EuiPageContent>
       </EuiPage>
@@ -107,7 +120,7 @@ export class SpacesGridPage extends React.Component {
   }
 
   getColumnConfig() {
-    const columns = [{
+    return [{
       field: 'name',
       name: 'Space',
       sortable: true,
@@ -123,8 +136,6 @@ export class SpacesGridPage extends React.Component {
       name: 'Description',
       sortable: true
     }];
-
-    return columns;
   }
 
   getSelectionConfig() {
@@ -135,8 +146,29 @@ export class SpacesGridPage extends React.Component {
     };
   }
 
+  onTableChange = ({ page = {} }) => {
+    const {
+      index: pageIndex,
+      size: pageSize
+    } = page;
+
+    this.setState({
+      pagination: {
+        ...this.state.pagination,
+        pageIndex,
+        pageSize
+      }
+    });
+  };
+
   onSelectionChange = (selectedSpaces) => {
     this.setState({ selectedSpaces });
+  };
+
+  onSearchChange = ({ text = '' }) => {
+    this.setState({
+      searchCriteria: text
+    });
   }
 }
 
