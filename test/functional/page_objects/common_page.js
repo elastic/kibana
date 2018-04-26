@@ -250,8 +250,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('breadcrumbPageTitle');
     }
 
-    async getBreadcrumbsText() {
-      return await testSubjects.getVisibleText('breadcrumbs');
+    async getTopNavText() {
+      return await testSubjects.getVisibleText('top-nav');
     }
 
     async doesCssSelectorExist(selector) {
