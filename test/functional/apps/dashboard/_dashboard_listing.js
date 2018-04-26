@@ -42,8 +42,8 @@ export default function ({ getService, getPageObjects }) {
 
     describe('delete', async function () {
       it('default confirm action is cancel', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('');
-        await PageObjects.dashboard.clickListItemCheckbox();
+        await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
+        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
         await PageObjects.common.pressEnterKey();
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('succeeds on confirmation press', async function () {
-        await PageObjects.dashboard.clickListItemCheckbox();
+        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
         await PageObjects.common.clickConfirmOnModal();
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     describe('search', function () {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
-        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('Two Words');
       });
 
