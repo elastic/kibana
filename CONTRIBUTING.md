@@ -272,21 +272,15 @@ yarn test && yarn build --skip-os-packages
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
 
 #### Mocha (legacy)
-Today a package can follow the pattern of having a `__tests__` directory in each source code directory of a package which contains the tests for that module. These are usually run by Mocha.
+Mocha tests are contained in `__tests__` directories.
 
 #### Jest
-A package can also follow the pattern of having .test.js files as siblings of the source code files, and these run by Jest.
+Jest tests are stored in the same directy as source code files with the `.test.js` suffix.
 
 ### Running Jest Unit Tests
 
 ```bash
-# Running oss jest test
 node scripts/jest
-```
-
-```bash
-# Running x-pack jest test
-cd x-pack; node scripts/jest.js
 ```
 
 ### Debugging Unit Tests
