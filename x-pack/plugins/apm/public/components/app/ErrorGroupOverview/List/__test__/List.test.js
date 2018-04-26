@@ -25,7 +25,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MemoryRouter>
-        <List items={[]} urlParams={props.urlParams} />
+        <List items={[]} urlParams={props.urlParams} location={{}} />
       </MemoryRouter>,
       storeState
     );
