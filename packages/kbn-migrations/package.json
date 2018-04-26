@@ -6,7 +6,6 @@
   "private": true,
   "dependencies": {
     "lodash": "3.10.1",
-    "moment": "^2.13.0",
     "object-hash": "1.2.0",
     "uuid": "3.0.1"
   }

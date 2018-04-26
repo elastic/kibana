@@ -1,5 +1,4 @@
 // The primary logic for applying migrations to an index
-const moment = require('moment');
 const { MigrationState, MigrationStatus, Persistence, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
@@ -12,8 +11,6 @@ const optsDefinition = {
   plugins: 'array',
   log: 'function',
   elasticVersion: 'string',
-  destIndex: ['undefined', 'string'],
-  initialIndex: ['undefined', 'string'],
   force: ['undefined', 'boolean'],
 };
 
@@ -36,11 +33,11 @@ async function migrate(opts) {
 }
 
 async function measureElapsedTime(fn) {
-  const startTime = moment();
+  const startTime = Date.now();
   const result = await fn();
   return {
     result,
-    elapsedMs: moment().diff(startTime, 'ms'),
+    elapsedMs: Date.now() - startTime,
   };
 }
 
@@ -69,8 +66,7 @@ async function runMigration(context) {
     index,
     callCluster,
     log,
-    plugins,
-    migrationState,
+    nextMigrationState,
     migrationPlan,
     scrollSize,
   } = context;
@@ -88,7 +84,7 @@ async function runMigration(context) {
   }
 
   log.info(() => `Saving migration state to ${targetIndex}`);
-  await MigrationState.save(callCluster, targetIndex, undefined, MigrationState.build(plugins, migrationState));
+  await MigrationState.save(callCluster, targetIndex, undefined, nextMigrationState);
 
   log.info(() => `Pointing alias ${index} to ${targetIndex}`);
   await Persistence.setAlias(callCluster, index, targetIndex);

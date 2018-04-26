@@ -25,7 +25,7 @@ describe('migrate', () => {
     }];
     const index = '.mufasa';
     const callCluster = mockCluster({});
-    await migrate({ callCluster, log, elasticVersion, index, plugins, destIndex: '.mufasa-original' });
+    await migrate({ callCluster, log, elasticVersion, index, plugins });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -45,7 +45,7 @@ describe('migrate', () => {
 
     expect(callCluster.state().data[destIndex]).toBeTruthy();
     expect(callCluster.state().meta.aliases[index][destIndex]).toBeTruthy();
-    expect(destIndex).toEqual('.mufasa-20210203040506-7.7.7');
+    expect(destIndex).toEqual('.mufasa-7.7.7-a6d07838aa0355002cda60a39df578cf69a45414');
   });
 
   test('existing indices are converted to aliases and migrated', async () => {
@@ -67,7 +67,7 @@ describe('migrate', () => {
       },
     });
     const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins, log, elasticVersion, destIndex: 'mufasa-v1' });
+    await migrate({ callCluster, index, plugins, log, elasticVersion });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -137,7 +137,7 @@ describe('migrate', () => {
     }];
     const index = '.mufasa';
     const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, elasticVersion, log, initialIndex: '.mufasa-v1' });
+    await migrate({ callCluster, index, plugins, elasticVersion, log });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -169,7 +169,7 @@ describe('migrate', () => {
       }],
     }];
     const callCluster = mockCluster({});
-    await migrate({ callCluster, index, plugins, elasticVersion, log, initialIndex: '.music-dest' });
+    await migrate({ callCluster, index, plugins, elasticVersion, log });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -185,7 +185,7 @@ describe('migrate', () => {
     const existingData = _.set({}, [index, 'baz:fred', '_source'], { type: 'baz', baz: { bar: 'bing' } });
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
     const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, plugins, elasticVersion, log, destIndex: 'gentleman-v2' });
+    await migrate({ callCluster, index, plugins, elasticVersion, log });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -229,7 +229,7 @@ describe('migrate', () => {
       user: { name: { type: 'keyword' } },
     });
     const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, elasticVersion, log, plugins: [plugin1, plugin2], destIndex: 'groovystuff-v2' });
+    await migrate({ callCluster, index, elasticVersion, log, plugins: [plugin1, plugin2] });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -266,7 +266,7 @@ describe('migrate', () => {
     _.set(existingData, [index, 'fish:f2', '_source'], { type: 'fish', fish: { kind: 'carp' } });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
     const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, elasticVersion, log, plugins: [pluginV2], destIndex: 'aquatica-2' });
+    await migrate({ callCluster, index, elasticVersion, log, plugins: [pluginV2] });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -312,7 +312,7 @@ describe('migrate', () => {
     });
     const existingMeta = assocMappings({}, index, pluginV1.mappings);
     const callCluster = mockCluster(existingData, existingMeta);
-    const result = await migrate({ callCluster, index, elasticVersion, log, force: true, plugins: [pluginV2], destIndex: 'skippy-2' });
+    const result = await migrate({ callCluster, index, elasticVersion, log, force: true, plugins: [pluginV2] });
     expect(result.destIndex).not.toEqual(result.index);
     expect(result.status).toEqual('migrated');
     expect(callCluster.state())
@@ -381,7 +381,7 @@ describe('migrate', () => {
     const existingMeta = assocAlias({}, existingIndex, index);
     assocMappings(existingMeta, existingIndex, { ...pluginsV1[0].mappings, ...pluginsV1[1].mappings });
     const callCluster = mockCluster(existingData, existingMeta);
-    await migrate({ callCluster, index, elasticVersion, log, plugins: pluginsV2, destIndex: 'disabled-scenario-2' });
+    await migrate({ callCluster, index, elasticVersion, log, plugins: pluginsV2 });
     expect(callCluster.state())
       .toMatchSnapshot();
   });
@@ -428,16 +428,6 @@ describe('migrate', () => {
 
   test('index must be a string', () => {
     expect(testMigrationOpts({ index: 23 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('destIndex must be a string', () => {
-    expect(testMigrationOpts({ destIndex: 23 }))
-      .rejects.toThrow(/Got number/);
-  });
-
-  test('initialIndex must be a string', () => {
-    expect(testMigrationOpts({ initialIndex: 23 }))
       .rejects.toThrow(/Got number/);
   });
 

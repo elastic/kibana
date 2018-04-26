@@ -3,7 +3,7 @@
 exports[`migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
-    ".mufasa-9.8.7-original": Object {
+    ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -27,7 +27,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        ".mufasa-9.8.7-original": Object {
+        ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -35,7 +35,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".mufasa-9.8.7-original": Object {
+      ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -138,7 +138,7 @@ Object {
         },
       },
     },
-    "disabled-scenario-2": Object {
+    "disabled-scenario-9.8.7-67dca5f58dca46f87eff53aa278eaf40ee3a6111": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -187,7 +187,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       "disabled-scenario": Object {
-        "disabled-scenario-2": Object {
+        "disabled-scenario-9.8.7-67dca5f58dca46f87eff53aa278eaf40ee3a6111": Object {
           "aliases": Object {
             "disabled-scenario": Object {},
           },
@@ -256,7 +256,7 @@ Object {
           },
         },
       },
-      "disabled-scenario-2": Object {
+      "disabled-scenario-9.8.7-67dca5f58dca46f87eff53aa278eaf40ee3a6111": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -328,7 +328,7 @@ Object {
           "blocks.read_only": false,
         },
       },
-      "disabled-scenario-2": Object {
+      "disabled-scenario-9.8.7-67dca5f58dca46f87eff53aa278eaf40ee3a6111": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
@@ -353,27 +353,7 @@ Object {
 exports[`migrate existing docs are migrated 1`] = `
 Object {
   "data": Object {
-    "gentleman-9.8.7-original": Object {
-      "baz:fred": Object {
-        "_source": Object {
-          "baz": Object {
-            "bar": "bing",
-          },
-          "type": "baz",
-        },
-      },
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-    "gentleman-v2": Object {
+    "gentleman-9.8.7-f69a764d8e124e43f74550dbdee085218389d52a": Object {
       "baz:fred": Object {
         "_source": Object {
           "baz": Object {
@@ -402,11 +382,31 @@ Object {
         "_version": 1,
       },
     },
+    "gentleman-original-f69a764d8e124e43f74550dbdee085218389d52a": Object {
+      "baz:fred": Object {
+        "_source": Object {
+          "baz": Object {
+            "bar": "bing",
+          },
+          "type": "baz",
+        },
+      },
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       "gentleman": Object {
-        "gentleman-v2": Object {
+        "gentleman-9.8.7-f69a764d8e124e43f74550dbdee085218389d52a": Object {
           "aliases": Object {
             "gentleman": Object {},
           },
@@ -414,61 +414,7 @@ Object {
       },
     },
     "mappings": Object {
-      "gentleman-9.8.7-original": Object {
-        "doc": Object {
-          "properties": Object {
-            "baz": Object {
-              "properties": Object {
-                "bar": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-      "gentleman-v2": Object {
+      "gentleman-9.8.7-f69a764d8e124e43f74550dbdee085218389d52a": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -523,17 +469,71 @@ Object {
           },
         },
       },
+      "gentleman-original-f69a764d8e124e43f74550dbdee085218389d52a": Object {
+        "doc": Object {
+          "properties": Object {
+            "baz": Object {
+              "properties": Object {
+                "bar": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
     },
     "settings": Object {
-      "gentleman-9.8.7-original": Object {
+      "gentleman-9.8.7-f69a764d8e124e43f74550dbdee085218389d52a": Object {
         "index": Object {
-          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "gentleman-v2": Object {
+      "gentleman-original-f69a764d8e124e43f74550dbdee085218389d52a": Object {
         "index": Object {
+          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
@@ -546,44 +546,7 @@ Object {
 exports[`migrate existing docs are transformed 1`] = `
 Object {
   "data": Object {
-    "groovystuff-9.8.7-original": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-      "preference:p1": Object {
-        "_source": Object {
-          "preference": Object {
-            "color": "blue",
-            "resultSize": 1,
-          },
-          "type": "preference",
-        },
-      },
-      "user:u1": Object {
-        "_source": Object {
-          "type": "user",
-          "user": Object {
-            "name": "jimmy fallon",
-          },
-        },
-      },
-      "user:u2": Object {
-        "_source": Object {
-          "type": "user",
-          "user": Object {
-            "name": "bono",
-          },
-        },
-      },
-    },
-    "groovystuff-v2": Object {
+    "groovystuff-9.8.7-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -654,11 +617,48 @@ Object {
         },
       },
     },
+    "groovystuff-original-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+      "preference:p1": Object {
+        "_source": Object {
+          "preference": Object {
+            "color": "blue",
+            "resultSize": 1,
+          },
+          "type": "preference",
+        },
+      },
+      "user:u1": Object {
+        "_source": Object {
+          "type": "user",
+          "user": Object {
+            "name": "jimmy fallon",
+          },
+        },
+      },
+      "user:u2": Object {
+        "_source": Object {
+          "type": "user",
+          "user": Object {
+            "name": "bono",
+          },
+        },
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       "groovystuff": Object {
-        "groovystuff-v2": Object {
+        "groovystuff-9.8.7-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
           "aliases": Object {
             "groovystuff": Object {},
           },
@@ -666,69 +666,7 @@ Object {
       },
     },
     "mappings": Object {
-      "groovystuff-9.8.7-original": Object {
-        "doc": Object {
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "preference": Object {
-              "properties": Object {
-                "color": Object {
-                  "type": "keyword",
-                },
-                "resultSize": Object {
-                  "type": "integer",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-            "user": Object {
-              "name": Object {
-                "type": "keyword",
-              },
-            },
-          },
-        },
-      },
-      "groovystuff-v2": Object {
+      "groovystuff-9.8.7-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -796,17 +734,79 @@ Object {
           },
         },
       },
+      "groovystuff-original-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
+        "doc": Object {
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "preference": Object {
+              "properties": Object {
+                "color": Object {
+                  "type": "keyword",
+                },
+                "resultSize": Object {
+                  "type": "integer",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+            "user": Object {
+              "name": Object {
+                "type": "keyword",
+              },
+            },
+          },
+        },
+      },
     },
     "settings": Object {
-      "groovystuff-9.8.7-original": Object {
+      "groovystuff-9.8.7-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
         "index": Object {
-          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "groovystuff-v2": Object {
+      "groovystuff-original-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
         "index": Object {
+          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
@@ -819,19 +819,7 @@ Object {
 exports[`migrate existing indices are converted to aliases and migrated 1`] = `
 Object {
   "data": Object {
-    ".mufasa-9.8.7-original": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-    "mufasa-v1": Object {
+    ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -851,11 +839,23 @@ Object {
         "_version": 1,
       },
     },
+    ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        "mufasa-v1": Object {
+        ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -863,7 +863,58 @@ Object {
       },
     },
     "mappings": Object {
-      ".mufasa-9.8.7-original": Object {
+      ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "stuff": Object {
+              "type": "integer",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -917,68 +968,17 @@ Object {
           },
         },
       },
-      "mufasa-v1": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "stuff": Object {
-              "type": "integer",
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
     },
     "settings": Object {
-      ".mufasa-9.8.7-original": Object {
+      ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
         "index": Object {
-          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "mufasa-v1": Object {
+      ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
         "index": Object {
+          "blocks.read_only": false,
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
@@ -991,7 +991,7 @@ Object {
 exports[`migrate existing previously migrated index only runs new migrations 1`] = `
 Object {
   "data": Object {
-    "aquatica-2": Object {
+    "aquatica-9.8.7-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
       "fish:f1": Object {
         "_source": Object {
           "fish": Object {
@@ -1032,7 +1032,7 @@ Object {
         "_version": 1,
       },
     },
-    "aquatica-9.8.7-original": Object {
+    "aquatica-original-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
       "fish:f1": Object {
         "_source": Object {
           "fish": Object {
@@ -1074,7 +1074,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       "aquatica": Object {
-        "aquatica-2": Object {
+        "aquatica-9.8.7-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
           "aliases": Object {
             "aquatica": Object {},
           },
@@ -1082,7 +1082,7 @@ Object {
       },
     },
     "mappings": Object {
-      "aquatica-2": Object {
+      "aquatica-9.8.7-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1137,7 +1137,7 @@ Object {
           },
         },
       },
-      "aquatica-9.8.7-original": Object {
+      "aquatica-original-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1193,13 +1193,13 @@ Object {
       },
     },
     "settings": Object {
-      "aquatica-2": Object {
+      "aquatica-9.8.7-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
         "index": Object {
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "aquatica-9.8.7-original": Object {
+      "aquatica-original-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",
@@ -1260,7 +1260,7 @@ Object {
 exports[`migrate migrations will run, if forced even if index is in migrating state 1`] = `
 Object {
   "data": Object {
-    "skippy-2": Object {
+    "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1280,7 +1280,7 @@ Object {
         "_version": 1,
       },
     },
-    "skippy-9.8.7-original": Object {
+    "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1304,7 +1304,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       "skippy": Object {
-        "skippy-2": Object {
+        "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
           "aliases": Object {
             "skippy": Object {},
           },
@@ -1312,7 +1312,7 @@ Object {
       },
     },
     "mappings": Object {
-      "skippy-2": Object {
+      "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1370,7 +1370,7 @@ Object {
           },
         },
       },
-      "skippy-9.8.7-original": Object {
+      "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1426,13 +1426,13 @@ Object {
       },
     },
     "settings": Object {
-      "skippy-2": Object {
+      "skippy-9.8.7-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
         "index": Object {
           "number_of_replicas": "42",
           "number_of_shards": "7",
         },
       },
-      "skippy-9.8.7-original": Object {
+      "skippy-original-cc85220b3f1ca5a4fe03afd0bdb8b2336dcfe877": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "42",
@@ -1447,7 +1447,7 @@ Object {
 exports[`migrate new index gets seeded 1`] = `
 Object {
   "data": Object {
-    ".mufasa-v1": Object {
+    ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1484,7 +1484,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        ".mufasa-v1": Object {
+        ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -1492,7 +1492,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".mufasa-v1": Object {
+      ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1556,7 +1556,7 @@ Object {
 exports[`migrate seeds are transformed 1`] = `
 Object {
   "data": Object {
-    ".music-dest": Object {
+    ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
       "artists:jazzmeup": Object {
         "_source": Object {
           "artists": Object {
@@ -1594,7 +1594,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".music": Object {
-        ".music-dest": Object {
+        ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
           "aliases": Object {
             ".music": Object {},
           },
@@ -1602,7 +1602,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".music-dest": Object {
+      ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {

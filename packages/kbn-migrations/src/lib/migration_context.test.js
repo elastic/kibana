@@ -12,12 +12,12 @@ describe('migrationContext', () => {
     expect(actual.plugins[0].migrations).toEqual([{ id: 'shazm' }]);
   });
 
-  test('creates destIndex name', async () => {
-    const now = new Date('2020-01-20 7:06:07 AM');
-    jest.spyOn(Date, 'now').mockImplementation(() => now.getTime());
+  test('generates predictable index names', async () => {
     const actual = await testMigrationContext({ index: 'dang' }, '2.0.4');
     expect(actual.destIndex)
-      .toEqual('dang-20200120070607-2.0.4');
+      .toEqual('dang-2.0.4-f6093f91ba78efb275516c2cdb7eabdc9e5be16f');
+    expect(actual.initialIndex)
+      .toEqual('dang-original-f6093f91ba78efb275516c2cdb7eabdc9e5be16f');
   });
 
   test('creates a logger that logs info', async () => {

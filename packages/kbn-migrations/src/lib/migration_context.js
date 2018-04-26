@@ -2,7 +2,7 @@
 // that are necessary to analyze and run migrations.
 
 const _ = require('lodash');
-const moment = require('moment');
+const objectHash = require('object-hash');
 const Plugins = require('./plugins');
 const MigrationPlan = require('./migration_plan');
 const MigrationState = require('./migration_state');
@@ -12,20 +12,23 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { callCluster, log, index, initialIndex, destIndex, plugins, elasticVersion, force, includeDisabledPlugins } = opts;
+  const { callCluster, log, index, plugins, elasticVersion, force, includeDisabledPlugins } = opts;
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState, includeDisabledPlugins);
+  const nextMigrationState = MigrationState.build(sanitizedPlugins, migrationState);
+  const sha = objectHash(nextMigrationState);
   return {
     index,
     callCluster,
     migrationState,
     migrationStateVersion,
+    nextMigrationState,
     migrationPlan,
     force,
     plugins: sanitizedPlugins,
-    destIndex: destIndex || `${index}-${moment().format('YYYYMMDDHHmmss')}-${elasticVersion}`,
-    initialIndex: initialIndex || `${index}-${elasticVersion}-original`,
+    destIndex: `${index}-${elasticVersion}-${sha}`,
+    initialIndex: `${index}-original-${sha}`,
     log: log ? migrationLogger(log) : _.noop,
   };
 }
