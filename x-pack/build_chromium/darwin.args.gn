@@ -1,0 +1,26 @@
+# This based on the //build/headless.gn, but modified to work with OSX.
+
+# Embed resource.pak into binary to simplify deployment.
+headless_use_embedded_resources = true
+
+# In order to simplify deployment we build ICU data file
+# into binary.
+icu_use_data_file = false
+
+enable_nacl = false
+enable_print_preview = false
+enable_remoting = false
+use_alsa = false
+use_ash = false
+use_dbus = false
+use_gconf = false
+use_gio = false
+use_kerberos = false
+use_libpci = false
+use_pulseaudio = false
+use_udev = false
+
+is_debug = false
+symbol_level = 0
+is_component_build = false
+remove_webcore_debug_symbols = true

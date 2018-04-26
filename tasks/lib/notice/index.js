@@ -1,1 +1,0 @@
-export { generateNoticeText } from './notice';

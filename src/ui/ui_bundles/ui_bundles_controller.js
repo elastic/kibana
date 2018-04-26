@@ -124,7 +124,7 @@ export class UiBundlesController {
       case 0:
         return '0 bundles';
       case 1:
-        return `bundle for ${this._bundles[0].id}`;
+        return `bundle for ${this._bundles[0].getId()}`;
       default:
         const ids = this.getIds();
         const last = ids.pop();

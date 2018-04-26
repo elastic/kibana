@@ -1,0 +1,7 @@
+{
+  "id": "tweets_and_beats",
+  "description": "ingest tweets and beats",
+  "username": "elastic",
+  "pipeline": "input {\n    twitter {\n        consumer_key => \"enter_your_consumer_key_here\"\n        consumer_secret => \"enter_your_secret_here\"\n        keywords => [\"cloud\"]\n        oauth_token => \"enter_your_access_token_here\"\n        oauth_token_secret => \"enter_your_access_token_secret_here\"\n    }\n    beats {\n        port => \"5043\"\n    }\n}\noutput {\n    elasticsearch {\n        hosts => [\"IP Address 1:port1\", \"IP Address 2:port2\", \"IP Address 3\"]\n    }\n}",
+  "settings": {}
+}

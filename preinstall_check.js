@@ -1,7 +1,7 @@
 const isUsingNpm = process.env.npm_config_git !== undefined;
 
 if (isUsingNpm) {
-  throw "Use Yarn instead of npm, see Kibana's contributing guidelines";
+  throw `Use Yarn instead of npm, see Kibana's contributing guidelines`;
 }
 
 // The value of the `npm_config_argv` env for each command:
@@ -29,4 +29,3 @@ try {
 } catch (e) {
   // if it fails we do nothing, as this is just intended to be a helpful message
 }
-

@@ -1,0 +1,117 @@
+{
+  "_xpack/watcher/watch/{watch_id}": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}"
+    ]
+  },
+  "DELETE _xpack/watcher/watch/{watch_id}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}"
+    ]
+  },
+  "PUT _xpack/watcher/watch/{watch_id}": {
+    "methods": [
+      "PUT"
+    ],
+    "url_params": {
+      "active": ["true", "false"]
+    },
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}"
+    ],
+    "data_autocomplete_rules": {
+      "metadata": {},
+      "trigger": {},
+      "input": {},
+      "condition": {},
+      "throttle_period": 5,
+      "actions": {}
+    }
+  },
+  "_xpack/watcher/watch/_execute": {
+    "methods": [
+      "POST"
+    ],
+    "url_params": {
+      "debug": ["true", "false"]
+    },
+    "patterns": [
+      "_xpack/watcher/watch/_execute",
+      "_xpack/watcher/watch/{watch_id}/_execute"
+    ],
+    "data_autocomplete_rules": {
+      "trigger_data": {},
+      "ignore_condition": true,
+      "record_execution": true,
+      "watch": {},
+      "alternative_input": {},
+      "action_modes": {}
+    }
+  }, 
+  "_xpack/watcher/watch/{watch_id}/_ack": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}/_ack",
+      "_xpack/watcher/watch/{watch_id}/_ack/{action_id}"
+    ]
+  }, 
+  "_xpack/watcher/watch/{watch_id}/_activate": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}/_activate"
+    ]
+  },  
+  "_xpack/watcher/watch/{watch_id}/_deactivate": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/watcher/watch/{watch_id}/_deactivate"
+    ]
+  },
+  "_xpack/watcher/stats": {
+    "url_params": {
+      "emit_stacktraces": ["true", "false"]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/watcher/stats"
+    ]
+  },
+  "_xpack/watcher/_start": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/watcher/_start"
+    ]
+  },
+  "_xpack/watcher/_stop": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/watcher/_stop"
+    ]
+  },
+  "_xpack/watcher/_restart": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/watcher/_restart"
+    ]
+  }  
+}

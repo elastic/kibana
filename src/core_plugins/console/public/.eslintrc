@@ -1,8 +1,5 @@
 ---
 
-root: true
-extends: '../../../../.eslintrc.js'
-
 rules:
   block-scoped-var: off
   camelcase: off

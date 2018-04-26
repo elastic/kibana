@@ -1,0 +1,47 @@
+<div class="create-watch" ng-class="{'create-watch-embedded': ui.embedded}">
+	<div ng-show="status.watch===null || status.watch===STATUS.SAVING || status.watch===STATUS.SAVE_FAILED">
+		<div class="form-group">
+			<div class="sub-form-group">
+				<label for="selectInterval" class="kuiFormLabel kuiVerticalRhythm">Time range</label><br />
+				Now - <input id="selectInterval" ng-model="config.interval" type="text" class="kuiTextInput kuiTextInput--small interval" placeholder="m">
+			</div>
+
+			<div class="sub-form-group">
+				<label for="selectSeverity" class="kuiFormLabel kuiVerticalRhythm">Severity threshold</label><br />
+		    <div class="dropdown-group" dropdown>
+		      <button id="selectSeverity" type="button" class="form-control dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+		        <span><i class="fa fa-exclamation-triangle ml-icon-severity-{{config.threshold.display}}"></i> {{config.threshold.display}}</span> <span class="caret"></span>
+		      </button>
+		      <ul class="dropdown-menu" role="menu">
+		        <li ng-repeat="thresholdOption in ui.thresholdOptions">
+		        	<a href="" ng-click="ui.setThreshold(thresholdOption)"><i class="fa fa-exclamation-triangle ml-icon-severity-{{thresholdOption.display}}"></i> {{thresholdOption.display}}</a>
+		        </li>
+		      </ul>
+		    </div>
+	    </div>
+		</div>
+		<div ng-show="ui.emailEnabled" class="form-group">
+			<label for="sendEmail" class="kuiCheckBoxLabel kuiVerticalRhythm">
+				<input id="sendEmail" ng-model="config.includeEmail" type="checkbox" class="kuiCheckBox" />
+				<span class="kuiCheckBoxLabel__text">Send email</span>
+			</label>
+			<div ng-show="config.includeEmail" class="email-section">
+				<input type="text" ng-model="config.email" class="kuiTextInput kuiTextInput--large" placeholder="email address">
+			</div>
+		</div>
+
+		<div ng-if="ui.watchAlreadyExists" class="watch-exists-warning">
+			Warning, watch ml-{{jobId}} already exists, clicking apply with overwrite the original.
+		</div>
+
+	</div>
+
+	<div ng-show="status.watch===STATUS.SAVED">
+		<div>Watch: <strong>{{config.id}}</strong> created</div>
+		<br />
+		<div>
+			<a href="{{config.watcherEditURL}}" target="_blank" rel="noopener noreferrer">Edit {{config.id}} in Watcher <i class="fa fa-external-link"></i></a>
+		</div>
+	</div>
+
+</div>

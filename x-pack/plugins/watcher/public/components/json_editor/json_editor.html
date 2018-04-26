@@ -1,0 +1,12 @@
+<form name="jsonEditor.form" novalidate>
+  <div
+    class="json-editor"
+    json-input
+    require-keys="true"
+    ui-ace="{
+      mode: 'json',
+      onLoad: aceLoaded
+    }"
+    ng-model="jsonEditor.json"
+  ></div>
+</form>

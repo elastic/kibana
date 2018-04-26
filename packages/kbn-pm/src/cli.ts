@@ -25,6 +25,7 @@ function help() {
 
        -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
        -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
+       --oss                Do not include the x-pack when running command.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
 }

@@ -1,4 +1,4 @@
-import { join, relative, resolve } from 'path';
+import { relative, resolve } from 'path';
 import { readYamlConfig } from './read_yaml_config';
 
 function fixture(name) {
@@ -49,15 +49,14 @@ describe('cli/serve/read_yaml_config', function () {
   });
 
   describe('different cwd()', function () {
-    const oldCwd = process.cwd();
-    const newCwd = join(oldCwd, '..');
+    const originalCwd = process.cwd();
+    const tempCwd = resolve(__dirname);
 
-    beforeAll(function () {
-      process.chdir(newCwd);
-    });
+    beforeAll(() => process.chdir(tempCwd));
+    afterAll(() => process.chdir(originalCwd));
 
     it('resolves relative files based on the cwd', function () {
-      const relativePath = relative(newCwd, fixture('one.yml'));
+      const relativePath = relative(tempCwd, fixture('one.yml'));
       const config = readYamlConfig(relativePath);
       expect(config).toEqual({
         foo: 1,
@@ -67,12 +66,13 @@ describe('cli/serve/read_yaml_config', function () {
 
     it('fails to load relative paths, not found because of the cwd', function () {
       expect(function () {
-        readYamlConfig(relative(oldCwd, fixture('one.yml')));
-      }).toThrowError(/ENOENT/);
-    });
+        const relativePath = relative(
+          resolve(__dirname, '../../'),
+          fixture('one.yml')
+        );
 
-    afterAll(function () {
-      process.chdir(oldCwd);
+        readYamlConfig(relativePath);
+      }).toThrowError(/ENOENT/);
     });
   });
 

@@ -4,7 +4,6 @@
 :include-xpack:  true
 :lang:           en
 :kib-repo-dir:   {docdir}
-:xes-repo-dir:   {docdir}/../../elasticsearch-extra/x-pack-elasticsearch/docs/{lang}
-:xkb-repo-dir:   {docdir}/../../kibana-extra/x-pack-kibana/docs/{lang}
+:xkb-repo-dir:   {docdir}/../x-pack/docs/{lang}
 
 include::{xkb-repo-dir}/index.asciidoc[]

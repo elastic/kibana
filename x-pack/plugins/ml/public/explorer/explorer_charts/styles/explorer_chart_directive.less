@@ -1,0 +1,99 @@
+ml-explorer-chart {
+  display: block;
+
+  svg {
+    font-size: 12px;
+    font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+
+    .line-chart {
+      rect {
+        fill: #FFFFFF;
+        opacity: 1;
+      }
+
+      rect.selected-interval {
+        fill: rgba(200, 200, 200, 0.25);
+      }
+
+      rect.scheduled-event-marker {
+        stroke-width: 1px;
+        stroke: #999999;
+        fill: #cccccc;
+        pointer-events: none;
+      }
+    }
+  }
+
+  .axis path, .axis line {
+    fill: none;
+    stroke: #cccccc;
+    shape-rendering: crispEdges;
+  }
+
+  .axis text {
+    fill: #000;
+  }
+
+  .axis .tick line {
+    stroke: rgba(0, 0, 0, 0.1);
+    stroke-width: 1px;
+  }
+
+  .values-line {
+    fill: none;
+    stroke: #32a7c2;
+    stroke-width: 2;
+  }
+
+  .values-dots circle {
+    fill: #32a7c2;
+    stroke-width: 0;
+  }
+
+  .metric-value {
+    opacity: 1;
+    fill: #32a7c2;
+  }
+
+  circle.metric-value {
+    opacity: 1;
+    fill: transparent;
+    stroke: #32a7c2;
+    stroke-width: 0px;
+  }
+
+  circle.anomaly-marker {
+    stroke-width: 1px;
+    stroke: #aaaaaa;
+  }
+
+  circle.anomaly-marker:hover {
+    stroke-width: 6px;
+    stroke: #32a7c2;
+  }
+
+  circle.metric-value.critical {
+    fill: #fe5050;
+  }
+
+  circle.metric-value.major {
+    fill: #ff7e00;
+  }
+
+  circle.metric-value.minor {
+    fill: #ffdd00;
+  }
+
+  circle.metric-value.warning {
+    fill: #8bc8fb;
+  }
+
+  circle.metric-value.low {
+    fill: #d2e9f7;
+  }
+
+  circle.metric-value:hover {
+    stroke-width: 6px;
+    stroke-opacity: 0.65;
+  }
+}

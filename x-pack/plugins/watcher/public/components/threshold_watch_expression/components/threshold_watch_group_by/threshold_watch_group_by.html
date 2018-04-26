@@ -1,0 +1,73 @@
+<expression-item
+  item-id="{{ thresholdWatchGroupBy.itemId }}"
+  description="thresholdWatchGroupBy.itemDescription"
+  value="thresholdWatchGroupBy.itemValue"
+  is-open="thresholdWatchGroupBy.isOpen"
+  is-visible="thresholdWatchGroupBy.isVisible"
+  on-open="thresholdWatchGroupBy.onOpen"
+  on-close="thresholdWatchGroupBy.onClose"
+  is-valid="thresholdWatchGroupBy.isValid"
+  is-dirty="thresholdWatchGroupBy.isDirty"
+  form="thresholdWatchGroupBy.form"
+>
+  <form name="thresholdWatchGroupBy.form" novalidate>
+    <div
+      id="{{thresholdWatchGroupBy.makeId(['termSize', 'required'])}}"
+      xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'required')"
+    >
+      A value is required.
+    </div>
+    <div
+      id="{{thresholdWatchGroupBy.makeId(['termSize', 'number'])}}"
+      xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'number')"
+    >
+      Value must be a valid number.
+    </div>
+    <div
+      id="{{thresholdWatchGroupBy.makeId(['termSize', 'min'])}}"
+      xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termSize')}}"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termSize', 'min')"
+    >
+      Value must be greater than 0.
+    </div>
+    <div
+      id="{{thresholdWatchGroupBy.makeId(['termField', 'required'])}}"
+      xpack-aria-describes="{{thresholdWatchGroupBy.makeId('termField')}}"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchGroupBy.isValidationMessageVisible('termField', 'required')"
+    >
+      Please select a field.
+    </div>
+    <select
+      id="{{thresholdWatchGroupBy.makeId('groupByType')}}"
+      class="kuiSelect"
+      ng-model="thresholdWatchGroupBy.groupByType"
+      ng-options="groupByType as groupByType.label for groupByType in thresholdWatchGroupBy.groupByTypes"
+    ></select>
+    <input
+      id="{{thresholdWatchGroupBy.makeId('termSize')}}"
+      name="termSize"
+      type="number"
+      min="1"
+      required
+      class="kuiTextInput watcherNumberInput"
+      ng-model="thresholdWatchGroupBy.termSize"
+      ng-if="thresholdWatchGroupBy.groupByType.sizeRequired">
+    <select
+      class="kuiSelect"
+      id="{{thresholdWatchGroupBy.makeId('termField')}}"
+      name="termField"
+      required
+      ng-model="thresholdWatchGroupBy.termField"
+      ng-options="termField as termField.name group by termField.normalizedType for termField in thresholdWatchGroupBy.termFields"
+      ng-if="thresholdWatchGroupBy.groupByType.sizeRequired"
+    >
+      <option value="">Select a field...</option>
+    </select>
+  </form>
+</expression-item>

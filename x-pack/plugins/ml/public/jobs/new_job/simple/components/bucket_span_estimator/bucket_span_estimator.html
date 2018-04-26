@@ -1,0 +1,13 @@
+<div class='bucket-span-estimator'>
+  <button
+    ng-click="guessBucketSpan()"
+    ng-disabled="ui.showJobInput===false || ui.formValid === false || formConfig.agg.type===undefined || jobStateWrapper.jobState===JOB_STATE.RUNNING || jobStateWrapper.jobState===JOB_STATE.STOPPING || jobStateWrapper.jobState===JOB_STATE.FINISHED || ui.bucketSpanEstimator.status===STATUS.RUNNING"
+    type="button"
+    tooltip="Experimental feature for estimating bucket span."
+    tooltip-append-to-body="true"
+    ng-class='{"running": (ui.bucketSpanEstimator.status===STATUS.RUNNING)}'
+    class="kuiButton kuiButton--basic kuiButton--small">
+      {{ui.bucketSpanEstimator.status===STATUS.RUNNING ? 'Estimating bucket span ' : 'Estimate bucket span'}}
+      <i ng-show='ui.bucketSpanEstimator.status===STATUS.RUNNING' class="fa fa-spinner fa-spin"></i>
+  </button>
+</div>

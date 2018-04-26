@@ -1,0 +1,66 @@
+[[graph-release-notes]]
+== Graph Release Notes (Pre-5.0)
+
+[float]
+[[graph-change-list]]
+=== Change List
+
+[float]
+==== 2.4.2
+September 22, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.4.2
+
+[float]
+==== 2.4.0
+August 31, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.4.0
+
+
+[float]
+==== 2.3.5
+August 3, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.5
+
+[float]
+==== 2.3.4
+July 7, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.4
+
+[float]
+==== 2.3.3
+May 18, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.3
+
+[float]
+==== 2.3.2
+April 26, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.2
+
+[float]
+==== 2.3.1
+April 4, 2016
+
+.Enhancements
+* Adds support for Elasticsearch 2.3.1
+
+[float]
+==== 2.3.0
+March 30, 2016
+
+.New Features
+* Introduces the <<graph-api, Graph API>> and a Graph UI plugin for Kibana.
+
+
+

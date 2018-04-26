@@ -1,0 +1,659 @@
+[
+  {
+    "alerts": {
+      "alertsMeta": {
+        "enabled": true
+      },
+      "clusterMeta": {
+        "enabled": false,
+        "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
+      }
+    },
+    "beats": {
+      "beats": {
+        "total": null,
+        "types": []
+      },
+      "bytesSent": null,
+      "totalEvents": null
+    },
+    "cluster_name": "clustertwo",
+    "cluster_state": {
+      "master_node": "7Cw93cHFS9mLBojuYdd9EQ",
+      "nodes": {
+        "7Cw93cHFS9mLBojuYdd9EQ": {
+          "attributes": {
+            "ml.enabled": "true"
+          },
+          "ephemeral_id": "39Xe_o2RR9uVBRAk5j6WOQ",
+          "name": "clustertwo-02",
+          "transport_address": "127.0.0.1:9304"
+        }
+      },
+      "state_uuid": "L0nkstGcQpKQr1kZDgryAw",
+      "status": "green",
+      "version": 15
+    },
+    "cluster_uuid": "6d-9tDFTRe-qT5GoBytdlQ",
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "completion": {
+            "size_in_bytes": 0
+          },
+          "count": 1,
+          "docs": {
+            "count": 8,
+            "deleted": 0
+          },
+          "fielddata": {
+            "evictions": 0,
+            "memory_size_in_bytes": 0
+          },
+          "query_cache": {
+            "cache_count": 0,
+            "cache_size": 0,
+            "evictions": 0,
+            "hit_count": 0,
+            "memory_size_in_bytes": 0,
+            "miss_count": 0,
+            "total_count": 0
+          },
+          "segments": {
+            "count": 8,
+            "doc_values_memory_in_bytes": 680,
+            "file_sizes": {},
+            "fixed_bit_set_memory_in_bytes": 0,
+            "index_writer_memory_in_bytes": 0,
+            "max_unsafe_auto_id_timestamp": -1,
+            "memory_in_bytes": 13852,
+            "norms_memory_in_bytes": 256,
+            "points_memory_in_bytes": 8,
+            "stored_fields_memory_in_bytes": 2496,
+            "term_vectors_memory_in_bytes": 0,
+            "terms_memory_in_bytes": 10412,
+            "version_map_memory_in_bytes": 0
+          },
+          "shards": {
+            "index": {
+              "primaries": {
+                "avg": 1,
+                "max": 1,
+                "min": 1
+              },
+              "replication": {
+                "avg": 0,
+                "max": 0,
+                "min": 0
+              },
+              "shards": {
+                "avg": 1,
+                "max": 1,
+                "min": 1
+              }
+            },
+            "primaries": 1,
+            "replication": 0,
+            "total": 1
+          },
+          "store": {
+            "size_in_bytes": 34095
+          }
+        },
+        "nodes": {
+          "count": {
+            "coordinating_only": 0,
+            "data": 1,
+            "ingest": 1,
+            "master": 1,
+            "total": 1
+          },
+          "fs": {
+            "available_in_bytes": 200403197952,
+            "free_in_bytes": 200665341952,
+            "total_in_bytes": 499065712640
+          },
+          "jvm": {
+            "max_uptime_in_millis": 701043,
+            "mem": {
+              "heap_max_in_bytes": 628555776,
+              "heap_used_in_bytes": 204299464
+            },
+            "threads": 40,
+            "versions": [
+              {
+                "count": 1,
+                "version": "1.8.0_121",
+                "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+                "vm_vendor": "Oracle Corporation",
+                "vm_version": "25.121-b13"
+              }
+            ]
+          },
+          "network_types": {
+            "http_types": {
+              "security4": 1
+            },
+            "transport_types": {
+              "security4": 1
+            }
+          },
+          "os": {
+            "allocated_processors": 1,
+            "available_processors": 4,
+            "mem": {
+              "free_in_bytes": 183799808,
+              "free_percent": 1,
+              "total_in_bytes": 17179869184,
+              "used_in_bytes": 16996069376,
+              "used_percent": 99
+            },
+            "names": [
+              {
+                "count": 1,
+                "name": "Mac OS X"
+              }
+            ]
+          },
+          "plugins": [
+            {
+              "classname": "org.elasticsearch.xpack.XPackPlugin",
+              "description": "Elasticsearch Expanded Pack Plugin",
+              "has_native_controller": true,
+              "name": "x-pack",
+              "version": "7.0.0-alpha1"
+            }
+          ],
+          "process": {
+            "cpu": {
+              "percent": 0
+            },
+            "open_file_descriptors": {
+              "avg": 163,
+              "max": 163,
+              "min": 163
+            }
+          },
+          "versions": [
+            "7.0.0-alpha1"
+          ]
+        },
+        "status": "green",
+        "timestamp": 1502835059952
+      }
+    },
+    "isPrimary": false,
+    "kibana": {
+      "concurrent_connections": 0,
+      "count": 0,
+      "memory_limit": 0,
+      "memory_size": 0,
+      "requests_total": 0,
+      "response_time_max": 0,
+      "status": null
+    },
+    "license": {
+      "expiry_date": "2030-08-29T23:59:59.999Z",
+      "expiry_date_in_millis": 1914278399999,
+      "issue_date": "2014-09-29T00:00:00.000Z",
+      "status": "active",
+      "type": "basic"
+    },
+    "logstash": {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "queue_types": {
+        "memory": 0,
+        "persisted": 0
+      },
+      "versions": []
+    },
+    "version": "7.0.0-alpha1"
+  },
+  {
+    "alerts": {
+      "alertsMeta": {
+        "enabled": true
+      },
+      "count": 1,
+      "high": 0,
+      "low": 0,
+      "medium": 1
+    },
+    "beats": {
+      "beats": {
+        "total": null,
+        "types": []
+      },
+      "bytesSent": null,
+      "totalEvents": null
+    },
+    "cluster_name": "monitoring-one",
+    "cluster_state": {
+      "master_node": "7r5cGj40Qcyia0J1xF0lnA",
+      "nodes": {
+        "7r5cGj40Qcyia0J1xF0lnA": {
+          "attributes": {
+            "ml.enabled": "true"
+          },
+          "ephemeral_id": "9h7Asl78Riu-5BjLw7W9Tg",
+          "name": "monitoring-one-01",
+          "transport_address": "127.0.0.1:9300"
+        }
+      },
+      "state_uuid": "asE-gTxlRuad4K1ED5lNag",
+      "status": "yellow",
+      "version": 45
+    },
+    "cluster_uuid": "lOF8kofiS_2DX58o9mXJ1Q",
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "completion": {
+            "size_in_bytes": 0
+          },
+          "count": 8,
+          "docs": {
+            "count": 3997,
+            "deleted": 69
+          },
+          "fielddata": {
+            "evictions": 0,
+            "memory_size_in_bytes": 2104
+          },
+          "query_cache": {
+            "cache_count": 0,
+            "cache_size": 0,
+            "evictions": 0,
+            "hit_count": 0,
+            "memory_size_in_bytes": 0,
+            "miss_count": 0,
+            "total_count": 0
+          },
+          "segments": {
+            "count": 36,
+            "doc_values_memory_in_bytes": 91352,
+            "file_sizes": {},
+            "fixed_bit_set_memory_in_bytes": 992,
+            "index_writer_memory_in_bytes": 205347,
+            "max_unsafe_auto_id_timestamp": -1,
+            "memory_in_bytes": 278961,
+            "norms_memory_in_bytes": 6784,
+            "points_memory_in_bytes": 3250,
+            "stored_fields_memory_in_bytes": 11544,
+            "term_vectors_memory_in_bytes": 0,
+            "terms_memory_in_bytes": 166031,
+            "version_map_memory_in_bytes": 26362
+          },
+          "shards": {
+            "index": {
+              "primaries": {
+                "avg": 1,
+                "max": 1,
+                "min": 1
+              },
+              "replication": {
+                "avg": 0,
+                "max": 0,
+                "min": 0
+              },
+              "shards": {
+                "avg": 1,
+                "max": 1,
+                "min": 1
+              }
+            },
+            "primaries": 8,
+            "replication": 0,
+            "total": 8
+          },
+          "store": {
+            "size_in_bytes": 2647163
+          }
+        },
+        "nodes": {
+          "count": {
+            "coordinating_only": 0,
+            "data": 1,
+            "ingest": 1,
+            "master": 1,
+            "total": 1
+          },
+          "fs": {
+            "available_in_bytes": 200403648512,
+            "free_in_bytes": 200665792512,
+            "total_in_bytes": 499065712640
+          },
+          "jvm": {
+            "max_uptime_in_millis": 761002,
+            "mem": {
+              "heap_max_in_bytes": 628555776,
+              "heap_used_in_bytes": 133041176
+            },
+            "threads": 42,
+            "versions": [
+              {
+                "count": 1,
+                "version": "1.8.0_121",
+                "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+                "vm_vendor": "Oracle Corporation",
+                "vm_version": "25.121-b13"
+              }
+            ]
+          },
+          "network_types": {
+            "http_types": {
+              "security4": 1
+            },
+            "transport_types": {
+              "security4": 1
+            }
+          },
+          "os": {
+            "allocated_processors": 1,
+            "available_processors": 4,
+            "mem": {
+              "free_in_bytes": 86732800,
+              "free_percent": 1,
+              "total_in_bytes": 17179869184,
+              "used_in_bytes": 17093136384,
+              "used_percent": 99
+            },
+            "names": [
+              {
+                "count": 1,
+                "name": "Mac OS X"
+              }
+            ]
+          },
+          "plugins": [
+            {
+              "classname": "org.elasticsearch.xpack.XPackPlugin",
+              "description": "Elasticsearch Expanded Pack Plugin",
+              "has_native_controller": true,
+              "name": "x-pack",
+              "version": "7.0.0-alpha1"
+            }
+          ],
+          "process": {
+            "cpu": {
+              "percent": 2
+            },
+            "open_file_descriptors": {
+              "avg": 178,
+              "max": 178,
+              "min": 178
+            }
+          },
+          "versions": [
+            "7.0.0-alpha1"
+          ]
+        },
+        "status": "yellow",
+        "timestamp": 1502835054610
+      }
+    },
+    "isSupported": true,
+    "isPrimary": false,
+    "kibana": {
+      "concurrent_connections": 0,
+      "count": 0,
+      "memory_limit": 0,
+      "memory_size": 0,
+      "requests_total": 0,
+      "response_time_max": 0,
+      "status": null
+    },
+    "license": {
+      "expiry_date": "2017-09-14T21:58:28.997Z",
+      "expiry_date_in_millis": 1505426308997,
+      "issue_date": "2017-08-15T21:58:28.997Z",
+      "status": "active",
+      "type": "trial"
+    },
+    "logstash": {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "queue_types": {
+        "memory": 0,
+        "persisted": 0
+      },
+      "versions": []
+    },
+    "version": "7.0.0-alpha1"
+  },
+  {
+    "alerts": {
+      "alertsMeta": {
+        "enabled": true
+      }
+    },
+    "beats": {
+      "beats": {
+        "total": null,
+        "types": []
+      },
+      "bytesSent": null,
+      "totalEvents": null
+    },
+    "cluster_name": "clusterone",
+    "cluster_state": {
+      "master_node": "fYjS7QwxT42788axNXnZ1Q",
+      "nodes": {
+        "ZcUHP_QBQzeRjE5by3TbvQ": {
+          "attributes": {
+            "ml.enabled": "true"
+          },
+          "ephemeral_id": "dkdHpjB2RIabMwbwcMWDNw",
+          "name": "clusterone-02",
+          "transport_address": "127.0.0.1:9303"
+        },
+        "fYjS7QwxT42788axNXnZ1Q": {
+          "attributes": {
+            "ml.enabled": "true"
+          },
+          "ephemeral_id": "gLCiGmfARciO6_8eTh9caw",
+          "name": "clusterone-01",
+          "transport_address": "127.0.0.1:9301"
+        }
+      },
+      "state_uuid": "v9cBtnUvQMqe_J-kAvZaBw",
+      "status": "green",
+      "version": 221
+    },
+    "cluster_uuid": "TkHOX_-1TzWwbROwQJU5IA",
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "completion": {
+            "size_in_bytes": 0
+          },
+          "count": 5,
+          "docs": {
+            "count": 150,
+            "deleted": 0
+          },
+          "fielddata": {
+            "evictions": 0,
+            "memory_size_in_bytes": 0
+          },
+          "query_cache": {
+            "cache_count": 0,
+            "cache_size": 0,
+            "evictions": 0,
+            "hit_count": 0,
+            "memory_size_in_bytes": 0,
+            "miss_count": 0,
+            "total_count": 0
+          },
+          "segments": {
+            "count": 76,
+            "doc_values_memory_in_bytes": 88064,
+            "file_sizes": {},
+            "fixed_bit_set_memory_in_bytes": 0,
+            "index_writer_memory_in_bytes": 7006184,
+            "max_unsafe_auto_id_timestamp": 1502834982386,
+            "memory_in_bytes": 1907922,
+            "norms_memory_in_bytes": 197184,
+            "points_memory_in_bytes": 3818,
+            "stored_fields_memory_in_bytes": 23744,
+            "term_vectors_memory_in_bytes": 0,
+            "terms_memory_in_bytes": 1595112,
+            "version_map_memory_in_bytes": 260
+          },
+          "shards": {
+            "index": {
+              "primaries": {
+                "avg": 2.6,
+                "max": 5,
+                "min": 1
+              },
+              "replication": {
+                "avg": 1,
+                "max": 1,
+                "min": 1
+              },
+              "shards": {
+                "avg": 5.2,
+                "max": 10,
+                "min": 2
+              }
+            },
+            "primaries": 13,
+            "replication": 1,
+            "total": 26
+          },
+          "store": {
+            "size_in_bytes": 4838464
+          }
+        },
+        "nodes": {
+          "count": {
+            "coordinating_only": 0,
+            "data": 2,
+            "ingest": 2,
+            "master": 2,
+            "total": 2
+          },
+          "fs": {
+            "available_in_bytes": 200404209664,
+            "free_in_bytes": 200666353664,
+            "total_in_bytes": 499065712640
+          },
+          "jvm": {
+            "max_uptime_in_millis": 741786,
+            "mem": {
+              "heap_max_in_bytes": 1257111552,
+              "heap_used_in_bytes": 465621856
+            },
+            "threads": 92,
+            "versions": [
+              {
+                "count": 2,
+                "version": "1.8.0_121",
+                "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+                "vm_vendor": "Oracle Corporation",
+                "vm_version": "25.121-b13"
+              }
+            ]
+          },
+          "network_types": {
+            "http_types": {
+              "security4": 2
+            },
+            "transport_types": {
+              "security4": 2
+            }
+          },
+          "os": {
+            "allocated_processors": 2,
+            "available_processors": 8,
+            "mem": {
+              "free_in_bytes": 332099584,
+              "free_percent": 1,
+              "total_in_bytes": 34359738368,
+              "used_in_bytes": 34027638784,
+              "used_percent": 99
+            },
+            "names": [
+              {
+                "count": 2,
+                "name": "Mac OS X"
+              }
+            ]
+          },
+          "plugins": [
+            {
+              "classname": "org.elasticsearch.xpack.XPackPlugin",
+              "description": "Elasticsearch Expanded Pack Plugin",
+              "has_native_controller": true,
+              "name": "x-pack",
+              "version": "7.0.0-alpha1"
+            }
+          ],
+          "process": {
+            "cpu": {
+              "percent": 2
+            },
+            "open_file_descriptors": {
+              "avg": 227,
+              "max": 237,
+              "min": 218
+            }
+          },
+          "versions": [
+            "7.0.0-alpha1"
+          ]
+        },
+        "status": "green",
+        "timestamp": 1502835052641
+      }
+    },
+    "isSupported": true,
+    "isPrimary": false,
+    "kibana": {
+      "concurrent_connections": 307,
+      "count": 1,
+      "memory_limit": 1501560832,
+      "memory_size": 231141376,
+      "requests_total": 571,
+      "response_time_max": 1930,
+      "status": "green"
+    },
+    "license": {
+      "expiry_date": "2017-09-14T21:58:47.135Z",
+      "expiry_date_in_millis": 1505426327135,
+      "issue_date": "2017-08-15T21:58:47.135Z",
+      "status": "active",
+      "type": "trial"
+    },
+    "logstash": {
+      "avg_memory": 1038876672,
+      "avg_memory_used": 487782224,
+      "events_in_total": 142,
+      "events_out_total": 142,
+      "max_uptime": 570039,
+      "node_count": 1,
+      "pipeline_count": 1,
+      "queue_types": {
+        "memory": 1,
+        "persisted": 0
+      },
+      "versions": [
+        "7.0.0-alpha1"
+      ]
+    },
+    "version": "7.0.0-alpha1"
+  }
+]
+

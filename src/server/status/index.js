@@ -1,5 +1,5 @@
 import ServerStatus from './server_status';
-import { Metrics } from './metrics';
+import { Metrics } from './metrics_collector/metrics';
 import { registerStatusPage, registerStatusApi } from './routes';
 
 export function statusMixin(kbnServer, server, config) {
