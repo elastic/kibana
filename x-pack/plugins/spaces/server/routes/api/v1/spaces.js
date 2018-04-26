@@ -58,7 +58,6 @@ export function initSpacesApi(server) {
     method: 'DELETE',
     path: '/api/spaces/v1/spaces/{id}',
     handler(request, reply) {
-      mockSpaces = mockSpaces.filter(space => space !== request.params.id);
       reply().code(204);
     },
     config: {

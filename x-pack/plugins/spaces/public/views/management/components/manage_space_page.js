@@ -26,8 +26,8 @@ import { Notifier, toastNotifications } from 'ui/notify';
 export class ManageSpacePage extends React.Component {
   state = {
     space: {},
-    error: null
-  }
+    validate: false
+  };
 
   componentDidMount() {
     this.notifier = new Notifier({ location: 'Spaces' });
@@ -49,9 +49,11 @@ export class ManageSpacePage extends React.Component {
           }
         })
         .catch(error => {
-          this.setState({
-            error
-          });
+          const {
+            message = ''
+          } = error.data || {};
+
+          toastNotifications.addDanger(`Error loading space: ${message}`);
         });
     }
   }
@@ -67,11 +69,19 @@ export class ManageSpacePage extends React.Component {
         <PageHeader breadcrumbs={this.props.breadcrumbs}/>
         <EuiPageContent>
           <EuiForm>
-            <EuiText><h1>{this.getTitle()}</h1></EuiText>
+            <EuiFlexGroup justifyContent={'spaceBetween'}>
+              <EuiFlexItem grow={false}>
+                <EuiText><h1>{this.getTitle()}</h1></EuiText>
+              </EuiFlexItem>
+              {this.getActionButton()}
+            </EuiFlexGroup>
+
             <EuiSpacer />
+
             <EuiFormRow
               label="Name"
               helpText="Name your space"
+              {...this.validateName()}
             >
               <EuiFieldText
                 name="name"
@@ -83,6 +93,7 @@ export class ManageSpacePage extends React.Component {
             <EuiFormRow
               label="Description"
               helpText="Describe your space"
+              {...this.validateDescription()}
             >
               <EuiFieldText
                 name="description"
@@ -116,7 +127,22 @@ export class ManageSpacePage extends React.Component {
       return `Edit space`;
     }
     return `Create a space`;
-  }
+  };
+
+  getActionButton = () => {
+    const isEditing = !!this.props.space;
+    if (isEditing) {
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiButton color={'danger'} onClick={this.deleteSpace}>
+            Delete Space
+          </EuiButton>
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
+  };
 
   onNameChange = (e) => {
     this.setState({
@@ -125,7 +151,7 @@ export class ManageSpacePage extends React.Component {
         name: e.target.value
       }
     });
-  }
+  };
 
   onDescriptionChange = (e) => {
     this.setState({
@@ -134,9 +160,19 @@ export class ManageSpacePage extends React.Component {
         description: e.target.value
       }
     });
-  }
+  };
 
   saveSpace = () => {
+    this.setState({
+      validate: true
+    }, () => {
+      const { isInvalid } = this.validateForm();
+      if (isInvalid) return;
+      this._performSave();
+    });
+  };
+
+  _performSave = () => {
     const {
       name = '',
       id = name.toLowerCase(),
@@ -146,7 +182,6 @@ export class ManageSpacePage extends React.Component {
     const { httpAgent, chrome } = this.props;
 
     if (name && description) {
-      console.log(this.state.space);
       httpAgent
         .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}`), { id, name, description })
         .then(result => {
@@ -154,14 +189,93 @@ export class ManageSpacePage extends React.Component {
           window.location.hash = `#/management/spaces/list`;
         })
         .catch(error => {
-          toastNotifications.addError(error);
+          const {
+            message = ''
+          } = error.data || {};
+
+          toastNotifications.addDanger(`Error saving space: ${message}`);
         });
     }
-  }
+  };
+
+  deleteSpace = () => {
+    const { httpAgent, chrome } = this.props;
+    const {
+      id,
+      name
+    } = this.state.space;
+
+    httpAgent
+      .delete(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}`))
+      .then(() => {
+        toastNotifications.addSuccess(`Deleted '${name}'`);
+        window.location.hash = `#/management/spaces/list`;
+      })
+      .catch(error => {
+        const {
+          message = ''
+        } = error.data || {};
+
+        toastNotifications.addDanger(`Error deleting space: ${message}`);
+      });
+  };
 
   backToSpacesList = () => {
     window.location.hash = `#/management/spaces/list`;
-  }
+  };
+
+  validateName = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const {
+      name
+    } = this.state.space;
+
+    if (!name) {
+      return {
+        isInvalid: true,
+        error: 'Name is required'
+      };
+    }
+
+    return {};
+  };
+
+  validateDescription = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const {
+      description
+    } = this.state.space;
+
+    if (!description) {
+      return {
+        isInvalid: true,
+        error: 'Description is required'
+      };
+    }
+
+    return {};
+  };
+
+  validateForm = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const validations = [this.validateName(), this.validateDescription()];
+    if (validations.some(validation => validation.isInvalid)) {
+      return {
+        isInvalid: true
+      };
+    }
+
+    return {};
+  };
 }
 
 ManageSpacePage.propTypes = {
