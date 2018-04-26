@@ -268,6 +268,27 @@ yarn test && yarn build --skip-os-packages
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
 
+### Unit testing frameworks
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+
+#### Mocha (legacy)
+Today a package can follow the pattern of having a `__tests__` directory in each source code directory of a package which contains the tests for that module. These are usually run by Mocha.
+
+#### Jest
+A package can also follow the pattern of having .test.js files as siblings of the source code files, and these run by Jest.
+
+### Running Jest Unit Tests
+
+```bash
+# Running oss jest test
+node scripts/jest
+```
+
+```bash
+# Running x-pack jest test
+cd x-pack; node scripts/jest.js
+```
+
 ### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
