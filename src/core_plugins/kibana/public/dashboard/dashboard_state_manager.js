@@ -89,9 +89,10 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
+    store.dispatch(setPanels({}));
+    this.embeddableConfigChangeListeners = {};
     this._pushAppStateChangesToStore();
 
-    this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
 
     this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
