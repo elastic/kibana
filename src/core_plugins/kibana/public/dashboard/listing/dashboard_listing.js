@@ -20,29 +20,6 @@ import {
 } from '@elastic/eui';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 
-const tableColumns = [
-  {
-    field: 'title',
-    name: 'Title',
-    sortable: true,
-    render: (field, record) => (
-      <EuiLink
-        className="dashboardLink"
-        href={`#${createDashboardEditUrl(record.id)}`}
-        data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
-      >
-        {field}
-      </EuiLink>
-    )
-  },
-  {
-    field: 'description',
-    name: 'Description',
-    dataType: 'string',
-    sortable: true,
-  }
-];
-
 export const EMPTY_FILTER = '';
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -299,6 +276,46 @@ export class DashboardListing extends React.Component {
   }
 
   renderTable() {
+    const tableColumns = [
+      {
+        field: 'title',
+        name: 'Title',
+        sortable: true,
+        render: (field, record) => (
+          <EuiLink
+            className="dashboardLink"
+            href={`#${createDashboardEditUrl(record.id)}`}
+            data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+          >
+            {field}
+          </EuiLink>
+        )
+      },
+      {
+        field: 'description',
+        name: 'Description',
+        dataType: 'string',
+        sortable: true,
+      }
+    ];
+    if (!this.props.hideWriteControls) {
+      tableColumns.push({
+        name: 'Actions',
+        actions: [
+          {
+            render: (record) => {
+              return (
+                <EuiLink
+                  href={`#${createDashboardEditUrl(record.id)}?_a=(viewMode:edit)`}
+                >
+                  Edit
+                </EuiLink>
+              );
+            }
+          }
+        ]
+      });
+    }
     const pagination = {
       pageIndex: this.state.page,
       pageSize: this.state.perPage,

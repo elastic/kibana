@@ -189,6 +189,14 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
       ]
     }
     itemIdToExpandedRowMap={Object {}}
@@ -323,6 +331,14 @@ exports[`after fetch renders table rows 1`] = `
           "field": "description",
           "name": "Description",
           "sortable": true,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
         },
       ]
     }
@@ -480,6 +496,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
       ]
     }
     itemIdToExpandedRowMap={Object {}}
@@ -605,6 +629,14 @@ exports[`initialFilter 1`] = `
           "name": "Description",
           "sortable": true,
         },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
       ]
     }
     itemIdToExpandedRowMap={Object {}}
@@ -716,6 +748,14 @@ exports[`renders table in loading state 1`] = `
           "field": "description",
           "name": "Description",
           "sortable": true,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
         },
       ]
     }
