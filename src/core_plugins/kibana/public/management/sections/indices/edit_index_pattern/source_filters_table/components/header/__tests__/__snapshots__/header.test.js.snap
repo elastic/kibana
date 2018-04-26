@@ -9,7 +9,9 @@ exports[`Header should render normally 1`] = `
       Source filters
     </h3>
   </EuiTitle>
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <p>
       Source filters can be used to exclude one or more fields when fetching the document source. This happens when viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.
     </p>
