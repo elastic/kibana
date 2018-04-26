@@ -89,14 +89,11 @@ export class SpacesGridPage extends Component {
 
   getPrimaryActionButton() {
     if (this.state.selectedSpaces.length > 0) {
+      const count = this.state.selectedSpaces.length;
       return (
-        <DeleteSpacesButton
-          $q={this.props.$q}
-          spaces={this.state.selectedSpaces}
-          httpAgent={this.props.httpAgent}
-          chrome={this.props.chrome}
-          onDelete={this.loadGrid}
-        />
+        <EuiButton fill color={'danger'}>
+          {`Delete ${count > 1 ? `${count} spaces` : 'space'}`}
+        </EuiButton>
       );
     }
 
@@ -167,7 +164,7 @@ export class SpacesGridPage extends Component {
     };
   }
 
-  onTableChange = ({ page = {} }) => {
+ onTableChange = ({ page = {} }) => {
     const {
       index: pageIndex,
       size: pageSize
