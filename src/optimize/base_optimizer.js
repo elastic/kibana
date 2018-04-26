@@ -174,10 +174,7 @@ export default class BaseOptimizer {
             '?',
             // this JSON is parsed by create_ui_exports_module and determines
             // what require() calls it will execute within the bundle
-            JSON.stringify({
-              type,
-              modules: [].concat(extensions[type] || [])
-            })
+            JSON.stringify({ type, modules: extensions[type] || [] })
           ].join('');
         }),
 
