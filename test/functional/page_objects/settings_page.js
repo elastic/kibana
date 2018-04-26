@@ -229,6 +229,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async openControlsByName(name) {
+      await this.filterField(name);
       const tableFields = await remote.setFindTimeout(defaultFindTimeout)
         .findAllByCssSelector('table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child')
         .getVisibleText();
@@ -258,29 +259,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async controlChangeSave() {
       await testSubjects.click('fieldSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async setPageSize(size) {
-      try {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector('div.euiPopover button.euiButtonEmpty')
-          .click();
-
-        const sizeButtons = await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector('div.euiPopover .euiContextMenuPanel button.euiContextMenuItem')
-          .getVisibleText();
-
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel
-          button.euiContextMenuItem:nth-child(${sizeButtons.indexOf(size + ' rows') + 1})`)
-          .click();
-      } catch(e) {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-          .click();
-      } finally {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
