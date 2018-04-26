@@ -1,5 +1,6 @@
-FROM gcc:6
+FROM ubuntu:14.04
 
+RUN apt-get update && apt-get -y install curl
 ENV NVM_DIR /.nvm
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
 ENV NODE_VERSION 8.11.0

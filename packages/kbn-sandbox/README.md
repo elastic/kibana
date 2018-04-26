@@ -40,12 +40,42 @@ Building:
 
 
 ```
-docker build -t kbn-sandbox ./
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox:latest bash -c 'cd /kbn-sandbox && npm run build'
+docker build -t kbn-sandbox/build -f docker/Dockerfile.build .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/build:latest bash -c 'cd /kbn-sandbox && npm run build'
 ```
 
 Testing:
 
 ```
-yarn test
+# CentOS 7
+docker build -t kbn-sandbox/centos7 -f docker/Dockerfile.centos7 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/centos7:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# Ubuntu 14.04
+docker build -t kbn-sandbox/ubuntu1404 -f docker/Dockerfile.ubuntu1404 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/ubuntu1404:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# Ubuntu 16.04
+docker build -t kbn-sandbox/ubuntu1604 -f docker/Dockerfile.ubuntu1604 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/ubuntu1604:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# openSUSE 42.1
+docker build -t kbn-sandbox/opensuse421 -f docker/Dockerfile.opensuse421 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/opensuse421:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# openSUSE LEAP
+docker build -t kbn-sandbox/opensuseleap -f docker/Dockerfile.opensuseleap .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/opensuseleap:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# Debian 7
+docker build -t kbn-sandbox/debian7 -f docker/Dockerfile.debian7 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian7:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# Debian 8
+docker build -t kbn-sandbox/debian8 -f docker/Dockerfile.debian8 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian8:latest bash -c 'cd /kbn-sandbox && npm run test'
+
+# Debian 9
+docker build -t kbn-sandbox/debian9 -f docker/Dockerfile.debian9 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian9:latest bash -c 'cd /kbn-sandbox && npm run test'
 ```
