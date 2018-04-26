@@ -42,7 +42,7 @@ export class GrokHighlightRules extends TextHighlightRules {
         {
           token: (escapeToken, /* regexToken */) => {
             if (escapeToken) {
-              return [ 'grokEscape', '' ];
+              return [ 'grokEscape', 'grokEscaped' ];
             }
             return 'grokRegex';
           },
