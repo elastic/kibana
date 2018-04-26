@@ -8,30 +8,23 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import 'plugins/spaces/views/space_selector/space_selector.less';
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
+import { uiModules } from 'ui/modules';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { SpaceSelector } from './space_selector';
-import { mockSpaces } from '../../../common/mock_spaces';
 
+const module = uiModules.get('spaces_selector', []);
+module.controller('spacesSelectorController', ($scope, $http) => {
+  const domNode = document.getElementById('spaceSelectorRoot');
+  render(<SpaceSelector httpAgent={$http} chrome={chrome} />, domNode);
+
+  // unmount react on controller destroy
+  $scope.$on('$destroy', () => {
+    unmountComponentAtNode(domNode);
+  });
+});
 
 chrome
   .setVisible(false)
   .setRootTemplate(template);
-
-// hack to wait for angular template to be ready
-const waitForAngularReady = new Promise(resolve => {
-  const checkInterval = setInterval(() => {
-    const hasElm = !!document.querySelector('#spaceSelectorRoot');
-    if (hasElm) {
-      clearInterval(checkInterval);
-      resolve();
-    }
-  }, 10);
-});
-
-waitForAngularReady.then(() => {
-  ReactDOM.render(<SpaceSelector spaces={mockSpaces} />, document.getElementById('spaceSelectorRoot'));
-});
-
-
