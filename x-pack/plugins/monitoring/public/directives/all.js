@@ -14,7 +14,6 @@ import './cluster/listing';
 import './elasticsearch/cluster_status';
 import './elasticsearch/index_listing';
 import './elasticsearch/index_summary';
-import './elasticsearch/node_listing';
 import './elasticsearch/node_summary';
 import './elasticsearch/ml_job_listing';
 import './elasticsearch/shard_allocation';

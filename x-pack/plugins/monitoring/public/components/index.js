@@ -5,9 +5,11 @@
  */
 
 export { MonitoringTimeseriesContainer } from './chart';
+export { MonitoringTable } from './table';
+export { Tooltip } from './tooltip';
 export { NoData } from './no_data';
 export { License } from './license';
 export { StatusIcon } from './status_icon';
 export { SummaryStatus } from './summary_status';
 export { PageLoading } from './page_loading';
-export { ElasticsearchOverview } from './elasticsearch';
+export { ElasticsearchOverview, ElasticsearchNodes } from './elasticsearch';
