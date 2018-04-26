@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
-  EuiAccordion,
   EuiFieldNumber,
   EuiForm,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 
 export class PieOptionsTab extends Component {
@@ -32,49 +33,57 @@ export class PieOptionsTab extends Component {
 
     return (
       <EuiForm>
-        <EuiSpacer />
-        <EuiFormRow
-          id="isDonut"
-        >
-          <EuiSwitch
-            label="Donut"
-            checked={params.isDonut}
-            onChange={this.handleUpdate('isDonut', 'checked')}
-            data-test-subj="pieEditorIsDonut"
-          />
-        </EuiFormRow>
 
-        <EuiFormRow
-          id="addTooltip"
-        >
-          <EuiSwitch
-            label="Show Tooltip"
-            checked={params.addTooltip}
-            onChange={this.handleUpdate('addTootip', 'checked')}
-            data-test-subj="pieEditorShowTooltip"
-          />
-        </EuiFormRow>
+        <EuiPanel>
+          <EuiTitle size="s"><span>Pie settings</span></EuiTitle>
 
-        <EuiFormRow
-          id="legendPosition"
-          label="Legend Position"
-        >
-          <EuiSelect
-            options={collections.legendPositions}
-            value={params.legendPosition}
-            onChange={this.handleUpdate('legendPosition')}
-            data-test-subj="pieEditorLegendPosition"
-          />
-        </EuiFormRow>
+          <EuiSpacer />
 
-        <EuiAccordion buttonContent="Labels Settings">
+          <EuiFormRow
+            id="isDonut"
+          >
+            <EuiSwitch
+              label="Donut"
+              checked={params.isDonut}
+              onChange={this.handleUpdate('isDonut', 'checked')}
+              data-test-subj="pieEditorIsDonut"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            id="addTooltip"
+          >
+            <EuiSwitch
+              label="Show tooltip per slice"
+              checked={params.addTooltip}
+              onChange={this.handleUpdate('addTootip', 'checked')}
+              data-test-subj="pieEditorShowTooltip"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            id="legendPosition"
+            label="Legend position"
+          >
+            <EuiSelect
+              options={collections.legendPositions}
+              value={params.legendPosition}
+              onChange={this.handleUpdate('legendPosition')}
+              data-test-subj="pieEditorLegendPosition"
+            />
+          </EuiFormRow>
+
+          <EuiSpacer />
+
+          <EuiTitle size="s"><span>Label settings</span></EuiTitle>
+
           <EuiSpacer />
 
           <EuiFormRow
             id="showLabels"
           >
             <EuiSwitch
-              label="Show Labels"
+              label="Show labels"
               checked={params.labels.show}
               onChange={this.handleUpdate('labels.show', 'checked')}
               data-test-subj="pieEditorShowLabels"
@@ -85,8 +94,9 @@ export class PieOptionsTab extends Component {
             id="showLastLevel"
           >
             <EuiSwitch
-              label="Show Top Level Only"
+              label="Show top level only"
               checked={params.labels.last_level}
+              disabled={!params.labels.show}
               onChange={this.handleUpdate('labels.last_level', 'checked')}
               data-test-subj="pieEditorShowLastLevel"
             />
@@ -96,8 +106,9 @@ export class PieOptionsTab extends Component {
             id="showValues"
           >
             <EuiSwitch
-              label="Show Values"
+              label="Show values"
               checked={params.labels.values}
+              disabled={!params.labels.show}
               onChange={this.handleUpdate('labels.values', 'checked')}
               data-test-subj="pieEditorShowValues"
             />
@@ -105,15 +116,17 @@ export class PieOptionsTab extends Component {
 
           <EuiFormRow
             id="truncateLabels"
-            label="Truncate"
+            label="Truncation limit"
           >
             <EuiFieldNumber
               value={params.labels.truncate}
+              disabled={!params.labels.show}
               onChange={this.handleUpdate('labels.truncate')}
               data-test-subj="pieEditorTruncateLabels"
             />
           </EuiFormRow>
-        </EuiAccordion>
+
+        </EuiPanel>
       </EuiForm>
     );
   }
