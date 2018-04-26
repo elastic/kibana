@@ -42,6 +42,9 @@ export class MonitoringViewBaseController {
    * @param {String} title - Title of the page
    * @param {String} api - Back-end API endpoint to poll for getting the page data using POST and time range data in the body.
    *                       Whenever possible, use this method for data polling rather than supply the getPageData param.
+   * @param {Function} apiFn - Function that returns a string for the back-end API endpoint, in case the string has
+   *                           dynamic query parameters (e.g. show_system_indices)
+   * rather than supply the getPageData param.
    * @param {Function} getPageData - (Optional) Function to fetch page data, if simply passing the API string isn't workable.
    * @param {Object} defaultData - Initial model data to populate
    * @param {String} reactNodeId - DOM element ID of the element for mounting the view's main React component
@@ -53,6 +56,7 @@ export class MonitoringViewBaseController {
   constructor({
     title = '',
     api = '',
+    apiFn,
     getPageData: _getPageData = getPageData,
     defaultData,
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
@@ -88,7 +92,8 @@ export class MonitoringViewBaseController {
     }
 
     this.updateData = () => {
-      return _getPageData($injector, api)
+      const _api = apiFn ? apiFn() : api;
+      return _getPageData($injector, _api)
         .then(pageData => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           this.data = pageData; // update the view's data with the fetch result
