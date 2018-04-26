@@ -27,6 +27,7 @@ test('renders disabled control with tooltip', () => {
   const disabledControl = {
     id: 'mock-disabled-control',
     isEnabled: () => { return false; },
+    disabledReason: 'I am disabled for testing purposes'
   };
   const component = shallow(
     <FormRow

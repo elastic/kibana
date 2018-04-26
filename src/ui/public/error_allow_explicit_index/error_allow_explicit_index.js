@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 
-import uiRoutes from 'ui/routes';
-import { KbnUrlProvider } from 'ui/url';
+import uiRoutes from '../routes';
+import { KbnUrlProvider } from '../url';
 
 import './error_allow_explicit_index.less';
 import template from './error_allow_explicit_index.html';
@@ -12,7 +12,7 @@ uiRoutes
 export function ErrorAllowExplicitIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);
 
-  return new class ErrorAllowExplicitIndex {
+  return new (class ErrorAllowExplicitIndex {
     test(error) {
       if (!error || error.status !== 400) {
         return false;
@@ -31,5 +31,5 @@ export function ErrorAllowExplicitIndexProvider(Private, Promise) {
       kbnUrl.change('/error/multi.allow_explicit_index');
       return Promise.halt();
     }
-  };
+  });
 }

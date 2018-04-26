@@ -1,11 +1,11 @@
-import 'plugins/kibana/dashboard/dashboard_app';
-import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
-import 'plugins/kibana/dashboard/styles/index.less';
-import 'plugins/kibana/dashboard/dashboard_config';
+import './dashboard_app';
+import './saved_dashboard/saved_dashboards';
+import './styles/index.less';
+import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 
-import dashboardTemplate from 'plugins/kibana/dashboard/dashboard_app.html';
+import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing.html';
 
 import { DashboardListingController } from './listing/dashboard_listing';
@@ -13,6 +13,7 @@ import { DashboardConstants, createDashboardEditUrl } from './dashboard_constant
 import { SavedObjectNotFound } from 'ui/errors';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { recentlyAccessed } from 'ui/persisted_log';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -64,7 +65,12 @@ uiRoutes
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
         const id = $route.current.params.id;
+
         return savedDashboards.get(id)
+          .then((savedDashboard) => {
+            recentlyAccessed.add(savedDashboard.getFullPath(), savedDashboard.title, id);
+            return savedDashboard;
+          })
           .catch((error) => {
             // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
             // See https://github.com/elastic/kibana/issues/10951 for more context.

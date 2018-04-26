@@ -35,11 +35,26 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setQuery('memory:<80000');
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.pieSliceCount(2);
 
       await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
       await PageObjects.header.clickDashboard();
 
       await dashboardExpect.pieSliceCount(2);
+    });
+
+    it('Nested visualization filter pills filters data as expected', async () => {
+      await PageObjects.dashboard.clickEditVisualization();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.filterOnPieSlice();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.pieSliceCount(1);
+
+      await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
+      await PageObjects.header.clickDashboard();
+
+      await dashboardExpect.pieSliceCount(1);
     });
 
     it('Pie chart attached to saved search filters data as expected', async () => {

@@ -8,6 +8,7 @@ import {
   buildProjectGraph,
   topologicallyBatchProjects,
   ProjectMap,
+  includeTransitiveProjects,
 } from '../utils/projects';
 import {
   createProductionPackageJson,
@@ -24,12 +25,7 @@ export async function buildProductionProjects({
   kibanaRoot: string;
   buildRoot: string;
 }) {
-  const projectPaths = getProjectPaths(kibanaRoot, {
-    'skip-kibana': true,
-    'skip-kibana-extra': true,
-  });
-
-  const projects = await getProductionProjects(kibanaRoot, projectPaths);
+  const projects = await getProductionProjects(kibanaRoot);
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
@@ -46,22 +42,25 @@ export async function buildProductionProjects({
 }
 
 /**
- * Returns only the projects that should be built into the production bundle
+ * Returns the subset of projects that should be built into the production
+ * bundle. As we copy these into Kibana's `node_modules` during the build step,
+ * and let Kibana's build process be responsible for installing dependencies,
+ * we only include Kibana's transitive _production_ dependencies.
  */
-async function getProductionProjects(
-  kibanaRoot: string,
-  projectPaths: string[]
-) {
-  const projects = await getProjects(kibanaRoot, projectPaths);
+async function getProductionProjects(rootPath: string) {
+  const projectPaths = getProjectPaths(rootPath, {});
+  const projects = await getProjects(rootPath, projectPaths);
 
-  const buildProjects: ProjectMap = new Map();
-  for (const [name, project] of projects.entries()) {
-    if (!project.skipFromBuild()) {
-      buildProjects.set(name, project);
-    }
-  }
+  const productionProjects = includeTransitiveProjects(
+    [projects.get('kibana')!],
+    projects,
+    { onlyProductionDependencies: true }
+  );
 
-  return buildProjects;
+  // We remove Kibana, as we're already building Kibana
+  productionProjects.delete('kibana');
+
+  return productionProjects;
 }
 
 async function deleteTarget(project: Project) {

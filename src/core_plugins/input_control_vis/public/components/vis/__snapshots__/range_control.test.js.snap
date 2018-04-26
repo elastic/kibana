@@ -26,6 +26,7 @@ exports[`renders RangeControl 1`] = `
   label="range control"
 >
   <EuiFormRow
+    data-test-subj="rangeControlFormRow"
     error={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -45,6 +46,7 @@ exports[`renders RangeControl 1`] = `
       >
         <input
           className="euiFieldNumber"
+          data-test-subj="rangeControlMinInputValue"
           disabled={false}
           id="mock-range-control_min"
           max={100}
@@ -99,6 +101,7 @@ exports[`renders RangeControl 1`] = `
       >
         <input
           className="euiFieldNumber"
+          data-test-subj="rangeControlMaxInputValue"
           disabled={false}
           id="mock-range-control_max"
           max={100}

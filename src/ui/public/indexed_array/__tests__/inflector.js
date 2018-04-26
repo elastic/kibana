@@ -1,4 +1,4 @@
-import { inflector } from 'ui/indexed_array/inflector';
+import { inflector } from '../inflector';
 import expect from 'expect.js';
 
 describe('IndexedArray Inflector', function () {

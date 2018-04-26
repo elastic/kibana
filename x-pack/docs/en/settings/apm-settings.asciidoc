@@ -1,0 +1,15 @@
+[role="xpack"]
+[[apm-settings-kb]]
+=== APM Settings in Kibana
+++++
+<titleabbrev>APM Settings</titleabbrev>
+++++
+
+You do not need to configure any settings to use APM. It is enabled by default.
+
+[float]
+[[general-apm-settings-kb]]
+==== General APM Settings
+
+xpack.apm.ui.enabled:: Set to `false` to hide the APM UI in {kib}. Defaults to
+`true`.

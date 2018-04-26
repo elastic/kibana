@@ -1,5 +1,5 @@
 
-import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
+import { extractBuckets } from '../_extract_buckets';
 import expect from 'expect.js';
 
 describe('buildHierarchicalData()', function () {
@@ -38,7 +38,25 @@ describe('buildHierarchicalData()', function () {
       };
       const buckets = extractBuckets(bucket);
       expect(buckets).to.be.an(Array);
-      expect(buckets).to.be(bucket.buckets);
+      expect(buckets).to.eql(bucket.buckets);
+    });
+
+    it('should attach keys using agg.getKey for array of buckets', () => {
+      const bucket = {
+        buckets: [
+          { from: 10, doc_count: 1 },
+          { from: 20, doc_count: 2 }
+        ]
+      };
+      const agg = {
+        getKey(bucket) {
+          return bucket.from;
+        }
+      };
+      const buckets = extractBuckets(bucket, agg);
+      expect(buckets).to.have.length(2);
+      expect(buckets[0].key).to.be(10);
+      expect(buckets[1].key).to.be(20);
     });
 
   });

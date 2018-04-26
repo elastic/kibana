@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-
 import {
   VisualizeConstants
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
@@ -85,21 +84,19 @@ export default function ({ getService, getPageObjects }) {
       expect(isDarkThemeOn).to.equal(true);
     });
 
-    it('should have data-shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
-      return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
-        .then(function (count) {
-          log.info('data-shared-items-count = ' + count);
-          expect(count).to.eql(testVisualizationTitles.length);
-        });
+    it('should be able to hide all panel titles', async function () {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.tryForTime(10000, async function () {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('');
+      });
     });
 
-    it('should have panels with expected data-shared-item title and description', function () {
-      return retry.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelSharedItemData()
-          .then(function (data) {
-            expect(data.map(item => item.title)).to.eql(testVisualizationTitles);
-            expect(data.map(item => item.description)).to.eql(testVisualizationDescriptions);
-          });
+    it('should be able to unhide all panel titles', async function () {
+      await PageObjects.dashboard.checkHideTitle();
+      await retry.tryForTime(10000, async function () {
+        const titles = await PageObjects.dashboard.getPanelTitles();
+        expect(titles[0]).to.eql('TSVB');
       });
     });
 
@@ -236,6 +233,8 @@ export default function ({ getService, getPageObjects }) {
           expect(isChromeVisible).to.be(true);
         });
       });
+
+
     });
 
     describe('add new visualization link', () => {

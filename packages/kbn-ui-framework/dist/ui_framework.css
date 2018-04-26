@@ -1,0 +1,4231 @@
+/**
+ * 1. Enforce pointer when there's no href.
+ * 2. Allow these styles to be applied to a button element.
+ */
+/**
+ * 1. Override Bootstrap styles.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :disabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Links can't have a disabled attribute, so they can't support :enabled.
+ */
+/**
+ * 1. Make sure outline doesn't get hidden beneath adjacent elements.
+ * 2. Override inherited styles (possibly from Bootstrap).
+ * 3. Create an offset box-shadow that follows the contours of the element.
+ */
+/**
+ * Nothing fancy, just the basics so we can use this for both regular and static controls.
+ */
+/**
+ * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
+ */
+/**
+ * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
+ * coupled with Angular.
+ */
+/**
+ * 1. Embedded SVG of fa-caret-down (https://github.com/encharm/Font-Awesome-SVG-PNG/blob/master/black/svg/caret-down.svg).
+ * 2. Make room on right side for the caret.
+ * 3. Prevent Firefox from showing dotted line around text on focus.
+ */
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Fit MicroButton inside of Table rows without pushing them taller.
+ */
+/**
+ * 1. Give Bar a consistent height for when it contains shorter children, and therefore can't
+ *    depend on them to give it the desired height.
+ */
+/**
+ * 1. Put 10px of space between each child.
+ * 2. If there is only one section, align it to the right. If you wanted it aligned right, you
+ *    wouldn't use the Bar in the first place.
+ * 3. Children in the middle should center their content.
+ * 4. Fix an IE bug which causes the last child to overflow the container.
+ * 5. Fixing this bug means we now need to align the children to the right.
+ */
+:focus:not([class^="eui"]) {
+  z-index: 1;
+  /* 1 */
+  outline: none !important;
+  /* 2 */
+  box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
+  /* 3 */ }
+
+/**
+ * 1. Required for IE11.
+ */
+main {
+  display: block;
+  /* 1 */ }
+
+.kuiScreenReaderOnly {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden; }
+
+.kuiActionItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+.kuiBadge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.7em;
+  vertical-align: middle;
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase; }
+
+.kuiBadge--default {
+  background-color: rgba(0, 0, 0, 0.1); }
+
+.kuiBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */ }
+
+.kuiBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiBarSection:first-child {
+    margin-left: 0; }
+  .kuiBarSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiBarSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Links can be focused when they're "disabled" (since we're just faking this with a class), but
+ *    at least make them look like they're not focused.
+ */
+.kuiButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 4px 12px 5px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  height: 30px;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px; }
+  .kuiButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
+  a.kuiButton.kuiButton-isDisabled {
+    cursor: not-allowed;
+    opacity: .5; }
+  .kuiButton:enabled:active {
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
+  a.kuiButton:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
+
+/**
+   * 1. Solves whitespace problems introduced by inline elements.
+   */
+.kuiButton__inner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  /* 1 */ }
+
+.kuiButton--small {
+  font-size: 12px;
+  padding: 2px 8px 3px;
+  height: 22px; }
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center; }
+
+.kuiButton--iconText .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 8px; }
+
+.kuiButton--iconText .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 8px; }
+
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:first-child:not(:only-child) {
+  margin-right: 4px; }
+
+.kuiButton--iconText.kuiButton--small .kuiButton__icon:last-child:not(:only-child) {
+  margin-left: 4px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--basic {
+  color: #2d2d2d;
+  background-color: #F5F5F5; }
+  .kuiButton--basic:not(a):enabled:focus {
+    color: #2d2d2d; }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #2d2d2d; }
+  .kuiButton--basic:enabled:hover {
+    background-color: gainsboro !important;
+    /* 1 */ }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    background-color: gainsboro !important;
+    /* 1 */ }
+  .kuiButton--basic:enabled:active {
+    background-color: gainsboro !important;
+    /* 1 */ }
+  a.kuiButton--basic:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    background-color: gainsboro !important;
+    /* 1 */ }
+  .theme-dark .kuiButton--basic {
+    color: #FFF;
+    background-color: #9c9c9c; }
+    .theme-dark .kuiButton--basic:not(a):enabled:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #0079a5;
+      /* 3 */
+      color: #FFF; }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):focus {
+      /* 1 */
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #777777, 0 0 0 2px #0079a5;
+      /* 3 */
+      color: #FFF; }
+    .theme-dark .kuiButton--basic:enabled:hover {
+      background-color: dimgray !important;
+      /* 1 */ }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):hover {
+      /* 1 */
+      background-color: dimgray !important;
+      /* 1 */ }
+    .theme-dark .kuiButton--basic:enabled:active {
+      background-color: dimgray !important;
+      /* 1 */ }
+    a.theme-dark .kuiButton--basic:not(.kuiButton-isDisabled):active {
+      /* 1 */
+      background-color: dimgray !important;
+      /* 1 */ }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--primary {
+  color: #FFF;
+  background-color: #0079a5; }
+  .kuiButton--primary:not(a):enabled:focus {
+    color: #FFF; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #FFF; }
+  .kuiButton--primary:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #005472; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #005472; }
+  .kuiButton--primary:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #005472; }
+  a.kuiButton--primary:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #005472; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--success {
+  color: #FFF;
+  background-color: #00A69B; }
+  .kuiButton--success:not(a):enabled:focus {
+    color: #FFF; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    color: #FFF; }
+  .kuiButton--success:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  .kuiButton--success:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+  a.kuiButton--success:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #00736b; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--danger {
+  color: #A30000;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: solid 1px #A30000; }
+  .kuiButton--danger:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */
+    color: #A30000; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */
+    color: #A30000; }
+  .kuiButton--danger:enabled:hover {
+    color: #700000 !important;
+    background-color: rgba(255, 163, 163, 0.5);
+    border: solid 1px #700000; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #700000 !important;
+    background-color: rgba(255, 163, 163, 0.5);
+    border: solid 1px #700000; }
+  .kuiButton--danger:enabled:active {
+    color: #700000 !important;
+    background-color: rgba(255, 163, 163, 0.5);
+    border: solid 1px #700000; }
+  a.kuiButton--danger:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #700000 !important;
+    background-color: rgba(255, 163, 163, 0.5);
+    border: solid 1px #700000; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: #FFF;
+  background-color: #f98100; }
+  .kuiButton--warning:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ffa500;
+    /* 3 */
+    color: #FFF; }
+  .kuiButton--warning:enabled:hover {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #c66700; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #c66700; }
+  .kuiButton--warning:enabled:active {
+    color: #FFF !important;
+    /* 1 */
+    background-color: #c66700; }
+  a.kuiButton--warning:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #FFF !important;
+    /* 1 */
+    background-color: #c66700; }
+  .kuiButton--warning:disabled {
+    background-color: #ff9a2d; }
+  a.kuiButton--warning.kuiButton-isDisabled {
+    background-color: #ff9a2d; }
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
+ */
+.kuiButton--hollow {
+  color: #0079a5 !important;
+  /* 2 */
+  background-color: transparent; }
+  .theme-dark .kuiButton--hollow {
+    color: #b7e2ea !important;
+    /* 2 */ }
+  .kuiButton--hollow:enabled:hover {
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:hover {
+      color: #def2f6 !important;
+      /* 2 */ }
+  a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+      color: #def2f6 !important;
+      /* 2 */ }
+  .kuiButton--hollow:enabled:active {
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:active {
+      color: #def2f6 !important;
+      /* 2 */ }
+  a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #006E8A !important;
+    /* 1 */
+    text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+      color: #def2f6 !important;
+      /* 2 */ }
+
+.kuiButton--secondary {
+  color: #0079a5 !important;
+  /* 2 */
+  border: solid 1px #0079a5;
+  background-color: rgba(255, 255, 255, 0.5); }
+  .kuiButton--secondary:enabled:hover {
+    color: #005472 !important;
+    /* 1 */
+    border: solid 1px #005472;
+    background-color: rgba(165, 231, 255, 0.5); }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
+    /* 1 */
+    color: #005472 !important;
+    /* 1 */
+    border: solid 1px #005472;
+    background-color: rgba(165, 231, 255, 0.5); }
+  .kuiButton--secondary:enabled:active {
+    color: #005472 !important;
+    /* 1 */
+    border: solid 1px #005472;
+    background-color: rgba(165, 231, 255, 0.5); }
+  a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
+    /* 1 */
+    color: #005472 !important;
+    /* 1 */
+    border: solid 1px #005472;
+    background-color: rgba(165, 231, 255, 0.5); }
+
+.kuiButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiButtonGroup .kuiButton + .kuiButton {
+    margin-left: 4px; }
+
+.kuiButtonGroup--united > .kuiButton:not(:first-child):not(:last-child) {
+  border-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0; }
+
+.kuiButtonGroup--united > .kuiButton:only-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px; }
+
+.kuiButtonGroup--united .kuiButton + .kuiButton {
+  margin-left: 2px; }
+
+.kuiButtonGroup--fullWidth {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiButtonGroup--fullWidth > .kuiButton {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    text-align: center; }
+
+.kuiCard {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  line-height: 1.5; }
+
+.kuiCard__description {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  padding: 18px 0;
+  text-align: center; }
+
+.kuiCard__descriptionTitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  max-width: calc(100% - 48px); }
+
+.kuiCard__descriptionText {
+  font-size: 14px;
+  max-width: calc(100% - 48px); }
+
+.kuiCard__footer {
+  text-align: center;
+  font-size: 14px;
+  padding: 0 15px 20px; }
+
+/**
+ * 1. Wrap cards when necessary.
+ * 2. Offset the spacing between wrapped cards.
+ */
+.kuiCardGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  /* 1 */
+  margin: -15px;
+  /* 2 */
+  /**
+   * 1. Use the defined width of the card to determine when to wrap.
+   * 2. Use an even margin all around the card so that the spacing is still even when wrapped.
+   */ }
+  .kuiCardGroup .kuiCard {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    /* 1 */
+    margin: 15px;
+    /* 2 */ }
+    .kuiCardGroup .kuiCard .kuiCard__description {
+      -webkit-box-flex: 1;
+      -webkit-flex: 1 1 auto;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto; }
+
+/**
+ * 1. There's no way to make this look good when wrapped.
+ * 2. Undo the default styles.
+ */
+.kuiCardGroup--united {
+  -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+          flex-wrap: nowrap;
+  /* 1 */
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0;
+  /* 2 */
+  /**
+   * 1. Force all cards to be the same size.
+   * 2. Undo the default styles.
+   */ }
+  .kuiCardGroup--united .kuiCard {
+    -webkit-flex-basis: 0;
+        -ms-flex-preferred-size: 0;
+            flex-basis: 0;
+    /* 1 */
+    border: none;
+    /* 2 */
+    border-radius: 0;
+    /* 2 */
+    margin: 0;
+    /* 2 */ }
+  .kuiCardGroup--united .kuiCard + .kuiCard {
+    border-left: 1px solid #E0E0E0; }
+
+.kuiCodeEditorWrapper {
+  position: relative; }
+  .kuiCodeEditorWrapper .ace_hidden-cursors {
+    opacity: 0; }
+  .kuiCodeEditorWrapper.kuiCodeEditorWrapper-isEditing .ace_hidden-cursors {
+    opacity: 1; }
+
+.kuiCodeEditorKeyboardHint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+  opacity: 0; }
+  .kuiCodeEditorKeyboardHint:focus {
+    opacity: 1;
+    border: 2px solid #0079a5;
+    z-index: 1000; }
+  .kuiCodeEditorKeyboardHint.kuiCodeEditorKeyboardHint-isInactive {
+    display: none; }
+
+.kuiCollapseButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: #2d2d2d !important;
+  /* 1 */
+  cursor: pointer;
+  opacity: 0.35; }
+  .kuiCollapseButton:hover {
+    opacity: 1; }
+  .theme-dark .kuiCollapseButton {
+    color: #cecece !important;
+    /* 1 */ }
+
+.kuiColorPicker {
+  cursor: pointer; }
+
+.kuiColorPicker__preview {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiColorPicker__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+  display: inline-block; }
+
+.kuiColorPicker__emptySwatch svg {
+  position: absolute;
+  width: 20px;
+  height: 20px; }
+
+.kuiColorPicker__emptySwatch svg line {
+  stroke: red;
+  stroke-width: 2; }
+
+.kuiColorPicker__label {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: middle; }
+
+.kuiColorPickerPopUp {
+  position: absolute;
+  z-index: 10; }
+
+/**
+ * 1. If we use margins instead, columns get pushed to the next line.
+ */
+.kuiColumn + .kuiColumn {
+  padding-left: 10px;
+  /* 1 */ }
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+.kuiColumn--1 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 8.33333%; }
+
+.kuiColumn--2 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 16.66667%; }
+
+.kuiColumn--3 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 25%; }
+
+.kuiColumn--4 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 33.33333%; }
+
+.kuiColumn--5 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 41.66667%; }
+
+.kuiColumn--6 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 50%; }
+
+.kuiColumn--7 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 58.33333%; }
+
+.kuiColumn--8 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 66.66667%; }
+
+.kuiColumn--9 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 75%; }
+
+.kuiColumn--10 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 83.33333%; }
+
+.kuiColumn--11 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 91.66667%; }
+
+.kuiColumn--12 {
+  display: inline-block;
+  /* 1 */
+  vertical-align: top;
+  /* 2 */
+  width: 100%; }
+
+.kuiContextMenu {
+  width: 256px;
+  position: relative;
+  overflow: hidden;
+  transition: height 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  border-radius: 4px; }
+  .kuiContextMenu .kuiContextMenu__content {
+    padding: 8px; }
+
+.kuiContextMenu__panel {
+  position: absolute; }
+
+/**
+   * 1. Ensure icon is centered within a container with a consistent width.
+   */
+.kuiContextMenu__icon {
+  width: 16px;
+  /* 1 */
+  text-align: center;
+  /* 1 */
+  margin-right: 8px; }
+
+.kuiContextMenu__itemLayout {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiContextMenuPanel {
+  width: 100%;
+  visibility: visible;
+  background-color: #ffffff;
+  /**
+   * 1. Override global focus style.
+   */ }
+  .kuiContextMenuPanel:focus {
+    box-shadow: none;
+    /* 1 */ }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txInLeft {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txOutLeft {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxOutLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxOutLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txInRight {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxInRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxInRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txOutRight {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .theme-dark .kuiContextMenuPanel {
+    background-color: #777777; }
+
+.kuiContextMenuPanel--next {
+  -webkit-transform: translateX(256px);
+          transform: translateX(256px);
+  visibility: hidden; }
+
+.kuiContextMenuPanel--previous {
+  -webkit-transform: translateX(-256px);
+          transform: translateX(-256px);
+  visibility: hidden; }
+
+/**
+ * 1. Button reset.
+ */
+.kuiContextMenuPanelTitle {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 1 */
+  border: none;
+  /* 1 */
+  cursor: pointer;
+  /* 1 */
+  background-color: #e6e6e6;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  /**
+   * 1. Overwrite default style.
+   */ }
+  .theme-dark .kuiContextMenuPanelTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
+  .kuiContextMenuPanelTitle:hover .kuiContextMenu__text, .kuiContextMenuPanelTitle:focus .kuiContextMenu__text {
+    text-decoration: underline; }
+  .kuiContextMenuPanelTitle:focus {
+    box-shadow: none;
+    /* 1 */ }
+
+@-webkit-keyframes kuiContextMenuPanelTxInLeft {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@keyframes kuiContextMenuPanelTxInLeft {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxOutLeft {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
+
+@keyframes kuiContextMenuPanelTxOutLeft {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxInRight {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@keyframes kuiContextMenuPanelTxInRight {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxOutRight {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
+
+@keyframes kuiContextMenuPanelTxOutRight {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
+
+/**
+ * 1. Button reset.
+ * 2. Ensure buttons stack.
+ */
+.kuiContextMenuItem {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 1 */
+  background-color: transparent;
+  /* 1 */
+  font-size: 14px;
+  /* 1 */
+  border: none;
+  /* 1 */
+  cursor: pointer;
+  /* 1 */
+  display: block;
+  /* 2 */
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+  color: #2d2d2d;
+  /**
+   * 1. Overwrite default style.
+   */ }
+  .kuiContextMenuItem:hover .kuiContextMenuItem__text, .kuiContextMenuItem:focus .kuiContextMenuItem__text {
+    text-decoration: underline; }
+  .kuiContextMenuItem:focus {
+    background-color: rgba(63, 168, 199, 0.2);
+    box-shadow: none;
+    /* 1 */ }
+    .theme-dark .kuiContextMenuItem:focus {
+      background-color: transparent; }
+  .theme-dark .kuiContextMenuItem {
+    color: #ffffff; }
+
+.kuiContextMenuItem__inner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiContextMenuItem__text {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.kuiContextMenuItem__arrow {
+  -webkit-align-self: flex-end;
+      -ms-flex-item-align: end;
+          align-self: flex-end; }
+
+.kuiContextMenuItem-disabled {
+  color: #9B9B9B;
+  cursor: default; }
+  .theme-dark .kuiContextMenuItem-disabled {
+    color: #9B9B9B; }
+  .kuiContextMenuItem-disabled:hover .kuiContextMenuItem__text, .kuiContextMenuItem-disabled:focus .kuiContextMenuItem__text {
+    text-decoration: none; }
+
+.kuiEvent {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiEventSymbol {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 1 auto;
+      -ms-flex: 0 1 auto;
+          flex: 0 1 auto;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-right: 8px; }
+
+.kuiEventBody {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%; }
+
+.kuiEventBody__message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #191E23; }
+
+.kuiEventBody__metadata {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666; }
+
+.kuiExpression {
+  padding: 20px;
+  white-space: nowrap; }
+
+.kuiExpressionButton {
+  background-color: transparent;
+  padding: 5px 0px;
+  border: none;
+  border-bottom: dotted 2px #D9D9D9;
+  font-size: 14px;
+  cursor: pointer; }
+
+.kuiExpressionButton__description {
+  color: #00A69B;
+  text-transform: uppercase; }
+
+.kuiExpressionButton__value {
+  color: #2d2d2d;
+  text-transform: lowercase; }
+
+.kuiExpressionButton-isActive {
+  border-bottom: solid 2px #00A69B; }
+
+.kuiFlexGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGroup .kuiFlexItem {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1; }
+
+.kuiFlexGroup--gutterSmall {
+  margin: -4px; }
+  .kuiFlexGroup--gutterSmall > .kuiFlexItem {
+    margin: 4px; }
+
+.kuiFlexGroup--gutterMedium {
+  margin: -8px; }
+  .kuiFlexGroup--gutterMedium > .kuiFlexItem {
+    margin: 8px; }
+
+.kuiFlexGroup--gutterLarge {
+  margin: -12px; }
+  .kuiFlexGroup--gutterLarge > .kuiFlexItem {
+    margin: 12px; }
+
+.kuiFlexGroup--gutterExtraLarge {
+  margin: -20px; }
+  .kuiFlexGroup--gutterExtraLarge > .kuiFlexItem {
+    margin: 20px; }
+
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  -webkit-box-pack: space-evenly;
+  -webkit-justify-content: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly; }
+
+.kuiFlexGroup--justifyContentSpaceBetween {
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+.kuiFlexGroup--justifyContentSpaceAround {
+  -webkit-justify-content: space-around;
+      -ms-flex-pack: distribute;
+          justify-content: space-around; }
+
+.kuiFlexGroup--justifyContentCenter {
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+
+.kuiFlexGroup--justifyContentFlexEnd {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.kuiFlexGroup--alignItemsStart {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFlexGroup--alignItemsCenter {
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiFlexGroup--alignItemsEnd {
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end; }
+
+.kuiFlexGroup--wrap {
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+
+@media only screen and (max-width: 768px) {
+  .kuiFlexGroup {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap; } }
+
+.kuiFlexGrid {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin-bottom: 0; }
+  .kuiFlexGrid > .kuiFlexItem {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0; }
+    .kuiFlexGrid > .kuiFlexItem.kuiFlexItem--flexGrowZero {
+      -webkit-box-flex: 0 !important;
+      -webkit-flex-grow: 0 !important;
+          -ms-flex-positive: 0 !important;
+              flex-grow: 0 !important;
+      -webkit-flex-basis: auto !important;
+          -ms-flex-preferred-size: auto !important;
+              flex-basis: auto !important; }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterSmall > .kuiFlexItem {
+  margin: 4px; }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 8px);
+        -ms-flex-preferred-size: calc(25% - 8px);
+            flex-basis: calc(25% - 8px); }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 8px);
+        -ms-flex-preferred-size: calc(33.3% - 8px);
+            flex-basis: calc(33.3% - 8px); }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 8px);
+        -ms-flex-preferred-size: calc(50% - 8px);
+            flex-basis: calc(50% - 8px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterMedium > .kuiFlexItem {
+  margin: 8px; }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 16px);
+        -ms-flex-preferred-size: calc(25% - 16px);
+            flex-basis: calc(25% - 16px); }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 16px);
+        -ms-flex-preferred-size: calc(33.3% - 16px);
+            flex-basis: calc(33.3% - 16px); }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 16px);
+        -ms-flex-preferred-size: calc(50% - 16px);
+            flex-basis: calc(50% - 16px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterLarge > .kuiFlexItem {
+  margin: 12px; }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 24px);
+        -ms-flex-preferred-size: calc(25% - 24px);
+            flex-basis: calc(25% - 24px); }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 24px);
+        -ms-flex-preferred-size: calc(33.3% - 24px);
+            flex-basis: calc(33.3% - 24px); }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 24px);
+        -ms-flex-preferred-size: calc(50% - 24px);
+            flex-basis: calc(50% - 24px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterXLarge > .kuiFlexItem {
+  margin: 16px; }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 32px);
+        -ms-flex-preferred-size: calc(25% - 32px);
+            flex-basis: calc(25% - 32px); }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 32px);
+        -ms-flex-preferred-size: calc(33.3% - 32px);
+            flex-basis: calc(33.3% - 32px); }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 32px);
+        -ms-flex-preferred-size: calc(50% - 32px);
+            flex-basis: calc(50% - 32px); }
+
+/**
+ * 1. Allow KuiPanels to expand to fill the item.
+ */
+.kuiFlexItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  /* 1 */
+  /*
+   * 1. We need the extra specificity here to override the FlexGroup > FlexItem styles.
+   * 2. FlexItem can be manually set to not grow if needed.
+   */ }
+  .kuiFlexItem.kuiFlexItem--flexGrowZero {
+    /* 1 */
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    /* 2 */
+    -webkit-flex-basis: auto;
+        -ms-flex-preferred-size: auto;
+            flex-basis: auto;
+    /* 2 */ }
+  .kuiFlexItem.kuiFlexItem--flexGrow1 {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1; }
+  .kuiFlexItem.kuiFlexItem--flexGrow2 {
+    -webkit-box-flex: 2;
+    -webkit-flex-grow: 2;
+        -ms-flex-positive: 2;
+            flex-grow: 2; }
+  .kuiFlexItem.kuiFlexItem--flexGrow3 {
+    -webkit-box-flex: 3;
+    -webkit-flex-grow: 3;
+        -ms-flex-positive: 3;
+            flex-grow: 3; }
+  .kuiFlexItem.kuiFlexItem--flexGrow4 {
+    -webkit-box-flex: 4;
+    -webkit-flex-grow: 4;
+        -ms-flex-positive: 4;
+            flex-grow: 4; }
+  .kuiFlexItem.kuiFlexItem--flexGrow5 {
+    -webkit-box-flex: 5;
+    -webkit-flex-grow: 5;
+        -ms-flex-positive: 5;
+            flex-grow: 5; }
+  .kuiFlexItem.kuiFlexItem--flexGrow6 {
+    -webkit-box-flex: 6;
+    -webkit-flex-grow: 6;
+        -ms-flex-positive: 6;
+            flex-grow: 6; }
+  .kuiFlexItem.kuiFlexItem--flexGrow7 {
+    -webkit-box-flex: 7;
+    -webkit-flex-grow: 7;
+        -ms-flex-positive: 7;
+            flex-grow: 7; }
+  .kuiFlexItem.kuiFlexItem--flexGrow8 {
+    -webkit-box-flex: 8;
+    -webkit-flex-grow: 8;
+        -ms-flex-positive: 8;
+            flex-grow: 8; }
+  .kuiFlexItem.kuiFlexItem--flexGrow9 {
+    -webkit-box-flex: 9;
+    -webkit-flex-grow: 9;
+        -ms-flex-positive: 9;
+            flex-grow: 9; }
+  .kuiFlexItem.kuiFlexItem--flexGrow10 {
+    -webkit-box-flex: 10;
+    -webkit-flex-grow: 10;
+        -ms-flex-positive: 10;
+            flex-grow: 10; }
+
+@media only screen and (max-width: 768px) {
+  .kuiFlexItem {
+    width: 100% !important;
+    -webkit-flex-basis: 100% !important;
+        -ms-flex-preferred-size: 100% !important;
+            flex-basis: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: 16px !important; } }
+
+/**
+ * 1. Set inline-block so this wrapper shrinks to fit the input.
+ */
+.kuiAssistedInput {
+  display: inline-block;
+  /* 1 */
+  position: relative; }
+
+/**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+.kuiAssistedInput__assistance {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  /* 1 */
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  /* 1 */ }
+
+/**
+ * 1. Deliberately disable only webkit appearance. If we disable it in Firefox, we get a really
+ *    ugly default appearance which we can't customize, so our best option is to give Firefox
+ *    control over the checkbox's appearance.
+ * 2. Override default styles (possibly from Bootstrap).
+ */
+.kuiCheckBox {
+  -webkit-appearance: none;
+  /* 1 */
+  background-color: #FFF;
+  border: 1px solid #BEBEBE;
+  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  line-height: 1.5 !important;
+  /* 2 */
+  margin: 0 !important;
+  /* 2 */
+  font: "Open Sans", Helvetica, Arial, sans-serif !important;
+  /* 2 */
+  font-family: "Open Sans", Helvetica, Arial, sans-serif !important;
+  /* 2 */
+  font-size: 10px !important;
+  /* 2 */
+  transition: background-color 0.1s linear; }
+  .kuiCheckBox:before {
+    position: relative;
+    left: 0.25em;
+    font-family: FontAwesome;
+    content: "\F00C";
+    font-size: 1em;
+    opacity: 0;
+    color: #FFF;
+    transition: opacity 0.1s linear; }
+  .kuiCheckBox:checked {
+    border-color: #0079a5;
+    background-color: #0079a5; }
+    .kuiCheckBox:checked:before {
+      opacity: 1; }
+  .kuiCheckBox:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  .kuiCheckBox:disabled {
+    background-color: #D9D9D9 !important;
+    border-color: #D9D9D9 !important;
+    cursor: not-allowed !important; }
+  .theme-dark .kuiCheckBox {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiCheckBox:checked {
+      background-color: #0079a5; }
+
+.kuiCheckBoxLabel {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-weight: normal !important;
+  line-height: 1.5; }
+
+.kuiCheckBoxLabel__text {
+  font-size: 14px;
+  margin-left: 8px; }
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiLabel {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: bold;
+  margin-bottom: 0;
+  /* 1 */ }
+
+.kuiSearchInput {
+  width: 180px;
+  display: inline-block;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.5; }
+  .kuiSearchInput.kuiSearchInput-isInvalid .kuiSearchInput__input {
+    border-color: #A30000; }
+
+.kuiSearchInput__icon {
+  position: absolute;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
+  color: #ACACAC; }
+
+/**
+   * 1. Make space for search icon.
+   * 2. Expand to fill container.
+   */
+.kuiSearchInput__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
+  padding-left: 28px;
+  /* 1 */
+  width: 100%;
+  /* 2 */ }
+  .theme-dark .kuiSearchInput__input {
+    color: #cecece; }
+  .kuiSearchInput__input:invalid {
+    border-color: #A30000; }
+  .kuiSearchInput__input:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiSearchInput__input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiSearchInput__input {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSearchInput__input:focus {
+      outline: none;
+      border-color: #0079a5; }
+
+.kuiSearchInput--small {
+  width: 60px; }
+
+.kuiSearchInput--large {
+  width: 400px; }
+
+/**
+ * Avoid setting a width here, so that the width of the options can dynamically set the width.
+ */
+.kuiSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */ }
+  .theme-dark .kuiSelect {
+    color: #cecece; }
+  .kuiSelect:invalid {
+    border-color: #A30000; }
+  .kuiSelect:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiSelect:focus {
+      outline: none;
+      border-color: #0079a5; }
+  .kuiSelect:-moz-focusring {
+    text-shadow: 0 0 0;
+    /* 3 */ }
+  .theme-dark .kuiSelect {
+    background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
+    /* 1 */ }
+  .kuiSelect.kuiSelect-isInvalid {
+    border-color: #A30000; }
+  .kuiSelect:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: #0079a5; }
+
+.kuiSelect--small {
+  width: 60px; }
+
+.kuiSelect--medium {
+  width: 180px; }
+
+.kuiSelect--large {
+  width: 400px; }
+
+/**
+ * 1. Have the same spatial footprint as the regular input.
+ */
+.kuiStaticInput {
+  width: 180px;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  border: 1px solid transparent;
+  /* 1 */
+  background-color: transparent; }
+  .theme-dark .kuiStaticInput {
+    color: #cecece; }
+
+.kuiTextArea {
+  width: 180px;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
+  .theme-dark .kuiTextArea {
+    color: #cecece; }
+  .kuiTextArea:invalid {
+    border-color: #A30000; }
+  .kuiTextArea:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiTextArea:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiTextArea {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiTextArea:focus {
+      outline: none;
+      border-color: #0079a5; }
+  .kuiTextArea:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: #0079a5; }
+  .kuiTextArea.kuiTextArea-isInvalid {
+    border-color: #A30000; }
+
+.kuiTextArea--nonResizable {
+  resize: none; }
+
+.kuiTextArea--small {
+  width: 60px; }
+
+.kuiTextArea--large {
+  width: 400px; }
+
+.kuiTextInput {
+  width: 180px;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */ }
+  .theme-dark .kuiTextInput {
+    color: #cecece; }
+  .kuiTextInput:invalid {
+    border-color: #A30000; }
+  .kuiTextInput:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiTextInput:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiTextInput {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiTextInput:focus {
+      outline: none;
+      border-color: #0079a5; }
+  .kuiTextInput.kuiTextInput-isInvalid {
+    border-color: #A30000; }
+
+.kuiTextInput--small {
+  width: 60px; }
+
+.kuiTextInput--large {
+  width: 400px; }
+
+/**
+ * 1. We may want to put elements in here which have different heights.
+ */
+.kuiFieldGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  /* 1 */ }
+
+.kuiFieldGroup--alignTop {
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start; }
+
+.kuiFieldGroupSection {
+  line-height: 1.5; }
+  .kuiFieldGroupSection + .kuiFieldGroupSection {
+    margin-left: 10px; }
+
+.kuiFieldGroupSection--wide {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+  .kuiFieldGroupSection--wide > * {
+    width: 100%; }
+
+.kuiGallery {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+
+.kuiGalleryItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 20px 20px 0;
+  padding: 25px 10px 10px;
+  line-height: 1.5;
+  background-color: #F6F6F6;
+  border: 1px solid #CED5DA;
+  border-radius: 4px;
+  text-decoration: none; }
+  .kuiGalleryItem:hover {
+    background-color: #FFFFFF;
+    border-color: #00A6FF; }
+
+.kuiGalleryItem__image {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 20px; }
+
+/**
+   * 1. Truncate overflowing text.
+   */
+.kuiGalleryItem__label {
+  font-size: 14px;
+  color: #191E23;
+  text-align: center;
+  max-width: 100%;
+  /* 1 */
+  white-space: nowrap;
+  /* 1 */
+  overflow: hidden;
+  /* 1 */
+  text-overflow: ellipsis;
+  /* 1 */ }
+
+.kuiGalleryItem__icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: #666; }
+
+.kuiHeaderBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
+  border-bottom: 1px solid #D9D9D9; }
+
+/**
+ * 1. Align a single section to the left by default.
+ */
+.kuiHeaderBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiHeaderBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiHeaderBarSection:first-child {
+    margin-left: 0; }
+  .kuiHeaderBarSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiHeaderBarSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiHeaderBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiHeaderBarSection:only-child {
+    margin-left: 0;
+    /* 1 */ }
+
+.kuiInfoButton {
+  font-size: 16px;
+  line-height: 0;
+  background-color: transparent;
+  color: #0079a5;
+  cursor: pointer;
+  border: none;
+  padding: 0; }
+  .kuiInfoButton:hover, .kuiInfoButton:active {
+    color: #005472; }
+
+/**
+ * 1. Copied from FontAwesome's .fa class. We use a custom class to make it easier to migrate away
+ *    from FontAwesome someday. When we do migrate away, we can just update this definition.
+ */
+.kuiIcon {
+  display: inline-block;
+  /* 1 */
+  font: normal normal normal 14px/1 FontAwesome;
+  /* 1 */
+  font-size: inherit;
+  /* 1 */
+  text-rendering: auto;
+  /* 1 */
+  -webkit-font-smoothing: antialiased;
+  /* 1 */
+  -moz-osx-font-smoothing: grayscale;
+  /* 1 */ }
+
+.kuiIcon--info {
+  color: #3fa8c7; }
+
+.kuiIcon--success {
+  color: #417505; }
+
+.kuiIcon--warning {
+  color: #ec9800; }
+
+.kuiIcon--error {
+  color: #A30000; }
+
+.kuiIcon--inactive {
+  color: #c3c3c3; }
+
+.kuiIcon--basic {
+  color: #565656; }
+
+.kuiInfoPanel {
+  padding: 14px 20px 18px;
+  line-height: 1.5;
+  border: 2px solid; }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--info {
+  border-color: rgba(63, 168, 199, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--success {
+  border-color: rgba(65, 117, 5, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--warning {
+  border-color: rgba(236, 152, 0, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--error {
+  border-color: rgba(163, 0, 0, 0.25);
+  /* 1 */ }
+
+/**
+ * 1. Align with first line of title text if it wraps.
+ */
+.kuiInfoPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline;
+  /* 1 */ }
+
+.kuiInfoPanelHeader__icon {
+  margin-right: 10px;
+  font-size: 14px;
+  line-height: 1.5; }
+
+.kuiInfoPanelHeader__title {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700; }
+
+.kuiInfoPanelBody {
+  margin-top: 8px; }
+  .kuiInfoPanelBody > * + * {
+    margin-top: 8px; }
+
+.kuiInfoPanelBody__message {
+  font-size: 14px;
+  line-height: 1.5; }
+
+.kuiLink {
+  color: #0079a5;
+  text-decoration: none;
+  cursor: pointer;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */ }
+  .kuiLink:visited, .kuiLink:active {
+    color: #0079a5; }
+  .kuiLink:hover {
+    color: #006E8A;
+    text-decoration: underline; }
+  .theme-dark .kuiLink {
+    color: #b7e2ea; }
+    .theme-dark .kuiLink:hover {
+      color: #b7e2ea; }
+
+/**
+ * 1. Breadcrumbs are placed in the top-left corner and need to be bumped over
+ *    a bit.
+ */
+.kuiLocalBreadcrumbs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-left: 10px;
+  /* 1 */ }
+
+.kuiLocalBreadcrumb {
+  font-size: 14px;
+  margin: 0;
+  font-weight: normal; }
+  .kuiLocalBreadcrumb + .kuiLocalBreadcrumb {
+    margin-left: 6px; }
+    .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+      content: '/';
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      margin-right: 4px;
+      color: #5a5a5a; }
+      .theme-dark .kuiLocalBreadcrumb + .kuiLocalBreadcrumb:before {
+        color: #a5a5a5; }
+
+/**
+ * 1. Make it a bit darker to contrast with the gray background.
+ */
+.kuiLocalBreadcrumb__link {
+  color: #0079a5;
+  text-decoration: none;
+  cursor: pointer;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: none;
+  /* 2 */
+  font-size: inherit;
+  /* 2 */
+  line-height: inherit;
+  /* 2 */
+  color: #0079a5;
+  /* 1 */
+  font-size: 14px; }
+  .kuiLocalBreadcrumb__link:visited, .kuiLocalBreadcrumb__link:active {
+    color: #0079a5; }
+  .kuiLocalBreadcrumb__link:hover {
+    color: #006E8A;
+    text-decoration: underline; }
+  .theme-dark .kuiLocalBreadcrumb__link {
+    color: #b7e2ea; }
+    .theme-dark .kuiLocalBreadcrumb__link:hover {
+      color: #b7e2ea; }
+
+.kuiLocalBreadcrumb__emphasis {
+  font-weight: 700; }
+
+.kuiDatePicker {
+  background-color: transparent;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: 1.5; }
+
+.kuiDatePickerNavigationCell {
+  padding: 0; }
+
+.kuiDatePickerNavigation {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-bottom: 4px; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerNavigationButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  border: none;
+  font-size: 12px;
+  color: #2d2d2d;
+  padding: 3px 6px;
+  border-radius: 4px; }
+  .kuiDatePickerNavigationButton:hover, .kuiDatePickerNavigationButton:active {
+    cursor: pointer;
+    color: #F5F5F5;
+    background-color: #0079a5; }
+  .kuiDatePickerNavigationButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #F5F5F5, 0 0 0 2px #0079a5;
+    /* 3 */
+    color: #2d2d2d;
+    /* 1 */ }
+  .theme-dark .kuiDatePickerNavigationButton {
+    color: #dedede; }
+    .theme-dark .kuiDatePickerNavigationButton:hover, .theme-dark .kuiDatePickerNavigationButton:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
+    .theme-dark .kuiDatePickerNavigationButton:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #0079a5;
+      /* 3 */
+      color: #dedede;
+      /* 1 */ }
+
+.kuiDatePickerHeaderCell {
+  padding: 9px 0;
+  color: #2d2d2d;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2; }
+  .theme-dark .kuiDatePickerHeaderCell {
+    color: #cecece; }
+
+.kuiDatePickerRowCell {
+  padding: 0;
+  text-align: center;
+  /**
+   * This state class exists to support weird angular-bootstrap datepicker functionality,
+   * in which you can't select a day on the "From" calendar if it falls after the selected day in
+   * the "To" calendar (and vice versa, you can't select a "To" day if it is before the "From" day).
+   */ }
+  .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked {
+    cursor: not-allowed; }
+    .kuiDatePickerRowCell.kuiDatePickerRowCell-isBlocked .kuiDatePickerRowCellContent {
+      pointer-events: none; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiDatePickerRowCellContent {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  color: #2d2d2d;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 4px;
+  line-height: 1.2; }
+  .kuiDatePickerRowCellContent:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #F5F5F5, 0 0 0 2px #0079a5;
+    /* 3 */
+    color: #2d2d2d;
+    /* 1 */ }
+  .kuiDatePickerRowCellContent:disabled {
+    pointer-events: none;
+    opacity: 0.5; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isOtherMonth {
+    visibility: hidden;
+    pointer-events: none; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+    color: #0079a5; }
+  .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+    background-color: #777777;
+    color: #ffffff; }
+  .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
+    cursor: pointer;
+    color: #F5F5F5;
+    background-color: #0079a5; }
+  .theme-dark .kuiDatePickerRowCellContent {
+    color: #cecece; }
+    .theme-dark .kuiDatePickerRowCellContent:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #525252, 0 0 0 2px #0079a5;
+      /* 3 */ }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
+      color: #b7e2ea; }
+    .theme-dark .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
+      color: #ffffff; }
+    .theme-dark .kuiDatePickerRowCellContent:hover, .theme-dark .kuiDatePickerRowCellContent:active {
+      color: #ffffff;
+      background-color: rgba(0, 0, 0, 0.4); }
+
+.kuiLocalDropdown {
+  position: relative;
+  padding: 10px 10px 14px;
+  background-color: #F5F5F5;
+  border-bottom: solid 1px #D9D9D9;
+  border-top: solid 1px #D9D9D9;
+  margin-bottom: 10px;
+  line-height: 20px; }
+  .theme-dark .kuiLocalDropdown {
+    background-color: #525252;
+    border-color: #1a1a1a; }
+
+.kuiLocalDropdownCloseButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-color: transparent;
+  padding: 4px;
+  border: none;
+  line-height: 1;
+  font-size: 16px;
+  color: #2d2d2d !important;
+  /* 1 */
+  cursor: pointer;
+  opacity: 0.35;
+  position: absolute;
+  top: 1px;
+  right: 5px; }
+  .kuiLocalDropdownCloseButton:hover {
+    opacity: 1; }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece !important;
+    /* 1 */ }
+  .theme-dark .kuiLocalDropdownCloseButton {
+    color: #cecece !important;
+    /* 1 */ }
+
+.kuiLocalDropdownPanels {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiLocalDropdownPanel {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 0%;
+      -ms-flex: 1 1 0%;
+          flex: 1 1 0%; }
+
+.kuiLocalDropdownPanel--left {
+  margin-right: 30px; }
+
+.kuiLocalDropdownPanel--right {
+  margin-left: 30px; }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiLocalDropdownTitle {
+  margin-top: 0;
+  /* 1 */
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #2d2d2d; }
+  .theme-dark .kuiLocalDropdownTitle {
+    color: #cecece; }
+
+.kuiLocalDropdownSection {
+  margin-bottom: 16px; }
+  .kuiLocalDropdownSection:last-child {
+    margin-bottom: 0; }
+
+.kuiLocalDropdownHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-bottom: 6px; }
+
+/**
+   * 1. Override inherited styles.
+   */
+.kuiLocalDropdownHeader__label {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 0;
+  /* 1 */
+  color: #2d2d2d; }
+  .theme-dark .kuiLocalDropdownHeader__label {
+    color: #cecece; }
+
+.kuiLocalDropdownHeader__actions {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiLocalDropdownHeader__action {
+  color: #0079a5;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer; }
+  .kuiLocalDropdownHeader__action + .kuiLocalDropdownHeader__action {
+    margin-left: 10px; }
+  .kuiLocalDropdownHeader__action:hover, .kuiLocalDropdownHeader__action:active {
+    color: #005472; }
+  .theme-dark .kuiLocalDropdownHeader__action {
+    color: #b7e2ea; }
+    .theme-dark .kuiLocalDropdownHeader__action:hover, .theme-dark .kuiLocalDropdownHeader__action:active {
+      color: #def2f6; }
+
+.kuiLocalDropdownInput {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 5px 15px;
+  font-size: 14px;
+  color: #2d2d2d;
+  background-color: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px; }
+  .kuiLocalDropdownInput:focus {
+    border-color: #0079a5; }
+  .theme-dark .kuiLocalDropdownInput {
+    color: #cecece;
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiLocalDropdownInput:focus {
+      border-color: #0079a5; }
+
+.kuiLocalDropdownFormNote {
+  font-size: 14px;
+  color: #737373; }
+  .theme-dark .kuiLocalDropdownFormNote {
+    color: #a2a2a2; }
+
+.kuiLocalDropdownWarning {
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: #2d2d2d;
+  background-color: #FFF; }
+  .theme-dark .kuiLocalDropdownWarning {
+    color: #cecece;
+    background-color: #636363; }
+
+.kuiLocalDropdownHelpText {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #2D2D2D; }
+  .theme-dark .kuiLocalDropdownHelpText {
+    color: #9e9e9e; }
+
+.kuiLocalMenu {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+
+.kuiLocalMenuItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 100%;
+  padding: 0 10px;
+  font-size: 14px;
+  background-color: transparent;
+  color: #2d2d2d;
+  border: 0;
+  cursor: pointer;
+  border-right: solid 1px transparent;
+  border-left: solid 1px transparent; }
+  .kuiLocalMenuItem:hover, .kuiLocalMenuItem:focus {
+    background-color: #0079a5;
+    color: #F5F5F5; }
+  .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
+    background-color: #F5F5F5;
+    border-color: #D9D9D9;
+    height: calc(100% + 1px);
+    z-index: 2;
+    color: #0079a5; }
+    .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:hover, .kuiLocalMenuItem.kuiLocalMenuItem-isSelected:focus {
+      color: #0079a5; }
+  .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled {
+    opacity: 0.5;
+    cursor: not-allowed; }
+    .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
+      background-color: transparent;
+      color: #2d2d2d; }
+  .theme-dark .kuiLocalMenuItem {
+    color: #dedede; }
+    .theme-dark .kuiLocalMenuItem:hover {
+      background-color: #000000;
+      color: #ffffff; }
+    .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isSelected {
+      background-color: #525252;
+      border-color: #1a1a1a;
+      color: #ffffff; }
+    .theme-dark .kuiLocalMenuItem.kuiLocalMenuItem-isDisabled:hover {
+      background-color: transparent;
+      color: #dedede; }
+
+.kuiLocalMenuItem__icon {
+  margin-right: 5px;
+  margin-bottom: -1px; }
+
+/**
+ * 1. Match height of logo in side bar, but allow it to expand to accommodate
+ *    dropdown.
+ */
+.kuiLocalNav {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 69px;
+  /* 1 */
+  color: #2d2d2d;
+  background-color: #FFF;
+  line-height: 1.5;
+  border-bottom: solid 1px #D9D9D9; }
+  .theme-dark .kuiLocalNav {
+    color: #cecece;
+    background-color: #333333;
+    border-color: #1a1a1a; }
+
+/**
+ * 1. Allow row to expand if the content is so long that it wraps.
+ */
+.kuiLocalNavRow {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 29px;
+  /* 1 */ }
+
+.kuiLocalNavRow__section {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+
+/**
+ * 1. We make this row flex-start because it usually contains a search input, which may expand
+ *    beyond the height of this container. We can't use `align-items: center`, because this would
+ *    cause the search input to overflow both on the top and bottom; `align-items: flex-start`
+ *    makes it only overflow on the bottom. But this means we need to manually center the content
+ *    of this container using padding.
+ */
+.kuiLocalNavRow--secondary {
+  padding: 0 10px;
+  /* 1 */
+  -webkit-box-align: start;
+  -webkit-align-items: flex-start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  /* 1 */ }
+
+.kuiLocalSearch {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  margin-bottom: 10px; }
+
+.kuiLocalSearchInput {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 100%;
+      -ms-flex: 1 1 100%;
+          flex: 1 1 100%;
+  border-color: #ffffff;
+  border-color: #D9D9D9;
+  border-radius: 4px 0 0 4px; }
+  .theme-dark .kuiLocalSearchInput {
+    color: #cecece; }
+  .kuiLocalSearchInput:invalid {
+    border-color: #A30000; }
+  .kuiLocalSearchInput:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiLocalSearchInput:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiLocalSearchInput {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiLocalSearchInput:focus {
+      outline: none;
+      border-color: #0079a5; }
+  .kuiLocalSearchInput:focus {
+    box-shadow: none; }
+  .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
+    border-color: #e74C3c; }
+
+.kuiLocalSearchInput--secondary {
+  height: 30px;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  border-radius: 0;
+  border-left-width: 0; }
+  .theme-dark .kuiLocalSearchInput--secondary {
+    border-left-width: 1px;
+    border-left-color: #333333;
+    border-right-color: #333333; }
+
+.kuiLocalSearchAssistedInput {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 100%;
+      -ms-flex: 1 1 100%;
+          flex: 1 1 100%;
+  position: relative; }
+
+/**
+   * 1. Vertically center the assistance, regardless of its height.
+   */
+.kuiLocalSearchAssistedInput__assistance {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  /* 1 */
+  z-index: 2;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  /* 1 */ }
+
+.kuiLocalSearchSelect {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  padding: 3px 12px 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #191E23;
+  background-color: #ffffff;
+  border: 1px solid #DEDEDE;
+  border-radius: 4px;
+  transition: border-color 0.1s linear;
+  min-height: 30px;
+  /* 1 */
+  padding-right: 30px;
+  /* 2 */
+  background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>');
+  /* 1 */
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: calc(100% - 8px);
+  /* 2 */
+  border-left-width: 0;
+  border-radius: 0; }
+  .theme-dark .kuiLocalSearchSelect {
+    color: #cecece; }
+  .kuiLocalSearchSelect:invalid {
+    border-color: #A30000; }
+  .kuiLocalSearchSelect:focus {
+    outline: none;
+    border-color: #0079a5; }
+  .kuiLocalSearchSelect:disabled {
+    opacity: 0.4;
+    cursor: not-allowed; }
+  .theme-dark .kuiLocalSearchSelect {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiLocalSearchSelect:focus {
+      outline: none;
+      border-color: #0079a5; }
+  .kuiLocalSearchSelect:-moz-focusring {
+    text-shadow: 0 0 0;
+    /* 3 */ }
+  .theme-dark .kuiLocalSearchSelect {
+    background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>');
+    /* 1 */ }
+
+/**
+ * 1. Override inherited styles.
+ */
+.kuiLocalSearchButton {
+  width: 43px;
+  height: 30px;
+  font-size: 14px;
+  line-height: 0;
+  /* 1 */
+  color: #ffffff;
+  background-color: #666;
+  border: 0;
+  border-radius: 0 4px 4px 0; }
+  .kuiLocalSearchButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  .theme-dark .kuiLocalSearchButton {
+    color: #ffffff;
+    background-color: #777777; }
+    .theme-dark .kuiLocalSearchButton:focus {
+      z-index: 1;
+      /* 1 */
+      outline: none !important;
+      /* 2 */
+      box-shadow: 0 0 0 1px #333333, 0 0 0 2px #0079a5;
+      /* 3 */ }
+
+/**
+ * 1. We want the bottom border on selected tabs to be flush with the bottom of the container.
+ */
+.kuiLocalTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: end;
+  -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  height: 100%; }
+
+/**
+   * 1. Override inherited typographic styles.
+   */
+.kuiLocalTab {
+  padding: 5px 0 6px 0;
+  font-size: 18px;
+  color: #3F3F3F;
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 0 !important;
+  /* 1 */
+  margin-bottom: 0 !important;
+  /* 1 */
+  /**
+     * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
+     *    a regular cursor instead of setting pointer-events: none.
+     */ }
+  .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
+    color: #0079a5; }
+    .theme-dark .kuiLocalTab:hover:not(.kuiLocalTab-isDisabled), .theme-dark .kuiLocalTab:active:not(.kuiLocalTab-isDisabled) {
+      color: #ffffff; }
+  .kuiLocalTab.kuiLocalTab-isSelected {
+    color: #0079a5;
+    border-bottom-color: #0079a5;
+    cursor: default; }
+    .theme-dark .kuiLocalTab.kuiLocalTab-isSelected {
+      color: #ffffff;
+      border-bottom-color: #ffffff; }
+  .kuiLocalTab.kuiLocalTab-isDisabled {
+    opacity: 0.5;
+    cursor: default;
+    /* 1 */ }
+  .kuiLocalTab + .kuiLocalTab {
+    margin-left: 15px; }
+  .theme-dark .kuiLocalTab {
+    color: #dedede; }
+
+.kuiLocalTitle {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 100%;
+  padding-left: 10px;
+  font-size: 14px;
+  font-weight: bold; }
+
+/**
+ * 1. Allow class to be applied to `ul` and `ol` elements
+ */
+.kuiMenu {
+  padding-left: 0;
+  /* 1 */ }
+
+.kuiMenu--contained {
+  border: 1px solid #D9D9D9; }
+  .kuiMenu--contained .kuiMenuItem {
+    padding: 6px 10px; }
+
+/**
+ * 1. Allow class to be applied to `li` elements
+ */
+.kuiMenuItem {
+  list-style: none;
+  /* 1 */
+  padding: 6px 0; }
+  .kuiMenuItem + .kuiMenuItem {
+    border-top: 1px solid #D9D9D9; }
+
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ * 3. Make the button just tall enough to fit inside an Option Layout.
+ */
+.kuiMenuButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 10px;
+  /* 3 */
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px; }
+  .kuiMenuButton:disabled {
+    cursor: default;
+    pointer-events: none;
+    /* 2 */ }
+  .kuiMenuButton:active:enabled {
+    -webkit-transform: translateY(1px);
+            transform: translateY(1px); }
+  .kuiMenuButton:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
+    /* 3 */ }
+
+.kuiMenuButton--iconText .kuiMenuButton__icon:first-child {
+  margin-right: 4px; }
+
+.kuiMenuButton--iconText .kuiMenuButton__icon:last-child {
+  margin-left: 4px; }
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--basic {
+  color: #5a5a5a;
+  background-color: #ffffff; }
+  .kuiMenuButton--basic:focus {
+    color: #5a5a5a !important;
+    /* 1 */ }
+  .kuiMenuButton--basic:hover, .kuiMenuButton--basic:active {
+    /* 2 */
+    color: #5a5a5a !important;
+    /* 1 */
+    background-color: #F2F2F2; }
+  .kuiMenuButton--basic:disabled {
+    color: #9B9B9B; }
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--primary {
+  color: #ffffff;
+  background-color: #0079a5; }
+  .kuiMenuButton--primary:focus {
+    color: #ffffff !important;
+    /* 1 */ }
+  .kuiMenuButton--primary:hover, .kuiMenuButton--primary:active {
+    /* 2 */
+    color: #ffffff !important;
+    /* 1 */
+    background-color: #006E8A; }
+  .kuiMenuButton--primary:disabled {
+    background-color: #B6D6E0; }
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--danger {
+  color: #D76051;
+  background-color: #ffffff; }
+  .kuiMenuButton--danger:hover, .kuiMenuButton--danger:active {
+    /* 2 */
+    color: #FFFFFF !important;
+    /* 1 */
+    background-color: #D76051; }
+  .kuiMenuButton--danger:disabled {
+    color: #9B9B9B; }
+  .kuiMenuButton--danger:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #ff523c;
+    /* 3 */ }
+
+.kuiMenuButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiMenuButtonGroup .kuiMenuButton + .kuiMenuButton {
+    margin-left: 4px; }
+
+.kuiMenuButtonGroup--alignRight {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.kuiMicroButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: #666;
+  background-color: transparent;
+  line-height: 1;
+  /* 2 */
+  font-size: 12px; }
+  .kuiMicroButton:hover {
+    color: #191E23; }
+
+.kuiMicroButtonGroup {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .kuiMicroButtonGroup .kuiMicroButton + .kuiMicroButton {
+    margin-left: 2px; }
+
+.kuiModalOverlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-bottom: 10vh;
+  background-color: rgba(0, 0, 0, 0.5); }
+
+.kuiModal {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+  background-color: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
+          animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+  .theme-dark .kuiModal {
+    background-color: #525252;
+    border-color: #000; }
+
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto; }
+
+.kuiModalHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 10px;
+  padding-left: 20px;
+  border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiModalHeader {
+    border-bottom-color: #000; }
+
+.kuiModalHeader__title {
+  font-size: 18px; }
+  .theme-dark .kuiModalHeader__title {
+    color: #cecece; }
+
+.kuiModalHeaderCloseButton {
+  display: inline-block;
+  /* 1 */
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  color: #666;
+  background-color: transparent;
+  line-height: 1;
+  /* 2 */
+  font-size: 18px; }
+  .kuiModalHeaderCloseButton:hover {
+    color: #191E23; }
+
+.kuiModalBody {
+  padding: 20px; }
+
+.kuiModalBodyText {
+  font-size: 14px; }
+  .theme-dark .kuiModalBodyText {
+    color: #cecece; }
+
+.kuiModalFooter {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  padding: 20px;
+  padding-top: 10px; }
+  .kuiModalFooter > * + * {
+    margin-left: 5px; }
+
+@-webkit-keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+.kuiNotice {
+  padding: 40px 60px 48px;
+  margin: 20px;
+  background-color: #FFF;
+  line-height: 1.5; }
+
+/**
+ * 1. Put 10px of space between each child.
+ */
+.kuiPager {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+  .kuiPager > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiPagerText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
+
+.kuiPanel {
+  border: 1px solid #D9D9D9;
+  border-radius: 4px; }
+
+.kuiPanel--prompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-height: 300px; }
+  .kuiPanel--prompt .kuiPanelBody {
+    padding: 30px;
+    max-width: 500px; }
+
+.kuiPanel--noBorder {
+  border: none; }
+
+.kuiPanel--withToolBar {
+  border-top: none;
+  border-radius: 0; }
+
+.kuiPanel--centered {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiPanelHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
+  padding: 10px;
+  height: 50px;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiPanelHeader .kuiButton:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  a.kuiPanelHeader .kuiButton:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  .kuiPanelHeader .kuiButton--danger:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  a.kuiPanelHeader .kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  .kuiPanelHeader .kuiSelect {
+    border-color: #ffffff; }
+    .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
+      outline: none;
+      border-color: #0079a5; }
+    a.kuiPanelHeader .kuiSelect:not(.kuiButton-isDisabled):focus {
+      /* 1 */
+      outline: none;
+      border-color: #0079a5; }
+
+/**
+   * 1. This way we can use h1, h2, etc.
+   */
+.kuiPanelHeader__title {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0;
+  /* 1 */ }
+
+/**
+ * 1. Undo what barSection mixin does.
+ */
+.kuiPanelHeaderSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiPanelHeaderSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiPanelHeaderSection:first-child {
+    margin-left: 0; }
+  .kuiPanelHeaderSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiPanelHeaderSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+  .kuiPanelHeaderSection:only-child {
+    margin-left: 0;
+    /* 1 */
+    margin-right: auto;
+    /* 1 */ }
+
+.kuiPanelBody {
+  padding: 10px; }
+
+.kuiPanelSimple {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  background-color: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+  .kuiPanelSimple.kuiPanelSimple--paddingSmall {
+    padding: 8px; }
+  .kuiPanelSimple.kuiPanelSimple--paddingMedium {
+    padding: 16px; }
+  .kuiPanelSimple.kuiPanelSimple--paddingLarge {
+    padding: 24px; }
+  .kuiPanelSimple.kuiPanelSimple--shadow {
+    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+  .kuiPanelSimple.kuiPanelSimple--flexGrowZero {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0; }
+  .theme-dark .kuiPanelSimple {
+    background-color: #777777;
+    border-color: #444444; }
+
+.kuiPopover {
+  display: inline-block;
+  position: relative; }
+  .kuiPopover.kuiPopover-isOpen .kuiPopover__panel {
+    opacity: 1;
+    visibility: visible;
+    margin-top: 8px;
+    pointer-events: auto; }
+
+.kuiPopover__panel {
+  position: absolute;
+  z-index: 2000;
+  top: 100%;
+  left: 50%;
+  -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
+          transform: translateX(-50%) translateY(8px) translateZ(0);
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  transition: opacity cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, visibility cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, margin-top cubic-bezier(0.34, 1.61, 0.7, 1) 350ms;
+  -webkit-transform-origin: center top;
+          transform-origin: center top;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin-top: 24px; }
+  .kuiPopover__panel:before {
+    position: absolute;
+    content: "";
+    top: -16px;
+    height: 0;
+    width: 0;
+    left: 50%;
+    margin-left: -16px;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #D9D9D9; }
+    .theme-dark .kuiPopover__panel:before {
+      border-bottom-color: #444444; }
+  .kuiPopover__panel:after {
+    position: absolute;
+    content: "";
+    top: -15px;
+    right: 0;
+    height: 0;
+    left: 50%;
+    margin-left: -16px;
+    width: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #ffffff; }
+    .theme-dark .kuiPopover__panel:after {
+      border-bottom-color: #777777; }
+
+.kuiPopover--withTitle .kuiPopover__panel:after {
+  border-bottom-color: #e6e6e6; }
+  .theme-dark .kuiPopover--withTitle .kuiPopover__panel:after {
+    border-bottom-color: #777777; }
+
+.kuiPopover--anchorLeft .kuiPopover__panel {
+  left: 0;
+  -webkit-transform: translateX(0%) translateY(8px) translateZ(0);
+          transform: translateX(0%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorLeft .kuiPopover__panel:before, .kuiPopover--anchorLeft .kuiPopover__panel:after {
+    right: auto;
+    left: 16px;
+    margin: 0; }
+
+.kuiPopover--anchorRight .kuiPopover__panel {
+  left: 100%;
+  -webkit-transform: translateX(-100%) translateY(8px) translateZ(0);
+          transform: translateX(-100%) translateY(8px) translateZ(0); }
+  .kuiPopover--anchorRight .kuiPopover__panel:before, .kuiPopover--anchorRight .kuiPopover__panel:after {
+    right: 16px;
+    left: auto; }
+
+.kuiPopoverTitle {
+  background-color: #e6e6e6;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 12px;
+  font-size: 14px; }
+  .theme-dark .kuiPopoverTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
+
+.kuiEmptyTablePrompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 30px; }
+
+.kuiEmptyTablePrompt__message {
+  font-size: 18px;
+  color: #666;
+  line-height: 1.5; }
+
+.kuiEmptyTablePrompt__actions {
+  margin-top: 10px; }
+
+.kuiStatusText {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: baseline;
+  -webkit-align-items: baseline;
+      -ms-flex-align: baseline;
+          align-items: baseline; }
+
+.kuiStatusText--info {
+  color: #3fa8c7; }
+
+.kuiStatusText--success {
+  color: #417505; }
+
+.kuiStatusText--warning {
+  color: #ec9800; }
+
+.kuiStatusText--error {
+  color: #A30000; }
+
+/**
+ * 1. Set the image to be the same size as a font icon at 14px.
+ * 2. We need to cap the height too, in case the icon was designed thin and tall.
+ */
+.kuiStatusText__icon {
+  margin-right: 6px;
+  width: 1.15em;
+  /* 1 */
+  max-height: 1.15em;
+  /* 2 */ }
+
+/**
+ * 1. Make seamless transition from ToolBar to Table header and contained Menu.
+ * 1. Make seamless transition from Table to ToolBarFooter header.
+ */
+.kuiControlledTable .kuiTable {
+  border-top: none;
+  /* 1 */ }
+
+.kuiControlledTable .kuiToolBarFooter {
+  border-top: none;
+  /* 2 */ }
+
+.kuiControlledTable .kuiMenu--contained {
+  border-top: none;
+  /* 1 */ }
+
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+/**
+ * NOTE: table-layout: fixed causes a bug in IE11 and Edge (see #9929). It also prevents us from
+ * specifying a column width, e.g. the checkbox column.
+ */
+.kuiTable {
+  width: 100%;
+  border: 1px solid #D9D9D9;
+  border-collapse: collapse;
+  background-color: #FFF; }
+
+/**
+ * 1. Allow contents of cells to determine table's width.
+ */
+.kuiTable--fluid {
+  width: auto;
+  /* 1 */ }
+  .kuiTable--fluid .kuiTableHeaderCell,
+  .kuiTable--fluid .kuiTableRowCell {
+    max-width: none;
+    /* 1 */ }
+
+.kuiTableHeaderCell {
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  max-width: 20px;
+  /* 1 */
+  line-height: 1.5;
+  color: #666; }
+
+.kuiTableHeaderCell__liner {
+  display: inline-block;
+  padding: 7px 8px 8px; }
+
+/**
+ * 1. Prevent rapid clicking from selecting text.
+ * 2. Remove native button element styles.
+ * 3. Make buttons look and behave like table header cells.
+ */
+.kuiTableHeaderCellButton {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  /* 1 */
+  cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: 0;
+  /* 2 */
+  padding: 0;
+  /* 2 */
+  color: inherit;
+  /* 3 */
+  line-height: inherit;
+  /* 3 */
+  font-size: inherit;
+  /* 3 */
+  text-align: inherit;
+  /* 3 */ }
+  .kuiTableHeaderCellButton:hover .kuiTableSortIcon {
+    display: block;
+    opacity: 1; }
+  .kuiTableHeaderCellButton .kuiTableHeaderCell__liner {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
+
+.kuiTableHeaderCell--alignRight {
+  text-align: right; }
+
+.kuiTableSortIcon {
+  display: none;
+  pointer-events: none;
+  margin-left: 4px; }
+  .kuiTableHeaderCellButton-isSorted .kuiTableSortIcon {
+    display: block;
+    opacity: 0.4; }
+
+.kuiTableRow:hover .kuiTableRowHoverReveal {
+  display: inline-block; }
+
+.kuiTableRowHoverReveal {
+  display: none; }
+
+.kuiTableRowCell {
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  max-width: 20px;
+  /* 1 */
+  color: #191E23;
+  border-top: 1px solid #D9D9D9;
+  vertical-align: middle; }
+
+/**
+   * 1. Vertically align all children.
+   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   * 3. Truncate content with an ellipsis.
+   */
+.kuiTableRowCell__liner {
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */
+  overflow: hidden;
+  /* 3 */
+  text-overflow: ellipsis;
+  /* 3 */
+  white-space: nowrap;
+  /* 3 */ }
+  .kuiTableRowCell__liner > * {
+    vertical-align: middle;
+    /* 1 */ }
+
+.kuiTableRowCell--wrap .kuiTableRowCell__liner {
+  white-space: normal; }
+
+.kuiTableRowCell--overflowingContent .kuiTableRowCell__liner {
+  overflow: visible;
+  white-space: normal; }
+
+/**
+ * 1. We don't want to create too strong a disconnect between the original row and the row
+ *    that contains its expanded details.
+ */
+.kuiTableRowCell--expanded {
+  border-top-color: #f0f0f0;
+  /* 1 */ }
+
+.kuiTableRowCell--alignRight {
+  text-align: right; }
+  .kuiTableRowCell--alignRight .kuiTableRowCell__liner {
+    text-align: right; }
+
+/**
+ * 1. Rendered width of cell with checkbox inside of it.
+ * 2. Align checkbox with text in other cells.
+ * 3. Show the checkbox in Edge; otherwise it gets cropped.
+ */
+.kuiTableHeaderCell--checkBox,
+.kuiTableRowCell--checkBox {
+  width: 28px;
+  /* 1 */
+  line-height: 1;
+  /* 2 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    overflow: visible;
+    /* 3 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    padding-right: 0; }
+
+.kuiTableInfo {
+  padding: 30px;
+  font-size: 18px;
+  color: #666;
+  line-height: 1.5; }
+
+.kuiTabs {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  border-bottom: 1px solid #D9D9D9; }
+  .theme-dark .kuiTabs {
+    border-bottom: 1px solid #777777; }
+
+/**
+ * 1. Override button styles (some of which are from Bootstrap).
+ * 2. Adding a border shifts tabs right by 1px, so we need to shift them back.
+ * 3. Move the tab down so that its bottom border covers the container's bottom border.
+ * 4. When the tab is focused, its bottom border changes to be 1px, so we need to add 1px more
+ *    of padding to make sure the text doesn't shift down.
+ */
+.kuiTab {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 1 */
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 14px;
+  color: #666;
+  background-color: #FFF;
+  /* 1 */
+  border: 1px solid #D9D9D9;
+  border-radius: 0;
+  /* 1 */
+  margin-bottom: -1px;
+  /* 3 */ }
+  .theme-dark .kuiTab {
+    color: #cecece;
+    background-color: #333333;
+    border-color: #777777; }
+  .kuiTab + .kuiTab {
+    border-left: none; }
+    .kuiTab + .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      margin-left: -1px;
+      /* 2 */ }
+  .kuiTab:active {
+    outline: none !important;
+    /* 1 */
+    box-shadow: none;
+    /* 1 */ }
+  .kuiTab:focus {
+    outline: none;
+    /* 1 */ }
+  .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+    z-index: 1;
+    color: #0079a5;
+    border: 1px solid #0079a5 !important; }
+    .theme-dark .kuiTab:focus:not(.kuiTab-isSelected):not(:active) {
+      color: #cecece;
+      background-color: #333333;
+      border-color: #777777 !important; }
+  .kuiTab:hover:not(.kuiTab-isSelected) {
+    color: #006E8A;
+    background-color: #F2F2F2; }
+    .theme-dark .kuiTab:hover:not(.kuiTab-isSelected) {
+      color: #def2f6;
+      background-color: #777777; }
+  .kuiTab.kuiTab-isSelected {
+    cursor: default;
+    color: #191E23;
+    background-color: #FFF;
+    border-bottom-color: #FFF; }
+    .theme-dark .kuiTab.kuiTab-isSelected {
+      color: #cecece;
+      background-color: #333333;
+      border-bottom-color: #333333; }
+
+/**
+ * 1. Allow container to deteermine font-size and line-height.
+ * 2. Override inherited Bootstrap styles.
+ */
+.kuiToggleButton {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  /* 1 */
+  line-height: inherit;
+  /* 1 */
+  color: #191E23; }
+  .kuiToggleButton:focus {
+    color: #191E23; }
+  .kuiToggleButton:active {
+    color: #0079a5 !important;
+    /* 2 */ }
+  .kuiToggleButton:hover:not(:disabled) {
+    color: #006E8A !important;
+    /* 2 */
+    text-decoration: underline; }
+  .kuiToggleButton:disabled {
+    cursor: not-allowed;
+    opacity: .5; }
+
+/**
+   * 1. Make icon a consistent width so the text doesn't get pushed around as the icon changes
+   *    between "expand" and "collapse". Use ems to be relative to inherited font-size.
+   */
+.kuiToggleButton__icon {
+  width: 0.8em;
+  /* 1 */ }
+
+.kuiTogglePanelHeader {
+  padding-bottom: 4px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #D9D9D9;
+  /**
+   * 1. Allow the user to click anywhere on the header, not just on the button text.
+   */ }
+  .kuiTogglePanelHeader .kuiToggleButton {
+    width: 100%;
+    /* 1 */
+    text-align: left;
+    /* 1 */ }
+
+.kuiToolBar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
+  padding: 10px;
+  height: 50px;
+  background-color: transparent;
+  border: solid 1px #D9D9D9; }
+  .kuiToolBar .kuiButton:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  a.kuiToolBar .kuiButton:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #0079a5;
+    /* 3 */ }
+  .kuiToolBar .kuiButton--danger:not(a):enabled:focus {
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  a.kuiToolBar .kuiButton--danger:not(.kuiButton-isDisabled):focus {
+    /* 1 */
+    z-index: 1;
+    /* 1 */
+    outline: none !important;
+    /* 2 */
+    box-shadow: 0 0 0 1px #D9D9D9, 0 0 0 2px #ff523c;
+    /* 3 */ }
+  .kuiToolBar .kuiSelect {
+    border-color: #ffffff; }
+    .kuiToolBar .kuiSelect:not(a):enabled:focus {
+      outline: none;
+      border-color: #0079a5; }
+    a.kuiToolBar .kuiSelect:not(.kuiButton-isDisabled):focus {
+      /* 1 */
+      outline: none;
+      border-color: #0079a5; }
+
+.kuiToolBarSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiToolBarSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiToolBarSection:first-child {
+    margin-left: 0; }
+  .kuiToolBarSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiToolBarSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiToolBarSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+/**
+ * 1. Override Bar styles and put Search on the left side.
+ */
+.kuiToolBar--searchOnly .kuiToolBarSearch {
+  margin-left: 0 !important;
+  /* 1 */ }
+
+.kuiToolBarFooter {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 30px;
+  /* 1 */
+  padding: 10px;
+  height: 40px;
+  background-color: #ffffff;
+  border: 1px solid #D9D9D9; }
+
+.kuiToolBarFooterSection {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin-left: 25px;
+  margin-right: 25px; }
+  .kuiToolBarFooterSection:not(:first-child):not(:last-child):not(:only-child) {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    /* 3 */ }
+  .kuiToolBarFooterSection:first-child {
+    margin-left: 0; }
+  .kuiToolBarFooterSection:last-child {
+    margin-right: 0;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 1 auto;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    /* 4 */
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    /* 5 */ }
+  .kuiToolBarFooterSection:only-child {
+    margin-left: auto;
+    /* 2 */ }
+  .kuiToolBarFooterSection > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+/**
+ * 1. Put 10px of space between each child.
+ * 2. Fix IE11 bug which causes this item to grow too wide when there is only a single
+ *    kuiToolBarSection sibling.
+ */
+.kuiToolBarSearch {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-left: 25px;
+  margin-right: 25px;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  max-width: 100%;
+  /* 2 */
+  line-height: 1.5; }
+  .kuiToolBarSearch:first-child {
+    margin-left: 0; }
+  .kuiToolBarSearch:last-child {
+    margin-right: 0; }
+  .kuiToolBarSearch > * + * {
+    margin-left: 10px;
+    /* 1 */ }
+
+.kuiToolBarSearchBox {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  position: relative;
+  font-size: 14px;
+  max-width: 800px; }
+
+.kuiToolBarSearchBox__icon {
+  position: absolute;
+  top: 0.5em;
+  left: 0.7em;
+  font-size: 1em;
+  color: #ACACAC; }
+
+/**
+   * 1. Fix inherited styles (possibly from Bootstrap).
+   */
+.kuiToolBarSearchBox__input {
+  width: 100%;
+  min-width: 200px;
+  padding: 4px 12px 5px 28px;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  /* 1 */
+  background-color: #FFFFFF;
+  color: #191E23;
+  border-radius: 4px;
+  font-size: 1em;
+  border: 1px solid #D9D9D9;
+  line-height: normal;
+  /* 1 */
+  transition: border-color 0.1s linear; }
+  .kuiToolBarSearchBox__input:focus {
+    outline: none;
+    border-color: #0079a5; }
+
+/*
+ * 1. We don't want the text to take up two lines and overflow the ToolBar.
+ */
+.kuiToolBarText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5A5A5A;
+  white-space: nowrap;
+  /* 1 */ }
+
+/**
+ * 1. Override h1.
+ */
+.kuiTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  font-size: 22px; }
+  .theme-dark .kuiTitle {
+    color: #cecece; }
+
+/**
+ * 1. Override h2, h3, etc.
+ */
+.kuiSubTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  font-size: 18px; }
+  .theme-dark .kuiSubTitle {
+    color: #cecece; }
+
+/**
+ * 1. Override p.
+ */
+.kuiTextTitle {
+  margin: 0;
+  /* 1 */
+  font-weight: 700;
+  /* 1 */
+  line-height: 1.5;
+  font-size: 14px; }
+  .theme-dark .kuiTextTitle {
+    color: #cecece; }
+
+/**
+ * 1. Override p.
+ */
+.kuiText {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  line-height: 1.5;
+  font-size: 14px; }
+  .theme-dark .kuiText {
+    color: #cecece; }
+
+.kuiSubText {
+  margin: 0;
+  /* 1 */
+  font-weight: 400;
+  /* 1 */
+  line-height: 1.5;
+  font-size: 12px; }
+  .theme-dark .kuiSubText {
+    color: #cecece; }
+
+.kuiSubduedText {
+  color: #666 !important; }
+
+.kuiVerticalRhythm + .kuiVerticalRhythm {
+  margin-top: 10px; }
+
+.kuiVerticalRhythmSmall + .kuiVerticalRhythmSmall {
+  margin-top: 5px; }
+
+.kuiVerticalRhythmLarge + .kuiVerticalRhythmLarge {
+  margin-top: 20px; }
+
+.kuiVerticalRhythmXLarge + .kuiVerticalRhythmXLarge {
+  margin-top: 40px; }
+
+.kuiView {
+  background-color: #FFF;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto; }
+
+.kuiViewContent {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width: 100%; }
+
+.kuiViewContent--constrainedWidth {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto; }
+
+.kuiViewContentItem {
+  padding-left: 20px;
+  padding-right: 20px; }

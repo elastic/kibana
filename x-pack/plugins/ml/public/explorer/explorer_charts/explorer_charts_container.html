@@ -1,0 +1,25 @@
+<div class="explorer-charts">
+  <div class="row" ng-hide="seriesToPlot.length === 0">
+
+    <div ng-repeat="series in seriesToPlot" class="ml-explorer-chart-container col-md-{{layoutCellsPerChart}}">
+      <div class="explorer-chart-label">
+        <div class="explorer-chart-label-fields">
+          <span ng-if="series.entityFields.length > 0">{{series.detectorLabel}} - </span>
+          <span ng-if="series.entityFields.length === 0">{{series.detectorLabel}}</span>
+          <span ng-repeat='entity in series.entityFields'>
+            {{entity.fieldName}} {{entity.fieldValue}} {{entity.fieldValueTest}}
+          </span>
+        </div>
+        <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="left" tooltip-html-unsafe="{{series.infoTooltip}}" tooltip-append-to-body="false"></i>
+        <i ng-if="tooManyBuckets" aria-hidden="true" class="fa fa-exclamation-triangle text-warning" tooltip-placement="bottom" tooltip-append-to-body="true"
+          tooltip-html-unsafe="This selection contains too many buckets to be displayed. The dashboard is best viewed over a shorter time range." ></i>
+        <a class="kuiLink" ng-click="exploreSeries(series)" data-toggle="tooltip" tooltip="View series in Single Metric Viewer">
+          View <i class="fa fa-external-link" aria-hidden="true"></i>
+        </a>
+      </div>
+      <ml-explorer-chart series-config="series" />
+    </div>
+
+  </div>
+
+</div>

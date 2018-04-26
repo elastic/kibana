@@ -308,6 +308,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('spyToggleButton');
     }
 
+    async setSpyPanelPageSize(size) {
+      await remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+        .click();
+    }
+
     async getMetric() {
       const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
       return await metricElement.getVisibleText();
@@ -369,6 +375,76 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async toggleOpenEditor(index) {
+      // index, see selectYAxisAggregation
+      const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
+      const toggleOpen = await toggle.getAttribute('aria-expanded');
+      log.debug(`toggle ${index} expand = ${toggleOpen}`);
+      if (toggleOpen === 'false') {
+        log.debug(`toggle ${index} click()`);
+        await toggle.click();
+      }
+    }
+
+    async selectYAxisAggregation(agg, field, label, index = 1) {
+      // index starts on the first "count" metric at 1
+      // Each new metric or aggregation added to a visualization gets the next index.
+      // So to modify a metric or aggregation tests need to keep track of the
+      // order they are added.
+      await this.toggleOpenEditor(index);
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
+      // open agg selection list
+      await aggSelect.click();
+      // select our agg
+      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
+      await aggItem.click();
+      const fieldSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match.ng-scope > span`);
+      // open field selection list
+      await fieldSelect.click();
+      // select our field
+      await testSubjects.click(field);
+      // enter custom label
+      await this.setCustomLabel(label, index);
+    }
+
+    async setCustomLabel(label, index = 1) {
+      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
+      customLabel.type(label);
+    }
+
+    async setAxisExtents(min, max, axis = 'LeftAxis-1') {
+      const axisOptions = await find.byCssSelector(`div[aria-label="Toggle ${axis} options"]`);
+      const isOpen = await axisOptions.getAttribute('aria-expanded');
+      if (isOpen === 'false') {
+        log.debug(`click to open ${axis} options`);
+        await axisOptions.click();
+      }
+      // it would be nice to get the correct axis by name like "LeftAxis-1"
+      // instead of an incremented index, but this link isn't under the div above
+      const advancedLink =
+        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
+
+      const advancedLinkState = await advancedLink.getAttribute('class');
+      if (advancedLinkState.includes('fa-caret-right')) {
+        await advancedLink.session.moveMouseTo(advancedLink);
+        log.debug('click advancedLink');
+        await advancedLink.click();
+      }
+      const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
+      const checkboxState = await checkbox.getAttribute('class');
+      if (checkboxState.includes('ng-empty')) {
+        await checkbox.session.moveMouseTo(checkbox);
+        await checkbox.click();
+      }
+      const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
+      await maxField.type(max);
+      const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
+      await minField.type(min);
+
+    }
+
     async getField() {
       const field = await retry.try(
         async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
@@ -391,12 +467,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
-        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
-          'option.ng-binding.ng-scope:contains("' + fieldValue + '")');
+        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
+        + `option.ng-binding.ng-scope:contains("${fieldValue}")`);
     }
 
     async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector('select[name="orderBy"] > option[value="' + fieldValue + '"]');
+      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
     }
 
     async getInterval() {
@@ -448,6 +524,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
+    }
+
+    async clickMetricsAndAxes() {
+      await testSubjects.click('visEditorTabadvanced');
+    }
+
+    async selectChartMode(mode) {
+      const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      await selector.click();
     }
 
     async clickData() {
@@ -538,23 +623,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      ** This method gets the chart data and scales it based on chart height and label.
      ** Returns an array of height values
      */
-    async getAreaChartData(aggregateName) {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxChartYAxisElement = await retry.try(
-        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
-
-      const yLabel = await maxChartYAxisElement.getVisibleText();
-      // since we're going to use the y-axis 'last' (top) label as a number to
-      // scale the chart pixel data, we need to clean out commas and % marks.
-      const yAxisLabel = yLabel.replace(/(%|,)/g, '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
+    async getAreaChartData(dataLabel, axis = 'ValueAxis-1') {
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
 
       const rectangle = await find.byCssSelector('rect.background');
       const yAxisHeight = await rectangle.getAttribute('height');
       log.debug(`height --------- ${yAxisHeight}`);
 
       const path = await retry.try(
-        async () => await find.byCssSelector(`path[data-label="${aggregateName}"]`, defaultFindTimeout * 2));
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2));
       const data = await path.getAttribute('d');
       log.debug(data);
       // This area chart data starts with a 'M'ove to a x,y location, followed
@@ -563,37 +640,33 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // So git rid of the one 'M' and split the rest on the 'L's.
       const tempArray = data.replace('M', '').split('L');
       const chartSections = tempArray.length / 2;
-      log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
+      // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
       for (let i = 0; i < chartSections; i++) {
-        chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) / yAxisHeight * yAxisLabel);
+        chartData[i] = Math.round((yAxisHeight - tempArray[i].split(',')[1]) * yAxisRatio);
         log.debug('chartData[i] =' + chartData[i]);
       }
       return chartData;
     }
 
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-    async getLineChartData(cssPart, axis = 'ValueAxis-1') {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxYAxisMarker = await retry.try(
-        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type`));
-      const yLabel = await maxYAxisMarker.getVisibleText();
-      const yAxisLabel = yLabel.replace(/,/g, '');
-
+    async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      // 1). get the range/pixel ratio
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 2). find and save the y-axis pixel size (the chart height)
       const rectangle = await find.byCssSelector('clipPath rect');
-      const theHeight = await rectangle.getAttribute('height');
-      const yAxisHeight = theHeight;
-      log.debug('theHeight = ' + theHeight);
-
+      const yAxisHeight = await rectangle.getAttribute('height');
       // 3). get the chart-wrapper elements
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector(`.chart-wrapper circle[${cssPart}]`, defaultFindTimeout * 2));
+        async () => await find
+          .allByCssSelector(`.chart-wrapper circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
 
       // 5). for each chart element, find the green circle, then the cy position
       async function getChartType(chart) {
         const cy = await chart.getAttribute('cy');
-        return Math.round((yAxisHeight - cy) / yAxisHeight * yAxisLabel);
+        // the point_series_options test has data in the billions range and
+        // getting 11 digits of precision with these calculations is very hard
+        return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(6));
       }
 
       // 4). pass the chartTypes to the getChartType function
@@ -602,33 +675,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
-    async getBarChartData() {
-      // 1). get the maximim chart Y-Axis marker value
-      const maxYAxisChartMarker = await retry.try(
-        async () => await find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
-
-      const yLabel = await maxYAxisChartMarker.getVisibleText();
-      const yAxisLabel = yLabel.replace(',', '');
-      log.debug('yAxisLabel = ' + yAxisLabel);
-
-      // 2). find and save the y-axis pixel size (the chart height)
-      const chartAreaObj = await find.byCssSelector('rect.background');
-      const yAxisHeight = await chartAreaObj.getAttribute('height');
-
+    async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+      // 1). get the range/pixel ratio
+      const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the chart-wrapper elements
-      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
-      async function getChartType(chart) {
-        const fillColor = await chart.getAttribute('fill');
+      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
 
-        // we're getting the default count color from defaults.js
-        if (fillColor === '#00a69b') {
-          const barHeight = await chart.getAttribute('height');
-          return Math.round(barHeight / yAxisHeight * yAxisLabel);
-        }
+      async function getChartType(chart) {
+        const barHeight = await chart.getAttribute('height');
+        return Math.round(barHeight * yAxisRatio);
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
     }
+
+
+    // Returns value per pixel
+    async getChartYAxisRatio(axis = 'ValueAxis-1') {
+      // 1). get the maximim chart Y-Axis marker value and Y position
+      const maxYAxisChartMarker = await retry.try(
+        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
+      );
+      const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
+      const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
+      log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
+
+      // 2). get the minimum chart Y-Axis marker value and Y position
+      const minYAxisChartMarker = await
+        find.byCssSelector('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick');
+      const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
+      const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
+      return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
+    }
+
 
     async getHeatmapData() {
       const chartTypes = await retry.try(
@@ -716,6 +795,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
 
+    async getVisualizationResponse() {
+      log.debug('getVisualizationResponse');
+      await this.openSpyPanel();
+      await testSubjects.click('spyModeSelect-response');
+      return await testSubjects.getVisibleText('visualizationEsResponseBody');
+    }
+
     async getMapBounds() {
       const request = await this.getVisualizationRequest();
       const requestObject = JSON.parse(request);
@@ -797,6 +883,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async doesSelectedLegendColorExist(color) {
       return await testSubjects.exists(`legendSelectedColor-${color}`);
+    }
+
+    async getYAxisTitle() {
+      const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
+      return await title.getVisibleText();
+    }
+
+    async selectBucketType(type) {
+      const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
+      return await bucketType.click();
     }
 
     async getPieSlice(name) {

@@ -5,11 +5,6 @@ import { FieldFormat } from './field_format';
 export function fieldFormatsMixin(kbnServer, server) {
   const fieldFormatClasses = [];
 
-  // for use in the context of a request, the default context
-  server.decorate('request', 'getFieldFormatService', async function () {
-    return await server.fieldFormatServiceFactory(this.getUiSettingsService());
-  });
-
   // for use outside of the request context, for special cases
   server.decorate('server', 'fieldFormatServiceFactory', async function (uiSettings) {
     const uiConfigs = await uiSettings.getAll();

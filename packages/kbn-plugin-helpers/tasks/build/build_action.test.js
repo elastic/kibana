@@ -2,7 +2,10 @@ const resolve = require('path').resolve;
 const fs = require('fs');
 const del = require('del');
 
-const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/build_action_test_plugin');
+const PLUGIN_FIXTURE = resolve(
+  __dirname,
+  '__fixtures__/build_action_test_plugin'
+);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
 const PLUGIN = require('../../lib/plugin_config')(PLUGIN_FIXTURE);
 const noop = () => {};
@@ -16,7 +19,10 @@ describe('creating build zip', () => {
   it('creates a zip in the build directory', async () => {
     await buildAction(PLUGIN);
 
-    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+    const buildFile = resolve(
+      PLUGIN_BUILD_DIR,
+      PLUGIN.id + '-' + PLUGIN.version + '.zip'
+    );
     if (!fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
@@ -25,7 +31,10 @@ describe('creating build zip', () => {
   it('skips zip creation based on flag', async () => {
     await buildAction(PLUGIN, noop, { skipArchive: true });
 
-    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+    const buildFile = resolve(
+      PLUGIN_BUILD_DIR,
+      PLUGIN.id + '-' + PLUGIN.version + '.zip'
+    );
     if (fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
@@ -52,8 +61,14 @@ describe('calling create_build', () => {
     await buildAction(PLUGIN, noop, options);
 
     expect(mockBuild.mock.calls).toHaveLength(1);
-    // eslint-disable-next-line no-unused-vars
-    const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+
+    const [
+      plugin, // eslint-disable-line no-unused-vars
+      buildTarget, // eslint-disable-line no-unused-vars
+      buildVersion,
+      kibanaVersion,
+      files, // eslint-disable-line no-unused-vars
+    ] = mockBuild.mock.calls[0];
     expect(buildVersion).toBe('1.2.3');
     expect(kibanaVersion).toBe('4.5.6');
   });
@@ -62,8 +77,14 @@ describe('calling create_build', () => {
     await buildAction(PLUGIN);
 
     expect(mockBuild.mock.calls).toHaveLength(1);
-    // eslint-disable-next-line no-unused-vars
-    const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+
+    const [
+      plugin, // eslint-disable-line no-unused-vars
+      buildTarget, // eslint-disable-line no-unused-vars
+      buildVersion, // eslint-disable-line no-unused-vars
+      kibanaVersion, // eslint-disable-line no-unused-vars
+      files,
+    ] = mockBuild.mock.calls[0];
     PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
   });
 
@@ -73,15 +94,31 @@ describe('calling create_build', () => {
         'index.js',
         'LICENSE.txt',
         'plugins/**/*',
-        '{server,public}/**/*'
-      ]
+        '{server,public}/**/*',
+      ],
     };
 
     await buildAction(PLUGIN, noop, options);
 
     expect(mockBuild.mock.calls).toHaveLength(1);
-    // eslint-disable-next-line no-unused-vars
-    const [ plugin, buildTarget, buildVersion, kibanaVersion, files ] = mockBuild.mock.calls[0];
+
+    const [
+      plugin, // eslint-disable-line no-unused-vars
+      buildTarget, // eslint-disable-line no-unused-vars
+      buildVersion, // eslint-disable-line no-unused-vars
+      kibanaVersion, // eslint-disable-line no-unused-vars
+      files,
+    ] = mockBuild.mock.calls[0];
     options.files.forEach(file => expect(files).toContain(file));
+  });
+
+  it('rejects returned promise when build fails', async () => {
+    mockBuild.mockImplementation(async () => {
+      throw new Error('foo bar');
+    });
+
+    await expect(
+      buildAction(PLUGIN, noop)
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

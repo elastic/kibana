@@ -140,12 +140,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     getTableHeader() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('table.table.table-condensed thead tr th');
+        .findAllByCssSelector('table.euiTable thead tr th');
     }
 
     sortBy(columnName) {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('table.table.table-condensed thead tr th span')
+        .findAllByCssSelector('table.euiTable thead tr th button')
         .then(function (chartTypes) {
           function getChartType(chart) {
             return chart.getVisibleText()
@@ -167,9 +167,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     getTableRow(rowNumber, colNumber) {
       return remote.setFindTimeout(defaultFindTimeout)
         // passing in zero-based index, but adding 1 for css 1-based indexes
-        .findByCssSelector('div.agg-table-paginated table.table.table-condensed tbody tr:nth-child(' +
-          (rowNumber + 1) + ') td.ng-scope:nth-child(' +
-          (colNumber + 1) + ') span.ng-binding'
+        .findByCssSelector('table.euiTable tbody tr:nth-child(' +
+          (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
+          (colNumber + 1) + ')'
         );
     }
 
@@ -190,29 +190,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     getPageSize() {
-      let selectedItemLabel = '';
       return remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('select.ng-pristine.ng-valid.ng-untouched option')
-        .then(function (chartTypes) {
-          function getChartType(chart) {
-            const thisChart = chart;
-            return chart.isSelected()
-              .then(function (isSelected) {
-                if (isSelected === true) {
-                  return thisChart.getProperty('label')
-                    .then(function (theLabel) {
-                      selectedItemLabel = theLabel;
-                    });
-                }
-              });
-          }
-
-          const getChartTypesPromises = chartTypes.map(getChartType);
-          return Promise.all(getChartTypesPromises);
-        })
-        .then(() => {
-          return selectedItemLabel;
-        });
+        .findByCssSelector('div.euiPopover button.euiButtonEmpty span.euiButtonEmpty__content span')
+        .getVisibleText();
     }
 
     async getFieldNames() {
@@ -249,9 +229,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async goToPage(pageNum) {
+      const pageButtons = await remote.setFindTimeout(defaultFindTimeout)
+        .findAllByCssSelector('.euiPagination button.euiPaginationButton')
+        .getVisibleText();
+
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="paginationControls"] li:nth-child(${pageNum + 1}) button`)
+        .findByCssSelector(`.euiPagination button.euiPaginationButton:nth-child(${pageButtons.indexOf(pageNum + '') + 2})`)
         .click();
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -262,8 +247,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async openControlsByName(name) {
+      const tableFields = await remote.setFindTimeout(defaultFindTimeout)
+        .findAllByCssSelector('table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child')
+        .getVisibleText();
+
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('[data-test-subj="indexPatternFieldEditButton"][href$="/' + name + '"]')
+        .findAllByCssSelector(`table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
+          td:last-child button`)
         .click();
     }
 
@@ -289,16 +279,33 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async setPageSize(size) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-        .click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      try {
+        await remote.setFindTimeout(defaultFindTimeout)
+          .findByCssSelector('div.euiPopover button.euiButtonEmpty')
+          .click();
+
+        const sizeButtons = await remote.setFindTimeout(defaultFindTimeout)
+          .findAllByCssSelector('div.euiPopover .euiContextMenuPanel button.euiContextMenuItem')
+          .getVisibleText();
+
+        await remote.setFindTimeout(defaultFindTimeout)
+          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel
+          button.euiContextMenuItem:nth-child(${sizeButtons.indexOf(size + ' rows') + 1})`)
+          .click();
+      } catch(e) {
+        await remote.setFindTimeout(defaultFindTimeout)
+          .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
+          .click();
+      } finally {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      }
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await this.clickOptionalAddNewButton();
         await this.setIndexPatternField(indexPatternName);
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -320,6 +327,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
 
       return await this.getIndexPatternIdFromUrl();
+    }
+
+    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
+
+    async clickOptionalAddNewButton() {
+      const buttonParent = await testSubjects.find('createIndexPatternParent');
+      const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes('createIndexPatternButton');
+      log.debug('found the button ' + buttonVisible);
+      if(buttonVisible) {
+        await testSubjects.click('createIndexPatternButton');
+      }
     }
 
     async getIndexPatternIdFromUrl() {

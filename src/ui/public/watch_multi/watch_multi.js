@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
+import { callEach } from '../utils/function';
 
 uiModules.get('kibana')
   .config(function ($provide) {
@@ -80,7 +81,7 @@ uiModules.get('kibana')
           });
         }));
 
-        return _.partial(_.callEach, unwatchers);
+        return _.partial(callEach, unwatchers);
       };
 
       function normalizeExpression($scope, expr) {

@@ -12,14 +12,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     const columns = [{
-      heading: 'name',
+      heading: 'Name',
       first: '@message',
       last: 'xss.raw',
       selector: function () {
         return PageObjects.settings.getTableRow(0, 0).getVisibleText();
       }
     }, {
-      heading: 'type',
+      heading: 'Type',
       first: '_source',
       last: 'string',
       selector: function () {
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('field list pagination', function () {
-      const EXPECTED_DEFAULT_PAGE_SIZE = 25;
+      const EXPECTED_DEFAULT_PAGE_SIZE = 10;
       const EXPECTED_FIELD_COUNT = 86;
       const EXPECTED_LAST_PAGE_COUNT = EXPECTED_FIELD_COUNT % EXPECTED_DEFAULT_PAGE_SIZE;
       const LAST_PAGE_NUMBER = Math.ceil(EXPECTED_FIELD_COUNT / EXPECTED_DEFAULT_PAGE_SIZE);
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
       it('should have correct default page size selected', function () {
         return PageObjects.settings.getPageSize()
           .then(function (pageSize) {
-            expect(pageSize).to.be('' + EXPECTED_DEFAULT_PAGE_SIZE);
+            expect(pageSize).to.be('Rows per page: ' + EXPECTED_DEFAULT_PAGE_SIZE);
           });
       });
 

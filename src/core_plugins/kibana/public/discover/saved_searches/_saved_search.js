@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
-
+import { createLegacyClass } from 'ui/utils/legacy_class';
 
 const module = uiModules.get('discover/saved_searches', [
   'kibana/notify',
@@ -9,7 +8,7 @@ const module = uiModules.get('discover/saved_searches', [
 ]);
 
 module.factory('SavedSearch', function (courier) {
-  _.class(SavedSearch).inherits(courier.SavedObject);
+  createLegacyClass(SavedSearch).inherits(courier.SavedObject);
   function SavedSearch(id) {
     courier.SavedObject.call(this, {
       type: SavedSearch.type,
@@ -26,6 +25,8 @@ module.factory('SavedSearch', function (courier) {
         version: 1
       }
     });
+
+    this.showInRecenltyAccessed = true;
   }
 
   SavedSearch.type = 'search';
@@ -43,6 +44,10 @@ module.factory('SavedSearch', function (courier) {
   SavedSearch.fieldOrder = ['title', 'description'];
 
   SavedSearch.searchSource = true;
+
+  SavedSearch.prototype.getFullPath = function () {
+    return `/app/kibana#/discover/${this.id}`;
+  };
 
   return SavedSearch;
 });

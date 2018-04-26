@@ -20,14 +20,14 @@ export default function ({ getService }) {
     },
   ];
 
-  describe('bulk_get', () => {
+  describe('_bulk_get', () => {
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
 
       it('should return 200 with individual responses', async () => (
         await supertest
-          .post(`/api/saved_objects/bulk_get`)
+          .post(`/api/saved_objects/_bulk_get`)
           .send(BULK_REQUESTS)
           .expect(200)
           .then(resp => {
@@ -83,7 +83,7 @@ export default function ({ getService }) {
 
       it('should return 200 with individual responses', async () => (
         await supertest
-          .post('/api/saved_objects/bulk_get')
+          .post('/api/saved_objects/_bulk_get')
           .send(BULK_REQUESTS)
           .expect(200)
           .then(resp => {

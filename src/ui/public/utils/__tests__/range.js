@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import { parseRange } from 'ui/utils/range';
+import { parseRange } from '../range';
 
 describe('Range parsing utility', function () {
 

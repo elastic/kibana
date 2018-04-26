@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import { createLegacyClass } from 'ui/utils/legacy_class';
 const module = uiModules.get('app/timelion');
 
 // Used only by the savedSheets service, usually no reason to change this
@@ -7,7 +7,7 @@ module.factory('SavedSheet', function (courier, config) {
 
   // SavedSheet constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  _.class(SavedSheet).inherits(courier.SavedObject);
+  createLegacyClass(SavedSheet).inherits(courier.SavedObject);
   function SavedSheet(id) {
     // Gives our SavedSheet the properties of a SavedObject
     courier.SavedObject.call(this, {
@@ -30,6 +30,8 @@ module.factory('SavedSheet', function (courier, config) {
         version: 1,
       }
     });
+
+    this.showInRecenltyAccessed = true;
   }
 
   // save these objects with the 'sheet' type
@@ -51,6 +53,10 @@ module.factory('SavedSheet', function (courier, config) {
 
   // Order these fields to the top, the rest are alphabetical
   SavedSheet.fieldOrder = ['title', 'description'];
+
+  SavedSheet.prototype.getFullPath = function () {
+    return `/app/timelion#/${this.id}`;
+  };
 
   return SavedSheet;
 });

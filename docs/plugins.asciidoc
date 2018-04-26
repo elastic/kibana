@@ -15,6 +15,7 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 ==============================================
 --
 
+[[_installing_plugins]]
 == Installing Plugins
 
 Use the following command to install a plugin:

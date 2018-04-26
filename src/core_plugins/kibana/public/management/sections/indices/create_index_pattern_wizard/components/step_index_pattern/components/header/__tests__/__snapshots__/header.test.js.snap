@@ -45,7 +45,7 @@ exports[`Header should mark the input as invalid 1`] = `
                  as a wildcard in your index pattern.
               </p>
               <p>
-                You can't use empty spaces or the characters 
+                You can't use spaces or the characters 
                 <strong>
                   %
                 </strong>
@@ -131,7 +131,7 @@ exports[`Header should render normally 1`] = `
                  as a wildcard in your index pattern.
               </p>
               <p>
-                You can't use empty spaces or the characters 
+                You can't use spaces or the characters 
                 <strong>
                   %
                 </strong>

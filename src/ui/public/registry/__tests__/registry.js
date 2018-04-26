@@ -1,4 +1,4 @@
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from '../_registry';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
@@ -22,6 +22,20 @@ describe('Registry', function () {
 
       reg.register(mod);
       // modules are not exposed, so this is the most that we can test
+    });
+
+    it('applies the filter function if one is specified', function () {
+      const reg = uiRegistry({
+        filter: item => item.value % 2 === 0 // register only even numbers
+      });
+
+      reg.register(() => ({ value: 17 }));
+      reg.register(() => ({ value: 18 })); // only this one should get registered
+      reg.register(() => ({ value: 19 }));
+
+      const modules = Private(reg);
+      expect(modules).to.have.length(1);
+      expect(modules[0].value).to.be(18);
     });
   });
 

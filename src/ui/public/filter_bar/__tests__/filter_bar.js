@@ -5,9 +5,9 @@ import sinon from 'sinon';
 
 import MockState from 'fixtures/mock_state';
 import $ from 'jquery';
-import 'ui/filter_bar';
-import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import '..';
+import { FilterBarLibMapFilterProvider } from '../lib/map_filter';
+import { FilterBarQueryFilterProvider } from '../query_filter';
 
 describe('Filter Bar Directive', function () {
   let $rootScope;

@@ -1,94 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table should render normally 1`] = `
-<EuiTableOfRecords
-  config={
-    Object {
-      "columns": Array [
-        Object {
-          "dataType": "string",
-          "description": "Name of the field",
-          "field": "name",
-          "name": "Name",
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "description": "Language used for the field",
-          "field": "lang",
-          "name": "Lang",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "dataType": "string",
-          "description": "Script for the field",
-          "field": "script",
-          "name": "Script",
-          "sortable": true,
-        },
-        Object {
-          "description": "Format used for the field",
-          "field": "name",
-          "name": "Format",
-          "render": [Function],
-          "sortable": false,
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "description": "Edit this field",
-              "icon": "pencil",
-              "name": "Edit",
-              "onClick": [Function],
-            },
-            Object {
-              "color": "danger",
-              "description": "Delete this field",
-              "icon": "trash",
-              "name": "Delete",
-              "onClick": [Function],
-            },
-          ],
-          "name": "",
-        },
-      ],
-      "onDataCriteriaChange": [Function],
-      "pagination": Object {
-        "pageSizeOptions": Array [
-          5,
-          10,
-          25,
-          50,
-        ],
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "dataType": "string",
+        "description": "Name of the field",
+        "field": "displayName",
+        "name": "Name",
+        "sortable": true,
+        "width": "38%",
       },
-      "recordId": "id",
-      "selection": undefined,
-    }
-  }
-  model={
-    Object {
-      "criteria": Object {
-        "page": Object {
-          "index": 0,
-          "size": 10,
-        },
-        "sort": Object {
-          "direction": "asc",
-          "field": "name",
-        },
+      Object {
+        "data-test-subj": "scriptedFieldLang",
+        "dataType": "string",
+        "description": "Language used for the field",
+        "field": "lang",
+        "name": "Lang",
+        "sortable": true,
       },
-      "data": Object {
-        "records": Array [
+      Object {
+        "dataType": "string",
+        "description": "Script for the field",
+        "field": "script",
+        "name": "Script",
+        "sortable": true,
+      },
+      Object {
+        "description": "Format used for the field",
+        "field": "name",
+        "name": "Format",
+        "render": [Function],
+        "sortable": false,
+      },
+      Object {
+        "actions": Array [
           Object {
-            "id": 1,
-            "name": "Elastic",
+            "description": "Edit this field",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+          },
+          Object {
+            "color": "danger",
+            "description": "Delete this field",
+            "icon": "trash",
+            "name": "Delete",
+            "onClick": [Function],
           },
         ],
-        "totalRecordCount": 1,
+        "name": "",
+        "width": "40px",
       },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "id": 1,
+        "name": "Elastic",
+      },
+    ]
+  }
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
     }
   }
+  sorting={true}
 />
 `;
 

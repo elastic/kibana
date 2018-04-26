@@ -15,21 +15,24 @@ import 'ui/state_management/app_state';
 import 'ui/timefilter';
 import 'ui/share';
 import 'ui/query_bar';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
-import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
+import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import indexTemplate from 'plugins/kibana/discover/index.html';
+import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { recentlyAccessed } from 'ui/persisted_log';
+import { getDocLink } from 'ui/documentation_links';
+import '../components/fetch_error';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -56,14 +59,14 @@ uiRoutes
         })
           .then(({ savedObjects }) => {
             /**
-         *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-         *  the load order of AppState conflicts with the load order of many other things
-         *  so in order to get the name of the index we should use, and to switch to the
-         *  default if necessary, we parse the appState with a temporary State object and
-         *  then destroy it immediatly after we're done
-         *
-         *  @type {State}
-         */
+             *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
+             *  the load order of AppState conflicts with the load order of many other things
+             *  so in order to get the name of the index we should use, and to switch to the
+             *  default if necessary, we parse the appState with a temporary State object and
+             *  then destroy it immediatly after we're done
+             *
+             *  @type {State}
+             */
             const state = new State('_a', {});
 
             const specified = !!state.index;
@@ -80,7 +83,17 @@ uiRoutes
           });
       },
       savedSearch: function (courier, savedSearches, $route) {
-        return savedSearches.get($route.current.params.id)
+        const savedSearchId = $route.current.params.id;
+        return savedSearches.get(savedSearchId)
+          .then((savedSearch) => {
+            if (savedSearchId) {
+              recentlyAccessed.add(
+                savedSearch.getFullPath(),
+                savedSearch.title,
+                savedSearchId);
+            }
+            return savedSearch;
+          })
           .catch(courier.redirectWhenMissing({
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
@@ -111,6 +124,7 @@ function discoverController(
   courier,
   kbnUrl,
   timefilter,
+  localStorage,
 ) {
 
   const Vis = Private(VisProvider);
@@ -123,7 +137,8 @@ function discoverController(
     location: 'Discover'
   });
 
-  $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+  $scope.getDocLink = getDocLink;
+  $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
 
@@ -251,7 +266,10 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: $scope.searchSource.get('query') || { query: '', language: config.get('search:queryLanguage') },
+      query: $scope.searchSource.get('query') || {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      },
       sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
@@ -262,6 +280,13 @@ function discoverController(
 
   $state.index = $scope.indexPattern.id;
   $state.sort = getSort.array($state.sort, $scope.indexPattern);
+
+  $scope.getBucketIntervalToolTipText = () => {
+    return (
+      `This interval creates ${$scope.bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets'}
+      to show in the selected time range, so it has been scaled to ${$scope.bucketInterval.description }`
+    );
+  };
 
   $scope.$watchCollection('state.columns', function () {
     $state.save();
@@ -277,15 +302,6 @@ function discoverController(
   };
 
   const init = _.once(function () {
-    const showTotal = 5;
-    $scope.failuresShown = showTotal;
-    $scope.showAllFailures = function () {
-      $scope.failuresShown = $scope.failures.length;
-    };
-    $scope.showLessFailures = function () {
-      $scope.failuresShown = showTotal;
-    };
-
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
       $appStatus.dirty = status.dirty || !savedSearch.id;
@@ -323,12 +339,11 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
+        timefilter.enableAutoRefreshSelector();
         $scope.$watch('opts.timefield', function (timefield) {
           if (!!timefield) {
-            timefilter.enableAutoRefreshSelector();
             timefilter.enableTimeRangeSelector();
           } else {
-            timefilter.disableAutoRefreshSelector();
             timefilter.disableTimeRangeSelector();
           }
         });
@@ -438,6 +453,8 @@ function discoverController(
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
+    $scope.fetchError = undefined;
+
     $scope.updateTime();
 
     $scope.updateDataSource()
@@ -450,17 +467,14 @@ function discoverController(
   };
 
   $scope.updateQueryAndFetch = function (query) {
-    // reset state if language changes
-    if ($state.query.language && $state.query.language !== query.language) {
-      $state.filters = [];
-    }
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
 
 
-  function initSegmentedFetch(segmented) {
+  function handleSegmentedFetch(segmented) {
     function flushResponseData() {
+      $scope.fetchError = undefined;
       $scope.hits = 0;
       $scope.faliures = [];
       $scope.rows = [];
@@ -573,10 +587,17 @@ function discoverController(
 
 
   function beginSegmentedFetch() {
-    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+    $scope.searchSource.onBeginSegmentedFetch(handleSegmentedFetch)
       .catch((error) => {
-        notify.error(error);
-        // Restart.
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          notify.error(error);
+        }
+
+        // Restart. This enables auto-refresh functionality.
         beginSegmentedFetch();
       });
   }
@@ -688,6 +709,10 @@ function discoverController(
         return $scope.vis.getAggConfig().toDsl();
       });
     }
+
+    $scope.vis.filters = {
+      timeRange: timefilter.time
+    };
   }
 
   function resolveIndexPatternLoading() {

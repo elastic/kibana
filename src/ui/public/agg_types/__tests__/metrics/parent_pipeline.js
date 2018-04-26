@@ -1,17 +1,18 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsDerivativeProvider } from 'ui/agg_types/metrics/derivative';
-import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumulative_sum';
-import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
-import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
-import { VisProvider } from 'ui/vis';
+import { derivativeMetricAgg } from '../../metrics/derivative';
+import { cumulativeSumMetricAgg } from '../../metrics/cumulative_sum';
+import { movingAvgMetricAgg } from '../../metrics/moving_avg';
+import { serialDiffMetricAgg } from '../../metrics/serial_diff';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'derivative', title: 'Derivative', provider: AggTypesMetricsDerivativeProvider },
-  { name: 'cumulative_sum', title: 'Cumulative Sum', provider: AggTypesMetricsCumulativeSumProvider },
-  { name: 'moving_avg', title: 'Moving Avg', provider: AggTypesMetricsMovingAvgProvider },
-  { name: 'serial_diff', title: 'Serial Diff', provider: AggTypesMetricsSerialDiffProvider },
+  { name: 'derivative', title: 'Derivative', agg: derivativeMetricAgg },
+  { name: 'cumulative_sum', title: 'Cumulative Sum', agg: cumulativeSumMetricAgg },
+  { name: 'moving_avg', title: 'Moving Avg', agg: movingAvgMetricAgg },
+  { name: 'serial_diff', title: 'Serial Diff', agg: serialDiffMetricAgg },
 ];
 
 describe('parent pipeline aggs', function () {
@@ -28,7 +29,7 @@ describe('parent pipeline aggs', function () {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
-          metricAgg = Private(metric.provider);
+          metricAgg = metric.agg;
 
           const params = settings || {
             metricAgg: '1',
@@ -170,6 +171,31 @@ describe('parent pipeline aggs', function () {
           }
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
+      });
+
+      it('should call modifyAggConfigOnSearchRequestStart for its customMetric\'s parameters', () => {
+        init({
+          metricAgg: 'custom',
+          customMetric: {
+            id: '2-metric',
+            type: 'max',
+            params: { field: 'bytes' },
+            schema: 'orderAgg'
+          }
+        });
+
+        const searchSource = {};
+        const request = {};
+        const customMetricSpy = sinon.spy();
+        const customMetric = aggConfig.params.customMetric;
+
+        // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
+        customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
+
+        aggConfig.type.params.forEach(param => {
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, request);
+        });
+        expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
       });
     });
   });

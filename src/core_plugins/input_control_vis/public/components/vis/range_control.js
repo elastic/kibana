@@ -14,10 +14,9 @@ const toState = (props) => {
   const state = {
     sliderValue: props.control.value,
     minValue: '',
-    isMinValid: true,
     maxValue: '',
-    isMaxValid: true,
-    errorMsgs: [],
+    isRangeValid: true,
+    errorMessage: '',
   };
   if (props.control.hasValue()) {
     state.minValue = props.control.value.min;
@@ -35,94 +34,60 @@ export class RangeControl extends Component {
 
   componentWillReceiveProps = (nextProps) => {
     this.setState(toState(nextProps));
-  }
+  };
 
   handleOnChange = (value) => {
     this.setState({
       sliderValue: value,
       minValue: value.min,
-      isMinValid: true,
+      isRangeValid: true,
       maxValue: value.max,
-      isMaxValid: true,
-      errorMsgs: [],
+      errorMessage: '',
     });
-  }
+  };
 
   handleOnChangeComplete = (value) => {
     this.props.stageFilter(this.props.controlIndex, value);
-  }
+  };
 
   handleMinChange = (evt) => {
-    const min = parseFloat(evt.target.value);
-    const max = this.state.maxValue;
-    if (isNaN(min)) {
-      if (max === '') {
-        this.setState({
-          minValue: '',
-          isMinValid: true,
-          maxValue: '',
-          isMaxValid: true,
-          errorMsgs: [],
-        });
-        return;
-      }
-      this.setState({
-        minValue: '',
-        isMinValid: false,
-        errorMsgs: ['both min and max must be set'],
-      });
-      return;
-
-    } else if (min > max) {
-      this.setState({
-        minValue: min,
-        isMinValid: false,
-        errorMsgs: ['min must be less than max'],
-      });
-      return;
-    }
-
-    this.handleOnChangeComplete({
-      min: min,
-      max: max
-    });
-  }
+    this.handleChange(parseFloat(evt.target.value), this.state.maxValue);
+  };
 
   handleMaxChange = (evt) => {
-    const min = this.state.minValue;
-    const max = parseFloat(evt.target.value);
-    if (isNaN(max)) {
-      if (min === '') {
-        this.setState({
-          minValue: '',
-          isMinValid: true,
-          maxValue: '',
-          isMaxValid: true,
-          errorMsgs: [],
-        });
-        return;
-      }
-      this.setState({
-        maxValue: '',
-        isMaxValid: false,
-        errorMsgs: ['both min and max must be set'],
-      });
-      return;
+    this.handleChange(this.state.minValue, parseFloat(evt.target.value));
+  };
 
-    } else if (max < min) {
-      this.setState({
-        maxValue: max,
-        isMaxValid: false,
-        errorMsgs: ['max must be greater than min'],
-      });
-      return;
+  handleChange = (min, max) => {
+    min = isNaN(min) ? '' : min;
+    max = isNaN(max) ? '' : max;
+
+    const isMinValid = min !== '';
+    const isMaxValid = max !== '';
+    let isRangeValid = true;
+    let errorMessage = '';
+
+    if ((!isMinValid && isMaxValid) || (isMinValid && !isMaxValid)) {
+      isRangeValid = false;
+      errorMessage = 'both min and max must be set';
     }
 
-    this.handleOnChangeComplete({
-      min: min,
-      max: max
+    if (isMinValid && isMaxValid && max < min) {
+      isRangeValid = false;
+      errorMessage = 'max must be greater or equal to min';
+    }
+
+    this.setState({
+      minValue: min,
+      maxValue: max,
+      isRangeValid,
+      errorMessage,
     });
-  }
+
+    if (isRangeValid && isMaxValid && isMinValid) {
+      this.handleOnChangeComplete({ min, max });
+    }
+  };
 
   formatLabel = (value) => {
     let formatedValue = value;
@@ -131,13 +96,14 @@ export class RangeControl extends Component {
       formatedValue = value.toFixed(decimalPlaces);
     }
     return formatedValue;
-  }
+  };
 
   renderControl() {
     return (
       <EuiFormRow
-        isInvalid={!this.state.isMinValid || !this.state.isMaxValid}
-        error={this.state.errorMsgs}
+        isInvalid={!this.state.isRangeValid}
+        error={this.state.errorMessage ? [this.state.errorMessage] : []}
+        data-test-subj="rangeControlFormRow"
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -146,6 +112,7 @@ export class RangeControl extends Component {
               disabled={!this.props.control.isEnabled()}
               name="min"
               type="number"
+              data-test-subj="rangeControlMinInputValue"
               className="euiFieldNumber"
               value={this.state.minValue}
               min={this.props.control.min}
@@ -174,6 +141,7 @@ export class RangeControl extends Component {
               name="max"
               type="number"
               className="euiFieldNumber"
+              data-test-subj="rangeControlMaxInputValue"
               value={this.state.maxValue}
               min={this.props.control.min}
               max={this.props.control.max}

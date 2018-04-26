@@ -1,0 +1,21 @@
+{
+  "{index}/_mapping/{type}": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "local": "__flag__"
+    },
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      "{indices}/_mapping/{type}"
+    ]
+  }
+}

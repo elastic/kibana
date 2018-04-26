@@ -1,6 +1,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
+import { set } from 'lodash';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {
@@ -14,7 +15,7 @@ function stdMetric(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {};
   body[bucket.type] = {
-    field: bucket.field
+    field: bucket.field,
   };
   return body;
 }
@@ -22,7 +23,7 @@ function stdMetric(bucket) {
 function extendStats(bucket) {
   checkMetric(bucket, ['type', 'field']);
   const body = {
-    extended_stats: { field: bucket.field }
+    extended_stats: { field: bucket.field },
   };
   if (bucket.sigma) body.extended_stats.sigma = parseInt(bucket.sigma, 10);
   return body;
@@ -44,10 +45,10 @@ export default {
         buckets_path: { count: '_count' },
         script: {
           source: 'count * 1',
-          lang: 'expression'
+          lang: 'expression',
         },
-        gap_policy: 'skip'
-      }
+        gap_policy: 'skip',
+      },
     };
   },
   static: bucket => {
@@ -57,10 +58,10 @@ export default {
         buckets_path: { count: '_count' },
         script: {
           source: bucket.value,
-          lang: 'painless'
+          lang: 'painless',
         },
-        gap_policy: 'skip'
-      }
+        gap_policy: 'skip',
+      },
     };
   },
   avg: stdMetric,
@@ -73,13 +74,36 @@ export default {
   variance: extendStats,
   std_deviation: extendStats,
 
+  top_hit: bucket => {
+    checkMetric(bucket, ['type', 'field', 'size']);
+    const body = {
+      filter: {
+        exists: { field: bucket.field },
+      },
+      aggs: {
+        docs: {
+          top_hits: {
+            size: bucket.size,
+            _source: { includes: [bucket.field] },
+          },
+        },
+      },
+    };
+    if (bucket.order_by) {
+      set(body, 'aggs.docs.top_hits.sort', [
+        { [bucket.order_by]: { order: bucket.order } },
+      ]);
+    }
+    return body;
+  },
+
   percentile_rank: bucket => {
     checkMetric(bucket, ['type', 'field', 'value']);
     const body = {
       percentile_ranks: {
         field: bucket.field,
-        values: [bucket.value]
-      }
+        values: [bucket.value],
+      },
     };
     return body;
   },
@@ -105,8 +129,8 @@ export default {
     const agg = {
       percentiles: {
         field: bucket.field,
-        percents
-      }
+        percents,
+      },
     };
     return agg;
   },
@@ -117,8 +141,8 @@ export default {
       derivative: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         gap_policy: 'skip', // seems sane
-        unit: bucketSize
-      }
+        unit: bucketSize,
+      },
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
     if (bucket.unit) {
@@ -135,8 +159,8 @@ export default {
       serial_diff: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         gap_policy: 'skip', // seems sane
-        lag: 1
-      }
+        lag: 1,
+      },
     };
     if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
     if (bucket.lag) {
@@ -149,8 +173,8 @@ export default {
     checkMetric(bucket, ['type', 'field']);
     return {
       cumulative_sum: {
-        buckets_path: getBucketsPath(bucket.field, metrics)
-      }
+        buckets_path: getBucketsPath(bucket.field, metrics),
+      },
     };
   },
 
@@ -160,8 +184,8 @@ export default {
       moving_avg: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         model: bucket.model || 'simple',
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     if (bucket.gap_policy) body.moving_avg.gap_policy = bucket.gap_policy;
     if (bucket.window) body.moving_avg.window = Number(bucket.window);
@@ -185,11 +209,11 @@ export default {
           source: bucket.script,
           lang: 'painless',
           params: {
-            _interval: parseInterval(bucketSize).asMilliseconds()
-          }
+            _interval: parseInterval(bucketSize).asMilliseconds(),
+          },
         },
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     if (bucket.gap_policy) body.bucket_script.gap_policy = bucket.gap_policy;
     return body;
@@ -200,15 +224,15 @@ export default {
     const body = {
       bucket_script: {
         buckets_path: {
-          value: getBucketsPath(bucket.field, metrics)
+          value: getBucketsPath(bucket.field, metrics),
         },
         script: {
           source: 'params.value > 0 ? params.value : 0',
-          lang: 'painless'
+          lang: 'painless',
         },
-        gap_policy: 'skip' // seems sane
-      }
+        gap_policy: 'skip', // seems sane
+      },
     };
     return body;
-  }
+  },
 };

@@ -1,0 +1,16 @@
+{
+  "{index}": {
+    "url_params": {
+      "wait_for_active_shards": "",
+      "timeout": "",
+      "master_timeout": "",
+      "update_all_types": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "{indices}"
+    ]
+  }
+}

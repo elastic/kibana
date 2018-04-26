@@ -1,6 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CreateIndexPatternWizard should render step 1 1`] = `
+exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <LoadingState />
+</div>
+`;
+
+exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
 <div>
   <Header
     isIncludingSystemIndices={false}
@@ -9,9 +19,7 @@ exports[`CreateIndexPatternWizard should render step 1 1`] = `
   <StepIndexPattern
     allIndices={
       Array [
-        Object {
-          "name": "kibana",
-        },
+        Object {},
       ]
     }
     esService={Object {}}
@@ -23,7 +31,20 @@ exports[`CreateIndexPatternWizard should render step 1 1`] = `
 </div>
 `;
 
-exports[`CreateIndexPatternWizard should render step 2 1`] = `
+exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
+<div>
+  <Header
+    isIncludingSystemIndices={false}
+    onChangeIncludingSystemIndices={[Function]}
+  />
+  <EmptyState
+    loadingDataDocUrl=""
+    onRefresh={[Function]}
+  />
+</div>
+`;
+
+exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
 <div>
   <Header
     isIncludingSystemIndices={false}
@@ -35,35 +56,5 @@ exports[`CreateIndexPatternWizard should render step 2 1`] = `
     indexPattern=""
     indexPatternsService={Object {}}
   />
-</div>
-`;
-
-exports[`CreateIndexPatternWizard should render the empty state 1`] = `
-<div>
-  <Header
-    isIncludingSystemIndices={false}
-    onChangeIncludingSystemIndices={[Function]}
-  />
-  <EmptyState
-    loadingDataDocUrl=""
-  />
-  <StepIndexPattern
-    allIndices={Array []}
-    esService={Object {}}
-    goToNextStep={[Function]}
-    initialQuery=""
-    isIncludingSystemIndices={false}
-    savedObjectsClient={Object {}}
-  />
-</div>
-`;
-
-exports[`CreateIndexPatternWizard should render the loading state 1`] = `
-<div>
-  <Header
-    isIncludingSystemIndices={false}
-    onChangeIncludingSystemIndices={[Function]}
-  />
-  <LoadingState />
 </div>
 `;

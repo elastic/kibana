@@ -6,17 +6,18 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import _ from 'lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 import { updateOldState } from 'ui/vis/vis_update_state';
+import { VisualizeConstants } from '../visualize_constants';
+import { createLegacyClass } from 'ui/utils/legacy_class';
 
 uiModules
   .get('app/visualize')
   .factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
     const Vis = Private(VisProvider);
 
-    _.class(SavedVis).inherits(courier.SavedObject);
+    createLegacyClass(SavedVis).inherits(courier.SavedObject);
     function SavedVis(opts) {
       const self = this;
       opts = opts || {};
@@ -45,6 +46,8 @@ uiModules
 
         afterESResp: this._afterEsResp
       });
+
+      this.showInRecenltyAccessed = true;
     }
 
     SavedVis.type = 'visualization';
@@ -62,6 +65,10 @@ uiModules
     SavedVis.fieldOrder = ['title', 'description'];
 
     SavedVis.searchSource = true;
+
+    SavedVis.prototype.getFullPath = function () {
+      return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
+    };
 
     SavedVis.prototype._afterEsResp = function () {
       const self = this;

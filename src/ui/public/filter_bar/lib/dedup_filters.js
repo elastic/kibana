@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
+import { compareFilters } from './compare_filters';
 
 /**
  * Combine 2 filter collections, removing duplicates

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiPanel,
@@ -14,6 +15,7 @@ import {
 
 export const EmptyState = ({
   loadingDataDocUrl,
+  onRefresh,
 }) => (
   <EuiPanel paddingSize="l">
     <EuiFlexGroup justifyContent="center" alignItems="center">
@@ -38,10 +40,16 @@ export const EmptyState = ({
             </EuiLink>
           </p>
         </EuiText>
-        <EuiSpacer size="xs"/>
+
+        <EuiSpacer size="m"/>
+
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="faceHappy">
+            <EuiButton
+              iconType="refresh"
+              onClick={onRefresh}
+              data-test-subj="refreshIndicesButton"
+            >
               Check for new data
             </EuiButton>
           </EuiFlexItem>
@@ -50,3 +58,8 @@ export const EmptyState = ({
     </EuiFlexGroup>
   </EuiPanel>
 );
+
+EmptyState.propTypes = {
+  loadingDataDocUrl: PropTypes.string.isRequired,
+  onRefresh: PropTypes.func.isRequired,
+};

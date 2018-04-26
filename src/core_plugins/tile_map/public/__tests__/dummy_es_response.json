@@ -1,0 +1,1810 @@
+{
+  "featureCollection": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -84.9070567265153,
+            36.36630680412054
+          ]
+        },
+        "properties": {
+          "geohash": "dn",
+          "doc_count": 715,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -84.375
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -90
+              ],
+              [
+                33.75,
+                -78.75
+              ],
+              [
+                39.375,
+                -78.75
+              ],
+              [
+                39.375,
+                -90
+              ]
+            ]
+          },
+          "value": 715
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -84.9149083904922,
+            41.58417354337871
+          ]
+        },
+        "properties": {
+          "geohash": "dp",
+          "doc_count": 657,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -84.375
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -90
+              ],
+              [
+                39.375,
+                -78.75
+              ],
+              [
+                45,
+                -78.75
+              ],
+              [
+                45,
+                -90
+              ]
+            ]
+          },
+          "value": 657
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.05993634462357,
+            36.32617760449648
+          ]
+        },
+        "properties": {
+          "geohash": "9y",
+          "doc_count": 623,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -95.625
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -101.25
+              ],
+              [
+                33.75,
+                -90
+              ],
+              [
+                39.375,
+                -90
+              ],
+              [
+                39.375,
+                -101.25
+              ]
+            ]
+          },
+          "value": 623
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -73.9467297680676,
+            42.102721743285656
+          ]
+        },
+        "properties": {
+          "geohash": "dr",
+          "doc_count": 576,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -73.125
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -78.75
+              ],
+              [
+                39.375,
+                -67.5
+              ],
+              [
+                45,
+                -67.5
+              ],
+              [
+                45,
+                -78.75
+              ]
+            ]
+          },
+          "value": 576
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.22280854173005,
+            41.98196731042117
+          ]
+        },
+        "properties": {
+          "geohash": "9z",
+          "doc_count": 555,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -95.625
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -101.25
+              ],
+              [
+                39.375,
+                -90
+              ],
+              [
+                45,
+                -90
+              ],
+              [
+                45,
+                -101.25
+              ]
+            ]
+          },
+          "value": 555
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -84.76328378543258,
+            31.699854251928627
+          ]
+        },
+        "properties": {
+          "geohash": "dj",
+          "doc_count": 528,
+          "geohash_meta": {
+            "center": [
+              30.9375,
+              -84.375
+            ],
+            "rectangle": [
+              [
+                28.125,
+                -90
+              ],
+              [
+                28.125,
+                -78.75
+              ],
+              [
+                33.75,
+                -78.75
+              ],
+              [
+                33.75,
+                -90
+              ]
+            ]
+          },
+          "value": 528
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.2651846781373,
+            31.394152916036546
+          ]
+        },
+        "properties": {
+          "geohash": "9v",
+          "doc_count": 510,
+          "geohash_meta": {
+            "center": [
+              30.9375,
+              -95.625
+            ],
+            "rectangle": [
+              [
+                28.125,
+                -101.25
+              ],
+              [
+                28.125,
+                -90
+              ],
+              [
+                33.75,
+                -90
+              ],
+              [
+                33.75,
+                -101.25
+              ]
+            ]
+          },
+          "value": 510
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -118.95955030806363,
+            36.473086257465184
+          ]
+        },
+        "properties": {
+          "geohash": "9q",
+          "doc_count": 390,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -118.125
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -123.75
+              ],
+              [
+                33.75,
+                -112.5
+              ],
+              [
+                39.375,
+                -112.5
+              ],
+              [
+                39.375,
+                -123.75
+              ]
+            ]
+          },
+          "value": 390
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -106.9422698020935,
+            36.371589582413435
+          ]
+        },
+        "properties": {
+          "geohash": "9w",
+          "doc_count": 257,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -106.875
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -112.5
+              ],
+              [
+                33.75,
+                -101.25
+              ],
+              [
+                39.375,
+                -101.25
+              ],
+              [
+                39.375,
+                -112.5
+              ]
+            ]
+          },
+          "value": 257
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -95.21766104735434,
+            46.71993430238217
+          ]
+        },
+        "properties": {
+          "geohash": "cb",
+          "doc_count": 248,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -95.625
+            ],
+            "rectangle": [
+              [
+                45,
+                -101.25
+              ],
+              [
+                45,
+                -90
+              ],
+              [
+                50.625,
+                -90
+              ],
+              [
+                50.625,
+                -101.25
+              ]
+            ]
+          },
+          "value": 248
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -119.4527724198997,
+            47.01064535882324
+          ]
+        },
+        "properties": {
+          "geohash": "c2",
+          "doc_count": 241,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -118.125
+            ],
+            "rectangle": [
+              [
+                45,
+                -123.75
+              ],
+              [
+                45,
+                -112.5
+              ],
+              [
+                50.625,
+                -112.5
+              ],
+              [
+                50.625,
+                -123.75
+              ]
+            ]
+          },
+          "value": 241
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -106.35303659364581,
+            41.90058804117143
+          ]
+        },
+        "properties": {
+          "geohash": "9x",
+          "doc_count": 233,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -106.875
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -112.5
+              ],
+              [
+                39.375,
+                -101.25
+              ],
+              [
+                45,
+                -101.25
+              ],
+              [
+                45,
+                -112.5
+              ]
+            ]
+          },
+          "value": 233
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -119.78077582083642,
+            42.019549501128495
+          ]
+        },
+        "properties": {
+          "geohash": "9r",
+          "doc_count": 202,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -118.125
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -123.75
+              ],
+              [
+                39.375,
+                -112.5
+              ],
+              [
+                45,
+                -112.5
+              ],
+              [
+                45,
+                -123.75
+              ]
+            ]
+          },
+          "value": 202
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -77.02892781235278,
+            37.012665029615164
+          ]
+        },
+        "properties": {
+          "geohash": "dq",
+          "doc_count": 188,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -73.125
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -78.75
+              ],
+              [
+                33.75,
+                -67.5
+              ],
+              [
+                39.375,
+                -67.5
+              ],
+              [
+                39.375,
+                -78.75
+              ]
+            ]
+          },
+          "value": 188
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -106.99090437032282,
+            47.078339285217226
+          ]
+        },
+        "properties": {
+          "geohash": "c8",
+          "doc_count": 158,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -106.875
+            ],
+            "rectangle": [
+              [
+                45,
+                -112.5
+              ],
+              [
+                45,
+                -101.25
+              ],
+              [
+                50.625,
+                -101.25
+              ],
+              [
+                50.625,
+                -112.5
+              ]
+            ]
+          },
+          "value": 158
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -107.13654454797506,
+            32.61927543673664
+          ]
+        },
+        "properties": {
+          "geohash": "9t",
+          "doc_count": 138,
+          "geohash_meta": {
+            "center": [
+              30.9375,
+              -106.875
+            ],
+            "rectangle": [
+              [
+                28.125,
+                -112.5
+              ],
+              [
+                28.125,
+                -101.25
+              ],
+              [
+                33.75,
+                -101.25
+              ],
+              [
+                33.75,
+                -112.5
+              ]
+            ]
+          },
+          "value": 138
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -152.64550829306245,
+            59.914903342723846
+          ]
+        },
+        "properties": {
+          "geohash": "bd",
+          "doc_count": 126,
+          "geohash_meta": {
+            "center": [
+              59.0625,
+              -151.875
+            ],
+            "rectangle": [
+              [
+                56.25,
+                -157.5
+              ],
+              [
+                56.25,
+                -146.25
+              ],
+              [
+                61.875,
+                -146.25
+              ],
+              [
+                61.875,
+                -157.5
+              ]
+            ]
+          },
+          "value": 126
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -81.2875135615468,
+            26.6619403520599
+          ]
+        },
+        "properties": {
+          "geohash": "dh",
+          "doc_count": 96,
+          "geohash_meta": {
+            "center": [
+              25.3125,
+              -84.375
+            ],
+            "rectangle": [
+              [
+                22.5,
+                -90
+              ],
+              [
+                22.5,
+                -78.75
+              ],
+              [
+                28.125,
+                -78.75
+              ],
+              [
+                28.125,
+                -90
+              ]
+            ]
+          },
+          "value": 96
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -161.96613382548094,
+            60.42251357808709
+          ]
+        },
+        "properties": {
+          "geohash": "b6",
+          "doc_count": 95,
+          "geohash_meta": {
+            "center": [
+              59.0625,
+              -163.125
+            ],
+            "rectangle": [
+              [
+                56.25,
+                -168.75
+              ],
+              [
+                56.25,
+                -157.5
+              ],
+              [
+                61.875,
+                -157.5
+              ],
+              [
+                61.875,
+                -168.75
+              ]
+            ]
+          },
+          "value": 95
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -162.01718556694686,
+            64.50348428450525
+          ]
+        },
+        "properties": {
+          "geohash": "b7",
+          "doc_count": 83,
+          "geohash_meta": {
+            "center": [
+              64.6875,
+              -163.125
+            ],
+            "rectangle": [
+              [
+                61.875,
+                -168.75
+              ],
+              [
+                61.875,
+                -157.5
+              ],
+              [
+                67.5,
+                -157.5
+              ],
+              [
+                67.5,
+                -168.75
+              ]
+            ]
+          },
+          "value": 83
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -152.76569221168756,
+            64.75516308099031
+          ]
+        },
+        "properties": {
+          "geohash": "be",
+          "doc_count": 77,
+          "geohash_meta": {
+            "center": [
+              64.6875,
+              -151.875
+            ],
+            "rectangle": [
+              [
+                61.875,
+                -157.5
+              ],
+              [
+                61.875,
+                -146.25
+              ],
+              [
+                67.5,
+                -146.25
+              ],
+              [
+                67.5,
+                -157.5
+              ]
+            ]
+          },
+          "value": 77
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -86.92213883623481,
+            45.67713766358793
+          ]
+        },
+        "properties": {
+          "geohash": "f0",
+          "doc_count": 70,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -84.375
+            ],
+            "rectangle": [
+              [
+                45,
+                -90
+              ],
+              [
+                45,
+                -78.75
+              ],
+              [
+                50.625,
+                -78.75
+              ],
+              [
+                50.625,
+                -90
+              ]
+            ]
+          },
+          "value": 70
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.65346693620086,
+            33.081501605920494
+          ]
+        },
+        "properties": {
+          "geohash": "9m",
+          "doc_count": 61,
+          "geohash_meta": {
+            "center": [
+              30.9375,
+              -118.125
+            ],
+            "rectangle": [
+              [
+                28.125,
+                -123.75
+              ],
+              [
+                28.125,
+                -112.5
+              ],
+              [
+                33.75,
+                -112.5
+              ],
+              [
+                33.75,
+                -123.75
+              ]
+            ]
+          },
+          "value": 61
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -65.73361264541745,
+            18.2236089091748
+          ]
+        },
+        "properties": {
+          "geohash": "de",
+          "doc_count": 41,
+          "geohash_meta": {
+            "center": [
+              19.6875,
+              -61.875
+            ],
+            "rectangle": [
+              [
+                16.875,
+                -67.5
+              ],
+              [
+                16.875,
+                -56.25
+              ],
+              [
+                22.5,
+                -56.25
+              ],
+              [
+                22.5,
+                -67.5
+              ]
+            ]
+          },
+          "value": 41
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -143.12310453504324,
+            64.18042578734457
+          ]
+        },
+        "properties": {
+          "geohash": "bg",
+          "doc_count": 39,
+          "geohash_meta": {
+            "center": [
+              64.6875,
+              -140.625
+            ],
+            "rectangle": [
+              [
+                61.875,
+                -146.25
+              ],
+              [
+                61.875,
+                -135
+              ],
+              [
+                67.5,
+                -135
+              ],
+              [
+                67.5,
+                -146.25
+              ]
+            ]
+          },
+          "value": 39
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -124.1186392866075,
+            42.33813495375216
+          ]
+        },
+        "properties": {
+          "geohash": "9p",
+          "doc_count": 37,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -129.375
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -135
+              ],
+              [
+                39.375,
+                -123.75
+              ],
+              [
+                45,
+                -123.75
+              ],
+              [
+                45,
+                -135
+              ]
+            ]
+          },
+          "value": 37
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -137.9709525872022,
+            59.20598397497088
+          ]
+        },
+        "properties": {
+          "geohash": "bf",
+          "doc_count": 36,
+          "geohash_meta": {
+            "center": [
+              59.0625,
+              -140.625
+            ],
+            "rectangle": [
+              [
+                56.25,
+                -146.25
+              ],
+              [
+                56.25,
+                -135
+              ],
+              [
+                61.875,
+                -135
+              ],
+              [
+                61.875,
+                -146.25
+              ]
+            ]
+          },
+          "value": 36
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -132.43937451392412,
+            55.6085482891649
+          ]
+        },
+        "properties": {
+          "geohash": "c1",
+          "doc_count": 35,
+          "geohash_meta": {
+            "center": [
+              53.4375,
+              -129.375
+            ],
+            "rectangle": [
+              [
+                50.625,
+                -135
+              ],
+              [
+                50.625,
+                -123.75
+              ],
+              [
+                56.25,
+                -123.75
+              ],
+              [
+                56.25,
+                -135
+              ]
+            ]
+          },
+          "value": 35
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -98.05168284103274,
+            27.216137498617172
+          ]
+        },
+        "properties": {
+          "geohash": "9u",
+          "doc_count": 33,
+          "geohash_meta": {
+            "center": [
+              25.3125,
+              -95.625
+            ],
+            "rectangle": [
+              [
+                22.5,
+                -101.25
+              ],
+              [
+                22.5,
+                -90
+              ],
+              [
+                28.125,
+                -90
+              ],
+              [
+                28.125,
+                -101.25
+              ]
+            ]
+          },
+          "value": 33
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -133.99208377115428,
+            57.29258285835385
+          ]
+        },
+        "properties": {
+          "geohash": "c4",
+          "doc_count": 30,
+          "geohash_meta": {
+            "center": [
+              59.0625,
+              -129.375
+            ],
+            "rectangle": [
+              [
+                56.25,
+                -135
+              ],
+              [
+                56.25,
+                -123.75
+              ],
+              [
+                61.875,
+                -123.75
+              ],
+              [
+                61.875,
+                -135
+              ]
+            ]
+          },
+          "value": 30
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -68.79461143165827,
+            45.693174339830875
+          ]
+        },
+        "properties": {
+          "geohash": "f2",
+          "doc_count": 24,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -73.125
+            ],
+            "rectangle": [
+              [
+                45,
+                -78.75
+              ],
+              [
+                45,
+                -67.5
+              ],
+              [
+                50.625,
+                -67.5
+              ],
+              [
+                50.625,
+                -78.75
+              ]
+            ]
+          },
+          "value": 24
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -163.01397004164755,
+            54.89952846430242
+          ]
+        },
+        "properties": {
+          "geohash": "b3",
+          "doc_count": 24,
+          "geohash_meta": {
+            "center": [
+              53.4375,
+              -163.125
+            ],
+            "rectangle": [
+              [
+                50.625,
+                -168.75
+              ],
+              [
+                50.625,
+                -157.5
+              ],
+              [
+                56.25,
+                -157.5
+              ],
+              [
+                56.25,
+                -168.75
+              ]
+            ]
+          },
+          "value": 24
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -156.45671758800745,
+            20.677654556930065
+          ]
+        },
+        "properties": {
+          "geohash": "8e",
+          "doc_count": 21,
+          "geohash_meta": {
+            "center": [
+              19.6875,
+              -151.875
+            ],
+            "rectangle": [
+              [
+                16.875,
+                -157.5
+              ],
+              [
+                16.875,
+                -146.25
+              ],
+              [
+                22.5,
+                -146.25
+              ],
+              [
+                22.5,
+                -157.5
+              ]
+            ]
+          },
+          "value": 21
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -151.52415155433118,
+            68.92314183991402
+          ]
+        },
+        "properties": {
+          "geohash": "bs",
+          "doc_count": 18,
+          "geohash_meta": {
+            "center": [
+              70.3125,
+              -151.875
+            ],
+            "rectangle": [
+              [
+                67.5,
+                -157.5
+              ],
+              [
+                67.5,
+                -146.25
+              ],
+              [
+                73.125,
+                -146.25
+              ],
+              [
+                73.125,
+                -157.5
+              ]
+            ]
+          },
+          "value": 18
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -124.08633585087955,
+            46.76067248918116
+          ]
+        },
+        "properties": {
+          "geohash": "c0",
+          "doc_count": 13,
+          "geohash_meta": {
+            "center": [
+              47.8125,
+              -129.375
+            ],
+            "rectangle": [
+              [
+                45,
+                -135
+              ],
+              [
+                45,
+                -123.75
+              ],
+              [
+                50.625,
+                -123.75
+              ],
+              [
+                50.625,
+                -135
+              ]
+            ]
+          },
+          "value": 13
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -158.69247693568468,
+            21.67966120876372
+          ]
+        },
+        "properties": {
+          "geohash": "87",
+          "doc_count": 12,
+          "geohash_meta": {
+            "center": [
+              19.6875,
+              -163.125
+            ],
+            "rectangle": [
+              [
+                16.875,
+                -168.75
+              ],
+              [
+                16.875,
+                -157.5
+              ],
+              [
+                22.5,
+                -157.5
+              ],
+              [
+                22.5,
+                -168.75
+              ]
+            ]
+          },
+          "value": 12
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -169.91430887952447,
+            14.246335001662374
+          ]
+        },
+        "properties": {
+          "geohash": "84",
+          "doc_count": 12,
+          "geohash_meta": {
+            "center": [
+              14.0625,
+              -174.375
+            ],
+            "rectangle": [
+              [
+                11.25,
+                -180
+              ],
+              [
+                11.25,
+                -168.75
+              ],
+              [
+                16.875,
+                -168.75
+              ],
+              [
+                16.875,
+                -180
+              ]
+            ]
+          },
+          "value": 12
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -145.1541736163199,
+            14.100071671418846
+          ]
+        },
+        "properties": {
+          "geohash": "8f",
+          "doc_count": 10,
+          "geohash_meta": {
+            "center": [
+              14.0625,
+              -140.625
+            ],
+            "rectangle": [
+              [
+                11.25,
+                -146.25
+              ],
+              [
+                11.25,
+                -135
+              ],
+              [
+                16.875,
+                -135
+              ],
+              [
+                16.875,
+                -146.25
+              ]
+            ]
+          },
+          "value": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -163.34791378118098,
+            69.16283434722573
+          ]
+        },
+        "properties": {
+          "geohash": "bk",
+          "doc_count": 9,
+          "geohash_meta": {
+            "center": [
+              70.3125,
+              -163.125
+            ],
+            "rectangle": [
+              [
+                67.5,
+                -168.75
+              ],
+              [
+                67.5,
+                -157.5
+              ],
+              [
+                73.125,
+                -157.5
+              ],
+              [
+                73.125,
+                -168.75
+              ]
+            ]
+          },
+          "value": 9
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -67.16800019145012,
+            44.8411110509187
+          ]
+        },
+        "properties": {
+          "geohash": "dx",
+          "doc_count": 6,
+          "geohash_meta": {
+            "center": [
+              42.1875,
+              -61.875
+            ],
+            "rectangle": [
+              [
+                39.375,
+                -67.5
+              ],
+              [
+                39.375,
+                -56.25
+              ],
+              [
+                45,
+                -56.25
+              ],
+              [
+                45,
+                -67.5
+              ]
+            ]
+          },
+          "value": 6
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -169.80291330255568,
+            56.72484784852713
+          ]
+        },
+        "properties": {
+          "geohash": "b4",
+          "doc_count": 4,
+          "geohash_meta": {
+            "center": [
+              59.0625,
+              -174.375
+            ],
+            "rectangle": [
+              [
+                56.25,
+                -180
+              ],
+              [
+                56.25,
+                -168.75
+              ],
+              [
+                61.875,
+                -168.75
+              ],
+              [
+                61.875,
+                -180
+              ]
+            ]
+          },
+          "value": 4
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -145.57611141353846,
+            68.11608082149178
+          ]
+        },
+        "properties": {
+          "geohash": "bu",
+          "doc_count": 3,
+          "geohash_meta": {
+            "center": [
+              70.3125,
+              -140.625
+            ],
+            "rectangle": [
+              [
+                67.5,
+                -146.25
+              ],
+              [
+                67.5,
+                -135
+              ],
+              [
+                73.125,
+                -135
+              ],
+              [
+                73.125,
+                -146.25
+              ]
+            ]
+          },
+          "value": 3
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -171.11272992566228,
+            63.72657997068018
+          ]
+        },
+        "properties": {
+          "geohash": "b5",
+          "doc_count": 2,
+          "geohash_meta": {
+            "center": [
+              64.6875,
+              -174.375
+            ],
+            "rectangle": [
+              [
+                61.875,
+                -180
+              ],
+              [
+                61.875,
+                -168.75
+              ],
+              [
+                67.5,
+                -168.75
+              ],
+              [
+                67.5,
+                -180
+              ]
+            ]
+          },
+          "value": 2
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -174.20635032467544,
+            52.220348292030394
+          ]
+        },
+        "properties": {
+          "geohash": "b1",
+          "doc_count": 2,
+          "geohash_meta": {
+            "center": [
+              53.4375,
+              -174.375
+            ],
+            "rectangle": [
+              [
+                50.625,
+                -180
+              ],
+              [
+                50.625,
+                -168.75
+              ],
+              [
+                56.25,
+                -168.75
+              ],
+              [
+                56.25,
+                -180
+              ]
+            ]
+          },
+          "value": 2
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -145.76861112378538,
+            18.1244444148615
+          ]
+        },
+        "properties": {
+          "geohash": "8g",
+          "doc_count": 2,
+          "geohash_meta": {
+            "center": [
+              19.6875,
+              -140.625
+            ],
+            "rectangle": [
+              [
+                16.875,
+                -146.25
+              ],
+              [
+                16.875,
+                -135
+              ],
+              [
+                22.5,
+                -135
+              ],
+              [
+                22.5,
+                -146.25
+              ]
+            ]
+          },
+          "value": 2
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -123.75373472459614,
+            39.26203776150942
+          ]
+        },
+        "properties": {
+          "geohash": "9n",
+          "doc_count": 1,
+          "geohash_meta": {
+            "center": [
+              36.5625,
+              -129.375
+            ],
+            "rectangle": [
+              [
+                33.75,
+                -135
+              ],
+              [
+                33.75,
+                -123.75
+              ],
+              [
+                39.375,
+                -123.75
+              ],
+              [
+                39.375,
+                -135
+              ]
+            ]
+          },
+          "value": 1
+        }
+      }
+    ]
+  },
+  "meta": {
+    "min": 1,
+    "max": 715,
+    "geohashPrecision": 2,
+    "geohashGridDimensionsAtEquator": [
+      1252300,
+      624100
+    ]
+  }
+}

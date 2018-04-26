@@ -36,27 +36,34 @@ exports[`LoadingState should render normally 1`] = `
       <EuiSpacer
         size="s"
       />
-      <EuiText
-        size="s"
+      <EuiFlexGroup
+        alignItems="center"
+        component="div"
+        gutterSize="s"
+        justifyContent="center"
+        responsive={true}
+        wrap={false}
       >
-        <p
-          style={
-            Object {
-              "textAlign": "center",
-            }
-          }
+        <EuiFlexItem
+          component="div"
+          grow={false}
         >
-          <EuiIcon
-            size="m"
-            type="faceSad"
+          <EuiLoadingSpinner
+            size="l"
           />
-          <EuiTextColor
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={false}
+        >
+          <EuiText
             color="subdued"
+            size="s"
           >
             Reticulating splines...
-          </EuiTextColor>
-        </p>
-      </EuiText>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
 </EuiPanel>

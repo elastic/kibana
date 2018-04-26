@@ -1,0 +1,125 @@
+<div class="new-event-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h3 class="euiTitle">Create new event</h3>
+  <div class="euiSpacer euiSpacer--s"></div>
+
+  <div class="ml-new-event-contents" >
+
+    <div class="kuiFormSection" aria-hidden="false">
+      <label for="id" class="kuiFormLabel">
+        Description
+      </label>
+      <input
+        type="text"
+        ng-disabled="isNewCalendar===false"
+        id="id"
+        name="id"
+        ng-model="ui.description"
+        ng-trim="false"
+        class="kuiTextInput fullWidth"
+        autofocus
+        required />
+    </div>
+    <div class="main-container row1">
+      <div class="tabs-container">
+        <ul class="nav nav-pills nav-stacked">
+          <li ng-class="{ active: ui.rangeType === '0' }"><a ng-click="ui.setRangeType('0')"> Single day</a></li>
+          <li ng-class="{ active: ui.rangeType === '1' }"><a ng-click="ui.setRangeType('1')"> Day range</a></li>
+          <li ng-class="{ active: ui.rangeType === '2' }"><a ng-click="ui.setRangeType('2')"> Time range</a></li>
+        </ul>
+      </div>
+      <div
+        class="calendar-container"
+        ng-class="{ 'top-tab-selected': ui.rangeType === '0' }" >
+
+        <div
+          ng-show="ui.rangeType === RANGE_TYPE.SINGLE_DAY"
+          class="calendar">
+          <datepicker
+            offset-timezone
+            ng-model="ui.timepicker.start"
+            show-weeks="false">
+          </datepicker>
+        </div>
+
+        <div ng-show="ui.rangeType === RANGE_TYPE.DAY_RANGE">
+          <div class="row">
+            <div class="col-md-6 calendar">
+              <label class="kuiFormLabel">
+                From:
+              </label>
+              <datepicker
+                offset-timezone
+                ng-model="ui.timepicker.start"
+                show-weeks="false">
+              </datepicker>
+              <div class="partition"></div>
+            </div>
+            <div class="col-md-6 calendar">
+              <label class="kuiFormLabel">
+                To:
+              </label>
+              <datepicker
+                offset-timezone
+                ng-model="ui.timepicker.end"
+                show-weeks="false">
+              </datepicker>
+            </div>
+          </div>
+        </div>
+
+        <div ng-show="ui.rangeType === RANGE_TYPE.TIME_RANGE">
+          <div class="row">
+            <div class="col-md-6 calendar">
+              <div class="calendar-input-container">
+                <label class="kuiFormLabel">
+                  From:
+                </label>
+                <input type="text" class="form-control" input-datetime="YYYY-MM-DD HH:mm:ss" ng-model="ui.timepicker.start">
+              </div>
+              <datepicker
+                offset-timezone
+                ng-model="ui.timepicker.start"
+                show-weeks="false">
+              </datepicker>
+              <div class="partition partition-large"></div>
+            </div>
+            <div class="col-md-6 calendar">
+              <label class="kuiFormLabel">
+                From:
+              </label>
+              <div class="calendar-input-container">
+                <input type="text" class="form-control" input-datetime="YYYY-MM-DD HH:mm:ss" ng-model="ui.timepicker.end">
+              </div>
+              <datepicker
+                offset-timezone
+                ng-model="ui.timepicker.end"
+                show-weeks="false">
+              </datepicker>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="clearfix"></div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium" />
+
+  <button
+    ng-click="save()"
+    ng-disabled="ui.saveEnabled() === false"
+    class="kuiButton kuiButton--primary" >
+    Add
+  </button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary"
+    aria-label="Cancel">
+    Cancel
+  </button>
+
+</div>

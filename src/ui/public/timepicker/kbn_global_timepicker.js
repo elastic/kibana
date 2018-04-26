@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { once, clone } from 'lodash';
 
 import toggleHtml from './kbn_global_timepicker.html';
@@ -44,6 +44,18 @@ uiModules
         $scope.updateInterval = function (interval) {
           timefilter.refreshInterval = interval;
           kbnTopNav.close('interval');
+        };
+
+        $scope.getSharedTimeFilterFromDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().min.clone().utc().format()
+            : null;
+        };
+
+        $scope.getSharedTimeFilterToDate = function () {
+          return (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled)
+            ? timefilter.getBounds().max.clone().utc().format()
+            : null;
         };
       },
     };

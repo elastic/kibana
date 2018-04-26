@@ -2,7 +2,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { DocTitleProvider } from 'ui/doc_title';
+import { DocTitleProvider } from '..';
 
 describe('docTitle Service', function () {
   let initialDocTitle;

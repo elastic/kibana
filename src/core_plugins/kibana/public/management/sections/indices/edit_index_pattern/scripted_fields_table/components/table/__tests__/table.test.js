@@ -13,32 +13,17 @@ const indexPattern = {
   }
 };
 
-const model = {
-  data: {
-    records: [{ id: 1, name: 'Elastic' }],
-    totalRecordCount: 1,
-  },
-  criteria: {
-    page: {
-      index: 0,
-      size: 10,
-    },
-    sort: {
-      field: 'name',
-      direction: 'asc'
-    },
-  }
-};
+const items = [{ id: 1, name: 'Elastic' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
         deleteField={() => {}}
-        onDataCriteriaChange={() => {}}
+        onChange={() => {}}
       />
     );
 
@@ -49,14 +34,14 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
         deleteField={() => {}}
-        onDataCriteriaChange={() => {}}
+        onChange={() => {}}
       />
     );
 
-    const formatTableCell = shallow(component.prop('config').columns[3].render('Elastic'));
+    const formatTableCell = shallow(component.prop('columns')[3].render('Elastic'));
     expect(formatTableCell).toMatchSnapshot();
   });
 
@@ -66,15 +51,15 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={editField}
         deleteField={() => {}}
-        onDataCriteriaChange={() => {}}
+        onChange={() => {}}
       />
     );
 
     // Click the delete button
-    component.prop('config').columns[4].actions[0].onClick();
+    component.prop('columns')[4].actions[0].onClick();
     expect(editField).toBeCalled();
   });
 
@@ -84,15 +69,15 @@ describe('Table', () => {
     const component = shallow(
       <Table
         indexPattern={indexPattern}
-        model={model}
+        items={items}
         editField={() => {}}
         deleteField={deleteField}
-        onDataCriteriaChange={() => {}}
+        onChange={() => {}}
       />
     );
 
     // Click the delete button
-    component.prop('config').columns[4].actions[1].onClick();
+    component.prop('columns')[4].actions[1].onClick();
     expect(deleteField).toBeCalled();
   });
 

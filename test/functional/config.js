@@ -25,6 +25,7 @@ import {
   ScreenshotsProvider,
   DashboardVisualizationProvider,
   DashboardExpectProvider,
+  FailureDebuggingProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -33,7 +34,8 @@ export default async function ({ readConfigFile }) {
   return {
     testFiles: [
       require.resolve('./apps/console'),
-      require.resolve('./apps/context'),
+      require.resolve('./apps/getting_started'),
+      // require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
@@ -73,6 +75,7 @@ export default async function ({ readConfigFile }) {
       screenshots: ScreenshotsProvider,
       dashboardVisualizations: DashboardVisualizationProvider,
       dashboardExpect: DashboardExpectProvider,
+      failureDebugging: FailureDebuggingProvider,
     },
     servers: commonConfig.get('servers'),
     apps: {

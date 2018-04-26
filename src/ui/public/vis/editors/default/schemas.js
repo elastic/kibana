@@ -1,15 +1,12 @@
 import _ from 'lodash';
-import { IndexedArray } from 'ui/indexed_array';
-import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
+import { IndexedArray } from '../../../indexed_array';
+import { AggParams } from '../../../agg_types/agg_params';
 
-export function VisSchemasProvider(Private) {
-  const AggParams = Private(AggTypesAggParamsProvider);
-
-  function Schemas(schemas) {
-    const self = this;
+class Schemas {
+  constructor(schemas) {
 
     _(schemas || [])
-      .map(function (schema) {
+      .map((schema) => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 
         if (schema.name === 'split') {
@@ -40,8 +37,8 @@ export function VisSchemasProvider(Private) {
 
         return schema;
       })
-      .tap(function (schemas) {
-        self.all = new IndexedArray({
+      .tap((schemas) => {
+        this.all = new IndexedArray({
           index: ['name'],
           group: ['group'],
           immutable: true,
@@ -49,8 +46,8 @@ export function VisSchemasProvider(Private) {
         });
       })
       .groupBy('group')
-      .forOwn(function (group, groupName) {
-        self[groupName] = new IndexedArray({
+      .forOwn((group, groupName) => {
+        this[groupName] = new IndexedArray({
           index: ['name'],
           immutable: true,
           initialSet: group
@@ -58,7 +55,7 @@ export function VisSchemasProvider(Private) {
       })
       .commit();
   }
-
-  return Schemas;
 }
+
+export { Schemas };
 

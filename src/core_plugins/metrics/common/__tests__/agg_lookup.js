@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { createOptions, isBasicAgg } from '../agg_lookup';
 
 describe('aggLookup', () => {
-
   describe('isBasicAgg(metric)', () => {
     it('returns true for a basic metric (count)', () => {
       expect(isBasicAgg({ type: 'count' })).to.equal(true);
@@ -13,11 +12,10 @@ describe('aggLookup', () => {
   });
 
   describe('createOptions(type, siblings)', () => {
-
     it('returns options for all aggs', () => {
       const options = createOptions();
-      expect(options).to.have.length(28);
-      options.forEach((option) => {
+      expect(options).to.have.length(30);
+      options.forEach(option => {
         expect(option).to.have.property('label');
         expect(option).to.have.property('value');
         expect(option).to.have.property('disabled');
@@ -26,20 +24,23 @@ describe('aggLookup', () => {
 
     it('returns options for basic', () => {
       const options = createOptions('basic');
-      expect(options).to.have.length(14);
-      expect(options.every(opt => isBasicAgg({ type: opt.value }))).to.equal(true);
+      expect(options).to.have.length(15);
+      expect(options.every(opt => isBasicAgg({ type: opt.value }))).to.equal(
+        true
+      );
     });
 
     it('returns options for pipeline', () => {
       const options = createOptions('pipeline');
-      expect(options).to.have.length(14);
-      expect(options.every(opt => !isBasicAgg({ type: opt.value }))).to.equal(true);
+      expect(options).to.have.length(15);
+      expect(options.every(opt => !isBasicAgg({ type: opt.value }))).to.equal(
+        true
+      );
     });
 
     it('returns options for all if given unknown key', () => {
       const options = createOptions('foo');
-      expect(options).to.have.length(28);
+      expect(options).to.have.length(30);
     });
-
   });
 });

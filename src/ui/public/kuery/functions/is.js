@@ -2,7 +2,7 @@ import _ from 'lodash';
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
-import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
+import { getPhraseScript } from '../../filter_manager/lib/phrase';
 import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
@@ -39,6 +39,19 @@ export function toElasticsearchQuery(node, indexPattern) {
   }
 
   const fields = getFields(fieldNameArg, indexPattern);
+
+  // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
+  // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
+  // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
+  // field should return no results. It's debatable whether this is desirable, but it's been that way forever, so we'll
+  // keep things familiar for now.
+  if (fields && fields.length === 0) {
+    fields.push({
+      name: ast.toElasticsearchQuery(fieldNameArg),
+      scripted: false,
+    });
+  }
+
   const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
   const isMatchAllQuery = isExistsQuery && fields && fields.length === indexPattern.fields.length;
 

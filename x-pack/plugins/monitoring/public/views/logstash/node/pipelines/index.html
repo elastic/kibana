@@ -1,0 +1,14 @@
+<monitoring-main
+  product="logstash"
+  name="nodes" instance="{{ pageData.nodeSummary.name }}"
+  resolver="{{ pageData.nodeSummary.uuid }}"
+  page="pipelines"
+>
+  <monitoring-logstash-node-summary logstash="pageData.nodeSummary"></monitoring-logstash-node-summary>
+  <div class="page-row">
+    <monitoring-logstash-pipeline-listing
+      pipelines="pageData.pipelines"
+      upgrade-message="{{ upgradeMessage }}"
+    ></monitoring-logstash-pipeline-listing>
+  </div>
+</monitoring-main>

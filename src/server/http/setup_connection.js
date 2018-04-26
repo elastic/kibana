@@ -1,10 +1,7 @@
 import { readFileSync } from 'fs';
 import secureOptions from './secure_options';
 
-export default function (kbnServer, server, config) {
-  // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
-  kbnServer = null;
-
+export function setupConnection(server, config) {
   const host = config.get('server.host');
   const port = config.get('server.port');
 

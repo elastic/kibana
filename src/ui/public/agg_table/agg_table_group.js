@@ -1,11 +1,12 @@
-import 'ui/compile_recursive_directive';
-import 'ui/agg_table';
-import { uiModules } from 'ui/modules';
-import aggTableGroupTemplate from 'ui/agg_table/agg_table_group.html';
+import 'angular';
+import 'angular-recursion';
+import './';
+import { uiModules } from '../modules';
+import aggTableGroupTemplate from './agg_table_group.html';
 
 uiModules
-  .get('kibana')
-  .directive('kbnAggTableGroup', function (compileRecursiveDirective) {
+  .get('kibana', ['RecursionHelper'])
+  .directive('kbnAggTableGroup', function (RecursionHelper) {
     return {
       restrict: 'E',
       template: aggTableGroupTemplate,
@@ -20,7 +21,7 @@ uiModules
       compile: function ($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
-        return compileRecursiveDirective.compile($el, {
+        return RecursionHelper.compile($el, {
           post: function ($scope) {
             $scope.$watch('group', function (group) {
             // clear the previous "state"

@@ -1,1 +1,1 @@
-import './source_filters_table';
+export { SourceFiltersTable } from './source_filters_table';

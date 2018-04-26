@@ -71,7 +71,7 @@ export default () => Joi.object({
         then: Joi.required()
       }),
       keyPassphrase: Joi.string(),
-      certificateAuthorities: Joi.array().single().items(Joi.string()),
+      certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
       supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
@@ -177,7 +177,8 @@ export default () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
+      // then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
+      then: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest'),
       otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest')
     }),
     includeElasticMapsService: Joi.boolean().default(true)

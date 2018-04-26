@@ -1,122 +1,107 @@
 import { resolve } from 'path';
-
-import libesvm from 'libesvm';
+import { get } from 'lodash';
+import { format } from 'url';
 import elasticsearch from 'elasticsearch';
-
+import toPath from 'lodash/internal/toPath';
+import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
-import { createCallCluster } from './create_call_cluster';
+import { rmrfSync } from './rmrf_sync';
 
-const ESVM_DIR = resolve(__dirname, '../../../esvm/test_utils/es_test_cluster');
-const BRANCHES_DOWNLOADED = [];
-
-function isDownloadNeeded(branch) {
-  if (process.env.ESVM_NO_FRESH || process.argv.includes('--esvm-no-fresh')) {
-    return false;
-  }
-
-  if (BRANCHES_DOWNLOADED.includes(branch)) {
-    return false;
-  }
-
-  return true;
-}
-
-export function createEsTestCluster(options = {}) {
+export function createTestCluster(options = {}) {
   const {
-    name,
-    log = console.log,
     port = esTestConfig.getPort(),
-    branch = esTestConfig.getBranch(),
+    password = 'changeme',
+    license = 'oss',
+    log,
+    basePath = resolve(__dirname, '../../../.es'),
   } = options;
 
-  if (!name) {
-    throw new Error('createEsTestCluster() requires { name }');
-  }
+  const randomHash = Math.random().toString(36).substring(2);
+  const clusterName = `test-${randomHash}`;
+  const config = {
+    version: esTestConfig.getVersion(),
+    installPath: resolve(basePath, clusterName),
+    sourcePath: resolve(__dirname, '../../../../elasticsearch'),
+    password,
+    license,
+    basePath,
+  };
 
-  // assigned in use.start(), reassigned in use.stop()
-  let cluster;
-  let client;
+  const cluster = new Cluster(log);
+
+  // Use source when running on CI
+  const from = options.from || esTestConfig.getBuildFrom();
 
   return new class EsTestCluster {
     getStartTimeout() {
-      return esTestConfig.getLibesvmStartTimeout();
+      const second = 1000;
+      const minute = second * 60;
+
+      return from === 'snapshot' ? minute : minute * 6;
     }
 
-    getClient() {
-      if (!client) {
-        client = new elasticsearch.Client({
-          host: esTestConfig.getUrl()
-        });
-      }
+    async start(esArgs = []) {
+      const { installPath } =
+        from === 'source'
+          ? await cluster.installSource(config)
+          : await cluster.installSnapshot(config);
 
-      return client;
+      await cluster.start(installPath, {
+        esArgs: [
+          `cluster.name=${clusterName}`,
+          `http.port=${port}`,
+          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          ...esArgs
+        ],
+      });
+    }
+
+    async stop() {
+      await cluster.stop();
+    }
+
+    async cleanup() {
+      await this.stop();
+      rmrfSync(config.installPath);
+    }
+
+    /**
+     * Returns an ES Client to the configured cluster
+     */
+    getClient() {
+      return new elasticsearch.Client({
+        host: this.getUrl(),
+      });
     }
 
     getCallCluster() {
       return createCallCluster(this.getClient());
     }
 
-    async start() {
-      const download = isDownloadNeeded(branch);
+    getUrl() {
+      const parts = esTestConfig.getUrlParts();
+      parts.port = port;
 
-      if (cluster) {
-        throw new Error(`
-          EsTestCluster[${name}] is already started, call and await es.stop()
-          before calling es.start() again.
-        `);
-      }
-
-      cluster = libesvm.createCluster({
-        fresh: download,
-        purge: !download,
-        directory: ESVM_DIR,
-        branch,
-        config: {
-          http: {
-            port,
-          },
-          cluster: {
-            name,
-          },
-          discovery: {
-            zen: {
-              ping: {
-                unicast: {
-                  hosts: [ `localhost:${port}` ]
-                }
-              }
-            }
-          }
-        }
-      });
-
-      cluster.on('log', (event) => {
-        log(`EsTestCluster[${name}]: ${event.type} - ${event.message}`);
-      });
-
-      await cluster.install();
-
-      if (download) {
-        // track the branches that have successfully downloaded
-        // after cluster.install() resolves
-        BRANCHES_DOWNLOADED.push(branch);
-      }
-
-      await cluster.start();
+      return format(parts);
     }
+  };
+}
 
-    async stop() {
-      if (client) {
-        const c = client;
-        client = null;
-        await c.close();
-      }
+/**
+ *  Create a callCluster function that properly executes methods on an
+ *  elasticsearch-js client
+ *
+ *  @param  {elasticsearch.Client} esClient
+ *  @return {Function}
+ */
+function createCallCluster(esClient) {
+  return function callCluster(method, params) {
+    const path = toPath(method);
+    const contextPath = path.slice(0, -1);
 
-      if (cluster) {
-        const c = cluster;
-        cluster = null;
-        await c.shutdown();
-      }
-    }
+    const action = get(esClient, path);
+    const context = contextPath.length ? get(esClient, contextPath) : esClient;
+
+    return action.call(context, params);
   };
 }

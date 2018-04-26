@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddFilter should ignore strings with just spaces 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={10}
+  >
+    <EuiFieldText
+      fullWidth={true}
+      isLoading={false}
+      onChange={[Function]}
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      value=""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      isDisabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      Add
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`AddFilter should render normally 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={10}
+  >
+    <EuiFieldText
+      fullWidth={true}
+      isLoading={false}
+      onChange={[Function]}
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      value=""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiButton
+      color="primary"
+      fill={false}
+      iconSide="left"
+      isDisabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      Add
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -1,15 +1,14 @@
 import _ from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
+import { AggConfig } from 'ui/vis/agg_config';
 import './styles/_tilemap.less';
+import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
-
-  const AggConfig = Private(VisAggConfigProvider);
-  const SearchSource = Private(SearchSourceProvider);
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+
+  const tooltipFormatter = Private(TileMapTooltipFormatterProvider);
 
   class CoordinateMapsVisualization extends BaseMapsVisualization {
 
@@ -19,10 +18,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._notify = new Notifier({ location: 'Coordinate Map' });
     }
 
-    isDataUsable(esResponse) {
-      return !(esResponse && typeof esResponse.geohashGridAgg === 'undefined');
-    }
-
 
     async _makeKibanaMap() {
 
@@ -30,56 +25,81 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
-      let previousPrecision = this._kibanaMap.getAutoPrecision();
+      let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
       this._kibanaMap.on('zoomchange', () => {
-        precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
-        previousPrecision = this._kibanaMap.getAutoPrecision();
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
-        if (agg && isAutoPrecision) {
-          agg.params.precision = previousPrecision;
+        precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
+        previousPrecision = this._kibanaMap.getGeohashPrecision();
+        const geohashAgg = this._getGeoHashAgg();
+        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
+        if (geohashAgg && isAutoPrecision) {
+          geohashAgg.params.precision = previousPrecision;
         }
       });
       this._kibanaMap.on('zoomend', () => {
-        const isAutoPrecision = _.get(this._chartData, 'geohashGridAgg.params.autoPrecision', true);
+        const agg = this._getGeoHashAgg();
+        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
         if (!isAutoPrecision) {
           return;
         }
         if (precisionChange) {
           this.vis.updateState();
         } else {
-          this._updateData(this._chartData);
+          //when we filter queries by collar
+          this._updateData(this._geoJsonFeatureCollectionAndMeta);
         }
       });
 
       this._kibanaMap.addDrawControl();
       this._kibanaMap.on('drawCreated:rectangle', event => {
-        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_bounding_box', event.bounds);
+        const geoAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geoAgg, 'geo_bounding_box', event.bounds);
       });
       this._kibanaMap.on('drawCreated:polygon', event => {
-        this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
+        const geoAgg = this._getGeoHashAgg();
+        this.addSpatialFilter(geoAgg, 'geo_polygon', { points: event.points });
       });
     }
 
-    async _updateData(esResponse) {
+    async _updateData(geojsonFeatureCollectionAndMeta) {
+
       // Only recreate geohash layer when there is new aggregation data
       // Exception is Heatmap: which needs to be redrawn every zoom level because the clustering is based on meters per pixel
-      if (this._getMapsParams().mapType !== 'Heatmap' && esResponse === this._chartData) {
+      if (
+        this._getMapsParams().mapType !== 'Heatmap' &&
+        geojsonFeatureCollectionAndMeta === this._geoJsonFeatureCollectionAndMeta) {
         return;
       }
-
-      this._chartData = esResponse;
 
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
       }
-      if (!this._chartData || !this._chartData.geoJson) {
+
+      if (!geojsonFeatureCollectionAndMeta) {
+        this._geoJsonFeatureCollectionAndMeta = null;
+        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
         return;
       }
 
+
+      this._geoJsonFeatureCollectionAndMeta = geojsonFeatureCollectionAndMeta;
+      this._recreateGeohashLayer();
+    }
+
+    _recreateGeohashLayer() {
+      if (this._geohashLayer) {
+        this._kibanaMap.removeLayer(this._geohashLayer);
+        this._geohashLayer = null;
+      }
       const geohashOptions = this._getGeohashOptions();
-      this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer = new GeohashLayer(
+        this._geoJsonFeatureCollectionAndMeta.featureCollection,
+        this._geoJsonFeatureCollectionAndMeta.meta,
+        geohashOptions,
+        this._kibanaMap.getZoomLevel(),
+        this._kibanaMap);
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
@@ -88,22 +108,32 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       await super._updateParams();
 
       this._kibanaMap.setDesaturateBaseLayer(this.vis.params.isDesaturated);
+
+      //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
+      //e.g. tooltip-visibility, legend position, basemap-desaturation, ...
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
-        this._updateData(this._chartData);
+        if (this._geoJsonFeatureCollectionAndMeta) {
+          this._recreateGeohashLayer();
+        }
+        this._updateData(this._geoJsonFeatureCollectionAndMeta);
       }
-
     }
 
-
     _getGeohashOptions() {
+
       const newParams = this._getMapsParams();
+      const metricAgg = this._getMetricAgg();
+      const boundTooltipFormatter = tooltipFormatter.bind(null, this.vis.getAggConfig(), metricAgg);
+
       return {
-        valueFormatter: this._chartData ? this._chartData.valueFormatter : null,
-        tooltipFormatter: this._chartData ? this._chartData.tooltipFormatter : null,
+        label: metricAgg ? metricAgg.makeLabel() : '',
+        valueFormatter: this._geoJsonFeatureCollectionAndMeta ? (metricAgg && metricAgg.fieldFormatter()) : null,
+        tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
+        colorRamp: newParams.colorSchema,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }
@@ -129,8 +159,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     async getGeohashBounds() {
       const agg = this._getGeoHashAgg();
       if (agg) {
-        const searchSource = new SearchSource();
-        searchSource.index(this.vis.indexPattern);
+        const searchSource = this.vis.API.createInheritedSearchSource(this.vis.searchSource);
         searchSource.size(0);
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
@@ -156,9 +185,16 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       });
     }
 
+
+    _getMetricAgg() {
+      return this.vis.getAggConfig().find((agg) => {
+        return agg.type.type === 'metrics';
+      });
+    }
+
+
     _isFilteredByCollar() {
       const DEFAULT = false;
-
       const agg = this._getGeoHashAgg();
       if (agg) {
         return _.get(agg, 'params.isFilteredByCollar', DEFAULT);

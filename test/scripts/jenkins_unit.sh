@@ -2,7 +2,8 @@
 
 set -e
 source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
+source "$(dirname $0)/../../src/dev/ci_setup/git_setup.sh"
+source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
 
-yarn kbn run test --skip-kibana --skip-kibana-extra
-
-xvfb-run "$(yarn bin)/grunt" jenkins:unit;
+export TEST_ES_FROM=source
+xvfb-run "$(yarn bin)/grunt" jenkins:unit --from=source;

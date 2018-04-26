@@ -149,7 +149,7 @@ export class IndicesList extends Component {
   }
 
   render() {
-    const { indices, query } = this.props;
+    const { indices, query, ...rest } = this.props;
 
     const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
 
@@ -165,7 +165,7 @@ export class IndicesList extends Component {
     });
 
     return (
-      <div>
+      <div {...rest}>
         <EuiTable>
           <EuiTableBody>
             {rows}

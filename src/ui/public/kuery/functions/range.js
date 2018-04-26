@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getRangeScript } from 'ui/filter_manager/lib/range';
+import { getRangeScript } from '../../filter_manager/lib/range';
 import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, params) {
@@ -21,6 +21,19 @@ export function toElasticsearchQuery(node, indexPattern) {
   const fields = getFields(fieldNameArg, indexPattern);
   const namedArgs = extractArguments(args);
   const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
+
+  // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
+  // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
+  // fields. If a user queries on a field that exists in one pattern but not the other, the index pattern without the
+  // field should return no results. It's debatable whether this is desirable, but it's been that way forever, so we'll
+  // keep things familiar for now.
+  if (fields && fields.length === 0) {
+    fields.push({
+      name: ast.toElasticsearchQuery(fieldNameArg),
+      scripted: false,
+    });
+  }
+
 
   const queries = fields.map((field) => {
     if (field.scripted) {

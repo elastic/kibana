@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 function makeDirectiveDef(id, compare) {
   return function ($parse) {

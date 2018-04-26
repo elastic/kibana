@@ -1,0 +1,20 @@
+{
+  "_analyze": {
+    "url_params": {
+      "index": "",
+      "prefer_local": "__flag__",
+      "format": [
+        "detailed",
+        "text"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_analyze",
+      "{indices}/_analyze"
+    ]
+  }
+}

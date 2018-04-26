@@ -1,10 +1,5 @@
 {
   "name": "@elastic/eslint-config-kibana",
-  "kibana": {
-    "build": {
-      "skip": true
-    }
-  },
   "version": "0.15.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",

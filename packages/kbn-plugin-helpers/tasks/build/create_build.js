@@ -29,30 +29,44 @@ function removeSymlinkDependencies(root) {
   });
 }
 
-module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaVersion, files) {
+module.exports = function createBuild(
+  plugin,
+  buildTarget,
+  buildVersion,
+  kibanaVersion,
+  files
+) {
   const buildSource = plugin.root;
   const buildRoot = join(buildTarget, 'kibana', plugin.id);
 
   return del(buildTarget)
-    .then(function () {
-      return new Promise(function (resolve, reject) {
+    .then(function() {
+      return new Promise(function(resolve, reject) {
         vfs
           .src(files, { cwd: buildSource, base: buildSource, allowEmpty: true })
           // modify the package.json file
           .pipe(rewritePackageJson(buildSource, buildVersion, kibanaVersion))
 
           // put all files inside the correct directories
-          .pipe(rename(function nestFileInDir(path) {
-            const nonRelativeDirname = path.dirname.replace(/^(\.\.\/?)+/g, '');
-            path.dirname = join(relative(buildTarget, buildRoot), nonRelativeDirname);
-          }))
+          .pipe(
+            rename(function nestFileInDir(path) {
+              const nonRelativeDirname = path.dirname.replace(
+                /^(\.\.\/?)+/g,
+                ''
+              );
+              path.dirname = join(
+                relative(buildTarget, buildRoot),
+                nonRelativeDirname
+              );
+            })
+          )
 
           .pipe(vfs.dest(buildTarget))
           .on('end', resolve)
           .on('error', reject);
       });
     })
-    .then(function () {
+    .then(function() {
       if (plugin.skipInstallDependencies) {
         return;
       }
@@ -63,13 +77,22 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         stdio: ['ignore', 'ignore', 'pipe'],
       };
 
-      execFileSync(winCmd('yarn'), ['install', '--production', '--frozen-lockfile'], options);
+      execFileSync(
+        winCmd('yarn'),
+        ['install', '--production', '--pure-lockfile'],
+        options
+      );
     })
-    .then(function () {
+    .then(function() {
       const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
 
       return new Promise((resolve, reject) => {
-        vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget, resolveSymlinks: false })
+        vfs
+          .src(buildFiles, {
+            cwd: buildTarget,
+            base: buildTarget,
+            resolveSymlinks: false,
+          })
           .pipe(removeSymlinkDependencies(buildRoot))
           .on('finish', resolve)
           .on('error', reject);

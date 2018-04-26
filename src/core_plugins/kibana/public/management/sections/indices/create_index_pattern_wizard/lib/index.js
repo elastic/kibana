@@ -1,6 +1,6 @@
 export { canAppendWildcard } from './can_append_wildcard';
 
-export { createReasonableWait } from './create_reasonable_wait';
+export { ensureMinimumTime } from './ensure_minimum_time';
 
 export { getIndices } from './get_indices';
 

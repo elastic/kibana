@@ -1,10 +1,11 @@
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from './_registry';
 
 export const FeatureCatalogueRegistryProvider = uiRegistry({
   name: 'featureCatalogue',
   index: ['id'],
   group: ['category'],
-  order: ['title']
+  order: ['title'],
+  filter: featureCatalogItem => Object.keys(featureCatalogItem).length > 0
 });
 
 export const FeatureCatalogueCategory = {

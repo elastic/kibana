@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import template from './sortable_column.html';
 
 const app = uiModules.get('kibana');

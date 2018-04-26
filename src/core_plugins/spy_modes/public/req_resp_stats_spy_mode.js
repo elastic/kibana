@@ -1,4 +1,4 @@
-import reqRespStatsHTML from 'plugins/spy_modes/req_resp_stats_spy_mode.html';
+import reqRespStatsHTML from './req_resp_stats_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
 const linkReqRespStats = function (mode, $scope) {

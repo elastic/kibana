@@ -1,0 +1,58 @@
+[role="xpack"]
+[[ml-jobs]]
+== Creating Machine Learning Jobs
+
+Machine learning jobs contain the configuration information and metadata
+necessary to perform an analytics task.
+
+{kib} provides the following wizards to make it easier to create jobs:
+
+[role="screenshot"]
+image::ml/images/ml-create-job.jpg[Create New Job]
+
+A _single metric job_ is a simple job that contains a single _detector_. A
+detector defines the type of analysis that will occur and which fields to
+analyze. In addition to limiting the number of detectors, the single metric job
+creation wizard omits many of the more advanced configuration options.
+
+A _multi-metric job_ can contain more than one detector, which is more efficient
+than running multiple jobs against the same data.
+
+A _population job_ detects activity that is unusual compared to the behavior of
+the population. For more information, see
+{xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+
+An _advanced job_ can contain multiple detectors and enables you to configure all
+job settings.
+
+{kib} can also recognize certain types of data and provide specialized wizards
+for that context.  For example, if you use {filebeat-ref}/index.html[Filebeat]
+to ship access logs from your
+http://nginx.org/[Nginx] and https://httpd.apache.org/[Apache] HTTP servers to
+{es}, the following wizards appear:
+
+[role="screenshot"]
+image::ml/images/ml-data-recognizer.jpg[A screenshot of the Apache and NGINX job creation wizards]
+
+If you are not certain which type of job to create, you can use the
+*Data Visualizer* to learn more about your data and to identify possible fields
+for {ml} analysis.
+
+[role="screenshot"]
+image::ml/images/ml-data-visualizer.jpg[A screenshot of the Data Visualizer option when creating new jobs]
+
+NOTE: If your data is located outside of {es}, you cannot use {kib} to create
+your jobs and you cannot use {dfeeds} to retrieve your data in real time.
+Machine learning analysis is still possible, however, by using APIs to
+create and manage jobs and post data to them. For more information, see
+{ref}/ml-apis.html[Machine Learning APIs].
+
+Ready to get some hands-on experience? See
+{xpack-ref}/ml-getting-started.html[Getting Started with Machine Learning].
+
+The following video tutorials also demonstrate single metric, multi-metric, and
+advanced jobs:
+
+* https://www.elastic.co/videos/machine-learning-tutorial-creating-a-single-metric-job[Machine Learning for the Elastic Stack: Creating a single metric job]
+* https://www.elastic.co/videos/machine-learning-tutorial-creating-a-multi-metric-job[Machine Learning for the Elastic Stack: Creating a multi-metric job]
+* https://www.elastic.co/videos/machine-learning-lab-3-detect-outliers-in-a-population[Machine Learning for the Elastic Stack: Detect Outliers in a Population]

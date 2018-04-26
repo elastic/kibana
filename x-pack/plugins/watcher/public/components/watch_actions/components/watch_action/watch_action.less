@@ -1,0 +1,58 @@
+@import (reference) '~ui/styles/variables/colors';
+
+.watchAction {
+  border-top: 1px dashed @globalColorMediumGray;
+}
+
+.watchAction__error {
+  background-color: #fbe9f1;
+}
+
+.watchActionErrorMessage {
+  color: #db3a81;
+}
+
+.watchActionSummaryButton {
+  padding: 15px;
+  width: 100%;
+  background: transparent;
+  border: transparent;
+  text-align: left;
+
+  &:hover {
+    background: tint(@globalColorBlue, 95%);
+  }
+}
+
+.watchActionSummaryToggleIcon {
+  margin-right: 10px;
+  width: 14px;
+}
+
+.watchActionSummaryTypeIcon {
+  margin-right: 5px;
+}
+
+.watchActionSummaryType {
+  font-size: 12pt;
+}
+
+.watchActionHeader {
+  display: block;
+}
+
+.watchActionDescription {
+  display: block;
+  color: #787879;
+  margin-left: 25px;
+}
+
+.watchActionDetails {
+  background-color: inherit;
+  padding:0 10px 10px 10px;
+  padding-left: 44px;
+}
+
+.watchActionSimulateButton {
+  float: right;
+}

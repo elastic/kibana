@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
 
-  describe.skip('index pattern filter', function describeIndexTests() {
+  describe('index pattern filter', function describeIndexTests() {
     before(function () {
       // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})

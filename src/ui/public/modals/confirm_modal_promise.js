@@ -1,5 +1,5 @@
-import { uiModules } from 'ui/modules';
-import 'ui/modals';
+import { uiModules } from '../modules';
+import './';
 
 const module = uiModules.get('kibana');
 

@@ -1,0 +1,80 @@
+<ml-nav-menu name="jobs"></ml-nav-menu>
+<ml-config-jobs ng-controller="MlJobsList">
+  <div class='jobs-stats-bar'>
+    <span ng-if='js.show' class='stat' ng-repeat='js in jobStats'>
+      <span class='stat-label'>{{js.label}}</span>: <span class='stat-value'>{{js.value}}</span>
+    </span>
+  </div>
+  <ml-message-bar ></ml-message-bar>
+
+  <div class="jobs-container">
+    <div ng-if="mlNodesAvailable === false && permissionToViewMlNodeCount === true" class="euiCallOut euiCallOut--warning">
+      <div class="euiCallOutHeader">
+        <svg class="euiIcon euiCallOutHeader__icon euiIcon--medium" xmlns="http://www.w3.org/2000/svg"
+            width="16" height="16" viewBox="0 0 16 16">
+          <g fill-rule="evenodd">
+            <path d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
+            />
+            <path d="M7 6h1v5H7zM7 12h1v1H7z" />
+          </g>
+        </svg>
+        <span class="euiCallOutHeader__title">No ML Nodes available</span>
+      </div>
+      <div class="euiText euiText--small">
+        <p>
+          There are no ML nodes available.
+          <span ng-if="isCloud">
+            This can be configured in Cloud
+            <a class="euiLink euiLink--primary" href="#">here</a>.
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <header>
+        <div class="row" >
+        <div class="col-xs-6 col-md-9">
+          <div ng-class="permissions.canCreateJob ? 'button-wrapper' : ['button-wrapper', 'disabled'] " data-placement="right" data-toggle="tooltip"
+            ng-attr-tooltip="{{permissions.canCreateJob ? undefined : createPermissionFailureMessage('canCreateJob')}}">
+            <button
+              ng-click='newJob()'
+              class="kuiButton kuiButton--primary"
+              ng-disabled='permissions.canCreateJob===false || mlNodesAvailable === false'
+              aria-label="Create new job">
+              <i aria-hidden="true" class="fa fa-plus"></i>
+              Create new job
+            </button>
+          </div>
+
+        </div>
+
+
+        <div class="col-xs-6 col-md-3">
+          <ml-form-filter-input
+            placeholder="Job filter"
+            filter="filterText"
+            filter-icon="filterIcon"
+            filter-changed="applyFilter"
+            clear-filter="clearFilter" />
+        </div>
+      </div>
+
+      </header>
+      <ml-paginated-table
+        columns="table.columns"
+        rows="table.rows"
+        per-page="table.perPage">
+      </ml-paginated-table>
+
+      <div class="no-jobs-warning" ng-show="filterText && table.rows.length===0">No jobs found</div>
+      <div class="no-jobs-warning" ng-show="noJobsCreated===true">No jobs configured</div>
+      <ml-loading-indicator
+        label="Loading jobs"
+        is-loading="noJobsCreated===undefined"
+        class="no-jobs-warning"
+      />
+
+    </div>
+  </div>
+</ml-config-jobs>

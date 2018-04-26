@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
 
 module.directive('kbnScrollBottom', function () {
@@ -15,7 +15,7 @@ module.directive('kbnScrollBottom', function () {
 
         if (!height || !position) return;
         if (remaining <= margin) {
-          $scope.$eval(attr.kbnScrollBottom);
+          $scope.$evalAsync(attr.kbnScrollBottom);
         }
       }
 

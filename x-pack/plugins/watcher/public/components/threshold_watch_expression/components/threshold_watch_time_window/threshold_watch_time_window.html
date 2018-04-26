@@ -1,0 +1,63 @@
+<expression-item
+  item-id="{{ thresholdWatchTimeWindow.itemId }}"
+  description="thresholdWatchTimeWindow.itemDescription"
+  value="thresholdWatchTimeWindow.itemValue"
+  is-open="thresholdWatchTimeWindow.isOpen"
+  is-visible="thresholdWatchTimeWindow.isVisible"
+  on-open="thresholdWatchTimeWindow.onOpen"
+  on-close="thresholdWatchTimeWindow.onClose"
+  is-valid="thresholdWatchTimeWindow.isValid"
+  is-dirty="thresholdWatchTimeWindow.isDirty"
+  form="thresholdWatchTimeWindow.form"
+>
+  <form name="thresholdWatchTimeWindow.form" novalidate>
+    <div
+      id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'required'])}}"
+      xpack-aria-describes="durationSelectWindowSize"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'required')"
+    >
+      Window duration size is required.
+    </div>
+    <div
+      id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'min'])}}"
+      aria-describes="durationSelectWindowSize"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'min')"
+    >
+      Window duration size can not be a negative number.
+    </div>
+    <div
+      id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'number'])}}"
+      xpack-aria-describes="durationSelectWindowSize"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'number')"
+    >
+      Window duration size must be a valid number.
+    </div>
+    <div
+      id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowUnit', 'required'])}}"
+      xpack-aria-describes="durationSelectWindowUnit"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowUnit', 'required')"
+    >
+      Window duration unit is required.
+    </div>
+    <div
+      id="{{thresholdWatchTimeWindow.makeId(['durationSelectWindowSize', 'minimumDuration'])}}"
+      xpack-aria-describes="durationSelectWindowSize durationSelectWindowUnit"
+      class="kuiInputNote kuiInputNote--danger"
+      ng-if="thresholdWatchTimeWindow.isValidationMessageVisible('durationSelectWindowSize', 'minimumDuration', false)"
+    >
+      Window duration is too short.
+      The miminum allowed is {{thresholdWatchTimeWindow.timeWindowMinimumSize}}{{thresholdWatchTimeWindow.timeWindowMinimumUnit}}.
+    </div>
+    <duration-select
+      duration-id="window"
+      minimum-unit="thresholdWatchTimeWindow.timeWindowMinimumUnit"
+      minimum-size="thresholdWatchTimeWindow.timeWindowMinimumSize"
+      unit="thresholdWatchTimeWindow.timeWindowUnit"
+      size="thresholdWatchTimeWindow.timeWindowSize"
+    ></duration-select>
+  </form>
+</expression-item>

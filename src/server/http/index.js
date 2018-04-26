@@ -3,24 +3,25 @@ import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import versionCheckMixin from './version_check';
+import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
-import shortUrlLookupProvider from './short_url_lookup';
-import setupConnectionMixin from './setup_connection';
-import setupRedirectMixin from './setup_redirect_server';
-import registerHapiPluginsMixin from './register_hapi_plugins';
+import { shortUrlLookupProvider } from './short_url_lookup';
+import { setupConnection } from './setup_connection';
+import { setupRedirectServer } from './setup_redirect_server';
+import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathRewrite } from './setup_base_path_rewrite';
-import xsrfMixin from './xsrf';
+import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
   const shortUrlLookup = shortUrlLookupProvider(server);
-  await kbnServer.mixin(setupConnectionMixin);
-  await kbnServer.mixin(setupBasePathRewrite);
-  await kbnServer.mixin(setupRedirectMixin);
-  await kbnServer.mixin(registerHapiPluginsMixin);
+
+  setupConnection(server, config);
+  setupBasePathRewrite(server, config);
+  await setupRedirectServer(config);
+  registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -38,37 +39,12 @@ export default async function (kbnServer, server, config) {
     });
   });
 
-  // provide a simple way to expose static files
-  server.decorate('server', 'exposeStaticFile', function (routePath, filePath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        file: filePath
-      },
-      config: { auth: false }
-    });
-  });
-
   // helper for creating view managers for servers
   server.decorate('server', 'setupViews', function (path, engines) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
       engines: _.assign({ jade: require('jade') }, engines || {})
-    });
-  });
-
-  server.decorate('server', 'redirectToSlash', function (route) {
-    this.route({
-      path: route,
-      method: 'GET',
-      handler: function (req, reply) {
-        return reply.redirect(format({
-          search: req.url.search,
-          pathname: req.url.pathname + '/',
-        }));
-      }
     });
   });
 
@@ -166,7 +142,6 @@ export default async function (kbnServer, server, config) {
   server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
   server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
 
-  kbnServer.mixin(versionCheckMixin);
-
-  return kbnServer.mixin(xsrfMixin);
+  setupVersionCheck(server, config);
+  setupXsrf(server, config);
 }

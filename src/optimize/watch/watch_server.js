@@ -1,7 +1,7 @@
 
 import { Server } from 'hapi';
 import { fromNode } from 'bluebird';
-import registerHapiPlugins from '../../server/http/register_hapi_plugins';
+import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
 
 export default class WatchServer {
   constructor(host, port, basePath, optimizer) {
@@ -9,7 +9,7 @@ export default class WatchServer {
     this.optimizer = optimizer;
     this.server = new Server();
 
-    registerHapiPlugins(null, this.server);
+    registerHapiPlugins(this.server);
 
     this.server.connection({
       host: host,

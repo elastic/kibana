@@ -19,7 +19,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:browser', [
     'checkPlugins',
-    'run:testServer',
+    'run:browserTestServer',
     'karma:unit',
   ]);
 
@@ -31,7 +31,7 @@ module.exports = function (grunt) {
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
 
     grunt.task.run([
-      'run:testServer',
+      'run:browserTestServer',
       ...ciShardTasks
     ]);
   });
@@ -43,50 +43,51 @@ module.exports = function (grunt) {
     'test:ui',
     'test:jest',
     'test:jest_integration',
+    'test:projects',
     'test:browser',
     'test:api'
   ]);
 
   grunt.registerTask('test:dev', [
     'checkPlugins',
-    'run:devTestServer',
+    'run:devBrowserTestServer',
     'karma:dev'
   ]);
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'esvm:ui',
-    'run:testUIServer',
+    'run:testEsServer',
+    'run:funcTestServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
-    'stop:testUIServer'
+    'stop:testEsServer',
+    'stop:funcTestServer'
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
-    'esvm:ui',
-    'run:testUIReleaseServer',
+    'run:testEsServer',
+    'run:ossDistFuncTestServer',
     'functional_test_runner:functional',
-    'esvm_shutdown:ui',
-    'stop:testUIReleaseServer'
+    'stop:testEsServer',
+    'stop:ossDistFuncTestServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'esvm:ui',
-    'run:testUIDevServer:keepalive'
+    'run:testEsServer',
+    'run:devFuncTestServer:keepalive'
   ]);
 
   grunt.registerTask('test:api', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:apiTestServer',
     'functional_test_runner:apiIntegration',
-    'esvm_shutdown:ui',
+    'stop:testEsServer',
     'stop:apiTestServer'
   ]);
 
   grunt.registerTask('test:api:server', [
-    'esvm:ui',
+    'run:testEsServer',
     'run:devApiTestServer:keepalive'
   ]);
 
@@ -106,4 +107,31 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
+
+  grunt.registerTask('test:projects', function () {
+    const done = this.async();
+    runProjectsTests().then(done, done);
+  });
+
+  function runProjectsTests() {
+    const serverCmd = {
+      cmd: 'yarn',
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
+      opts: { stdio: 'inherit' }
+    };
+
+    return new Promise((resolve, reject) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
+        if (error || code !== 0) {
+          const error = new Error(`projects tests exited with code ${code}`);
+          grunt.fail.fatal(error);
+          reject(error);
+          return;
+        }
+
+        grunt.log.writeln(result);
+        resolve();
+      });
+    });
+  }
 };

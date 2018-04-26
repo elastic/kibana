@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export function PanelError({ error }) {
   return (
-    <div className="load-error">
+    <div className="load-error panel-content">
       <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
       <span>{error}</span>
     </div>

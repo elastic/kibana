@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import { Notifier } from 'ui/notify';
+import { Notifier } from '../../../notify';
 import { SearchRequestProvider } from './search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
+import { pushAll } from '../../../utils/collection';
 
 export function SegmentedRequestProvider(Private, timefilter, config) {
   const SearchRequest = Private(SearchRequestProvider);
@@ -226,7 +227,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
       const desiredSize = this._desiredSize;
       const sortFn = this._sortFn;
 
-      _.pushAll(hits, mergedHits);
+      pushAll(hits, mergedHits);
 
       if (sortFn) {
         notify.event('resort rows', function () {

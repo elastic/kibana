@@ -2,7 +2,9 @@
 
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 <div>
-  <header />
+  <header
+    addScriptedFieldUrl="#"
+  />
   <call-outs
     deprecatedLangsInUse={
       Array [
@@ -11,11 +13,6 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
     }
     painlessDocLink="painlessDocs"
   />
-  <eui-button
-    data-test-subj="addScriptedFieldLink"
-  >
-    Add scripted field
-  </eui-button>
   <eui-spacer
     size="l"
   />
@@ -27,52 +24,33 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "lang": "painless",
-              "name": "ScriptedField",
-              "script": "x++",
-            },
-            Object {
-              "lang": "painless",
-              "name": "JustATest",
-              "script": "z++",
-            },
-          ],
-          "totalRecordCount": 2,
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
         },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
   />
 </div>
 `;
 
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 <div>
-  <header />
+  <header
+    addScriptedFieldUrl="#"
+  />
   <call-outs
     deprecatedLangsInUse={Array []}
     painlessDocLink="painlessDocs"
   />
-  <eui-button
-    data-test-subj="addScriptedFieldLink"
-  >
-    Add scripted field
-  </eui-button>
   <eui-spacer
     size="l"
   />
@@ -84,65 +62,53 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "lang": "painless",
-              "name": "JustATest",
-              "script": "z++",
-            },
-          ],
-          "totalRecordCount": 1,
-        },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
   />
 </div>
 `;
 
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
 <div>
-  <header />
+  <header
+    addScriptedFieldUrl="#"
+  />
   <call-outs
     deprecatedLangsInUse={Array []}
     painlessDocLink="painlessDocs"
   />
-  <eui-button
-    data-test-subj="addScriptedFieldLink"
-  >
-    Add scripted field
-  </eui-button>
   <eui-spacer
     size="l"
+  />
+  <Table
+    deleteField={[Function]}
+    editField={[Function]}
+    indexPattern={
+      Object {
+        "getScriptedFields": [Function],
+      }
+    }
+    items={Array []}
   />
 </div>
 `;
 
 exports[`ScriptedFieldsTable should render normally 1`] = `
 <div>
-  <header />
+  <header
+    addScriptedFieldUrl="#"
+  />
   <call-outs
     deprecatedLangsInUse={Array []}
     painlessDocLink="painlessDocs"
   />
-  <eui-button
-    data-test-subj="addScriptedFieldLink"
-  >
-    Add scripted field
-  </eui-button>
   <eui-spacer
     size="l"
   />
@@ -154,52 +120,33 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "lang": "painless",
-              "name": "ScriptedField",
-              "script": "x++",
-            },
-            Object {
-              "lang": "painless",
-              "name": "JustATest",
-              "script": "z++",
-            },
-          ],
-          "totalRecordCount": 2,
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
         },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
   />
 </div>
 `;
 
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
 <div>
-  <header />
+  <header
+    addScriptedFieldUrl="#"
+  />
   <call-outs
     deprecatedLangsInUse={Array []}
     painlessDocLink="painlessDocs"
   />
-  <eui-button
-    data-test-subj="addScriptedFieldLink"
-  >
-    Add scripted field
-  </eui-button>
   <eui-spacer
     size="l"
   />
@@ -211,36 +158,20 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
         "getScriptedFields": [Function],
       }
     }
-    model={
-      Object {
-        "criteria": Object {
-          "page": Object {
-            "index": 0,
-            "size": 10,
-          },
-          "sort": Object {
-            "direction": "asc",
-            "field": "name",
-          },
+    items={
+      Array [
+        Object {
+          "lang": "painless",
+          "name": "ScriptedField",
+          "script": "x++",
         },
-        "data": Object {
-          "records": Array [
-            Object {
-              "lang": "painless",
-              "name": "ScriptedField",
-              "script": "x++",
-            },
-            Object {
-              "lang": "painless",
-              "name": "JustATest",
-              "script": "z++",
-            },
-          ],
-          "totalRecordCount": 2,
+        Object {
+          "lang": "painless",
+          "name": "JustATest",
+          "script": "z++",
         },
-      }
+      ]
     }
-    onDataCriteriaChange={[Function]}
   />
   <eui-overlay-mask>
     <eui-confirm-modal

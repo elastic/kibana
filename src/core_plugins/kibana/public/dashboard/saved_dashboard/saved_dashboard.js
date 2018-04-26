@@ -1,13 +1,15 @@
 import angular from 'angular';
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { createDashboardEditUrl } from '../dashboard_constants';
+import { createLegacyClass } from 'ui/utils/legacy_class';
+
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
 module.factory('SavedDashboard', function (courier, config) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  _.class(SavedDashboard).inherits(courier.SavedObject);
+  createLegacyClass(SavedDashboard).inherits(courier.SavedObject);
   function SavedDashboard(id) {
     // Gives our SavedDashboard the properties of a SavedObject
     SavedDashboard.Super.call(this, {
@@ -41,6 +43,9 @@ module.factory('SavedDashboard', function (courier, config) {
       // object, clear it. It was a mistake
       clearSavedIndexPattern: true
     });
+
+
+    this.showInRecenltyAccessed = true;
   }
 
   // save these objects with the 'dashboard' type
@@ -76,6 +81,10 @@ module.factory('SavedDashboard', function (courier, config) {
   SavedDashboard.fieldOrder = ['title', 'description'];
 
   SavedDashboard.searchsource = true;
+
+  SavedDashboard.prototype.getFullPath = function () {
+    return `/app/kibana#${createDashboardEditUrl(this.id)}`;
+  };
 
   return SavedDashboard;
 });

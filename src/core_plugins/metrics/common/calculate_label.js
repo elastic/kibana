@@ -12,14 +12,15 @@ const paths = [
   'variance_bucket',
   'sum_of_squares_bucket',
   'serial_diff',
-  'positive_only'
+  'positive_only',
 ];
 export default function calculateLabel(metric, metrics) {
   if (!metric) return 'Unknown';
   if (metric.alias) return metric.alias;
 
   if (metric.type === 'count') return 'Count';
-  if (metric.type === 'calculation') return 'Calculation';
+  if (metric.type === 'calculation') return 'Bucket Script';
+  if (metric.type === 'math') return 'Math';
   if (metric.type === 'series_agg') return `Series Agg (${metric.function})`;
   if (metric.type === 'filter_ratio') return 'Filter Ratio';
   if (metric.type === 'static') return `Static Value of ${metric.value}`;
@@ -27,7 +28,6 @@ export default function calculateLabel(metric, metrics) {
   if (metric.type === 'percentile_rank') {
     return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;
   }
-
 
   if (includes(paths, metric.type)) {
     let additionalLabel = '';
@@ -48,4 +48,3 @@ export default function calculateLabel(metric, metrics) {
 
   return `${lookup[metric.type]} of ${metric.field}`;
 }
-
