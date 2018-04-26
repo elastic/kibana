@@ -8,7 +8,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
   return new class DashboardAddPanel {
     async clickOpenAddPanel() {
-      log.debug('clickOpenAddPanel');
+      log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
     }
 
@@ -44,11 +44,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async isAddPanelOpen() {
+      log.debug('DashboardAddPanel.isAddPanelOpen');
       return await testSubjects.exists('dashboardAddPanel');
     }
 
     async ensureAddPanelIsShowing() {
-      log.debug('ensureAddPanelIsShowing');
+      log.debug('DashboardAddPanel.ensureAddPanelIsShowing');
       const isOpen = await this.isAddPanelOpen();
       if (!isOpen) {
         await retry.try(async () => {
@@ -115,15 +116,20 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addSavedSearches(searches) {
-      await Promise.all(searches.map(async search => await this.addSavedSearch(search)));
+      for (const name of searches) {
+        await this.addSavedSearch(name);
+      }
     }
 
     async addVisualizations(visualizations) {
-      await Promise.all(visualizations.map(async visualization => await this.addVisualization(visualization)));
+      log.debug('DashboardAddPanel.addVisualizations');
+      for (const vizName of visualizations) {
+        await this.addVisualization(vizName);
+      }
     }
 
     async addVisualization(vizName) {
-      log.debug(`addVisualization(${vizName})`);
+      log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
       await find.clickByPartialLinkText(vizName);
