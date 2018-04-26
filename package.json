@@ -30,10 +30,7 @@
     "postinstall": "scripts/postinstall.js"
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.js": ["prettier --write", "git add"]
   },
   "author": "Søren Louv-Jansen",
   "homepage": "https://github.com/sqren/backport/blob/master/README.md",
@@ -45,21 +42,20 @@
     "url": "git+https://github.com/sqren/backport.git"
   },
   "jest": {
-    "setupFiles": [
-      "./test/setup.js"
-    ]
+    "setupFiles": ["./test/setup.js"]
   },
   "engines": {
     "node": ">=8.0.0"
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "chalk": "^2.3.2",
+    "chalk": "^2.4.1",
     "find-up": "^2.1.0",
     "inquirer": "^5.2.0",
-    "joi": "^13.1.2",
+    "joi": "^13.2.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
+    "lodash.last": "^3.0.0",
     "mkdirp": "^0.5.1",
     "ora": "^2.0.0",
     "strip-json-comments": "^2.0.1",
@@ -67,16 +63,16 @@
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
-    "babel-eslint": "^8.2.2",
+    "babel-eslint": "^8.2.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-prettier": "^2.6.0",
     "husky": "^0.14.3",
     "jest": "^22.4.3",
-    "lint-staged": "^7.0.4",
+    "lint-staged": "^7.0.5",
     "nock": "^9.2.5",
-    "prettier": "^1.11.1"
+    "prettier": "^1.12.1"
   }
 }

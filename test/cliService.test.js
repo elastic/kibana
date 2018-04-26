@@ -5,14 +5,16 @@ const httpAdapter = require('axios/lib/adapters/http');
 const cliService = require('../src/cli/cliService');
 const rpc = require('../src/lib/rpc');
 const commitMock = require('./mocks/commit.json');
+const { exec } = require('child_process');
 
 axios.defaults.host = 'http://localhost';
 axios.defaults.adapter = httpAdapter;
 
+jest.mock('child_process');
+
 describe('doBackportVersion', () => {
   let addLabelMock;
   beforeEach(() => {
-    rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
     rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());
 
     addLabelMock = nock('https://api.github.com')
@@ -57,7 +59,7 @@ describe('doBackportVersion', () => {
     });
 
     expect(res.config).toMatchSnapshot();
-    expect(rpc.exec.mock.calls).toMatchSnapshot();
+    expect(exec.mock.calls).toMatchSnapshot();
     expect(createPRMock.isDone()).toBe(true);
     expect(addLabelMock.isDone()).toBe(true);
   });
@@ -91,7 +93,7 @@ describe('doBackportVersion', () => {
     });
 
     expect(res.config).toMatchSnapshot();
-    expect(rpc.exec.mock.calls).toMatchSnapshot();
+    expect(exec.mock.calls).toMatchSnapshot();
     expect(createPRMock.isDone()).toBe(true);
     expect(addLabelMock.isDone()).toBe(false);
   });

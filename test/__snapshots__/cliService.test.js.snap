@@ -33,31 +33,41 @@ Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest_pr-myOtherPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest_pr-myOtherPullRequest ",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git cherry-pick mySha2",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git push sqren backport/6.x/pr-myPullRequest_pr-myOtherPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
 ]
 `;
@@ -95,25 +105,73 @@ Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
-    "git fetch origin 6.x && git branch backport/6.x/commit-mySha origin/6.x --force && git checkout backport/6.x/commit-mySha ",
+    "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest_pr-myOtherPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest_pr-myOtherPullRequest ",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick mySha2",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git push sqren backport/6.x/pr-myPullRequest_pr-myOtherPullRequest --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git fetch origin 6.x && git branch backport/6.x/commit-mySha origin/6.x --force && git checkout backport/6.x/commit-mySha ",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
   ],
   Array [
     "git push sqren backport/6.x/commit-mySha --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
 ]
 `;

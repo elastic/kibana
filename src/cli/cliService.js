@@ -19,7 +19,8 @@ const {
   push,
   repoExists,
   setupRepo,
-  isIndexDirty
+  isIndexDirty,
+  verifyGithubSshAuth
 } = require('../lib/git');
 
 function doBackportVersions({
@@ -104,6 +105,8 @@ function withPullRequest(owner, repoName, commits) {
 }
 
 async function maybeSetupRepo(owner, repoName, username) {
+  await verifyGithubSshAuth();
+
   if (await repoExists(owner, repoName)) {
     return;
   }
@@ -179,7 +182,8 @@ function handleErrors(e) {
 
     // Unhandled exceptions
     default:
-      logger.error(e);
+      console.log(e);
+      throw e;
   }
 }
 

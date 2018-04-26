@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const findUp = require('find-up');
 const isEmpty = require('lodash.isempty');
 const get = require('lodash.get');
 const stripJsonComments = require('strip-json-comments');
@@ -120,7 +121,7 @@ async function getGlobalConfig() {
 }
 
 async function getProjectConfig() {
-  const filepath = await rpc.findUp('.backportrc.json');
+  const filepath = await findUp('.backportrc.json');
   if (!filepath) {
     return null;
   }

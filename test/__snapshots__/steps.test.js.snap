@@ -4,46 +4,221 @@ exports[`run through steps exec should be called with correct args 1`] = `
 Array [
   Array [
     "ssh -oBatchMode=yes -T git@github.com",
+    Object {
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git clone git@github.com:elastic/kibana --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
   ],
   Array [
     "git remote add sqren git@github.com:sqren/kibana",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git cherry-pick mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
   Array [
     "git push sqren backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
+    [Function],
   ],
-]
-`;
-
-exports[`run through steps execVanilla should be called with correct args 1`] = `
-Array [
+  Array [
+    "ssh -oBatchMode=yes -T git@github.com",
+    Object {
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
   Array [
     "git clone git@github.com:elastic/kibana --progress",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/kibana",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git push sqren backport/6.2/pr-myPullRequest --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "ssh -oBatchMode=yes -T git@github.com",
+    Object {
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git clone git@github.com:elastic/kibana --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/kibana",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git push sqren backport/6.2/pr-myPullRequest --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "ssh -oBatchMode=yes -T git@github.com",
+    Object {
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git clone git@github.com:elastic/kibana --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/kibana",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+  Array [
+    "git push sqren backport/6.2/pr-myPullRequest --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+      "maxBuffer": 104857600,
     },
     [Function],
   ],

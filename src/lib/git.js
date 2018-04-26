@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+
 const env = require('./env');
 const rpc = require('./rpc');
 const { GithubSSHError } = require('./errors');
@@ -21,7 +23,6 @@ function repoExists(owner, repoName) {
 
 // Clone repo and add remotes
 async function setupRepo(owner, repoName, username, callback) {
-  await verifyGithubSshAuth();
   await rpc.mkdirp(env.getRepoOwnerPath(owner));
   await cloneRepo(owner, repoName, callback);
   return addRemote(owner, repoName, username);
@@ -33,9 +34,9 @@ function getRemoteUrl(owner, repoName) {
 
 function cloneRepo(owner, repoName, callback) {
   return new Promise((resolve, reject) => {
-    const cloneProc = rpc.execVanilla(
+    const cloneProc = exec(
       `git clone ${getRemoteUrl(owner, repoName)} --progress`,
-      { cwd: env.getRepoOwnerPath(owner) },
+      { cwd: env.getRepoOwnerPath(owner), maxBuffer: 100 * 1024 * 1024 },
       error => {
         if (error) {
           reject(error);

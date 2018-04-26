@@ -2,12 +2,14 @@ const axios = require('axios');
 const inquirer = require('inquirer');
 const nock = require('nock');
 const httpAdapter = require('axios/lib/adapters/http');
-
+const { exec } = require('child_process');
 const commitsMock = require('./mocks/commits.json');
 
 const initSteps = require('../src/cli/steps');
 const github = require('../src/lib/github');
 const rpc = require('../src/lib/rpc');
+
+jest.mock('child_process');
 
 describe('run through steps', () => {
   beforeEach(() => {
@@ -17,14 +19,11 @@ describe('run through steps', () => {
     axios.defaults.host = 'http://localhost';
     axios.defaults.adapter = httpAdapter;
 
-    rpc.execVanilla = jest.fn((cmd, options, callback) => callback(null));
-    rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
-    rpc.writeFile = jest.fn().mockReturnValue(Promise.resolve());
-    rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());
-    rpc.statSync = jest.fn(() => ({ mode: 33152 }));
+    jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
+    jest.spyOn(rpc, 'mkdirp').mockReturnValue(Promise.resolve());
 
-    github.getCommits = jest.fn(github.getCommits);
-    github.createPullRequest = jest.fn(github.createPullRequest);
+    jest.spyOn(github, 'getCommits');
+    jest.spyOn(github, 'createPullRequest');
 
     inquirer.prompt = jest
       .fn()
@@ -99,10 +98,6 @@ describe('run through steps', () => {
   });
 
   it('exec should be called with correct args', () => {
-    expect(rpc.exec.mock.calls).toMatchSnapshot();
-  });
-
-  it('execVanilla should be called with correct args', () => {
-    expect(rpc.execVanilla.mock.calls).toMatchSnapshot();
+    expect(exec.mock.calls).toMatchSnapshot();
   });
 });

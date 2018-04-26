@@ -1,6 +1,7 @@
 const configs = require('../src/lib/configs');
 const rpc = require('../src/lib/rpc');
 const inquirer = require('inquirer');
+const findUp = require('find-up');
 
 describe('config.js', () => {
   afterEach(() => jest.restoreAllMocks());
@@ -9,10 +10,6 @@ describe('config.js', () => {
     describe('when projectConfig is valid', () => {
       let projectConfig;
       beforeEach(async () => {
-        jest
-          .spyOn(rpc, 'findUp')
-          .mockReturnValue(Promise.resolve('/path/to/config'));
-
         jest
           .spyOn(rpc, 'readFile')
           .mockReturnValue(
@@ -23,7 +20,7 @@ describe('config.js', () => {
       });
 
       it('should call findUp', () => {
-        expect(rpc.findUp).toHaveBeenCalledWith('.backportrc.json');
+        expect(findUp).toHaveBeenCalledWith('.backportrc.json');
       });
 
       it('should return config', () => {
@@ -33,10 +30,6 @@ describe('config.js', () => {
 
     describe('when projectConfig is empty', () => {
       it('should throw error', () => {
-        jest
-          .spyOn(rpc, 'findUp')
-          .mockReturnValue(Promise.resolve('/path/to/config'));
-
         jest.spyOn(rpc, 'readFile').mockReturnValueOnce(Promise.resolve('{}'));
         expect.assertions(1);
 
@@ -50,7 +43,7 @@ describe('config.js', () => {
 
     describe('when projectConfig is missing', () => {
       it('should throw error', () => {
-        jest.spyOn(rpc, 'findUp').mockReturnValue(Promise.resolve(null));
+        findUp.mockReturnValue(Promise.resolve(null));
         expect.assertions(1);
         return expect(configs.getProjectConfig()).resolves.toBe(null);
       });

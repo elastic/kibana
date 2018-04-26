@@ -1,10 +1,8 @@
-const logger = {};
-logger.log = (...args) => {
-  console.log(...args);
+module.exports = {
+  log: (...args) => {
+    console.log(...args);
+  },
+  error: (...args) => {
+    console.error(...args);
+  }
 };
-
-logger.error = (...args) => {
-  console.error(...args);
-};
-
-module.exports = logger;
