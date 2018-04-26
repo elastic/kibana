@@ -58,7 +58,11 @@ export function initSpacesApi(server) {
     method: 'DELETE',
     path: '/api/spaces/v1/spaces/{id}',
     handler(request, reply) {
-      reply().code(204);
+      if (request.params.id === 'sales') {
+        reply(Boom.badRequest('ahhhhhhhh'));
+      } else {
+        reply().code(204);
+      }
     },
     config: {
       pre: [routePreCheckLicenseFn]

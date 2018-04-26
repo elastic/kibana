@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { PageHeader } from './page_header';
+import { DeleteSpacesButton } from './delete_spaces_button';
 
 import { Notifier, toastNotifications } from 'ui/notify';
 
@@ -113,8 +114,6 @@ export class ManageSpacePage extends React.Component {
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            {this.getActionButtons}
           </EuiForm>
         </EuiPageContent>
       </EuiPage>
@@ -134,9 +133,13 @@ export class ManageSpacePage extends React.Component {
     if (isEditing) {
       return (
         <EuiFlexItem grow={false}>
-          <EuiButton color={'danger'} onClick={this.deleteSpace}>
-            Delete Space
-          </EuiButton>
+          <DeleteSpacesButton
+            $q={this.props.$q}
+            spaces={[this.state.space]}
+            httpAgent={this.props.httpAgent}
+            chrome={this.props.chrome}
+            onDelete={this.backToSpacesList}
+          />
         </EuiFlexItem>
       );
     }
@@ -198,28 +201,6 @@ export class ManageSpacePage extends React.Component {
     }
   };
 
-  deleteSpace = () => {
-    const { httpAgent, chrome } = this.props;
-    const {
-      id,
-      name
-    } = this.state.space;
-
-    httpAgent
-      .delete(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}`))
-      .then(() => {
-        toastNotifications.addSuccess(`Deleted '${name}'`);
-        window.location.hash = `#/management/spaces/list`;
-      })
-      .catch(error => {
-        const {
-          message = ''
-        } = error.data || {};
-
-        toastNotifications.addDanger(`Error deleting space: ${message}`);
-      });
-  };
-
   backToSpacesList = () => {
     window.location.hash = `#/management/spaces/list`;
   };
@@ -279,6 +260,7 @@ export class ManageSpacePage extends React.Component {
 }
 
 ManageSpacePage.propTypes = {
+  $q: PropTypes.func.isRequired,
   space: PropTypes.string,
   httpAgent: PropTypes.func.isRequired,
   chrome: PropTypes.object,

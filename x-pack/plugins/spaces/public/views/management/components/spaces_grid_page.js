@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -22,11 +22,13 @@ import {
 
 import { PageHeader } from './page_header';
 import { SpacesDataStore } from '../lib/spaces_data_store';
+import { DeleteSpacesButton } from './delete_spaces_button';
 
 
-export class SpacesGridPage extends React.Component {
+export class SpacesGridPage extends Component {
   state = {
     selectedSpaces: [],
+    displayedSpaces: [],
     loading: true,
     searchCriteria: '',
     pagination: {
@@ -43,30 +45,11 @@ export class SpacesGridPage extends React.Component {
   }
 
   componentDidMount() {
-    const {
-      httpAgent,
-      chrome
-    } = this.props;
-
-    httpAgent
-      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
-      .then(response => {
-        this.dataStore.loadSpaces(response.data);
-        this.setState({
-          loading: false
-        });
-      })
-      .catch(error => {
-        this.setState({
-          loading: false,
-          error
-        });
-      });
+    this.loadGrid();
   }
 
   render() {
     const filteredSpaces = this.dataStore.search(this.state.searchCriteria);
-    const pageOfFilteredSpaces = this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize);
 
     const pagination = {
       ...this.state.pagination,
@@ -93,7 +76,7 @@ export class SpacesGridPage extends React.Component {
           />
           <EuiSpacer size={'xl'} />
           <EuiBasicTable
-            items={pageOfFilteredSpaces}
+            items={this.state.displayedSpaces}
             columns={this.getColumnConfig()}
             selection={this.getSelectionConfig()}
             pagination={pagination}
@@ -106,11 +89,14 @@ export class SpacesGridPage extends React.Component {
 
   getPrimaryActionButton() {
     if (this.state.selectedSpaces.length > 0) {
-      const count = this.state.selectedSpaces.length;
       return (
-        <EuiButton fill color={'danger'}>
-          {`Delete ${count > 1 ? `${count} spaces` : 'space'}`}
-        </EuiButton>
+        <DeleteSpacesButton
+          $q={this.props.$q}
+          spaces={this.state.selectedSpaces}
+          httpAgent={this.props.httpAgent}
+          chrome={this.props.chrome}
+          onDelete={this.loadGrid}
+        />
       );
     }
 
@@ -118,6 +104,41 @@ export class SpacesGridPage extends React.Component {
       <EuiButton fill onClick={() => { window.location.hash = `#/management/spaces/create`; }}>Create new space</EuiButton>
     );
   }
+
+  loadGrid = () => {
+    const {
+      httpAgent,
+      chrome
+    } = this.props;
+
+    this.setState({
+      loading: true,
+      displayedSpaces: [],
+      selectedSpaces: []
+    });
+
+    this.dataStore.loadSpaces([]);
+
+    const setSpaces = (spaces) => {
+      this.dataStore.loadSpaces(spaces);
+      this.setState({
+        loading: false,
+        displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
+      });
+    };
+
+    httpAgent
+      .get(chrome.addBasePath(`/api/spaces/v1/spaces`))
+      .then(response => {
+        setSpaces(response.data);
+      })
+      .catch(error => {
+        this.setState({
+          loading: false,
+          error
+        });
+      });
+  };
 
   getColumnConfig() {
     return [{
@@ -166,13 +187,16 @@ export class SpacesGridPage extends React.Component {
   };
 
   onSearchChange = ({ text = '' }) => {
+    this.dataStore.search(text);
     this.setState({
-      searchCriteria: text
+      searchCriteria: text,
+      displayedSpaces: this.dataStore.getPage(this.state.pagination.pageIndex, this.state.pagination.pageSize)
     });
-  }
+  };
 }
 
 SpacesGridPage.propTypes = {
+  $q: PropTypes.func.isRequired,
   chrome: PropTypes.object.isRequired,
   httpAgent: PropTypes.func.isRequired,
   breadcrumbs: PropTypes.array.isRequired

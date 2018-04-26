@@ -18,10 +18,15 @@ const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
-  controller: function ($scope, $http, chrome) {
+  controller: function ($scope, $http, $q, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
-    render(<SpacesGridPage httpAgent={$http} chrome={chrome} breadcrumbs={routes.getBreadcrumbs()}/>, domNode);
+    render(<SpacesGridPage
+      httpAgent={$http}
+      chrome={chrome}
+      $q={$q}
+      breadcrumbs={routes.getBreadcrumbs()}
+    />, domNode);
 
     // unmount react on controller destroy
     $scope.$on('$destroy', () => {
@@ -32,10 +37,15 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
-  controller: function ($scope,  $http, chrome) {
+  controller: function ($scope,  $http, $q, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
-    render(<ManageSpacePage httpAgent={$http} chrome={chrome} breadcrumbs={routes.getBreadcrumbs()} />, domNode);
+    render(<ManageSpacePage
+      httpAgent={$http}
+      chrome={chrome}
+      $q={$q}
+      breadcrumbs={routes.getBreadcrumbs()}
+    />, domNode);
 
     // unmount react on controller destroy
     $scope.$on('$destroy', () => {
@@ -50,12 +60,18 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:space', {
   template,
-  controller: function ($scope, $http, $route, chrome) {
+  controller: function ($scope, $http, $route, $q, chrome) {
     const domNode = document.getElementById(reactRootNodeId);
 
     const { space } = $route.current.params;
 
-    render(<ManageSpacePage httpAgent={$http} space={space} chrome={chrome} breadcrumbs={routes.getBreadcrumbs()} />, domNode);
+    render(<ManageSpacePage
+      httpAgent={$http}
+      space={space}
+      chrome={chrome}
+      $q={$q}
+      breadcrumbs={routes.getBreadcrumbs()}
+    />, domNode);
 
     // unmount react on controller destroy
     $scope.$on('$destroy', () => {
