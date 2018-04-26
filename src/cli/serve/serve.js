@@ -92,6 +92,7 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.silent) set('logging.silent', true);
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
+  if (opts.forceMigration) set('migration.force', opts.forceMigration);
 
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
@@ -133,6 +134,7 @@ export default function (program) {
     .option('--verbose', 'Turns on verbose logging')
     .option('-H, --host <host>', 'The host to bind to')
     .option('-l, --log-file <path>', 'The file to log to')
+    .option('--force-migration', 'Forces Kibana to migrate its index even if the index is in the "migrating" state')
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +

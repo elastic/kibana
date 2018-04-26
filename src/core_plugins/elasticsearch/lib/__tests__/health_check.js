@@ -75,9 +75,6 @@ describe('plugins/elasticsearch', () => {
             getCluster: sinon.stub().returns(cluster)
           }
         },
-        migrations: () => ({
-          migrate: () => Promise.resolve({ status: 'migrated' }),
-        }),
         ext: sinon.stub()
       };
 
@@ -119,48 +116,6 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
-          sinon.assert.calledOnce(plugin.status.green);
-          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
-        });
-    });
-
-    it('should set the cluster red if migrations fail', function () {
-      const stub = sinon.stub();
-      server.migrations = () => ({ migrate: stub });
-      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
-      stub.onCall(0).returns(Promise.reject({ index: { error: { reason: 'très mal' } } }));
-      stub.onCall(1).returns(Promise.resolve({ status: 'migrated' }));
-
-      return health.run()
-        .then(function () {
-          sinon.assert.calledOnce(plugin.status.yellow);
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
-
-          sinon.assert.calledOnce(plugin.status.red);
-          sinon.assert.calledWithExactly(
-            plugin.status.red,
-            `Kibana index migration error: très mal`
-          );
-          sinon.assert.calledTwice(stub);
-          sinon.assert.calledOnce(plugin.status.green);
-          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
-        });
-    });
-
-    it('should set the cluster yellow if migrations are in progress', function () {
-      const stub = sinon.stub();
-      server.migrations = () => ({ migrate: stub });
-      cluster.callWithInternalUser.withArgs('ping').returns(Promise.resolve());
-      stub.onCall(0).returns(Promise.resolve({ status: 'migrating' }));
-      stub.onCall(1).returns(Promise.resolve({ status: 'migrated' }));
-
-      return health.run()
-        .then(function () {
-          sinon.assert.calledTwice(plugin.status.yellow);
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Kibana index is migrating');
-
-          sinon.assert.calledTwice(stub);
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });

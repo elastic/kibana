@@ -44,6 +44,10 @@ export default () => Joi.object({
     })
   }),
 
+  migration: {
+    force: Joi.boolean().default(false),
+  },
+
   server: Joi.object({
     uuid: Joi.string().guid().default(),
     name: Joi.string().default(os.hostname()),

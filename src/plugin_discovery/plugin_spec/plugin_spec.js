@@ -25,6 +25,9 @@ export class PluginSpec {
    * configuration values in the main configuration service
    * @param {Function} [opts.config] A function that produces a configuration
    * schema using Joi, which is passed as its first argument.
+   * @param {Array} [opts.migrations] a list of migrations used to update old
+   * documents to conform to the version of this plugin or to seed the kibana index
+   * with new documents.
    * @param {String|False} [opts.publicDir=path + '/public'] the public
    * directory for this plugin. The final directory must have the name "public",
    * though it can be located somewhere besides the root of the plugin. Set
@@ -37,6 +40,7 @@ export class PluginSpec {
       version,
       kibanaVersion,
       uiExports,
+      migrations,
       publicDir,
       configPrefix,
       config,
@@ -54,6 +58,7 @@ export class PluginSpec {
 
     this._publicDir = publicDir;
     this._uiExports = uiExports;
+    this._migrations = migrations;
 
     this._configPrefix = configPrefix;
     this._configSchemaProvider = config;
@@ -99,6 +104,10 @@ export class PluginSpec {
 
   getId() {
     return this._id || this.getPkg().name;
+  }
+
+  getMigrations() {
+    return this._migrations;
   }
 
   getVersion() {

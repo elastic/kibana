@@ -45,14 +45,15 @@ async function runMigrationIfOutOfDate(opts) {
   const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
   const status = await MigrationState.status(context.plugins, context.migrationState);
 
-  if (status !== MigrationStatus.outOfDate && !context.force) {
-    return skipMigration(context, status);
-  } else {
+  if (status === MigrationStatus.outOfDate || (status === MigrationStatus.migrating && context.force)) {
     return runMigration(context);
+  } else {
+    return skipMigration(context, status);
   }
 }
 
-function skipMigration({ index }, status) {
+function skipMigration({ index, log }, status) {
+  log.info(() => `Skipping migration of "${index}", beacause its status is: ${status}`);
   return {
     index,
     status,

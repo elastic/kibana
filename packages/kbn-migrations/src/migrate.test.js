@@ -334,8 +334,12 @@ describe('migrate', () => {
     const existingMeta = assocMappings({}, index, plugins[0].mappings);
     const callCluster = mockCluster(existingData, existingMeta);
     const result = await migrate({ force: true, callCluster, index, elasticVersion, log, plugins });
-    expect(result.destIndex).not.toEqual(result.index);
-    expect(result.status).toEqual('migrated');
+    expect(_.pick(result, ['destIndex', 'index', 'status']))
+      .toEqual({
+        destIndex: 'skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716',
+        index: 'skippy',
+        status: 'migrated'
+      });
     expect(callCluster.state())
       .toMatchSnapshot();
   });

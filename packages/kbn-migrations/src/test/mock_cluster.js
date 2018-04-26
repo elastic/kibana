@@ -124,6 +124,17 @@ function mockElasticSearchCommands(data, meta) {
     });
   }
 
+  function isReadOnly(index) {
+    index = tryUnAlias(index);
+    return _.get(meta, ['settings', index, 'index', 'blocks.read_only']);
+  }
+
+  function assertWritable(index) {
+    if (isReadOnly(index)) {
+      throw new Error(`Index ${index} is read_only!`);
+    }
+  }
+
   function getAlias({ name }) {
     return meta.aliases[name];
   }
@@ -164,6 +175,7 @@ function mockElasticSearchCommands(data, meta) {
   async function updateDoc({ index, version, id, type, body }) {
     index = unAlias(index);
     assertDocType(type);
+    assertWritable(index);
     const existing = getDocSync({ index, type, id });
     if (!existing && !body.doc_as_upsert) {
       return reject(404, `updateDoc ${index}, ${id}, ${type}`);
@@ -205,6 +217,7 @@ function mockElasticSearchCommands(data, meta) {
 
   function putMapping({ index, type, body }) {
     index = tryUnAlias(index);
+    assertWritable(index);
     const mappings = _.get(meta, ['mappings', index, type, 'properties']) || {};
     const newMappings = _.assign({}, mappings, body.properties);
     _.set(meta, ['mappings', index, type, 'properties'], newMappings);
@@ -255,6 +268,7 @@ function mockElasticSearchCommands(data, meta) {
       const { _index, _type, _id } = cmd.index;
       assertDocType(_type);
       assertMappings(_index, _source);
+      assertWritable(_index);
       _.set(data, [_index, _id], { _source });
     });
     return { items: [] };
