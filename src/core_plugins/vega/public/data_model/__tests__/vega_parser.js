@@ -102,6 +102,25 @@ describe('VegaParser._parseSchema', () => {
   it('vega-lite old', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
 });
 
+describe('VegaParser._parseTooltips', () => {
+  function test(tooltips, expected) {
+    return () => {
+      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      if (expected === undefined) {
+        // error
+        expect(() => vp._parseTooltips()).to.throw();
+      } else {
+        expect(vp._parseTooltips()).to.be(expected);
+      }
+    };
+  }
+
+  it('undefined', test(undefined, 'top'));
+  it('left', test('left', 'left'));
+  it('err1', test({}, undefined));
+  it('err2', test(true, undefined));
+});
+
 describe('VegaParser._parseMapConfig', () => {
   function test(config, expected, warnCount) {
     return () => {

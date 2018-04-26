@@ -1,9 +1,9 @@
 import $ from 'jquery';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
+import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { TooltipHandler } from './vega_tooltip';
-import { Utils } from '../data_model/utils';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -145,10 +145,9 @@ export class VegaBaseView {
   setView(view) {
     this._view = view;
 
-    if (view) {
-      // TODO: make position a user-supplied parameter via
-      // {config:{kibana:{tooltip:{position:*}}}}
-      new TooltipHandler(view, 'top');
+    if (view && this._parser.tooltips) {
+      // position can be specified with {config:{kibana:{tooltips: 'top' }}}
+      new TooltipHandler(view, this._parser.tooltips);
     }
   }
 

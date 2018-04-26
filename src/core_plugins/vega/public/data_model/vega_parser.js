@@ -67,7 +67,7 @@ export class VegaParser {
     this.hideWarnings = !!this._config.hideWarnings;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
-    this.tooltips = this._config.tooltips;
+    this.tooltips = this._parseTooltips();
 
     this._setDefaultColors();
     this._parseControlPlacement(this._config);
@@ -210,6 +210,22 @@ export class VegaParser {
       }
     }
     return result || {};
+  }
+
+  _parseTooltips() {
+    switch (this._config.tooltips) {
+      case 'top':
+      case 'bottom':
+      case 'left':
+      case 'right':
+        return this._config.tooltips;
+      case undefined:
+        return 'top';
+      case false:
+        return false;
+      default:
+        throw new Error('Unexpected tooltips');
+    }
   }
 
   /**
