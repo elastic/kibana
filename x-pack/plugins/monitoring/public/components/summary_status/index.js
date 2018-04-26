@@ -7,7 +7,7 @@
 import React from 'react';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StatusIcon } from 'plugins/monitoring/components';
+import { StatusIcon } from '../';
 
 const wrapChild = ({ label, value, dataTestSubj }, index) => (
   <EuiFlexItem
@@ -26,7 +26,7 @@ const StatusIndicator = ({ status }) => {
 
   return (
     <div className="monitoring-summary-status__status-indicator">
-      Health: <StatusIcon type={status.toUpperCase()} label={status} />{' '}
+      Health: <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />{' '}
       {capitalize(status)}
     </div>
   );
