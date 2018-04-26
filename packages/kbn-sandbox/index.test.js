@@ -27,7 +27,6 @@ if (process.platform === 'darwin') {
     const result = sandbox.activate();
     assert.ok(result.success === false, 'Sandbox activated');
 
-    // EACCES on Linux, UNKNOWN on Windows.
     assert.doesNotThrow(tryExec);
   });
 }

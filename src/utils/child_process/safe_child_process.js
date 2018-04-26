@@ -26,7 +26,7 @@ export function safeChildProcess(childProcess, signal = 'SIGTERM') {
     .take(1)
     .switchMapTo(childProcessSignal$);
 
-    // send termination signals
+  // send termination signals
   const terminate$ = Observable.merge(
     signalForChildProcess$
       .do(signal => {

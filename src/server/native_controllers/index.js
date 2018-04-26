@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { spawnNativeController } from './spawn_native_controller';
 import { findPluginSpecs } from '../../plugin_discovery';
 import { safeChildProcess } from '../../utils/child_process';
-
 import { NativeController } from './native_controller';
 
 const getNativeControllers = async (settings) => {
