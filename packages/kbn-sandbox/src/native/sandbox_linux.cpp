@@ -2,12 +2,21 @@
 #include <linux/audit.h>
 #include <linux/seccomp.h>
 #include <linux/filter.h>
-#include <sys/syscall.h>
 #include <stddef.h>
 #include <errno.h>
 #include <sys/prctl.h>
-
 #include <string.h> /* for strerror */
+
+// Derived from syscall_64.tbl and not importing <sys/syscall.h>
+// because we want to build a "portable" binary and link against
+// an old version of GCC, various syscalls aren't available on
+// these older kernels, specifically __NR_execveat and __NR_seccomp
+#define __X32_SYSCALL_BIT 0x40000000
+#define __NR_seccomp 317
+#define __NR_fork 57
+#define __NR_vfork 58
+#define __NR_execve 59
+#define __NR_execveat 322
 
 struct sock_filter reject_syscalls[] = {
   BPF_STMT(BPF_LD|BPF_W|BPF_ABS, (offsetof(struct seccomp_data, arch))),

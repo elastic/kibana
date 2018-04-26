@@ -38,8 +38,10 @@ Building requires you have a compiler environment available. For more details on
 
 Building:
 
+
 ```
-yarn build-binaries
+docker build -t kbn-sandbox ./
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox:latest bash -c 'cd /kbn-sandbox && npm run build'
 ```
 
 Testing:
