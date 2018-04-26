@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiPage,
   EuiPageContent,
   EuiBasicTable,
   EuiSearchBar,
@@ -19,6 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { PageHeader } from './page_header';
 
 
 const pagination = {
@@ -32,7 +34,7 @@ export class SpacesGridPage extends React.Component {
   state = {
     selectedSpaces: [],
     spaces: []
-  }
+  };
 
   componentDidMount() {
     const {
@@ -60,29 +62,32 @@ export class SpacesGridPage extends React.Component {
     } = this.state;
 
     return (
-      <EuiPageContent>
-        <EuiFlexGroup justifyContent={'spaceBetween'}>
-          <EuiFlexItem grow={false}>
-            <EuiText><h1>Spaces</h1></EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size={'xl'} />
-        <EuiSearchBar
-          box={{
-            placeholder: 'Search for a space...',
-          }}
-          onChange={() => {}}
-        />
-        <EuiSpacer size={'xl'} />
-        <EuiBasicTable
-          items={spaces}
-          columns={this.getColumnConfig()}
-          selection={this.getSelectionConfig()}
-          pagination={pagination}
-          onChange={() => {}}
-        />
-      </EuiPageContent>
+      <EuiPage>
+        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
+        <EuiPageContent>
+          <EuiFlexGroup justifyContent={'spaceBetween'}>
+            <EuiFlexItem grow={false}>
+              <EuiText><h1>Spaces</h1></EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size={'xl'} />
+          <EuiSearchBar
+            box={{
+              placeholder: 'Search for a space...',
+            }}
+            onChange={() => {}}
+          />
+          <EuiSpacer size={'xl'} />
+          <EuiBasicTable
+            items={spaces}
+            columns={this.getColumnConfig()}
+            selection={this.getSelectionConfig()}
+            pagination={pagination}
+            onChange={() => {}}
+          />
+        </EuiPageContent>
+      </EuiPage>
     );
   }
 
@@ -137,5 +142,6 @@ export class SpacesGridPage extends React.Component {
 
 SpacesGridPage.propTypes = {
   chrome: PropTypes.object.isRequired,
-  httpAgent: PropTypes.func.isRequired
+  httpAgent: PropTypes.func.isRequired,
+  breadcrumbs: PropTypes.array.isRequired
 };

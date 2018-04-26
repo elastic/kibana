@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import {
   EuiText,
   EuiSpacer,
+  EuiPage,
   EuiPageContent,
   EuiForm,
   EuiFormRow,
@@ -17,6 +18,8 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
+
+import { PageHeader } from './page_header';
 
 import { Notifier, toastNotifications } from 'ui/notify';
 
@@ -60,47 +63,50 @@ export class ManageSpacePage extends React.Component {
     } = this.state.space;
 
     return (
-      <EuiPageContent>
-        <EuiForm>
-          <EuiText><h1>{this.getTitle()}</h1></EuiText>
-          <EuiSpacer />
-          <EuiFormRow
-            label="Name"
-            helpText="Name your space"
-          >
-            <EuiFieldText
-              name="name"
-              placeholder={'Awesome space'}
-              value={name}
-              onChange={this.onNameChange}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label="Description"
-            helpText="Describe your space"
-          >
-            <EuiFieldText
-              name="description"
-              placeholder={'This is where the magic happens'}
-              value={description}
-              onChange={this.onDescriptionChange}
-            />
-          </EuiFormRow>
+      <EuiPage>
+        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
+        <EuiPageContent>
+          <EuiForm>
+            <EuiText><h1>{this.getTitle()}</h1></EuiText>
+            <EuiSpacer />
+            <EuiFormRow
+              label="Name"
+              helpText="Name your space"
+            >
+              <EuiFieldText
+                name="name"
+                placeholder={'Awesome space'}
+                value={name}
+                onChange={this.onNameChange}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Description"
+              helpText="Describe your space"
+            >
+              <EuiFieldText
+                name="description"
+                placeholder={'This is where the magic happens'}
+                value={description}
+                onChange={this.onDescriptionChange}
+              />
+            </EuiFormRow>
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={this.backToSpacesList}>
-                Cancel
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={this.backToSpacesList}>
+                  Cancel
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-          {this.getActionButtons}
-        </EuiForm>
-      </EuiPageContent>
+            {this.getActionButtons}
+          </EuiForm>
+        </EuiPageContent>
+      </EuiPage>
     );
   }
 
@@ -161,5 +167,6 @@ export class ManageSpacePage extends React.Component {
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
   httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object
+  chrome: PropTypes.object,
+  breadcrumbs: PropTypes.array.isRequired,
 };
