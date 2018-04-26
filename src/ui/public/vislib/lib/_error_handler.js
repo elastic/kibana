@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ContainerTooSmall } from 'ui/errors';
+import { ContainerTooSmall } from '../../errors';
 
 export function VislibLibErrorHandlerProvider() {
 

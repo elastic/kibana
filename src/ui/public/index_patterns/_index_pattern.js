@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from '../errors';
 import angular from 'angular';
-import { fieldFormats } from 'ui/registry/field_formats';
-import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
-import { Notifier } from 'ui/notify';
+import { fieldFormats } from '../registry/field_formats';
+import UtilsMappingSetupProvider from '../utils/mapping_setup';
+import { Notifier } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -14,7 +14,7 @@ import { IndexPatternsFlattenHitProvider } from './_flatten_hit';
 import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from './unsupported_time_patterns';
-import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { SavedObjectsClientProvider, findObjectByTitle } from '../saved_objects';
 
 export function getRoutes() {
   return {

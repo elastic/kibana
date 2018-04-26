@@ -1,0 +1,62 @@
+[role="xpack"]
+[[job-tips]]
+=== Machine Learning Job Tips
+++++
+<titleabbrev>Job Tips</titleabbrev>
+++++
+
+When you are creating a job in {kib}, the job creation wizards can provide
+advice based on the characteristics of your data. By heeding these suggestions,
+you can create jobs that are more likely to produce insightful {ml} results.
+
+[[bucket-span]]
+==== Bucket Span
+
+The bucket span is the time interval that {ml} analytics use to summarize and
+model data for your job. When you create a job in {kib}, you can choose to
+estimate a bucket span value based on your data characteristics. Typically, the
+estimated value is between 5 minutes to 1 hour. If you choose a value that is
+larger than one day or is significantly different than the estimated value, you
+receive an informational message. For more information about choosing an
+appropriate bucket span, see {xpack-ref}/ml-buckets.html[Buckets].
+
+[[cardinality]]
+==== Cardinality
+
+If there are logical groupings of related entities in your data, {ml} analytics
+can make data models and generate results that take these groupings into
+consideration. For example, you might choose to split your data by user ID and
+detect when users are accessing resources differently than they usually do.
+
+If the field that you use to split your data has many different values, the
+job uses more memory resources. In particular, if the cardinality of the
+`partition_field_name` is greater than 100, you are advised to consider
+alternative options such as population analysis.
+
+Likewise if you are performing population analysis and the cardinality of the
+`over_field_name` is below 10, you are advised that this might not be a suitable
+field to use.
+
+For more information, see
+{xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+
+[[influencers]]
+==== Influencers
+
+When you create a job, you can specify _influencers_, which are also sometimes
+referred to as _key fields_. Picking an influencer is strongly recommended for
+the following reasons:
+
+* It allows you to more easily assign blame for the anomaly
+* It simplifies and aggregates the results
+
+The best influencer is the person or thing that you want to blame for the
+anomaly. In many cases, users or client IP addresses make excellent influencers.
+Influencers can be any field in your data; they do not need to be fields that
+are specified in your detectors, though they often are.
+
+As a best practice, do not pick too many influencers. For example, you generally
+do not need more than three. If you pick many influencers, the results can be
+overwhelming and there is a small overhead to the analysis.
+
+The job creation wizards in {kib} can suggest which fields to use as influencers.

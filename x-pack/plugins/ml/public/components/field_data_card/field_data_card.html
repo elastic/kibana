@@ -1,0 +1,33 @@
+<div class="ml-field-data-card">
+  <div class="euiText title-bar" ng-class="card.fieldName===undefined ? 'document_count': card.isUnsupportedType===true ? 'type-other' : card.type">
+    <ml-field-type-icon
+        type="card.type"
+        tooltip="{{ card.type }}"
+        tooltip-placement="left"
+        tooltip-append-to-body="true">
+    </ml-field-type-icon>
+    <div
+      class="field-name"
+      tooltip="{{ mlEscape(card.fieldName) || 'document count' }}"
+      tooltip-append-to-body="true">
+      {{ card.fieldName || 'document count' }}
+    </div>
+  </div>
+
+  <div ng-if="card.loading === true" class="card-contents">
+    <ml-loading-indicator
+      label="Loading"
+      is-loading="card.loading"
+      height="200"
+    />
+  </div>
+
+  <div ng-if="card.existsInDocs === false" class="card-contents">
+    <div class="not-exist-message">
+      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+      This field does not appear in any documents for the selected time range
+    </div>
+  </div>
+
+  <ng-include ng-if="card.loading === false" src="getCardUrl()"></ng-include>
+</div>

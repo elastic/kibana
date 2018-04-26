@@ -1,7 +1,7 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { modifyUrl } from 'ui/url';
+import { modifyUrl } from '../../url';
 
 const markdownIt = new MarkdownIt({
   html: false,

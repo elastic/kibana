@@ -1,6 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules
   .get('kibana')

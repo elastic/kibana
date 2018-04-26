@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { FilterBarLibMapAndFlattenFiltersProvider } from '../map_and_flatten_filters';
 
 describe('Filter Bar Directive', function () {
   describe('mapAndFlattenFilters()', function () {

@@ -1,15 +1,15 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { NoResults } from 'ui/errors';
-import { Binder } from 'ui/binder';
+import { NoResults } from '../../errors';
+import { Binder } from '../../binder';
 import { VislibLibLayoutLayoutProvider } from './layout/layout';
 import { VislibLibChartTitleProvider } from './chart_title';
 import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
-import { dispatchRenderComplete } from 'ui/render_complete';
+import { dispatchRenderComplete } from '../../render_complete';
 
 const markdownIt = new MarkdownIt({
   html: false,

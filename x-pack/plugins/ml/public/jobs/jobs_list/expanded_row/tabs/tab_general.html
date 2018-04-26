@@ -1,0 +1,127 @@
+<div ng-controller='TabController'>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="ml_sub_heading">General</div>
+      <div class='ml_job_section_container'>
+        <table class="euiTable euiTable--compressed">
+          <tbody>
+          <tr ng-repeat="(key, value) in job | filterObjects: true" class="euiTableRow">
+            <th class="euiTableRowCell">
+              <div class="euiTableCellContent">
+                <span class="euiTableCellContent__text">{{key}}</span>
+              </div>
+            </th>
+            <td class="euiTableRowCell">
+              <div class="euiTableCellContent">
+                <span ng-switch="key" class="euiTableCellContent__text">
+                  <span ng-switch-when="location"><a target="_blank" href='{{value}}' rel="noopener noreferrer">{{value}}</a></span>
+                  <span ng-switch-when="averageBucketProcessingTimeMs">{{formatMS(value)}}</span>
+                  <span ng-switch-when="create_time">{{formatDate(value)}}</span>
+                  <span ng-switch-when="finished_time">{{formatDate(value)}}</span>
+                  <span ng-switch-when="groups">{{(value.join(', '))}}</span>
+                  <span ng-switch-when="established_model_memory">{{formatData(value)}}</span>
+                  <span ng-switch-default>{{value}}</span>
+                </span>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div>
+        <div class="ml_sub_heading">Actions</div>
+        <div class="ml_job_section_container euiFlexGroup euiFlexGroup--gutterSmall">
+          <div class="euiFlexItem euiFlexItem--flexGrowZero">
+            <div class="euiFormRow">
+              <span ng-class="(job.datafeed_config && job.datafeed_config.state===DATAFEED_STATE.STOPPED && job.state===JOB_STATE.OPENED)?'button':['button-wrapper', 'disabled']"
+                ng-attr-tooltip="{{ui.getCloseJobTooltip()}}" data-toggle="tooltip">
+                <button ng-click="closeJob(job)" ng-disabled="ui.closeJobDisabled()===true" class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                  type="button" aria-label="Close job">
+                  <span class="euiButton__content">
+                    <span>Close Job</span>
+                  </span>
+                </button>
+              </span>
+            </div>
+          </div>
+          <div class="euiFlexItem euiFlexItem--flexGrowZero">
+            <ml-validate-job
+              class="euiFormRow"
+              get-duration="getDuration"
+              get-job-config="getJobConfig"
+              is-current-job-config="true"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div ng-repeat="(key, value) in job" ng-if="key==='custom_settings'">
+        <div ng-repeat="(key1, value1) in value">
+          <div ng-switch="key1">
+            <div ng-switch-when="custom_urls">
+              <div class="ml_sub_heading">Custom URLs</div>
+              <div class='ml_job_section_container'>
+                <table class="euiTable euiTable--compressed">
+                  <tbody>
+                    <tr ng-repeat="(key2, value2) in value1" class="euiTableRow">
+                      <th class="euiTableRowCell">
+                        <div class="euiTableCellContent">
+                          <span class="euiTableCellContent__text">{{value2.url_name}}</span>
+                        </div>
+                      </th>
+                      <td class="euiTableRowCell">
+                        <div class="euiTableCellContent">
+                          <span class="euiTableCellContent__text">{{value2.url_value}}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div ng-repeat="(key, value) in job" ng-if="key==='node'">
+        <div class="ml_sub_heading">Node</div>
+        <div class='ml_job_section_container'>
+          <table class="euiTable euiTable--compressed">
+            <tbody>
+              <tr ng-repeat="(key1, value1) in value" ng-if="key1==='name'" class="euiTableRow">
+                <th class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{key1}}</span>
+                  </div>
+                </th>
+                <td class="euiTableRowCell">
+                  <div class="euiTableCellContent">
+                    <span class="euiTableCellContent__text">{{value1}}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div ng-if="calendars && calendars.length">
+        <div class="ml_sub_heading">Calendars</div>
+        <div class='ml_job_section_container'>
+          <div>
+            <ml-job-item>
+              <div class="ml_job_row row">
+                <div class="col-md-12">{{calendars.join(', ')}}</div>
+              </div>
+            </ml-job-item>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from './_registry';
 
 export const DocViewsRegistryProvider = uiRegistry({
   name: 'docViews',

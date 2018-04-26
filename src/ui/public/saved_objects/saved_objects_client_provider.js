@@ -1,4 +1,4 @@
-import { ErrorAutoCreateIndexProvider } from 'ui/error_auto_create_index';
+import { ErrorAutoCreateIndexProvider } from '../error_auto_create_index';
 
 import { SavedObjectsClient } from './saved_objects_client';
 

@@ -1,0 +1,25 @@
+[role="xpack"]
+[[xpack-security]]
+== Security
+
+{xpack} security enables you to easily secure a cluster. With security, you can
+password-protect your data as well as implement more advanced security measures
+such as encrypting communications, role-based access control, IP filtering, and
+auditing. For more information, see
+{xpack-ref}/xpack-security.html[Securing {es} and {kib}] and
+<<using-kibana-with-security,Configuring Security in {kib}>>.
+
+[float]
+=== Users
+
+You can create and manage users on the *Management* / *Security* / *Users* page.
+You can also change their passwords and roles. For more information about
+authentication and built-in users, see
+{xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+
+[float]
+=== Roles
+
+You can manage roles on the *Management* / *Security* / *Roles* page.  For more
+information, see
+{xpack-ref}/authorization.html[Configuring Role-based Access Control].

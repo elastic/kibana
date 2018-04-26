@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/zero_injection/inject_zeros';
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
 import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
-import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';
+import { VislibComponentsColorColorProvider } from '../../vis/components/color/color';
 
 export function VislibLibDataProvider(Private) {
 

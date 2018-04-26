@@ -1,7 +1,7 @@
 import template from './kbn_timepicker_recent_panel.html';
-import { uiModules } from 'ui/modules';
-import { timeHistory } from 'ui/timefilter/time_history';
-import { prettyDuration } from 'ui/timepicker/pretty_duration';
+import { uiModules } from '../../modules';
+import { timeHistory } from '../../timefilter/time_history';
+import { prettyDuration } from '../pretty_duration';
 
 const module = uiModules.get('ui/timepicker');
 

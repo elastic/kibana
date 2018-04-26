@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { dedupFilters } from 'ui/filter_bar/lib/dedup_filters';
+import { dedupFilters } from './dedup_filters';
 
 /**
  * Remove duplicate filters from an array of filters

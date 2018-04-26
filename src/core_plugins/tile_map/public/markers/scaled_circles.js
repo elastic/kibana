@@ -3,16 +3,23 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import * as colorUtil from 'ui/vis/map/color_util';
 
 export class ScaledCirclesMarkers extends EventEmitter {
 
-  constructor(featureCollection, options, targetZoom, kibanaMap) {
+  constructor(featureCollection, featureCollectionMetaData, options, targetZoom, kibanaMap, metricAgg) {
     super();
-    this._geohashGeoJson = featureCollection;
+    this._featureCollection = featureCollection;
+    this._featureCollectionMetaData = featureCollectionMetaData;
+
     this._zoom = targetZoom;
+    this._metricAgg = metricAgg;
 
     this._valueFormatter = options.valueFormatter || ((x) => {x;});
     this._tooltipFormatter = options.tooltipFormatter || ((x) => {x;});
+    this._label = options.label;
+    this._colorRamp = options.colorRamp;
 
     this._legendColors = null;
     this._legendQuantizer = null;
@@ -29,13 +36,12 @@ export class ScaledCirclesMarkers extends EventEmitter {
     // Filter leafletlayer on client when results are not filtered on the server
     if (!options.isFilteredByCollar) {
       layerOptions.filter = (feature) => {
-        const bucketRectBounds = _.get(feature, 'properties.rectangle');
+        const bucketRectBounds = feature.properties.geohash_meta.rectangle;
         return kibanaMap.isInside(bucketRectBounds);
       };
     }
     this._leafletLayer = L.geoJson(null, layerOptions);
-
-    this._leafletLayer.addData(this._geohashGeoJson);
+    this._leafletLayer.addData(this._featureCollection);
   }
 
   getLeafletLayer() {
@@ -44,14 +50,16 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
   getStyleFunction() {
-    const min = _.get(this._geohashGeoJson, 'properties.min', 0);
-    const max = _.get(this._geohashGeoJson, 'properties.max', 1);
+
+    const min = _.get(this._featureCollectionMetaData, 'min', 0);
+    const max = _.get(this._featureCollectionMetaData, 'max', 1);
 
     const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
-    this._legendColors = makeCircleMarkerLegendColors(min, max);
+
+    this._legendColors = makeLegendColors(this._colorRamp);
     this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
 
-    return makeStyleFunction(min, max, this._legendColors, quantizeDomain);
+    return makeStyleFunction(this._legendColors, quantizeDomain);
   }
 
 
@@ -60,11 +68,10 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
   getLabel() {
     if (this._popups.length) {
-      return this._popups[0].feature.properties.aggConfigResult.aggConfig.makeLabel();
+      return this._label;
     }
     return '';
   }
-
 
   appendLegendContents(jqueryDiv) {
 
@@ -130,20 +137,16 @@ export class ScaledCirclesMarkers extends EventEmitter {
    *
    * @method _showTooltip
    * @param feature {LeafletFeature}
-   * @param latLng? {Leaflet latLng}
    * @return undefined
    */
-  _showTooltip(feature, latLng) {
-
-    const lat = _.get(feature, 'geometry.coordinates.1');
-    const lng = _.get(feature, 'geometry.coordinates.0');
-    latLng = latLng || L.latLng(lat, lng);
+  _showTooltip(feature) {
 
     const content = this._tooltipFormatter(feature);
     if (!content) {
       return;
     }
 
+    const latLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
     this.emit('showTooltip', {
       content: content,
       position: latLng
@@ -168,16 +171,15 @@ export class ScaledCirclesMarkers extends EventEmitter {
    * @return {Number}
    */
   _radiusScale(value) {
-
     //magic numbers
     const precisionBiasBase = 5;
     const precisionBiasNumerator = 200;
 
-    const precision = _.max(this._geohashGeoJson.features.map((feature) => {
+    const precision = _.max(this._featureCollection.features.map((feature) => {
       return String(feature.properties.geohash).length;
     }));
 
-    const pct = Math.abs(value) / Math.abs(this._geohashGeoJson.properties.max);
+    const pct = Math.abs(value) / Math.abs(this._featureCollectionMetaData.max);
     const zoomRadius = 0.5 * Math.pow(2, this._zoom);
     const precisionScale = precisionBiasNumerator / Math.pow(precisionBiasBase, precision);
 
@@ -192,27 +194,9 @@ export class ScaledCirclesMarkers extends EventEmitter {
 }
 
 
-/**
- * d3 quantize scale returns a hex color, used for marker fill color
- *
- * @method quantizeLegendColors
- * return {undefined}
- */
-function makeCircleMarkerLegendColors(min, max) {
-  const reds1 = ['#ff6128'];
-  const reds3 = ['#fecc5c', '#fd8d3c', '#e31a1c'];
-  const reds5 = ['#fed976', '#feb24c', '#fd8d3c', '#f03b20', '#bd0026'];
-  const bottomCutoff = 2;
-  const middleCutoff = 24;
-  let legendColors;
-  if (max - min <= bottomCutoff) {
-    legendColors = reds1;
-  } else if (max - min <= middleCutoff) {
-    legendColors = reds3;
-  } else {
-    legendColors = reds5;
-  }
-  return legendColors;
+function makeLegendColors(colorRampKey) {
+  const colorRamp = truncatedColorMaps[colorRampKey];
+  return colorUtil.getLegendColors(colorRamp);
 }
 
 function makeColorDarker(color) {
@@ -220,7 +204,7 @@ function makeColorDarker(color) {
   return d3.hcl(color).darker(amount).toString();
 }
 
-function makeStyleFunction(min, max, legendColors, quantizeDomain) {
+function makeStyleFunction(legendColors, quantizeDomain) {
   const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
   return (feature) => {
     const value = _.get(feature, 'properties.value');

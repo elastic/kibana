@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Notifier } from 'ui/notify';
+import { Notifier } from '../../../notify';
 import { SearchRequestProvider } from './search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
 import { pushAll } from '../../../utils/collection';

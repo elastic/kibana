@@ -1,0 +1,100 @@
+[role="xpack"]
+[[elasticsearch-metrics]]
+=== {es} Monitoring Metrics
+++++
+<titleabbrev>{es} Metrics</titleabbrev>
+++++
+
+You can drill down into the status of your {es} cluster in {kib} by clicking
+the <<cluster-overview-page, Overview>>, <<nodes-page, Nodes>>, and
+<<indices-overview-page, Indices>> links on the *Monitoring* page.
+
+See also {ref}/es-monitoring.html[Monitoring {es}].
+
+[float]
+[[cluster-overview-page]]
+==== Cluster Overview
+
+To view the key metrics that indicate the overall health of an {es} cluster,
+click **Overview** in the {es} section. Anything that needs your attention is
+highlighted in yellow or red.
+
+TIP: Conditions that require your attention are listed at the top of the
+Clusters page. You can also set up watches to alert you when the status
+of your cluster changes. To learn how, see
+{xpack-ref}/watch-cluster-status.html[Watch Your Cluster Health].
+
+The panel at the top shows the current cluster statistics, the charts show the
+search and indexing performance over time, and the table at the bottom shows
+information about any shards that are being recovered.
+
+image::monitoring/images/monitoring-overview.jpg["Elasticsearch Cluster Overview",link="images/monitoring-overview.jpg"]
+
+TIP: Not sure what a chart is showing? Click the info button for a description
+of the metrics.
+
+From there, you can dive into detailed metrics for particular nodes and indices.
+
+[float]
+[[nodes-page]]
+==== Nodes
+
+To view node metrics, click **Nodes**. The Nodes section shows the status
+of each node in your cluster.
+
+image::monitoring/images/monitoring-nodes.jpg["Elasticsearch Nodes",link="images/monitoring-nodes.jpg"]
+
+[float]
+[[nodes-page-overview]]
+===== Node Overview
+
+Click the name of a node to view its node statistics over time. These represent
+high-level statistics collected from {es} that provide a good overview of health.
+
+image::monitoring/images/monitoring-node.jpg["Elasticsearch Node Overview",link="images/monitoring-node.jpg"]
+
+[float]
+[[nodes-page-advanced]]
+===== Node Advanced
+
+To view advanced node metrics, click the **Advanced** tab for a node. The
+*Advanced* tab shows additional metrics, such as memory and garbage collection
+statistics reported by the selected {es} node.
+
+image::monitoring/images/monitoring-node-advanced.png["Elasticsearch Node Advanced",link="images/monitoring-node-advanced.png"]
+
+You can use the advanced node view to diagnose issues that generally involve
+more advanced knowledge of {es}, such as poor garbage collection performance.
+
+
+[float]
+[[indices-overview-page]]
+==== Indices
+
+To view index metrics, click **Indices**. The Indices section shows the same
+overall index and search metrics as the Overview and a table of your indices.
+
+image::monitoring/images/monitoring-indices.jpg["Elasticsearch Indices",link="images/monitoring-indices.jpg"]
+
+[float]
+[[indices-page-overview]]
+===== Index Overview
+
+From the Indices listing, you can view data for a particular index. To drill
+down into the data for a particular index, click its name in the Indices table.
+
+image::monitoring/images/monitoring-index.jpg["Elasticsearch Index Overview",link="images/monitoring-index.jpg"]
+
+[float]
+[[indices-page-advanced]]
+===== Index Advanced
+
+To view advanced index metrics, click the **Advanced** tab for an index. The
+*Advanced*  tab shows additional metrics, such as memory statistics reported
+about the {es} index. If the index has more than one shard, then its shards
+might live on more than one node.
+
+image::monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Advanced",link="images/monitoring-index-advanced.png"]
+
+The Advanced index view can be used to diagnose issues that generally involve
+more advanced knowledge of {es}, such as wasteful index memory usage.

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import moment from 'moment';
 import ngMock from 'ng_mock';
-import 'ui/filters/moment';
+import '../moment';
 
 
 let filter;

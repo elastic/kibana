@@ -134,7 +134,6 @@ export class Config {
           const child = schema._inner.children[i];
           // If the child is an object recurse through it's children and return
           // true if there's a match
-
           if (child.schema._type === 'object') {
             if (has(key, child.schema, path.concat([child.key]))) return true;
           // if the child matches, return true

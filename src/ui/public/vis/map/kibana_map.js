@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import { zoomToPrecision } from 'ui/utils/zoom_to_precision';
+import { zoomToPrecision } from '../../utils/zoom_to_precision';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -331,7 +331,7 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getMaxZoom();
   }
 
-  getAutoPrecision() {
+  getGeohashPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
 
@@ -667,6 +667,12 @@ export class KibanaMap extends EventEmitter {
       visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
+    this._leafletMap.on('resize', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
+    this._leafletMap.on('load', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }

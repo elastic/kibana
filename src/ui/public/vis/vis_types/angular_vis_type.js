@@ -1,4 +1,4 @@
-import { VisTypeProvider } from 'ui/vis/vis_types';
+import { VisTypeProvider } from './';
 import $ from 'jquery';
 
 

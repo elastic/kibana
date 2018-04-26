@@ -1,0 +1,13 @@
+<monitoring-main name="listing">
+  <div class="page-row">
+    <h3 class="kuiScreenReaderOnly">Clusters</h3>
+    <monitoring-cluster-listing
+      page-index="clusters.pageIndex"
+      filter-text="clusters.filterText"
+      sort-key="clusters.sortKey"
+      sort-order="clusters.sortOrder"
+      on-new-state="clusters.onNewState"
+      clusters="clusters.data"
+    ></monitoring-cluster-listing>
+  </div>
+</monitoring-main>

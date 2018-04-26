@@ -32,28 +32,14 @@ export function setupConnection(server, config) {
     return;
   }
 
-  const tlsOptions = {};
-  const keystoreConfig = config.get('server.ssl.keystore.path');
-  const pemConfig = config.get('server.ssl.certificate');
-
-  if (keystoreConfig && pemConfig) {
-    throw new Error(`Invalid Configuration: please specify either "server.ssl.keystore.path" or "server.ssl.certificate", not both.`);
-  }
-
-  if (keystoreConfig) {
-    tlsOptions.pfx = readFileSync(keystoreConfig);
-    tlsOptions.passphrase = config.get('server.ssl.keystore.password');
-  } else {
-    tlsOptions.key = readFileSync(config.get('server.ssl.key'));
-    tlsOptions.cert = readFileSync(pemConfig);
-    tlsOptions.passphrase = config.get('server.ssl.keyPassphrase');
-  }
-
   const connection = server.connection({
     ...connectionOptions,
     tls: {
-      ...tlsOptions,
+      key: readFileSync(config.get('server.ssl.key')),
+      cert: readFileSync(config.get('server.ssl.certificate')),
       ca: config.get('server.ssl.certificateAuthorities').map(ca => readFileSync(ca, 'utf8')),
+      passphrase: config.get('server.ssl.keyPassphrase'),
+
       ciphers: config.get('server.ssl.cipherSuites').join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack
       honorCipherOrder: true,

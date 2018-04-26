@@ -1,6 +1,6 @@
-import { Scanner } from 'ui/utils/scanner';
-import { StringUtils } from 'ui/utils/string_utils';
-import { SavedObjectsClient } from 'ui/saved_objects';
+import { Scanner } from '../../utils/scanner';
+import { StringUtils } from '../../utils/string_utils';
+import { SavedObjectsClient } from '../../saved_objects';
 
 export class SavedObjectLoader {
   constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome) {

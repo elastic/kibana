@@ -1,0 +1,61 @@
+[role="xpack"]
+[[reporting-troubleshooting]]
+== Reporting Troubleshooting
+
+[float]
+=== Text is Not rendered correctly in generated reports
+
+If a report label is rendered as an empty rectangle, no system fonts
+are available. Install at least one font package on the system.
+
+If the report is missing certain Chinese, Japanese or Korean characters, ensure that a system font with
+those characters is installed.
+
+[float]
+=== Error generating your report
+You might see "There was an error generating your report" or one of the following errors when you download your report. See below for
+an explanation of why the failure occurred and what you can do to fix it.
+
+[float]
+==== `You must install fontconfig and freetype for Reporting to work'`
+Reporting using PhantomJS, the default browser, relies on system packages. Install the appropriate fontconfig and freetype
+packages for your distrobution.
+
+[float]
+==== `Max attempts reached (3)`
+There are two primary causes of this error:
+
+. You're creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the `xpack.reporting.queue.timeout`
+
+. Kibana is hosted behind a reverse-proxy, and the <<reporting-kibana-server-settings, Kibana server settings>> are not configured correctly
+
+Create a   Markdown visualization and then create a PDF report. If this succeeds, increase the `xpack.reporting.queue.timeout`
+setting. If the PDF report fails with "Max attempts reached (3)," check your <<reporting-kibana-server-settings, Kibana server settings>>.
+
+[float]
+==== `You must install freetype and ttf-font for Reporting to work`
+Reporting using the Chromium browser relies on system packages and at least one system font. Install the appropriate fontconfig and freetype
+packages for your distrobution and at least one system font.
+
+[float]
+==== `You must install nss for Reporting to work`
+Reporting using the Chromium browser relies on the Network Security Service libraries (NSS). Install the appropriate nss package for your distrobution.
+
+[float]
+==== `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'`
+Chromium uses sandboxing techniques that are built on top of operating system primitives. The Linux sandbox depends on user namespaces,
+which were introduced with the 3.8 Linux kernel. However, many distrobutions don't have user namespaces enabled by default, or they require
+the CAP_SYS_ADMIN capability.
+
+Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
+is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
+
+[float]
+==== `spawn EACCES`
+Ensure that the `phantomjs` binary in your Kibana data directory is owned by the user who is running Kibana, that the user has the execute permission,
+and if applicable, that the filesystem is mounted with the `exec` option.
+
+[float]
+==== `Caught error spawning Chromium`
+Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the user has the execute permission,
+and if applicable, that the filesystem is mounted with the `exec` option.

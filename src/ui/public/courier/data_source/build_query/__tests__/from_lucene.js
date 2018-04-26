@@ -1,19 +1,12 @@
 import { buildQueryFromLucene } from '../from_lucene';
-import { DecorateQueryProvider } from '../../_decorate_query.js';
-import ngMock from 'ng_mock';
+import { decorateQuery } from '../../_decorate_query.js';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 
-let decorateQuery;
 
 describe('build query', function () {
 
   describe('buildQueryFromLucene', function () {
-
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      decorateQuery = Private(DecorateQueryProvider);
-    }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildQueryFromLucene();

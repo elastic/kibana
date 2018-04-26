@@ -1,5 +1,5 @@
 import dragula from 'dragula';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { move } from '../utils/collection';
 
 uiModules

@@ -2,17 +2,16 @@ import $ from 'jquery';
 import _ from 'lodash';
 import aggSelectHtml from './agg_select.html';
 import advancedToggleHtml from './advanced_toggle.html';
-import 'ui/filters/match_any';
+import '../../../filters/match_any';
 import './agg_param';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
-import { uiModules } from 'ui/modules';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import { aggTypes } from '../../../agg_types';
+import { uiModules } from '../../../modules';
+import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAggParams', function ($compile, $parse, Private) {
-    const aggTypes = Private(AggTypesIndexProvider);
+  .directive('visEditorAggParams', function ($compile) {
 
     return {
       restrict: 'E',

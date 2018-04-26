@@ -1,0 +1,21 @@
+[role="xpack"]
+[[release-notes-xkb]]
+= {xpack} Release Notes
+
+[partintro]
+--
+This section summarizes the changes in each release for all of the {xpack}
+components in {kib}: {security}, {monitoring}, {watcher}, {reporting}, {xpackml},
+and {graph}.
+
+* <<xkb-7.0.0-alpha1>>
+
+See also:
+
+* <<release-notes,{kib} Release Notes>>
+* {ref}/es-release-notes.html[{es} {xpack} Release Notes]
+* {logstash-ref}/release-notes-xls.html[Logstash {xpack} Release Notes]
+
+--
+
+include::7.0.0-alpha1.asciidoc[]
