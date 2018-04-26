@@ -106,12 +106,10 @@ function aliasExists(callCluster, alias) {
   return callCluster('indices.existsAlias', { name: alias });
 }
 
-function createIndex(callCluster, index, mappings) {
+function createIndex(callCluster, index, body) {
   return callCluster('indices.create', {
     index,
-    body: {
-      mappings,
-    },
+    body,
   });
 }
 

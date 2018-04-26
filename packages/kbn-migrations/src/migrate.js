@@ -66,50 +66,19 @@ async function runMigration(context) {
     index,
     callCluster,
     log,
+    migrationState,
+    migrationStateVersion,
     nextMigrationState,
     migrationPlan,
     scrollSize,
+    destIndex,
   } = context;
 
   log.info(() => `Preparing to migrate "${index}"`);
   log.debug(() => `Migrations being applied: ${migrationPlan.migrations.map(({ id }) => id).join(', ')}`);
-  const { targetIndex, isNew } = await initializeMigration(context);
 
-  log.info(() => `Seeding ${targetIndex}`);
-  await Persistence.applySeeds(callCluster, log, targetIndex, migrationPlan.migrations);
+  await ensureIndexExists(context);
 
-  if (!isNew) {
-    log.info(() => `Transforming ${index} into ${targetIndex}`);
-    await Persistence.applyTransforms(callCluster, log, index, targetIndex, migrationPlan.migrations, scrollSize);
-  }
-
-  log.info(() => `Saving migration state to ${targetIndex}`);
-  await MigrationState.save(callCluster, targetIndex, undefined, nextMigrationState);
-
-  log.info(() => `Pointing alias ${index} to ${targetIndex}`);
-  await Persistence.setAlias(callCluster, index, targetIndex);
-
-  return {
-    index,
-    destIndex: targetIndex,
-    status: MigrationStatus.migrated,
-  };
-}
-
-async function initializeMigration(context) {
-  const { callCluster, index } = context;
-  const exists = await Persistence.indexExists(callCluster, index);
-  return exists ? initializeExistingIndex(context) : initializeNewIndex(context);
-}
-
-async function initializeNewIndex({ log, initialIndex, callCluster, migrationPlan: { mappings } }) {
-  log.info(() => `Creating index ${initialIndex}`);
-  await Persistence.createIndex(callCluster, initialIndex, mappings);
-  return { targetIndex: initialIndex, isNew: true };
-}
-
-async function initializeExistingIndex(context) {
-  const { log, index, callCluster, migrationStateVersion, migrationState, destIndex, migrationPlan: { mappings } } = context;
   log.info(() => `Marking index ${index} as migrating`);
   await MigrationState.save(callCluster, index, migrationStateVersion, {
     ...migrationState,
@@ -122,12 +91,44 @@ async function initializeExistingIndex(context) {
   await Persistence.setReadonly(callCluster, index, true);
 
   log.info(() => `Creating index ${destIndex}`);
-  await Persistence.cloneIndexSettings(callCluster, index, destIndex, mappings);
+  await Persistence.cloneIndexSettings(callCluster, index, destIndex, migrationPlan.mappings);
+
+  log.info(() => `Seeding ${destIndex}`);
+  await Persistence.applySeeds(callCluster, log, destIndex, migrationPlan.migrations);
+
+  log.info(() => `Transforming ${index} into ${destIndex}`);
+  await Persistence.applyTransforms(callCluster, log, index, destIndex, migrationPlan.migrations, scrollSize);
+
+  log.info(() => `Saving migration state to ${destIndex}`);
+  await MigrationState.save(callCluster, destIndex, undefined, nextMigrationState);
+
+  log.info(() => `Pointing alias ${index} to ${destIndex}`);
+  await Persistence.setAlias(callCluster, index, destIndex);
 
   return {
-    targetIndex: destIndex,
-    isNew: false,
+    index,
+    destIndex,
+    status: MigrationStatus.migrated,
   };
+}
+
+async function ensureIndexExists({ log, index, initialIndex, callCluster, migrationPlan: { mappings } }) {
+  const exists = await Persistence.indexExists(callCluster, index);
+  if (!exists) {
+    log.info(() => `Creating index ${initialIndex}`);
+    await Persistence.createIndex(callCluster, initialIndex, {
+      mappings,
+      aliases: {
+        [index]: {},
+      },
+      settings: {
+        index: {
+          number_of_replicas: '1',
+          number_of_shards: '5',
+        },
+      },
+    });
+  }
 }
 
 async function ensureIsAliased({ callCluster, index, initialIndex, log }) {

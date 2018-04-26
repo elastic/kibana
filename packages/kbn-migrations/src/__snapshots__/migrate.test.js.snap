@@ -3,7 +3,7 @@
 exports[`migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
-    ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+    ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -23,11 +23,23 @@ Object {
         "_version": 1,
       },
     },
+    ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+        ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -35,6 +47,57 @@ Object {
       },
     },
     "mappings": Object {
+      ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "stuff": Object {
+              "type": "integer",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
       ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
         "doc": Object {
           "dynamic": "strict",
@@ -87,7 +150,21 @@ Object {
         },
       },
     },
-    "settings": Object {},
+    "settings": Object {
+      ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".mufasa-original-a6d07838aa0355002cda60a39df578cf69a45414": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
   },
 }
 `;
@@ -1447,7 +1524,7 @@ Object {
 exports[`migrate new index gets seeded 1`] = `
 Object {
   "data": Object {
-    ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+    ".mufasa-9.8.7-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1480,11 +1557,23 @@ Object {
         },
       },
     },
+    ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       ".mufasa": Object {
-        ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+        ".mufasa-9.8.7-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
           "aliases": Object {
             ".mufasa": Object {},
           },
@@ -1492,6 +1581,61 @@ Object {
       },
     },
     "mappings": Object {
+      ".mufasa-9.8.7-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "music": Object {
+              "properties": Object {
+                "jazz": Object {
+                  "type": "blob",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
       ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
         "doc": Object {
           "dynamic": "strict",
@@ -1548,7 +1692,21 @@ Object {
         },
       },
     },
-    "settings": Object {},
+    "settings": Object {
+      ".mufasa-9.8.7-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".mufasa-original-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
   },
 }
 `;
@@ -1556,7 +1714,7 @@ Object {
 exports[`migrate seeds are transformed 1`] = `
 Object {
   "data": Object {
-    ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+    ".music-9.8.7-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
       "artists:jazzmeup": Object {
         "_source": Object {
           "artists": Object {
@@ -1590,11 +1748,23 @@ Object {
         "_version": 1,
       },
     },
+    ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
+      },
+    },
   },
   "meta": Object {
     "aliases": Object {
       ".music": Object {
-        ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+        ".music-9.8.7-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
           "aliases": Object {
             ".music": Object {},
           },
@@ -1602,6 +1772,64 @@ Object {
       },
     },
     "mappings": Object {
+      ".music-9.8.7-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "artists": Object {
+              "properties": Object {
+                "john": Object {
+                  "type": "text",
+                },
+                "louis": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
       ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
         "doc": Object {
           "dynamic": "strict",
@@ -1661,7 +1889,21 @@ Object {
         },
       },
     },
-    "settings": Object {},
+    "settings": Object {
+      ".music-9.8.7-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+        "index": Object {
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".music-original-6c93252e50c6f5f7393513a544785e16a2097f59": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+    },
   },
 }
 `;

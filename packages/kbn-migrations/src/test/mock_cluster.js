@@ -107,7 +107,7 @@ function mockElasticSearchCommands(data, meta) {
     return unAlias(index);
   }
 
-  function createIndex({ index, body: { mappings, settings } }) {
+  function createIndex({ index, body: { mappings, aliases = {}, settings } }) {
     if (indexExists({ index })) {
       return reject(400, `Index ${index} exists!`);
     }
@@ -116,6 +116,7 @@ function mockElasticSearchCommands(data, meta) {
     if (settings) {
       meta.settings[index] = settings;
     }
+    Object.keys(aliases).forEach(alias => putAlias({ index, name: alias }));
     return Promise.resolve({
       acknowledged: true,
       shards_acknowledged: true,
