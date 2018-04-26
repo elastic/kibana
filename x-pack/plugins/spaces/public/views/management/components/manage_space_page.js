@@ -55,6 +55,7 @@ export class ManageSpacePage extends React.Component {
           } = error.data || {};
 
           toastNotifications.addDanger(`Error loading space: ${message}`);
+          this.backToSpacesList();
         });
     }
   }
@@ -121,16 +122,14 @@ export class ManageSpacePage extends React.Component {
   }
 
   getTitle = () => {
-    const isEditing = !!this.props.space;
-    if (isEditing) {
+    if (this.editingExistingSpace()) {
       return `Edit space`;
     }
     return `Create a space`;
   };
 
   getActionButton = () => {
-    const isEditing = !!this.props.space;
-    if (isEditing) {
+    if (this.editingExistingSpace()) {
       return (
         <EuiFlexItem grow={false}>
           <DeleteSpacesButton
@@ -178,15 +177,23 @@ export class ManageSpacePage extends React.Component {
   _performSave = () => {
     const {
       name = '',
-      id = name.toLowerCase(),
+      id = name.toLowerCase().replace(/\s/g, '-'),
       description
     } = this.state.space;
 
     const { httpAgent, chrome } = this.props;
 
+    const params = {
+      name,
+      id,
+      description
+    };
+
+    const overwrite = this.editingExistingSpace();
+
     if (name && description) {
       httpAgent
-        .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}`), { id, name, description })
+        .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}?overwrite=${overwrite}`), params)
         .then(result => {
           toastNotifications.addSuccess(`Saved '${result.data.id}'`);
           window.location.hash = `#/management/spaces/list`;
@@ -257,6 +264,8 @@ export class ManageSpacePage extends React.Component {
 
     return {};
   };
+
+  editingExistingSpace = () => !!this.props.space;
 }
 
 ManageSpacePage.propTypes = {
