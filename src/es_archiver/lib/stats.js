@@ -12,6 +12,7 @@ export function createStats(name, log) {
         deleted: false,
         created: false,
         archived: false,
+        waitForSnapshot: 0,
         configDocs: {
           upgraded: 0,
           tagged: 0,
@@ -30,6 +31,11 @@ export function createStats(name, log) {
     skippedIndex(index) {
       getOrCreate(index).skipped = true;
       info('Skipped restore for existing index %j', index);
+    }
+
+    waitingForInProgressSnapshot(index) {
+      getOrCreate(index).waitForSnapshot += 1;
+      info('Waiting for snapshot of %j to complete');
     }
 
     deletedIndex(index) {
