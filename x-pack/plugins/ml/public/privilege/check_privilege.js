@@ -8,10 +8,12 @@
 
 import { privilegesProvider } from 'plugins/ml/privilege/get_privileges';
 import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
+// import { initPromise } from 'plugins/ml/services/http_service';
 
 let privileges = {};
 
 export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
+  // Private(initPromise);
   const mlPrivilegeService = Private(privilegesProvider);
 
   return new Promise((resolve, reject) => {
@@ -31,6 +33,7 @@ export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
 }
 
 export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
+  // Private(initPromise);
   const mlPrivilegeService = Private(privilegesProvider);
 
   return new Promise((resolve, reject) => {

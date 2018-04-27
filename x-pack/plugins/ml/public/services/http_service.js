@@ -13,6 +13,11 @@ import 'isomorphic-fetch';
 
 import { addSystemApiHeader } from 'ui/system_api';
 
+export function initPromise($q) {
+  window.Promise = $q;
+  return Promise.resolve();
+}
+
 export function http(options) {
   return new Promise((resolve, reject) => {
     if(options && options.url) {
@@ -34,7 +39,11 @@ export function http(options) {
         body,
       })
         .then((resp) => {
-          resolve(resp.json());
+          if (resp.ok === true) {
+            resolve(resp.json());
+          } else {
+            reject(resp);
+          }
         })
         .catch((resp) => {
           reject(resp);

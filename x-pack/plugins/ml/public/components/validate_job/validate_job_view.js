@@ -30,6 +30,7 @@ import {
 // because it won't work with the jest tests
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 import { getMostSevereMessageStatus } from '../../../common/util/validation_utils';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({
@@ -167,7 +168,7 @@ class ValidateJob extends Component {
     if (typeof job === 'object') {
       let shouldShowLoadingIndicator = true;
 
-      this.props.mlJobService
+      mlJobService
         .validateJob({ duration, fields, job })
         .then((data) => {
           shouldShowLoadingIndicator = false;
@@ -248,7 +249,6 @@ ValidateJob.propTypes = {
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  mlJobService: PropTypes.object.isRequired
 };
 
 export { ValidateJob };

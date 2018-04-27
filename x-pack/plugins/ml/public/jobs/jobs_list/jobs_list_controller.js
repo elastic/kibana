@@ -32,10 +32,11 @@ import createWatchTemplate from 'plugins/ml/jobs/jobs_list/create_watch_modal/cr
 import { buttonsEnabledChecks } from 'plugins/ml/jobs/jobs_list/buttons_enabled_checks';
 import { cloudServiceProvider } from 'plugins/ml/services/cloud_service';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
-import { JobMessagesServiceProvider } from 'plugins/ml/services/job_messages_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlCalendarService } from 'plugins/ml/services/calendar_service';
+import { jobMessagesService } from 'plugins/ml/services/job_messages_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { initPromise } from 'plugins/ml/services/http_service';
 
 uiRoutes
   .when('/jobs/?', {
@@ -44,7 +45,8 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      loadNewJobDefaults
+      loadNewJobDefaults,
+      initPromise
     }
   });
 
@@ -54,13 +56,10 @@ const module = uiModules.get('apps/ml', ['ui.bootstrap']);
 module.controller('MlJobsList',
   function (
     $scope,
-    $route,
     $location,
-    $window,
     $timeout,
     $compile,
     $modal,
-    es,
     timefilter,
     kbnUrl,
     Private,
@@ -85,9 +84,6 @@ module.controller('MlJobsList',
     $scope.mlNodesAvailable = mlNodesAvailable();
     $scope.permissionToViewMlNodeCount = permissionToViewMlNodeCount();
 
-    const mlJobService = Private(JobServiceProvider);
-    const mlCalendarService = Private(CalendarServiceProvider);
-    const jobMessagesService = Private(JobMessagesServiceProvider);
     const { isRunningOnCloud, getCloudId } = Private(cloudServiceProvider);
     $scope.isCloud = isRunningOnCloud();
     $scope.cloudId = getCloudId();

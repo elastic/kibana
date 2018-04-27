@@ -17,12 +17,13 @@ import 'plugins/kibana/visualize/styles/main.less';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { getIndexPatternWithRoute, getSavedSearchWithRoute } from 'plugins/ml/util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { initPromise } from 'plugins/ml/services/http_service';
 import template from './create_job.html';
 
 uiRoutes
@@ -31,9 +32,10 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
-      indexPattern: getIndexPatternWithRoute,
-      savedSearch: getSavedSearchWithRoute,
-      checkMlNodesAvailable
+      indexPattern: loadCurrentIndexPattern,
+      savedSearch: loadCurrentSavedSearch,
+      checkMlNodesAvailable,
+      initPromise
     }
   });
 
@@ -45,11 +47,9 @@ module
     $scope,
     $window,
     $route,
-    $q,
     timefilter,
     Private) {
 
-    const mlJobService = Private(JobServiceProvider);
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
@@ -147,7 +147,7 @@ module
     function loadJobConfigs() {
       // load the job and datafeed configs as well as the kibana saved objects
       // from the recognizer endpoint
-      $q.when(ml.getDataRecognizerModule({ moduleId }))
+      ml.getDataRecognizerModule({ moduleId })
         .then(resp => {
           // populate the jobs and datafeeds
           if (resp.jobs && resp.jobs.length) {
@@ -250,7 +250,7 @@ module
 
     // call the the setupModuleConfigs endpoint to create the jobs, datafeeds and saved objects
     function saveDataRecognizerItems() {
-      return $q((resolve) => {
+      return new Promise((resolve) => {
       // set all jobs, datafeeds and saved objects to a SAVING state
       // i.e. display spinners
         setAllToSaving();
@@ -261,7 +261,7 @@ module
         const tempQuery = (savedSearch.id === undefined) ?
           undefined : combinedQuery;
 
-        $q.when(ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName }))
+        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {
@@ -339,7 +339,7 @@ module
     }
 
     function startDatafeeds() {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         const jobs = $scope.formConfig.jobs;
         const numberOfJobs = jobs.length;
@@ -436,7 +436,7 @@ module
     }
 
     function checkForSavedObject(type, savedObject) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         let exists = false;
         mlCreateRecognizerJobsService.loadExistingSavedObjects(type)
           .then((resp) => {

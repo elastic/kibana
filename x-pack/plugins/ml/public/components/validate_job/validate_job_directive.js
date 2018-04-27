@@ -9,21 +9,15 @@
 
 import 'ngreact';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { ValidateJob } from './validate_job_view';
 
-module.directive('mlValidateJob', function ($injector) {
-  const Private = $injector.get('Private');
-  const mlJobService = Private(JobServiceProvider);
-  const reactDirective = $injector.get('reactDirective');
-
+module.directive('mlValidateJob', function (reactDirective) {
   return reactDirective(
     ValidateJob,
     undefined,
-    { restrict: 'E' },
-    { mlJobService }
+    { restrict: 'E' }
   );
 });

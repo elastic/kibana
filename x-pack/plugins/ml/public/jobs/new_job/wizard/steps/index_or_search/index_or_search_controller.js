@@ -15,8 +15,9 @@ import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconfigured_job_redirect';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { initPromise } from 'plugins/ml/services/http_service';
 import template from './index_or_search.html';
 
 uiRoutes
@@ -30,9 +31,10 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
-      indexPatterns: getIndexPatterns,
+      indexPatterns: loadIndexPatterns,
       preConfiguredJobRedirect,
-      checkMlNodesAvailable
+      checkMlNodesAvailable,
+      initPromise
     }
   });
 
@@ -48,7 +50,7 @@ module.controller('MlNewJobStepIndexOrSearch',
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
 
-    $scope.indexPatterns = $route.current.locals.indexPatterns;
+    $scope.indexPatterns = getIndexPatterns();
 
     $scope.withIndexPatternUrl = function (pattern) {
       if (!pattern) {

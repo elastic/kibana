@@ -10,11 +10,14 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { notify, Notifier } from 'ui/notify';
 import _ from 'lodash';
 
+// import { initPromise } from 'plugins/ml/services/http_service';
+
 import chrome from 'ui/chrome';
 
 let licenseHasExpired = true;
 
-export function checkLicense(Private, Promise, kbnBaseUrl) {
+export function checkLicense(Private, kbnBaseUrl) {
+  // Private(initPromise);
   const xpackInfo = Private(XPackInfoProvider);
   const features = xpackInfo.get('features.ml');
 
@@ -66,4 +69,15 @@ export function checkLicenseExpired(Private, Promise, kbnBaseUrl, kbnUrl) {
 
 export function getLicenseHasExpired() {
   return licenseHasExpired;
+}
+
+export function xpackFeatureProvider(Private) {
+  const xpackInfo = Private(XPackInfoProvider);
+  function isAvailable(feature) {
+    return xpackInfo.get(`features.${feature}.isAvailable`, false);
+  }
+
+  return {
+    isAvailable
+  };
 }
