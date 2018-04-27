@@ -6,10 +6,10 @@ export async function importDashboards(req) {
   const exclude = flatten([req.query.exclude]);
 
   const savedObjectsClient = req.getSavedObjectsClient();
-
+  const migrationState = payload.migrationState || {};
   const docs = payload.objects
     .filter(item => !exclude.includes(item.type));
 
-  const objects = await savedObjectsClient.bulkCreate(docs, { overwrite });
+  const objects = await savedObjectsClient.bulkCreate(docs, { overwrite, migrationState });
   return { objects };
 }

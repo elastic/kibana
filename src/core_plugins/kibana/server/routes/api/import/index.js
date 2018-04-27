@@ -10,6 +10,7 @@ export function importApi(server) {
       validate: {
         payload: Joi.object().keys({
           objects: Joi.array(),
+          migrationState: Joi.object(),
           version: Joi.string()
         }),
         query: Joi.object().keys({
