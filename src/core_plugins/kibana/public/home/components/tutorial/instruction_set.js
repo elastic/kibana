@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   KuiBar,
@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButton,
-  EuiTextColor,
+  EuiCallOut,
 } from '@elastic/eui';
 
 export class InstructionSet extends React.Component {
@@ -67,13 +67,10 @@ export class InstructionSet extends React.Component {
 
   renderStatusCheckMsg(msg, color) {
     return (
-      <EuiText>
-        <p>
-          <EuiTextColor color={color}>
-            {msg}
-          </EuiTextColor>
-        </p>
-      </EuiText>
+      <EuiCallOut
+        title={msg}
+        color={color}
+      />
     );
   }
 
@@ -81,34 +78,39 @@ export class InstructionSet extends React.Component {
     let statusMsg;
     if (this.props.statusCheckState === 'complete') {
       const msg = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
-      statusMsg = this.renderStatusCheckMsg(msg, 'secondary');
+      statusMsg = this.renderStatusCheckMsg(msg, 'success');
     } else if (this.props.hasStatusCheckFailed) {
       const msg = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
       statusMsg = this.renderStatusCheckMsg(msg, 'warning');
     }
 
     const checkStausStep = (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
-          <EuiText>
-            <p>
-              {this.props.statusCheckConfig.text}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiText>
+              <p>
+                {this.props.statusCheckConfig.text}
+              </p>
+            </EuiText>
+          </EuiFlexItem>
 
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButton
-            onClick={() => {this.props.onStatusCheck();}}
-            isLoading={this.props.isCheckingStatus}
+          <EuiFlexItem
+            grow={false}
           >
-            {this.props.statusCheckConfig.btnLabel ? this.props.statusCheckConfig.btnLabel : 'Check status'}
-          </EuiButton>
-          {statusMsg}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiButton
+              onClick={() => {this.props.onStatusCheck();}}
+              isLoading={this.props.isCheckingStatus}
+            >
+              {this.props.statusCheckConfig.btnLabel ? this.props.statusCheckConfig.btnLabel : 'Check status'}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        {statusMsg}
+      </Fragment>
     );
     return {
       title: this.props.statusCheckConfig.title ? this.props.statusCheckConfig.title : 'Status Check',
