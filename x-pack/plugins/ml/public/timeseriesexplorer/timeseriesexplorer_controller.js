@@ -28,7 +28,6 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
 import {
-  isJobVersionGte,
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
   isModelPlotEnabled,
@@ -44,8 +43,7 @@ import {
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import template from './timeseriesexplorer.html';
-import forecastingModalTemplate from 'plugins/ml/timeseriesexplorer/forecasting_modal/forecasting_modal.html';
-import { getMlNodeCount, mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -84,7 +82,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
-  const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
   const CHARTS_POINT_TARGET = 500;
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
@@ -98,8 +95,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.hasResults = false;
 
   $scope.modelPlotEnabled = false;
-  $scope.forecastingDisabled = false;
-  $scope.forecastingDisabledMessage = '';
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
@@ -528,31 +523,6 @@ module.controller('MlTimeSeriesExplorerController', function (
     });
   };
 
-  $scope.openForecastDialog = function () {
-    // Allow forecast data to be viewed from the start of the dashboard bounds.
-    const bounds = timefilter.getActiveBounds();
-
-    $modal.open({
-      template: forecastingModalTemplate,
-      controller: 'MlForecastingModal',
-      backdrop: 'static',
-      size: 'lg',
-      keyboard: false,
-
-      resolve: {
-        params: () => {
-          return {
-            pscope: $scope,
-            job: $scope.selectedJob,
-            entities: $scope.chartDetails.entityData.entities,
-            earliest: bounds.min.valueOf(),
-            mlNodesAvailable: mlNodesAvailable()
-          };
-        }
-      }
-    });
-  };
-
   $scope.detectorIndexChanged = function () {
     updateControlsForDetector();
     loadEntityValues();
@@ -728,20 +698,6 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
 
     $scope.entities = entities;
-
-    // Disable forecasting if the detector has an 'over' field as
-    // forecasting is not currently supported for these kinds of models,
-    // or if the job was created earlier than 6.1.0.
-    if (overFieldName !== undefined) {
-      $scope.forecastingDisabled = true;
-      $scope.forecastingDisabledMessage = 'Forecasting is not available for population detectors with an over field';
-    } else if (isJobVersionGte($scope.selectedJob, FORECAST_JOB_MIN_VERSION) === false) {
-      $scope.forecastingDisabled = true;
-      $scope.forecastingDisabledMessage = `Forecasting is only available for jobs created in version ${FORECAST_JOB_MIN_VERSION} or later`;
-    } else {
-      $scope.forecastingDisabled = false;
-      $scope.forecastingDisabledMessage = '';
-    }
   }
 
   function loadEntityValues() {
