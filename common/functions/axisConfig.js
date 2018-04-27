@@ -14,10 +14,13 @@ export const axisConfig = () => ({
     },
     position: {
       types: ['string'],
-      help: 'Position of the axis labels',
+      help: 'Position of the axis labels. Eg, top, bottom, left, and right.',
+      default: '',
     },
   },
   fn: (context, args) => {
+    const positions = ['top', 'bottom', 'left', 'right', ''];
+    if (!positions.includes(args.position)) throw new Error(`Invalid position ${args.position}`);
     return {
       type: 'axisConfig',
       ...args,

@@ -1,3 +1,5 @@
+import { isValid as isValidDataURL } from '../lib/dataurl';
+
 export const containerStyle = () => ({
   name: 'containerStyle',
   aliases: [],
@@ -27,7 +29,17 @@ export const containerStyle = () => ({
     },
     backgroundImage: {
       types: ['string', 'null'],
-      help: 'Value CSS background image string',
+      help: 'Valid CSS background image string',
+    },
+    backgroundSize: {
+      types: ['string'],
+      help: 'Valid CSS background size string',
+      default: 'contain',
+    },
+    backgroundRepeat: {
+      types: ['string'],
+      help: 'Valid CSS background repeat string',
+      default: 'no-repeat',
     },
     opacity: {
       types: ['number', 'null'],
@@ -35,6 +47,23 @@ export const containerStyle = () => ({
     },
   },
   fn: (context, args) => {
-    return { type: 'containerStyle', ...args };
+    const isURL = url => url.startsWith('http://') || url.startsWith('https://');
+
+    const { backgroundImage, backgroundSize, backgroundRepeat, ...remainingArgs } = args;
+    const style = {
+      type: 'containerStyle',
+      ...remainingArgs,
+    };
+
+    if (backgroundImage) {
+      if (!isValidDataURL(backgroundImage) && !isURL(backgroundImage))
+        throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
+      style.backgroundImage = `url(${backgroundImage})`;
+      style.backgroundSize = backgroundSize;
+      style.backgroundRepeat = backgroundRepeat;
+    }
+
+    // removes keys with undefined value
+    return JSON.parse(JSON.stringify(style));
   },
 });

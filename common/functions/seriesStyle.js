@@ -21,25 +21,25 @@ export const seriesStyle = () => ({
       help: 'Color to assign the line',
     },
     lines: {
-      types: ['number', 'null'],
+      types: ['number'],
       displayName: 'Line width',
       help: 'Width of the line',
       default: 0,
     },
     bars: {
-      types: ['number', 'null'],
+      types: ['number'],
       displayName: 'Bar Width',
       help: 'Width of bars',
       default: 0,
     },
     points: {
-      types: ['number', 'null'],
+      types: ['number'],
       displayName: 'Show Points',
       help: 'Size of points on line',
       default: 5,
     },
     fill: {
-      types: ['number', 'boolean', 'null'],
+      types: ['number', 'boolean'],
       displayName: 'Fill points',
       help: 'Should we fill points?',
       default: false,
@@ -51,7 +51,7 @@ export const seriesStyle = () => ({
         'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
     horizontalBars: {
-      types: ['null', 'boolean'],
+      types: ['boolean'],
       displayName: 'Horizontal Bars Orientation',
       help: 'Sets the orientation of bars in the chart to horizontal',
       default: false,
