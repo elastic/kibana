@@ -107,3 +107,10 @@ export function addNewJobToRecentlyAccessed(jobId, resultsUrl) {
   const urlParts = resultsUrl.match(/ml#\/(.+?)(\?.+)/);
   addItemToRecentlyAccessed(urlParts[1], jobId, urlParts[2]);
 }
+
+export function moveToAdvancedJobCreationProvider(mlJobService, $location) {
+  return function moveToAdvancedJobCreation(job) {
+    mlJobService.currentJob = job;
+    $location.path('jobs/new_job/advanced');
+  };
+}

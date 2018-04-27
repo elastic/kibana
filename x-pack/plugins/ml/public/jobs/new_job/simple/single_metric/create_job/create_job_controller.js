@@ -24,7 +24,6 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
 import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/components/utils/adjust_interval';
-import { createSearchItems, createResultsUrl, addNewJobToRecentlyAccessed } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { getIndexedFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
 import { changeJobIDCase } from 'plugins/ml/jobs/new_job/simple/components/general_job_details/change_job_id_case';
@@ -32,6 +31,12 @@ import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/component
 import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import {
+  createSearchItems,
+  createResultsUrl,
+  addNewJobToRecentlyAccessed,
+  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+
 import template from './create_job.html';
 
 uiRoutes
@@ -68,6 +73,7 @@ module
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
     const MlTimeBuckets = Private(IntervalHelperProvider);
+    const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
 
     const stateDefaults = {
       mlJobSettings: {}
@@ -548,6 +554,11 @@ module
     // setting the state to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
       mlSingleMetricJobService.stopDatafeed($scope.formConfig);
+    };
+
+    $scope.moveToAdvancedJobCreation = function () {
+      const job = mlSingleMetricJobService.getJobFromConfig($scope.formConfig);
+      moveToAdvancedJobCreation(job);
     };
 
     $scope.setFullTimeRange = function () {
