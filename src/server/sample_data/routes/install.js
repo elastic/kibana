@@ -3,6 +3,7 @@ import Joi from 'joi';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import { adjustTimestamp } from './lib/adjust_timestamp';
+import { initUiSettings } from './lib/init_ui_settings';
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
@@ -91,6 +92,22 @@ export const createInstallRoute = () => ({
         } catch (err) {
           console.warn(`sample_data install errors while loading saved objects. Error: ${err.message}`);
           return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(500);
+        }
+
+        try {
+          const uiSettings = initUiSettings(server);
+          const defaultIndexPattern = await uiSettings.get('defaultIndex');
+          if (defaultIndexPattern === null) {
+            const indexPatternSavedObjectJson = sampleDataSet.savedObjects.find(savedObjectJson => {
+              return savedObjectJson.type === 'index-pattern';
+            });
+            if (indexPatternSavedObjectJson) {
+              await uiSettings.set('defaultIndex', indexPatternSavedObjectJson.id);
+            }
+          }
+        } catch (err) {
+          console.warn(`sample_data install errors while setting default index pattern. Error: ${err.message}`);
+          return reply(`Unable to configure 'defaultIndex', see kibana logs for details`).code(500);
         }
 
         return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataSet.savedObjects.length });
