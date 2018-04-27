@@ -117,7 +117,7 @@ export class SavedObjectsClient {
     const method = id && !overwrite ? 'create' : 'index';
 
     try {
-      const [{ _id, _source }] = this._upgradeDocuments({
+      const [{ _id, _source }] = await this._upgradeDocuments({
         time,
         migrationState,
         docs: [{ id, type, attributes }],
@@ -479,7 +479,7 @@ export class SavedObjectsClient {
   // Upgrades documents to the same version as the index, using
   // the Migrations transformDocuments function that was passed into
   // the constructor.
-  _upgradeDocuments({ time, migrationState, docs }) {
+  async _upgradeDocuments({ time, migrationState, docs }) {
     const rawDocs = docs.map(({ id, type, attributes }) => ({
       _id: this._generateEsId(type, id),
       _source: {

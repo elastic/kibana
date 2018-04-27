@@ -15,7 +15,7 @@ export const createCreateRoute = (prereqs) => {
           id: Joi.string()
         }).required(),
         payload: Joi.object({
-          migrationState: Joi.object().default(undefined),
+          migrationState: Joi.object().default(null),
           attributes: Joi.object().required()
         }).required()
       },
