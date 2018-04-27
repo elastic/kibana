@@ -36,6 +36,7 @@ const mappings = {
   migration: {
     properties: {
       status: { type: 'keyword' },
+      previousIndex: { type: 'keyword' },
       plugins: {
         type: 'nested',
         properties: {
@@ -70,7 +71,7 @@ function trimForExport({ plugins }) {
 
 // Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
 // around even if the plugin is disabled / removed.
-function build(plugins, previousState = empty) {
+function build(plugins, previousIndex, previousState = empty) {
   const isDisabled = Plugins.disabledIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
   const disabledPlugins = previousState.plugins.filter(({ id }) => isDisabled[id]);
   const enabledPlugins = plugins.map((plugin) => {
@@ -83,6 +84,7 @@ function build(plugins, previousState = empty) {
     };
   });
   return {
+    previousIndex,
     status: MigrationStatus.migrated,
     plugins: disabledPlugins.concat(enabledPlugins),
   };

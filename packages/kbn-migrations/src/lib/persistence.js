@@ -16,6 +16,7 @@ module.exports = {
   setAlias,
   setReadonly,
   fetchOrNull,
+  getCurrentIndex,
 };
 
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
@@ -144,6 +145,13 @@ function setReadonly(callCluster, index, readOnly = true) {
       },
     },
   });
+}
+
+async function getCurrentIndex(callCluster, index) {
+  const currentAlias = await fetchOrNull(callCluster('indices.getAlias', { name: index }));
+  if (currentAlias) {
+    return Object.keys(currentAlias)[0];
+  }
 }
 
 async function removeIndicesFromAlias(callCluster, alias) {

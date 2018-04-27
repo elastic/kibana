@@ -6,6 +6,7 @@ const objectHash = require('object-hash');
 const Plugins = require('./plugins');
 const MigrationPlan = require('./migration_plan');
 const MigrationState = require('./migration_state');
+const Persistence = require('./persistence');
 
 module.exports = {
   fetch,
@@ -13,11 +14,14 @@ module.exports = {
 
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
-  const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
+  const [currentIndex, { migrationState, migrationStateVersion }] = await Promise.all([
+    Persistence.getCurrentIndex(callCluster, index),
+    MigrationState.fetch(callCluster, index),
+  ]);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
-  const nextMigrationState = MigrationState.build(sanitizedPlugins, migrationState);
-  const sha = objectHash(nextMigrationState);
+  const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex, migrationState);
+  const sha = objectHash(nextMigrationState.plugins);
   return {
     index,
     callCluster,
@@ -38,5 +42,6 @@ function migrationLogger(log) {
   return {
     info: logFn(['info', 'migration']),
     debug: logFn(['debug', 'migration']),
+    error: logFn(['error', 'migration']),
   };
 }

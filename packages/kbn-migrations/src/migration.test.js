@@ -435,7 +435,7 @@ describe('Migration.migrate', () => {
     const result = await migrate({ force: true, callCluster, index, elasticVersion, log, plugins });
     expect(_.pick(result, ['destIndex', 'index', 'status']))
       .toEqual({
-        destIndex: 'skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716',
+        destIndex: 'skippy-9.8.7-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc',
         index: 'skippy',
         status: 'migrated'
       });

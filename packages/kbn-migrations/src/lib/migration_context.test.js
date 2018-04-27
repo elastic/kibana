@@ -15,9 +15,9 @@ describe('migrationContext', () => {
   test('generates predictable index names', async () => {
     const actual = await testMigrationContext({ index: 'dang' }, '2.0.4');
     expect(actual.destIndex)
-      .toEqual('dang-2.0.4-f6093f91ba78efb275516c2cdb7eabdc9e5be16f');
+      .toEqual('dang-2.0.4-989db2448f309bfdd99b513f37c84b8f5794d2b5');
     expect(actual.initialIndex)
-      .toEqual('dang-original-f6093f91ba78efb275516c2cdb7eabdc9e5be16f');
+      .toEqual('dang-original-989db2448f309bfdd99b513f37c84b8f5794d2b5');
   });
 
   test('creates a logger that logs info', async () => {

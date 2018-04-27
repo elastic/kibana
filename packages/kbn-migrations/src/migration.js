@@ -66,10 +66,15 @@ async function runMigrationIfOutOfDate(opts) {
   const context = await MigrationContext.fetch(opts);
   const status = await MigrationState.status(context.plugins, context.migrationState);
 
-  if (status === MigrationStatus.outOfDate || (status === MigrationStatus.migrating && context.force)) {
-    return runMigration(context);
-  } else {
-    return skipMigration(context, status);
+  try {
+    if (status === MigrationStatus.outOfDate || (status === MigrationStatus.migrating && context.force)) {
+      return runMigration(context);
+    } else {
+      return skipMigration(context, status);
+    }
+  } catch (err) {
+    context.log.error(err);
+    throw err;
   }
 }
 
@@ -88,24 +93,35 @@ async function runMigration(context) {
     index,
     callCluster,
     log,
-    migrationState,
-    migrationStateVersion,
     nextMigrationState,
     migrationPlan,
     scrollSize,
     destIndex,
   } = context;
+  const result = {
+    index,
+    destIndex,
+    status: MigrationStatus.migrated,
+  };
 
   log.info(() => `Preparing to migrate "${index}"`);
   log.debug(() => `Migrations being applied: ${migrationPlan.migrations.map(({ id }) => id).join(', ')}`);
 
   await ensureIndexExists(context);
 
+  // This can happen if you attempt to migrate the current index to some future
+  // version, the migration fails, and you revert your Kibana to the same version
+  // as the existing index. In this case, the existing index state is 'migrating'
+  // and it is read-only.
+  if (nextMigrationState.previousIndex === destIndex) {
+    log.info(() => `Re-activating "${index}" to use "${destIndex}"`);
+    await resetIndex(context);
+    return result;
+  }
+
   log.info(() => `Marking index ${index} as migrating`);
-  await MigrationState.save(callCluster, index, migrationStateVersion, {
-    ...migrationState,
-    status: MigrationStatus.migrating,
-  });
+  await Persistence.setReadonly(callCluster, index, false);
+  await setMigrationStatus(context, MigrationStatus.migrating);
 
   await ensureIsAliased(context);
 
@@ -126,11 +142,14 @@ async function runMigration(context) {
   log.info(() => `Pointing alias ${index} to ${destIndex}`);
   await Persistence.setAlias(callCluster, index, destIndex);
 
-  return {
-    index,
-    destIndex,
-    status: MigrationStatus.migrated,
-  };
+  return result;
+}
+
+async function setMigrationStatus({ callCluster, index, migrationStateVersion, migrationState }, status) {
+  await MigrationState.save(callCluster, index, migrationStateVersion, {
+    ...migrationState,
+    status,
+  });
 }
 
 async function ensureIndexExists({ log, index, initialIndex, callCluster, migrationPlan: { mappings } }) {
@@ -171,4 +190,10 @@ async function createDestIndex({ callCluster, force, destIndex, index, migration
   }
   log.info(() => `Creating destination index ${destIndex}`);
   await Persistence.cloneIndexSettings(callCluster, index, destIndex, migrationPlan.mappings);
+}
+
+async function resetIndex(context) {
+  const { callCluster, index } = context;
+  await Persistence.setReadonly(callCluster, index, false);
+  await setMigrationStatus(context, MigrationStatus.migrated);
 }
