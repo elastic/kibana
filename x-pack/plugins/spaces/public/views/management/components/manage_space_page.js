@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import {
   EuiText,
   EuiSpacer,
+  EuiPage,
   EuiPageContent,
   EuiForm,
   EuiFormRow,
@@ -18,13 +19,16 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { PageHeader } from './page_header';
+import { DeleteSpacesButton } from './delete_spaces_button';
+
 import { Notifier, toastNotifications } from 'ui/notify';
 
 export class ManageSpacePage extends React.Component {
   state = {
     space: {},
-    error: null
-  }
+    validate: false
+  };
 
   componentDidMount() {
     this.notifier = new Notifier({ location: 'Spaces' });
@@ -46,9 +50,12 @@ export class ManageSpacePage extends React.Component {
           }
         })
         .catch(error => {
-          this.setState({
-            error
-          });
+          const {
+            message = ''
+          } = error.data || {};
+
+          toastNotifications.addDanger(`Error loading space: ${message}`);
+          this.backToSpacesList();
         });
     }
   }
@@ -60,57 +67,83 @@ export class ManageSpacePage extends React.Component {
     } = this.state.space;
 
     return (
-      <EuiPageContent>
-        <EuiForm>
-          <EuiText><h1>{this.getTitle()}</h1></EuiText>
-          <EuiSpacer />
-          <EuiFormRow
-            label="Name"
-            helpText="Name your space"
-          >
-            <EuiFieldText
-              name="name"
-              placeholder={'Awesome space'}
-              value={name}
-              onChange={this.onNameChange}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label="Description"
-            helpText="Describe your space"
-          >
-            <EuiFieldText
-              name="description"
-              placeholder={'This is where the magic happens'}
-              value={description}
-              onChange={this.onDescriptionChange}
-            />
-          </EuiFormRow>
+      <EuiPage>
+        <PageHeader breadcrumbs={this.props.breadcrumbs}/>
+        <EuiPageContent>
+          <EuiForm>
+            <EuiFlexGroup justifyContent={'spaceBetween'}>
+              <EuiFlexItem grow={false}>
+                <EuiText><h1>{this.getTitle()}</h1></EuiText>
+              </EuiFlexItem>
+              {this.getActionButton()}
+            </EuiFlexGroup>
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={this.backToSpacesList}>
-                Cancel
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            <EuiSpacer />
 
-          {this.getActionButtons}
-        </EuiForm>
-      </EuiPageContent>
+            <EuiFormRow
+              label="Name"
+              helpText="Name your space"
+              {...this.validateName()}
+            >
+              <EuiFieldText
+                name="name"
+                placeholder={'Awesome space'}
+                value={name}
+                onChange={this.onNameChange}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Description"
+              helpText="Describe your space"
+              {...this.validateDescription()}
+            >
+              <EuiFieldText
+                name="description"
+                placeholder={'This is where the magic happens'}
+                value={description}
+                onChange={this.onDescriptionChange}
+              />
+            </EuiFormRow>
+
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={this.backToSpacesList}>
+                  Cancel
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiForm>
+        </EuiPageContent>
+      </EuiPage>
     );
   }
 
   getTitle = () => {
-    const isEditing = !!this.props.space;
-    if (isEditing) {
+    if (this.editingExistingSpace()) {
       return `Edit space`;
     }
     return `Create a space`;
-  }
+  };
+
+  getActionButton = () => {
+    if (this.editingExistingSpace()) {
+      return (
+        <EuiFlexItem grow={false}>
+          <DeleteSpacesButton
+            spaces={[this.state.space]}
+            httpAgent={this.props.httpAgent}
+            chrome={this.props.chrome}
+            onDelete={this.backToSpacesList}
+          />
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
+  };
 
   onNameChange = (e) => {
     this.setState({
@@ -119,7 +152,7 @@ export class ManageSpacePage extends React.Component {
         name: e.target.value
       }
     });
-  }
+  };
 
   onDescriptionChange = (e) => {
     this.setState({
@@ -128,38 +161,115 @@ export class ManageSpacePage extends React.Component {
         description: e.target.value
       }
     });
-  }
+  };
 
   saveSpace = () => {
+    this.setState({
+      validate: true
+    }, () => {
+      const { isInvalid } = this.validateForm();
+      if (isInvalid) return;
+      this._performSave();
+    });
+  };
+
+  _performSave = () => {
     const {
       name = '',
-      id = name.toLowerCase(),
+      id = name.toLowerCase().replace(/\s/g, '-'),
       description
     } = this.state.space;
 
     const { httpAgent, chrome } = this.props;
 
+    const params = {
+      name,
+      id,
+      description
+    };
+
+    const overwrite = this.editingExistingSpace();
+
     if (name && description) {
-      console.log(this.state.space);
       httpAgent
-        .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}`), { id, name, description })
+        .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}?overwrite=${overwrite}`), params)
         .then(result => {
           toastNotifications.addSuccess(`Saved '${result.data.id}'`);
           window.location.hash = `#/management/spaces/list`;
         })
         .catch(error => {
-          toastNotifications.addError(error);
+          const {
+            message = ''
+          } = error.data || {};
+
+          toastNotifications.addDanger(`Error saving space: ${message}`);
         });
     }
-  }
+  };
 
   backToSpacesList = () => {
     window.location.hash = `#/management/spaces/list`;
-  }
+  };
+
+  validateName = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const {
+      name
+    } = this.state.space;
+
+    if (!name) {
+      return {
+        isInvalid: true,
+        error: 'Name is required'
+      };
+    }
+
+    return {};
+  };
+
+  validateDescription = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const {
+      description
+    } = this.state.space;
+
+    if (!description) {
+      return {
+        isInvalid: true,
+        error: 'Description is required'
+      };
+    }
+
+    return {};
+  };
+
+  validateForm = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const validations = [this.validateName(), this.validateDescription()];
+    if (validations.some(validation => validation.isInvalid)) {
+      return {
+        isInvalid: true
+      };
+    }
+
+    return {};
+  };
+
+  editingExistingSpace = () => !!this.props.space;
 }
 
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
   httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object
+  chrome: PropTypes.object,
+  breadcrumbs: PropTypes.array.isRequired,
 };

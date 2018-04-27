@@ -9,6 +9,7 @@ import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import mappings from './mappings.json';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -32,6 +33,7 @@ export const spaces = (kibana) => new kibana.Plugin({
       hidden: true,
     }],
     hacks: [],
+    mappings,
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
       return { };
