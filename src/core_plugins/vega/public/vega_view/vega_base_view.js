@@ -148,7 +148,11 @@ export class VegaBaseView {
     if (view && this._parser.tooltips) {
       // position and padding can be specified with
       // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
-      new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+      const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+
+      // Vega bug workaround - need to destroy tooltip by hand
+      this._addDestroyHandler(() => tthandler.hideTooltip());
+
     }
   }
 

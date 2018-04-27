@@ -32,15 +32,14 @@ export class TooltipHandler {
    * The handler function.
    */
   handler(view, event, item, value) {
-    let el = document.getElementById(tooltipId);
-    if (el) el.remove();
+    this.hideTooltip();
 
     // hide tooltip for null, undefined, or empty string values
     if (value == null || value === '') {
       return;
     }
 
-    el = document.createElement('div');
+    const el = document.createElement('div');
     el.setAttribute('id', tooltipId);
     el.classList.add('euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`);
 
@@ -70,5 +69,10 @@ export class TooltipHandler {
     const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position, this.padding);
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
+  }
+
+  hideTooltip() {
+    const el = document.getElementById(tooltipId);
+    if (el) el.remove();
   }
 }
