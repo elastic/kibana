@@ -12,11 +12,6 @@ export const pointseries = () => ({
     },
   },
   to: {
-    number: pointseries => {
-      const firstRow = pointseries.rows[0];
-      const firstKey = Object.keys(firstRow)[0];
-      return firstRow[firstKey];
-    },
     render: pointseries => {
       return {
         type: 'render',
