@@ -18,12 +18,16 @@ exports[`apmUiEnabled 1`] = `
       component="div"
       grow={true}
     >
-      <EuiTitle>
+      <EuiTitle
+        size="m"
+      >
         <h3>
           Add Data to Kibana
         </h3>
       </EuiTitle>
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
         </p>
@@ -174,7 +178,9 @@ exports[`apmUiEnabled 1`] = `
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <span
           style={
             Object {
@@ -220,12 +226,16 @@ exports[`render 1`] = `
       component="div"
       grow={true}
     >
-      <EuiTitle>
+      <EuiTitle
+        size="m"
+      >
         <h3>
           Add Data to Kibana
         </h3>
       </EuiTitle>
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
         </p>
@@ -346,7 +356,9 @@ exports[`render 1`] = `
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <span
           style={
             Object {
