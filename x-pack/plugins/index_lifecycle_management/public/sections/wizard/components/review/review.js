@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import DiffEditor from 'react-ace/lib/diff';
@@ -44,14 +41,14 @@ export class Review extends Component {
     saveAsNewPolicy: PropTypes.bool.isRequired,
     originalPolicyName: PropTypes.string,
     bootstrapEnabled: PropTypes.bool.isRequired,
-    aliasName: PropTypes.string.isRequired
+    aliasName: PropTypes.string.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       selectedTab: 1,
-      affectedIndices: []
+      affectedIndices: [],
     };
   }
 
@@ -72,7 +69,7 @@ export class Review extends Component {
       templateDiff,
       lifecycle,
       bootstrapEnabled,
-      aliasName
+      aliasName,
     } = this.props;
 
     const { affectedIndices } = this.state;
@@ -91,7 +88,8 @@ export class Review extends Component {
               </EuiTitle>
               <EuiText size="s">
                 <p>
-                  <strong>Index templates</strong> affected by this change (to the selected policy):
+                  <strong>Index templates</strong> affected by this change (to
+                  the selected policy):
                 </p>
                 <ul>
                   {affectedIndexTemplates.map(template => (
@@ -108,7 +106,8 @@ export class Review extends Component {
               </EuiTitle>
               <EuiText size="s">
                 <p>
-                  <strong>Indices</strong> affected by this change (to the selected policy):
+                  <strong>Indices</strong> affected by this change (to the
+                  selected policy):
                 </p>
                 <ul>
                   {affectedIndices.map(index => <li key={index}>{index}</li>)}
@@ -123,14 +122,9 @@ export class Review extends Component {
                   <p>New alias</p>
                 </EuiTitle>
                 <EuiText size="s">
-                  <p>Point to these new aliases going forward:</p>
+                  <p>Point to this new alias going forward:</p>
                   <ul>
-                    <li>
-                      <strong>READ</strong>: {aliasName}
-                    </li>
-                    <li>
-                      <strong>WRITE</strong>: {aliasName}
-                    </li>
+                    <li>{aliasName}</li>
                   </ul>
                 </EuiText>
               </EuiPanel>
@@ -138,30 +132,35 @@ export class Review extends Component {
           ) : null}
         </EuiFlexGrid>
         <EuiHorizontalRule className="ilmHrule" />
-        <EuiTitle>
-          <h4>
-            We will be changing the index template named `{
-              selectedIndexTemplateName
-            }`
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <DiffEditor
-          editorProps={{
-            $blockScrolling: Infinity,
-            autoScrollEditorIntoView: false
-          }}
-          value={[
-            JSON.stringify(templateDiff.originalFullIndexTemplate, null, 2),
-            JSON.stringify(templateDiff.newFullIndexTemplate, null, 2)
-          ]}
-          readOnly={true}
-          height="300px"
-          width="100%"
-          mode="json"
-        />
 
-        <EuiHorizontalRule className="ilmHrule" />
+        {templateDiff.hasChanged ? (
+          <Fragment>
+            <EuiTitle>
+              <h4>
+                We will be changing the index template named `{
+                  selectedIndexTemplateName
+                }`
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <DiffEditor
+              editorProps={{
+                $blockScrolling: Infinity,
+                autoScrollEditorIntoView: false,
+              }}
+              value={[
+                JSON.stringify(templateDiff.originalFullIndexTemplate, null, 2),
+                JSON.stringify(templateDiff.newFullIndexTemplate, null, 2),
+              ]}
+              readOnly={true}
+              height="300px"
+              width="100%"
+              mode="json"
+            />
+
+            <EuiHorizontalRule className="ilmHrule" />
+          </Fragment>
+        ) : null}
 
         <EuiButton
           fill

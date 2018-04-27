@@ -112,39 +112,32 @@ export const getAffectedIndexPatterns = state => {
   return indexPatterns;
 };
 
+// const hasJSONChanged = (json1, json2) => JSON.stringify(json1) !== JSON.stringify(json2);
 export const getTemplateDiff = state => {
-  const fullIndexTemplate = getFullSelectedIndexTemplate(state) || { settings: {} };
-  return {
-    originalFullIndexTemplate: fullIndexTemplate,
-    newFullIndexTemplate: merge(cloneDeep(fullIndexTemplate), {
-      settings: {
-        index: {
-          number_of_shards: '' + getSelectedPrimaryShardCount(state),
-          number_of_replicas: '' + getSelectedReplicaCount(state),
-          lifecycle: {
-            name: getSelectedPolicyName(state)
-          },
-          routing: {
-            allocation: {
-              include: {
-                sattr_name: getSelectedNodeAttrs(state),
-              }
+  const originalFullIndexTemplate = getFullSelectedIndexTemplate(state) || { settings: {} };
+  const newFullIndexTemplate = merge(cloneDeep(originalFullIndexTemplate), {
+    settings: {
+      index: {
+        number_of_shards: '' + getSelectedPrimaryShardCount(state),
+        number_of_replicas: '' + getSelectedReplicaCount(state),
+        lifecycle: {
+          name: getSelectedPolicyName(state)
+        },
+        routing: {
+          allocation: {
+            include: {
+              sattr_name: getSelectedNodeAttrs(state),
             }
           }
         }
       }
-    }),
-    // modifications: {
-    //   settings: {
-    //     index: {
-    //       number_of_shards: getSelectedPrimaryShardCount(state),
-    //       number_of_replicas: getSelectedReplicaCount(state),
-    //       lifecycle: {
-    //         name: getSelectedPolicyName(state),
-    //       }
-    //     }
-    //   }
-    // }
+    }
+  });
+
+  return {
+    originalFullIndexTemplate,
+    newFullIndexTemplate,
+    hasChanged: true//hasJSONChanged(originalFullIndexTemplate, newFullIndexTemplate),
   };
 };
 
