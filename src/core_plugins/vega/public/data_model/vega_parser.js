@@ -231,6 +231,15 @@ export class VegaParser {
       throw new Error('config.kibana.result.padding is expected to be a number');
     }
 
+    if (result.centerOnMark === undefined) {
+      // if mark's width & height is less than this value, center on it
+      result.centerOnMark = 50;
+    } else if (typeof result.centerOnMark === 'boolean') {
+      result.centerOnMark = result.centerOnMark ? Number.MAX_VALUE : -1;
+    } else if (typeof result.centerOnMark !== 'number') {
+      throw new Error('config.kibana.result.centerOnMark is expected to be true, false, or a number');
+    }
+
     return result;
   }
 

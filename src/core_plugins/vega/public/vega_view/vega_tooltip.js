@@ -6,19 +6,32 @@ import { formatValue as createTooltipContent, escapeHTML } from 'vega-tooltip';
 const tooltipId = 'vega-kibana-tooltip';
 
 /**
+ * Simulate the result of the DOM's getBoundingClientRect()
+ */
+function createRect(left, top, width, height) {
+  return {
+    left, top, width, height,
+    x: left, y: top, right: left + width, bottom: top + height,
+  };
+}
+
+/**
  * The tooltip handler class.
  */
 export class TooltipHandler {
-  constructor(view, opts) {
-    view.tooltip(this.handler.bind(this));
+  constructor(container, view, opts) {
+    this.container = container;
     this.position = opts.position;
-    this.buffer = opts.padding;
+    this.padding = opts.padding;
+    this.centerOnMark = opts.centerOnMark;
+
+    view.tooltip(this.handler.bind(this));
   }
 
   /**
    * The handler function.
    */
-  handler(handler, event, item, value) {
+  handler(view, event, item, value) {
     let el = document.getElementById(tooltipId);
     if (el) el.remove();
 
@@ -31,7 +44,7 @@ export class TooltipHandler {
     el.setAttribute('id', tooltipId);
     el.classList.add('euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`);
 
-    // Desired, sanitized HTML is created by the tooltip library,
+    // Sanitized HTML is created by the tooltip library,
     // with a largue nmuber of tests, hence supressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
     el.innerHTML = createTooltipContent(value, escapeHTML);
@@ -39,17 +52,23 @@ export class TooltipHandler {
     // add to DOM to calculate tooltip size
     document.body.appendChild(el);
 
-    const anchorBounds = {
+    // if centerOnMark numeric value is smaller than the size of the mark, use mouse [x,y]
+    let anchorBounds;
+    if (item.bounds.width() > this.centerOnMark || item.bounds.height() > this.centerOnMark) {
       // I would expect clientX/Y, but that shows incorrectly
-      left: event.pageX,
-      top: event.pageY,
-      width: 0,
-      height: 0
-    };
+      anchorBounds = createRect(event.pageX, event.pageY, 0, 0);
+    } else {
+      const containerBox = this.container.getBoundingClientRect();
+      anchorBounds = createRect(
+        containerBox.left + view._origin[0] + item.bounds.x1,
+        containerBox.top + view._origin[1] + item.bounds.y1,
+        item.bounds.width(),
+        item.bounds.height()
+      );
+    }
 
-    const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position, this.buffer);
+    const pos = calculatePopoverPosition(anchorBounds, el.getBoundingClientRect(), this.position, this.padding);
 
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
   }
-
 }
