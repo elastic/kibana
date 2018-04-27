@@ -18,7 +18,9 @@ exports[`EmptyState should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiTitle>
+      <EuiTitle
+        size="m"
+      >
         <EuiTextColor
           color="subdued"
         >
@@ -36,7 +38,9 @@ exports[`EmptyState should render normally 1`] = `
       <EuiSpacer
         size="s"
       />
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           <EuiTextColor
             color="subdued"
