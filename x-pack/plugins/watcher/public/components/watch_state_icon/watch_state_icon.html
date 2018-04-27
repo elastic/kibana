@@ -1,0 +1,18 @@
+<div class="kuiIcon">
+  <div
+    class="kuiIcon kuiIcon--success fa-ban"
+    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.DISABLED"
+  ></div>
+  <div
+    class="kuiIcon kuiIcon--success fa-check"
+    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.OK"
+  ></div>
+  <div
+    class="kuiIcon kuiIcon--warning fa-bullhorn"
+    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.FIRING"
+  ></div>
+  <div
+    class="kuiIcon kuiIcon--error fa-exclamation-triangle"
+    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.ERROR"
+  ></div>
+</div>

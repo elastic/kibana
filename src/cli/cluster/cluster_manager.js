@@ -103,6 +103,10 @@ export default class ClusterManager {
       fromRoot('src/server'),
       fromRoot('src/ui'),
       fromRoot('src/utils'),
+      fromRoot('x-pack/common'),
+      fromRoot('x-pack/plugins'),
+      fromRoot('x-pack/server'),
+      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
       ...extraPaths
     ].map(path => resolve(path));
@@ -110,7 +114,8 @@ export default class ClusterManager {
     this.watcher = chokidar.watch(uniq(watchPaths), {
       cwd: fromRoot('.'),
       ignored: [
-        /[\\\/](\..*|node_modules|bower_components|public|__tests__|coverage)[\\\/]/,
+        /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
+        /\.test\.js$/,
         ...extraIgnores
       ]
     });

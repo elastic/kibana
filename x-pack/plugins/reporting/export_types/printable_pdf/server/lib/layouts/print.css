@@ -1,0 +1,133 @@
+/*
+ ******
+ ****** This is a collection of CSS overrides that make Kibana look better for
+ ****** generating PDF reports with Phantom.
+ ******
+ */
+
+/**
+ *  global
+ */
+
+/* elements can hide themself when shared */
+.hide-for-sharing {
+  display: none;
+}
+
+/* hide unusable controls */
+.global-nav,
+kbn-top-nav,
+.toaster-container,
+filter-bar,
+::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* override open/closed positioning of the app wrapper/nav */
+.app-wrapper {
+  left: 0px !important;
+}
+
+/**
+ *  Discover Tweaks
+ */
+
+/* hide unusable controls */
+discover-app .discover-timechart,
+discover-app .sidebar-container,
+discover-app .sidebar-collapser,
+discover-app navbar[name="discover-search"],
+discover-app .discover-table-footer {
+  display: none;
+}
+
+/**
+ *  Visualize Editor Tweaks
+ */
+/* hide unusable controls */
+visualize-app
+  visualize
+  > :not(.vis-editor-content):not(.vis_editor)/* all non-content rows in interface */,
+visualize-app
+  visualize
+  .vis-editor-content
+  .default-vis-editor
+  > :not(.vis-editor-canvas):not(.vis_editor) {
+  display: none;
+}
+/** THIS IS FOR TSVB UNTIL REFACTOR **/
+.vis_editor__visualization {
+  position: static !important;
+}
+.vis-editor-hide-for-reporting {
+  /* all non-content rows in interface */
+  display: none;
+}
+/**  END TSVB BAD BAD HACKS **/
+
+/* remove left padding from visualizations so that map lines up with .leaflet-container and
+*  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
+*  are triggering the media breakpoints that cause the .vis-editor-canvas to take up more room than the viewport */
+visualize-app .vis-editor-canvas {
+  padding-left: 0px;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/**
+ *  Visualization tweaks
+ */
+
+/* hide unusable controls */
+visualize .legend-toggle,
+visualize .visualize-show-spy,
+visualize .visualize-spy-container > header/* spy "tabs" */,
+visualize .agg-table-controls/* export raw, export formatted, etc. */,
+visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */,
+visualize visualize-spy .pagination-size/* page-size select box */,
+visualize paginate-controls {
+  display: none;
+}
+
+/* force the proportions of the spy panel */
+visualize visualize-spy .visualize-spy-container {
+  height: 315px;
+  overflow: hidden;
+}
+
+/* slightly increate legend text size for readability */
+visualize visualize-legend .legend-value-title {
+  font-size: 1.2em;
+}
+
+/* Ensure the min-height of the small breakpoint isn't used */
+.vis-editor visualization {
+  min-height: 0 !important;
+}
+
+/**
+*  Dashboard tweaks
+*/
+
+.dashboard-panel .panel-heading {
+  /* hide the panel heading with the controls in it like expand */
+  display: none !important;
+}
+
+/**
+ * 1. Reporting manually makes each visualization it wants to screenshot larger, so we need to hide
+ * the visualizations in the other panels.  We can only use properties that will be manually set in
+ * reporting/export_types/printable_pdf/server/lib/screenshot.js or this will also hide the visualization
+ * we want to capture.
+ * 2. React grid item's transform affects the visualizations, even when they are using fixed positioning. Chrome seems
+ * to handle this fine, but firefox moves the visualizations around, as I suspect Phantom since it had a problem.
+ */
+ dashboard-app .react-grid-item {
+  height: 0 !important; /* 1. */
+  width: 0 !important; /* 1. */
+  transform: none !important; /* 2. */
+  -webkit-transform: none !important; /* 2. */
+}

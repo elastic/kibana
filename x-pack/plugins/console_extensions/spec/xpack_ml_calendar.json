@@ -1,0 +1,82 @@
+{
+  "_xpack/ml/calendars/{calendar_id}": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}",
+      "_xpack/ml/calendars/_all"
+    ],
+    "data_autocomplete_rules": {
+      "from": 0,
+      "size": 100
+    }
+  },
+  "PUT _xpack/ml/calendars/{calendar_id}": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}"
+    ],
+    "data_autocomplete_rules": {
+      "description": ""
+    }
+  },
+  "DELETE _xpack/ml/calendars/{calendar_id}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}"
+    ]
+  },
+  "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
+    ]
+  },
+  "DELETE _xpack/ml/calendars/{calendar_id}/jobs/{job_id}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/jobs/{job_id}"
+    ]
+  },
+  "_xpack/ml/calendars/{calendar_id}/events": {
+    "methods": [
+      "GET"
+    ],
+    "data_autocomplete_rules": {
+      "from": 0,
+      "size": 100
+    },
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/events",
+      "_xpack/ml/calendars/_all/events"
+    ]
+  },
+  "POST _xpack/ml/calendars/{calendar_id}/events": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/events"
+    ],
+    "data_autocomplete_rules": {
+      "events": [{}]
+    }
+  },
+  "_xpack/ml/calendars/{calendar_id}/events/{event_id}": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/calendars/{calendar_id}/events/{event_id}"
+    ]
+  }
+}

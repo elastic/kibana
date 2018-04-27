@@ -1,11 +1,9 @@
 const { resolve } = require('path');
-const debug = require('./debug');
 
-const getKibanaPath = require('./get_kibana_path');
-const getPlugins = require('./get_plugins');
+const { debug } = require('./debug');
+const { getPlugins } = require('./get_plugins');
 
-module.exports = function getWebpackConfig(source, projectRoot, config) {
-  const kibanaPath = getKibanaPath(config, projectRoot);
+exports.getWebpackConfig = function(kibanaPath, projectRoot, config) {
   const fromKibana = (...path) => resolve(kibanaPath, ...path);
 
   const alias = {

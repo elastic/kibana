@@ -1,0 +1,5 @@
+[[monitoring-logstash]]
+== Monitoring Logstash
+
+See
+{logstash-ref}/monitoring-logstash.html[Monitoring Logstash]. 

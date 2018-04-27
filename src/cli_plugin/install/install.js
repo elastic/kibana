@@ -5,6 +5,7 @@ import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
 import { sync as rimrafSync } from 'rimraf';
+import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, rebuildCache, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
 import mkdirp from 'mkdirp';
@@ -13,6 +14,8 @@ const mkdir = Promise.promisify(mkdirp);
 
 export default async function install(settings, logger) {
   try {
+    errorIfXPackInstall(settings, logger);
+
     await cleanPrevious(settings, logger);
 
     await mkdir(settings.workingPath);

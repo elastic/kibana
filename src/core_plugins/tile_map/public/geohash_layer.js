@@ -30,7 +30,8 @@ export class GeohashLayer extends KibanaMapLayer {
       isFilteredByCollar: this._geohashOptions.isFilteredByCollar,
       valueFormatter: this._geohashOptions.valueFormatter,
       tooltipFormatter: this._geohashOptions.tooltipFormatter,
-      label: this._geohashOptions.label
+      label: this._geohashOptions.label,
+      colorRamp: this._geohashOptions.colorRamp
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
@@ -113,7 +114,10 @@ export class GeohashLayer extends KibanaMapLayer {
       return true;
     }
 
-    if (this._geohashOptions.mapType !== options.mapType) {
+    //check if any impacts leaflet styler function
+    if (this._geohashOptions.colorRamp !== options.colorRamp) {
+      return false;
+    } else if (this._geohashOptions.mapType !== options.mapType) {
       return false;
     } else if (this._geohashOptions.mapType === 'Heatmap' && !_.isEqual(this._geohashOptions.heatmap, options)) {
       return false;

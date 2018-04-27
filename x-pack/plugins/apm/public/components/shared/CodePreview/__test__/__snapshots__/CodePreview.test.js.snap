@@ -1,0 +1,395 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CodePreview should render with data 1`] = `
+.c0 {
+  margin: 0 0 24px 0;
+  position: relative;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.c0 .c2 {
+  color: #000000;
+}
+
+.c1 {
+  color: #999999;
+  padding: 8px;
+  border-bottom: 1px solid #d9d9d9;
+  border-radius: 5px 5px 0 0;
+}
+
+.c3 {
+  font-weight: bold;
+}
+
+.c4 {
+  position: relative;
+  border-radius: 0 0 5px 5px;
+}
+
+.c5 {
+  position: absolute;
+  width: 100%;
+  height: 18px;
+  top: 36px;
+  pointer-events: none;
+  background-color: #FCF2E6;
+}
+
+.c6 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 0 5px;
+  background: #f5f5f5;
+}
+
+.c7 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #999999;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d9d9d9;
+}
+
+.c7:last-of-type {
+  border-radius: 0 0 0 5px;
+}
+
+.c8 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #999999;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d9d9d9;
+  background-color: #FCF2E6;
+}
+
+.c8:last-of-type {
+  border-radius: 0 0 0 5px;
+}
+
+.c9 {
+  overflow: auto;
+  margin: 0 0 0 42px;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+.c9:last-of-type {
+  border-radius: 0 0 5px 0;
+}
+
+.c10 {
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 18px;
+  line-height: 18px;
+}
+
+.c11 {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+}
+
+<div
+  className="c0"
+>
+  <div
+    className="c1"
+  >
+    <span
+      className="c2 c3"
+    >
+      server/coffee.js
+    </span>
+     in
+     
+    <span
+      className="c2 c3"
+    >
+      &lt;anonymous&gt;
+    </span>
+     at
+     
+    <span
+      className="c2 c3"
+    >
+      line 
+      17
+    </span>
+  </div>
+  <div
+    className="c4"
+  >
+    <div
+      className="c5"
+    />
+    <div
+      className="c6"
+    >
+      <div
+        className="c7"
+      >
+        15
+        .
+      </div>
+      <div
+        className="c7"
+      >
+        16
+        .
+      </div>
+      <div
+        className="c8"
+      >
+        17
+        .
+      </div>
+      <div
+        className="c7"
+      >
+        18
+        .
+      </div>
+      <div
+        className="c7"
+      >
+        19
+        .
+      </div>
+    </div>
+    <div
+      className="c9"
+    >
+      <pre
+        className="c10"
+        style={
+          Object {
+            "background": "#fff",
+            "color": "black",
+            "display": "block",
+            "overflowX": null,
+            "padding": null,
+          }
+        }
+      >
+        <code
+          className="c11"
+        >
+          
+
+        </code>
+      </pre>
+      <pre
+        className="c10"
+        style={
+          Object {
+            "background": "#fff",
+            "color": "black",
+            "display": "block",
+            "overflowX": null,
+            "padding": null,
+          }
+        }
+      >
+        <code
+          className="c11"
+        >
+          app.get(
+          <span
+            style={
+              Object {
+                "color": "#c41a16",
+              }
+            }
+          >
+            '/log-error'
+          </span>
+          , 
+          <span
+            style={Object {}}
+          >
+            <span
+              style={
+                Object {
+                  "color": "#aa0d91",
+                }
+              }
+            >
+              function
+            </span>
+             (
+            <span
+              style={
+                Object {
+                  "color": "#5c2699",
+                }
+              }
+            >
+              req, res
+            </span>
+            ) 
+          </span>
+          {
+        </code>
+      </pre>
+      <pre
+        className="c10"
+        style={
+          Object {
+            "background": "#fff",
+            "color": "black",
+            "display": "block",
+            "overflowX": null,
+            "padding": null,
+          }
+        }
+      >
+        <code
+          className="c11"
+        >
+            apm.captureError(
+          <span
+            style={
+              Object {
+                "color": "#aa0d91",
+              }
+            }
+          >
+            new
+          </span>
+           
+          <span
+            style={
+              Object {
+                "color": "#5c2699",
+              }
+            }
+          >
+            Error
+          </span>
+          (
+          <span
+            style={
+              Object {
+                "color": "#c41a16",
+              }
+            }
+          >
+            'foo'
+          </span>
+          ), 
+          <span
+            style={Object {}}
+          >
+            <span
+              style={
+                Object {
+                  "color": "#aa0d91",
+                }
+              }
+            >
+              function
+            </span>
+             (
+            <span
+              style={
+                Object {
+                  "color": "#5c2699",
+                }
+              }
+            >
+              err
+            </span>
+            ) 
+          </span>
+          {
+        </code>
+      </pre>
+      <pre
+        className="c10"
+        style={
+          Object {
+            "background": "#fff",
+            "color": "black",
+            "display": "block",
+            "overflowX": null,
+            "padding": null,
+          }
+        }
+      >
+        <code
+          className="c11"
+        >
+              
+          <span
+            style={
+              Object {
+                "color": "#aa0d91",
+              }
+            }
+          >
+            if
+          </span>
+           (err) {
+        </code>
+      </pre>
+      <pre
+        className="c10"
+        style={
+          Object {
+            "background": "#fff",
+            "color": "black",
+            "display": "block",
+            "overflowX": null,
+            "padding": null,
+          }
+        }
+      >
+        <code
+          className="c11"
+        >
+                res.status(
+          <span
+            style={
+              Object {
+                "color": "#1c00cf",
+              }
+            }
+          >
+            500
+          </span>
+          ).send(
+          <span
+            style={
+              Object {
+                "color": "#c41a16",
+              }
+            }
+          >
+            'could not capture error: '
+          </span>
+           + err.message)
+        </code>
+      </pre>
+    </div>
+  </div>
+</div>
+`;

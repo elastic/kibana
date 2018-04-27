@@ -1,0 +1,12 @@
+<monitoring-main product="logstash" name="nodes" instance="{{ pageData.nodeSummary.name }}" resolver="{{ pageData.nodeSummary.uuid }}" page="advanced">
+  <monitoring-logstash-node-summary logstash="pageData.nodeSummary"></monitoring-logstash-node-summary>
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_node_cpu_utilization"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_queue_events_count"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_node_cgroup_cpu"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_pipeline_queue_size"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.logstash_node_cgroup_stats"/></div>
+    </div>
+  </div>
+</monitoring-main>

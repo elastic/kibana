@@ -1,0 +1,13 @@
+{
+  "_xpack/security/realm/{realms}/_clear_cache": {
+    "methods": [
+      "POST"
+    ],
+    "url_params": {
+      "usernames": ""
+    },
+    "patterns": [
+      "_xpack/security/realm/{realms}/_clear_cache"
+    ]
+  }
+}

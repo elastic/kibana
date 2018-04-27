@@ -1,0 +1,56 @@
+<div>
+  <div class="form-group">
+    <div ng-repeat="detector in detectors track by $index">
+      <div class="detector" ng-class="{'detector-edit-mode':(editMode==='EDIT')}">
+        <div class="detector-fields">
+          <label ng-show="editMode==='EDIT'">Detector:</label>
+          <div aria-label="Customised description" ng-hide="editMode==='EDIT' || detector.detector_description === '' || detector.detector_description === detectorToString(detector) ">{{ detector.detector_description }}</div>
+          <div aria-label="Default description" style="font-style:italic;" >{{ detectorToString(detector) }}</div>
+
+          <div ng-show="editMode==='EDIT'">
+            <label class="kuiFormLabel">Description:</label>
+            <input
+              ng-model="detector.detector_description"
+              class="form-control" />
+          </div>
+
+        </div>
+
+        <div class="button-container" ng-show="editMode==='NEW'">
+          <button
+            ng-click="editDetector($index)"
+            aria-label="Edit"
+            class="kuiButton kuiButton--basic kuiButton--small"
+            data-toggle="tooltip"
+            tooltip="Edit Detector">
+              <i aria-hidden="true" class="fa fa-pencil"></i>
+          </button>
+
+          <button
+            aria-label="Remove Detector"
+            ng-click="removeDetector($index)"
+            tooltip-append-to-body="true"
+            type="button"
+            class="kuiButton kuiButton--danger kuiButton--small remove-button">
+              <i aria-hidden="true" class="fa fa-trash"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div ng-show="editMode==='NEW'">
+      <button
+        aria-labelledby="ml_aria_description_new_job_detectors"
+        aria-describedby="ml_aria_label_new_job_add_detector"
+        ng-click="openNewWindow()"
+        type="button"
+        class="kuiButton kuiButton--primary kuiButton--small">
+          <i aria-hidden="true" class="fa fa-plus"></i>
+          <span id="ml_aria_label_new_job_add_detector">Add Detector</span>
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -1,46 +1,68 @@
 import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
-import { resolve, join } from 'path';
-import { platform as getPlatform } from 'os';
+import { resolve } from 'path';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
-const PLATFORM = getPlatform();
+const PKG_VERSION = require('../../package.json').version;
 
 module.exports = function (grunt) {
-  const binScript =  `node`;
-  const pkgVersion = grunt.config.get('pkg.version');
-  const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
-  const optimizeScript = /^win/.test(PLATFORM) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
-  const binArgs = [
-    join('scripts', 'kibana'),
+
+  function createKbnServerTask({ runBuild, flags = [] }) {
+    return {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: runBuild
+        ? `./build/${runBuild}/bin/kibana`
+        : process.execPath,
+      args: [
+        ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
+
+        '--env.name=development',
+        '--logging.json=false',
+
+        ...flags,
+
+        // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
+        ...grunt.option.flags().reduce(function (flags, flag) {
+          if (flag.startsWith('--kbnServer.')) {
+            flags.push(`--${flag.slice(12)}`);
+          }
+
+          return flags;
+        }, [])
+      ]
+    };
+  }
+
+  const apiTestServerFlags = [
+    '--optimize.enabled=false',
+    '--elasticsearch.url=' + esTestConfig.getUrl(),
+    '--elasticsearch.healthCheck.delay=' + HOUR,
+    '--server.port=' + kibanaTestServerUrlParts.port,
+    '--server.xsrf.disableProtection=true',
   ];
 
-  const stdDevArgs = [
-    '--env.name=development',
-    '--logging.json=false',
-  ];
-
-  const testUIArgs = [
+  const funcTestServerFlags = [
     '--server.maxPayloadBytes=1648576', //default is 1048576
+    '--elasticsearch.url=' + esTestConfig.getUrl(),
+    '--server.port=' + kibanaTestServerUrlParts.port,
   ];
 
-  const buildTestsArgs = [
-    ...stdDevArgs,
+  const browserTestServerFlags = [
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--server.port=5610',
   ];
 
-  const kbnServerFlags = grunt.option.flags().reduce(function (flags, flag) {
-    if (flag.startsWith('--kbnServer.')) {
-      flags.push(`--${flag.slice(12)}`);
-    }
-
-    return flags;
-  }, []);
-
   return {
+    // used by the test and jenkins:unit tasks
+    //    runs the eslint script to check for linting errors
     eslint: {
       cmd: process.execPath,
       args: [
@@ -49,176 +71,87 @@ module.exports = function (grunt) {
       ]
     },
 
-    testServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...buildTestsArgs,
-        '--server.port=5610',
-        ...kbnServerFlags,
+    // used by the test:api task
+    //    runs the kibana server prepared for the api_integration tests
+    apiTestServer: createKbnServerTask({
+      flags: [
+        ...apiTestServerFlags
       ]
-    },
+    }),
 
-    apiTestServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...stdDevArgs,
-        '--optimize.enabled=false',
-        '--elasticsearch.url=' + esTestConfig.getUrl(),
-        '--elasticsearch.healthCheck.delay=' + HOUR,
-        '--server.port=' + kibanaTestServerUrlParts.port,
-        '--server.xsrf.disableProtection=true',
-        ...kbnServerFlags,
-      ]
-    },
-
-    devApiTestServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...stdDevArgs,
+    // used by the test:api:server task
+    //    runs the kibana server in --dev mode, prepared for developing api_integration tests
+    //    and watching for changes so the server will restart when necessary
+    devApiTestServer: createKbnServerTask({
+      flags: [
         '--dev',
         '--no-base-path',
-        '--optimize.enabled=false',
-        '--elasticsearch.url=' + esTestConfig.getUrl(),
-        '--server.port=' + kibanaTestServerUrlParts.port,
-        '--server.xsrf.disableProtection=true',
-        ...kbnServerFlags,
+        ...apiTestServerFlags,
       ]
-    },
+    }),
 
-    testUIServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...stdDevArgs,
-        ...testUIArgs,
-        '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + esTestConfig.getUrl(),
-        ...kbnServerFlags,
+    // used by test:ui task
+    //    runs the kibana server prepared for the functional tests
+    funcTestServer: createKbnServerTask({
+      flags: [
+        ...funcTestServerFlags,
       ]
-    },
+    }),
 
-    testUIReleaseServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: releaseBinScript,
-      args: [
-        ...stdDevArgs,
-        ...testUIArgs,
-        '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + esTestConfig.getUrl(),
-        ...kbnServerFlags,
-      ]
-    },
-
-    testUIDevServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...stdDevArgs,
-        ...testUIArgs,
-        '--server.port=' + kibanaTestServerUrlParts.port,
-        '--elasticsearch.url=' + esTestConfig.getUrl(),
+    // used by the test:ui:server task
+    //    runs the kibana server in dev mode, prepared for the functional tests
+    devFuncTestServer: createKbnServerTask({
+      flags: [
+        ...funcTestServerFlags,
         '--dev',
         '--dev_mode.enabled=false',
         '--no-base-path',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
-        ...kbnServerFlags,
       ]
-    },
+    }),
 
-    testCoverageServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...buildTestsArgs,
-        '--server.port=5610',
+    // used by test:uiRelease task
+    //    runs the kibana server from the oss distributable prepared for the functional tests
+    ossDistFuncTestServer: createKbnServerTask({
+      runBuild: `oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+      flags: [
+        ...funcTestServerFlags,
+      ]
+    }),
+
+    // used by the test:browser task
+    //    runs the kibana server to serve the browser test bundle
+    browserTestServer: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
+      ]
+    }),
+
+    // used by the test:coverage task
+    //    runs the kibana server to serve the intrumented version of the browser test bundle
+    browserTestCoverageServer: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
         '--tests_bundle.instrument=true',
-        ...kbnServerFlags,
       ]
-    },
+    }),
 
-    devTestServer: {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: binScript,
-      args: [
-        ...binArgs,
-        ...buildTestsArgs,
+    // used by the test:dev task
+    //    runs the kibana server to serve the browser test bundle, but listens for changes
+    //    to the public/browser code and rebuilds the test bundle on changes
+    devBrowserTestServer: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
         '--dev',
         '--no-watch',
         '--no-base-path',
-        '--server.port=5610',
         '--optimize.watchPort=5611',
         '--optimize.watchPrebuild=true',
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
-        ...kbnServerFlags,
       ]
-    },
-
-    optimizeBuild: {
-      options: {
-        wait: false,
-        ready: /Optimization .+ complete/,
-        quiet: false
-      },
-      cmd: optimizeScript,
-      args: [
-        '--env.name=production',
-        '--logging.json=false',
-        '--plugins.initialize=false',
-        '--server.autoListen=false',
-        ...kbnServerFlags,
-      ],
-    },
+    }),
 
     testEsServer: {
       options: {
@@ -230,8 +163,9 @@ module.exports = function (grunt) {
       args: [
         'scripts/es',
         grunt.option('from') || 'snapshot',
-        '-E',
-        `http.port=${esTestConfig.getPort()}`,
+        '--license', 'oss',
+        '-E', `http.port=${esTestConfig.getPort()}`,
+        '-E', `discovery.zen.ping.unicast.hosts=localhost:${esTestConfig.getPort()}`,
       ],
     },
 

@@ -1,0 +1,136 @@
+@import (reference) "~ui/styles/variables";
+
+.data-visualizer-container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+
+  .kuiVerticalRhythm + .kuiVerticalRhythm {
+    margin-top: 20px;
+  }
+
+  .title-container {
+    padding-bottom: 10px;
+    padding-right: 6px;
+  }
+
+  .main-container {
+    width: calc(~"100% - 300px");
+    display: inline-block;
+    padding-right: 10px;
+  }
+
+  .datavisualizer-sidebar {
+    width: 290px;
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .datavisualizer-panel {
+    padding: 10px 15px;
+    background-color: #ffffff;
+  }
+
+  .datavisualizer-panel.card-panel {
+    padding-right: 5px;
+  }
+
+  .query-bar-form {
+    padding-top: 5px;
+  }
+
+  .document-count-container {
+    padding-top: 10px;
+
+    label {
+      font-weight: normal;
+    }
+
+    .fa-info-circle {
+      color: #555;
+      font-size: 13px;
+    }
+  }
+
+  .field-count-label {
+    display: inline-block;
+  }
+
+  .field-sort-controls {
+    margin-bottom: 0px;
+    min-width: 300px;
+    padding: 10px 0px;
+
+    .field-group-input {
+      display: inline;
+      margin-left: 10px;
+    }
+
+    label {
+      display: inline;
+    }
+  }
+
+  .field-filter-controls {
+    margin-bottom: 0px;
+    min-width: 400px;
+    padding-bottom: 30px;
+    padding-right: 10px;
+
+    .type-input {
+      float: left;
+      margin-right: 5px;
+    }
+
+  }
+
+  .field-emphasis {
+    font-weight: 700;
+  }
+
+  .card-container {
+    display: inline-grid;
+    padding: 0px 10px 10px 0px;
+  }
+
+  .create-job-content {
+    padding-bottom: 5px;
+
+    .synopsisTitle {
+      font-size: 16px;
+      font-weight: normal;
+      color: #0079a5;
+    }
+
+    .synopsis:hover {
+      text-decoration: none;
+
+      .synopsisTitle {
+        text-decoration: underline;
+      }
+    }
+
+    .synopsisIcon {
+      padding-top: 8px;
+    }
+
+    .recognized-job-content {
+      margin-bottom: 40px;
+
+      .recognizer-result {
+        margin-top: 10px;
+        margin-bottom: 0px;
+      }
+    }
+  }
+
+  p {
+    margin-bottom: 10px;
+  }
+}

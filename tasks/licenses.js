@@ -1,24 +1,21 @@
+import { getInstalledPackages } from '../src/dev/npm';
 import {
-  getInstalledPackages,
-  assertLicensesValid
-} from './lib';
+  assertLicensesValid,
+  LICENSE_WHITELIST,
+  LICENSE_OVERRIDES,
+} from '../src/dev/license_checker';
 
 export default function licenses(grunt) {
   grunt.registerTask('licenses', 'Checks dependency licenses', async function () {
     const done = this.async();
 
     try {
-      const options = this.options({
-        licenses: [],
-        overrides: {}
-      });
-
       assertLicensesValid({
         packages: await getInstalledPackages({
           directory: grunt.config.get('root'),
-          licenseOverrides: options.overrides
+          licenseOverrides: LICENSE_OVERRIDES
         }),
-        validLicenses: options.licenses
+        validLicenses: LICENSE_WHITELIST
       });
       done();
     } catch (err) {

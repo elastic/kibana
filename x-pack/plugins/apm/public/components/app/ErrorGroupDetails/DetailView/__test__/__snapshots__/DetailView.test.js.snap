@@ -1,0 +1,1819 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailView should render empty state 1`] = `""`;
+
+exports[`DetailView should render with data 1`] = `
+.c0 {
+  position: relative;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  margin-top: 24px;
+}
+
+.c1 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  padding: 24px 24px 0;
+  margin-bottom: 16px;
+}
+
+.c2 {
+  margin: 24px 0;
+  font-size: 20px;
+  margin: 0;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0 24px;
+  width: 100%;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.c4 {
+  width: 33%;
+  margin-bottom: 16px;
+}
+
+.c5 {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #999999;
+}
+
+.c5 span {
+  cursor: help;
+}
+
+.c6 {
+  display: inline-block;
+  line-height: 16px;
+}
+
+.c7 {
+  color: #999999;
+}
+
+.c8 {
+  width: 33%;
+  margin-bottom: 16px;
+  width: 66%;
+}
+
+.c9 {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 16px;
+}
+
+.c10 {
+  padding: 0 24px;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.c11 {
+  display: inline-block;
+  font-size: 16px;
+  padding: 16px 20px;
+  text-align: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-bottom: 2px solid #006E8A;
+}
+
+.c12 {
+  display: inline-block;
+  font-size: 16px;
+  padding: 16px 20px;
+  text-align: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c13 {
+  padding: 24px 24px 0;
+}
+
+.c14 {
+  margin: 0 0 24px 0;
+  position: relative;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.c14 .c16 {
+  color: #000000;
+}
+
+.c15 {
+  color: #999999;
+  padding: 8px;
+  border-bottom: 1px solid #d9d9d9;
+  border-radius: 5px 5px 0 0;
+}
+
+.c17 {
+  font-weight: bold;
+}
+
+.c18 {
+  position: relative;
+  border-radius: 0 0 5px 5px;
+}
+
+.c19 {
+  position: absolute;
+  width: 100%;
+  height: 18px;
+  top: 126px;
+  pointer-events: none;
+  background-color: #FCF2E6;
+}
+
+.c20 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 0 5px;
+  background: #f5f5f5;
+}
+
+.c21 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #999999;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d9d9d9;
+}
+
+.c21:last-of-type {
+  border-radius: 0 0 0 5px;
+}
+
+.c22 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #999999;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d9d9d9;
+  background-color: #FCF2E6;
+}
+
+.c22:last-of-type {
+  border-radius: 0 0 0 5px;
+}
+
+.c23 {
+  overflow: auto;
+  margin: 0 0 0 42px;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+.c23:last-of-type {
+  border-radius: 0 0 5px 0;
+}
+
+.c24 {
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 18px;
+  line-height: 18px;
+}
+
+.c25 {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+}
+
+.c26 {
+  margin: 0 0 24px 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+<div
+  className="c0"
+>
+  <div
+    className="c1"
+  >
+    <h2
+      className="c2"
+    >
+      Error occurrence
+    </h2>
+    <a
+      className="euiLink euiLink--primary"
+      href="/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:\\"opbeans-node\\" AND error.grouping_key:c00e245c2fbebaf178fc31eeb2bb0250'),sort:('@timestamp':desc))"
+    >
+      <button
+        className="euiButton euiButton--primary"
+        type="button"
+      >
+        <span
+          className="euiButton__content"
+        >
+          <svg
+            aria-hidden="true"
+            className="euiIcon euiIcon--medium euiButton__icon"
+            height="32"
+            style={
+              Object {
+                "fill": undefined,
+              }
+            }
+            viewBox="0 0 32 32"
+            width="32"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g
+              fill="none"
+              fillRule="evenodd"
+            >
+              <path
+                d="M17.213 17.998l-5.91 3.523c-.536.322-1.145-.288-.824-.823l3.523-5.91a2.34 2.34 0 0 1 3.664-.457l.003.004a2.34 2.34 0 0 1-.456 3.663"
+                fill="#14A7DF"
+                style={
+                  Object {
+                    "mixBlendMode": "multiply",
+                  }
+                }
+              />
+              <path
+                d="M14.788 14.002l5.91-3.523c.536-.32 1.145.288.824.824l-3.523 5.91a2.34 2.34 0 0 1-3.664.456l-.003-.003a2.34 2.34 0 0 1 .456-3.664"
+                fill="#00BFB3"
+                style={
+                  Object {
+                    "mixBlendMode": "multiply",
+                  }
+                }
+              />
+              <path
+                d="M17.51 4.42L16.585.465c-.144-.62-1.026-.62-1.171 0l-.93 3.986c-.218.933 3.244.913 3.024-.031zm-2.935 23.516l.84 3.6c.145.62 1.027.62 1.172 0l.9-3.864c.228-.974-3.16-.798-2.912.264zm-9.998-13.48l-4.112.959c-.62.145-.62 1.027 0 1.172l3.98.928c.935.218 1.023-3.268.132-3.06zm22.697-.036c-.842-.196-.63 3.308.316 3.087l3.946-.92c.62-.145.62-1.027 0-1.172l-4.262-.995z"
+                fill="#00BFB3"
+              />
+              <path
+                d="M16 26c-5.523 0-10-4.476-10-10 0-5.523 4.477-10 10-10 5.524 0 10 4.477 10 10 0 5.524-4.476 10-10 10m0-23C8.821 3 3 8.821 3 16c0 7.18 5.821 13 13 13 7.18 0 13-5.82 13-13 0-7.179-5.82-13-13-13"
+                fill="#00A9E5"
+              />
+            </g>
+          </svg>
+          <span
+            className="euiButton__text"
+          >
+            View 18 occurences in Discover
+          </span>
+        </span>
+      </button>
+    </a>
+  </div>
+  <div
+    className="c3"
+  >
+    <div
+      className="c4"
+    >
+      <div
+        className="c5"
+      >
+        <span
+          aria-describedby="overlay1"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          Timestamp
+        </span>
+      </div>
+      <div
+        className="c6"
+      >
+        1515508740
+         
+        <span
+          className="c7"
+        >
+          (
+          1515508740
+          )
+        </span>
+      </div>
+    </div>
+    <div
+      className="c8"
+    >
+      <div
+        className="c5"
+      >
+        <span
+          aria-describedby="overlay2"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          URL
+        </span>
+      </div>
+      <span
+        aria-describedby="overlay3"
+        className="c9"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        N/A
+      </span>
+    </div>
+    <div
+      className="c4"
+    >
+      <div
+        className="c5"
+      >
+        <span
+          aria-describedby="overlay4"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          Request method
+        </span>
+      </div>
+      <div
+        className="c6"
+      >
+        GET
+      </div>
+    </div>
+    <div
+      className="c4"
+    >
+      <div
+        className="c5"
+      >
+        <span
+          aria-describedby="overlay5"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          Handled
+        </span>
+      </div>
+      <div
+        className="c6"
+      >
+        N/A
+      </div>
+    </div>
+    <div
+      className="c4"
+    >
+      <div
+        className="c5"
+      >
+        <span
+          aria-describedby="overlay6"
+          onMouseOut={[Function]}
+          onMouseOver={[Function]}
+        >
+          User ID
+        </span>
+      </div>
+      <div
+        className="c6"
+      >
+        N/A
+      </div>
+    </div>
+  </div>
+  <div
+    className="c10"
+  >
+    <div
+      className="c11"
+      onClick={[Function]}
+      selected={true}
+    >
+      Exception stacktrace
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Request
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Response
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      System
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Service
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Process
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      User
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Tags
+    </div>
+    <div
+      className="c12"
+      onClick={[Function]}
+      selected={false}
+    >
+      Custom
+    </div>
+  </div>
+  <div
+    className="c13"
+  >
+    <div>
+      <div
+        className="c14"
+      >
+        <div
+          className="c15"
+        >
+          <span
+            className="c16 c17"
+          >
+            server/coffee.js
+          </span>
+           in
+           
+          <span
+            className="c16 c17"
+          >
+            &lt;anonymous&gt;
+          </span>
+           at
+           
+          <span
+            className="c16 c17"
+          >
+            line 
+            9
+          </span>
+        </div>
+        <div
+          className="c18"
+        >
+          <div
+            className="c19"
+          />
+          <div
+            className="c20"
+          >
+            <div
+              className="c21"
+            >
+              2
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              3
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              4
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              5
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              6
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              7
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              8
+              .
+            </div>
+            <div
+              className="c22"
+            >
+              9
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              10
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              11
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              12
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              13
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              14
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              15
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              16
+              .
+            </div>
+          </div>
+          <div
+            className="c23"
+          >
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                
+
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  var
+                </span>
+                 express = 
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  require
+                </span>
+                (
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'express'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  var
+                </span>
+                 apm = 
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  require
+                </span>
+                (
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'elastic-apm-node'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                
+
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  var
+                </span>
+                 app = 
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  module
+                </span>
+                .exports = 
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  new
+                </span>
+                 express.Router()
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                
+
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.get(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  '/is-it-coffee-time'
+                </span>
+                , 
+                <span
+                  style={Object {}}
+                >
+                  <span
+                    style={
+                      Object {
+                        "color": "#aa0d91",
+                      }
+                    }
+                  >
+                    function
+                  </span>
+                   (
+                  <span
+                    style={
+                      Object {
+                        "color": "#5c2699",
+                      }
+                    }
+                  >
+                    req, res
+                  </span>
+                  ) 
+                </span>
+                {
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  if
+                </span>
+                 (req.paarms.level === 
+                <span
+                  style={
+                    Object {
+                      "color": "#1c00cf",
+                    }
+                  }
+                >
+                  11
+                </span>
+                ) {
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                    res.send(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'Of course!'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  } 
+                <span
+                  style={
+                    Object {
+                      "color": "#aa0d91",
+                    }
+                  }
+                >
+                  else
+                </span>
+                 {
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                    res.send(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'You can\\'t have any!'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  }
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                })
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                
+
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.get(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  '/log-error'
+                </span>
+                , 
+                <span
+                  style={Object {}}
+                >
+                  <span
+                    style={
+                      Object {
+                        "color": "#aa0d91",
+                      }
+                    }
+                  >
+                    function
+                  </span>
+                   (
+                  <span
+                    style={
+                      Object {
+                        "color": "#5c2699",
+                      }
+                    }
+                  >
+                    req, res
+                  </span>
+                  ) 
+                </span>
+                {
+              </code>
+            </pre>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          className="c26"
+        >
+          <button
+            className="euiLink euiLink--primary"
+            onClick={[Function]}
+            type="button"
+          >
+            <i
+              className="fa fa-ellipsis-v undefined"
+              style={
+                Object {
+                  "marginRight": 8,
+                  "transform": "rotate(0deg)",
+                  "transition": "transform 0.1s",
+                }
+              }
+            />
+             
+            14
+             library frames
+          </button>
+        </div>
+        <div
+          className=""
+        />
+      </div>
+      <div
+        className="c14"
+      >
+        <div
+          className="c15"
+        >
+          <span
+            className="c16 c17"
+          >
+            server.js
+          </span>
+           in
+           
+          <span
+            className="c16 c17"
+          >
+            &lt;anonymous&gt;
+          </span>
+           at
+           
+          <span
+            className="c16 c17"
+          >
+            line 
+            27
+          </span>
+        </div>
+        <div
+          className="c18"
+        >
+          <div
+            className="c19"
+          />
+          <div
+            className="c20"
+          >
+            <div
+              className="c21"
+            >
+              20
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              21
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              22
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              23
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              24
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              25
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              26
+              .
+            </div>
+            <div
+              className="c22"
+            >
+              27
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              28
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              29
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              30
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              31
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              32
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              33
+              .
+            </div>
+            <div
+              className="c21"
+            >
+              34
+              .
+            </div>
+          </div>
+          <div
+            className="c23"
+          >
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.use(
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  require
+                </span>
+                (
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'body-parser'
+                </span>
+                ).json())
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.use(express.static(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'client/build'
+                </span>
+                ))
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.use(
+                <span
+                  style={Object {}}
+                >
+                  <span
+                    style={
+                      Object {
+                        "color": "#aa0d91",
+                      }
+                    }
+                  >
+                    function
+                  </span>
+                   (
+                  <span
+                    style={
+                      Object {
+                        "color": "#5c2699",
+                      }
+                    }
+                  >
+                    req, res, next
+                  </span>
+                  ) 
+                </span>
+                {
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  apm.setTag(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'foo'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'bar'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  apm.setTag(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'lorem'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  apm.setTag(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'this-is-a-very-long-tag-name-without-any-spaces'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'test'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  apm.setTag(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'multi-line'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'foo\\nbar\\nbaz'
+                </span>
+                )
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  next()
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                })
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                
+
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.use(
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  require
+                </span>
+                (
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  './server/coffee'
+                </span>
+                ))
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.use(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  '/api'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#5c2699",
+                    }
+                  }
+                >
+                  require
+                </span>
+                (
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  './server/routes'
+                </span>
+                ))
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                app.get(
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  '*'
+                </span>
+                , 
+                <span
+                  style={Object {}}
+                >
+                  <span
+                    style={
+                      Object {
+                        "color": "#aa0d91",
+                      }
+                    }
+                  >
+                    function
+                  </span>
+                   (
+                  <span
+                    style={
+                      Object {
+                        "color": "#5c2699",
+                      }
+                    }
+                  >
+                    req, res
+                  </span>
+                  ) 
+                </span>
+                {
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                  res.sendFile(path.resolve(__dirname, 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'client/build'
+                </span>
+                , 
+                <span
+                  style={
+                    Object {
+                      "color": "#c41a16",
+                    }
+                  }
+                >
+                  'index.html'
+                </span>
+                ))
+              </code>
+            </pre>
+            <pre
+              className="c24"
+              style={
+                Object {
+                  "background": "#fff",
+                  "color": "black",
+                  "display": "block",
+                  "overflowX": null,
+                  "padding": null,
+                }
+              }
+            >
+              <code
+                className="c25"
+              >
+                })
+              </code>
+            </pre>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div
+          className="c26"
+        >
+          <button
+            className="euiLink euiLink--primary"
+            onClick={[Function]}
+            type="button"
+          >
+            <i
+              className="fa fa-ellipsis-v undefined"
+              style={
+                Object {
+                  "marginRight": 8,
+                  "transform": "rotate(0deg)",
+                  "transition": "transform 0.1s",
+                }
+              }
+            />
+             
+            15
+             library frames
+          </button>
+        </div>
+        <div
+          className=""
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
