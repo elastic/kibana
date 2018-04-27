@@ -1,5 +1,6 @@
 import { calculatePopoverPosition } from '@elastic/eui';
-import { formatValue as createTooltipContent, escapeHTML } from 'vega-tooltip';
+import { formatValue as createTooltipContent } from 'vega-tooltip';
+import _ from 'lodash';
 
 // Some of this code was adapted from https://github.com/vega/vega-tooltip
 
@@ -46,7 +47,7 @@ export class TooltipHandler {
     // Sanitized HTML is created by the tooltip library,
     // with a largue nmuber of tests, hence supressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
-    el.innerHTML = createTooltipContent(value, escapeHTML);
+    el.innerHTML = createTooltipContent(value, _.escape);
 
     // add to DOM to calculate tooltip size
     document.body.appendChild(el);
