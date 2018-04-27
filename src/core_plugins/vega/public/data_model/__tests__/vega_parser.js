@@ -106,10 +106,10 @@ describe('VegaParser._parseTooltips', () => {
   function test(tooltips, position, padding, centerOnMark) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
-      vp._parseConfig();
+      vp._config = vp._parseConfig();
       if (position === undefined) {
         // error
-        expect(() => vp._parseTooltips()).to.throw();
+        expect(() => vp._parseTooltips()).to.throwError();
       } else if (position === false) {
         expect(vp._parseTooltips()).to.eql(false);
       } else {
@@ -118,15 +118,15 @@ describe('VegaParser._parseTooltips', () => {
     };
   }
 
-  it('undefined', test(undefined, 'top', 16));
-  it('{}', test({}, 'top', 16));
-  it('left', test({ position: 'left' }, 'left', 16));
-  it('padding', test({ position: 'bottom', padding: 60 }, 'bottom', 60));
-  it('padding2', test({ padding: 70 }, 'top', 70));
+  it('undefined', test(undefined, 'top', 16, 50));
+  it('{}', test({}, 'top', 16, 50));
+  it('left', test({ position: 'left' }, 'left', 16, 50));
+  it('padding', test({ position: 'bottom', padding: 60 }, 'bottom', 60, 50));
+  it('padding2', test({ padding: 70 }, 'top', 70, 50));
   it('centerOnMark', test({}, 'top', 16, 50));
   it('centerOnMark=10', test({ centerOnMark: 10 }, 'top', 16, 10));
-  it('centerOnMark=true', test({ centerOnMark: true }, 'top', 16, true));
-  it('centerOnMark=false', test({ centerOnMark: false }, 'top', 16, false));
+  it('centerOnMark=true', test({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
+  it('centerOnMark=false', test({ centerOnMark: false }, 'top', 16, -1));
 
   it('false', test(false, false));
 
