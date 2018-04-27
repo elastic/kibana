@@ -9,10 +9,11 @@ module.exports = {
 
 // Given the current set of enabled plugins, and the previous
 // or default migration state, this returns the mappings and
-// migrations which need to be applied.
-function build(plugins, migrationState, includeDisabledPlugins = true) {
+// migrations which need to be applied. It's important to move
+// disbled plugin mappings over so that their docs remain valid.
+function build(plugins, migrationState) {
   return {
-    mappings: buildMappings(plugins, migrationState, includeDisabledPlugins),
+    mappings: buildMappings([...plugins, ...disabledPluginMappings(plugins, migrationState)]),
     migrations: unappliedMigrations(plugins, migrationState),
   };
 }
@@ -29,11 +30,7 @@ function unappliedMigrations(plugins, migrationState) {
     .value();
 }
 
-// Given a list of plugins and the current migration state of the index,
-// builds the mappings to be applied to the next version of the index.
-// Mappings associated w/ disabled plugins are moved as-is.
-function buildMappings(plugins, migrationState, includeDisabledPlugins) {
-  const disabledPlugins = includeDisabledPlugins ? disabledPluginMappings(plugins, migrationState) : [];
+function buildMappings(plugins) {
   const migrationMappings = {
     id: 'migrations',
     mappings: MigrationState.mappings
@@ -43,7 +40,6 @@ function buildMappings(plugins, migrationState, includeDisabledPlugins) {
       dynamic: 'strict',
       properties: mergeMappings([
         migrationMappings,
-        ...disabledPlugins,
         ...plugins,
       ]),
     },

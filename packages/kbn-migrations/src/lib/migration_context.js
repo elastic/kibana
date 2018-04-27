@@ -12,10 +12,10 @@ module.exports = {
 };
 
 async function fetch(opts) {
-  const { callCluster, log, index, plugins, elasticVersion, force, includeDisabledPlugins } = opts;
+  const { callCluster, log, index, plugins, elasticVersion, force } = opts;
   const { migrationState, migrationStateVersion } = await MigrationState.fetch(callCluster, index);
   const sanitizedPlugins = Plugins.validate(plugins, migrationState);
-  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState, includeDisabledPlugins);
+  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
   const nextMigrationState = MigrationState.build(sanitizedPlugins, migrationState);
   const sha = objectHash(nextMigrationState);
   return {
