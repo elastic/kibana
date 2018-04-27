@@ -5,8 +5,9 @@
  */
 
 import { get } from 'lodash';
+import { metadata } from '../../../../../src/ui/public/metadata';
 
-const STACK_VERSION = '6.2';
+const STACK_VERSION = metadata.branch;
 const DOCS_ROOT = 'https://www.elastic.co/guide/en/apm';
 
 //
