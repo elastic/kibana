@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { toastNotifications } from 'ui/notify';
@@ -14,6 +14,7 @@ import {
   EuiIconTip,
   EuiImage,
   EuiLink,
+  EuiText,
   EuiTextArea,
   EuiTextColor,
   EuiSelect,
@@ -362,41 +363,37 @@ export class Field extends PureComponent {
 
   renderLabel(setting) {
     return(
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-        <EuiFlexItem className="advancedSettings__field__name">{setting.displayName}</EuiFlexItem>
-        <EuiFlexItem className="advancedSettings__field__key" grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            {setting.name !== setting.displayName ?
-              <EuiFlexItem className="advancedSettings__field__key__wrapper">
-                <EuiTextColor
-                  className="advancedSettings__field__key__text"
-                  color="subdued"
-                  aria-label={setting.ariaName}
-                >
-                  {setting.name}
-                </EuiTextColor>
-              </EuiFlexItem>
-              : ''}
-            {setting.isCustom ?
-              <EuiFlexItem grow={false}>
-                <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
-              </EuiFlexItem>
-              : ''}
-          </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem>
+          <span aria-label={setting.ariaName}>
+            {setting.name}
+          </span>
         </EuiFlexItem>
+        {setting.isCustom ?
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
+          </EuiFlexItem>
+          : ''}
       </EuiFlexGroup>
     );
   }
 
   renderHelpText(setting) {
     return (
-      <div>
-        <div>
-          <span dangerouslySetInnerHTML={{ __html: setting.description }} />
-        </div>
+      <EuiText size="s">
+        <h3>{setting.displayName || setting.name}</h3>
+        <EuiTextColor color="subdued">
+          <p
+            /*
+             * Justification for dangerouslySetInnerHTML:
+             * Setting description may contain formatting and links to documentation.
+             */
+            dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
+          />
+        </EuiTextColor>
         {this.renderDefaultValue(setting)}
         {this.renderChangeImageLink(setting)}
-      </div>
+      </EuiText>
     );
   }
 
@@ -481,14 +478,16 @@ export class Field extends PureComponent {
     const { setting } = this.props;
     const { error, isInvalid } = this.state;
 
-    return(
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+    return (
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem grow={false} style={{ width: 350 }}>
+          {this.renderHelpText(setting)}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 400 }}>
           <EuiFormRow
             isInvalid={isInvalid}
             error={error}
             label={this.renderLabel(setting)}
-            helpText={this.renderHelpText(setting)}
           >
             {this.renderField(setting)}
           </EuiFormRow>
@@ -496,5 +495,21 @@ export class Field extends PureComponent {
         {this.renderActions(setting)}
       </EuiFlexGroup>
     );
+
+    // return(
+    //   <EuiFlexGroup gutterSize="m">
+    //     <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
+    //       <EuiFormRow
+    //         isInvalid={isInvalid}
+    //         error={error}
+    //         label={this.renderLabel(setting)}
+    //         helpText={this.renderHelpText(setting)}
+    //       >
+    //         {this.renderField(setting)}
+    //       </EuiFormRow>
+    //     </EuiFlexItem>
+    //     {this.renderActions(setting)}
+    //   </EuiFlexGroup>
+    // );
   }
 }

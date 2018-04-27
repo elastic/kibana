@@ -64,15 +64,13 @@ export class AdvancedSettings extends Component {
 
     return (
       <div className="advancedSettings">
-        <EuiPanel size="l">
-          <CallOuts/>
-          <Form
-            settings={settings}
-            save={this.saveConfig}
-            clear={this.clearConfig}
-            query={query}
-          />
-        </EuiPanel>
+        <CallOuts/>
+        <Form
+          settings={settings}
+          save={this.saveConfig}
+          clear={this.clearConfig}
+          query={query}
+        />
       </div>
     );
   }

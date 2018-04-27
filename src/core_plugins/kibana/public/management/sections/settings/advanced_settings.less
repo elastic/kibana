@@ -3,30 +3,11 @@
 .advancedSettings {
   padding: 20px;
   background: @globalColorLightestGray;
+  min-height: calc(~"100vh - 70px");
 
-  > .euiPanel {
+  > div {
     max-width: 1000px;
     margin: 0 auto;
-  }
-
-  &__field {
-    &__name {
-      white-space: nowrap;
-    }
-
-    &__key {
-      overflow: hidden;
-      font-weight: normal;
-
-      &__wrapper {
-        overflow: hidden;
-      }
-
-      &__text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
   }
 
   .euiForm > .euiFlexGroup + * {

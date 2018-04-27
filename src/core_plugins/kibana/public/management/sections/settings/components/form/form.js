@@ -5,6 +5,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiPanel,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -70,26 +71,28 @@ export class Form extends PureComponent {
     });
   }
 
-  renderCategory(category, settings, isLast) {
+  renderCategory(category, settings) {
     return (
       <Fragment key={category}>
-        <EuiForm>
-          <EuiText>
-            <h2>{getCategoryName(category)}</h2>
-          </EuiText>
-          <EuiSpacer size="l" />
-          {settings.map(setting => {
-            return (
-              <Field
-                key={setting.name}
-                setting={setting}
-                save={this.props.save}
-                clear={this.props.clear}
-              />
-            );
-          })}
-        </EuiForm>
-        {isLast ? '' : <EuiHorizontalRule />}
+        <EuiPanel paddingSize="l">
+          <EuiForm>
+            <EuiText>
+              <h2>{getCategoryName(category)}</h2>
+            </EuiText>
+            <EuiSpacer size="l" />
+            {settings.map(setting => {
+              return (
+                <Field
+                  key={setting.name}
+                  setting={setting}
+                  save={this.props.save}
+                  clear={this.props.clear}
+                />
+              );
+            })}
+          </EuiForm>
+        </EuiPanel>
+        <EuiSpacer size="l" />
       </Fragment>
     );
   }
@@ -119,20 +122,22 @@ export class Form extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
-          <EuiFormRow>
-            <EuiSearchBar
-              box={box}
-              filters={filters}
-              onChange={this.onQueryChange}
-              defaultQuery={query}
-            />
-          </EuiFormRow>
-        </EuiForm>
+        <EuiPanel paddingSize="l">
+          <EuiForm>
+            <EuiFormRow>
+              <EuiSearchBar
+                box={box}
+                filters={filters}
+                onChange={this.onQueryChange}
+                defaultQuery={query}
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </EuiPanel>
         <EuiSpacer />
-        {currentCategories.map((category, i) => {
+        {currentCategories.map((category) => {
           return (
-            this.renderCategory(category, settings[category], i === currentCategories.length - 1)
+            this.renderCategory(category, settings[category])
           );
         })}
       </Fragment>
