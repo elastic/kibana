@@ -6,5 +6,14 @@
 
 
 
-import './forecasting_modal_directive';
-import './styles/main.less';
+/*
+ * Constants corresponding to the progress of actions made in the forecasting modal.
+ */
+
+export const PROGRESS_STATES = {
+  UNSET: -1,
+  WAITING: 0,
+  DONE: 1,
+  ERROR: -10
+};
+

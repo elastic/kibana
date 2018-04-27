@@ -37,18 +37,13 @@
       <i class="fa fa-play" ></i>
     </button>
 
-    <div ng-class="forecastingDisabled === false ? 'forecast-controls' : ['forecast-controls', 'disabled']"
-      data-toggle="tooltip"
-      ng-attr-tooltip="{{forecastingDisabled === true ?  forecastingDisabledMessage : undefined}}"
-      tooltip-placement="left">
-      <button
-        ng-click='openForecastDialog()'
-        ng-disabled="forecastingDisabled === true"
-        class="kuiButton kuiButton--primary"
-        aria-label="Forecast">
-        Forecast
-      </button>
-    </div>
+    <ml-forecasting-modal
+      job="selectedJob"
+      detectorIndex="+detectorId"
+      entities="entities"
+      loadForForecastId="loadForForecastId"
+      class="forecast-controls"
+    />
 
   </div>
 
@@ -92,12 +87,12 @@
         </div>
 
         <div ng-show="showForecastCheckbox === true">
-          <input id="toggleShowForecaseCheckbox"
+          <input id="toggleShowForecastCheckbox"
             type="checkbox"
             class="kuiCheckBox"
             ng-click="toggleShowForecast()"
             ng-checked="showForecast === true">
-          <label for="toggleShowForecaseCheckbox" class="kuiCheckBoxLabel">show forecast</label>
+          <label for="toggleShowForecastCheckbox" class="kuiCheckBoxLabel">show forecast</label>
         </div>
       </div>
 

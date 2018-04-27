@@ -6,5 +6,11 @@
 
 
 
-import './forecasting_modal_directive';
-import './styles/main.less';
+
+export const MESSAGE_LEVEL = {
+  ERROR: 'error',
+  INFO: 'info',
+  SUCCESS: 'success',
+  WARNING: 'warning'
+};
+
