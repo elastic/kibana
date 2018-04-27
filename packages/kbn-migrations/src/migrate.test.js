@@ -413,57 +413,57 @@ describe('migrate', () => {
 
   test('index is required', () => {
     expect(testMigrationOpts({ index: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"index" is required/);
   });
 
   test('callCluster is required', () => {
     expect(testMigrationOpts({ callCluster: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"callCluster" is required/);
   });
 
   test('log is required', () => {
     expect(testMigrationOpts({ log: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"log" is required/);
   });
 
   test('log must be a function', () => {
     expect(testMigrationOpts({ log: 'hello' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"log" must be a Function/);
   });
 
   test('elasticVersion is required', () => {
     expect(testMigrationOpts({ elasticVersion: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"elasticVersion" is required/);
   });
 
   test('elasticVersion must be a string', () => {
     expect(testMigrationOpts({ elasticVersion: 32 }))
-      .rejects.toThrow(/Got number/);
+      .rejects.toThrow(/"elasticVersion" must be a string/);
   });
 
   test('plugins are required', () => {
     expect(testMigrationOpts({ plugins: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"plugins" is required/);
   });
 
   test('callCluster must be an object', () => {
     expect(testMigrationOpts({ callCluster: 'hello' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"callCluster" must be a Function/);
   });
 
   test('index must be a string', () => {
     expect(testMigrationOpts({ index: 23 }))
-      .rejects.toThrow(/Got number/);
+      .rejects.toThrow(/"index" must be a string/);
   });
 
   test('plugins must be an array', () => {
     expect(testMigrationOpts({ plugins: 'notright' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"plugins" must be an array/);
   });
 
   test('force must be a boolean if specified', () => {
     expect(testMigrationOpts({ force: 99 }))
-      .rejects.toThrow(/force must be of type undefined or boolean/);
+      .rejects.toThrow(/"force" must be a boolean/);
   });
 });
 

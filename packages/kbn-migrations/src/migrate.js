@@ -1,18 +1,19 @@
 // The primary logic for applying migrations to an index
+const Joi = require('joi');
 const { MigrationState, MigrationStatus, Persistence, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
   migrate,
 };
 
-const optsDefinition = {
-  callCluster: 'function',
-  index: 'string',
-  plugins: 'array',
-  log: 'function',
-  elasticVersion: 'string',
-  force: ['undefined', 'boolean'],
-};
+const optsSchema = Joi.object().unknown().keys({
+  callCluster: Opts.callClusterSchema.required(),
+  index: Opts.indexSchema.required(),
+  plugins: Opts.pluginArraySchema.required(),
+  log: Joi.func().required(),
+  elasticVersion: Joi.string().required(),
+  force: Joi.bool().default(false),
+});
 
 /**
  * @typedef {elapsedMs: number, index: string, destIndex: string, status: MigrationStatus} MigrationResult
@@ -42,7 +43,8 @@ async function measureElapsedTime(fn) {
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
+  Joi.assert(opts, optsSchema);
+  const context = await MigrationContext.fetch(opts);
   const status = await MigrationState.status(context.plugins, context.migrationState);
 
   if (status === MigrationStatus.outOfDate || (status === MigrationStatus.migrating && context.force)) {

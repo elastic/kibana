@@ -1,16 +1,64 @@
-module.exports = {
-  validate,
-};
+const Joi = require('joi');
 
-function validate(def, opts) {
-  Object.keys(def).forEach(prop => {
-    const types = Array.isArray(def[prop]) ? def[prop] : [def[prop]];
-    const val = opts[prop];
-    const type = typeof val;
-    const isValid = types.some(t => t === 'array' ? Array.isArray(val) : type === t);
-    if (!isValid) {
-      throw new Error(`Options: property ${prop} must be of type ${types.join(' or ')}. Got ${type}: ${val}`);
-    }
-  });
-  return opts;
-}
+const migrationSchema = Joi.object({
+  id: Joi.string().required(),
+  seed: Joi.func(),
+  filter: Joi.func(),
+  transform: Joi.func(),
+}).xor('seed', 'filter')
+  .xor('seed', 'transform');
+
+const pluginSchema = Joi.object({
+  id: Joi.string().required(),
+  mappings: Joi.object(),
+  migrations: Joi.array().items(migrationSchema),
+});
+
+const docSourceSpec = Joi.extend((joi) => ({
+  base: joi.object(),
+  name: 'typed',
+  language: {
+    propError: 'Needs to have property "{{prop}}"',
+  },
+  rules: [{
+    name: 'withTypeProp',
+    validate(params, value, state, options) {
+      if (!value || value[value.type] === undefined) {
+        return this.createError('typed.propError', { prop: value.type }, state, options);
+      }
+      return value;
+    },
+  }],
+}));
+
+const documentSchema = Joi.object({
+  _id: Joi.string().required(),
+  _source: docSourceSpec.typed().required().unknown().keys({
+    type: Joi.string().required(),
+  }),
+});
+
+const callClusterSchema = Joi.func();
+const indexSchema = Joi.string();
+const pluginArraySchema = Joi.array().items(pluginSchema);
+const documentArraySchema = Joi.array().items(documentSchema);
+const migrationStateSchema = Joi.object({
+  status: Joi.string(),
+  plugins: Joi.array().items(Joi.object({
+    id: Joi.string().required(),
+    mappings: Joi.string(),
+    mappingsChecksum: Joi.string().required(),
+    migrationIds: Joi.array().required().items(Joi.string()),
+    migrationsChecksum: Joi.string().required(),
+  })),
+});
+
+module.exports = {
+  migrationSchema,
+  pluginSchema,
+  callClusterSchema,
+  indexSchema,
+  pluginArraySchema,
+  documentArraySchema,
+  migrationStateSchema,
+};

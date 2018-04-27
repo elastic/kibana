@@ -1,17 +1,18 @@
 const _ = require('lodash');
+const Joi = require('joi');
 const { MigrationPlan, MigrationContext, Plugins, Documents, Opts } = require('./lib');
 
 module.exports = {
   transformDocuments,
 };
 
-const optsDefinition = {
-  callCluster: 'function',
-  index: 'string',
-  docs: 'array',
-  plugins: 'array',
-  migrationState: 'object',
-};
+const optsSchema = Joi.object().unknown().keys({
+  callCluster: Opts.callClusterSchema.required(),
+  index: Opts.indexSchema.required(),
+  plugins: Opts.pluginArraySchema.required(),
+  docs: Opts.documentArraySchema.required(),
+  migrationState: Opts.migrationStateSchema.required(),
+});
 
 /**
  * Given a migration state (migrationState) and a set of documents (docs),
@@ -20,7 +21,8 @@ const optsDefinition = {
  * @param {ImportDocsOpts} opts
  */
 async function transformDocuments(opts) {
-  const context = await MigrationContext.fetch(Opts.validate(optsDefinition, opts));
+  Joi.assert(opts, optsSchema);
+  const context = await MigrationContext.fetch(opts);
   const { migrationState: exportedState, docs } = opts;
   const { plugins, migrationState } = context;
   const transformDoc = buildImportFunction(plugins, exportedState, migrationState);

@@ -1,12 +1,13 @@
+const Joi = require('joi');
 const { MigrationPlan, Plugins, Opts } = require('./lib');
 
 module.exports = {
   activeMappings,
 };
 
-const optsDefinition = {
-  plugins: 'array',
-};
+const optsSpec = Joi.object().unknown().keys({
+  plugins: Opts.pluginArraySchema.required(),
+});
 
 /**
  * Computes the current mappings for the specified index. These mappings may not have been
@@ -17,6 +18,6 @@ const optsDefinition = {
  * @returns {Promise<Mappings>}
  */
 function activeMappings(opts) {
-  const { plugins } = Opts.validate(optsDefinition, opts);
-  return MigrationPlan.buildMappings(Plugins.sanitize(plugins), {}, false);
+  Joi.assert(opts, optsSpec);
+  return MigrationPlan.buildMappings(Plugins.sanitize(opts.plugins), {}, false);
 }

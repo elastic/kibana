@@ -37,12 +37,12 @@ describe('fetchMigrationState', () => {
 
   test('index is required', () => {
     expect(testMigrationOpts({ index: undefined }))
-      .rejects.toThrow(/property index must be of type string/);
+      .rejects.toThrow(/"index" is required/);
   });
 
   test('callCluser is required', () => {
     expect(testMigrationOpts({ callCluster: undefined }))
-      .rejects.toThrow(/property callCluster must be of type function/);
+      .rejects.toThrow(/"callCluster" is required/);
   });
 });
 

@@ -207,6 +207,7 @@ describe('transformDocuments', () => {
         mappings: JSON.stringify({ aha: { type: 'text' } }),
         mappingsChecksum: 'aha',
         migrationsChecksum: 'ahoy',
+        migrationIds: [],
       }],
     };
     const plugins = [];
@@ -229,6 +230,7 @@ describe('transformDocuments', () => {
         mappings: JSON.stringify({ space: { type: 'text' } }),
         mappingsChecksum: 'aha',
         migrationsChecksum: 'ahoy',
+        migrationIds: [],
       }],
     });
     const callCluster = mockCluster(data, meta);
@@ -244,52 +246,52 @@ describe('transformDocuments', () => {
 
   test('index is required', () => {
     expect(testImportOpts({ index: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"index" is required/);
   });
 
   test('docs are required', () => {
     expect(testImportOpts({ docs: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"docs" is required/);
   });
 
   test('docs should be an array', () => {
     expect(testImportOpts({ docs: 'hrm' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"docs" must be an array/);
   });
 
   test('migrationState is required', () => {
     expect(testImportOpts({ migrationState: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"migrationState" is required/);
   });
 
   test('migrationState should be an object', () => {
     expect(testImportOpts({ migrationState: 'hrm' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"migrationState" must be an object/);
   });
 
   test('callCluster is required', () => {
     expect(testImportOpts({ callCluster: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"callCluster" is required/);
   });
 
   test('plugins are required', () => {
     expect(testImportOpts({ plugins: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"plugins" is required/);
   });
 
-  test('callCluster must be an object', () => {
+  test('callCluster must be a function', () => {
     expect(testImportOpts({ callCluster: 'hello' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"callCluster" must be a Function/);
   });
 
   test('index must be a string', () => {
     expect(testImportOpts({ index: 23 }))
-      .rejects.toThrow(/Got number/);
+      .rejects.toThrow(/"index" must be a string/);
   });
 
   test('plugins must be an array', () => {
     expect(testImportOpts({ plugins: 'notright' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"plugins" must be an array/);
   });
 });
 

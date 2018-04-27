@@ -7,7 +7,7 @@ describe('fetchMigrationStatus', () => {
   test('is migrated, if the stored migration state matches the plugin state', async () => {
     const plugins = [{
       id: 'shwank',
-      migrations: [{ id: 'do_stuff' }],
+      migrations: [{ id: 'do_stuff', seed() {} }],
       mappings: {
         shwank: { type: 'text' },
       },
@@ -30,7 +30,7 @@ describe('fetchMigrationStatus', () => {
   test('is not migrated, if there is no stored migration state', async () => {
     const plugins = [{
       id: 'shwank',
-      migrations: [{ id: 'do_stuff' }],
+      migrations: [{ id: 'do_stuff', seed() {} }],
       mappings: {
         shwank: { type: 'text' },
       },
@@ -50,7 +50,7 @@ describe('fetchMigrationStatus', () => {
   test('is outOfDate if mappings change', async () => {
     const plugins = [{
       id: 'shwank',
-      migrations: [{ id: 'do_stuff' }],
+      migrations: [{ id: 'do_stuff', seed() {} }],
       mappings: {
         shwank: { type: 'text' },
       },
@@ -73,32 +73,32 @@ describe('fetchMigrationStatus', () => {
 
   test('index is required', () => {
     expect(testMigrationOpts({ index: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"index" is required/);
   });
 
   test('callCluster is required', () => {
     expect(testMigrationOpts({ callCluster: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"callCluster" is required/);
   });
 
   test('plugins are required', () => {
     expect(testMigrationOpts({ plugins: undefined }))
-      .rejects.toThrow(/Got undefined/);
+      .rejects.toThrow(/"plugins" is required/);
   });
 
   test('callCluster must be an object', () => {
     expect(testMigrationOpts({ callCluster: 'hello' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"callCluster" must be a Function/);
   });
 
   test('index must be a string', () => {
     expect(testMigrationOpts({ index: 23 }))
-      .rejects.toThrow(/Got number/);
+      .rejects.toThrow(/"index" must be a string/);
   });
 
   test('plugins must be an array', () => {
     expect(testMigrationOpts({ plugins: 'notright' }))
-      .rejects.toThrow(/Got string/);
+      .rejects.toThrow(/"plugins" must be an array/);
   });
 });
 
