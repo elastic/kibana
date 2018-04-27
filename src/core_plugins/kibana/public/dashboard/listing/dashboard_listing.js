@@ -282,13 +282,15 @@ export class DashboardListing extends React.Component {
         name: 'Title',
         sortable: true,
         render: (field, record) => (
-          <EuiLink
-            className="dashboardLink"
-            href={`#${createDashboardEditUrl(record.id)}`}
-            data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
+          <span>
+            <EuiLink
+              className="dashboardLink"
+              href={`#${createDashboardEditUrl(record.id)}`}
+              data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+            >
+              {field}
+            </EuiLink>
+          </span>
         )
       },
       {
