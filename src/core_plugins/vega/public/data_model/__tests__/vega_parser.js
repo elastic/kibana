@@ -106,6 +106,7 @@ describe('VegaParser._parseTooltips', () => {
   function test(tooltips, position, padding, centerOnMark) {
     return () => {
       const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      vp._parseConfig();
       if (position === undefined) {
         // error
         expect(() => vp._parseTooltips()).to.throw();
