@@ -28,7 +28,7 @@ import { get } from 'lodash';
 import { hasPipelineAggregation } from './lib/check_timeseries_pipelines';
 import { ModalConfirm } from './modal_confirm';
 import { removeTimeseriesMetrics } from './lib/remove_timeseries_metrics';
-import { metricTypes } from '../../common/metric_types';
+import { isMetric } from '../../common/metric_types';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -75,7 +75,7 @@ class VisEditor extends Component {
     const timerangeMode = part.timerange_mode || model.timerange_mode;
     const type = part.type || model.type;
     const modeIsAll =
-      timerangeMode && timerangeMode === 'all' && metricTypes.includes(type);
+      timerangeMode && timerangeMode === 'all' && isMetric(type);
     const series = part.series || model.series;
     const containsPipelines = series.some(hasPipelineAggregation);
     if (modeIsAll && containsPipelines) {
