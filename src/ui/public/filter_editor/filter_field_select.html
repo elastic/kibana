@@ -16,8 +16,10 @@
     repeat="field in fieldOptions
       | filter:{ name: $select.search }
       | orderBy:'name'
-      | sortPrefixFirst:$select.search:'name'"
+      | sortPrefixFirst:$select.search:'name'
+      | limitTo: limit"
     group-by="getFieldIndexPattern"
+    kbn-scroll-bottom="increaseLimit()"
   >
     <div ng-bind-html="field.name | highlight: $select.search"></div>
   </ui-select-choices>
