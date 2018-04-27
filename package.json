@@ -166,7 +166,6 @@
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "react": "^16.2.0",
-    "react-ace": "6.0.0",
     "react-addons-shallow-compare": "15.6.2",
     "react-anything-sortable": "^1.7.4",
     "react-color": "^2.13.8",

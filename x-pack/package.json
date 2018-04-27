@@ -130,6 +130,7 @@
     "prop-types": "^15.6.0",
     "puid": "1.0.5",
     "react": "^16.2.0",
+    "react-ace": "6.0.0",
     "react-clipboard.js": "^1.1.2",
     "react-dom": "^16.2.0",
     "react-markdown-renderer": "^1.4.0",
