@@ -1,5 +1,5 @@
 import { SavedObjectsClient } from './client';
-import Migrations from '@kbn/migrations';
+import { Mapping, Document } from '@kbn/migrations';
 import { optsFromKbnServer } from '../migrations';
 import {
   createBulkGetRoute,
@@ -11,7 +11,7 @@ import {
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = Migrations.activeMappings(optsFromKbnServer(kbnServer, () => {}));
+  const mappings = Mapping.fromPlugins(optsFromKbnServer(kbnServer, () => {}).plugins);
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
@@ -33,7 +33,7 @@ export function savedObjectsMixin(kbnServer, server) {
     return new SavedObjectsClient({
       mappings,
       callCluster,
-      transformDocuments: ({ migrationState, docs }) => Migrations.transformDocuments({ ...opts, migrationState, docs }),
+      transformDocuments: ({ migrationState, docs }) => Document.transform({ ...opts, migrationState, docs }),
       index: server.config().get('kibana.index'),
     });
   });

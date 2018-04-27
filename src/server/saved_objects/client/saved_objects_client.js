@@ -117,18 +117,21 @@ export class SavedObjectsClient {
     const method = id && !overwrite ? 'create' : 'index';
 
     try {
-      const [{ _id, _source }] = await this._upgradeDocuments({
-        time,
+      const [doc] = await this._upgradeDocuments({
         migrationState,
         docs: [{ id, type, attributes }],
       });
 
       const response = await this._writeToCluster(method, {
-        id: _id,
+        id: this._generateEsId(doc.type, doc.id),
         type: this._type,
         index: this._index,
         refresh: 'wait_for',
-        body: _source,
+        body: {
+          type: doc.type,
+          updated_at: time,
+          [doc.type]: doc.attributes,
+        },
       });
 
       return {
@@ -158,7 +161,8 @@ export class SavedObjectsClient {
    */
   async bulkCreate(objects, options = {}) {
     const {
-      overwrite = false
+      overwrite = false,
+      migrationState,
     } = options;
     const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
@@ -179,10 +183,11 @@ export class SavedObjectsClient {
       ];
     };
 
+    const docs = this._upgradeDocuments({ migrationState, docs: objects });
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
+      body: docs.reduce((acc, object) => ([
         ...acc,
         ...objectToBulkRequest(object)
       ]), []),
@@ -479,23 +484,14 @@ export class SavedObjectsClient {
   // Upgrades documents to the same version as the index, using
   // the Migrations transformDocuments function that was passed into
   // the constructor.
-  async _upgradeDocuments({ time, migrationState, docs }) {
-    const rawDocs = docs.map(({ id, type, attributes }) => ({
-      _id: this._generateEsId(type, id),
-      _source: {
-        type,
-        updated_at: time,
-        [type]: attributes,
-      },
-    }));
-
+  async _upgradeDocuments({ migrationState, docs }) {
     if (!migrationState) {
-      return rawDocs;
+      return docs;
     }
 
     return this._transformDocuments({
       migrationState,
-      docs: rawDocs,
+      docs,
     });
   }
 

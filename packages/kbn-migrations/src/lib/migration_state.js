@@ -59,7 +59,14 @@ module.exports = {
   status,
   fetch,
   save,
+  trimForExport,
 };
+
+function trimForExport({ plugins }) {
+  return {
+    plugins: plugins.map(plugin => _.pick(plugin, ['id', 'mappingsChecksum', 'migrationIds', 'migrationsChecksum'])),
+  };
+}
 
 // Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
 // around even if the plugin is disabled / removed.

@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const { migrateKibanaIndex } = require('./migrate_kibana_index');
 const { mockCluster } = require('../../../packages/kbn-migrations/src/test');
-const Migration = require('@kbn/migrations');
 
 describe('migrateKibanaIndex', () => {
   test('fails if the index is already migrating', async () => {
@@ -73,7 +72,7 @@ describe('migrateKibanaIndex', () => {
     };
 
     await migrateKibanaIndex(kbnServer);
-    const { status } = await Migration.fetchMigrationState({ callCluster, index });
+    const { _source: { migration: { status } } } = await callCluster('get', { id: 'migration:migration-state', type: 'doc', index });
     expect(status).toEqual('migrated');
   });
 });

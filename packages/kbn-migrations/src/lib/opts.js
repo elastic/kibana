@@ -14,28 +14,10 @@ const pluginSchema = Joi.object({
   migrations: Joi.array().items(migrationSchema),
 });
 
-const docSourceSpec = Joi.extend((joi) => ({
-  base: joi.object(),
-  name: 'typed',
-  language: {
-    propError: 'Needs to have property "{{prop}}"',
-  },
-  rules: [{
-    name: 'withTypeProp',
-    validate(params, value, state, options) {
-      if (!value || value[value.type] === undefined) {
-        return this.createError('typed.propError', { prop: value.type }, state, options);
-      }
-      return value;
-    },
-  }],
-}));
-
 const documentSchema = Joi.object({
-  _id: Joi.string().required(),
-  _source: docSourceSpec.typed().required().unknown().keys({
-    type: Joi.string().required(),
-  }),
+  id: Joi.string(),
+  type: Joi.string().required(),
+  attributes: Joi.any().required(),
 });
 
 const callClusterSchema = Joi.func();

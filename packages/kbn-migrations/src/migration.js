@@ -3,10 +3,17 @@ const Joi = require('joi');
 const { MigrationState, MigrationStatus, Persistence, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
+  fetchStatus,
   migrate,
 };
 
-const optsSchema = Joi.object().unknown().keys({
+const fetchStatusOptsSchema = Joi.object().unknown().keys({
+  callCluster: Opts.callClusterSchema.required(),
+  index: Opts.indexSchema.required(),
+  plugins: Opts.pluginArraySchema.required(),
+});
+
+const migrateOptsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
   plugins: Opts.pluginArraySchema.required(),
@@ -18,6 +25,18 @@ const optsSchema = Joi.object().unknown().keys({
 /**
  * @typedef {elapsedMs: number, index: string, destIndex: string, status: MigrationStatus} MigrationResult
 */
+
+/**
+ * Checks whether or not the specified index is in need of migrations.
+ *
+ * @param {MigrationOpts} opts
+ * @returns {Promise<MigrationStatus>}
+ */
+async function fetchStatus(opts) {
+  Joi.assert(opts, fetchStatusOptsSchema);
+  const { plugins, migrationState } = await MigrationContext.fetch(opts);
+  return MigrationState.status(plugins, migrationState);
+}
 
 /**
  * Performs a migration of the specified index using the migrations defined by
@@ -43,7 +62,7 @@ async function measureElapsedTime(fn) {
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  Joi.assert(opts, optsSchema);
+  Joi.assert(opts, migrateOptsSchema);
   const context = await MigrationContext.fetch(opts);
   const status = await MigrationState.status(context.plugins, context.migrationState);
 

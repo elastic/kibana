@@ -2,7 +2,7 @@ const Joi = require('joi');
 const { MigrationPlan, Plugins, Opts } = require('./lib');
 
 module.exports = {
-  activeMappings,
+  fromPlugins,
 };
 
 const optsSpec = Joi.object().unknown().keys({
@@ -14,10 +14,10 @@ const optsSpec = Joi.object().unknown().keys({
  * applied yet, if the index is unmigrated. This function returns mappings for enabled
  * and disabled pugins unless the includeDisabledPlugins option is set to false
  *
- * @param {MigrationOpts} opts
+ * @param {Object} opts
  * @returns {Promise<Mappings>}
  */
-function activeMappings(opts) {
+function fromPlugins(opts) {
   Joi.assert(opts, optsSpec);
   return MigrationPlan.buildMappings(Plugins.sanitize(opts.plugins), {}, false);
 }

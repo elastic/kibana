@@ -1,9 +1,108 @@
 const _ = require('lodash');
-const { migrate } = require('./migrate');
+const { migrate, fetchStatus } = require('./migration');
 const { mockCluster } = require('./test');
-const { MigrationState, Plugins, MigrationContext } = require('./lib');
+const { MigrationState, Plugins, MigrationContext, MigrationStatus } = require('./lib');
 
-describe('migrate', () => {
+describe('Migration.fetchStatus', () => {
+  test('is migrated, if the stored migration state matches the plugin state', async () => {
+    const plugins = [{
+      id: 'shwank',
+      migrations: [{ id: 'do_stuff', seed() {} }],
+      mappings: {
+        shwank: { type: 'text' },
+      },
+    }];
+    const index = '.amazemazing';
+    const migrationState = MigrationState.build(plugins);
+    const callCluster = mockCluster({
+      [index]: {
+        'migration:migration-state': {
+          _source: {
+            migration: migrationState,
+          },
+        },
+      }
+    });
+    const actual = await fetchStatus({ callCluster, index, plugins });
+    expect(actual).toEqual(MigrationStatus.migrated);
+  });
+
+  test('is not migrated, if there is no stored migration state', async () => {
+    const plugins = [{
+      id: 'shwank',
+      migrations: [{ id: 'do_stuff', seed() {} }],
+      mappings: {
+        shwank: { type: 'text' },
+      },
+    }];
+    const callCluster = mockCluster({});
+    const actual = await fetchStatus({ callCluster, plugins, index: '.amazemazing' });
+    expect(actual).toEqual(MigrationStatus.outOfDate);
+  });
+
+  test('is migrated, if there is no stored state and no plugins with migrations', async () => {
+    const plugins = [];
+    const callCluster = mockCluster({});
+    const actual = await fetchStatus({ callCluster, plugins, index: '.amazemazing' });
+    expect(actual).toEqual(MigrationStatus.migrated);
+  });
+
+  test('is outOfDate if mappings change', async () => {
+    const plugins = [{
+      id: 'shwank',
+      migrations: [{ id: 'do_stuff', seed() {} }],
+      mappings: {
+        shwank: { type: 'text' },
+      },
+    }];
+    const index = '.kibana';
+    const migrationState = MigrationState.build(plugins);
+    const callCluster = mockCluster({
+      [index]: {
+        'migration:migration-state': {
+          _source: {
+            migration: migrationState,
+          },
+        },
+      },
+    });
+    plugins[0].mappings.shwank.type = 'integer';
+    const actual = await fetchStatus({ callCluster, index, plugins });
+    expect(actual).toEqual(MigrationStatus.outOfDate);
+  });
+
+  test('index is required', () => {
+    expect(testMigrationOpts({ index: undefined }))
+      .rejects.toThrow(/"index" is required/);
+  });
+
+  test('callCluster is required', () => {
+    expect(testMigrationOpts({ callCluster: undefined }))
+      .rejects.toThrow(/"callCluster" is required/);
+  });
+
+  test('plugins are required', () => {
+    expect(testMigrationOpts({ plugins: undefined }))
+      .rejects.toThrow(/"plugins" is required/);
+  });
+
+  test('callCluster must be an object', () => {
+    expect(testMigrationOpts({ callCluster: 'hello' }))
+      .rejects.toThrow(/"callCluster" must be a Function/);
+  });
+
+  test('index must be a string', () => {
+    expect(testMigrationOpts({ index: 23 }))
+      .rejects.toThrow(/"index" must be a string/);
+  });
+
+  test('plugins must be an array', () => {
+    expect(testMigrationOpts({ plugins: 'notright' }))
+      .rejects.toThrow(/"plugins" must be an array/);
+  });
+});
+
+describe('Migration.migrate', () => {
   const elasticVersion = '9.8.7';
   const log = () => {};
 

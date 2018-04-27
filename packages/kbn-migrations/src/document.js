@@ -3,7 +3,7 @@ const Joi = require('joi');
 const { MigrationPlan, MigrationContext, Plugins, Documents, Opts } = require('./lib');
 
 module.exports = {
-  transformDocuments,
+  transform,
 };
 
 const optsSchema = Joi.object().unknown().keys({
@@ -20,7 +20,7 @@ const optsSchema = Joi.object().unknown().keys({
  * transform is impossible, this will fail.
  * @param {ImportDocsOpts} opts
  */
-async function transformDocuments(opts) {
+async function transform(opts) {
   Joi.assert(opts, optsSchema);
   const context = await MigrationContext.fetch(opts);
   const { migrationState: exportedState, docs } = opts;
@@ -48,13 +48,12 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
   const disabledIds = new Set(Plugins.disabledIds(plugins, migrationState));
 
   return (doc) => {
-    const docPlugins = _(doc._source).keys().map(k => propToPlugin[k]).compact().uniq().value();
-    const outOfDatePlugins = docPlugins.filter(({ id }) => isOutOfDate(previousPlugins[id], currentPlugins[id]));
-    const disabledPlugin = outOfDatePlugins.find(({ id }) => disabledIds.has(id));
-    const unknownPlugin = docPlugins.find(({ id }) => !currentPlugins[id]);
+    const { id } = propToPlugin[doc.type];
+    const requiresDisabledPlugin = isOutOfDate(previousPlugins[id], currentPlugins[id]) && disabledIds.has(id);
+    const requiresUnknownPlugin = !currentPlugins[id];
 
-    if (disabledPlugin || unknownPlugin) {
-      throw new Error(`Document "${doc._id}" requires unavailable plugin "${(disabledPlugin || unknownPlugin).id}"`);
+    if (requiresDisabledPlugin || requiresUnknownPlugin) {
+      throw new Error(`Document "${doc._id}" requires unavailable plugin "${id}"`);
     }
 
     return doc;

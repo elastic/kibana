@@ -7,8 +7,8 @@ module.exports = {
   DOC_TYPE,
   seededDocs,
   buildTransformFunction,
-  rawToClient,
-  clientToRaw,
+  toRaw,
+  toObjectClient,
 };
 
 // Given a list of migration definitions, returns a list of properly transformed seeds
@@ -17,7 +17,7 @@ function seededDocs(migrations) {
     .filter(({ m }) => !!m.seed)
     .map(({ m, i }) => {
       const transform = buildTransformFunction(migrations.slice(i));
-      return transform(clientToRaw(m.seed()));
+      return transform(m.seed());
     });
 }
 
@@ -28,16 +28,38 @@ function buildTransformFunction(migrations) {
   const transformDoc = (doc, { filter, transform }) => {
     return filter(doc) ? transform(doc) : doc;
   };
-  return (rawDoc) => {
-    if (canConvertToClient(rawDoc)) {
-      return clientToRaw(transforms.reduce(transformDoc, rawToClient(rawDoc)));
-    }
-    return rawDoc;
+  return (doc) => {
+    const objectClientDoc = toObjectClient(doc);
+    return objectClientDoc ? transforms.reduce(transformDoc, objectClientDoc) : doc;
   };
 }
 
-function rawToClient(doc) {
-  const { _id, _source } = doc;
+function toRaw(doc) {
+  if (isObjectClient(doc)) {
+    return clientToRaw(doc);
+  }
+  return doc;
+}
+
+function toObjectClient(doc) {
+  if (isObjectClient(doc)) {
+    return doc;
+  }
+  if (isRaw(doc)) {
+    return rawToClient(doc);
+  }
+  return undefined;
+}
+
+function isObjectClient(doc) {
+  return doc.hasOwnProperty('type') && doc.hasOwnProperty('attributes');
+}
+
+function isRaw({ _source }) {
+  return _source && _source.type && _source.hasOwnProperty(_source.type);
+}
+
+function rawToClient({ _id, _source }) {
   const { type } = _source;
   const id = _id.slice(type.length + 1);
   return {
@@ -58,13 +80,4 @@ function clientToRaw({ id, type, updated_at, attributes }) {
       [type]: attributes,
     },
   };
-}
-
-function canConvertToClient(rawDoc) {
-  const { _id, _source } = rawDoc;
-  if (!_id || !_source || !_source.type) {
-    return false;
-  }
-  const { type } = _source;
-  return _id.startsWith(type) && !!_source[type];
 }

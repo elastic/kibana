@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`migrate creates the index and alias if it does not exist 1`] = `
+exports[`Migration.migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
     ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
@@ -169,7 +169,7 @@ Object {
 }
 `;
 
-exports[`migrate data and mappings for disabled plugins is retained 1`] = `
+exports[`Migration.migrate data and mappings for disabled plugins is retained 1`] = `
 Object {
   "data": Object {
     "disabled-scenario-1": Object {
@@ -416,7 +416,7 @@ Object {
 }
 `;
 
-exports[`migrate does nothing if there are no migrations defined 1`] = `
+exports[`Migration.migrate does nothing if there are no migrations defined 1`] = `
 Object {
   "data": Object {},
   "meta": Object {
@@ -427,7 +427,7 @@ Object {
 }
 `;
 
-exports[`migrate existing docs are migrated 1`] = `
+exports[`Migration.migrate existing docs are migrated 1`] = `
 Object {
   "data": Object {
     "gentleman-9.8.7-f69a764d8e124e43f74550dbdee085218389d52a": Object {
@@ -620,7 +620,7 @@ Object {
 }
 `;
 
-exports[`migrate existing docs are transformed 1`] = `
+exports[`Migration.migrate existing docs are transformed 1`] = `
 Object {
   "data": Object {
     "groovystuff-9.8.7-b005de6dc8dbb44b6e423c605ecce1b0d524e80c": Object {
@@ -893,7 +893,7 @@ Object {
 }
 `;
 
-exports[`migrate existing indices are converted to aliases and migrated 1`] = `
+exports[`Migration.migrate existing indices are converted to aliases and migrated 1`] = `
 Object {
   "data": Object {
     ".mufasa-9.8.7-a6d07838aa0355002cda60a39df578cf69a45414": Object {
@@ -1065,7 +1065,7 @@ Object {
 }
 `;
 
-exports[`migrate existing previously migrated index only runs new migrations 1`] = `
+exports[`Migration.migrate existing previously migrated index only runs new migrations 1`] = `
 Object {
   "data": Object {
     "aquatica-9.8.7-52c0c387354060d296fb1b90e41f8616e25b4ca1": Object {
@@ -1288,7 +1288,7 @@ Object {
 }
 `;
 
-exports[`migrate migrations are skipped if migration status is migrating 1`] = `
+exports[`Migration.migrate migrations are skipped if migration status is migrating 1`] = `
 Object {
   "data": Object {
     "skippy": Object {
@@ -1334,7 +1334,7 @@ Object {
 }
 `;
 
-exports[`migrate migrations will run, if forced even if index is in migrating state 1`] = `
+exports[`Migration.migrate migrations will run, if forced even if index is in migrating state 1`] = `
 Object {
   "data": Object {
     "skippy-9.8.7-bb29e6e9fb7a359b4f49527b3f8c20886ce1e716": Object {
@@ -1521,7 +1521,7 @@ Object {
 }
 `;
 
-exports[`migrate new index gets seeded 1`] = `
+exports[`Migration.migrate new index gets seeded 1`] = `
 Object {
   "data": Object {
     ".mufasa-9.8.7-bf6f0959cb9db4a56db40bcefe5f96435eece216": Object {
@@ -1711,7 +1711,7 @@ Object {
 }
 `;
 
-exports[`migrate seeds are transformed 1`] = `
+exports[`Migration.migrate seeds are transformed 1`] = `
 Object {
   "data": Object {
     ".music-9.8.7-6c93252e50c6f5f7393513a544785e16a2097f59": Object {

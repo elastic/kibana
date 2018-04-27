@@ -1,6 +1,6 @@
 // A set of helper functions for calling Elasticsearch
 
-const { DOC_TYPE, buildTransformFunction, seededDocs } = require('./documents');
+const { DOC_TYPE, buildTransformFunction, seededDocs, toRaw } = require('./documents');
 
 module.exports = {
   applyTransforms,
@@ -22,7 +22,7 @@ module.exports = {
 async function applyTransforms(callCluster, log, sourceIndex, destIndex, migrations, scrollSize = 100) {
   const migrationFn = buildTransformFunction(migrations);
   await eachScroll(callCluster, sourceIndex, async (scroll) => {
-    const docs = scroll.hits.hits.map(migrationFn);
+    const docs = scroll.hits.hits.map((doc) => toRaw(migrationFn(doc)));
     return bulkInsert(callCluster, log, destIndex, docs);
   }, scrollSize);
 }
@@ -38,7 +38,7 @@ async function applyMappings(callCluster, index, mappings) {
 async function applySeeds(callCluster, log, index, migrations) {
   const docs = seededDocs(migrations);
   if (docs.length) {
-    await bulkInsert(callCluster, log, index, docs);
+    await bulkInsert(callCluster, log, index, docs.map(toRaw));
   }
 }
 

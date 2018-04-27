@@ -1,11 +1,11 @@
 const _ = require('lodash');
-const { seededDocs, buildTransformFunction, rawToClient, clientToRaw } = require('./documents');
+const { seededDocs, buildTransformFunction, toObjectClient, toRaw } = require('./documents');
 
 // Test if id is not specified by seed, it will be generated
 // Test that seeds blow up, maybe, if type isn't specified, etc?
 
 describe('buildTransformFunction', () => {
-  test('always returns a raw document', () => {
+  test('accepts a raw document (e.g. straight from the index)', () => {
     const migrations = [{
       filter: ({ type }) => type === 'dabo',
       transform: (doc) => _.set(doc, 'attributes.name', 'swinney'),
@@ -15,8 +15,26 @@ describe('buildTransformFunction', () => {
       _id: 'dabo:coach',
       _source: { type: 'dabo', dabo: { name: 'tigers' } },
     })).toEqual({
-      _id: 'dabo:coach',
-      _source: { type: 'dabo', dabo: { name: 'swinney' } },
+      id: 'coach',
+      type: 'dabo',
+      attributes: { name: 'swinney' },
+    });
+  });
+
+  test('accepts an object client document', () => {
+    const migrations = [{
+      filter: ({ type }) => type === 'coach',
+      transform: (doc) => _.set(doc, 'attributes.name', 'swinney'),
+    }];
+    const fn = buildTransformFunction(migrations);
+    expect(fn({
+      id: 'dabo',
+      type: 'coach',
+      attributes: { name: 'tigers' },
+    })).toEqual({
+      id: 'dabo',
+      type: 'coach',
+      attributes: { name: 'swinney' },
     });
   });
 
@@ -33,29 +51,22 @@ describe('buildTransformFunction', () => {
       _id: 'bar:123',
       _source: { type: 'bar', bar: { baz: 'shazm' } },
     })).toEqual({
-      _id: 'bar:123',
-      _source: { type: 'bar', bar: { baz: 'Nifties', bing: 'Bingiton' } },
+      id: '123',
+      type: 'bar',
+      attributes: { baz: 'Nifties', bing: 'Bingiton' },
     });
   });
 
   test('only applies when filter evaluates to true', () => {
     const docA = {
-      _id: 'dont:panic',
-      _source: {
-        type: 'dont',
-        dont: {
-          thanks: 'for all the fish',
-        },
-      },
+      id: 'panic',
+      type: 'dont',
+      attributes: { thanks: 'for all the fish' },
     };
     const docB = {
-      _id: 'do:panic',
-      _source: {
-        type: 'do',
-        do: {
-          thanks: 'and bring a towel',
-        },
-      },
+      id: 'panic',
+      type: 'do',
+      attributes: { thanks: 'and bring a towel' },
     };
     const migrations = [{
       filter: ({ type }) => type === 'do',
@@ -64,7 +75,7 @@ describe('buildTransformFunction', () => {
     const fn = buildTransformFunction(migrations);
     expect(fn(_.cloneDeep(docA))).toEqual(docA);
     expect(fn(_.cloneDeep(docB))).not.toEqual(docB);
-    expect(fn(_.cloneDeep(docB))._source.do.towel).toEqual('massively useful');
+    expect(fn(_.cloneDeep(docB)).attributes.towel).toEqual('massively useful');
   });
 
   test('only applies transform migrations', () => {
@@ -89,14 +100,12 @@ describe('buildTransformFunction', () => {
     const fn = buildTransformFunction(migrations);
     expect(fn(doc))
       .toEqual({
-        _id: 'here:iam',
-        _source: {
-          type: 'here',
-          here: {
-            there: 'You are',
-            a: true,
-            b: true,
-          },
+        id: 'iam',
+        type: 'here',
+        attributes: {
+          there: 'You are',
+          a: true,
+          b: true,
         },
       });
   });
@@ -139,37 +148,14 @@ describe('seededDocs', () => {
     }];
     expect(seededDocs(migrations))
       .toEqual([{
-        _id: 'book:onceandfutureking',
-        _source: {
-          type: 'book',
-          book: {
-            quote: 'Everything not forbidden is compulsory',
-          },
-        }
+        id: 'onceandfutureking',
+        type: 'book',
+        attributes: { quote: 'Everything not forbidden is compulsory' },
       }, {
-        _id: 'island:ireland',
-        _source: {
-          type: 'island',
-          island: {
-            color: 'emerald',
-          },
-        },
+        id: 'ireland',
+        type: 'island',
+        attributes: { color: 'emerald' },
       }]);
-  });
-
-  test('generates id if not provided', () => {
-    const migrations = [{
-      seed: () => ({
-        type: 'animal',
-        attributes: {
-          name: 'Sir Scrambles',
-        },
-      }),
-    }];
-    expect(seededDocs(migrations)[0]._id)
-      .not.toEqual(seededDocs(migrations)[0]._id);
-    expect(seededDocs(migrations)[0]._id)
-      .toMatch(/[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}$/);
   });
 
   test('runs seeds through subsequent transforms', () => {
@@ -201,29 +187,25 @@ describe('seededDocs', () => {
     }];
     expect(seededDocs(_.cloneDeep(migrations)))
       .toEqual([{
-        _id: 'novel:1984',
-        _source: {
-          type: 'novel',
-          novel: {
-            text: 'Perhaps a lunatic was simply a minority of one.',
-            rating: 5,
-            author: 'N/A',
-          },
+        id: '1984',
+        type: 'novel',
+        attributes: {
+          text: 'Perhaps a lunatic was simply a minority of one.',
+          rating: 5,
+          author: 'N/A',
         },
       }, {
-        _id: 'novel:twotowers',
-        _source: {
-          type: 'novel',
-          novel: {
-            text: 'Fair speech may hide a foul heart.',
-            author: 'N/A',
-          },
+        id: 'twotowers',
+        type: 'novel',
+        attributes: {
+          text: 'Fair speech may hide a foul heart.',
+          author: 'N/A',
         },
       }]);
   });
 });
 
-describe('rawToClient', () => {
+describe('toObjectClient', () => {
   test('it transforms raw docs to the save object client format', () => {
     const rawDoc = {
       _id: 'foo:32342',
@@ -233,7 +215,7 @@ describe('rawToClient', () => {
         foo: { bar: 'baz' },
       },
     };
-    expect(rawToClient(rawDoc))
+    expect(toObjectClient(rawDoc))
       .toEqual({
         id: '32342',
         type: 'foo',
@@ -243,7 +225,20 @@ describe('rawToClient', () => {
   });
 });
 
-describe('clientToRaw', () => {
+describe('toRaw', () => {
+  test('it generates an id if none is provided', () => {
+    const clientDoc = {
+      type: 'foo',
+      updated_at: 'yesterday',
+      attributes: { },
+    };
+
+    expect(toRaw(clientDoc)._id)
+      .not.toEqual(toRaw(clientDoc)._id);
+    expect(toRaw(clientDoc)._id)
+      .toMatch(/[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}$/);
+  });
+
   test('it transforms client object format to raw', () => {
     const clientDoc = {
       id: '32342',
@@ -251,7 +246,7 @@ describe('clientToRaw', () => {
       updated_at: 'yesterday',
       attributes: { bar: 'baz' },
     };
-    expect(clientToRaw(clientDoc))
+    expect(toRaw(clientDoc))
       .toEqual({
         _id: 'foo:32342',
         _source: {

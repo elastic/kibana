@@ -1,9 +1,9 @@
 const _ = require('lodash');
-const { transformDocuments } = require('./transform_documents');
+const Document = require('./document');
 const { MigrationState } = require('./lib');
 const { mockCluster } = require('./test');
 
-describe('transformDocuments', () => {
+describe('Document', () => {
   const index = 'kibana';
   const elasticVersion = '9.8.7';
 
@@ -31,10 +31,11 @@ describe('transformDocuments', () => {
       migrations: [],
     }];
     const doc = {
-      _id: 'dunnoes:hrm',
-      _source: { type: 'dunnoes', dunnoes: 'This should get rejected, methinks.' },
+      id: 'hrm',
+      type: 'dunnoes',
+      attributes: 'This should get rejected, methinks.',
     };
-    expect(transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs: [doc] }))
+    expect(Document.transform({ callCluster, migrationState, plugins, elasticVersion, index, docs: [doc] }))
       .rejects.toThrow(/unavailable plugin \"whatisit\"/);
   });
 
@@ -63,15 +64,17 @@ describe('transformDocuments', () => {
       }],
     }];
     const docs = [{
-      _id: 'space:enterprise',
-      _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
+      id: 'enterprise',
+      type: 'space',
+      attributes: 'The final frontier',
     }];
-    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
+    const transformed = await Document.transform({ callCluster, migrationState, plugins, elasticVersion, index, docs });
 
     expect(transformed)
       .toEqual([{
-        _id: 'space:enterprise',
-        _source: { type: 'space', updated_at: 'today', space: 'SPACE THE FINAL FRONTIER!!!' },
+        id: 'enterprise',
+        type: 'space',
+        attributes: 'SPACE THE FINAL FRONTIER!!!',
       }]);
   });
 
@@ -128,23 +131,17 @@ describe('transformDocuments', () => {
         transform: (doc) => ({ ...doc, attributes: `Title: ${doc.attributes}` }),
       }],
     }];
-    const docs = [{
-      _id: 'space:enterprise',
-      _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
-    }, {
-      _id: 'book:thetwotowers',
-      _source: { type: 'book', updated_at: 'today', book: 'The Two Towers' },
-    }];
-    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
+    const docs = [
+      { id: 'enterprise', type: 'space', attributes: 'The final frontier' },
+      { id: 'thetwotowers', type: 'book', attributes: 'The Two Towers' },
+    ];
+    const transformed = await Document.transform({ callCluster, migrationState, plugins, elasticVersion, index, docs });
 
     expect(transformed)
-      .toEqual([{
-        _id: 'space:enterprise',
-        _source: { type: 'space', updated_at: 'today', space: 'THE FINAL FRONTIER!!!' },
-      }, {
-        _id: 'book:thetwotowers',
-        _source: { type: 'book', updated_at: 'today', book: 'Title: The Two Towers' },
-      }]);
+      .toEqual([
+        { id: 'enterprise', type: 'space', attributes: 'THE FINAL FRONTIER!!!' },
+        { id: 'thetwotowers', type: 'book', attributes: 'Title: The Two Towers' },
+      ]);
   });
 
   test('Exported migration state does not need to specify mappings', async () => {
@@ -178,17 +175,11 @@ describe('transformDocuments', () => {
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
       }],
     }];
-    const docs = [{
-      _id: 'space:enterprise',
-      _source: { type: 'space', updated_at: 'today', space: 'The final frontier' },
-    }];
-    const transformed = await transformDocuments({ callCluster, migrationState, plugins, elasticVersion, index, docs });
+    const docs = [{ id: 'enterprise', type: 'space', attributes: 'The final frontier' }];
+    const transformed = await Document.transform({ callCluster, migrationState, plugins, elasticVersion, index, docs });
 
     expect(transformed)
-      .toEqual([{
-        _id: 'space:enterprise',
-        _source: { type: 'space', updated_at: 'today', space: 'THE FINAL FRONTIER!!!' },
-      }]);
+      .toEqual([{ id: 'enterprise', type: 'space', attributes: 'THE FINAL FRONTIER!!!' }]);
   });
 
   test('accepts if a disabled plugin is required, but doc is up to date', async () => {
@@ -211,16 +202,10 @@ describe('transformDocuments', () => {
       }],
     };
     const plugins = [];
-    const docs = [{
-      _id: 'aha:123',
-      _source: { type: 'aha', aha: 'Move along' },
-    }];
-    const transformed = await transformDocuments({ callCluster, docs, migrationState, plugins, index, elasticVersion });
+    const docs = [{ id: '123', type: 'aha', attributes: 'Move along' }];
+    const transformed = await Document.transform({ callCluster, docs, migrationState, plugins, index, elasticVersion });
     expect(transformed)
-      .toEqual([{
-        _id: 'aha:123',
-        _source: { type: 'aha', aha: 'Move along' },
-      }]);
+      .toEqual([{ id: '123', type: 'aha', attributes: 'Move along' }]);
   });
 
   test('throws if migration requires a disabled plugin', () => {
@@ -237,10 +222,11 @@ describe('transformDocuments', () => {
     const migrationState = {};
     const plugins = [];
     const docs = [{
-      _id: 'space:enterprise',
-      _source: { type: 'space', space: 'The final frontier' },
+      id: 'enterprise',
+      type: 'space',
+      attributes: 'The final frontier',
     }];
-    expect(transformDocuments({ docs, migrationState, plugins, callCluster, elasticVersion, index }))
+    expect(Document.transform({ docs, migrationState, plugins, callCluster, elasticVersion, index }))
       .rejects.toThrow(/requires unavailable plugin \"jam\"/);
   });
 
@@ -296,7 +282,7 @@ describe('transformDocuments', () => {
 });
 
 function testImportOpts(opts) {
-  return transformDocuments({
+  return Document.transform({
     callCluster: _.noop,
     log: _.noop,
     index: 'kibana',
