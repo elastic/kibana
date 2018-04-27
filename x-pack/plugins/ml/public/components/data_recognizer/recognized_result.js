@@ -12,8 +12,14 @@ import PropTypes from 'prop-types';
 export const RecognizedResult = ({
   config,
   indexPattern,
+  savedSearch
 }) => {
-  const href = `#/jobs/new_job/simple/recognize?id=${config.id}&index=${indexPattern.id}`;
+  const id = (savedSearch.id === undefined) ?
+    `index=${indexPattern.id}` :
+    `savedSearchId=${savedSearch.id}`;
+
+  const href = `#/jobs/new_job/simple/recognize?id=${config.id}&${id}`;
+
   let logo = null;
   // if a logo is available, use that, otherwise display the id
   // the logo should be a base64 encoded image
@@ -51,4 +57,5 @@ export const RecognizedResult = ({
 RecognizedResult.propTypes = {
   config: PropTypes.object,
   indexPattern: PropTypes.object,
+  savedSearch: PropTypes.object,
 };

@@ -21,9 +21,9 @@ function getModule(callWithRequest, moduleId) {
   return dr.getModule(moduleId);
 }
 
-function saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, request) {
+function saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, query, request) {
   const dr = new DataRecognizer(callWithRequest);
-  return dr.setupModuleItems(moduleId, prefix, groups, indexPatternName, request);
+  return dr.setupModuleItems(moduleId, prefix, groups, indexPatternName, query, request);
 }
 
 export function dataRecognizer(server, commonRouteConfig) {
@@ -64,10 +64,15 @@ export function dataRecognizer(server, commonRouteConfig) {
     handler(request, reply) {
       const callWithRequest = callWithRequestFactory(server, request);
       const moduleId = request.params.moduleId;
-      const prefix = (request.payload) ? request.payload.prefix : undefined;
-      const groups = (request.payload) ? request.payload.groups : undefined;
-      const indexPatternName = (request.payload) ? request.payload.indexPatternName : undefined;
-      return saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, request)
+
+      const {
+        prefix,
+        groups,
+        indexPatternName,
+        query
+      } = request.payload;
+
+      return saveModuleItems(callWithRequest, moduleId, prefix, groups, indexPatternName, query, request)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },

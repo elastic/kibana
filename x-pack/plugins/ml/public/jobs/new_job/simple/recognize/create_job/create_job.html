@@ -3,8 +3,27 @@
   <ml-message-bar></ml-message-bar>
   <div ng-controller="MlCreateRecognizerJobs" class="recognizer-job-container">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-12">
         <h3 class="euiTitle euiTitle--large">New job from {{ui.pageTitle}}</h3>
+
+        <div ng-if="displayQueryWarning === true" class="euiCallOut euiCallOut--warning">
+            <div class="euiCallOutHeader">
+              <svg class="euiIcon euiCallOutHeader__icon euiIcon--medium" xmlns="http://www.w3.org/2000/svg"
+                  width="16" height="16" viewBox="0 0 16 16">
+                <g fill-rule="evenodd">
+                  <path d="M7.5 2.236L1.618 14h11.764L7.5 2.236zm.894-.447l5.882 11.764A1 1 0 0 1 13.382 15H1.618a1 1 0 0 1-.894-1.447L6.606 1.789a1 1 0 0 1 1.788 0z"
+                  />
+                  <path d="M7 6h1v5H7zM7 12h1v1H7z" />
+                </g>
+              </svg>
+              <span class="euiCallOutHeader__title">Search will be overwritten</span>
+            </div>
+            <div class="euiText euiText--small">
+              <p>
+                Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {{moduleId}} module.
+              </p>
+            </div>
+          </div>
       </div>
     </div>
 
