@@ -11,6 +11,7 @@ window.onerror = (err, url, line) => {
   const isKnownError = knownErrors.find(errorName => msg.indexOf(errorName) >= 0);
 
   if (!isKnownError) {
+    console.log(process);
     oldHandler(err, url, line);
   }
 };
