@@ -17,12 +17,14 @@ export class SecureSavedObjectsClient {
       request,
       baseClient,
       application,
+      kibanaVersion,
     } = options;
 
     this.errors = baseClient.errors;
 
     this._client = baseClient;
     this._application = application;
+    this._kibanaVersion = kibanaVersion;
     this._callCluster = getClient(server).callWithRequest;
     this._request = request;
   }
@@ -49,7 +51,7 @@ export class SecureSavedObjectsClient {
 
   async find(options = {}) {
     // TODO(legrego) - need to constrain which types users can search for...
-    await this._performAuthorizationCheck(null, 'search', null, options);
+    await this._performAuthorizationCheck(options.type, 'search', null, options);
 
     return await this._client.find(options);
   }
@@ -75,22 +77,21 @@ export class SecureSavedObjectsClient {
   }
 
   async _performAuthorizationCheck(type, action, attributes = {}, options = {}) { // eslint-disable-line no-unused-vars
-    return;
-    // TODO(legrego) use ES Custom Privilege API once implemented.
-    const kibanaAction = `saved-objects/${type}/${action}`;
+    const version = `version:${this._kibanaVersion}`;
+    const kibanaAction = `action:saved-objects/${type}/${action}`;
 
     const privilegeCheck = await this._callCluster(this._request, 'shield.hasPrivileges', {
       body: {
         applications: [{
           application: this._application,
           resources: ['default'],
-          privileges: [kibanaAction]
+          privileges: [version, kibanaAction]
         }]
       }
     });
 
     if (!privilegeCheck.has_all_requested) {
-      throw Boom.unauthorized(`User ${privilegeCheck.username} is not authorized to ${action} objects of type ${type}`);
+      throw Boom.forbidden(`User ${privilegeCheck.username} is not authorized to ${action} objects of type ${type}`);
     }
   }
 }

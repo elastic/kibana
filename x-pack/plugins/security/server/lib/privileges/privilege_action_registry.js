@@ -11,8 +11,6 @@ import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
 export async function registerPrivilegesWithCluster(server) {
-  return;
-
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
@@ -23,7 +21,6 @@ export async function registerPrivilegesWithCluster(server) {
 
   const callCluster = getClient(server).callWithInternalUser;
 
-  // TODO(legrego) - non-working stub
   await callCluster('shield.postPrivileges', {
     body: {
       [application]: privilegeActionMapping

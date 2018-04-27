@@ -10,7 +10,7 @@
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
 
-const createRoleIfDoesntExist = async (callCluster, name) => {
+const createRoleIfDoesntExist = async (callCluster, { name, application, privilege }) => {
   try {
     await callCluster('shield.getRole', { name });
   } catch (err) {
@@ -23,7 +23,13 @@ const createRoleIfDoesntExist = async (callCluster, name) => {
       body: {
         cluster: [],
         index: [],
-        // application: [ { "privileges": [ "kibana:all" ], "resources": [ "*" ] } ]
+        applications: [
+          {
+            application,
+            privileges: [ privilege ],
+            resources: [ 'default' ]
+          }
+        ]
       }
     });
   }
@@ -40,8 +46,17 @@ export async function createDefaultRoles(server) {
 
   const callCluster = getClient(server).callWithInternalUser;
 
-  const createKibanaUserRole = createRoleIfDoesntExist(callCluster, `${application}_rbac_user`);
-  const createKibanaDashboardOnlyRole = createRoleIfDoesntExist(callCluster, `${application}_rbac_dashboard_only_user`);
+  const createKibanaUserRole = createRoleIfDoesntExist(callCluster, {
+    name: `${application}_rbac_user`,
+    application,
+    privilege: 'all'
+  });
+
+  const createKibanaDashboardOnlyRole = createRoleIfDoesntExist(callCluster, {
+    name: `${application}_rbac_dashboard_only_user`,
+    application,
+    privilege: 'read'
+  });
 
   await Promise.all([createKibanaUserRole, createKibanaDashboardOnlyRole]);
 }

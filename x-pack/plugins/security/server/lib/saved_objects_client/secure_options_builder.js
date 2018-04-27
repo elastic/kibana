@@ -11,9 +11,12 @@ export function secureSavedObjectsClientOptionsBuilder(server, options) {
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
   const { callWithInternalUser } = adminCluster;
 
+  const config = server.config();
+
   return {
     ...options,
-    application: server.config().get('xpack.security.rbac.application'),
+    application: config.get('xpack.security.rbac.application'),
+    kibanaVersion: config.get('pkg.version'),
     callCluster: callWithInternalUser
   };
 }

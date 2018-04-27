@@ -8,49 +8,33 @@
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
 export function buildPrivilegeMap(application, kibanaVersion) {
-  const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges('');
+  const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges();
 
-  const commonMetadata = {
-    kibanaVersion
-  };
+  const privilegeActions = {};
 
-  function getActionName(...nameParts) {
-    return nameParts.join('/');
-  }
-
-  const privilegeActionMap = [];
-
-  privilegeActionMap.push({
+  privilegeActions.all = {
     application,
     name: 'all',
-    actions: [getActionName('*')],
-    metadata: {
-      ...commonMetadata,
-      displayName: 'all'
-    }
-  });
+    actions: [`version:${kibanaVersion}`, 'action:*'],
+  };
 
-  privilegeActionMap.push({
+  privilegeActions.read = {
     application,
     name: 'read',
-    actions: [...readSavedObjectsPrivileges],
-    metadata: {
-      ...commonMetadata,
-      displayName: 'read'
-    }
-  });
+    actions: [`version:${kibanaVersion}`, ...readSavedObjectsPrivileges],
+  };
 
-  return privilegeActionMap;
+  return privilegeActions;
 }
 
-function buildSavedObjectsReadPrivileges(prefix) {
+function buildSavedObjectsReadPrivileges() {
   const readActions = ['get', 'mget', 'search'];
-  return buildSavedObjectsPrivileges(prefix, readActions);
+  return buildSavedObjectsPrivileges(readActions);
 }
 
-function buildSavedObjectsPrivileges(prefix, actions) {
-  const objectTypes = ['dashboard', 'visualization', 'search'];
+function buildSavedObjectsPrivileges(actions) {
+  const objectTypes = ['config', 'dashboard', 'index-pattern', 'search', 'visualization'];
   return objectTypes
-    .map(type => actions.map(action => `${prefix}/${type}/${action}`))
+    .map(type => actions.map(action => `action:saved-objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);
 }
