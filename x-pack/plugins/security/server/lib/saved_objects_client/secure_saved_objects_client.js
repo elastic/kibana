@@ -50,7 +50,6 @@ export class SecureSavedObjectsClient {
   }
 
   async find(options = {}) {
-    // TODO(legrego) - need to constrain which types users can search for...
     await this._performAuthorizationCheck(options.type, 'search', null, options);
 
     return await this._client.find(options);
