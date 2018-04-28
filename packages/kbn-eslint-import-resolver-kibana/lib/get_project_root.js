@@ -1,6 +1,7 @@
 const { dirname, resolve, parse } = require('path');
 const { accessSync, readFileSync } = require('fs');
-const debug = require('./debug');
+
+const { debug } = require('./debug');
 
 function getConfig(config) {
   const defaults = {
@@ -40,7 +41,7 @@ function getRootPackageDir(dirRoot, dir, rootPackageName) {
   }
 }
 
-module.exports = function getProjectRoot(file, config) {
+exports.getProjectRoot = function(file, config) {
   const { root, dir } = parse(resolve(file));
   const { rootPackageName } = config;
 

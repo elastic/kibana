@@ -1,0 +1,109 @@
+<div class="job-timepicker-modal">
+  <ml-message-bar ></ml-message-bar>
+  <h1 tooltip="Start datafeed for {{jobId}}" class="euiTitle">Start datafeed for {{jobId}}</h1>
+
+  <div class="euiSpacer euiSpacer--s"></div>
+
+  <div class="ml-timepicker-contents" >
+    <div class="row">
+      <div
+        class="ml-timepicker-section"
+        ng-class="{
+          'ml-timepicker-right-border':
+            (+ui.startRadio <= 1 && ui.endRadio === '0') ||
+            (ui.startRadio === '2' && +ui.endRadio <= 1)
+        }">
+        <label class="kuiFormLabel">Search start time</label>
+
+        <div class="ml-timepicker-radios" >
+          <ul class="nav nav-pills nav-stacked">
+            <li ng-class="{ active: ui.startRadio === '1' }">
+              <a ng-click="ui.startRadio = '1'" >{{ ( isNew?"Start at beginning of data" : "Continue from " + ui.lastTime ) }}</a>
+            </li>
+            <li ng-class="{ active: ui.startRadio === '0' }">
+              <a ng-click="ui.startRadio = '0'">{{ ( isNew?"Start now" : "Continue from now" ) }}</a>
+            </li>
+            <li ng-class="{ active: ui.startRadio === '2' }">
+              <a ng-click="ui.startRadio = '2'" ng-class="{'ml-timepicker-radio-bottom': ui.startRadio === '2'}">{{ ( isNew?"Specify start time" : "Continue from specified time" ) }}</a>
+            </li>
+          </ul>
+        </div>
+        <div class='ml-timepicker' ng-show="ui.startRadio == '2'">
+          <div>
+            <input type="text" class="form-control" input-datetime="YYYY-MM-DD HH:mm:ss" ng-model="ui.timepicker.from" >
+          </div>
+          <div>
+            <datepicker
+              offset-timezone
+              ng-model="ui.timepicker.from"
+              show-weeks="false">
+            </datepicker>
+          </div>
+        </div>
+      </div>
+
+      <div class="ml-timepicker-section"
+        ng-class="{
+          'ml-timepicker-left-border':
+            (+ui.startRadio <= 1 && ui.endRadio === '1')
+        }">
+        <label class="kuiFormLabel">Search end time</label>
+        <div class="ml-timepicker-radios" >
+          <ul class="nav nav-pills nav-stacked">
+            <li ng-class="{ active: ui.endRadio === '0' }">
+              <a ng-click="ui.endRadio = '0'">No end time (Real-time search)</a>
+            </li>
+            <li ng-class="{ active: ui.endRadio === '1' }">
+              <a ng-click="ui.endRadio = '1'" ng-class="{'ml-timepicker-radio-bottom': ui.endRadio === '1'}">Specify end time</a>
+            </li>
+          </ul>
+        </div>
+        <div class='ml-timepicker' ng-show="ui.endRadio == '1'">
+          <div>
+            <input type="text" class="form-control" input-datetime="{{format}}" ng-model="ui.timepicker.to">
+          </div>
+          <div>
+            <datepicker
+              offset-timezone
+              ng-model="ui.timepicker.to"
+              show-weeks="false">
+            </datepicker>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div ng-if="ui.endRadio === '0' && watcherEnabled">
+    <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+    <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+      <input ng-model='ui.createWatch' type="checkbox" class='kuiCheckBox'/>
+      <span class="kuiCheckBoxLabel__text">
+        Create watch after datafeed has started
+      </span>
+    </label>
+  </div>
+  <div class="clearfix"></div>
+
+  <hr class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium">
+
+  <button
+    ng-click="save()"
+    ng-disabled="(
+      saveLock === true ||
+      ( ui.startRadio==='2' && ui.timepicker.from==='' ) ||
+      ( ui.endRadio==='1' && ui.timepicker.to==='' )
+    )"
+    class="kuiButton kuiButton--primary" >
+    Start
+  </button>
+  <button
+    ng-click="cancel()"
+    ng-disabled="(saveLock === true)"
+    class="kuiButton kuiButton--primary"
+    aria-label="Cancel">
+    Cancel
+  </button>
+
+</div>

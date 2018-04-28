@@ -5,7 +5,8 @@
 .DS_Store
 .node_binaries
 node_modules
-!/tasks/lib/packages/__tests__/fixtures/fixture1/node_modules
+!/src/dev/npm/__tests__/fixtures/fixture1/node_modules
+!/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
 target
@@ -38,6 +39,6 @@ selenium
 !/packages/kbn-ui-framework/doc_site/build/index.html
 package-lock.json
 .yo-rc.json
-/.vscode
+.vscode
 npm-debug.log*
 .tern-project

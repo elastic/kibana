@@ -8,13 +8,14 @@ exports.description = 'Install and run from an Elasticsearch tar';
 exports.usage = 'es archive <path> [<args>]';
 
 exports.help = (defaults = {}) => {
+  const { password = 'changeme', 'base-path': basePath } = defaults;
+
   return dedent`
     Options:
 
-      --base-path     Path containing cache/installations [default: ${
-        defaults['base-path']
-      }]
+      --base-path     Path containing cache/installations [default: ${basePath}]
       --install-path  Installation path, defaults to 'source' within base-path
+      --password      Sets password for elastic user [default: ${password}]
       -E              Additional key=value settings to pass to Elasticsearch
 
     Example:

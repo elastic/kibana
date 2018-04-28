@@ -1,0 +1,82 @@
+<div class="general-job-details">
+  <div class="form-group">
+    <ml-form-label label-id="new_job_id" tooltip-append-to-body="true">Name</ml-form-label>
+    <input
+      aria-labelledby="ml_aria_label_new_job_id"
+      aria-describedby="ml_aria_description_new_job_id"
+      id="job-id-input"
+      ng-model="formConfig.jobId"
+      required
+      placeholder="Job ID"
+      ng-change="changeJobIDCase(formConfig)"
+      ng-disabled="jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+      class="form-control lowercase" />
+    <div ng-hide="ui.validation.checks.jobId.valid" class="validation-error">{{ ( ui.validation.checks.jobId.message || "Enter a name for the job" ) }}</div>
+  </div>
+
+  <div class="form-group">
+    <ml-form-label label-id="new_job_description">Description</ml-form-label>
+    <input
+      aria-labelledby="ml_aria_label_new_job_description"
+      aria-describedby="ml_aria_description_new_job_description"
+      ng-model="formConfig.description"
+      placeholder="Job description"
+      ng-disabled="jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+      class="form-control" />
+  </div>
+  <div class="form-group">
+    <ml-form-label label-id="new_job_group">Job Groups</ml-form-label>
+    <ml-job-group-select
+      aria-labelledby="ml_aria_label_new_job_group"
+      aria-describedby="ml_aria_description_new_job_group"
+      job-groups='formConfig.jobGroups'
+      disabled='(jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)' />
+    <div ng-hide="ui.validation.checks.groupIds.valid" class="validation-error">{{ ui.validation.checks.groupIds.message }}</div>
+  </div>
+
+  <div class="form-group">
+    <div ng-click="ui.showAdvanced = (!ui.showAdvanced || formConfig.useDedicatedIndex)" class="advanced-button-container">
+      <button
+        aria-label="{{ ui.showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}"
+        ng-disabled="formConfig.useDedicatedIndex"
+        type="button"
+        class="kuiButton kuiButton--small kuiButton--hollow advanced-button">
+        <i aria-hidden="true" ng-class="{ 'fa-caret-down': ui.showAdvanced, 'fa-caret-right': !ui.showAdvanced }" class="fa"></i>
+      </button>
+      <label class="kuiFormLabel" aria-describedby="ml_aria_description_new_job_advanced_settings">Advanced</label>
+      <i ml-info-icon="new_job_advanced_settings" ></i>
+    </div>
+    <div class='advanced-group' ng-show="ui.showAdvanced">
+      <div class="form-group">
+      <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
+        <input type="checkbox"
+          aria-labelledby="ml_aria_label_new_job_dedicated_index"
+          aria-describedby="ml_aria_description_new_job_dedicated_index"
+          class='kuiCheckBox'
+          ng-model  ="formConfig.useDedicatedIndex" />
+        <span class='kuiCheckBoxLabel__text'>
+          <span id="ml_aria_label_new_job_dedicated_index">Use dedicated index</span>
+          <i ml-info-icon="new_job_dedicated_index" ></i>
+        </span>
+      </label>
+      </div>
+      <div class="form-group">
+        <label class='kuiFormLabel kuiVerticalRhythm'>
+          <span id="ml_aria_label_new_job_model_memory_limit">
+            Model memory limit
+          </span>
+          <i ml-info-icon="new_job_model_memory_limit"></i>
+        </label>
+        <div></div>
+        <input
+          aria-labelledby="ml_aria_label_new_job_model_memory_limit"
+          aria-describedby="ml_aria_description_new_job_model_memory_limit"
+          type="text"
+          ng-model='formConfig.modelMemoryLimit'
+          class="kuiTextInput kuiTextInput--large" />
+        <div ng-hide="ui.validation.checks.modelMemoryLimit.valid" class="validation-error">{{ ui.validation.checks.modelMemoryLimit.message }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group"></div>
+</div>

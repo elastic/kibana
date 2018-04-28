@@ -87,7 +87,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         if (!searchSource.lastQuery || vis.reload) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
-        if (!_.isEqual(_.cloneDeep(copyAggs(vis.aggs)), searchSource.lastQuery.aggs)) return true;
+        if (!_.isEqual(_.cloneDeep(copyAggs(vis.aggs.getRequestAggs())), searchSource.lastQuery.aggs)) return true;
         if (!_.isEqual(_.cloneDeep(timeRange), searchSource.lastQuery.timeRange)) return true;
 
         return false;
@@ -100,7 +100,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
               query: _.cloneDeep(searchSource.get('query')),
-              aggs: _.cloneDeep(copyAggs(vis.aggs)),
+              aggs: _.cloneDeep(copyAggs(vis.aggs.getRequestAggs())),
               timeRange: _.cloneDeep(timeRange)
             };
 

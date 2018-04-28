@@ -1,0 +1,14 @@
+[[reporting-release-notes]]
+== Reporting Release Notes (Pre-5.0)
+
+[float]
+[[reporting-change-list]]
+=== Change List
+
+[float]
+==== 2.4.0 
+August 31, 2016
+
+.New Features
+
+* Manually Export PDF reports from Kibana and automatically generate reports from Watcher.

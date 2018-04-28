@@ -1,0 +1,200 @@
+.ml-field-data-card {
+  width: 360px;
+  height: 435px;
+
+  .boolean {
+    background-color: #e6c220;
+  }
+
+  .date {
+    background-color: #f98510;
+  }
+
+  .document_count {
+    background-color: #db1374;
+  }
+
+  .geo_point {
+    background-color: #461a0a;
+  }
+
+  .ip {
+    background-color: #490092;
+  }
+
+  .keyword {
+    background-color: #00b3a4;
+  }
+
+  .number {
+    background-color: #3185fc;
+  }
+
+  .text {
+    background-color: #920000;
+  }
+
+  .type-other {
+    background-color: #bfa180;
+  }
+
+  .title-bar {
+    color: #ffffff;
+    font-size: 18px;
+    text-align: center;
+    border-radius: 5px 5px 0px 0px;
+    padding: 5px 6px;
+
+    .field-type-icon {
+      vertical-align: middle;
+      padding-right: 4px;
+      display: inline-block;
+    }
+
+    .field-name {
+      vertical-align: middle;
+      padding-right: 8px;
+      max-width: 290px;
+      display: inline-block;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  }
+
+  .card-contents {
+    height: 393px;
+    border-color: #d9d9d9;
+    border-style: solid;
+    border-width: 0px 1px 1px 1px;
+    border-radius: 0px 0px 5px 5px;
+    overflow: hidden;
+  }
+
+  .stats {
+    padding: 10px 10px 0px 10px;
+    text-align: center;
+  }
+
+  .stat {
+    padding-bottom: 6px;
+  }
+
+  .stat.heading {
+    padding-bottom: 0px;
+  }
+
+  .stat.min, .stat.max, .stat.median {
+    width: 30%;
+    display: inline-block;
+  }
+
+  .not-exist-message {
+    padding: 50px 30px 0px 30px;
+    text-align: center;
+  }
+
+  .sampled-message {
+    font-size: 11px;
+    color: #555555;
+    text-align: center;
+    padding-top: 3px;
+  }
+
+  .text-code {
+    font-family: "Lucida Console", Monaco, monospace;
+  }
+
+  .details-select {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .details-container {
+    padding-top: 5px;
+  }
+
+  svg {
+    font-size: 11px;
+    font-family: "Open Sans", "Lato", "Helvetica Neue", Helvetica, Arial;
+
+    text {
+      fill: #555555;
+    }
+
+    .info-text {
+      text-anchor: middle;
+    }
+
+    .distribution-chart {
+
+      .x.axis path, .x.axis line {
+        fill: none;
+        stroke: #cccccc;
+        shape-rendering: crispEdges;
+      }
+
+      .area {
+        fill: #3185fc;
+      }
+    }
+
+  }
+
+  ml-metric-distribution-chart {
+    display: block;
+    padding: 0px 15px 10px 15px;
+  }
+
+  ml-document-count-chart {
+    display: block;
+    padding: 18px 15px 0px 15px;
+    rect.bar {
+      fill: #db1374;
+    }
+
+    .bar {
+      stroke: #ffffff;
+    }
+
+    .axis path, .axis line {
+      fill: none;
+      stroke: #cccccc;
+      shape-rendering: crispEdges;
+    }
+  }
+
+  .top-value {
+    height: 21px;
+    font-size: 13px;
+
+    .field-label {
+      display: inline-block;
+      width: 100px;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .count-label {
+      display: inline-block;
+      width: 70px;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-value-bar-holder {
+      display: inline-block;
+      width: 160px;
+    }
+
+    .top-value-bar {
+      height: 15px;
+      min-width: 3px;
+    }
+  }
+}
+

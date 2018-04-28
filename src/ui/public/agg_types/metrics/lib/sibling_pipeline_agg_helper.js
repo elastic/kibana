@@ -5,7 +5,7 @@ import { Schemas } from '../../../vis/editors/default/schemas';
 import { siblingPipelineAggController } from './sibling_pipeline_agg_controller';
 import { siblingPipelineAggWritter } from './sibling_pipeline_agg_writter';
 import metricAggTemplate from '../../controls/sub_metric.html';
-
+import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 const metricAggFilter = [
   '!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev',
@@ -55,6 +55,7 @@ const siblingPipelineAggHelper = {
         },
         editor: metricAggTemplate,
         controller: siblingPipelineAggController('customBucket'),
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customBucket'),
         write: _.noop
       },
       {
@@ -76,6 +77,7 @@ const siblingPipelineAggHelper = {
         },
         editor: metricAggTemplate,
         controller: siblingPipelineAggController('customMetric'),
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
         write: siblingPipelineAggWritter
       }
     ];
@@ -86,5 +88,3 @@ const siblingPipelineAggHelper = {
 };
 
 export { siblingPipelineAggHelper };
-
-
