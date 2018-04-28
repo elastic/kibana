@@ -11132,7 +11132,7 @@ let parallelizeBatches = exports.parallelizeBatches = (() => {
         for (const batch of batches) {
             // We need to make sure the entire batch has completed before we can move on
             // to the next batch
-            yield parallellize(batch, fn);
+            yield parallelize(batch, fn);
         }
     });
 
@@ -11141,46 +11141,49 @@ let parallelizeBatches = exports.parallelizeBatches = (() => {
     };
 })();
 
-exports.parallellize = parallellize;
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-function parallellize(items, fn, concurrency = 4) {
-    return new Promise((resolve, reject) => {
-        let scheduleItem = (() => {
-            var _ref2 = _asyncToGenerator(function* (item) {
-                activePromises++;
-                try {
-                    yield fn(item);
-                    activePromises--;
-                    if (values.length > 0) {
-                        // We have more work to do, so we schedule the next promise
-                        scheduleItem(values.shift());
-                    } else if (activePromises === 0) {
-                        // We have no more values left, and all items have completed, so we've
-                        // completed all the work.
-                        resolve();
-                    }
-                } catch (error) {
-                    reject(error);
-                }
-            });
-
-            return function scheduleItem(_x3) {
-                return _ref2.apply(this, arguments);
-            };
-        })();
-
+let parallelize = exports.parallelize = (() => {
+    var _ref2 = _asyncToGenerator(function* (items, fn, concurrency = 4) {
         if (items.length === 0) {
-            resolve();
             return;
         }
-        let activePromises = 0;
-        const values = items.slice(0);
+        return new Promise(function (resolve, reject) {
+            let scheduleItem = (() => {
+                var _ref3 = _asyncToGenerator(function* (item) {
+                    activePromises++;
+                    try {
+                        yield fn(item);
+                        activePromises--;
+                        if (values.length > 0) {
+                            // We have more work to do, so we schedule the next promise
+                            scheduleItem(values.shift());
+                        } else if (activePromises === 0) {
+                            // We have no more values left, and all items have completed, so we've
+                            // completed all the work.
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
 
-        values.splice(0, concurrency).map(scheduleItem);
+                return function scheduleItem(_x5) {
+                    return _ref3.apply(this, arguments);
+                };
+            })();
+
+            let activePromises = 0;
+            const values = items.slice(0);
+
+            values.splice(0, concurrency).map(scheduleItem);
+        });
     });
-}
+
+    return function parallelize(_x3, _x4) {
+        return _ref2.apply(this, arguments);
+    };
+})();
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /***/ }),
 /* 60 */
