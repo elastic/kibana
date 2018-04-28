@@ -127,10 +127,15 @@
 
                   <div class='job-state-info' ng-show="overallState === SAVE_STATE.SAVING">Analysis running <i class='fa fa-spinner fa-spin' aria-label="Analysis running" ></i></div>
                 </div>
-                <div ng-show="overallState === SAVE_STATE.SAVED">
-                  <h3 class="euiTitle euiTitle--large">Jobs created
+                <div ng-show="overallState === SAVE_STATE.SAVED || overallState === SAVE_STATE.PARTIAL_FAILURE">
+                  <h3 ng-if="overallState === SAVE_STATE.SAVED" class="euiTitle euiTitle--large">Jobs created
                     <i style="color:green;" class="fa fa-check" aria-label="Saved"></i>
                   </h3>
+
+                  <h3 ng-if="overallState === SAVE_STATE.PARTIAL_FAILURE" class="euiTitle euiTitle--large">Some jobs failed to be created
+                    <i style="color:red;" class="fa fa-remove" aria-label="Save failed"></i>
+                  </h3>
+
                   <div class="euiSpacer euiSpacer--m"></div>
 
                   <button
@@ -154,7 +159,9 @@
                 </div>
 
                 <div ng-show="overallState === SAVE_STATE.FAILED">
-                  <h3 class="euiTitle euiTitle--large">Jobs creation failed</h3>
+                  <h3 class="euiTitle euiTitle--large">Jobs creation failed
+                    <i style="color:red;" class="fa fa-remove" aria-label="Save failed"></i>
+                  </h3>
                   <div class="euiSpacer euiSpacer--m"></div>
 
                   <button
