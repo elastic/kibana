@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 import { recentlyAccessedShape } from './recently_accessed';
 
 export function HomeApp({ addBasePath, directories, recentlyAccessed }) {

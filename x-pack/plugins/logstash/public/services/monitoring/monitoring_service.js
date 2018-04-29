@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import { ROUTES } from '../../../common/constants';
 import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
 

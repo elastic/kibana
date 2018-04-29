@@ -7,7 +7,7 @@
 
 
 import uiRoutes from 'ui/routes';
-import uiChrome from 'ui/chrome';
+import uiChrome from '../../../../../src/ui/public/chrome';
 import template from './index.html';
 
 uiRoutes.when('/access-denied', {

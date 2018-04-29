@@ -5,7 +5,7 @@
  */
 
 import 'plugins/reporting/services/job_completion_notifications';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import rison from 'rison-node';
 import { uiModules } from 'ui/modules';
 import { QueryString } from 'ui/utils/query_string';

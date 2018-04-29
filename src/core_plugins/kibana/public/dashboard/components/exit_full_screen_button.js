@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 
 import {
   KuiButton,

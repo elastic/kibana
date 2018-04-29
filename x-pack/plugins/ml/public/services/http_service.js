@@ -8,7 +8,7 @@
 
 // service for interacting with the server
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import 'isomorphic-fetch';
 
 import { addSystemApiHeader } from 'ui/system_api';

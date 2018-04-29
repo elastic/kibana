@@ -11,7 +11,7 @@
  * the user to select the type of job they wish to create.
  */
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../../src/ui/public/chrome';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';

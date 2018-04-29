@@ -8,7 +8,7 @@ import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
 import url from 'url';
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 
 async function callApi(options) {
   const { pathname, query, camelcase, compact, ...urlOptions } = {

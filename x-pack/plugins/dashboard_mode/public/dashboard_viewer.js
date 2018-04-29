@@ -9,7 +9,7 @@
 // since it's view only, but we want the urls to be the same, so we are using largely the same setup.
 
 // preloading (for faster webpack builds)
-import chrome from 'ui/chrome';
+import chrome from '../../../../src/ui/public/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 

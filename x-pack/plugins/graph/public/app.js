@@ -10,7 +10,7 @@ import rison from 'rison-node';
 
 import 'ui/autoload/all';
 import 'ui/directives/saved_object_finder';
-import chrome from 'ui/chrome';
+import chrome from '../../../../src/ui/public/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { notify, Notifier, fatalError, toastNotifications } from 'ui/notify';

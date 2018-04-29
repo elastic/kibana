@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../ui/public/chrome';
 import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
 

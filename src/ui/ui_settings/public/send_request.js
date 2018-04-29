@@ -1,4 +1,4 @@
-import chrome from 'ui/chrome';
+import chrome from '../../public/chrome';
 
 export async function sendRequest({ method, path, body }) {
   const response = await fetch(chrome.addBasePath(path), {

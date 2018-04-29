@@ -7,7 +7,7 @@
 
 
 import { pick } from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 
 import { http } from './http_service';
 

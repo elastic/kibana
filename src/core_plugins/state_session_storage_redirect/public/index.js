@@ -1,5 +1,5 @@
 import 'ui/autoload/styles';
-import chrome from 'ui/chrome';
+import chrome from '../../../ui/public/chrome';
 import { hashUrl } from 'ui/state_management/state_hashing';
 import uiRoutes from 'ui/routes';
 

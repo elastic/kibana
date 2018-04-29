@@ -1,7 +1,7 @@
 // autoloading
 
 // preloading (for faster webpack builds)
-import chrome from 'ui/chrome';
+import chrome from '../../../ui/public/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 

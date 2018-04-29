@@ -1,7 +1,7 @@
 import 'ngreact';
 import React, { Fragment } from 'react';
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../ui/public/chrome';
 
 import {
   EuiFlexGroup,

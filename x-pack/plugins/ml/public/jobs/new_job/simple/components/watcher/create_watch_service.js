@@ -6,7 +6,7 @@
 
 
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../../src/ui/public/chrome';
 import _ from 'lodash';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 

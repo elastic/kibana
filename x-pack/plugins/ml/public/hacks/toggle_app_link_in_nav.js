@@ -7,7 +7,7 @@
 
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('xpack/ml').run((Private) => {

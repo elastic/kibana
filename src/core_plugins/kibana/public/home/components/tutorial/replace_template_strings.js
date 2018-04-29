@@ -1,5 +1,5 @@
 import { Writer } from 'mustache';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../ui/public/chrome';
 import { metadata } from 'ui/metadata';
 import {
   DOC_LINK_VERSION,

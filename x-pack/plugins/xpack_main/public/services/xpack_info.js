@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import { XPackInfoSignatureProvider } from 'plugins/xpack_main/services/xpack_info_signature';
 import { convertKeysToCamelCaseDeep } from '../../../../server/lib/key_case_converter';
 

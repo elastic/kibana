@@ -14,7 +14,7 @@ import _ from 'lodash';
 import rison from 'rison-node';
 import { EuiLink } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 
 export function toQuery(search) {
   return qs.parse(search.slice(1));

@@ -1,6 +1,6 @@
 import { PersistedState } from 'ui/persisted_state';
 import { Embeddable } from 'ui/embeddable';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 import _ from 'lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {

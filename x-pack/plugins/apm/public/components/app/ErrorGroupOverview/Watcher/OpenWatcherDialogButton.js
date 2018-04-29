@@ -11,7 +11,7 @@ import {
   EuiContextMenuItem,
   EuiPopover
 } from '@elastic/eui';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../src/ui/public/chrome';
 
 export default class OpenWatcherDialogButton extends Component {
   state = {

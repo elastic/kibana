@@ -7,7 +7,7 @@
 import { get, find } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';

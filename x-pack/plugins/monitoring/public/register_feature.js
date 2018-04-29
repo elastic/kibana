@@ -6,7 +6,7 @@
 
 
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../src/ui/public/chrome';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('monitoringUiEnabled')) {
