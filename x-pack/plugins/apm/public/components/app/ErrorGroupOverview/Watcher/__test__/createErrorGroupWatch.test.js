@@ -6,7 +6,6 @@
 
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import mustache from 'mustache';
-import chrome from '../../../../../../../../../src/ui/public/chrome';
 import * as rest from '../../../../../services/rest';
 import { isObject, isArray, isString } from 'lodash';
 import esResponse from './esResponse.json';
@@ -22,7 +21,6 @@ describe('createErrorGroupWatch', () => {
   let createWatchResponse;
   let tmpl;
   beforeEach(async () => {
-    chrome.getInjected = jest.fn().mockReturnValue('myIndexPattern');
     jest.spyOn(rest, 'createWatch').mockReturnValue();
 
     createWatchResponse = await createErrorGroupWatch({
