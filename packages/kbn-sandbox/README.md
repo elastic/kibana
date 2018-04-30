@@ -75,6 +75,10 @@ docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian7:latest bash -c 'cd
 docker build -t kbn-sandbox/debian8 -f docker/Dockerfile.debian8 .
 docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian8:latest bash -c 'cd /kbn-sandbox && npm run test'
 
+# Debian 8 i386
+docker build -t kbn-sandbox/debian8-i386 -f docker/Dockerfile.debian8-i386 .
+docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian8-i386:latest bash -c 'cd /kbn-sandbox && npm run test'
+
 # Debian 9
 docker build -t kbn-sandbox/debian9 -f docker/Dockerfile.debian9 .
 docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian9:latest bash -c 'cd /kbn-sandbox && npm run test'

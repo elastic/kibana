@@ -8,20 +8,8 @@ function tryExec() {
   exec('true');
 }
 
-if (process.platform === 'win32' || process.platform === 'linux') {
-  test(`${process.platform} activates sandbox`, () => {
-    assert.doesNotThrow(tryExec);
-
-    const result = sandbox.activate();
-    assert.ok(result.success, 'Sandbox failed to activate: ' + result.message);
-
-    // EACCES on Linux, UNKNOWN on Windows.
-    assert.throws(tryExec, /Error: spawn (EACCES|UNKNOWN)/);
-  });
-}
-
-if (process.platform === 'darwin') {
-  test('darwin', () => {
+if (process.arch !== 'x64') {
+  test(`${process.arch} architecture has no sandbox`, () => {
     assert.doesNotThrow(tryExec);
 
     const result = sandbox.activate();
@@ -29,5 +17,27 @@ if (process.platform === 'darwin') {
 
     assert.doesNotThrow(tryExec);
   });
-}
+} else {
+  if (process.platform === 'win32' || process.platform === 'linux') {
+    test(`${process.platform} activates sandbox`, () => {
+      assert.doesNotThrow(tryExec);
 
+      const result = sandbox.activate();
+      assert.ok(result.success, 'Sandbox failed to activate: ' + result.message);
+
+      // EACCES on Linux, UNKNOWN on Windows.
+      assert.throws(tryExec, /Error: spawn (EACCES|UNKNOWN)/);
+    });
+  }
+
+  if (process.platform === 'darwin') {
+    test('darwin', () => {
+      assert.doesNotThrow(tryExec);
+
+      const result = sandbox.activate();
+      assert.ok(result.success === false, 'Sandbox activated');
+
+      assert.doesNotThrow(tryExec);
+    });
+  }
+}
