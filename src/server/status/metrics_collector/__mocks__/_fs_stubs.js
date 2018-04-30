@@ -40,3 +40,32 @@ export function cGroups(hierarchy) {
     }
   };
 }
+
+class FSError extends Error {
+  constructor(fileName, code) {
+    super('Stub File Sytem Stub Error: ' + fileName);
+    this.code = code;
+    this.stack = null;
+  }
+}
+
+let _mockFiles = Object.create({});
+
+export const setMockFiles = mockFiles => {
+  _mockFiles = Object.create({});
+  if (mockFiles) {
+    const files = Object.keys(mockFiles);
+    for(const file of files) {
+      _mockFiles[file] = mockFiles[file];
+    }
+  }
+};
+
+export const readFileMock = (fileName, callback) => {
+  if (_mockFiles.hasOwnProperty(fileName)) {
+    callback(null, _mockFiles[fileName]);
+  } else {
+    const err = new FSError(fileName, 'ENOENT');
+    callback(err, null);
+  }
+};

@@ -1,5 +1,5 @@
 import { get, isObject, merge } from 'lodash';
-import { keysToSnakeCaseShallow } from '../../utils/case_conversion';
+import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
 
 export class Metrics {
