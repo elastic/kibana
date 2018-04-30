@@ -10,14 +10,16 @@ exports[`DashboardPanel matches snapshot 1`] = `
   >
     <div
       class="panel-heading"
-      data-test-subj="dashboardPanelHeading-"
+      data-test-subj="dashboardPanelHeading-myembeddabletitle"
     >
       <span
-        aria-label="Dashboard panel: "
+        aria-label="Dashboard panel: my embeddable title"
         class="panel-title"
         data-test-subj="dashboardPanelTitle"
-        title=""
-      />
+        title="my embeddable title"
+      >
+        my embeddable title
+      </span>
       <div
         class="kuiMicroButtonGroup"
       >
