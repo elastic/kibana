@@ -11,20 +11,21 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
-import { NODE_ATTRS_KEYS_TO_IGNORE } from './constants';
 
-function formatStats(stats) {
+function formatStats(stats, nodeAttrs) {
   return Object.entries(stats.nodes).reduce((accum, [nodeId, stats]) => {
     const attributes = stats.attributes || {};
     for (const [key, value] of Object.entries(attributes)) {
-      if (!NODE_ATTRS_KEYS_TO_IGNORE.includes(key)) {
-        const attributeString = `${key}:${value}`;
-        accum[attributeString] = accum[attributeString] || [];
-        accum[attributeString].push(nodeId);
+      if (`${key}:${value}` === nodeAttrs) {
+        accum.push({
+          nodeId,
+          stats,
+        });
+        break;
       }
     }
     return accum;
-  }, {});
+  }, []);
 }
 
 async function fetchNodeStats(callWithRequest) {
@@ -35,19 +36,19 @@ async function fetchNodeStats(callWithRequest) {
   return await callWithRequest('nodes.stats', params);
 }
 
-export function registerListRoute(server) {
+export function registerDetailsRoute(server) {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/index_lifecycle_management/nodes/list',
+    path: '/api/index_lifecycle_management/nodes/{nodeAttrs}/details',
     method: 'GET',
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
         const stats = await fetchNodeStats(callWithRequest);
-        const response = formatStats(stats);
+        const response = formatStats(stats, request.params.nodeAttrs);
         reply(response);
       } catch (err) {
         if (isEsError(err)) {

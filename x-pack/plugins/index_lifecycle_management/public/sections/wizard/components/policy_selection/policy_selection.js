@@ -18,7 +18,9 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiPanel,
-  EuiText
+  EuiText,
+  EuiHorizontalRule,
+  EuiButtonEmpty
 } from '@elastic/eui';
 
 export class PolicySelection extends Component {
@@ -26,6 +28,7 @@ export class PolicySelection extends Component {
     fetchPolicies: PropTypes.func.isRequired,
     setSelectedPolicy: PropTypes.func.isRequired,
     done: PropTypes.func.isRequired,
+    back: PropTypes.func.isRequired,
 
     existingPolicyName: PropTypes.string.isRequired,
     policies: PropTypes.array.isRequired
@@ -41,7 +44,7 @@ export class PolicySelection extends Component {
   }
 
   render() {
-    const { policies, existingPolicyName } = this.props;
+    const { policies, existingPolicyName, back } = this.props;
 
     return (
       <div className="euiAnimateContentLoad">
@@ -57,30 +60,6 @@ export class PolicySelection extends Component {
               </p>
             </EuiText>
           </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color="danger">
-                  Hot
-                </EuiHealth>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color="accent">
-                  Warm
-                </EuiHealth>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color="primary">
-                  Cold
-                </EuiHealth>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color="text">
-                  Delete
-                </EuiHealth>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem> */}
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFlexGrid columns={4}>
@@ -111,6 +90,15 @@ export class PolicySelection extends Component {
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
+        <EuiHorizontalRule className="ilmHrule" />
+
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType="sortLeft"
+          onClick={back}
+        >
+          Back
+        </EuiButtonEmpty>
       </div>
     );
   }

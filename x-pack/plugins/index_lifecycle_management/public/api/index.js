@@ -16,6 +16,11 @@ export async function loadNodes() {
   return response.data;
 }
 
+export async function loadNodeDetails(selectedNodeAttrs) {
+  const response = await httpClient.get(`${apiPrefix}/nodes/${selectedNodeAttrs}/details`);
+  return response.data;
+}
+
 export async function loadIndexTemplates() {
   const response = await httpClient.get(`${apiPrefix}/templates`);
   return response.data;

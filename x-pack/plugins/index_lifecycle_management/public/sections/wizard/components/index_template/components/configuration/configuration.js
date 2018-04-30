@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -18,17 +15,20 @@ import {
   EuiSelect,
   EuiFieldNumber,
   EuiHorizontalRule,
-  EuiCallOut
+  EuiCallOut,
+  EuiFormRow,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import {
   STRUCTURE_NODE_ATTRS,
   STRUCTURE_PRIMARY_NODES,
-  STRUCTURE_REPLICAS
+  STRUCTURE_REPLICAS,
 } from '../../../../../../store/constants';
 
 import { ErrableFormRow } from '../../../../form_errors';
+import { NodeAttrsDetails } from '../../../node_attrs_details';
 
-export class Configuration extends PureComponent {
+export class Configuration extends Component {
   static propTypes = {
     fetchNodes: PropTypes.func.isRequired,
     setSelectedNodeAttrs: PropTypes.func.isRequired,
@@ -38,18 +38,26 @@ export class Configuration extends PureComponent {
 
     selectedPrimaryShardCount: PropTypes.oneOfType([
       PropTypes.number,
-      PropTypes.string
+      PropTypes.string,
     ]).isRequired,
     selectedNodeAttrs: PropTypes.string.isRequired,
     nodeOptions: PropTypes.array.isRequired,
     selectedReplicaCount: PropTypes.oneOfType([
       PropTypes.number,
-      PropTypes.string
+      PropTypes.string,
     ]).isRequired,
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    isPrimaryShardCountHigherThanSelectedNodeAttrsCount: PropTypes.bool.isRequired,
+    isPrimaryShardCountHigherThanSelectedNodeAttrsCount:
+      PropTypes.bool.isRequired,
   };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      isShowingNodeDetailsFlyout: false,
+    };
+  }
 
   componentWillMount() {
     this.props.fetchNodes();
@@ -68,7 +76,7 @@ export class Configuration extends PureComponent {
       selectedNodeAttrs,
       errors,
       isShowingErrors,
-      isPrimaryShardCountHigherThanSelectedNodeAttrsCount
+      isPrimaryShardCountHigherThanSelectedNodeAttrsCount,
     } = this.props;
 
     const primaryNodeErrors = isPrimaryShardCountHigherThanSelectedNodeAttrsCount ? (
@@ -78,7 +86,8 @@ export class Configuration extends PureComponent {
         color="warning"
         iconType="help"
       >
-        The selected primary shard count is higher than the number of nodes matching the selected attributes.
+        The selected primary shard count is higher than the number of nodes
+        matching the selected attributes.
       </EuiCallOut>
     ) : null;
 
@@ -89,29 +98,42 @@ export class Configuration extends PureComponent {
           <h4>Configure options</h4>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <ErrableFormRow
-          label="Where do you want your hot indices to live"
-          errorKey={STRUCTURE_NODE_ATTRS}
-          isShowingErrors={isShowingErrors}
-          errors={errors}
-        >
-          <EuiSelect
-            value={selectedNodeAttrs}
-            onChange={async e => {
-              await setSelectedNodeAttrs(e.target.value);
-              validate();
-            }}
-            options={nodeOptions}
-          />
-        </ErrableFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={!selectedNodeAttrs}>
+            <ErrableFormRow
+              label="Where do you want your hot indices to live"
+              errorKey={STRUCTURE_NODE_ATTRS}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+            >
+              <EuiSelect
+                value={selectedNodeAttrs}
+                onChange={async e => {
+                  await setSelectedNodeAttrs(e.target.value);
+                  validate();
+                }}
+                options={nodeOptions}
+              />
+            </ErrableFormRow>
+          </EuiFlexItem>
+          {selectedNodeAttrs ? (
+            <EuiFlexItem grow={false}>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiButtonEmpty
+                  flush="left"
+                  onClick={() =>
+                    this.setState({ isShowingNodeDetailsFlyout: true })
+                  }
+                >
+                  See more details about these nodes
+                </EuiButtonEmpty>
+              </EuiFormRow>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         <EuiSpacer />
-        <EuiCallOut
-          style={{ marginBottom: '1rem' }}
-          title="Note"
-        >
-          <p>
-            Optimize these values for throughput. (Add more)
-          </p>
+        <EuiCallOut style={{ marginBottom: '1rem' }} title="Note">
+          <p>Optimize these values for throughput. (Add more)</p>
         </EuiCallOut>
         <EuiSpacer />
         <EuiFlexGroup>
@@ -148,6 +170,12 @@ export class Configuration extends PureComponent {
             </ErrableFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {this.state.isShowingNodeDetailsFlyout ? (
+          <NodeAttrsDetails
+            selectedNodeAttrs={selectedNodeAttrs}
+            close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
+          />
+        ) : null}
 
         {primaryNodeErrors}
       </div>

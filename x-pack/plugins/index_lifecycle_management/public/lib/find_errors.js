@@ -5,15 +5,18 @@
  */
 
 export const hasErrors = (object, keysToIgnore = []) => {
-  const errors = [];
+  let errors = false;
   for (const [key, value] of Object.entries(object)) {
     if (keysToIgnore.includes(key)) continue;
     if (Array.isArray(value) && value.length > 0) {
-      return true;
-      errors.push(...value);
+      errors = true;
+      break;
     } else if (value) {
-      return hasErrors(value, keysToIgnore);
+      errors = hasErrors(value, keysToIgnore);
+      if (errors) {
+        break;
+      }
     }
   }
-  return false;
+  return errors;
 };

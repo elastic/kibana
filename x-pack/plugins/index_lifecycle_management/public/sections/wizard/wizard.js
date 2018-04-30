@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
@@ -20,12 +17,12 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
-  EuiStepsHorizontal
+  EuiStepsHorizontal,
 } from '@elastic/eui';
 import { bootstrap } from '../../api';
 import {
   STRUCTURE_INDEX_TEMPLATE,
-  STRUCTURE_POLICY_CONFIGURATION
+  STRUCTURE_POLICY_CONFIGURATION,
 } from '../../store/constants';
 
 export class Wizard extends Component {
@@ -36,7 +33,7 @@ export class Wizard extends Component {
     indexTemplatePatch: PropTypes.object.isRequired,
     bootstrapEnabled: PropTypes.bool.isRequired,
     indexName: PropTypes.string.isRequired,
-    aliasName: PropTypes.string.isRequired
+    aliasName: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -44,13 +41,13 @@ export class Wizard extends Component {
 
     this.state = {
       selectedStep: 1,
-      errors: this.getErrors()
+      errors: this.getErrors(),
     };
   }
 
   onSelectedStepChanged = selectedStep => {
     this.setState({
-      selectedStep
+      selectedStep,
     });
   };
 
@@ -101,17 +98,28 @@ export class Wizard extends Component {
           />
         );
       case 2:
-        return <PolicySelection done={() => this.onSelectedStepChanged(3)} />;
+        return (
+          <PolicySelection
+            done={() => this.onSelectedStepChanged(3)}
+            back={() => this.onSelectedStepChanged(1)}
+          />
+        );
       case 3:
         return (
           <PolicyConfiguration
             validate={this.validate}
             errors={errors[STRUCTURE_POLICY_CONFIGURATION]}
             done={() => this.onSelectedStepChanged(4)}
+            back={() => this.onSelectedStepChanged(2)}
           />
         );
       case 4:
-        return <Review done={this.addLifecycle} />;
+        return (
+          <Review
+            done={this.addLifecycle}
+            back={() => this.onSelectedStepChanged(3)}
+          />
+        );
     }
   }
 
@@ -121,29 +129,29 @@ export class Wizard extends Component {
         title: 'Select a template',
         isSelected: this.state.selectedStep === 1,
         isComplete: this.state.selectedStep > 1,
-        onClick: () => this.onSelectedStepChanged(1)
+        onClick: () => this.onSelectedStepChanged(1),
       },
       {
         title: 'Select or create policy',
         isSelected: this.state.selectedStep === 2,
         isComplete: this.state.selectedStep > 2,
         disabled: this.state.selectedStep < 2,
-        onClick: () => this.onSelectedStepChanged(2)
+        onClick: () => this.onSelectedStepChanged(2),
       },
       {
         title: 'Configure policy',
         isSelected: this.state.selectedStep === 3,
         isComplete: this.state.selectedStep > 3,
         disabled: this.state.selectedStep < 3,
-        onClick: () => this.onSelectedStepChanged(3)
+        onClick: () => this.onSelectedStepChanged(3),
       },
       {
         title: 'Review and save',
         isSelected: this.state.selectedStep === 4,
         isComplete: this.state.selectedStep > 4,
         disabled: this.state.selectedStep < 4,
-        onClick: () => this.onSelectedStepChanged(4)
-      }
+        onClick: () => this.onSelectedStepChanged(4),
+      },
     ];
 
     return (

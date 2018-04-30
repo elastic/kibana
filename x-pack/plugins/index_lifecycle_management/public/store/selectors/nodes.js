@@ -4,23 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { createSelector } from 'reselect';
 
 export const getNodes = state => state.nodes.nodes;
 export const getNodeOptions = createSelector(
-  [
-    state => getNodes(state),
-  ],
+  [state => getNodes(state)],
   nodes => {
     if (!nodes) {
       return [];
     }
 
     const options = Object.keys(nodes).map(attrs => ({
-      text: attrs,
+      text: `${attrs} (${nodes[attrs].length})`,
       value: attrs,
     }));
 
@@ -34,8 +29,10 @@ export const getNodeOptions = createSelector(
   }
 );
 
-export const getSelectedPrimaryShardCount = state => state.nodes.selectedPrimaryShardCount;
-export const getSelectedReplicaCount = state => state.nodes.selectedReplicaCount;
+export const getSelectedPrimaryShardCount = state =>
+  state.nodes.selectedPrimaryShardCount;
+export const getSelectedReplicaCount = state =>
+  state.nodes.selectedReplicaCount;
 export const getSelectedNodeAttrs = state => state.nodes.selectedNodeAttrs;
 export const getNodesFromSelectedNodeAttrs = state => {
   const nodes = getNodes(state)[getSelectedNodeAttrs(state)];
@@ -43,4 +40,8 @@ export const getNodesFromSelectedNodeAttrs = state => {
     return nodes.length;
   }
   return null;
+};
+
+export const getNodeDetails = (state, selectedNodeAttrs) => {
+  return state.nodes.details[selectedNodeAttrs];
 };

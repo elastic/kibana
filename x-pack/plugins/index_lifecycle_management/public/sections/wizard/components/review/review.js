@@ -24,6 +24,7 @@ import {
   EuiFlexGrid,
   EuiPanel,
   EuiText,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import { getAffectedIndices } from '../../../../api';
 
@@ -32,6 +33,7 @@ export class Review extends Component {
     setSelectedPolicyName: PropTypes.func.isRequired,
     setSaveAsNewPolicy: PropTypes.func.isRequired,
     done: PropTypes.func.isRequired,
+    back: PropTypes.func.isRequired,
 
     selectedIndexTemplateName: PropTypes.string.isRequired,
     affectedIndexTemplates: PropTypes.array.isRequired,
@@ -63,6 +65,7 @@ export class Review extends Component {
   render() {
     const {
       done,
+      back,
 
       selectedIndexTemplateName,
       affectedIndexTemplates,
@@ -132,7 +135,6 @@ export class Review extends Component {
           ) : null}
         </EuiFlexGrid>
         <EuiHorizontalRule className="ilmHrule" />
-
         {templateDiff.hasChanged ? (
           <Fragment>
             <EuiTitle>
@@ -161,7 +163,10 @@ export class Review extends Component {
             <EuiHorizontalRule className="ilmHrule" />
           </Fragment>
         ) : null}
-
+        <EuiButtonEmpty iconSide="left" iconType="sortLeft" onClick={back}>
+          Back
+        </EuiButtonEmpty>
+        &nbsp;&nbsp;
         <EuiButton
           fill
           color="secondary"

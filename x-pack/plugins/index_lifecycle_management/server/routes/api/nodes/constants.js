@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerListRoute } from './register_list_route';
-import { registerDetailsRoute } from './register_details_route';
-
-export function registerNodesRoutes(server) {
-  registerListRoute(server);
-  registerDetailsRoute(server);
-}
+export const NODE_ATTRS_KEYS_TO_IGNORE = [
+  'ml.enabled',
+  'ml.machine_memory',
+  'ml.max_open_jobs'
+];

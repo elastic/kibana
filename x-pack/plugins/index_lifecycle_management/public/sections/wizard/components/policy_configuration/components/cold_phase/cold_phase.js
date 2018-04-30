@@ -40,6 +40,7 @@ export class ColdPhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     validate: PropTypes.func.isRequired,
+    showNodeDetailsFlyout: PropTypes.func.isRequired,
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
@@ -70,6 +71,7 @@ export class ColdPhase extends PureComponent {
     const {
       setPhaseData,
       validate,
+      showNodeDetailsFlyout,
 
       phaseData,
       nodeOptions,
@@ -170,21 +172,37 @@ export class ColdPhase extends PureComponent {
 
           <EuiSpacer />
 
-          <ErrableFormRow
-            label="Where would you like to allocate these indices?"
-            errorKey={PHASE_NODE_ATTRS}
-            isShowingErrors={isShowingErrors}
-            errors={errors}
-          >
-            <EuiSelect
-              value={phaseData[PHASE_NODE_ATTRS]}
-              options={nodeOptions}
-              onChange={async e => {
-                await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                validate();
-              }}
-            />
-          </ErrableFormRow>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={!phaseData[PHASE_NODE_ATTRS]}>
+              <ErrableFormRow
+                label="Where would you like to allocate these indices?"
+                errorKey={PHASE_NODE_ATTRS}
+                isShowingErrors={isShowingErrors}
+                errors={errors}
+              >
+                <EuiSelect
+                  value={phaseData[PHASE_NODE_ATTRS]}
+                  options={nodeOptions}
+                  onChange={async e => {
+                    await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+                    validate();
+                  }}
+                />
+              </ErrableFormRow>
+            </EuiFlexItem>
+            {phaseData[PHASE_NODE_ATTRS] ? (
+              <EuiFlexItem grow={false}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiButtonEmpty
+                    flush="left"
+                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+                  >
+                    See more details about these nodes
+                  </EuiButtonEmpty>
+                </EuiFormRow>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
 
           <EuiFlexGroup>
             <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>

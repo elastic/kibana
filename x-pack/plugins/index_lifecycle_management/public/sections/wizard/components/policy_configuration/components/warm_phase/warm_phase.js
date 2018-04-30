@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -35,7 +32,7 @@ import {
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
   PHASE_ROLLOVER_AFTER,
-  PHASE_ROLLOVER_AFTER_UNITS
+  PHASE_ROLLOVER_AFTER_UNITS,
 } from '../../../../../../store/constants';
 import { ErrableFormRow } from '../../../../form_errors';
 
@@ -43,6 +40,7 @@ export class WarmPhase extends Component {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     validate: PropTypes.func.isRequired,
+    showNodeDetailsFlyout: PropTypes.func.isRequired,
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
@@ -53,40 +51,40 @@ export class WarmPhase extends Component {
       [PHASE_FORCE_MERGE_ENABLED]: PropTypes.bool.isRequired,
       [PHASE_FORCE_MERGE_SEGMENTS]: PropTypes.oneOfType([
         PropTypes.number,
-        PropTypes.string
+        PropTypes.string,
       ]).isRequired,
       [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
       [PHASE_PRIMARY_SHARD_COUNT]: PropTypes.oneOfType([
         PropTypes.number,
-        PropTypes.string
+        PropTypes.string,
       ]).isRequired,
       [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([
         PropTypes.number,
-        PropTypes.string
+        PropTypes.string,
       ]).isRequired,
       [PHASE_ROLLOVER_AFTER]: PropTypes.oneOfType([
         PropTypes.number,
-        PropTypes.string
+        PropTypes.string,
       ]).isRequired,
-      [PHASE_ROLLOVER_AFTER_UNITS]: PropTypes.string.isRequired
+      [PHASE_ROLLOVER_AFTER_UNITS]: PropTypes.string.isRequired,
     }).isRequired,
 
     hotPhaseReplicaCount: PropTypes.oneOfType([
       PropTypes.number,
-      PropTypes.string
+      PropTypes.string,
     ]).isRequired,
     hotPhasePrimaryShardCount: PropTypes.oneOfType([
       PropTypes.number,
-      PropTypes.string
+      PropTypes.string,
     ]).isRequired,
 
-    nodeOptions: PropTypes.array.isRequired
+    nodeOptions: PropTypes.array.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      applyOnRollover: false
+      applyOnRollover: false,
     };
   }
 
@@ -98,6 +96,7 @@ export class WarmPhase extends Component {
     const {
       validate,
       setPhaseData,
+      showNodeDetailsFlyout,
 
       phaseData,
       hotPhaseReplicaCount,
@@ -105,7 +104,7 @@ export class WarmPhase extends Component {
       nodeOptions,
       errors,
       isShowingErrors,
-      hotPhaseRolloverEnabled
+      hotPhaseRolloverEnabled,
     } = this.props;
 
     return (
@@ -122,7 +121,7 @@ export class WarmPhase extends Component {
                   width: 64,
                   lineHeight: '64px',
                   textAlign: 'center',
-                  color: 'white'
+                  color: 'white',
                 }}
               >
                 <EuiIcon type="sortDown" size="xl" />
@@ -213,7 +212,7 @@ export class WarmPhase extends Component {
                     }}
                     options={[
                       { value: 'd', text: 'days' },
-                      { value: 'h', text: 'hours' }
+                      { value: 'h', text: 'hours' },
                     ]}
                   />
                 </EuiFormRow>
@@ -223,21 +222,37 @@ export class WarmPhase extends Component {
 
           <EuiSpacer />
 
-          <ErrableFormRow
-            label="Where would you like to allocate these indices?"
-            errorKey={PHASE_NODE_ATTRS}
-            isShowingErrors={isShowingErrors}
-            errors={errors}
-          >
-            <EuiSelect
-              value={phaseData[PHASE_NODE_ATTRS]}
-              options={nodeOptions}
-              onChange={async e => {
-                await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                validate();
-              }}
-            />
-          </ErrableFormRow>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={!phaseData[PHASE_NODE_ATTRS]}>
+              <ErrableFormRow
+                label="Where would you like to allocate these indices?"
+                errorKey={PHASE_NODE_ATTRS}
+                isShowingErrors={isShowingErrors}
+                errors={errors}
+              >
+                <EuiSelect
+                  value={phaseData[PHASE_NODE_ATTRS]}
+                  options={nodeOptions}
+                  onChange={async e => {
+                    await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+                    validate();
+                  }}
+                />
+              </ErrableFormRow>
+            </EuiFlexItem>
+            {phaseData[PHASE_NODE_ATTRS] ? (
+              <EuiFlexItem grow={false}>
+                <EuiFormRow hasEmptyLabelSpace>
+                  <EuiButtonEmpty
+                    flush="left"
+                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+                  >
+                    See more details about these nodes
+                  </EuiButtonEmpty>
+                </EuiFormRow>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
               <ErrableFormRow

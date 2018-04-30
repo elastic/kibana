@@ -9,7 +9,8 @@ import {
   fetchedNodes,
   setSelectedNodeAttrs,
   setSelectedPrimaryShardCount,
-  setSelectedReplicaCount
+  setSelectedReplicaCount,
+  fetchedNodeDetails
 } from '../actions/nodes';
 
 const defaultState = {
@@ -17,7 +18,8 @@ const defaultState = {
   selectedNodeAttrs: '',
   selectedPrimaryShardCount: 1,
   selectedReplicaCount: 1,
-  nodes: []
+  nodes: [],
+  details: {},
 };
 
 export const nodes = handleActions(
@@ -27,6 +29,16 @@ export const nodes = handleActions(
         ...state,
         isLoading: false,
         nodes
+      };
+    },
+    [fetchedNodeDetails](state, { payload }) {
+      const { selectedNodeAttrs, details } = payload;
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          [selectedNodeAttrs]: details,
+        }
       };
     },
     [setSelectedNodeAttrs](state, { payload: selectedNodeAttrs }) {

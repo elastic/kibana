@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiFieldText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
 import { WarmPhase } from './components/warm_phase';
@@ -32,6 +33,7 @@ import {
 } from '../../../../store/constants';
 import { hasErrors } from '../../../../lib/find_errors';
 import { ErrableFormRow } from '../../form_errors';
+import { NodeAttrsDetails } from '../node_attrs_details';
 
 export class PolicyConfiguration extends Component {
   static propTypes = {
@@ -41,6 +43,7 @@ export class PolicyConfiguration extends Component {
     setAliasName: PropTypes.func.isRequired,
     setBootstrapEnabled: PropTypes.func.isRequired,
     done: PropTypes.func.isRequired,
+    back: PropTypes.func.isRequired,
     validate: PropTypes.func.isRequired,
 
     affectedIndexTemplates: PropTypes.array.isRequired,
@@ -58,6 +61,8 @@ export class PolicyConfiguration extends Component {
     super(props);
     this.state = {
       isShowingErrors: false,
+      isShowingNodeDetailsFlyout: false,
+      selectedNodeAttrsForDetails: undefined,
     };
   }
 
@@ -74,6 +79,10 @@ export class PolicyConfiguration extends Component {
     }
   };
 
+  showNodeDetailsFlyout = selectedNodeAttrsForDetails => {
+    this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
+  }
+
   render() {
     const {
       setSelectedPolicyName,
@@ -82,6 +91,7 @@ export class PolicyConfiguration extends Component {
       setIndexName,
       setAliasName,
       validate,
+      back,
 
       affectedIndexTemplates,
       selectedIndexTemplateName,
@@ -141,12 +151,14 @@ export class PolicyConfiguration extends Component {
         <WarmPhase
           validate={this.validate}
           errors={errors[PHASE_WARM]}
+          showNodeDetailsFlyout={this.showNodeDetailsFlyout}
           isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_WARM])}
         />
         <EuiHorizontalRule className="ilmHrule" />
         <ColdPhase
           validate={this.validate}
           errors={errors[PHASE_COLD]}
+          showNodeDetailsFlyout={this.showNodeDetailsFlyout}
           isShowingErrors={isShowingErrors && hasErrors(errors[PHASE_COLD])}
         />
         <EuiHorizontalRule className="ilmHrule" />
@@ -240,6 +252,14 @@ export class PolicyConfiguration extends Component {
 
         <EuiSpacer />
 
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType="sortLeft"
+          onClick={back}
+        >
+          Back
+        </EuiButtonEmpty>
+        &nbsp;&nbsp;
         <EuiButton
           fill
           iconSide="right"
@@ -248,6 +268,13 @@ export class PolicyConfiguration extends Component {
         >
           Next
         </EuiButton>
+
+        {this.state.isShowingNodeDetailsFlyout ? (
+          <NodeAttrsDetails
+            selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
+            close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
+          />
+        ) : null}
       </div>
     );
   }
