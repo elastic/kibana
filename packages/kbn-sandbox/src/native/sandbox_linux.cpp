@@ -9,7 +9,7 @@
 
 // Derived from syscall_64.tbl and not importing <sys/syscall.h>
 // because we want to build a "portable" binary and link against
-// an old version of GCC, various syscalls aren't available on
+// an old version of glibc, various syscalls aren't available on
 // these older kernels, specifically __NR_execveat and __NR_seccomp
 #define __X32_SYSCALL_BIT 0x40000000
 #define __NR_seccomp 317
