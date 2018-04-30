@@ -23,9 +23,9 @@ export const TextStylePicker = ({
       size,
       align,
       color,
-      weight,
-      underline,
-      italic,
+      weight: weight || 'normal',
+      underline: underline || false,
+      italic: italic || false,
       [propName]: value,
     });
   }
