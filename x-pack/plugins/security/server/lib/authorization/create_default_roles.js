@@ -8,6 +8,7 @@
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { DEFAULT_RESOURCE } from '../../../common/constants';
 
 
 const createRoleIfDoesntExist = async (callCluster, { name, application, privilege }) => {
@@ -27,7 +28,7 @@ const createRoleIfDoesntExist = async (callCluster, { name, application, privile
           {
             application,
             privileges: [ privilege ],
-            resources: [ 'default' ]
+            resources: [ DEFAULT_RESOURCE ]
           }
         ]
       }

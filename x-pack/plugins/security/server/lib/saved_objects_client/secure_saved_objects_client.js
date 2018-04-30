@@ -9,6 +9,7 @@
 
 import Boom from 'boom';
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { DEFAULT_RESOURCE } from '../../../common/constants';
 
 export class SecureSavedObjectsClient {
   constructor(options) {
@@ -83,7 +84,7 @@ export class SecureSavedObjectsClient {
       body: {
         applications: [{
           application: this._application,
-          resources: ['default'],
+          resources: [DEFAULT_RESOURCE],
           privileges: [version, kibanaAction]
         }]
       }

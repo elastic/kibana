@@ -21,6 +21,7 @@ import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
+import { DEFAULT_RESOURCE } from '../../../common/constants';
 
 const getApplicationPrivileges = (kibanaPrivileges, role, application) => {
   const applicationPrivileges = kibanaPrivileges.reduce((acc, p) => {
@@ -32,7 +33,7 @@ const getApplicationPrivileges = (kibanaPrivileges, role, application) => {
     return applicationPrivileges;
   }
 
-  const applications = role.applications.filter(x => x.application === application && x.resources.indexOf('default') !== -1);
+  const applications = role.applications.filter(x => x.application === application && x.resources.indexOf(DEFAULT_RESOURCE) !== -1);
 
   const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
@@ -56,7 +57,7 @@ const setApplicationPrivileges = (applicationPrivileges, role, application) => {
   role.applications = [...role.applications, {
     application,
     privileges: Object.keys(applicationPrivileges).filter(key => applicationPrivileges[key]),
-    resources: [ 'default' ]
+    resources: [ DEFAULT_RESOURCE ]
   }];
 };
 
