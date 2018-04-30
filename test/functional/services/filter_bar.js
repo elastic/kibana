@@ -58,7 +58,6 @@ export function FilterBarProvider({ getService }) {
     async getFilterFieldIndexPatterns() {
       const indexPatterns = [];
       const groups = await find.allByCssSelector('.ui-select-choices-group-label');
-      console.log('found ' + groups.length + ' index pattern group labels');
       for (let i = 0; i < groups.length; i++) {
         indexPatterns.push(await groups[i].getVisibleText());
       }

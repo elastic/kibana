@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      console.log('showing chrome again');
       const currentUrl = await remote.getCurrentUrl();
       const newUrl = currentUrl.replace('&embed=true', '');
       // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
