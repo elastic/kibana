@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import { ROUTES } from '../../../common/constants';
 import { PipelineListItem } from 'plugins/logstash/models/pipeline_list_item';
 

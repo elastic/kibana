@@ -12,7 +12,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import 'ui/filters/moment';
 
 import template from './field_data_card.html';

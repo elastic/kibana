@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 
 const module = uiModules.get('security');
 module.service('autoLogout', ($window, Promise) => {

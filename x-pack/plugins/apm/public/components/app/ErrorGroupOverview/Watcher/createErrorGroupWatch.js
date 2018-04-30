@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../src/ui/public/chrome';
 import uuid from 'uuid';
 import { isEmpty } from 'lodash';
 import {

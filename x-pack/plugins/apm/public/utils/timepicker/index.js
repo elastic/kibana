@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import 'ui/autoload/all';
 import { updateTimePicker } from '../../store/urlParams';
 

@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
-import chrome from 'ui/chrome';
+import chrome from '../../../../src/ui/public/chrome';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';

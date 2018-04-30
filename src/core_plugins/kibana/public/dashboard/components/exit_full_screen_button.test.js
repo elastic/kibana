@@ -7,7 +7,7 @@ jest.mock('ui/chrome',
 import React from 'react';
 import { render, mount } from 'enzyme';
 import sinon from 'sinon';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 
 import {
   ExitFullScreenButton,

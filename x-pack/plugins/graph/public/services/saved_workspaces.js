@@ -7,7 +7,7 @@
 import _ from 'lodash';
 
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import { reduce } from 'lodash';
 import { ROUTES, WATCH_TYPES, ACTION_MODES } from '../../../common/constants';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details';

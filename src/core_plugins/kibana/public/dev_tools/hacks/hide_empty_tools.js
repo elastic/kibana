@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 
 export function hideEmptyDevTools(Private) {

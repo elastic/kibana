@@ -120,7 +120,7 @@ Object {
           "size": 0,
         },
         "indices": Array [
-          "myIndexPattern",
+          "mocked_value_for:apmIndexPattern",
         ],
       },
     },

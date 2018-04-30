@@ -6,7 +6,7 @@ import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/share';
 import 'ui/query_bar';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 import angular from 'angular';
 import { Notifier, toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';

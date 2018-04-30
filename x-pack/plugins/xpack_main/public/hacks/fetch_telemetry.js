@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uiChrome from 'ui/chrome';
+import uiChrome from '../../../../../src/ui/public/chrome';
 import moment from 'moment';
 
 /**

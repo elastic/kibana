@@ -31,8 +31,8 @@ describe('loadServiceList', () => {
   });
 
   it('should make a http request', () => {
-    expect(fetchMock.lastUrl(matcherName)).toContain(
-      '/api/apm/services?start=myStart&end=myEnd'
+    expect(fetchMock.lastUrl(matcherName)).toBe(
+      '/kibanaBasePath/api/apm/services?start=myStart&end=myEnd'
     );
   });
 

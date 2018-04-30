@@ -18,7 +18,7 @@ import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/ml/components/form_filter_input';
 
 import 'ui/courier';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
 import { luceneStringToDsl } from 'ui/courier/data_source/build_query/lucene_string_to_dsl.js';

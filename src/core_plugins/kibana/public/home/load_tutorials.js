@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../../../ui/public/chrome';
 import { notify } from 'ui/notify';
 
 const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');

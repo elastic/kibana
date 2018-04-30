@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_WIDTH_SCALE_FACTOR = 4;

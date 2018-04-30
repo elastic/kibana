@@ -10,7 +10,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { notify, Notifier } from 'ui/notify';
 import _ from 'lodash';
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 
 let licenseHasExpired = true;
 

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from '../../../../../src/ui/public/chrome';
-
-const apmUiEnabled = chrome.getInjected('apmUiEnabled');
-if (apmUiEnabled === false && chrome.navLinkExists('apm')) {
-  chrome.getNavLinkById('apm').hidden = true;
-}
+jest.mock('../../../../src/ui/public/chrome', () => ({
+  addBasePath: path => `/kibanaBasePath${path}`,
+  getInjected: jest.fn(name => `mocked_value_for:${name}`),
+}));

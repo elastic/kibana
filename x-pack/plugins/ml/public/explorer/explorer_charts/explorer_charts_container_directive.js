@@ -18,7 +18,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import rison from 'rison-node';
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import 'ui/timefilter';
 import template from './explorer_charts_container.html';
 

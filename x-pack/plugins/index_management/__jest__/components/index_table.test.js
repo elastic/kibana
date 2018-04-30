@@ -125,7 +125,7 @@ describe('index table', () => {
     );
     store.dispatch(loadIndicesSuccess({ indices }));
     server = sinon.fakeServer.create();
-    server.respondWith('/api/index_management/indices', [
+    server.respondWith('/kibanaBasePath/api/index_management/indices', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(indices)
@@ -135,7 +135,7 @@ describe('index table', () => {
       { 'Content-Type': 'application/json' },
       JSON.stringify({ acknowledged: true })
     ]);
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith('/kibanaBasePath/api/index_management/indices/reload', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(indices)
@@ -347,7 +347,7 @@ describe('index table', () => {
         status: index.name === 'testy0' ? 'close' : index.status
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith('/kibanaBasePath/api/index_management/indices/reload', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices)
@@ -361,7 +361,7 @@ describe('index table', () => {
         status: index.name === 'testy1' ? 'open' : index.status
       };
     });
-    server.respondWith('/api/index_management/indices/reload', [
+    server.respondWith('/kibanaBasePath/api/index_management/indices/reload', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices)

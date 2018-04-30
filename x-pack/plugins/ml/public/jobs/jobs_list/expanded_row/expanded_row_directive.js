@@ -16,7 +16,7 @@ import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import numeral from '@elastic/numeral';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../src/ui/public/chrome';
 import angular from 'angular';
 import template from './expanded_row.html';
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { toastNotifications } from 'ui/notify';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import { uiModules } from 'ui/modules';
 import { addSystemApiHeader } from 'ui/system_api';
 import { get } from 'lodash';

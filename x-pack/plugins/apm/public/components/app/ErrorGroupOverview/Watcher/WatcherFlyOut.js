@@ -37,7 +37,7 @@ import { ELASTIC_DOCS } from '../../../../utils/documentation';
 
 import { KibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch } from './createErrorGroupWatch';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../src/ui/public/chrome';
 
 const getUserTimezone = _.memoize(() => {
   const uiSettings = chrome.getUiSettingsClient();

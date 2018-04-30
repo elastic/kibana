@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;

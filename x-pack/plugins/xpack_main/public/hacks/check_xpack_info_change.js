@@ -6,7 +6,7 @@
 
 import { identity } from 'lodash';
 import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../src/ui/public/chrome';
 import { Notifier } from 'ui/notify';
 import { DebounceProvider } from 'ui/debounce';
 import { PathProvider } from 'plugins/xpack_main/services/path';

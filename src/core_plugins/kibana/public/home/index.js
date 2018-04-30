@@ -1,5 +1,5 @@
 import './home.less';
-import chrome from 'ui/chrome';
+import chrome from '../../../../ui/public/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';

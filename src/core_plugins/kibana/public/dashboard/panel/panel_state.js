@@ -1,5 +1,5 @@
 import { DASHBOARD_GRID_COLUMN_COUNT, DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 
 /**
  * Represents a panel on a grid. Keeps track of position in the grid and what visualization it

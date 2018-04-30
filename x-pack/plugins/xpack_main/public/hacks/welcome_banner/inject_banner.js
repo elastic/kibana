@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../src/ui/public/chrome';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { fetchTelemetry } from '../fetch_telemetry';
 import { renderBanner } from './render_banner';

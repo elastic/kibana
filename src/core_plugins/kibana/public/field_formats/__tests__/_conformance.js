@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import expect from 'expect.js';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../ui/public/chrome';
 import { fieldFormats } from 'ui/registry/field_formats';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 

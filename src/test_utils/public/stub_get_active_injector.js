@@ -9,7 +9,7 @@
 
 import ngMock from 'ng_mock';
 
-import chrome from 'ui/chrome';
+import chrome from '../../ui/public/chrome';
 import sinon from 'sinon';
 
 /**

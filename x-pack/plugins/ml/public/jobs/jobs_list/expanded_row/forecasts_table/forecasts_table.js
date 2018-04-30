@@ -23,7 +23,7 @@ import {
   EuiLoadingSpinner
 } from '@elastic/eui';
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
-import chrome from 'ui/chrome';
+import chrome from '../../../../../../../../src/ui/public/chrome';
 
 import { FORECAST_REQUEST_STATE } from 'plugins/ml/../common/constants/states';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
