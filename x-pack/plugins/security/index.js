@@ -75,7 +75,8 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacEnabled: config.get('xpack.security.rbac.enabled')
+        rbacEnabled: config.get('xpack.security.rbac.enabled'),
+        rbacApplication: config.get('xpack.security.rbac.application'),
       };
     }
   },

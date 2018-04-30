@@ -64,8 +64,7 @@ export function initRolesApi(server) {
     path: '/api/security/v1/roles/{name}',
     handler(request, reply) {
       const name = request.params.name;
-      // TODO(legrego) - temporarily remove applications from role until ES API is implemented
-      const body = _.omit(request.payload, ['name', 'applications', 'hasUnsupportedCustomPrivileges']);
+      const body = _.omit(request.payload, 'name');
 
       return callWithRequest(request, 'shield.putRole', { name, body }).then(
         () => reply(request.payload),

@@ -22,6 +22,44 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 
+const getApplicationPrivileges = (kibanaPrivileges, role, application) => {
+  const applicationPrivileges = kibanaPrivileges.reduce((acc, p) => {
+    acc[p.name] = false;
+    return acc;
+  }, {});
+
+  if (!role.applications || role.applications.length === 0) {
+    return applicationPrivileges;
+  }
+
+  const applications = role.applications.filter(x => x.application === application && x.resources.indexOf('default') !== -1);
+
+  const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
+  assigned.forEach(a => {
+    applicationPrivileges[a] = true;
+  });
+
+  return applicationPrivileges;
+};
+
+const setApplicationPrivileges = (applicationPrivileges, role, application) => {
+  if (!role.applications) {
+    role.applications = [];
+  }
+
+  // we first remove the matching application entries
+  role.applications = role.applications.filter(x => {
+    x.application !== application;
+  });
+
+  // put the application entry back
+  role.applications = [...role.applications, {
+    application,
+    privileges: Object.keys(applicationPrivileges).filter(key => applicationPrivileges[key]),
+    resources: [ 'default' ]
+  }];
+};
+
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
   resolve: {
@@ -64,7 +102,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, rbacEnabled) {
+  controller($injector, $scope, rbacEnabled, rbacApplication) {
     const $route = $injector.get('$route');
     const kbnUrl = $injector.get('kbnUrl');
     const shieldPrivileges = $injector.get('shieldPrivileges');
@@ -77,8 +115,12 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.users = $route.current.locals.users;
     $scope.indexPatterns = $route.current.locals.indexPatterns;
     $scope.privileges = shieldPrivileges;
-    $scope.kibanaPrivileges = $route.current.locals.kibanaPrivileges;
+
     $scope.rbacEnabled = rbacEnabled;
+    const kibanaPrivileges = $route.current.locals.kibanaPrivileges;
+    const role = $route.current.locals.role;
+    $scope.applicationPrivileges = getApplicationPrivileges(kibanaPrivileges, role, rbacApplication);
+
     $scope.rolesHref = `#${ROLES_PATH}`;
 
     this.isNewRole = $route.current.params.name == null;
@@ -103,6 +145,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.saveRole = (role) => {
       role.indices = role.indices.filter((index) => index.names.length);
       role.indices.forEach((index) => index.query || delete index.query);
+
+      setApplicationPrivileges($scope.applicationPrivileges, role, rbacApplication);
+
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))
         .then($scope.goToRoleList)
@@ -154,12 +199,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       } else {
         role.applications = rolePermissions.concat([permission]);
       }
-    };
-
-    $scope.hasPermission = (role, permission) => {
-      // TODO(legrego): faking until ES is implemented
-      const rolePermissions = role.applications || [];
-      return rolePermissions.find(rolePermission => permission.name === rolePermission.name);
     };
 
     $scope.union = _.flow(_.union, _.compact);
