@@ -52,7 +52,3 @@ export class GrokHighlightRules extends TextHighlightRules {
     };
   }
 }
-
-/*
-%{TIMESTAMP_ISO8601:timestamp} \[%{IPV4:ip};%{WORD:environment}\] %{LOGLEVEL:log_level} %{GREEDYDATA:message}
-*/
