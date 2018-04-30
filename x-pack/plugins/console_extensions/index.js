@@ -10,7 +10,7 @@ export function consoleExtensions(kibana) {
     id: 'console_extensions',
     require: ['kibana', 'console'],
     isEnabled(config) {
-      return config.get('console.enabled');
+      return config.has('console.enabled') && config.get('console.enabled');
     },
     init: server => {
       if (
