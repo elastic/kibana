@@ -23,7 +23,9 @@ export function dropLastBucket(resp, panel, series) {
   return next => results => {
     if (panel.timerange_mode === 'all') return next(results);
     const bucketSize = get(resp, `aggregations.${series.id}.meta.bucketSize`);
+    const minString = get(resp, `aggregations.${series.id}.meta.from`);
     const maxString = get(resp, `aggregations.${series.id}.meta.to`);
+    const min = moment.utc(minString);
     const max = moment.utc(maxString);
     const seriesDropLastBucket = get(series, 'override_drop_last_bucket', 1);
     const dropLastBucket = get(panel, 'drop_last_bucket', seriesDropLastBucket);
@@ -32,10 +34,14 @@ export function dropLastBucket(resp, panel, series) {
     if (dropLastBucket && isCompatibleRequest) {
       results.forEach(item => {
         const lastIndex = item.data.reduceRight((acc, row) => {
-          const date = moment.utc(row[0] + bucketSize);
+          const date = moment.utc(row[0] + (bucketSize * 1000));
           return date.isAfter(max) ? --acc : acc;
         }, item.data.length);
-        item.data = item.data.slice(0, lastIndex);
+        const firstIndex = item.data.reduce((acc, row) => {
+          const date = moment.utc(row[0]);
+          return date.isBefore(min) ? ++acc : acc;
+        }, 0);
+        item.data = item.data.slice(firstIndex, lastIndex);
       });
     }
 

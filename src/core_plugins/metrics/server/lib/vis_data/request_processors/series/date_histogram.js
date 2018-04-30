@@ -23,6 +23,7 @@ import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import { set } from 'lodash';
 import { isMetric } from '../../../../../common/metric_types';
 import { hasSiblingAggs } from '../../helpers/has_sibling_aggs';
+import { getBucketOffset } from '../../helpers/get_bucket_offset';
 
 export default function dateHistogram(req, panel, series) {
   return next => doc => {
@@ -30,6 +31,9 @@ export default function dateHistogram(req, panel, series) {
     const { bucketSize, intervalString } = getBucketSize(req, interval);
     const { from, to }  = offsetTime(req, series.offset_time, panel);
     const { timezone } = req.payload.timerange;
+
+    const offset = getBucketOffset(from.valueOf(), bucketSize * 1000);
+    const offsetString = `${Math.floor(offset / 1000)}s`;
 
     if (isMetric(panel.type) && panel.timerange_mode === 'all') {
       set(doc, `aggs.${series.id}.aggs.timeseries.filters`, { filters: { _all: { match_all: {} } } });
@@ -42,6 +46,7 @@ export default function dateHistogram(req, panel, series) {
         interval: intervalString,
         min_doc_count: 0,
         time_zone: timezone,
+        offset: offsetString,
         extended_bounds: {
           min: boundsMin.valueOf(),
           max: to.valueOf()
@@ -53,7 +58,8 @@ export default function dateHistogram(req, panel, series) {
       from: from.toISOString(),
       timeField,
       intervalString,
-      bucketSize
+      bucketSize,
+      offset: offsetString
     });
     return next(doc);
   };

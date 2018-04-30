@@ -139,7 +139,7 @@ class TablePanelConfig extends Component {
               name="ignore_global_filter"
               onChange={this.props.onChange}
             />
-            <div className="vis_editor__label">Drop Partial Bucket</div>
+            <div className="vis_editor__label">Drop Partial Buckets</div>
             <YesNo
               value={model.drop_last_bucket}
               name="drop_last_bucket"

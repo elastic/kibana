@@ -44,11 +44,12 @@ describe('dropLastBucket(resp, panel, series)', () => {
   });
 
 
-  it('should drop the last partial buckte', () => {
+  it('should drop the last partial bucktet', () => {
     const next = value => value;
     const results = [
       {
         data: [
+          [ 1514791500000, 0 ],
           [ 1514791560000, 0 ],
           [ 1514791620000, 0 ],
           [ 1514791680000, 0 ],

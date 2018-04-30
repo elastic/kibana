@@ -78,46 +78,46 @@ export function DataConfig({ onChange, model, fields }) {
           />
         </div>
         {isTimeseries ? (
-          <label className="vis_editor__label" htmlFor={htmlId('interval')}>
-            Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
-          </label>
-        ) : null}
-        {isTimeseries ? (
-          <input
-            id={htmlId('interval')}
-            className="vis_editor__input"
-            onChange={handleTextChange('interval', 'auto')}
-            value={model.interval}
-          />
-        ) : null}
-        {!isTimeseries ? (
-          <label className="vis_editor__label" htmlFor={htmlId('timerange_mode')}>
-            Timerange mode <Info message={timerangeModeHelp} />
-          </label>
-        ) : null}
-        {!isTimeseries ? (
-          <div className="vis_editor__row_item" data-test-subj="dataTimeRange">
-            <EuiComboBox
-              options={timerangeModes}
-              isClearable={false}
-              onChange={handleSelectChange('timerange_mode')}
-              selectedOptions={selectedOptions}
-              singleSelection={true}
+          <React.Fragment>
+            <label className="vis_editor__label" htmlFor={htmlId('interval')}>
+              Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
+            </label>
+            <input
+              id={htmlId('interval')}
+              className="vis_editor__input"
+              onChange={handleTextChange('interval', 'auto')}
+              value={model.interval}
             />
-          </div>
+          </React.Fragment>
         ) : null}
-        <label className="vis_editor__label" htmlFor={htmlId('timerange_mode_interval')}>
-          Interval (auto, 1s, 1m, 1h, 1d, &gt;=1m)
-        </label>
-        <input
-          disabled={!isTimeseries && !isLastValue}
-          id={htmlId('timerange_mode_interval')}
-          data-test-subj="timeRangeInterval"
-          className="vis_editor__input-grows"
-          type="text"
-          onChange={handleTextChange('timerange_mode_interval')}
-          value={model.timerange_mode_interval}
-        />
+        {!isTimeseries ? (
+          <React.Fragment>
+            <label className="vis_editor__label" htmlFor={htmlId('timerange_mode')}>
+              Timerange mode <Info message={timerangeModeHelp} />
+            </label>
+            <div className="vis_editor__row_item" data-test-subj="dataTimeRange">
+              <EuiComboBox
+                options={timerangeModes}
+                isClearable={false}
+                onChange={handleSelectChange('timerange_mode')}
+                selectedOptions={selectedOptions}
+                singleSelection={true}
+              />
+            </div>
+            <label className="vis_editor__label" htmlFor={htmlId('timerange_mode_interval')}>
+              Interval (auto, 1s, 1m, 1h, 1d, &gt;=1m)
+            </label>
+            <input
+              disabled={!isTimeseries && !isLastValue}
+              id={htmlId('timerange_mode_interval')}
+              data-test-subj="timeRangeInterval"
+              className="vis_editor__input-grows"
+              type="text"
+              onChange={handleTextChange('timerange_mode_interval')}
+              value={model.timerange_mode_interval}
+            />
+          </React.Fragment>
+        ) : null}
       </div>
     </div>
   );

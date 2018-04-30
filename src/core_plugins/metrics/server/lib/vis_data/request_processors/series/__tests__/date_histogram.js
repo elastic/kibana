@@ -70,6 +70,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 interval: '10s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
+                offset: '-10s',
                 extended_bounds: {
                   min: 1483228800000,
                   max: 1483232400000
@@ -82,7 +83,8 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             to: '2017-01-01T01:00:00.000Z',
-            from: '2017-01-01T00:00:00.000Z'
+            from: '2017-01-01T00:00:00.000Z',
+            offset: '-10s'
           }
         }
       }
@@ -110,6 +112,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 interval: '10s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
+                offset: '-10s',
                 extended_bounds: {
                   min: 1483225200000,
                   max: 1483228800000
@@ -122,7 +125,8 @@ describe('dateHistogram(req, panel, series)', () => {
             intervalString: '10s',
             timeField: '@timestamp',
             to: '2017-01-01T00:00:00.000Z',
-            from: '2016-12-31T23:00:00.000Z'
+            from: '2016-12-31T23:00:00.000Z',
+            offset: '-10s'
           }
         }
       }
@@ -153,6 +157,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 interval: '20s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
+                offset: '-20s',
                 extended_bounds: {
                   min: 1483228800000,
                   max: 1483232400000
@@ -163,6 +168,7 @@ describe('dateHistogram(req, panel, series)', () => {
           meta: {
             bucketSize: 20,
             intervalString: '20s',
+            offset: '-20s',
             timeField: 'timestamp',
             to: '2017-01-01T01:00:00.000Z',
             from: '2017-01-01T00:00:00.000Z'
