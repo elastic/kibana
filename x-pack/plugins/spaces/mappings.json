@@ -1,8 +1,14 @@
 {
+  "spaceId": {
+    "type": "keyword"
+  },
   "space": {
     "properties": {
       "name": {
         "type": "text"
+      },
+      "context_path": {
+        "type": "keyword"
       },
       "description": {
         "type": "text"

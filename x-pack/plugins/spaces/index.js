@@ -53,5 +53,33 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     initSpacesApi(server);
+
+    server.ext('onRequest', function spacesOnRequestHandler(request, reply) {
+      const path = request.path;
+      const url = request.url;
+      console.log(`Intercepting request to ${path} with url ${JSON.stringify(url)}`);
+
+      if (path.startsWith('/s/')) {
+        const pathParts = path.split('/');
+        const spaceContextUrl = pathParts[2];
+
+        console.log('got space context', spaceContextUrl);
+
+        request.setBasePath(`/s/${spaceContextUrl}`);
+
+        const newUrl = {
+          ...request.url,
+          path: path.substr(7),
+          pathname: path.substr(7),
+          href: path.substr(7)
+        };
+        console.log('rewriting ', JSON.stringify(newUrl));
+
+        request.setUrl(newUrl);
+        request.app._space = 'test';
+      }
+
+      return reply.continue();
+    });
   }
 });
