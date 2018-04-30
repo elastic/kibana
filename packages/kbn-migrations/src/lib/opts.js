@@ -14,7 +14,7 @@ const pluginSchema = Joi.object({
   migrations: Joi.array().items(migrationSchema),
 });
 
-const documentSchema = Joi.object({
+const documentSchema = Joi.object().unknown().keys({
   id: Joi.string(),
   type: Joi.string().required(),
   attributes: Joi.any().required(),

@@ -183,7 +183,7 @@ export class SavedObjectsClient {
       ];
     };
 
-    const docs = this._upgradeDocuments({ migrationState, docs: objects });
+    const docs = await this._upgradeDocuments({ migrationState, docs: objects });
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
