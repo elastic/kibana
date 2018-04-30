@@ -36,8 +36,10 @@ export class MetricsCollector {
   static sumAccumulate(property, accum, next) {
     const accumValue = accum[property];
     const nextValue = next[property];
-    if (Object.prototype.toString.call(nextValue) === '[object Object]') {
-      // nested structure
+
+    if (nextValue === null || nextValue === undefined) {
+      return; // do not accumulate null/undefined since it can't be part of a sum
+    } else if (nextValue.constructor === Object) { // nested structure, object
       const newProps = {};
       for (const innerKey in nextValue) {
         if (nextValue.hasOwnProperty(innerKey)) {
@@ -45,18 +47,19 @@ export class MetricsCollector {
           newProps[innerKey] = MetricsCollector.sumAccumulate(innerKey, tempAccumValue, nextValue);
         }
       }
-      // merge the newly summed nested values
-      return {
+      return { // merge the newly summed nested values
         ...accumValue,
         ...newProps,
       };
-    } else {
+    } else if (nextValue.constructor === Number) {
       // leaf value
       if (nextValue || nextValue === 0) {
         const tempAccumValue = accumValue || 0; // treat null / undefined as 0
         const tempNextValue = nextValue || 0;
         return tempAccumValue + tempNextValue; // perform sum
       }
+    } else {
+      return; // drop unknown type
     }
   }
 
