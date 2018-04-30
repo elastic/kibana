@@ -9,7 +9,7 @@ export function MonitoringElasticsearchNodesProvider({ getService/*, getPageObje
   const retry = getService('retry');
 
   const SUBJ_LISTING_PAGE = 'elasticsearchNodesListingPage';
-  const SUBJ_TABLE_BODY = 'nodesTableBody';
+  const SUBJ_TABLE_BODY = 'elasticsearchNodesTableBody';
   const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_BODY} nodeLink-`;
 
   return new class ElasticsearchIndices {
