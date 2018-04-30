@@ -26,7 +26,7 @@ import uiRoutes from 'ui/routes';
 import 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege, permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import {
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
@@ -100,11 +100,9 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
 
-  const { checkPermission, createPermissionFailureMessage } = Private(permissionCheckProvider);
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
   };
-  $scope.createPermissionFailureMessage = createPermissionFailureMessage;
 
 
   $scope.initializeVis = function () {

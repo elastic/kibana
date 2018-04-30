@@ -386,8 +386,6 @@ class ForecastingModal extends Component {
             jobOpeningState={this.state.jobOpeningState}
             jobClosingState={this.state.jobClosingState}
             messages={this.state.messages}
-            checkPermission={this.props.checkPermission}
-            createPermissionFailureMessage={this.props.createPermissionFailureMessage}
           />
         }
       </div>
@@ -403,8 +401,6 @@ ForecastingModal.propTypes = {
   jobService: PropTypes.object.isRequired,
   fieldsService: PropTypes.object.isRequired,
   loadForForecastId: PropTypes.func,
-  checkPermission: PropTypes.func,
-  createPermissionFailureMessage: PropTypes.func
 };
 
 export { ForecastingModal };

@@ -6,7 +6,9 @@
 
 
 
-export function buttonsEnabledChecks(permissions, createPermissionFailureMessage, mlNodesAvailable) {
+import { createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
+
+export function buttonsEnabledChecks(permissions, mlNodesAvailable) {
   const NO_ML_NODES_ERROR = 'No ML nodes available';
 
   function newButtonWrapperClass() {

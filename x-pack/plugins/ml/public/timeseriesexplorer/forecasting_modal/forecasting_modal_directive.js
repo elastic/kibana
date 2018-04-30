@@ -10,7 +10,6 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
 import { FieldsServiceProvider } from 'plugins/ml/services/fields_service';
 import { ForecastingModal } from './forecasting_modal';
 
@@ -21,8 +20,6 @@ module.directive('mlForecastingModal', function ($injector, Private) {
   const timefilter = $injector.get('timefilter');
   const reactDirective = $injector.get('reactDirective');
 
-  const { checkPermission, createPermissionFailureMessage } = Private(permissionCheckProvider);
-
   return reactDirective(
     ForecastingModal,
     undefined,
@@ -31,8 +28,6 @@ module.directive('mlForecastingModal', function ($injector, Private) {
       forecastService,
       jobService,
       fieldsService,
-      checkPermission,
-      createPermissionFailureMessage,
       timefilter
     }
   );
