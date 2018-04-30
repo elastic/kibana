@@ -11,11 +11,7 @@ const { TextHighlightRules } = ace.acequire("ace/mode/text_highlight_rules");
 export class GrokHighlightRules extends TextHighlightRules {
   constructor() {
     super();
-    this.$rules = this.getHighlightRules();
-  }
-
-  getHighlightRules() {
-    return {
+    this.$rules = {
       start: [
         {
           token: [
