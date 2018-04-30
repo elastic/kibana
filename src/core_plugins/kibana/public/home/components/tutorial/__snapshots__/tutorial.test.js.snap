@@ -42,6 +42,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       paddingSize="l"
     >
       <InstructionSet
+        hasStatusCheckFailed={false}
         instructionVariants={
           Array [
             Object {
@@ -54,8 +55,10 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
             },
           ]
         }
+        isCheckingStatus={false}
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
@@ -127,6 +130,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       paddingSize="l"
     >
       <InstructionSet
+        hasStatusCheckFailed={false}
         instructionVariants={
           Array [
             Object {
@@ -139,8 +143,10 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
             },
           ]
         }
+        isCheckingStatus={false}
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
@@ -194,6 +200,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       paddingSize="l"
     >
       <InstructionSet
+        hasStatusCheckFailed={false}
         instructionVariants={
           Array [
             Object {
@@ -206,8 +213,10 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
             },
           ]
         }
+        isCheckingStatus={false}
         key="0"
         offset={1}
+        onStatusCheck={[Function]}
         paramValues={Object {}}
         replaceTemplateStrings={[Function]}
         setParameter={[Function]}
