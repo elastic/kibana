@@ -156,6 +156,7 @@ export class TutorialDirectory extends React.Component {
             id={sampleDataSet.id}
             description={sampleDataSet.description}
             name={sampleDataSet.name}
+            launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
             isInstalled={sampleDataSet.isInstalled}
             onRequestComplete={this.loadSampleDataSets}
           />

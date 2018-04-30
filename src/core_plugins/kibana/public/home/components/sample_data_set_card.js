@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment }  from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -40,18 +40,31 @@ export class SampleDataSetCard extends React.Component {
   }
 
   renderBtn = () => {
-    let btnText;
     if (this.props.isInstalled) {
-      btnText = this.state.isProcessingRequest ? 'Uninstalling' : 'Uninstall';
-    } else {
-      btnText = this.state.isProcessingRequest ? 'Installing' : 'Install';
+      return (
+        <Fragment>
+          <EuiButton
+            href={this.props.launchUrl}
+          >
+            Launch
+          </EuiButton>
+          <EuiButton
+            isLoading={this.state.isProcessingRequest}
+            onClick={this.startRequest}
+            color="warning"
+          >
+            {this.state.isProcessingRequest ? 'Uninstalling' : 'Uninstall'}
+          </EuiButton>
+        </Fragment>
+      );
     }
+
     return (
       <EuiButton
         isLoading={this.state.isProcessingRequest}
         onClick={this.startRequest}
       >
-        {btnText}
+        {this.state.isProcessingRequest ? 'Installing' : 'Install'}
       </EuiButton>
     );
   }
@@ -71,6 +84,7 @@ SampleDataSetCard.propTypes = {
   id: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  launchUrl: PropTypes.string.isRequired,
   isInstalled: PropTypes.bool.isRequired,
   onRequestComplete: PropTypes.func.isRequired,
 };
