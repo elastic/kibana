@@ -22,7 +22,7 @@ export async function startTrial(req, xpackInfo) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const options = {
     method: 'POST',
-    path: '_xpack/license/start_trial'
+    path: '_xpack/license/start_trial?acknowledge=true'
   };
   try {
     /*eslint camelcase: 0*/
