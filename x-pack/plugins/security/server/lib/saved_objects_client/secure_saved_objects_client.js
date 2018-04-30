@@ -31,14 +31,14 @@ export class SecureSavedObjectsClient {
   }
 
   async create(type, attributes = {}, options = {}) {
-    await this._performAuthorizationCheck(type, 'create', attributes, options);
+    await this._performAuthorizationCheck(type, 'create');
 
     return await this._client.create(type, attributes, options);
   }
 
   async bulkCreate(objects, options = {}) {
     for (const object of objects) {
-      await this._performAuthorizationCheck(object.type, 'create', object.attributes);
+      await this._performAuthorizationCheck(object.type, 'create');
     }
 
     return await this._client.bulkCreate(objects, options);
@@ -51,14 +51,14 @@ export class SecureSavedObjectsClient {
   }
 
   async find(options = {}) {
-    await this._performAuthorizationCheck(options.type, 'search', null, options);
+    await this._performAuthorizationCheck(options.type, 'search');
 
     return await this._client.find(options);
   }
 
   async bulkGet(objects = []) {
     for (const object of objects) {
-      await this._performAuthorizationCheck(object.type, 'mget', object.attributes);
+      await this._performAuthorizationCheck(object.type, 'mget');
     }
 
     return await this._client.bulkGet(objects);
@@ -71,12 +71,12 @@ export class SecureSavedObjectsClient {
   }
 
   async update(type, id, attributes, options = {}) {
-    await this._performAuthorizationCheck(type, attributes, options);
+    await this._performAuthorizationCheck(type, 'update');
 
     return await this._client.update(type, id, attributes, options);
   }
 
-  async _performAuthorizationCheck(type, action, attributes = {}, options = {}) { // eslint-disable-line no-unused-vars
+  async _performAuthorizationCheck(type, action) {
     const version = `version:${this._kibanaVersion}`;
     const kibanaAction = `action:saved-objects/${type}/${action}`;
 
