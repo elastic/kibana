@@ -9,7 +9,7 @@ import moment from 'moment';
 import { toLocaleString, detectorToString } from 'plugins/ml/util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
-import { permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import numeral from '@elastic/numeral';
 import chrome from 'ui/chrome';
 import angular from 'angular';
@@ -18,7 +18,7 @@ import template from './expanded_row.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobListExpandedRow', function ($location, mlMessageBarService, mlJobService, mlClipboardService, Private) {
+module.directive('mlJobListExpandedRow', function ($location, mlMessageBarService, mlJobService, mlClipboardService) {
   return {
     restrict: 'AE',
     replace: false,
@@ -38,7 +38,6 @@ module.directive('mlJobListExpandedRow', function ($location, mlMessageBarServic
       const DATA_FORMAT = '0.0 b';
 
       $scope.urlBasePath = chrome.getBasePath();
-      const { checkPermission } = Private(permissionCheckProvider);
       $scope.permissions = {
         canPreviewDatafeed: checkPermission('canPreviewDatafeed')
       };

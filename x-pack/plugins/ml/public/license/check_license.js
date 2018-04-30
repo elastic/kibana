@@ -12,6 +12,8 @@ import _ from 'lodash';
 
 import chrome from 'ui/chrome';
 
+let licenseHasExpired = true;
+
 export function checkLicense(Private, Promise, kbnBaseUrl) {
   const xpackInfo = Private(XPackInfoProvider);
   const features = xpackInfo.get('features.ml');
@@ -27,7 +29,7 @@ export function checkLicense(Private, Promise, kbnBaseUrl) {
     return Promise.halt();
   }
 
-  const licenseHasExpired = features.hasExpired || false;
+  licenseHasExpired = features.hasExpired || false;
 
   // If the license has expired ML app will still work for 7 days and then
   // the job management endpoints (e.g. create job, start datafeed) will be restricted.
@@ -60,4 +62,8 @@ export function checkLicenseExpired(Private, Promise, kbnBaseUrl, kbnUrl) {
     .catch(() => {
       return Promise.halt();
     });
+}
+
+export function getLicenseHasExpired() {
+  return licenseHasExpired;
 }

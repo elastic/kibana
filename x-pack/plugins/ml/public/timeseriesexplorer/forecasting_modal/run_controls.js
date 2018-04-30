@@ -31,11 +31,10 @@ import {
 import { JOB_STATE } from '../../../common/constants/states';
 import { ForecastProgress } from './forecast_progress';
 import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
 
 
 function getRunInputDisabledState(
-  checkPermission,
-  createPermissionFailureMessage,
   job,
   isForecastRequested) {
   // Disable the 'run forecast' text field and button if any of the conditions are met:
@@ -79,13 +78,9 @@ export function RunControls({
   isForecastRequested,
   forecastProgress,
   jobOpeningState,
-  jobClosingState,
-  checkPermission,
-  createPermissionFailureMessage }) {
+  jobClosingState }) {
 
   const disabledState = getRunInputDisabledState(
-    checkPermission,
-    createPermissionFailureMessage,
     job,
     isForecastRequested);
 
@@ -175,6 +170,4 @@ RunControls.propType = {
   forecastProgress: PropTypes.number,
   jobOpeningState: PropTypes.number,
   jobClosingState: PropTypes.number,
-  checkPermission: PropTypes.func,
-  createPermissionFailureMessage: PropTypes.func
 };

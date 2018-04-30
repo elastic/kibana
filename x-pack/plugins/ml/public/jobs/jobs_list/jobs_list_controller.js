@@ -19,7 +19,7 @@ import { toLocaleString, mlEscape } from 'plugins/ml/util/string_utils';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege, permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission, createPermissionFailureMessage } from 'plugins/ml/privilege/check_privilege';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { getMlNodeCount, mlNodesAvailable, permissionToViewMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 
@@ -89,7 +89,6 @@ module.controller('MlJobsList',
     $scope.isCloud = isRunningOnCloud();
     $scope.cloudId = getCloudId();
 
-    const { checkPermission, createPermissionFailureMessage } = Private(permissionCheckProvider);
     $scope.createPermissionFailureMessage = createPermissionFailureMessage;
     $scope.permissions = {
       canCreateJob: checkPermission('canCreateJob'),
@@ -285,7 +284,7 @@ module.controller('MlJobsList',
         rowScope.enableTimeSeries = isTimeSeriesViewJob(job);
         rowScope.addItemToRecentlyAccessed = addItemToRecentlyAccessed;
 
-        rowScope.checks = buttonsEnabledChecks($scope.permissions, job, createPermissionFailureMessage, $scope.mlNodesAvailable);
+        rowScope.checks = buttonsEnabledChecks($scope.permissions, job, $scope.mlNodesAvailable);
 
         rowScopes.push(rowScope);
         const jobDescription = job.description || '';

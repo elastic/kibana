@@ -14,7 +14,7 @@ import 'ui/sortable_column';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege, permissionCheckProvider } from 'plugins/ml/privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount, mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { buttonsEnabledChecks } from 'plugins/ml/settings/scheduled_events/calendars_list/buttons_enabled_checks';
 
@@ -45,7 +45,6 @@ module.controller('MlCalendarsList',
     timefilter,
     mlConfirmModalService) {
 
-    const { checkPermission, createPermissionFailureMessage } = Private(permissionCheckProvider);
     $scope.permissions = {
       canCreateCalendar: checkPermission('canCreateCalendar'),
       canDeleteCalendar: checkPermission('canDeleteCalendar'),
@@ -57,7 +56,7 @@ module.controller('MlCalendarsList',
 
     let calendars = [];                // Complete list of calendars received from the ML endpoint.
     $scope.displayCalendars = [];      // List of calendars being displayed after filtering and sorting.
-    $scope.buttonChecks = buttonsEnabledChecks($scope.permissions, createPermissionFailureMessage, mlNodesAvailable());
+    $scope.buttonChecks = buttonsEnabledChecks($scope.permissions, mlNodesAvailable());
 
     // Create a pager object to page through long lists of calendars.
     const PAGE_SIZE = 20;
