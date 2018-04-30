@@ -1,22 +1,14 @@
-#include "sandbox.hpp"
+#include "../sandbox.hpp"
 #include <linux/audit.h>
 #include <linux/seccomp.h>
 #include <linux/filter.h>
-#include <stddef.h>
-#include <errno.h>
 #include <sys/prctl.h>
-#include <string.h> /* for strerror */
-
-// Derived from syscall_64.tbl and not importing <sys/syscall.h>
-// because we want to build a "portable" binary and link against
-// an old version of glibc, various syscalls aren't available on
-// these older kernels, specifically __NR_execveat and __NR_seccomp
-#define __X32_SYSCALL_BIT 0x40000000
-#define __NR_seccomp 317
-#define __NR_fork 57
-#define __NR_vfork 58
-#define __NR_execve 59
-#define __NR_execveat 322
+#include <sys/syscall.h>
+#include <errno.h>
+#include <stddef.h>
+#include <string.h>
+#include <unistd.h>
+#include "system_headers.hpp"
 
 struct sock_filter reject_syscalls[] = {
   BPF_STMT(BPF_LD|BPF_W|BPF_ABS, (offsetof(struct seccomp_data, arch))),
@@ -54,14 +46,18 @@ Sandbox::Result Sandbox::activate() {
   };
 
   if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)) {
-    static const std::string prctl_privs_error = "prctl(PR_SET_NO_NEW_PRIVS, ...) failed: ";
-    return { false, prctl_privs_error + strerror(errno) };
+    static const std::string err = "prctl(PR_SET_NO_NEW_PRIVS, ...) failed: ";
+    return { false, err + strerror(errno) };
   }
 
-  if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog)) {
-    static const std::string prctl_seccomp_error = "prctl(PR_SET_SECCOMP, ...) failed: ";
-    return { false, prctl_seccomp_error + strerror(errno) };
+  if (seccomp(SECCOMP_SET_MODE_FILTER, 0, &prog)) {
+    if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog)) {
+      static const std::string err = "prctl(PR_SET_SECCOMP, ...) failed: ";
+      return { false, err + strerror(errno) };
+    }
+
+    return { true, "Sandbox activated using prctl" };
   }
 
-  return Sandbox::SUCCESS;
+  return { true, "Sandbox activated using seccomp" };
 }
