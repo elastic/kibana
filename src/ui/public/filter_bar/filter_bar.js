@@ -30,9 +30,10 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
     template,
     restrict: 'E',
     scope: {
-      indexPatterns: '='
+      indexPatterns: '=',
+      tooltipContent: '=',
     },
-    link: function ($scope) {
+    link: function ($scope, $elem) {
       // bind query filter actions to the scope
       [
         'addFilters',
@@ -49,6 +50,32 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
+
+      $scope.showCollapseLink = () => {
+        const pill = $elem.find('filter-pill');
+        return pill[pill.length - 1].offsetTop > 10;
+      };
+
+      $scope.filterNavToggle = {
+        isOpen: true,
+        tooltipContent: 'Collapse to hide filters'
+      };
+
+      $scope.toggleFilterShown = () => {
+        const collapser = $elem.find('.filter-nav-link__collapser');
+        const filterPanelPill = $elem.find('.filter-panel__pill');
+        if ($scope.filterNavToggle.isOpen) {
+          $scope.filterNavToggle.tooltipContent = 'Expand to show filters';
+          collapser.attr('aria-expanded', 'false');
+          filterPanelPill.attr('style', 'width: calc(100% - 80px)');
+        } else {
+          $scope.filterNavToggle.tooltipContent = 'Collapse to hide filters';
+          collapser.attr('aria-expanded', 'true');
+          filterPanelPill.attr('style', 'width: auto');
+        }
+
+        $scope.filterNavToggle.isOpen = !$scope.filterNavToggle.isOpen;
+      };
 
       $scope.applyFilters = function (filters) {
         addAndInvertFilters(filterAppliedAndUnwrap(filters));
