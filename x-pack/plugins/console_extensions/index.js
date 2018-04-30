@@ -9,6 +9,9 @@ export function consoleExtensions(kibana) {
   return new kibana.Plugin({
     id: 'console_extensions',
     require: ['kibana', 'console'],
+    isEnabled(config) {
+      return config.get('console.enabled');
+    },
     init: server => {
       if (
         server.plugins.console &&
