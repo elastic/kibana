@@ -17,7 +17,11 @@ import 'ui/accessibility/kbn_accessible_click';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('jobSelectButton', function (mlJobSelectService) {
+import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
+
+module.directive('jobSelectButton', function (Private) {
+
+  const mlJobSelectService = Private(JobSelectServiceProvider);
 
   function link(scope) {
     scope.selectJobBtnJobIdLabel = '';

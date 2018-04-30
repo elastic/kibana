@@ -44,6 +44,7 @@ import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
 import { ForecastServiceProvider } from 'plugins/ml/services/forecast_service';
+import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -66,7 +67,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   timefilter,
   AppState,
-  mlJobSelectService,
   mlTimeSeriesSearchService,
   mlAnomaliesTableService) {
 
@@ -82,6 +82,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   const mlJobService = Private(JobServiceProvider);
   const mlFieldFormatService = Private(FieldFormatServiceProvider);
   const mlForecastService  = Private(ForecastServiceProvider);
+  const mlJobSelectService = Private(JobSelectServiceProvider);
 
   $scope.jobPickerSelections = [];
   $scope.selectedJob;

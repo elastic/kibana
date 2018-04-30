@@ -34,6 +34,7 @@ import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/u
 import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
 uiRoutes
   .when('/explorer/?', {
@@ -56,7 +57,6 @@ module.controller('MlExplorerController', function (
   Private,
   timefilter,
   mlCheckboxShowChartsService,
-  mlJobSelectService,
   mlExplorerDashboardService,
   mlSelectLimitService,
   mlSelectSeverityService) {
@@ -72,6 +72,7 @@ module.controller('MlExplorerController', function (
   const mlResultsService = Private(ResultsServiceProvider);
   const mlJobService = Private(JobServiceProvider);
   const mlFieldFormatService = Private(FieldFormatServiceProvider);
+  const mlJobSelectService = Private(JobSelectServiceProvider);
 
   let resizeTimeout = null;
 
