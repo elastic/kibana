@@ -14,7 +14,7 @@ export const RecognizedResult = ({
   indexPattern,
   savedSearch
 }) => {
-  const id = (savedSearch.id === undefined) ?
+  const id = (savedSearch === undefined || savedSearch.id === undefined) ?
     `index=${indexPattern.id}` :
     `savedSearchId=${savedSearch.id}`;
 
