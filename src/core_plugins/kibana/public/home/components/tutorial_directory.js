@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
+import { SampleDataSetCard } from './sample_data_set_card';
 
 import {
   EuiPage,
@@ -15,8 +16,10 @@ import {
 
 
 import { getTutorials } from '../load_tutorials';
+import { listSampleDataSets } from '../sample_data_sets';
 
-const ALL = 'all';
+const ALL_TAB_ID = 'all';
+const SAMPLE_DATA_TAB_ID = 'sampleData';
 
 export class TutorialDirectory extends React.Component {
 
@@ -24,7 +27,7 @@ export class TutorialDirectory extends React.Component {
     super(props);
 
     this.tabs = [{
-      id: ALL,
+      id: ALL_TAB_ID,
       name: 'All',
     }, {
       id: 'logging',
@@ -35,9 +38,12 @@ export class TutorialDirectory extends React.Component {
     }, {
       id: 'security',
       name: 'Security Analytics',
+    }, {
+      id: SAMPLE_DATA_TAB_ID,
+      name: 'Sample Data',
     }];
 
-    let openTab = ALL;
+    let openTab = ALL_TAB_ID;
     if (props.openTab && this.tabs.some(tab => { return tab.id === props.openTab; })) {
       openTab = props.openTab;
     }
@@ -47,7 +53,17 @@ export class TutorialDirectory extends React.Component {
     };
   }
 
-  async componentWillMount() {
+  componentWillMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async componentDidMount() {
+    this.loadSampleDataSets();
+
     let tutorials = await getTutorials();
     if (this.props.isCloudEnabled) {
       tutorials = tutorials.filter(tutorial => {
@@ -57,8 +73,28 @@ export class TutorialDirectory extends React.Component {
     tutorials.sort((a, b) => {
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
-    this.setState({
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({ // eslint-disable-line react/no-did-mount-set-state
       tutorials: tutorials,
+    });
+  }
+
+  loadSampleDataSets = async () => {
+    const sampleDataSets = await listSampleDataSets();
+    sampleDataSets.sort((a, b) => {
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({
+      sampleDataSets: sampleDataSets,
     });
   }
 
@@ -81,10 +117,18 @@ export class TutorialDirectory extends React.Component {
     ));
   }
 
-  renderTutorials = () => {
+  renderTab = () => {
+    if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
+      return this.renderSampleDataSetsTab();
+    }
+
+    return this.renderTutorialsTab();
+  }
+
+  renderTutorialsTab = () => {
     return this.state.tutorials
       .filter((tutorial) => {
-        if (this.state.selectedTabId === ALL) {
+        if (this.state.selectedTabId === ALL_TAB_ID) {
           return true;
         }
         return this.state.selectedTabId === tutorial.category;
@@ -103,6 +147,22 @@ export class TutorialDirectory extends React.Component {
         );
       });
   };
+
+  renderSampleDataSetsTab = () => {
+    return this.state.sampleDataSets.map(sampleDataSet => {
+      return (
+        <EuiFlexItem key={sampleDataSet.id}>
+          <SampleDataSetCard
+            id={sampleDataSet.id}
+            description={sampleDataSet.description}
+            name={sampleDataSet.name}
+            isInstalled={sampleDataSet.isInstalled}
+            onRequestComplete={this.loadSampleDataSets}
+          />
+        </EuiFlexItem>
+      );
+    });
+  }
 
   render() {
     return (
@@ -123,7 +183,7 @@ export class TutorialDirectory extends React.Component {
         </EuiTabs>
         <EuiSpacer />
         <EuiFlexGrid columns={4}>
-          { this.renderTutorials() }
+          { this.renderTab() }
         </EuiFlexGrid>
 
       </EuiPage>
