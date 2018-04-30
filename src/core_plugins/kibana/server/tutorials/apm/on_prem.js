@@ -65,7 +65,8 @@ export function onPremInstructions(server) {
         ],
         statusCheck: {
           title: 'APM Server status',
-          text: 'Make sure APM Server is running before you start implementing the APM agents.',
+          text:
+            'Make sure APM Server is running before you start implementing the APM agents.',
           btnLabel: 'Check APM Server status',
           success: 'You have correctly setup APM-Server',
           error: 'APM-Server has still not connected to Elasticsearch',
@@ -75,7 +76,7 @@ export function onPremInstructions(server) {
               bool: {
                 filter: {
                   exists: {
-                    field: 'processor.name',
+                    field: 'listening',
                   },
                 },
               },
@@ -111,6 +112,26 @@ export function onPremInstructions(server) {
             instructions: JS_CLIENT_INSTRUCTIONS,
           },
         ],
+        statusCheck: {
+          title: 'Agent status',
+          text:
+            'Make sure you application is running, and the agents are sending data',
+          btnLabel: 'Check agent status',
+          success: 'Data succesfully received from one or more agents',
+          error: `No data has been received from agents yet`,
+          esHitsCheck: {
+            index: apmIndexPattern,
+            query: {
+              bool: {
+                filter: {
+                  exists: {
+                    field: 'processor.name',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     ],
   };
