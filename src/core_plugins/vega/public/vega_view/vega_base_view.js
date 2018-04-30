@@ -3,6 +3,7 @@ import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { TooltipHandler } from './vega_tooltip';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -139,6 +140,20 @@ export class VegaBaseView {
       return true;
     }
     return false;
+  }
+
+  setView(view) {
+    this._view = view;
+
+    if (view && this._parser.tooltips) {
+      // position and padding can be specified with
+      // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
+      const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+
+      // Vega bug workaround - need to destroy tooltip by hand
+      this._addDestroyHandler(() => tthandler.hideTooltip());
+
+    }
   }
 
   /**

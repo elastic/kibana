@@ -73,7 +73,9 @@ exports[`after fetch hideWriteControls 1`] = `
     items={Array []}
     loading={false}
     noItemsMessage={
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <h2>
           <EuiTextColor
             color="subdued"
@@ -96,6 +98,7 @@ exports[`after fetch hideWriteControls 1`] = `
         "totalItemCount": 0,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",
@@ -204,7 +207,9 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     loading={false}
     noItemsMessage={
       <UNDEFINED>
-        <EuiText>
+        <EuiText
+          grow={true}
+        >
           <h2>
             <EuiTextColor
               color="subdued"
@@ -239,6 +244,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         "totalItemCount": 0,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",
@@ -372,6 +378,7 @@ exports[`after fetch renders table rows 1`] = `
         "totalItemCount": 2,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",
@@ -536,6 +543,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         "totalItemCount": 2,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",
@@ -656,6 +664,7 @@ exports[`initialFilter 1`] = `
         "totalItemCount": 0,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",
@@ -776,6 +785,7 @@ exports[`renders table in loading state 1`] = `
         "totalItemCount": 0,
       }
     }
+    responsive={true}
     selection={
       Object {
         "itemId": "id",

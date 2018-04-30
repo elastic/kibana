@@ -49,6 +49,25 @@ filter-bar {
   }
 }
 
+.filter-panel {
+  position: relative;
+
+  .filter-panel__pill {
+    display: inline;
+  }
+
+}
+
+.filter-panel--close {
+  max-height: 36px;
+  overflow-y: hidden;
+  min-width: 250px;
+
+  .filter-panel__pill {
+    display: inline-block;
+  }
+}
+
 .filter-bar {
   padding: 6px 10px 1px 10px;
   background: @filter-bar-bar-bg;
@@ -74,6 +93,30 @@ filter-bar {
     text-overflow: ellipsis;
     vertical-align: middle;
     line-height: 1.5;
+  }
+
+  .action-show {
+    position: absolute;
+    right: 30px;
+    bottom: 0;
+  }
+
+  .filter-nav-link__icon {
+    display: inline;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0.75;
+    font-size: 16px;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .filter-nav-link__collapser {
+      border: none;
+      line-height: 1;
+    }
   }
 
   .filter {

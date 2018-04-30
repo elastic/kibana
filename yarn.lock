@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.38", "@elastic/eui@v0.0.38":
-  version "0.0.38"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.38.tgz#83d55b7ad111c0a917dee2747247bac9f0be7fb5"
+"@elastic/eui@0.0.44", "@elastic/eui@v0.0.44":
+  version "0.0.44"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.44.tgz#b0b58eb1b10d6f8de017f548bb06c5b5f71e3d61"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -97,7 +97,9 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-color "^2.13.8"
+    react-datepicker v1.4.1
     react-input-autosize "^2.2.1"
+    react-virtualized "^9.18.5"
     serve "^6.3.1"
     tabbable "^1.1.0"
     uuid "^3.1.0"
@@ -2347,7 +2349,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@2.2.5, classnames@2.x, classnames@^2.1.2, classnames@^2.2.4, classnames@^2.2.5:
+classnames@2.2.5, classnames@2.x, classnames@^2.1.2, classnames@^2.2.3, classnames@^2.2.4, classnames@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.5.tgz#fb3801d453467649ef3603c7d61a02bd129bde6d"
 
@@ -3632,6 +3634,10 @@ doctrine@^2.0.0, doctrine@^2.0.2:
 dojo@2.0.0-alpha.7:
   version "2.0.0-alpha.7"
   resolved "https://registry.yarnpkg.com/dojo/-/dojo-2.0.0-alpha.7.tgz#c2b25d43d8f72ccc9c8fe89a34906a2d271e5c91"
+
+"dom-helpers@^2.4.0 || ^3.0.0":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/dom-helpers/-/dom-helpers-3.3.1.tgz#fc1a4e15ffdf60ddde03a480a9c0fece821dd4a6"
 
 dom-serialize@^2.2.0:
   version "2.2.1"
@@ -8211,7 +8217,7 @@ longest@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
 
-loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.2.0, loose-envify@^1.3.1:
+loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.2.0, loose-envify@^1.3.0, loose-envify@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.3.1.tgz#d1a8ad33fa9ce0e713d65fdd0ac8b748d478c848"
   dependencies:
@@ -9607,6 +9613,10 @@ pngjs@^3.0.0:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.3.2.tgz#097c3c2a75feb223eadddea6bc9f0050cf830bc3"
 
+popper.js@^1.14.1:
+  version "1.14.3"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.3.tgz#1438f98d046acf7b4d78cd502bf418ac64d4f095"
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
@@ -10260,6 +10270,15 @@ react-color@^2.13.8:
     reactcss "^1.2.0"
     tinycolor2 "^1.4.1"
 
+react-datepicker@v1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/react-datepicker/-/react-datepicker-1.4.1.tgz#ee171b71d9853e56f9eece5fc3186402f4648683"
+  dependencies:
+    classnames "^2.2.5"
+    prop-types "^15.6.0"
+    react-onclickoutside "^6.7.1"
+    react-popper "^0.9.1"
+
 react-dom@^16.0.0, react-dom@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.2.0.tgz#69003178601c0ca19b709b33a83369fe6124c044"
@@ -10323,6 +10342,17 @@ react-motion@^0.5.2:
     performance-now "^0.2.0"
     prop-types "^15.5.8"
     raf "^3.1.0"
+
+react-onclickoutside@^6.7.1:
+  version "6.7.1"
+  resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.7.1.tgz#6a5b5b8b4eae6b776259712c89c8a2b36b17be93"
+
+react-popper@^0.9.1:
+  version "0.9.5"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.9.5.tgz#02a24ef3eec33af9e54e8358ab70eb0e331edd05"
+  dependencies:
+    popper.js "^1.14.1"
+    prop-types "^15.6.1"
 
 react-portal@^3.2.0:
   version "3.2.0"
@@ -10428,6 +10458,16 @@ react-toggle@4.0.2:
   resolved "https://registry.yarnpkg.com/react-toggle/-/react-toggle-4.0.2.tgz#77f487860efb87fafd197672a2db8c885be1440f"
   dependencies:
     classnames "^2.2.5"
+
+react-virtualized@^9.18.5:
+  version "9.18.5"
+  resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.18.5.tgz#42dd390ebaa7ea809bfcaf775d39872641679b89"
+  dependencies:
+    babel-runtime "^6.26.0"
+    classnames "^2.2.3"
+    dom-helpers "^2.4.0 || ^3.0.0"
+    loose-envify "^1.3.0"
+    prop-types "^15.6.0"
 
 react-vis@^1.8.1:
   version "1.9.2"
@@ -13013,6 +13053,13 @@ vega-statistics@^1.2:
   resolved "https://registry.yarnpkg.com/vega-statistics/-/vega-statistics-1.2.1.tgz#a35b3fc3d0039f8bb0a8ba1381d42a1df79ecb34"
   dependencies:
     d3-array "1"
+
+vega-tooltip@^0.9.14:
+  version "0.9.14"
+  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.9.14.tgz#c10bcacf69bf60a02c598ec46b905f94f28c54ac"
+  dependencies:
+    json-stringify-safe "^5.0.1"
+    vega-util "^1.7.0"
 
 vega-transforms@^1.2:
   version "1.3.1"
