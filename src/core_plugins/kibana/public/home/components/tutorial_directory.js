@@ -49,7 +49,8 @@ export class TutorialDirectory extends React.Component {
     }
     this.state = {
       selectedTabId: openTab,
-      tutorials: []
+      tutorials: [],
+      sampleDataSets: [],
     };
   }
 
