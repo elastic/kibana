@@ -11,7 +11,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RecognizedResult } from './recognized_result';
 
-export function dataRecognizerProvider(ml) {
+import { ml } from 'plugins/ml/services/ml_api_service';
+
+export function dataRecognizerProvider() {
 
   class DataRecognizer extends Component {
     constructor(props) {

@@ -12,8 +12,10 @@ import { parseInterval } from 'ui/utils/parse_interval';
 
 import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
 import { replaceTokensInUrlValue } from 'plugins/ml/util/custom_url_utils';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
-export function CustomUrlEditorServiceProvider(es, mlJobService, $q) {
+export function CustomUrlEditorServiceProvider(es, Private, $q) {
+  const mlJobService = Private(JobServiceProvider);
 
   // Builds the full URL for testing out a custom URL configuration, which
   // may contain dollar delimited partition / influencer entity tokens and

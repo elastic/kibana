@@ -15,7 +15,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import 'plugins/ml/services/results_service';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';

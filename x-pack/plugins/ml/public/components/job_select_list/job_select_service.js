@@ -11,10 +11,13 @@
 import _ from 'lodash';
 import { notify } from 'ui/notify';
 
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.service('mlJobSelectService', function ($rootScope, mlJobService, globalState) {
+module.service('mlJobSelectService', function ($rootScope, Private, globalState) {
+  const mlJobService = Private(JobServiceProvider);
 
   const self = this;
 

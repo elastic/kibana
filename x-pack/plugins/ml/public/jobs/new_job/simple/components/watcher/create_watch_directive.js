@@ -8,13 +8,15 @@
 
 import _ from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
+import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 
 import template from './create_watch.html';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlCreateWatch', function (es, ml, mlCreateWatchService) {
+module.directive('mlCreateWatch', function (es, $q, Private) {
   return {
     restrict: 'AE',
     replace: false,
@@ -25,7 +27,7 @@ module.directive('mlCreateWatch', function (es, ml, mlCreateWatchService) {
     },
     template,
     link: function ($scope) {
-
+      const mlCreateWatchService = Private(CreateWatchServiceProvider);
       $scope.config = mlCreateWatchService.config;
       $scope.status = mlCreateWatchService.status;
       $scope.STATUS = mlCreateWatchService.STATUS;
@@ -56,7 +58,7 @@ module.directive('mlCreateWatch', function (es, ml, mlCreateWatchService) {
       }
 
       // load elasticsearch settings to see if email has been configured
-      ml.getNotificationSettings().then((resp) => {
+      $q.when(ml.getNotificationSettings()).then((resp) => {
         if (_.has(resp, 'defaults.xpack.notification.email')) {
           $scope.ui.emailEnabled = true;
         }

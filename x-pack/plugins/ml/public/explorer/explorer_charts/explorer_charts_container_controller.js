@@ -21,15 +21,16 @@ const module = uiModules.get('apps/ml');
 import { explorerChartConfigBuilder } from './explorer_chart_config_builder';
 import { chartLimits } from 'plugins/ml/util/chart_utils';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
-import 'plugins/ml/services/results_service';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
 module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
   const Private = $injector.get('Private');
-  const mlJobService = $injector.get('mlJobService');
   const mlExplorerDashboardService = $injector.get('mlExplorerDashboardService');
-  const mlResultsService = $injector.get('mlResultsService');
   const mlSelectSeverityService = $injector.get('mlSelectSeverityService');
   const $q = $injector.get('$q');
+  const mlResultsService = Private(ResultsServiceProvider);
+  const mlJobService = Private(JobServiceProvider);
 
   $scope.seriesToPlot = [];
 

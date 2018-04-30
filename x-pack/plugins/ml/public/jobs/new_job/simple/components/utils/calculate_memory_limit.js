@@ -10,7 +10,9 @@
 // based on the cardinality of the field being used to split the data.
 // the limit should be 10MB plus 20kB per series, rounded up to the nearest MB.
 
-export function CalculateModelMemoryLimitProvider(ml) {
+import { ml } from 'plugins/ml/services/ml_api_service';
+
+export function CalculateModelMemoryLimitProvider() {
   return function calculateModelMemoryLimit(
     indexPattern,
     splitFieldName,

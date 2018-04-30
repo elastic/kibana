@@ -17,6 +17,7 @@ import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 import { CustomUrlEditorServiceProvider } from 'plugins/ml/jobs/components/custom_url_editor/custom_url_editor_service';
 import { isWebUrl } from 'plugins/ml/util/string_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -28,10 +29,10 @@ module.controller('MlEditJobModal', function (
   $window,
   params,
   Private,
-  mlJobService,
   mlMessageBarService) {
   const msgs = mlMessageBarService;
   msgs.clear();
+  const mlJobService = Private(JobServiceProvider);
   $scope.saveLock = false;
   const refreshJob = params.pscope.refreshJob;
 

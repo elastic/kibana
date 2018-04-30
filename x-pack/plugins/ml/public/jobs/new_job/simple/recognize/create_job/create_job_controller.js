@@ -19,6 +19,9 @@ import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getIndexPatternWithRoute, getSavedSearchWithRoute } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { CreateRecognizerJobsServiceProvider } from './create_job_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 
 uiRoutes
@@ -42,13 +45,12 @@ module
     $window,
     $route,
     $q,
-    ml,
     timefilter,
     Private,
-    mlCreateRecognizerJobsService,
-    mlJobService,
     mlMessageBarService) {
 
+    const mlJobService = Private(JobServiceProvider);
+    const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     $scope.tt = timefilter;
@@ -143,9 +145,9 @@ module
     };
 
     function loadJobConfigs() {
-    // load the job and datafeed configs as well as the kibana saved objects
-    // from the recognizer endpoint
-      ml.getDataRecognizerModule({ moduleId })
+      // load the job and datafeed configs as well as the kibana saved objects
+      // from the recognizer endpoint
+      $q.when(ml.getDataRecognizerModule({ moduleId }))
         .then(resp => {
           // populate the jobs and datafeeds
           if (resp.jobs && resp.jobs.length) {
@@ -259,7 +261,7 @@ module
         const tempQuery = (savedSearch.id === undefined) ?
           undefined : combinedQuery;
 
-        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
+        $q.when(ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName }))
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {

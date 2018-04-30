@@ -8,7 +8,8 @@
 
 
 import 'ngreact';
-import 'plugins/ml/services/forecast_service';
+
+import { ForecastServiceProvider } from 'plugins/ml/services/forecast_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -16,7 +17,8 @@ const module = uiModules.get('apps/ml', ['react']);
 import { ForecastsTable } from './forecasts_table';
 
 module.directive('mlForecastsTable', function ($injector) {
-  const mlForecastService = $injector.get('mlForecastService');
+  const Private = $injector.get('Private');
+  const mlForecastService = Private(ForecastServiceProvider);
   const reactDirective = $injector.get('reactDirective');
 
   return reactDirective(

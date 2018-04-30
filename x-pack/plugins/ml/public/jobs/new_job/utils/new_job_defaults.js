@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 let defaults = {
   anomaly_detectors: {},
@@ -12,7 +12,7 @@ let defaults = {
 };
 let limits = {};
 
-export function loadNewJobDefaults(ml) {
+export function loadNewJobDefaults() {
   return new Promise((resolve) => {
     ml.mlInfo()
       .then((resp) => {

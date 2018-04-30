@@ -6,15 +6,14 @@
 
 
 
-import moment from 'moment';
 import template from './full_time_range_selector.html';
 
-import { FieldsServiceProvider } from 'plugins/ml/services/fields_service';
+import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlFullTimeRangeSelector', function (mlFullTimeRangeSelectorService) {
+module.directive('mlFullTimeRangeSelector', function (Private) {
   return {
     restrict: 'E',
     replace: true,
@@ -25,33 +24,11 @@ module.directive('mlFullTimeRangeSelector', function (mlFullTimeRangeSelectorSer
       query: '='
     },
     controller: function ($scope) {
+      const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
+
       $scope.setFullTimeRange = function () {
         mlFullTimeRangeSelectorService.setFullTimeRange($scope.indexPattern, $scope.query);
       };
     }
   };
-})
-  .service('mlFullTimeRangeSelectorService', function (
-    timefilter,
-    Notifier,
-    Private) {
-
-    const notify = new Notifier();
-    const fieldsService = Private(FieldsServiceProvider);
-
-    // called on button press
-    this.setFullTimeRange = function (indexPattern, query) {
-      // load the earliest and latest time stamps for the index
-      fieldsService.getTimeFieldRange(
-        indexPattern.title,
-        indexPattern.timeFieldName,
-        query)
-        .then((resp) => {
-          timefilter.time.from = moment(resp.start.epoch).toISOString();
-          timefilter.time.to = moment(resp.end.epoch).toISOString();
-        })
-        .catch((resp) => {
-          notify.error(resp);
-        });
-    };
-  });
+});

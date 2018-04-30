@@ -16,11 +16,12 @@ import { detectorToString } from 'plugins/ml/util/string_utils';
 import template from './detectors_list.html';
 import detectorModalTemplate from 'plugins/ml/jobs/new_job/advanced/detector_modal/detector_modal.html';
 import detectorFilterModalTemplate from 'plugins/ml/jobs/new_job/advanced/detector_filter_modal/detector_filter_modal.html';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobDetectorsList', function ($modal, $q, mlJobService) {
+module.directive('mlJobDetectorsList', function ($modal, $q, Private) {
   return {
     restrict: 'AE',
     replace: true,
@@ -33,6 +34,7 @@ module.directive('mlJobDetectorsList', function ($modal, $q, mlJobService) {
     },
     template,
     controller: function ($scope) {
+      const mlJobService = Private(JobServiceProvider);
 
       $scope.addDetector = function (dtr, index) {
         if (dtr !== undefined) {

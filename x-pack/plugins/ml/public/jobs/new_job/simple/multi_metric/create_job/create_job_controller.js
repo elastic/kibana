@@ -37,6 +37,9 @@ import {
   createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { MultiMetricJobServiceProvider } from './create_job_service';
+import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import template from './create_job.html';
 
 uiRoutes
@@ -61,10 +64,7 @@ module
     $route,
     timefilter,
     Private,
-    mlJobService,
-    mlMultiMetricJobService,
     mlMessageBarService,
-    mlFullTimeRangeSelectorService,
     AppState) {
 
     timefilter.enableTimeRangeSelector();
@@ -74,6 +74,9 @@ module
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const calculateModelMemoryLimit = Private(CalculateModelMemoryLimitProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
+    const mlJobService = Private(JobServiceProvider);
+    const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
+    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
     const stateDefaults = {

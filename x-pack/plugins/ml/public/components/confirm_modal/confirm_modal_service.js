@@ -16,28 +16,28 @@ const module = uiModules.get('apps/ml');
 module.service('mlConfirmModalService', function ($modal, $q) {
 
   this.open = function (options) {
-    const deferred = $q.defer();
-    $modal.open({
-      template,
-      controller: 'MlConfirmModal',
-      backdrop: 'static',
-      keyboard: false,
-      size: (options.size === undefined) ? 'sm' : options.size,
-      resolve: {
-        params: function () {
-          return {
-            message: options.message,
-            title: options.title,
-            okLabel: options.okLabel,
-            cancelLabel: options.cancelLabel,
-            hideCancel: options.hideCancel,
-            ok: deferred.resolve,
-            cancel: deferred.reject,
-          };
+    return $q((resolve, reject) => {
+      $modal.open({
+        template,
+        controller: 'MlConfirmModal',
+        backdrop: 'static',
+        keyboard: false,
+        size: (options.size === undefined) ? 'sm' : options.size,
+        resolve: {
+          params: function () {
+            return {
+              message: options.message,
+              title: options.title,
+              okLabel: options.okLabel,
+              cancelLabel: options.cancelLabel,
+              hideCancel: options.hideCancel,
+              ok: resolve,
+              cancel: reject,
+            };
+          }
         }
-      }
+      });
     });
-    return deferred.promise;
   };
 });
 

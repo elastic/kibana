@@ -32,6 +32,7 @@ import { isJobVersionGte } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
@@ -122,7 +123,7 @@ class ForecastingModal extends Component {
       jobOpeningState: PROGRESS_STATES.WAITING
     });
 
-    this.props.jobService.openJob(this.props.job.job_id)
+    this.props.mlJobService.openJob(this.props.job.job_id)
       .then(() => {
         // If open was successful run the forecast, then close the job again.
         this.setState({
@@ -159,7 +160,7 @@ class ForecastingModal extends Component {
     // formats accepted by Kibana (w, M, y) are not valid formats in Elasticsearch.
     const durationInSeconds = parseInterval(this.state.newForecastDuration).asSeconds();
 
-    this.props.forecastService.runForecast(this.props.job.job_id, `${durationInSeconds}s`)
+    this.props.mlForecastService.runForecast(this.props.job.job_id, `${durationInSeconds}s`)
       .then((resp) => {
         // Endpoint will return { acknowledged:true, id: <now timestamp> } before forecast is complete.
         // So wait for results and then refresh the dashboard to the end of the forecast.
@@ -179,7 +180,7 @@ class ForecastingModal extends Component {
     let previousProgress = 0;
     let noProgressMs = 0;
     this.forecastChecker = setInterval(() => {
-      this.props.forecastService.getForecastRequestStats(this.props.job, forecastId)
+      this.props.mlForecastService.getForecastRequestStats(this.props.job, forecastId)
         .then((resp) => {
           // Get the progress (stats value is between 0 and 1).
           const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
@@ -197,7 +198,7 @@ class ForecastingModal extends Component {
 
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              this.props.jobService.closeJob(this.props.job.job_id)
+              this.props.mlJobService.closeJob(this.props.job.job_id)
                 .then(() => {
                   this.setState({
                     jobClosingState: PROGRESS_STATES.DONE
@@ -262,7 +263,7 @@ class ForecastingModal extends Component {
           forecast_status: FORECAST_REQUEST_STATE.FINISHED
         }
       };
-      this.props.forecastService.getForecastsSummary(
+      this.props.mlForecastService.getForecastsSummary(
         job,
         statusFinishedQuery,
         bounds.min.valueOf(),
@@ -281,14 +282,15 @@ class ForecastingModal extends Component {
       // of partitioning fields.
       const entityFieldNames = this.props.entities.map(entity => entity.fieldName);
       if (entityFieldNames.length > 0) {
-        this.props.fieldsService.getCardinalityOfFields(
-          job.datafeed_config.indices,
-          job.datafeed_config.types,
-          entityFieldNames,
-          job.datafeed_config.query,
-          job.data_description.time_field,
-          job.data_counts.earliest_record_timestamp,
-          job.data_counts.latest_record_timestamp)
+        ml.getCardinalityOfFields({
+          index: job.datafeed_config.indices,
+          types: job.datafeed_config.types,
+          fieldNames: entityFieldNames,
+          query: job.datafeed_config.query,
+          timeFieldName: job.data_description.time_field,
+          earliestMs: job.data_counts.earliest_record_timestamp,
+          latestMs: job.data_counts.latest_record_timestamp
+        })
           .then((results) => {
             let numPartitions = 1;
             Object.values(results).forEach((cardinality) => {
@@ -397,9 +399,8 @@ ForecastingModal.propTypes = {
   job: PropTypes.object,
   detectorIndex: PropTypes.number,
   entities: PropTypes.array,
-  forecastService: PropTypes.object.isRequired,
-  jobService: PropTypes.object.isRequired,
-  fieldsService: PropTypes.object.isRequired,
+  mlForecastService: PropTypes.object.isRequired,
+  mlJobService: PropTypes.object.isRequired,
   loadForForecastId: PropTypes.func,
 };
 

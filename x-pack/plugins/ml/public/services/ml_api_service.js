@@ -7,142 +7,139 @@
 
 
 import { pick } from 'lodash';
-import './http_service';
 import chrome from 'ui/chrome';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import { http } from './http_service';
 
-module.service('ml', function (prlHttpService) {
-  const http = prlHttpService;
-  const basePath = chrome.addBasePath('/api/ml');
+const basePath = chrome.addBasePath('/api/ml');
 
-  this.jobs = function (obj) {
+export const ml = {
+  jobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/anomaly_detectors${jobId}`,
     });
-  };
+  },
 
-  this.jobStats = function (obj) {
+  jobStats(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/anomaly_detectors${jobId}/_stats`,
     });
-  };
+  },
 
-  this.addJob = function (obj) {
-    return http.request({
+  addJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
       method: 'PUT',
       data: obj.job
     });
-  };
+  },
 
-  this.openJob = function (obj) {
-    return http.request({
+  openJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_open`,
       method: 'POST'
     });
-  };
+  },
 
-  this.closeJob = function (obj) {
-    return http.request({
+  closeJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_close`,
       method: 'POST'
     });
-  };
+  },
 
-  this.forceCloseJob = function (obj) {
-    return http.request({
+  forceCloseJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_close?force=true`,
       method: 'POST'
     });
-  };
+  },
 
-  this.deleteJob = function (obj) {
-    return http.request({
+  deleteJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
       method: 'DELETE'
     });
-  };
+  },
 
-  this.forceDeleteJob = function (obj) {
-    return http.request({
+  forceDeleteJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}?force=true`,
       method: 'DELETE'
     });
-  };
+  },
 
-  this.updateJob = function (obj) {
-    return http.request({
+  updateJob(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_update`,
       method: 'POST',
       data: obj.job
     });
-  };
+  },
 
-  this.estimateBucketSpan = function (obj) {
-    return http.request({
+  estimateBucketSpan(obj) {
+    return http({
       url: `${basePath}/validate/estimate_bucket_span`,
       method: 'POST',
       data: obj
     });
-  };
+  },
 
-  this.validateJob = function (obj) {
-    return http.request({
+  validateJob(obj) {
+    return http({
       url: `${basePath}/validate/job`,
       method: 'POST',
       data: obj
     });
-  };
+  },
 
-  this.datafeeds = function (obj) {
+  datafeeds(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/datafeeds${datafeedId}`,
     });
-  };
+  },
 
-  this.datafeedStats = function (obj) {
+  datafeedStats(obj) {
     const datafeedId = (obj && obj.datafeedId) ? `/${obj.datafeedId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/datafeeds${datafeedId}/_stats`,
     });
-  };
+  },
 
-  this.addDatafeed = function (obj) {
-    return http.request({
+  addDatafeed(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}`,
       method: 'PUT',
       data: obj.datafeedConfig
     });
-  };
+  },
 
-  this.updateDatafeed = function (obj) {
-    return http.request({
+  updateDatafeed(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_update`,
       method: 'POST',
       data: obj.datafeedConfig
     });
-  };
+  },
 
-  this.deleteDatafeed = function (obj) {
-    return http.request({
+  deleteDatafeed(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}`,
       method: 'DELETE'
     });
-  };
+  },
 
-  this.forceDeleteDatafeed = function (obj) {
-    return http.request({
+  forceDeleteDatafeed(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}?force=true`,
       method: 'DELETE'
     });
-  };
+  },
 
-  this.startDatafeed = function (obj) {
+  startDatafeed(obj) {
     const data = {};
     if(obj.start !== undefined) {
       data.start = obj.start;
@@ -150,78 +147,78 @@ module.service('ml', function (prlHttpService) {
     if(obj.end !== undefined) {
       data.end = obj.end;
     }
-    return http.request({
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_start`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.stopDatafeed = function (obj) {
-    return http.request({
+  stopDatafeed(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_stop`,
       method: 'POST'
     });
-  };
+  },
 
-  this.datafeedPreview = function (obj) {
-    return http.request({
+  datafeedPreview(obj) {
+    return http({
       url: `${basePath}/datafeeds/${obj.datafeedId}/_preview`,
       method: 'GET'
     });
-  };
+  },
 
-  this.validateDetector = function (obj) {
-    return http.request({
+  validateDetector(obj) {
+    return http({
       url: `${basePath}/anomaly_detectors/_validate/detector`,
       method: 'POST',
       data: obj.detector
     });
-  };
+  },
 
-  this.forecast = function (obj) {
+  forecast(obj) {
     const data = {};
     if(obj.duration !== undefined) {
       data.duration = obj.duration;
     }
 
-    return http.request({
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/_forecast`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.overallBuckets = function (obj) {
+  overallBuckets(obj) {
     const data = pick(obj, [
       'topN',
       'bucketSpan',
       'start',
       'end'
     ]);
-    return http.request({
+    return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}/results/overall_buckets`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.checkPrivilege = function (obj) {
-    return http.request({
+  checkPrivilege(obj) {
+    return http({
       url: `${basePath}/_has_privileges`,
       method: 'POST',
       data: obj
     });
-  };
+  },
 
-  this.getNotificationSettings = function () {
-    return http.request({
+  getNotificationSettings() {
+    return http({
       url: `${basePath}/notification_settings`,
       method: 'GET'
     });
-  };
+  },
 
-  this.getFieldCaps = function (obj) {
+  getFieldCaps(obj) {
     const data = {};
     if(obj.index !== undefined) {
       data.index = obj.index;
@@ -229,28 +226,28 @@ module.service('ml', function (prlHttpService) {
     if(obj.fields !== undefined) {
       data.fields = obj.fields;
     }
-    return http.request({
+    return http({
       url: `${basePath}/indices/field_caps`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.recognizeIndex = function (obj) {
-    return http.request({
+  recognizeIndex(obj) {
+    return http({
       url: `${basePath}/modules/recognize/${obj.indexPatternTitle}`,
       method: 'GET'
     });
-  };
+  },
 
-  this.getDataRecognizerModule = function (obj) {
-    return http.request({
+  getDataRecognizerModule(obj) {
+    return http({
       url: `${basePath}/modules/get_module/${obj.moduleId}`,
       method: 'GET'
     });
-  };
+  },
 
-  this.setupDataRecognizerConfig = function (obj) {
+  setupDataRecognizerConfig(obj) {
     const data = pick(obj, [
       'prefix',
       'groups',
@@ -258,14 +255,14 @@ module.service('ml', function (prlHttpService) {
       'query'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/modules/setup/${obj.moduleId}`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.getVisualizerFieldStats = function (obj) {
+  getVisualizerFieldStats(obj) {
     const data = pick(obj, [
       'query',
       'timeFieldName',
@@ -277,14 +274,14 @@ module.service('ml', function (prlHttpService) {
       'maxExamples'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/data_visualizer/get_field_stats/${obj.indexPatternTitle}`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.getVisualizerOverallStats = function (obj) {
+  getVisualizerOverallStats(obj) {
     const data = pick(obj, [
       'query',
       'timeFieldName',
@@ -295,61 +292,60 @@ module.service('ml', function (prlHttpService) {
       'nonAggregatableFields'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/data_visualizer/get_overall_stats/${obj.indexPatternTitle}`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.calendars = function (obj) {
+  calendars(obj) {
     const calendarId = (obj && obj.calendarId) ? `/${obj.calendarId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/calendars${calendarId}`,
       method: 'GET'
     });
-  };
+  },
 
-
-  this.addCalendar = function (obj) {
-    return http.request({
+  addCalendar(obj) {
+    return http({
       url: `${basePath}/calendars`,
       method: 'PUT',
       data: obj
     });
-  };
+  },
 
-  this.updateCalendar = function (obj) {
+  updateCalendar(obj) {
     const calendarId = (obj && obj.calendarId) ? `/${obj.calendarId}` : '';
-    return http.request({
+    return http({
       url: `${basePath}/calendars${calendarId}`,
       method: 'PUT',
       data: obj
     });
-  };
+  },
 
-  this.deleteCalendar = function (obj) {
-    return http.request({
+  deleteCalendar(obj) {
+    return http({
       url: `${basePath}/calendars/${obj.calendarId}`,
       method: 'DELETE'
     });
-  };
+  },
 
-  this.mlNodeCount = function () {
-    return http.request({
+  mlNodeCount() {
+    return http({
       url: `${basePath}/ml_node_count`,
       method: 'GET'
     });
-  };
+  },
 
-  this.mlInfo = function () {
-    return http.request({
+  mlInfo() {
+    return http({
       url: `${basePath}/info`,
       method: 'GET'
     });
-  };
+  },
 
-  this.calculateModelMemoryLimit = function (obj) {
+  calculateModelMemoryLimit(obj) {
     const data = pick(obj, [
       'indexPattern',
       'splitFieldName',
@@ -361,14 +357,14 @@ module.service('ml', function (prlHttpService) {
       'latestMs'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/validate/calculate_model_memory_limit`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.getCardinalityOfFields = function (obj) {
+  getCardinalityOfFields(obj) {
     const data = pick(obj, [
       'index',
       'types',
@@ -379,25 +375,24 @@ module.service('ml', function (prlHttpService) {
       'latestMs'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/fields_service/field_cardinality`,
       method: 'POST',
       data
     });
-  };
+  },
 
-  this.getTimeFieldRange = function (obj) {
+  getTimeFieldRange(obj) {
     const data = pick(obj, [
       'index',
       'timeFieldName',
       'query'
     ]);
 
-    return http.request({
+    return http({
       url: `${basePath}/fields_service/time_field_range`,
       method: 'POST',
       data
     });
-  };
-
-});
+  }
+};

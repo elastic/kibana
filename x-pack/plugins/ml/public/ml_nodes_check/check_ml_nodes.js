@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 let mlNodeCount = 0;
 let userHasPermissionToViewMlNodeCount = false;
 
-export function checkMlNodesAvailable(ml, kbnUrl) {
-  getMlNodeCount(ml).then((nodes) => {
+export function checkMlNodesAvailable(kbnUrl) {
+  getMlNodeCount().then((nodes) => {
     if (nodes.count !== undefined && nodes.count > 0) {
       Promise.resolve();
     } else {
@@ -20,7 +20,7 @@ export function checkMlNodesAvailable(ml, kbnUrl) {
   });
 }
 
-export function getMlNodeCount(ml) {
+export function getMlNodeCount() {
   return new Promise((resolve) => {
     ml.mlNodeCount()
       .then((nodes) => {

@@ -11,155 +11,150 @@
 import _ from 'lodash';
 
 import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
-
-module.service('mlForecastService', function ($q, es, ml) {
+export function ForecastServiceProvider(es, $q) {
 
   // Gets a basic summary of the most recently run forecasts for the specified
   // job, with results at or later than the supplied timestamp.
   // Extra query object can be supplied, or pass null if no additional query.
   // Returned response contains a forecasts property, which is an array of objects
   // containing id, earliest and latest keys.
-  this.getForecastsSummary = function (
+  function getForecastsSummary(
     job,
     query,
     earliestMs,
     maxResults
   ) {
-    const deferred = $q.defer();
-    const obj = {
-      success: true,
-      forecasts: []
-    };
+    return $q((resolve, reject) => {
+      const obj = {
+        success: true,
+        forecasts: []
+      };
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID, result type and earliest time, plus
-    // the additional query if supplied.
-    const filterCriteria = [
-      {
-        term: { result_type: 'model_forecast_request_stats' }
-      },
-      {
-        term: { job_id: job.job_id }
-      },
-      {
-        range: {
-          timestamp: {
-            gte: earliestMs,
-            format: 'epoch_millis'
-          }
-        }
-      }
-    ];
-
-    if (query) {
-      filterCriteria.push(query);
-    }
-
-    es.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: maxResults,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria
-          }
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the job ID, result type and earliest time, plus
+      // the additional query if supplied.
+      const filterCriteria = [
+        {
+          term: { result_type: 'model_forecast_request_stats' }
         },
-        sort: [
-          { forecast_create_timestamp: { 'order': 'desc' } }
-        ]
-      }
-    })
-      .then((resp) => {
-        if (resp.hits.total !== 0) {
-          _.each(resp.hits.hits, (hit) => {
-            obj.forecasts.push(hit._source);
-          });
+        {
+          term: { job_id: job.job_id }
+        },
+        {
+          range: {
+            timestamp: {
+              gte: earliestMs,
+              format: 'epoch_millis'
+            }
+          }
         }
+      ];
 
-        deferred.resolve(obj);
+      if (query) {
+        filterCriteria.push(query);
+      }
+
+      es.search({
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: maxResults,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria
+            }
+          },
+          sort: [
+            { forecast_create_timestamp: { 'order': 'desc' } }
+          ]
+        }
       })
-      .catch((resp) => {
-        deferred.reject(resp);
-      });
+        .then((resp) => {
+          if (resp.hits.total !== 0) {
+            obj.forecasts = resp.hits.hits.map(hit => hit._source);
+          }
 
-    return deferred.promise;
-  };
+          resolve(obj);
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
+    });
+  }
 
   // Obtains the earliest and latest timestamps for the forecast data from
   // the forecast with the specified ID.
   // Returned response contains earliest and latest properties which are the
   // timestamps of the first and last model_forecast results.
-  this.getForecastDateRange = function (job, forecastId) {
+  function getForecastDateRange(job, forecastId) {
 
-    const deferred = $q.defer();
-    const obj = {
-      success: true,
-      earliest: null,
-      latest: null
-    };
+    return $q((resolve, reject) => {
+      const obj = {
+        success: true,
+        earliest: null,
+        latest: null
+      };
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID, forecast ID, result type and time range.
-    const filterCriteria = [{
-      query_string: {
-        query: 'result_type:model_forecast',
-        analyze_wildcard: true
-      }
-    },
-    {
-      term: { job_id: job.job_id }
-    },
-    {
-      term: { forecast_id: forecastId }
-    }];
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the job ID, forecast ID, result type and time range.
+      const filterCriteria = [{
+        query_string: {
+          query: 'result_type:model_forecast',
+          analyze_wildcard: true
+        }
+      },
+      {
+        term: { job_id: job.job_id }
+      },
+      {
+        term: { forecast_id: forecastId }
+      }];
 
-    // TODO - add in criteria for detector index and entity fields (by, over, partition)
-    // once forecasting with these parameters is supported.
+      // TODO - add in criteria for detector index and entity fields (by, over, partition)
+      // once forecasting with these parameters is supported.
 
-    es.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria
-          }
-        },
-        aggs: {
-          earliest: {
-            min: {
-              field: 'timestamp'
+      es.search({
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria
             }
           },
-          latest: {
-            max: {
-              field: 'timestamp'
+          aggs: {
+            earliest: {
+              min: {
+                field: 'timestamp'
+              }
+            },
+            latest: {
+              max: {
+                field: 'timestamp'
+              }
             }
           }
         }
-      }
-    })
-      .then((resp) => {
-        obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
-        obj.latest = _.get(resp, 'aggregations.latest.value', null);
-        if (obj.earliest ===  null || obj.latest === null) {
-          deferred.reject(resp);
-        } else {
-          deferred.resolve(obj);
-        }
       })
-      .catch((resp) => {
-        deferred.reject(resp);
-      });
+        .then((resp) => {
+          obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
+          obj.latest = _.get(resp, 'aggregations.latest.value', null);
+          if (obj.earliest ===  null || obj.latest === null) {
+            reject(resp);
+          } else {
+            resolve(obj);
+          }
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
 
-    return deferred.promise;
-  };
+    });
+  }
 
   // Obtains the requested forecast model data for the forecast with the specified ID.
-  this.getForecastData = function (
+  function getForecastData(
     job,
     detectorIndex,
     forecastId,
@@ -198,184 +193,192 @@ module.service('mlForecastService', function ($q, es, ml) {
       }
     }
 
-    const deferred = $q.defer();
-    const obj = {
-      success: true,
-      results: {}
-    };
-
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID, forecast ID, detector index, result type and time range.
-    const filterCriteria = [{
-      query_string: {
-        query: 'result_type:model_forecast',
-        analyze_wildcard: true
-      }
-    },
-    {
-      term: { job_id: job.job_id }
-    },
-    {
-      term: { forecast_id: forecastId }
-    },
-    {
-      term: { detector_index: detectorIndex }
-    },
-    {
-      range: {
-        timestamp: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis'
-        }
-      }
-    }];
-
-
-    // Add in term queries for each of the specified criteria.
-    _.each(criteriaFields, (criteria) => {
-      filterCriteria.push({
-        term: {
-          [criteria.fieldName]: criteria.fieldValue
-        }
-      });
-    });
-
-
-
-    // If an aggType object has been passed in, use it.
-    // Otherwise default to avg, min and max aggs for the
-    // forecast prediction, upper and lower
-    const forecastAggs = (aggType === undefined) ?
-      { avg: 'avg', max: 'max', min: 'min' } :
-      {
-        avg: aggType.avg,
-        max: aggType.max,
-        min: aggType.min
+    return $q((resolve, reject) => {
+      const obj = {
+        success: true,
+        results: {}
       };
 
-    es.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the job ID, forecast ID, detector index, result type and time range.
+      const filterCriteria = [{
+        query_string: {
+          query: 'result_type:model_forecast',
+          analyze_wildcard: true
+        }
+      },
+      {
+        term: { job_id: job.job_id }
+      },
+      {
+        term: { forecast_id: forecastId }
+      },
+      {
+        term: { detector_index: detectorIndex }
+      },
+      {
+        range: {
+          timestamp: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis'
           }
-        },
-        aggs: {
-          times: {
-            date_histogram: {
-              field: 'timestamp',
-              interval: interval,
-              min_doc_count: 1
-            },
-            aggs: {
-              prediction: {
-                [forecastAggs.avg]: {
-                  field: 'forecast_prediction'
-                }
+        }
+      }];
+
+
+      // Add in term queries for each of the specified criteria.
+      _.each(criteriaFields, (criteria) => {
+        filterCriteria.push({
+          term: {
+            [criteria.fieldName]: criteria.fieldValue
+          }
+        });
+      });
+
+
+
+      // If an aggType object has been passed in, use it.
+      // Otherwise default to avg, min and max aggs for the
+      // forecast prediction, upper and lower
+      const forecastAggs = (aggType === undefined) ?
+        { avg: 'avg', max: 'max', min: 'min' } :
+        {
+          avg: aggType.avg,
+          max: aggType.max,
+          min: aggType.min
+        };
+
+      es.search({
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria
+            }
+          },
+          aggs: {
+            times: {
+              date_histogram: {
+                field: 'timestamp',
+                interval: interval,
+                min_doc_count: 1
               },
-              forecastUpper: {
-                [forecastAggs.max]: {
-                  field: 'forecast_upper'
-                }
-              },
-              forecastLower: {
-                [forecastAggs.min]: {
-                  field: 'forecast_lower'
+              aggs: {
+                prediction: {
+                  [forecastAggs.avg]: {
+                    field: 'forecast_prediction'
+                  }
+                },
+                forecastUpper: {
+                  [forecastAggs.max]: {
+                    field: 'forecast_upper'
+                  }
+                },
+                forecastLower: {
+                  [forecastAggs.min]: {
+                    field: 'forecast_lower'
+                  }
                 }
               }
             }
           }
         }
-      }
-    })
-      .then((resp) => {
-        const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, (dataForTime) => {
-          const time = dataForTime.key;
-          obj.results[time] = {
-            prediction: _.get(dataForTime, ['prediction', 'value']),
-            forecastUpper: _.get(dataForTime, ['forecastUpper', 'value']),
-            forecastLower: _.get(dataForTime, ['forecastLower', 'value'])
-          };
+      })
+        .then((resp) => {
+          const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
+          _.each(aggregationsByTime, (dataForTime) => {
+            const time = dataForTime.key;
+            obj.results[time] = {
+              prediction: _.get(dataForTime, ['prediction', 'value']),
+              forecastUpper: _.get(dataForTime, ['forecastUpper', 'value']),
+              forecastLower: _.get(dataForTime, ['forecastLower', 'value'])
+            };
+          });
+
+          resolve(obj);
+        })
+        .catch((resp) => {
+          reject(resp);
         });
 
-        deferred.resolve(obj);
-      })
-      .catch((resp) => {
-        deferred.reject(resp);
-      });
-
-    return deferred.promise;
-  };
+    });
+  }
 
   // Runs a forecast
-  this.runForecast = function (jobId, duration) {
+  function runForecast(jobId, duration) {
     console.log('ML forecast service run forecast with duration:', duration);
-    const deferred = $q.defer();
+    return $q((resolve, reject) => {
 
-    ml.forecast({
-      jobId,
-      duration
-    })
-      .then((resp) => {
-        deferred.resolve(resp);
-      }).catch((err) => {
-        deferred.reject(err);
-      });
-    return deferred.promise;
-  };
+      ml.forecast({
+        jobId,
+        duration
+      })
+        .then((resp) => {
+          resolve(resp);
+        }).catch((err) => {
+          reject(err);
+        });
+    });
+  }
 
   // Gets stats for a forecast that has been run on the specified job.
   // Returned response contains a stats property, including
   // forecast_progress (a value from 0 to 1),
   // and forecast_status ('finished' when complete) properties.
-  this.getForecastRequestStats = function (job, forecastId) {
-    const deferred = $q.defer();
-    const obj = {
-      success: true,
-      stats: {}
-    };
+  function getForecastRequestStats(job, forecastId) {
+    return $q((resolve, reject) => {
+      const obj = {
+        success: true,
+        stats: {}
+      };
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the job ID, result type and earliest time.
-    const filterCriteria = [{
-      query_string: {
-        query: 'result_type:model_forecast_request_stats',
-        analyze_wildcard: true
-      }
-    },
-    {
-      term: { job_id: job.job_id }
-    },
-    {
-      term: { forecast_id: forecastId }
-    }];
+      // Build the criteria to use in the bool filter part of the request.
+      // Add criteria for the job ID, result type and earliest time.
+      const filterCriteria = [{
+        query_string: {
+          query: 'result_type:model_forecast_request_stats',
+          analyze_wildcard: true
+        }
+      },
+      {
+        term: { job_id: job.job_id }
+      },
+      {
+        term: { forecast_id: forecastId }
+      }];
 
-    es.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria
+      es.search({
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 1,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria
+            }
           }
         }
-      }
-    })
-      .then((resp) => {
-        if (resp.hits.total !== 0) {
-          obj.stats = _.first(resp.hits.hits)._source;
-        }
-        deferred.resolve(obj);
       })
-      .catch((resp) => {
-        deferred.reject(resp);
-      });
+        .then((resp) => {
+          if (resp.hits.total !== 0) {
+            obj.stats = _.first(resp.hits.hits)._source;
+          }
+          resolve(obj);
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
 
-    return deferred.promise;
+    });
+  }
+
+  return {
+    getForecastsSummary,
+    getForecastDateRange,
+    getForecastData,
+    runForecast,
+    getForecastRequestStats
   };
 
-});
+}

@@ -8,19 +8,19 @@
 
 import _ from 'lodash';
 
-import { FieldsServiceProvider } from 'plugins/ml/services/fields_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 import { isModelPlotEnabled } from 'plugins/ml/../common/util/job_utils';
 import { buildConfigFromDetector } from 'plugins/ml/util/chart_config_builder';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.service('mlTimeSeriesSearchService', function (
   $q,
-  $timeout,
-  Private,
-  es,
-  mlResultsService) {
+  Private) {
+
+  const mlResultsService = Private(ResultsServiceProvider);
 
   this.getMetricData = function (job, detectorIndex, entityFields, earliestMs, latestMs, interval) {
     if (isModelPlotEnabled(job, detectorIndex, entityFields)) {
@@ -63,40 +63,40 @@ module.service('mlTimeSeriesSearchService', function (
         interval
       );
     } else {
-      const deferred = $q.defer();
-      const obj = {
-        success: true,
-        results: {}
-      };
+      return $q((resolve, reject) => {
+        const obj = {
+          success: true,
+          results: {}
+        };
 
-      const chartConfig = buildConfigFromDetector(job, detectorIndex);
+        const chartConfig = buildConfigFromDetector(job, detectorIndex);
 
-      mlResultsService.getMetricData(
-        chartConfig.datafeedConfig.indices,
-        chartConfig.datafeedConfig.types,
-        entityFields,
-        chartConfig.datafeedConfig.query,
-        chartConfig.metricFunction,
-        chartConfig.metricFieldName,
-        chartConfig.timeField,
-        earliestMs,
-        latestMs,
-        interval
-      )
-        .then((resp) => {
-          _.each(resp.results, (value, time) => {
-            obj.results[time] = {
-              'actual': value
-            };
+        mlResultsService.getMetricData(
+          chartConfig.datafeedConfig.indices,
+          chartConfig.datafeedConfig.types,
+          entityFields,
+          chartConfig.datafeedConfig.query,
+          chartConfig.metricFunction,
+          chartConfig.metricFieldName,
+          chartConfig.timeField,
+          earliestMs,
+          latestMs,
+          interval
+        )
+          .then((resp) => {
+            _.each(resp.results, (value, time) => {
+              obj.results[time] = {
+                'actual': value
+              };
+            });
+
+            resolve(obj);
+          })
+          .catch((resp) => {
+            reject(resp);
           });
 
-          deferred.resolve(obj);
-        })
-        .catch((resp) => {
-          deferred.reject(resp);
-        });
-
-      return deferred.promise;
+      });
     }
 
   };
@@ -106,54 +106,54 @@ module.service('mlTimeSeriesSearchService', function (
   // Queries Elasticsearch if necessary to obtain the distinct count of entities
   // for which data is being plotted.
   this.getChartDetails = function (job, detectorIndex, entityFields, earliestMs, latestMs) {
-    const deferred = $q.defer();
-    const obj = { success: true, results: { functionLabel: '', entityData: { entities: [] } } };
+    return $q((resolve, reject) => {
+      const obj = { success: true, results: { functionLabel: '', entityData: { entities: [] } } };
 
-    const chartConfig = buildConfigFromDetector(job, detectorIndex);
-    let functionLabel = chartConfig.metricFunction;
-    if (chartConfig.metricFieldName !== undefined) {
-      functionLabel += ' ';
-      functionLabel += chartConfig.metricFieldName;
-    }
-    obj.results.functionLabel = functionLabel;
+      const chartConfig = buildConfigFromDetector(job, detectorIndex);
+      let functionLabel = chartConfig.metricFunction;
+      if (chartConfig.metricFieldName !== undefined) {
+        functionLabel += ' ';
+        functionLabel += chartConfig.metricFieldName;
+      }
+      obj.results.functionLabel = functionLabel;
 
-    const blankEntityFields = _.filter(entityFields, (entity) => {
-      return entity.fieldValue.length === 0;
-    });
+      const blankEntityFields = _.filter(entityFields, (entity) => {
+        return entity.fieldValue.length === 0;
+      });
 
-    // Look to see if any of the entity fields have defined values
-    // (i.e. blank input), and if so obtain the cardinality.
-    if (blankEntityFields.length === 0) {
-      obj.results.entityData.count = 1;
-      obj.results.entityData.entities = entityFields;
-      deferred.resolve(obj);
-    } else {
-      const entityFieldNames = _.map(blankEntityFields, 'fieldName');
-      const fieldsService = Private(FieldsServiceProvider);
-      fieldsService.getCardinalityOfFields(
-        chartConfig.datafeedConfig.indices,
-        chartConfig.datafeedConfig.types,
-        entityFieldNames,
-        chartConfig.datafeedConfig.query,
-        chartConfig.timeField,
-        earliestMs,
-        latestMs)
-        .then((results) => {
-          _.each(blankEntityFields, (field) => {
-            obj.results.entityData.entities.push({
-              fieldName: field.fieldName,
-              cardinality: _.get(results, field.fieldName, 0)
-            });
-          });
-
-          deferred.resolve(obj);
+      // Look to see if any of the entity fields have defined values
+      // (i.e. blank input), and if so obtain the cardinality.
+      if (blankEntityFields.length === 0) {
+        obj.results.entityData.count = 1;
+        obj.results.entityData.entities = entityFields;
+        resolve(obj);
+      } else {
+        const entityFieldNames = _.map(blankEntityFields, 'fieldName');
+        ml.getCardinalityOfFields({
+          index: chartConfig.datafeedConfig.indices,
+          types: chartConfig.datafeedConfig.types,
+          fieldNames: entityFieldNames,
+          query: chartConfig.datafeedConfig.query,
+          timeFieldName: chartConfig.timeField,
+          earliestMs,
+          latestMs
         })
-        .catch((resp) => {
-          deferred.reject(resp);
-        });
-    }
+          .then((results) => {
+            _.each(blankEntityFields, (field) => {
+              obj.results.entityData.entities.push({
+                fieldName: field.fieldName,
+                cardinality: _.get(results, field.fieldName, 0)
+              });
+            });
 
-    return deferred.promise;
+            resolve(obj);
+          })
+          .catch((resp) => {
+            reject(resp);
+          });
+      }
+
+    });
   };
 
 });

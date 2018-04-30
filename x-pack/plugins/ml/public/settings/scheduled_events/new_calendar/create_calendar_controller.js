@@ -18,6 +18,9 @@ import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 import template from './create_calendar.html';
 
@@ -47,13 +50,14 @@ module.controller('MlCreateCalendar',
     $scope,
     $route,
     $location,
-    ml,
+    $q,
     timefilter,
     mlMessageBarService,
-    mlJobService,
-    mlCalendarService) {
+    Private) {
     const msgs = mlMessageBarService;
     msgs.clear();
+    const mlJobService = Private(JobServiceProvider);
+    const mlCalendarService = Private(CalendarServiceProvider);
 
     const calendarId = $route.current.params.calendarId;
     $scope.isNewCalendar = (calendarId === undefined);
@@ -137,8 +141,8 @@ module.controller('MlCreateCalendar',
 
       if (validateCalendarId(calendar.calendarId, $scope.validation.checks)) {
         $scope.saveLock = true;
-        const saveFunc = $scope.isNewCalendar ? ml.addCalendar : ml.updateCalendar;
-        saveFunc(calendar)
+        const saveFunc = $scope.isNewCalendar ? (c => ml.addCalendar(c)) : (c => ml.updateCalendar(c));
+        $q.when(saveFunc(calendar))
           .then(() => {
             $location.path('settings/calendars_list');
             $scope.saveLock = false;

@@ -18,17 +18,19 @@ import d3 from 'd3';
 
 import template from './job_select_list.html';
 import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobSelectList', function (mlJobService, mlJobSelectService, timefilter) {
+module.directive('mlJobSelectList', function (Private, mlJobSelectService, timefilter) {
   return {
     restrict: 'AE',
     replace: true,
     transclude: true,
     template,
     controller: function ($scope) {
+      const mlJobService = Private(JobServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
       $scope.homelessJobs = [];

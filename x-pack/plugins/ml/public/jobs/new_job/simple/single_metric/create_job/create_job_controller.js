@@ -36,6 +36,9 @@ import {
   createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { SingleMetricJobServiceProvider } from './create_job_service';
+import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 
 import template from './create_job.html';
 
@@ -63,10 +66,7 @@ module
     $q,
     timefilter,
     Private,
-    mlJobService,
-    mlSingleMetricJobService,
     mlMessageBarService,
-    mlFullTimeRangeSelectorService,
     AppState) {
 
     timefilter.enableTimeRangeSelector();
@@ -74,6 +74,9 @@ module
     const msgs = mlMessageBarService;
     const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
+    const mlJobService = Private(JobServiceProvider);
+    const mlSingleMetricJobService = Private(SingleMetricJobServiceProvider);
+    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
 
     const stateDefaults = {
       mlJobSettings: {}

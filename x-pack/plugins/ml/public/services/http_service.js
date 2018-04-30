@@ -8,43 +8,39 @@
 
 // service for interacting with the server
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import chrome from 'ui/chrome';
+import 'isomorphic-fetch';
 
 import { addSystemApiHeader } from 'ui/system_api';
 
-module.service('prlHttpService', function ($http, $q) {
-
-  // request function returns a promise
-  // once resolved, just the data response is returned
-  this.request = function (options) {
+export function http(options) {
+  return new Promise((resolve, reject) => {
     if(options && options.url) {
       let url = '';
       url = url + (options.url || '');
-      const headers = addSystemApiHeader({});
-      const allHeaders = (options.headers === undefined) ?
-        headers :
-        Object.assign(options.headers, headers);
+      const headers = addSystemApiHeader({
+        'Content-Type': 'application/json',
+        'kbn-version': chrome.getXsrfToken(),
+        ...options.headers
+      });
 
+      const allHeaders = (options.headers === undefined) ? headers : { ...options.headers, ...headers };
+      const body = (options.data === undefined) ? null : JSON.stringify(options.data);
 
-      const deferred = $q.defer();
-
-      $http({
-        url: url,
+      fetch(url, {
         method: (options.method || 'GET'),
         headers: (allHeaders),
-        params: (options.params || {}),
-        data: (options.data || null)
+        credentials: 'same-origin',
+        body,
       })
-        .then(function successCallback(response) {
-          deferred.resolve(response.data);
-        }, function errorCallback(response) {
-          deferred.reject(response.data);
+        .then((resp) => {
+          resolve(resp.json());
+        })
+        .catch((resp) => {
+          reject(resp);
         });
-
-      return deferred.promise;
+    } else {
+      reject();
     }
-  };
-
-});
-
+  });
+}
