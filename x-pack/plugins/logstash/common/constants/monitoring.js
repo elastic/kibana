@@ -5,5 +5,11 @@
  */
 
 export const MONITORING = {
+
+  /**
+   * How far back in time (from now) do we look in Monitoring data for pipelines to be considered as "currently" running. This is
+   * also, deliberately, the same duration we give Monitoring to pick up and report on a recently-deleted pipeline before we
+   * are safe to stop tracking that pipeline as recently-deleted.
+   */
   PIPELINE_RECENCY_DURATION_S: 30
 };
