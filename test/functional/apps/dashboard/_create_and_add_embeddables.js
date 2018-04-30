@@ -2,7 +2,7 @@ import expect from 'expect.js';
 
 import {
   VisualizeConstants
-} from '../../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');

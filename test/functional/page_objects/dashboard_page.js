@@ -21,7 +21,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests({
-      kibanaIndex = 'dashboard/pre_6_3',
+      kibanaIndex = 'dashboard/legacy',
       dataIndex = 'logstash_functional',
       defaultIndex = 'logstash-*',
     } = {}) {
