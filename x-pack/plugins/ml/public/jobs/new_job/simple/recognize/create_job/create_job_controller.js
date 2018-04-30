@@ -21,6 +21,7 @@ import { getIndexPatternWithRoute, getSavedSearchWithRoute } from 'plugins/ml/ut
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { CreateRecognizerJobsServiceProvider } from './create_job_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 
@@ -46,8 +47,7 @@ module
     $route,
     $q,
     timefilter,
-    Private,
-    mlMessageBarService) {
+    Private) {
 
     const mlJobService = Private(JobServiceProvider);
     const mlCreateRecognizerJobsService = Private(CreateRecognizerJobsServiceProvider);

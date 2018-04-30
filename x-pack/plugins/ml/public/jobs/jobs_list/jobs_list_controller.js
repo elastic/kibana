@@ -35,6 +35,7 @@ import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaul
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
 import { JobMessagesServiceProvider } from 'plugins/ml/services/job_messages_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 uiRoutes
   .when('/jobs/?', {
@@ -63,7 +64,6 @@ module.controller('MlJobsList',
     timefilter,
     kbnUrl,
     Private,
-    mlMessageBarService,
     mlDatafeedService) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page

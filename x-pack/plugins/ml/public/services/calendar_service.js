@@ -10,10 +10,11 @@ import _ from 'lodash';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 let calendarService = undefined;
 
-export function CalendarServiceProvider($q, Private, mlMessageBarService) {
+export function CalendarServiceProvider($q, Private) {
   const msgs = mlMessageBarService;
   const mlJobService = Private(JobServiceProvider);
 

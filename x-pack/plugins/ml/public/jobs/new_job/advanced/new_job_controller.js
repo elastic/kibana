@@ -29,6 +29,7 @@ import {
   basicJobValidation
 } from 'plugins/ml/../common/util/job_utils';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 uiRoutes
@@ -71,7 +72,6 @@ module.controller('MlNewJob',
     es,
     Private,
     timefilter,
-    mlMessageBarService,
     mlDatafeedService,
     mlConfirmModalService) {
 
