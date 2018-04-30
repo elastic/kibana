@@ -6,7 +6,7 @@
 
 import ace from 'ace';
 
-const TextHighlightRules = ace.acequire("ace/mode/text_highlight_rules").TextHighlightRules;
+const { TextHighlightRules } = ace.acequire("ace/mode/text_highlight_rules");
 
 export class GrokHighlightRules extends TextHighlightRules {
   constructor() {
