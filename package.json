@@ -54,7 +54,6 @@
     "test:ui:runner": "echo 'use `node scripts/functional_test_runner`' && false",
     "test:server": "grunt test:server",
     "test:coverage": "grunt test:coverage",
-    "test:visualRegression": "grunt test:visualRegression:buildGallery",
     "migration": "node scripts/migrations",
     "checkLicenses": "grunt licenses",
     "build": "node scripts/build",
