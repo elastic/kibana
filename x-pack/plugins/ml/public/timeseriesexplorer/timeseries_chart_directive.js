@@ -31,6 +31,7 @@ import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import 'plugins/ml/filters/format_value';
 import { mlEscape } from 'plugins/ml/util/string_utils';
+import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -38,15 +39,15 @@ const module = uiModules.get('apps/ml');
 module.directive('mlTimeseriesChart', function (
   $compile,
   $timeout,
-  Private,
   timefilter,
   mlAnomaliesTableService,
-  mlFieldFormatService,
   formatValueFilter,
+  Private,
   mlChartTooltipService) {
 
   function link(scope, element) {
 
+    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     // Key dimensions for the viz and constituent charts.
     let svgWidth = angular.element('.results-container').width();
     const focusZoomPanelHeight = 25;

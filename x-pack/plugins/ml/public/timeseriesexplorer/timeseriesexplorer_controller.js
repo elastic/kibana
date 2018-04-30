@@ -16,10 +16,6 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import 'plugins/ml/components/anomalies_table';
-import 'plugins/ml/services/field_format_service';
-import 'plugins/ml/services/forecast_service';
-import 'plugins/ml/services/job_service';
-import 'plugins/ml/services/results_service';
 
 import { notify } from 'ui/notify';
 import uiRoutes from 'ui/routes';
@@ -42,8 +38,12 @@ import {
   processScheduledEventsForChart } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
 import template from './timeseriesexplorer.html';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { ForecastServiceProvider } from 'plugins/ml/services/forecast_service';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -63,20 +63,12 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope,
   $route,
   $timeout,
-  $compile,
-  $modal,
   Private,
-  $q,
-  es,
   timefilter,
   AppState,
-  mlJobService,
-  mlResultsService,
   mlJobSelectService,
   mlTimeSeriesSearchService,
-  mlForecastService,
-  mlAnomaliesTableService,
-  mlFieldFormatService) {
+  mlAnomaliesTableService) {
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -86,6 +78,10 @@ module.controller('MlTimeSeriesExplorerController', function (
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
+  const mlResultsService = Private(ResultsServiceProvider);
+  const mlJobService = Private(JobServiceProvider);
+  const mlFieldFormatService = Private(FieldFormatServiceProvider);
+  const mlForecastService  = Private(ForecastServiceProvider);
 
   $scope.jobPickerSelections = [];
   $scope.selectedJob;

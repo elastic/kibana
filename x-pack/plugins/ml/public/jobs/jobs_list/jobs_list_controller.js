@@ -16,6 +16,7 @@ import jobsListControlsHtml from './jobs_list_controls.html';
 import jobsListArrow from 'plugins/ml/components/paginated_table/open.html';
 import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
 import { toLocaleString, mlEscape } from 'plugins/ml/util/string_utils';
+import { copyTextToClipboard } from 'plugins/ml/util/clipboard_utils';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
@@ -31,6 +32,9 @@ import createWatchTemplate from 'plugins/ml/jobs/jobs_list/create_watch_modal/cr
 import { buttonsEnabledChecks } from 'plugins/ml/jobs/jobs_list/buttons_enabled_checks';
 import { cloudServiceProvider } from 'plugins/ml/services/cloud_service';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
+import { JobMessagesServiceProvider } from 'plugins/ml/services/job_messages_service';
 
 uiRoutes
   .when('/jobs/?', {
@@ -60,11 +64,7 @@ module.controller('MlJobsList',
     kbnUrl,
     Private,
     mlMessageBarService,
-    mlClipboardService,
-    mlJobService,
-    mlCalendarService,
-    mlDatafeedService,
-    mlNotificationService) {
+    mlDatafeedService) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
@@ -85,6 +85,9 @@ module.controller('MlJobsList',
     $scope.mlNodesAvailable = mlNodesAvailable();
     $scope.permissionToViewMlNodeCount = permissionToViewMlNodeCount();
 
+    const mlJobService = Private(JobServiceProvider);
+    const mlCalendarService = Private(CalendarServiceProvider);
+    const jobMessagesService = Private(JobMessagesServiceProvider);
     const { isRunningOnCloud, getCloudId } = Private(cloudServiceProvider);
     $scope.isCloud = isRunningOnCloud();
     $scope.cloudId = getCloudId();
@@ -169,7 +172,7 @@ module.controller('MlJobsList',
     };
 
     $scope.copyToClipboard = function (job) {
-      const success = mlClipboardService.copy(angular.toJson(job));
+      const success = copyTextToClipboard(angular.toJson(job));
       if (success) {
         msgs.clear();
         msgs.info(job.job_id + ' JSON copied to clipboard');
@@ -436,7 +439,7 @@ module.controller('MlJobsList',
         }
       }
 
-      return mlNotificationService.getJobAuditMessages(fromRange, jobId)
+      return jobMessagesService.getJobAuditMessages(fromRange, jobId)
         .then((resp) => {
           const messages = resp.messages;
           _.each(messages, (msg) => {
@@ -488,7 +491,7 @@ module.controller('MlJobsList',
         createTimes[job.job_id] = moment(job.create_time).valueOf();
       });
 
-      mlNotificationService.getAuditMessagesSummary()
+      jobMessagesService.getAuditMessagesSummary()
         .then((resp) => {
           const messagesPerJob = resp.messagesPerJob;
           _.each(messagesPerJob, (job) => {

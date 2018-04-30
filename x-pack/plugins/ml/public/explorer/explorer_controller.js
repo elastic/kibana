@@ -20,9 +20,6 @@ import moment from 'moment';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/influencers_list';
 import 'plugins/ml/components/job_select_list';
-import 'plugins/ml/services/field_format_service';
-import 'plugins/ml/services/job_service';
-import 'plugins/ml/services/results_service';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
@@ -34,6 +31,9 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
 
 uiRoutes
   .when('/explorer/?', {
@@ -56,9 +56,6 @@ module.controller('MlExplorerController', function (
   Private,
   timefilter,
   mlCheckboxShowChartsService,
-  mlFieldFormatService,
-  mlJobService,
-  mlResultsService,
   mlJobSelectService,
   mlExplorerDashboardService,
   mlSelectLimitService,
@@ -72,6 +69,9 @@ module.controller('MlExplorerController', function (
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
+  const mlResultsService = Private(ResultsServiceProvider);
+  const mlJobService = Private(JobServiceProvider);
+  const mlFieldFormatService = Private(FieldFormatServiceProvider);
 
   let resizeTimeout = null;
 

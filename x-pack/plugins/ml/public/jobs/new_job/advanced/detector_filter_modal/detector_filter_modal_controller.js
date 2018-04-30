@@ -12,7 +12,7 @@ import angular from 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params, mlJobService, mlMessageBarService) {
+module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params, mlMessageBarService) {
   const msgs = mlMessageBarService;
   msgs.clear();
   $scope.title = 'Add new filter';

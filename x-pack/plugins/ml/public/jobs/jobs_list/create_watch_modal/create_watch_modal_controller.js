@@ -5,11 +5,13 @@
  */
 
 
+import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlCreateWatchModal', function ($scope, $modalInstance, params, mlMessageBarService, mlCreateWatchService) {
+module.controller('MlCreateWatchModal', function ($scope, $modalInstance, params, mlMessageBarService, Private) {
+  const mlCreateWatchService = Private(CreateWatchServiceProvider);
   const msgs = mlMessageBarService; // set a reference to the message bar service
   msgs.clear();
 

@@ -8,34 +8,30 @@
 
 import _ from 'lodash';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-module.service('mlESMappingService', function ($q, ml) {
-
-  // Returns the mapping type of the specified field.
-  // Accepts fieldName containing dots representing a nested sub-field.
-  this.getFieldTypeFromMapping = function (index, fieldName) {
-    return $q((resolve, reject) => {
-      if (index !== '') {
-        ml.getFieldCaps({ index, fields: [fieldName] })
-          .then((resp) => {
-            let fieldType = '';
-            _.each(resp.fields, (field) => {
-              _.each(field, (type) => {
-                if (fieldType === '') {
-                  fieldType = type.type;
-                }
-              });
+// Returns the mapping type of the specified field.
+// Accepts fieldName containing dots representing a nested sub-field.
+export function getFieldTypeFromMapping(index, fieldName) {
+  return new Promise((resolve, reject) => {
+    if (index !== '') {
+      ml.getFieldCaps({ index, fields: [fieldName] })
+        .then((resp) => {
+          let fieldType = '';
+          _.each(resp.fields, (field) => {
+            _.each(field, (type) => {
+              if (fieldType === '') {
+                fieldType = type.type;
+              }
             });
-            resolve(fieldType);
-          })
-          .catch((error) => {
-            reject(error);
           });
-      } else {
-        reject();
-      }
-    });
-  };
-});
+          resolve(fieldType);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else {
+      reject();
+    }
+  });
+}

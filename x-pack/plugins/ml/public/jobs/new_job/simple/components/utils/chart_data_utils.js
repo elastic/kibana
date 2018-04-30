@@ -11,9 +11,13 @@
 import _ from 'lodash';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { SimpleJobSearchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
 
-export function ChartDataUtilsProvider($q, Private, timefilter, mlSimpleJobSearchService, mlResultsService) {
+export function ChartDataUtilsProvider($q, Private, timefilter) {
   const TimeBuckets = Private(IntervalHelperProvider);
+  const mlResultsService = Private(ResultsServiceProvider);
+  const mlSimpleJobSearchService = Private(SimpleJobSearchServiceProvider);
 
   function loadDocCountData(formConfig, chartData) {
     return $q((resolve, reject) => {

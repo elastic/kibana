@@ -18,7 +18,7 @@ import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
-import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { getIndexPatterns, getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -28,6 +28,8 @@ import {
   ML_DATA_PREVIEW_COUNT,
   basicJobValidation
 } from 'plugins/ml/../common/util/job_utils';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 uiRoutes
   .when('/jobs/new_job/advanced', {
@@ -65,19 +67,15 @@ module.controller('MlNewJob',
     $location,
     $modal,
     $q,
-    $timeout,
     courier,
     es,
-    ml,
     Private,
     timefilter,
-    esServerUrl,
-    mlJobService,
     mlMessageBarService,
     mlDatafeedService,
     mlConfirmModalService) {
 
-
+    const mlJobService = Private(JobServiceProvider);
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
     const MODE = {
@@ -431,12 +429,6 @@ module.controller('MlNewJob',
                     changeTab({ index: 1 });
                   });
               }
-            }
-
-            function createJobForSaving(job) {
-              const newJob = angular.copy(job);
-              delete newJob.datafeed_config;
-              return newJob;
             }
 
             function saveFunc() {

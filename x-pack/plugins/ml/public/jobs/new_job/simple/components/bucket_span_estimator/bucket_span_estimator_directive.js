@@ -9,13 +9,12 @@
 import template from './bucket_span_estimator.html';
 import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlBucketSpanEstimator', function ($injector) {
-  const ml = $injector.get('ml');
-
+module.directive('mlBucketSpanEstimator', function ($q) {
   return {
     restrict: 'AE',
     replace: false,
@@ -79,7 +78,7 @@ module.directive('mlBucketSpanEstimator', function ($injector) {
           });
         }
 
-        ml.estimateBucketSpan(data)
+        $q.when(ml.estimateBucketSpan(data))
           .then((interval) => {
             if (interval.error) {
               errorHandler(interval.message);

@@ -17,6 +17,7 @@ import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount, mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { buttonsEnabledChecks } from 'plugins/ml/settings/scheduled_events/calendars_list/buttons_enabled_checks';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 import template from './calendars_list.html';
 
@@ -39,9 +40,9 @@ module.controller('MlCalendarsList',
     $filter,
     $route,
     $location,
+    $q,
     pagerFactory,
     Private,
-    ml,
     timefilter,
     mlConfirmModalService) {
 
@@ -116,7 +117,7 @@ module.controller('MlCalendarsList',
         title: `Delete calendar`
       })
         .then(() => {
-          ml.deleteCalendar({ calendarId })
+          $q.when(ml.deleteCalendar({ calendarId }))
             .then(loadCalendars)
             .catch((error) => {
               console.log(error);
@@ -126,7 +127,7 @@ module.controller('MlCalendarsList',
     };
 
     function loadCalendars() {
-      ml.calendars()
+      $q.when(ml.calendars())
         .then((resp) => {
           calendars = resp;
           $scope.pager = pagerFactory.create(calendars.length, PAGE_SIZE, 1);

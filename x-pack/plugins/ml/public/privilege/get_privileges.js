@@ -5,8 +5,9 @@
  */
 
 
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function privilegesProvider(Promise, ml) {
+export function privilegesProvider() {
 
   function getPrivileges() {
     const privileges = {

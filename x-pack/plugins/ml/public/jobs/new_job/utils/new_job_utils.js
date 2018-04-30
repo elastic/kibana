@@ -10,6 +10,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { migrateFilter } from 'ui/courier/data_source/_migrate_filter.js';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
 export function getQueryFromSavedSearch(formConfig) {
   const must = [];
@@ -103,12 +104,19 @@ export function createResultsUrl(jobIds, start, end, resultsPage) {
   return path;
 }
 
+export function createJobForSaving(job) {
+  const newJob = _.cloneDeep(job);
+  delete newJob.datafeed_config;
+  return newJob;
+}
+
 export function addNewJobToRecentlyAccessed(jobId, resultsUrl) {
   const urlParts = resultsUrl.match(/ml#\/(.+?)(\?.+)/);
   addItemToRecentlyAccessed(urlParts[1], jobId, urlParts[2]);
 }
 
-export function moveToAdvancedJobCreationProvider(mlJobService, $location) {
+export function moveToAdvancedJobCreationProvider(Private, $location) {
+  const mlJobService = Private(JobServiceProvider);
   return function moveToAdvancedJobCreation(job) {
     mlJobService.currentJob = job;
     $location.path('jobs/new_job/advanced');

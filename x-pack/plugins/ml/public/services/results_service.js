@@ -14,16 +14,14 @@ import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
 import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/constants/index_patterns';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-module.service('mlResultsService', function ($q, es, ml) {
-
-  // Obtains the maximum bucket anomaly scores by job ID and time.
-  // Pass an empty array or ['*'] to search over all job IDs.
-  // Returned response contains a results property, with a key for job
-  // which has results for the specified time range.
-  this.getScoresByBucket = function (jobIds, earliestMs, latestMs, interval, maxResults) {
+export function ResultsServiceProvider($q, es) {
+// Obtains the maximum bucket anomaly scores by job ID and time.
+// Pass an empty array or ['*'] to search over all job IDs.
+// Returned response contains a results property, with a key for job
+// which has results for the specified time range.
+  function getScoresByBucket(jobIds, earliestMs, latestMs, interval, maxResults) {
     return $q((resolve, reject) => {
       const obj = {
         success: true,
@@ -141,13 +139,13 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Obtains a list of scheduled events by job ID and time.
   // Pass an empty array or ['*'] to search over all job IDs.
   // Returned response contains a events property, which will only
   // contains keys for jobs which have scheduled events for the specified time range.
-  this.getScheduledEventsByBucket = function (
+  function getScheduledEventsByBucket(
     jobIds,
     earliestMs,
     latestMs,
@@ -256,14 +254,14 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Obtains the top influencers, by maximum influencer score, for the specified index, time range and job ID(s).
   // Pass an empty array or ['*'] to search over all job IDs.
   // Returned response contains an influencers property, with a key for each of the influencer field names,
   // whose value is an array of objects containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-  this.getTopInfluencers = function (jobIds, earliestMs, latestMs, maxFieldNames, maxFieldValues) {
+  function getTopInfluencers(jobIds, earliestMs, latestMs, maxFieldNames, maxFieldValues) {
     return $q((resolve, reject) => {
       const obj = { success: true, influencers: {} };
 
@@ -385,21 +383,20 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Obtains the top influencer field values, by maximum anomaly score, for a
   // particular index, field name and job ID(s).
   // Pass an empty array or ['*'] to search over all job IDs.
   // Returned response contains a results property, which is an array of objects
   // containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-  this.getTopInfluencerValues = function (jobIds, influencerFieldName, earliestMs, latestMs, maxResults) {
+  function getTopInfluencerValues(jobIds, influencerFieldName, earliestMs, latestMs, maxResults) {
     return $q((resolve, reject) => {
       const obj = { success: true, results: [] };
 
       // Build the criteria to use in the bool filter part of the request.
       // Adds criteria for the time range plus any specified job IDs.
-      const boolCriteria = [];
-      boolCriteria.push({
+      const boolCriteria = [{
         range: {
           timestamp: {
             gte: earliestMs,
@@ -407,7 +404,8 @@ module.service('mlResultsService', function ($q, es, ml) {
             format: 'epoch_millis'
           }
         }
-      });
+      }];
+
       if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
         let jobIdFilterStr = '';
         _.each(jobIds, (jobId, i) => {
@@ -487,12 +485,12 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Obtains the overall bucket scores for the specified job ID(s).
   // Pass ['*'] to search over all job IDs.
   // Returned response contains a results property as an object of max score by time.
-  this.getOverallBucketScores = function (jobIds, topN, earliestMs, latestMs, interval) {
+  function getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
     return $q((resolve, reject) => {
       const obj = { success: true, results: {} };
 
@@ -518,14 +516,14 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Obtains the maximum score by influencer_field_value and by time for the specified job ID(s)
   // (pass an empty array or ['*'] to search over all job IDs), and specified influencer field
   // values (pass an empty array to search over all field values).
   // Returned response contains a results property with influencer field values keyed
   // against max score by time.
-  this.getInfluencerValueMaxScoreByTime = function (
+  function getInfluencerValueMaxScoreByTime(
     jobIds,
     influencerFieldName,
     influencerFieldValues,
@@ -666,13 +664,13 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Obtains the definition of the category with the specified ID and job ID.
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
-  this.getCategoryDefinition = function (jobId, categoryId) {
+  function getCategoryDefinition(jobId, categoryId) {
     return $q((resolve, reject) => {
       const obj = { success: true, categoryId: categoryId, terms: null, regex: null, examples: [] };
 
@@ -704,14 +702,14 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Obtains the categorization examples for the categories with the specified IDs
   // from the given index and job ID.
   // Returned response contains two properties - jobId and
   // examplesByCategoryId (list of examples against categoryId).
-  this.getCategoryExamples = function (jobId, categoryIds, maxExamples) {
+  function getCategoryExamples(jobId, categoryIds, maxExamples) {
     return $q((resolve, reject) => {
       const obj = { success: true, jobId: jobId, examplesByCategoryId: {} };
 
@@ -747,7 +745,7 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Queries Elasticsearch to obtain record level results containing the influencers
@@ -755,7 +753,7 @@ module.service('mlResultsService', function ($q, es, ml) {
   // Pass an empty array or ['*'] to search over all job IDs.
   // Returned response contains a records property, with each record containing
   // only the fields job_id, detector_index, record_score and influencers.
-  this.getRecordInfluencers = function (jobIds, threshold, earliestMs, latestMs, maxResults) {
+  function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResults) {
     return $q((resolve, reject) => {
       const obj = { success: true, records: [] };
 
@@ -851,7 +849,7 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Queries Elasticsearch to obtain the record level results containing the specified influencer(s),
@@ -860,7 +858,7 @@ module.service('mlResultsService', function ($q, es, ml) {
   // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
   // so this returns record level results which have at least one of the influencers.
   // Pass an empty array or ['*'] to search over all job IDs.
-  this.getRecordsForInfluencer = function (jobIds, influencers, threshold, earliestMs, latestMs, maxResults) {
+  function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults) {
     return $q((resolve, reject) => {
       const obj = { success: true, records: [] };
 
@@ -957,7 +955,7 @@ module.service('mlResultsService', function ($q, es, ml) {
           },
           sort: [
             { record_score: { order: 'desc' } }
-          ],
+          ]
         }
       })
         .then((resp) => {
@@ -972,13 +970,13 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Queries Elasticsearch to obtain the record level results for the specified job and detector,
   // time range, record score threshold, and whether to only return results containing influencers.
   // An additional, optional influencer field name and value may also be provided.
-  this.getRecordsForDetector = function (
+  function getRecordsForDetector(
     jobId,
     detectorIndex,
     checkForInfluencers,
@@ -1098,22 +1096,22 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Queries Elasticsearch to obtain all the record level results for the specified job(s), time range,
   // and record score threshold.
   // Pass an empty array or ['*'] to search over all job IDs.
   // Returned response contains a records property, which is an array of the matching results.
-  this.getRecords = function (jobIds, threshold, earliestMs, latestMs, maxResults) {
+  function getRecords(jobIds, threshold, earliestMs, latestMs, maxResults) {
     return this.getRecordsForInfluencer(jobIds, [], threshold, earliestMs, latestMs, maxResults);
-  };
+  }
 
   // Queries Elasticsearch to obtain the record level results matching the given criteria,
   // for the specified job(s), time range, and record score threshold.
   // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
   // 'fieldValue' properties.
   // Pass an empty array or ['*'] to search over all job IDs.
-  this.getRecordsForCriteria = function (jobIds, criteriaFields, threshold, earliestMs, latestMs, maxResults) {
+  function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, latestMs, maxResults) {
     return $q((resolve, reject) => {
       const obj = { success: true, records: [] };
 
@@ -1202,7 +1200,7 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
 
   // Queries Elasticsearch to obtain metric aggregation results.
@@ -1213,7 +1211,7 @@ module.service('mlResultsService', function ($q, es, ml) {
   // Extra query object can be supplied, or pass null if no additional query
   // to that built from the supplied entity fields.
   // Returned response contains a results property containing the requested aggregation.
-  this.getMetricData = function (
+  function getMetricData(
     index,
     types,
     entityFields,
@@ -1364,7 +1362,7 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Queries Elasticsearch to obtain event rate data i.e. the count
   // of documents over time.
@@ -1372,7 +1370,7 @@ module.service('mlResultsService', function ($q, es, ml) {
   // Extra query object can be supplied, or pass null if no additional query.
   // Returned response contains a results property, which is an object
   // of document counts against time (epoch millis).
-  this.getEventRateData = function (
+  function getEventRateData(
     index,
     query,
     timeFieldName,
@@ -1440,9 +1438,9 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
-  this.getModelPlotOutput = function (
+  function getModelPlotOutput(
     jobId,
     detectorIndex,
     criteriaFields,
@@ -1584,13 +1582,13 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
-  };
+  }
 
   // Queries Elasticsearch to obtain the max record score over time for the specified job,
   // criteria, time range, and aggregation interval.
   // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
   // 'fieldValue' properties.
-  this.getRecordMaxScoreByTime = function (jobId, criteriaFields, earliestMs, latestMs, interval) {
+  function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
     return $q((resolve, reject) => {
       const obj = {
         success: true,
@@ -1698,6 +1696,26 @@ module.service('mlResultsService', function ($q, es, ml) {
           reject(resp);
         });
     });
+  }
+
+  return {
+    getScoresByBucket,
+    getScheduledEventsByBucket,
+    getTopInfluencers,
+    getTopInfluencerValues,
+    getOverallBucketScores,
+    getInfluencerValueMaxScoreByTime,
+    getCategoryDefinition,
+    getCategoryExamples,
+    getRecordInfluencers,
+    getRecordsForInfluencer,
+    getRecordsForDetector,
+    getRecords,
+    getRecordsForCriteria,
+    getMetricData,
+    getEventRateData,
+    getModelPlotOutput,
+    getRecordMaxScoreByTime
   };
 
-});
+}

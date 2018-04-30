@@ -32,6 +32,7 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './datavisualizer.html';
 
 uiRoutes
@@ -55,10 +56,10 @@ module
     $route,
     $timeout,
     $window,
+    $q,
     Private,
     timefilter,
-    AppState,
-    ml) {
+    AppState) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -461,7 +462,7 @@ module
       buckets.setBarTarget(BAR_TARGET);
       const aggInterval = buckets.getInterval();
 
-      ml.getVisualizerFieldStats({
+      $q.when(ml.getVisualizerFieldStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -470,7 +471,7 @@ module
         samplerShardSize: $scope.samplerShardSize,
         interval: aggInterval.expression,
         fields: numberFields
-      })
+      }))
         .then((resp) => {
           // Add the metric stats to the existing stats in the corresponding card.
           _.each($scope.metricCards, (card) => {
@@ -520,7 +521,7 @@ module
 
       if (fields.length > 0) {
 
-        ml.getVisualizerFieldStats({
+        $q.when(ml.getVisualizerFieldStats({
           indexPatternTitle: indexPattern.title,
           query: $scope.searchQuery,
           fields: fields,
@@ -529,7 +530,7 @@ module
           latest: $scope.latest,
           samplerShardSize: $scope.samplerShardSize,
           maxExamples: 10
-        })
+        }))
           .then((resp) => {
             // Add the metric stats to the existing stats in the corresponding card.
             _.each($scope.fieldCards, (card) => {
@@ -575,7 +576,7 @@ module
       // 2. List of aggregatable fields that do not exist in docs
       // 3. List of non-aggregatable fields that do exist in docs.
       // 4. List of non-aggregatable fields that do not exist in docs.
-      ml.getVisualizerOverallStats({
+      $q.when(ml.getVisualizerOverallStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -584,7 +585,7 @@ module
         latest: $scope.latest,
         aggregatableFields: aggregatableFields,
         nonAggregatableFields: nonAggregatableFields
-      })
+      }))
         .then((resp) => {
           $scope.overallStats = resp;
           createMetricCards();

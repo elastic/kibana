@@ -27,14 +27,16 @@ import {
   showTypicalForFunction,
   getSeverity
 } from 'plugins/ml/util/anomaly_utils';
+import { getFieldTypeFromMapping } from 'plugins/ml/services/mapping_service';
+import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
 import template from './anomalies_table.html';
 
 import 'plugins/ml/components/controls';
 import 'plugins/ml/components/paginated_table';
 import 'plugins/ml/filters/format_value';
 import 'plugins/ml/filters/metric_change_description';
-import 'plugins/ml/services/job_service';
-import 'plugins/ml/services/mapping_service';
 import './expanded_row/expanded_row_directive';
 import './influencers_cell/influencers_cell_directive';
 
@@ -48,13 +50,10 @@ module.directive('mlAnomaliesTable', function (
   $window,
   $route,
   timefilter,
-  mlJobService,
-  mlESMappingService,
-  mlResultsService,
+  Private,
   mlAnomaliesTableService,
   mlSelectIntervalService,
   mlSelectSeverityService,
-  mlFieldFormatService,
   formatValueFilter) {
 
   return {
@@ -77,6 +76,9 @@ module.directive('mlAnomaliesTable', function (
       // just remove these resets.
       mlSelectIntervalService.state.reset().changed();
       mlSelectSeverityService.state.reset().changed();
+      const mlResultsService = Private(ResultsServiceProvider);
+      const mlJobService = Private(JobServiceProvider);
+      const mlFieldFormatService = Private(FieldFormatServiceProvider);
 
       scope.momentInterval = 'second';
 
@@ -195,7 +197,7 @@ module.directive('mlAnomaliesTable', function (
         findFieldType(datafeedIndices[i]);
 
         function findFieldType(index) {
-          mlESMappingService.getFieldTypeFromMapping(index, categorizationFieldName)
+          getFieldTypeFromMapping(index, categorizationFieldName)
             .then((resp) => {
               if (resp !== '') {
                 createAndOpenUrl(index, resp);
