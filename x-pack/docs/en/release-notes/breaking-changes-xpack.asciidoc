@@ -1,0 +1,22 @@
+[role="xpack"]
+[[breaking-changes-xkb]]
+= {xpack} Breaking Changes
+
+[partintro]
+--
+This section summarizes the changes that you need to be aware of when migrating
+your application from one version of {xpack} to another.
+
+* <<breaking-7.0.0-xkb>>
+
+See also:
+
+* {ref}/breaking-changes-xes.html[{es} {xpack} Breaking Changes]
+* {logstash-ref}/breaking-changes-xls.html[Logstash {xpack} Breaking Changes]
+--
+
+[role="xpack"]
+[[breaking-7.0.0-xkb]]
+== {xpack} Breaking changes in 7.0.0
+
+No breaking changes have been made yet.

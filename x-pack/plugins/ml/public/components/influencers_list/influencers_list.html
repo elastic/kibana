@@ -1,0 +1,51 @@
+<div class="ml-influencers-list">
+
+  <div ng-if="showNoResultsMessage()" class="text-center visualize-error">
+    <div class="item top"></div>
+    <div class="item">
+      <h4 class="euiTitle euiTitle--small">No influencers found</h4>
+    </div>
+    <div class="item bottom"></div>
+  </div>
+
+  <div ng-repeat="(influencerfieldname, groupData) in influencers">
+
+    <div class="section-label">{{influencerfieldname}}</div>
+
+    <div ng-repeat="influencer in groupData" class="influencer-content">
+
+      <div class="field-label">
+        <div ng-if="influencerfieldname !== 'mlcategory'" class="influencerfieldvalue">{{influencer.influencerFieldValue}}</div>
+        <div ng-if="influencerfieldname === 'mlcategory'" class="influencerfieldvalue">mlcategory {{influencer.influencerFieldValue}}</div>
+        <div class="filter-buttons" style="display: none;">
+          <i ng-click="filter(influencerfieldname, influencer.influencerFieldValue, '+')"
+            tooltip="Filter for value" tooltip-append-to-body="1" class="fa fa-search-plus"></i>
+          <i ng-click="filter(influencerfieldname, influencer.influencerFieldValue, '-')"
+            tooltip="Filter out value" tooltip-append-to-body="1" class="fa fa-search-minus"></i>
+        </div>
+
+      </div>
+
+      <div class="progress" value="{{influencer.barScore}}" max="100">
+        <div class="progress-bar-holder">
+          <div class="progress-bar {{influencer.severity}}" ng-attr-style="width: {{influencer.barScore}}%;"
+            tooltip-placement="{{tooltipPlacement}}" tooltip-html-unsafe="{{influencer.tooltip}}" tooltip-append-to-body="true">
+          </div>
+        </div>
+        <span class="score-label">{{influencer.maxScoreLabel}}</span>
+
+      </div>
+
+      <div ng-if="influencer.totalScore > 0" class="score-label total-score-label" tooltip-placement="{{tooltipPlacement}}" tooltip-html-unsafe="{{influencer.tooltip}}" tooltip-append-to-body="true">
+        {{influencer.totalScore | abbreviateWholeNumber:4}}
+      </div>
+      <div ng-if="influencer.totalScore === 0" class="score-label total-score-label" tooltip-placement="{{tooltipPlacement}}" tooltip-html-unsafe="{{influencer.tooltip}}" tooltip-append-to-body="true">
+        &lt;&nbsp;1
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+

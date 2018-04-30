@@ -331,7 +331,7 @@ export class KibanaMap extends EventEmitter {
     return this._leafletMap.getMaxZoom();
   }
 
-  getAutoPrecision() {
+  getGeohashPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
   }
 
@@ -667,6 +667,12 @@ export class KibanaMap extends EventEmitter {
       visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
+    this._leafletMap.on('resize', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
+    this._leafletMap.on('load', () => {
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }

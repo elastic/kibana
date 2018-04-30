@@ -15,7 +15,12 @@ module.exports = function testSubjSelector(selector) {
   while (terms.length) {
     const term = terms.shift();
     // split each term by joins/& and map to css selectors
-    cssSelectors.push(term.split('&').map(termToCssSelector).join(''));
+    cssSelectors.push(
+      term
+        .split('&')
+        .map(termToCssSelector)
+        .join('')
+    );
   }
 
   return cssSelectors.join(' ');

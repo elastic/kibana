@@ -1,0 +1,23 @@
+{
+  "_xpack/security/role_mapping": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/security/role_mapping",
+      "_xpack/security/role_mapping/{name}"
+    ]
+  },
+  "_xpack/security/role_mapping/{name}": {
+    "methods": ["PUT", "POST"],
+    "patterns": ["_xpack/security/role_mapping/{name}"],
+    "data_autocomplete_rules": {
+      "enabled": true,
+      "metadata": {},
+      "roles": [],
+      "rules": {}
+    },
+    "DELETE _xpack/security/role_mapping/{name}": {
+      "methods": ["DELETE"],
+      "patterns": ["_xpack/security/role_mapping/{name}"]
+    }
+  }
+}

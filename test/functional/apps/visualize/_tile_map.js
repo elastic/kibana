@@ -3,10 +3,14 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const remote = getService('remote');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tile map visualize app', function describeIndexTests() {
     before(async function () {
+      // Make sure the window is height enough to show the spy panel without hiding the map
+      remote.setWindowSize(1280, 1000);
+
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 

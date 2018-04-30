@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WeTried should render "we tried" message 1`] = `
+Array [
+  <h2
+    class="euiTitle euiTitle--large"
+  >
+    We couldn't activate monitoring
+  </h2>,
+  <span
+    class="euiTextColor euiTextColor--subdued"
+  >
+    <div
+      class="euiText"
+    >
+      <p>
+        Here might be some things to check
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+  />,
+  <div
+    class="euiText noData__alignLeft"
+  >
+    <p>
+      No Monitoring data could be found for the selected time period, but we could not find the cluster setting that makes the data unavailable.
+    </p>
+    <p>
+      There may be data available for a different time period than we have selected. Try adjusting the time filter controls to a time range where the Monitoring data is expected.
+    </p>
+    <p>
+      We are refreshing the search for data in the background. If cluster data is found, we will redirect to the cluster overview page.
+    </p>
+  </div>,
+]
+`;

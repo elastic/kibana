@@ -1,0 +1,67 @@
+.fields-selection-population {
+  .selection-list-container {
+    max-height: 250px;
+    overflow: auto;
+    padding: 5px 8px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #444444;
+    background-color: #ffffff;
+    background-image: none;
+    border: 2px solid #ecf0f1;
+    border-radius: 4px;
+
+    .field-row {
+      display: flex;
+      flex-direction: row;
+
+      .field {
+        padding-left: 2px;
+        flex: auto;
+        white-space: nowrap;
+        overflow: hidden;
+        input {
+          min-width: 13px !important;
+        }
+        span {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          margin-left: 4px;
+        }
+      }
+
+      .agg-type {
+        float: right;
+        width: 152px;
+        flex-grow: 0;
+        white-space: nowrap;
+        select {
+          width: 120px;
+          display: inline-block;
+        }
+
+        .remove-button {
+          min-width: 28px;
+          vertical-align: inherit;
+        }
+      }
+    }
+  }
+  .sparse-data {
+    font-size: 13px;
+    font-weight: normal;
+    margin-left: -13px;
+    margin-top: 10px;
+  }
+
+  .field-select-container {
+    margin-bottom: 5px;
+  }
+
+  .field-select-add {
+    float: right;
+    margin: 6px 2px 0px 0px;
+  }
+}
+

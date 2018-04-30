@@ -36109,7 +36109,12 @@ var _path = __webpack_require__(3);
  */
 function getProjectPaths(rootPath, options) {
     const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
+    const ossOnly = Boolean(options.oss);
     const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
+    if (!ossOnly) {
+        projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
+        projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
+    }
     if (!skipKibanaExtra) {
         projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*'));
         projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/packages/*'));
@@ -36325,6 +36330,7 @@ function help() {
 
        -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
        -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
+       --oss                Do not include the x-pack when running command.
        --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
   `);
 }
