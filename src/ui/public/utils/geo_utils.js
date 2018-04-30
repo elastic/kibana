@@ -16,12 +16,19 @@ export function geoContains(collar, bounds) {
 }
 
 export function scaleBounds(bounds) {
-  if (!bounds) return;
+
+  if (!bounds) {
+    return;
+  }
+
+  bounds = normalizeLongitudes(bounds);
 
   const scale = .5; // scale bounds by 50%
 
   const topLeft = bounds.top_left;
   const bottomRight = bounds.bottom_right;
+
+
   let latDiff = _.round(Math.abs(topLeft.lat - bottomRight.lat), 5);
   const lonDiff = _.round(Math.abs(bottomRight.lon - topLeft.lon), 5);
   //map height can be zero when vis is first created
@@ -42,4 +49,38 @@ export function scaleBounds(bounds) {
     'top_left': { lat: topLeftLat, lon: topLeftLon },
     'bottom_right': { lat: bottomRightLat, lon: bottomRightLon }
   };
+}
+
+/**
+ * Creates a bounds that does not wrap around the world over longitude
+ * e.g. panning may cause the map to wrap to -400 longitude.
+ *
+ * @param bounds
+ */
+function normalizeLongitudes(bounds) {
+
+  const width = bounds.bottom_right.lon - bounds.top_left.lon;
+  let westLon;
+  let eastLon;
+  if (width > 360) {
+    westLon = -180;
+    eastLon = 180;
+  } else {
+    westLon = ((bounds.top_left.lon + 180) % 360) - 180;
+    westLon = (westLon < -180) ? -180 : westLon;
+    eastLon = westLon + width;
+    eastLon = eastLon > 180 ? 180 : eastLon;
+  }
+
+  return {
+    top_left: {
+      lon: westLon,
+      lat: bounds.top_left.lat
+    },
+    bottom_right: {
+      lon: eastLon,
+      lat: bounds.bottom_right.lat
+    }
+  };
+
 }
