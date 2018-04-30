@@ -38,7 +38,7 @@ export function AddData({ apmUiEnabled }) {
     );
 
     return (
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup wrap gutterSize="none">
 
         {apmUiEnabled !== false && getApmCard()}
 

@@ -43,7 +43,7 @@ exports[`apmUiEnabled 1`] = `
     gutterSize="none"
     justifyContent="flexStart"
     responsive={true}
-    wrap={false}
+    wrap={true}
   >
     <EuiFlexItem
       component="div"
@@ -251,7 +251,7 @@ exports[`render 1`] = `
     gutterSize="none"
     justifyContent="flexStart"
     responsive={true}
-    wrap={false}
+    wrap={true}
   >
     <EuiFlexItem
       component="div"
