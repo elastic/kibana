@@ -40,6 +40,7 @@ import {
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import template from './create_job.html';
 
 uiRoutes
@@ -64,7 +65,6 @@ module
     $route,
     timefilter,
     Private,
-    mlMessageBarService,
     AppState) {
 
     timefilter.enableTimeRangeSelector();

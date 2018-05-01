@@ -14,12 +14,13 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 import { labelDuplicateDetectorDescriptions } from 'plugins/ml/util/anomaly_utils';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { isWebUrl } from 'plugins/ml/util/string_utils';
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
 
 let jobService = undefined;
 
-export function JobServiceProvider($q, es, Private, mlMessageBarService) {
+export function JobServiceProvider($q, es) {
   const msgs = mlMessageBarService;
   let jobs = [];
   let datafeedIds = {};

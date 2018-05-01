@@ -12,6 +12,7 @@ import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states
 import { ML_DATA_PREVIEW_COUNT } from 'plugins/ml/../common/util/job_utils';
 import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import numeral from '@elastic/numeral';
 import chrome from 'ui/chrome';
 import angular from 'angular';
@@ -20,7 +21,7 @@ import template from './expanded_row.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobListExpandedRow', function ($location, mlMessageBarService, Private) {
+module.directive('mlJobListExpandedRow', function ($location, Private) {
   return {
     restrict: 'AE',
     replace: false,

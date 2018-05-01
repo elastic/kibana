@@ -11,6 +11,7 @@ import angular from 'angular';
 
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -20,8 +21,7 @@ module.controller('MlJobTimepickerModal', function (
   $rootScope,
   $modalInstance,
   params,
-  Private,
-  mlMessageBarService) {
+  Private) {
   const msgs = mlMessageBarService;
   const mlJobService = Private(JobServiceProvider);
   const mlCreateWatchService = Private(CreateWatchServiceProvider);

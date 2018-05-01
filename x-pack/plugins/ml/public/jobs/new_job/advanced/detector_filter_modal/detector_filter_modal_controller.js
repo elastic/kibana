@@ -9,10 +9,12 @@
 import _ from 'lodash';
 import angular from 'angular';
 
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params, mlMessageBarService) {
+module.controller('MlDetectorFilterModal', function ($scope, $modalInstance, params) {
   const msgs = mlMessageBarService;
   msgs.clear();
   $scope.title = 'Add new filter';

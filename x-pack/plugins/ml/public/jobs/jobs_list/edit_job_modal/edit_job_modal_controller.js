@@ -18,6 +18,7 @@ import { CustomUrlEditorServiceProvider } from 'plugins/ml/jobs/components/custo
 import { isWebUrl } from 'plugins/ml/util/string_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -28,8 +29,7 @@ module.controller('MlEditJobModal', function (
   $modal,
   $window,
   params,
-  Private,
-  mlMessageBarService) {
+  Private) {
   const msgs = mlMessageBarService;
   msgs.clear();
   const mlJobService = Private(JobServiceProvider);

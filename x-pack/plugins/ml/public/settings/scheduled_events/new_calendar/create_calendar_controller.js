@@ -20,6 +20,7 @@ import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { CalendarServiceProvider } from 'plugins/ml/services/calendar_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 import template from './create_calendar.html';
@@ -52,7 +53,6 @@ module.controller('MlCreateCalendar',
     $location,
     $q,
     timefilter,
-    mlMessageBarService,
     Private) {
     const msgs = mlMessageBarService;
     msgs.clear();

@@ -9,8 +9,9 @@
 
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
-export function PostSaveServiceProvider(Private, mlMessageBarService, $q) {
+export function PostSaveServiceProvider(Private, $q) {
   const msgs = mlMessageBarService;
   const mlJobService = Private(JobServiceProvider);
   const createWatchService = Private(CreateWatchServiceProvider);
