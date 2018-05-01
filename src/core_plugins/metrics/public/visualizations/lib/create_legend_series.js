@@ -17,6 +17,7 @@ export default props => (row, i) => {
     <div
       key={key}
       className={classes.join(' ')}
+      data-test-subj="tsvbLegendItem"
     >
       <button
         onClick={event => props.onToggle(event, row.id)}

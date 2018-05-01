@@ -11,6 +11,7 @@ import {
   updateViewMode,
   setPanels,
   updateTimeRange,
+  embeddableIsInitialized,
 } from '../actions';
 import { Provider } from 'react-redux';
 
@@ -37,6 +38,8 @@ beforeAll(() => {
   store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  const metadata = { title: 'my embeddable title', editUrl: 'editme' };
+  store.dispatch(embeddableIsInitialized({ metadata, panelId: 'foo1' }));
 });
 
 test('DashboardPanel matches snapshot', () => {
