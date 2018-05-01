@@ -28,6 +28,7 @@
     "patterns": [
       "{indices}/{type}/{id}/_update",
       "{indices}/_doc/{id}/_update"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
   }
 }

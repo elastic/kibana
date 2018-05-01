@@ -19,6 +19,7 @@
       "_msearch",
       "{indices}/_msearch",
       "{indices}/{type}/_msearch"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
   }
 }

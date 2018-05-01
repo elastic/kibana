@@ -10,6 +10,7 @@
     ],
     "patterns": [
       "_cluster/settings"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-update-settings.html"
   }
 }

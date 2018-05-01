@@ -20,6 +20,7 @@
       "{indices}/_mapping",
       "_mapping/{type}",
       "{indices}/_mapping/{type}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-mapping.html"
   }
 }

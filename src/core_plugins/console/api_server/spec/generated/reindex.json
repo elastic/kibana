@@ -13,6 +13,7 @@
     ],
     "patterns": [
       "_reindex"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html"
   }
 }

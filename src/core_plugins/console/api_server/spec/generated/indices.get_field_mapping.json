@@ -20,6 +20,7 @@
       "{indices}/_mapping/field/{fields}",
       "_mapping/{type}/field/{fields}",
       "{indices}/_mapping/{type}/field/{fields}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html"
   }
 }

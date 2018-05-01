@@ -21,6 +21,7 @@
       "{indices}/_settings",
       "{indices}/_settings/{name}",
       "_settings/{name}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-settings.html"
   }
 }

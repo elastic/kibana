@@ -30,6 +30,7 @@
       "_search/template",
       "{indices}/_search/template",
       "{indices}/{type}/_search/template"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
   }
 }

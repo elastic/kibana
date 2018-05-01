@@ -58,6 +58,7 @@
         "warmer"
       ],
       "nodes": null
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
   }
 }

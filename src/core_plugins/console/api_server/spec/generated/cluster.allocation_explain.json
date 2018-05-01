@@ -10,6 +10,7 @@
     ],
     "patterns": [
       "_cluster/allocation/explain"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-allocation-explain.html"
   }
 }

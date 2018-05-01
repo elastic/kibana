@@ -15,6 +15,7 @@
     "patterns": [
       "_analyze",
       "{indices}/_analyze"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
   }
 }

@@ -26,6 +26,7 @@
         "thread_pool",
         "transport"
       ]
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-info.html"
   }
 }

@@ -33,6 +33,7 @@
       "{indices}/{type}/{id}",
       "{indices}/_doc/{id}",
       "{indices}/_doc"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
 }

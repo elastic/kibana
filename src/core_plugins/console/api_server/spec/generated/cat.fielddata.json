@@ -29,6 +29,7 @@
     "patterns": [
       "_cat/fielddata",
       "_cat/fielddata/{fields}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-fielddata.html"
   }
 }

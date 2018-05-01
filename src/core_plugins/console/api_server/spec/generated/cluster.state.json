@@ -33,6 +33,7 @@
         "routing_table",
         "version"
       ]
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
 }

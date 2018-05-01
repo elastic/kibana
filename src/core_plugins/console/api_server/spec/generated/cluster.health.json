@@ -33,6 +33,7 @@
     "patterns": [
       "_cluster/health",
       "_cluster/health/{indices}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-health.html"
   }
 }

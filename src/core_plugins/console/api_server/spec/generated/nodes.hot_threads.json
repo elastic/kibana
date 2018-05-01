@@ -24,6 +24,7 @@
       "_nodes/hot_threads",
       "_nodes/{nodes}/hotthreads",
       "_nodes/{nodes}/hot_threads"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html"
   }
 }

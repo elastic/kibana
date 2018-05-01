@@ -6,6 +6,7 @@
     "patterns": [
       "_search/scroll/{scroll_id}",
       "_search/scroll"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-scroll.html"
   }
 }

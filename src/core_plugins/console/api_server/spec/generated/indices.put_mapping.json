@@ -26,6 +26,7 @@
       "_mappings/{type}",
       "{indices}/_mappings",
       "{indices}/_mapping"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
   }
 }

@@ -42,6 +42,7 @@
         "suggest",
         "warmer"
       ]
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
   }
 }

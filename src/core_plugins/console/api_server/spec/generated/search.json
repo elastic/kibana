@@ -64,6 +64,7 @@
       "_search",
       "{indices}/_search",
       "{indices}/{type}/_search"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html"
   }
 }

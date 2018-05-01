@@ -16,6 +16,7 @@
     ],
     "patterns": [
       "_cat/tasks"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
   }
 }

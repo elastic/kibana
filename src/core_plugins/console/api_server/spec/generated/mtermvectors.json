@@ -28,6 +28,7 @@
       "_mtermvectors",
       "{indices}/_mtermvectors",
       "{indices}/{type}/_mtermvectors"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
   }
 }

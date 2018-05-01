@@ -25,6 +25,7 @@
     "patterns": [
       "{indices}/{type}/{id}",
       "{indices}/_doc/{id}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-delete.html"
   }
 }

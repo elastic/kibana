@@ -5,6 +5,7 @@
     ],
     "patterns": [
       ""
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/"
   }
 }

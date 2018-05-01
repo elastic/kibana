@@ -9,6 +9,7 @@
     ],
     "patterns": [
       "_cluster/pending_tasks"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-pending.html"
   }
 }
