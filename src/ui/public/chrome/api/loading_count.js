@@ -4,6 +4,7 @@ export function initLoadingCountApi(chrome, internals) {
   const counts = { angular: 0, manual: 0 };
   const handlers = new Set();
 
+  // update counts and call handlers with sum if there is a change
   function update(name, count) {
     if (counts[name] === count) {
       return;
@@ -20,9 +21,9 @@ export function initLoadingCountApi(chrome, internals) {
    * Injected into angular module by ui/chrome angular integration
    * and adds a root-level watcher that will capture the count of
    * active $http requests on each digest loop
-   * @param  {} $rootScope
-   * @param  {[type]} $http      [description]
-   * @return {[type]}            [description]
+   * @param  {Angular.Scope} $rootScope
+   * @param  {HttpService} $http
+   * @return {undefined}
    */
   internals.capture$httpLoadingCount = function ($rootScope, $http) {
     $rootScope.$watch(() => {
