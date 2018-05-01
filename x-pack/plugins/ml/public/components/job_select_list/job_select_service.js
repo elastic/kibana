@@ -13,13 +13,10 @@ import { notify } from 'ui/notify';
 
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+let jobSelectService = undefined;
 
-module.service('mlJobSelectService', function ($rootScope, Private, globalState) {
+export function JobSelectServiceProvider($rootScope, Private, globalState) {
   const mlJobService = Private(JobServiceProvider);
-
-  const self = this;
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {
@@ -28,26 +25,6 @@ module.service('mlJobSelectService', function ($rootScope, Private, globalState)
     }
   }
   checkGlobalState();
-
-  this.jobIdsWithGroup = [];
-  this.jobIds = [];
-  this.groupIds = [];
-  this.description = { txt: '' };
-  this.singleJobDescription = { txt: '' };
-  this.jobSelectListState = {
-    applyTimeRange: true
-  };
-
-  // Broadcasts that a change has been made to the selected jobs.
-  this.broadcastJobSelectionChange = function () {
-    $rootScope.$broadcast('jobSelectionChange', this.getSelectedJobIds());
-  };
-
-  // Add a listener for changes to the selected jobs.
-  this.listenJobSelectionChange = function (scope, callback) {
-    const handler = $rootScope.$on('jobSelectionChange', callback);
-    scope.$on('$destroy', handler);
-  };
 
   function loadJobIdsFromGlobalState() {
     const jobIds = [];
@@ -233,16 +210,16 @@ module.service('mlJobSelectService', function ($rootScope, Private, globalState)
   // this could be a mixture of job ids, group ids or a *.
   // stores an expanded list of job ids (i.e. groupId.jobId) and a list of jobs ids only.
   // creates the description text used on the job picker button.
-  function processIds(ids) {
+  function processIds(service, ids) {
     const expandedJobIds = expandGroups(ids);
-    self.jobIdsWithGroup.length = 0;
-    self.jobIdsWithGroup.push(...expandedJobIds);
-    self.groupIds = getGroupIds(ids);
-    self.jobIds.length = 0;
-    self.jobIds.push(...removeGroupIds(expandedJobIds));
-    self.description.txt = createDescription(self.jobIdsWithGroup);
-    self.singleJobDescription.txt = ids[0];
-    setBrowserTitle(self.description.txt);
+    service.jobIdsWithGroup.length = 0;
+    service.jobIdsWithGroup.push(...expandedJobIds);
+    service.groupIds = getGroupIds(ids);
+    service.jobIds.length = 0;
+    service.jobIds.push(...removeGroupIds(expandedJobIds));
+    service.description.txt = createDescription(service.jobIdsWithGroup);
+    service.singleJobDescription.txt = ids[0];
+    setBrowserTitle(service.description.txt);
   }
 
   // display the job id in the tab title
@@ -250,23 +227,52 @@ module.service('mlJobSelectService', function ($rootScope, Private, globalState)
     document.title = `${title} - Kibana`;
   }
 
-  // called externally to retrieve the selected jobs ids.
-  // passing in `true` will load the jobs ids from the URL first
-  this.getSelectedJobIds = function (loadFromURL) {
-    if (loadFromURL) {
-      processIds(loadJobIdsFromGlobalState());
+  class JobSelectService {
+    constructor() {
+      this.jobIds = [];
+      this.groupIds = [];
+      this.description = { txt: '' };
+      this.singleJobDescription = { txt: '' };
+      this.jobSelectListState = {
+        applyTimeRange: true
+      };
+      this.jobIdsWithGroup = [];
+      this.splitJobId = splitJobId;
     }
-    return this.jobIds;
-  };
 
-  // called externally to set the job ids.
-  // job ids are added to the URL and an event is broadcast for anything listening.
-  // e.g. the anomaly explorer or time series explorer.
-  // currently only called by the jobs selection menu.
-  this.setJobIds = function (jobIds) {
-    processIds(jobIds);
-    storeJobIdsInGlobalState(jobIds);
-    this.broadcastJobSelectionChange();
-  };
+    // Broadcasts that a change has been made to the selected jobs.
+    broadcastJobSelectionChange() {
+      $rootScope.$broadcast('jobSelectionChange', this.getSelectedJobIds());
+    }
 
-});
+    // Add a listener for changes to the selected jobs.
+    listenJobSelectionChange(scope, callback) {
+      const handler = $rootScope.$on('jobSelectionChange', callback);
+      scope.$on('$destroy', handler);
+    }
+
+    // called externally to retrieve the selected jobs ids.
+    // passing in `true` will load the jobs ids from the URL first
+    getSelectedJobIds(loadFromURL) {
+      if (loadFromURL) {
+        processIds(this, loadJobIdsFromGlobalState());
+      }
+      return this.jobIds;
+    }
+
+    // called externally to set the job ids.
+    // job ids are added to the URL and an event is broadcast for anything listening.
+    // e.g. the anomaly explorer or time series explorer.
+    // currently only called by the jobs selection menu.
+    setJobIds(jobIds) {
+      processIds(this, jobIds);
+      storeJobIdsInGlobalState(jobIds);
+      this.broadcastJobSelectionChange();
+    }
+  }
+
+  if (jobSelectService === undefined) {
+    jobSelectService = new JobSelectService();
+  }
+  return jobSelectService;
+}

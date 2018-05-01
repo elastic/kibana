@@ -19,11 +19,12 @@ import d3 from 'd3';
 import template from './job_select_list.html';
 import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
 import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobSelectList', function (Private, mlJobSelectService, timefilter) {
+module.directive('mlJobSelectList', function (Private, timefilter) {
   return {
     restrict: 'AE',
     replace: true,
@@ -31,6 +32,7 @@ module.directive('mlJobSelectList', function (Private, mlJobSelectService, timef
     template,
     controller: function ($scope) {
       const mlJobService = Private(JobServiceProvider);
+      const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
       $scope.homelessJobs = [];
@@ -364,6 +366,7 @@ module.directive('mlJobSelectList', function (Private, mlJobSelectService, timef
       };
     },
     link: function (scope, element, attrs) {
+      const mlJobSelectService = Private(JobSelectServiceProvider);
       scope.timeSeriesOnly = false;
       if (attrs.timeseriesonly === 'true') {
         scope.timeSeriesOnly = true;
