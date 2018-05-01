@@ -73,7 +73,7 @@ describe('kibana_map tests', function () {
   });
 
 
-  describe('getUntrimmedBounds', function () {
+  describe('getBounds', function () {
 
     afterEach(function () {
       kibanaMap.destroy();
@@ -92,7 +92,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should get untrimmed map bounds', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('281.25');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-281.25');
       });
@@ -112,7 +112,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(round(bounds.bottom_right.lon, 2)).to.equal(0.27);
         expect(round(bounds.bottom_right.lat, 2)).to.equal(0);
@@ -142,7 +142,7 @@ describe('kibana_map tests', function () {
       });
 
       it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds).to.have.property('bottom_right');
         expect(Math.round(bounds.bottom_right.lon)).to.equal(0);
         expect(bounds.bottom_right.lat.toFixed(2)).to.equal('-0.18');
@@ -165,7 +165,7 @@ describe('kibana_map tests', function () {
       });
 
       it('coordinates should be corrected to  center the -180,180 range', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('201.09');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-361.41');
       });
@@ -183,7 +183,7 @@ describe('kibana_map tests', function () {
       });
 
       it('coordinates should be corrected to fall within the -180,180 range', function () {
-        const bounds = kibanaMap.getUntrimmedBounds();
+        const bounds = kibanaMap.getBounds();
         expect(bounds.bottom_right.lon.toFixed(2)).to.equal('-75.61');
         expect(bounds.top_left.lon.toFixed(2)).to.equal('-84.40');
       });

@@ -353,48 +353,11 @@ export class KibanaMap extends EventEmitter {
     return _.min([distanceX, distanceY]);
   }
 
-  getBounds() {
-
-    const bounds = this._leafletMap.getBounds();
-    if (!bounds) {
-      return null;
-    }
-
-    const southEast = bounds.getSouthEast();
-    const northWest = bounds.getNorthWest();
-    let southEastLng = southEast.lng;
-    if (southEastLng > 180) {
-      southEastLng -= 360;
-    }
-    let northWestLng = northWest.lng;
-    if (northWestLng < -180) {
-      northWestLng += 360;
-    }
-
-    const southEastLat = southEast.lat;
-    const northWestLat = northWest.lat;
-
-    //Bounds cannot be created unless they form a box with larger than 0 dimensions
-    //Invalid areas are rejected by ES.
-    if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      return;
-    }
-
-    return {
-      bottom_right: {
-        lat: southEastLat,
-        lon: southEastLng
-      },
-      top_left: {
-        lat: northWestLat,
-        lon: northWestLng
-      }
-    };
-  }
-
   _getLeafletBounds(resizeOnFail) {
 
-    const bounds = this._leafletMap.getBounds();
+    const boundsRaw = this._leafletMap.getBounds();
+    const bounds = this._leafletMap.wrapLatLngBounds(boundsRaw);
+
     if (!bounds) {
       return null;
     }
@@ -416,11 +379,9 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  getUntrimmedBounds() {
+  getBounds() {
 
-    const boundsRaw = this._getLeafletBounds(true);
-    const bounds = this._leafletMap.wrapLatLngBounds(boundsRaw);
-
+    const bounds = this._getLeafletBounds(true);
     if (!bounds) {
       return null;
     }
@@ -667,14 +628,14 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     }
 
     this._leafletMap.on('resize', () => {
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     });
     this._leafletMap.on('load', () => {
-      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
+      visualization.sessionState.mapBounds = this.getBounds();
     });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
