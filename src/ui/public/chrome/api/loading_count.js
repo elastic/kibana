@@ -1,10 +1,20 @@
-import { Observable, BehaviorSubject } from 'rxjs';
-
 import { isSystemApiRequest } from '../../system_api';
 
 export function initLoadingCountApi(chrome, internals) {
-  const angularCount$ = new BehaviorSubject(0);
-  const manualCount$ = new BehaviorSubject(0);
+  const counts = { angular: 0, manual: 0 };
+  const handlers = new Set();
+
+  function update(name, count) {
+    if (counts[name] === count) {
+      return;
+    }
+
+    counts[name] = count;
+    const sum = counts.angular + counts.manual;
+    for (const handler of handlers) {
+      handler(sum);
+    }
+  }
 
   /**
    * Injected into angular module by ui/chrome angular integration
@@ -17,28 +27,31 @@ export function initLoadingCountApi(chrome, internals) {
   internals.capture$httpLoadingCount = function ($rootScope, $http) {
     $rootScope.$watch(() => {
       const reqs = $http.pendingRequests || [];
-      angularCount$.next(reqs.filter(req => !isSystemApiRequest(req)).length);
+      update('angular', reqs.filter(req => !isSystemApiRequest(req)).length);
     });
   };
 
   chrome.loadingCount = new class ChromeLoadingCountApi {
     /**
-     * Observable of count of loading items, powers the
-     * loading indicator directive
+     * Call to add a subscriber to for the loading count that
+     * will be called every time the loading count changes.
+     *
      * @type {Observable<number>}
+     * @return {Function} unsubscribe
      */
-    count$ = Observable
-      .combineLatest(manualCount$, angularCount$)
-      .map((counts) => counts[0] + counts[1])
-      .distinctUntilChanged()
-      .share()
+    subscribe(handler) {
+      handler.add(handler);
+      return () => {
+        handler.delete(handler);
+      };
+    }
 
     /**
      * Increment the loading count by one
      * @return {undefined}
      */
     increment() {
-      manualCount$.next(manualCount$.getValue() + 1);
+      update('manual', counts.manual + 1);
     }
 
     /**
@@ -46,7 +59,7 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {undefined}
      */
     decrement() {
-      manualCount$.next(manualCount$.getValue() - 1);
+      update('manual', counts.manual - 1);
     }
   };
 }

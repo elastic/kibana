@@ -7,34 +7,26 @@ import chrome from 'ui/chrome';
 
 import './loading_indicator.less';
 
-class LoadingIndicator extends React.Component {
+export class LoadingIndicator extends React.Component {
   state = {
-    hidden: false,
-    error: null
+    visible: false,
   }
 
   componentDidMount() {
-    this._sub = chrome.loadingCount.count$.subscribe({
-      next: (count) => {
-        this.setState({
-          hidden: count === 0
-        });
-      },
-      error: (error) => {
-        this.setState({
-          error
-        });
-      }
+    this._unsub = chrome.loadingCount.subscribe((count) => {
+      this.setState({
+        visible: count > 0
+      });
     });
   }
 
   componentWillUnmount() {
-    this._sub.unsubscribe();
-    this._sub = null;
+    this._unsub();
+    this._unsub = null;
   }
 
   render() {
-    const { error, hidden } = this.state;
+    const { error, visible } = this.state;
 
     if (error) {
       throw error;
@@ -42,11 +34,11 @@ class LoadingIndicator extends React.Component {
 
     return (
       <div
-        className={classNames('loadingIndicator', hidden && 'hidden')}
+        className={classNames('loadingIndicator', visible ? null : 'hidden')}
         data-test-subj={
-          hidden
-            ? 'globalLoadingIndicator-hidden'
-            : 'globalLoadingIndicator'
+          visible
+            ? 'globalLoadingIndicator'
+            : 'globalLoadingIndicator-hidden'
         }
       >
         <div className="loadingIndicator__bar" />
