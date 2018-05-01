@@ -32,7 +32,7 @@ export class PipelinesService {
 
         // Monitoring will report centrally-managed pipelines as well, including recently-deleted centrally-managed ones.
         // If there's a recently-deleted pipeline we're keeping track of BUT monitoring doesn't report it, that means
-        // it's no longer actually running in Logstash any more. So we can stop tracking it as a recently-deleted pipeline.
+        // it's not running in Logstash any more. So we can stop tracking it as a recently-deleted pipeline.
         const monitoringPipelineIds = monitoringPipelines.map(pipeline => pipeline.id);
         this.getRecentlyDeleted().forEach(recentlyDeletedPipeline => {
           // We don't want to stop tracking the recently-deleted pipeline until Monitoring has had some
