@@ -17,7 +17,7 @@
 #define __NR_vfork 58
 #endif
 
-#ifndef __NR_vfork
+#ifndef __NR_execve
 #define __NR_execve 59
 #endif
 
