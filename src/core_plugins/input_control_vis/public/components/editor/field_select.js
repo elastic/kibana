@@ -98,11 +98,7 @@ export class FieldSelect extends Component {
   }, 300);
 
   onChange = (selectedOptions) => {
-    let selectedFieldName;
-    if (selectedOptions.length) {
-      selectedFieldName = selectedOptions[0].value;
-    }
-    this.props.onChange(selectedFieldName);
+    this.props.onChange(_.get(selectedOptions, '0.value'));
   }
 
   render() {

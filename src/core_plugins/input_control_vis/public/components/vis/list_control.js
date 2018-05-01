@@ -24,8 +24,11 @@ export class ListControl extends Component {
     }
 
     const options = this.props.options.map(option => {
-      option['data-test-subj'] = `option_${option.value.replace(' ', '_')}`;
-      return option;
+      return {
+        label: option.label,
+        value: option.value,
+        ['data-test-subj']: `option_${option.value.replace(' ', '_')}`
+      };
     });
 
     return (

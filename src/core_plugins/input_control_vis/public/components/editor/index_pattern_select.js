@@ -52,7 +52,9 @@ export class IndexPatternSelect extends Component {
       return;
     }
 
-    // TODO: handle case where index pattern no longer exists
+    if (!indexPattern) {
+      return;
+    }
 
     this.setState({
       selectedIndexPattern: {
@@ -93,11 +95,7 @@ export class IndexPatternSelect extends Component {
   }
 
   onChange = (selectedOptions) => {
-    let selectedIndexPatternId;
-    if (selectedOptions.length) {
-      selectedIndexPatternId = selectedOptions[0].value;
-    }
-    this.props.onChange(selectedIndexPatternId);
+    this.props.onChange(_.get(selectedOptions, '0.value'));
   }
 
   render() {
