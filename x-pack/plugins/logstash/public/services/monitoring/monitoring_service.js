@@ -37,7 +37,7 @@ export class MonitoringService {
         const body = {
           timeRange: {
             max: now.toISOString(),
-            min: now.subtract(MONITORING.PIPELINE_RECENCY_DURATION_S, 'seconds').toISOString()
+            min: now.subtract(MONITORING.ACTIVE_PIPELINE_RANGE_S, 'seconds').toISOString()
           }
         };
         return this.$http.post(url, body);
