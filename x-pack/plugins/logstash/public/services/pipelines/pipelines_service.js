@@ -127,11 +127,9 @@ export class PipelinesService {
     }
 
     return JSON.parse(recentlyDeletedPipelines);
-
   }
 
   setRecentlyDeleted(recentlyDeletedPipelineIds) {
     this.$window.localStorage.setItem(RECENTLY_DELETED_PIPELINE_IDS_STORAGE_KEY, JSON.stringify(recentlyDeletedPipelineIds));
   }
-
 }
