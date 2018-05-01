@@ -2,7 +2,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import $ from 'jquery';
 
-import '../directives/loading_indicator/loading_indicator';
+import '../directives/loading_indicator';
 
 describe('kbnLoadingIndicator', function () {
   let compile;

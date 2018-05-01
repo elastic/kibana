@@ -1,7 +1,9 @@
-import { uiModules } from '../../../modules';
 import 'ngreact';
 import React from 'react';
+
+import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+
 import './loading_indicator.less';
 
 class LoadingIndicator extends React.Component {
