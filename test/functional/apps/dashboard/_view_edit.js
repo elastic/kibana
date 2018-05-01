@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const remote = getService('remote');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
   const dashboardName = 'Dashboard View Edit Test';
 
@@ -28,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
     it('create test dashboard', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardAddPanel.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
       const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName);
       expect(isDashboardSaved).to.eql(true);
     });
@@ -125,8 +126,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a new vis is added', async function () {
-          await PageObjects.dashboard.clickAddVisualization();
-          await PageObjects.dashboard.clickAddNewVisualizationLink();
+          await dashboardAddPanel.ensureAddPanelIsShowing();
+          await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualization('new viz panel');
@@ -142,7 +143,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when an existing vis is added', async function () {
-          await PageObjects.dashboard.addVisualization('new viz panel');
+          await dashboardAddPanel.addVisualization('new viz panel');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes

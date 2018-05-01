@@ -13,7 +13,7 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
   }
 
   return (
-    <div className="panel-heading">
+    <div className="panel-heading" data-test-subj={`dashboardPanelHeading-${title.replace(/\s/g, '')}`}>
       <span
         data-test-subj="dashboardPanelTitle"
         className="panel-title"
