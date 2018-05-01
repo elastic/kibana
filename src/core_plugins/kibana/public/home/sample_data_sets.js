@@ -1,5 +1,5 @@
 import chrome from 'ui/chrome';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 
 const sampleDataUrl = chrome.addBasePath('/api/sample_data');
 const headers = new Headers();
@@ -19,13 +19,16 @@ export async function listSampleDataSets() {
     }
 
     return await response.json();
-  } catch(err) {
-    notify.error(`Unable to load sample data sets, ${err}`);
+  } catch (err) {
+    toastNotifications.addDanger({
+      title: `Unable to load sample data sets list`,
+      text: `${err.message}`,
+    });
     return [];
   }
 }
 
-export async function installSampleDataSet(id) {
+export async function installSampleDataSet(id, name) {
   try {
     const response = await fetch(`${sampleDataUrl}/${id}`, {
       method: 'post',
@@ -35,12 +38,20 @@ export async function installSampleDataSet(id) {
     if (response.status >= 300) {
       throw new Error(`Request failed with status code: ${response.status}`);
     }
-  } catch(err) {
-    notify.error(`Unable to install sample data set, ${err}`);
+  } catch (err) {
+    toastNotifications.addDanger({
+      title: `Unable to install sample data set: ${name}`,
+      text: `${err.message}`,
+    });
+    return;
   }
+
+  toastNotifications.addSuccess({
+    title: `${name} sample data set successfully installed`,
+  });
 }
 
-export async function uninstallSampleDataSet(id) {
+export async function uninstallSampleDataSet(id, name) {
   try {
     const response = await fetch(`${sampleDataUrl}/${id}`, {
       method: 'delete',
@@ -50,7 +61,14 @@ export async function uninstallSampleDataSet(id) {
     if (response.status >= 300) {
       throw new Error(`Request failed with status code: ${response.status}`);
     }
-  } catch(err) {
-    notify.error(`Unable to uninstall sample data set, ${err}`);
+  } catch (err) {
+    toastNotifications.addDanger({
+      title: `Unable to uninstall sample data set`,
+      text: `${err.message}`,
+    });
+    return;
   }
+  toastNotifications.addSuccess({
+    title: `${name} sample data set successfully uninstalled`,
+  });
 }

@@ -86,16 +86,15 @@ export class TutorialDirectory extends React.Component {
 
   loadSampleDataSets = async () => {
     const sampleDataSets = await listSampleDataSets();
-    sampleDataSets.sort((a, b) => {
-      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-    });
 
     if (!this._isMounted) {
       return;
     }
 
     this.setState({
-      sampleDataSets: sampleDataSets,
+      sampleDataSets: sampleDataSets.sort((a, b) => {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      }),
     });
   }
 

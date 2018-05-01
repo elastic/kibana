@@ -1,6 +1,5 @@
 import React, { Fragment }  from 'react';
 import PropTypes from 'prop-types';
-
 import {
   EuiCard,
   EuiButton,
@@ -27,9 +26,9 @@ export class SampleDataSetCard extends React.Component {
     });
 
     if (this.props.isInstalled) {
-      await uninstallSampleDataSet(this.props.id);
+      await uninstallSampleDataSet(this.props.id, this.props.name);
     } else {
-      await installSampleDataSet(this.props.id);
+      await installSampleDataSet(this.props.id, this.props.name);
     }
 
     this.props.onRequestComplete();
