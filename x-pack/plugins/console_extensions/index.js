@@ -10,8 +10,19 @@ export function consoleExtensions(kibana) {
     id: 'console_extensions',
     require: ['kibana', 'console'],
     isEnabled(config) {
-      return config.has('console.enabled') && config.get('console.enabled');
+      return (
+        config.get('console_extensions.enabled') &&
+        config.has('console.enabled') &&
+        config.get('console.enabled')
+      );
     },
+
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
     init: server => {
       if (
         server.plugins.console &&
