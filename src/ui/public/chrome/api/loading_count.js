@@ -41,9 +41,9 @@ export function initLoadingCountApi(chrome, internals) {
      * @return {Function} unsubscribe
      */
     subscribe(handler) {
-      handler.add(handler);
+      handlers.add(handler);
       return () => {
-        handler.delete(handler);
+        handlers.delete(handler);
       };
     }
 
