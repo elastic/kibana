@@ -25,8 +25,4 @@ export function abbreviateWholeNumber(value, maxDigits) {
 }
 
 // TODO - remove the filter once all uses of the abbreviateWholeNumber Angular filter have been removed.
-module.filter('abbreviateWholeNumber', function () {
-  return function (value, maxDigits) {
-    return abbreviateWholeNumber(value, maxDigits);
-  };
-});
+module.filter('abbreviateWholeNumber', () => abbreviateWholeNumber);

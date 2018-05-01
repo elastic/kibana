@@ -94,8 +94,5 @@ function formatSingleValue(value, mlFunction, fieldFormat) {
 }
 
 // TODO - remove the filter once all uses of the formatValue Angular filter have been removed.
-module.filter('formatValue', function () {
-  return function (value, mlFunction, fieldFormat) {
-    return formatValue(value, mlFunction, fieldFormat);
-  };
-});
+module.filter('formatValue', () => formatValue);
+
