@@ -16,17 +16,12 @@ export function geoContains(collar, bounds) {
 }
 
 export function scaleBounds(bounds) {
-
-  if (!bounds) {
-    return;
-  }
+  if (!bounds) return;
 
   const scale = .5; // scale bounds by 50%
 
   const topLeft = bounds.top_left;
   const bottomRight = bounds.bottom_right;
-
-
   let latDiff = _.round(Math.abs(topLeft.lat - bottomRight.lat), 5);
   const lonDiff = _.round(Math.abs(bottomRight.lon - topLeft.lon), 5);
   //map height can be zero when vis is first created
