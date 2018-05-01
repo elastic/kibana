@@ -57,15 +57,22 @@ export function getQueryParams(mappings, type, search, searchFields, includeType
   }
 
   if (includeTypes) {
-    bool.should = includeTypes.map(includeType => ({
-      term: {
-        type: includeType,
+    bool.must = [
+      {
+        bool: {
+          should: includeTypes.map(includeType => ({
+            term: {
+              type: includeType,
+            }
+          })),
+        }
       }
-    }));
+    ];
   }
 
   if (search) {
     bool.must = [
+      ...bool.must || [],
       {
         simple_query_string: {
           query: search,

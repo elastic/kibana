@@ -41,6 +41,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
       ]
     }
     pagination={true}
+    responsive={true}
     sorting={false}
   />
 </EuiConfirmModal>
@@ -73,19 +74,19 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
       Array [
         Object {
           "id": "index-pattern",
-          "label": "index-pattern (1)",
+          "label": "index-pattern (0)",
         },
         Object {
           "id": "visualization",
-          "label": "visualization (1)",
+          "label": "visualization (0)",
         },
         Object {
           "id": "dashboard",
-          "label": "dashboard (1)",
+          "label": "dashboard (0)",
         },
         Object {
           "id": "search",
-          "label": "search (1)",
+          "label": "search (0)",
         },
       ]
     }
@@ -144,22 +145,22 @@ exports[`ObjectsTable should render normally 1`] = `
         Object {
           "name": "index-pattern",
           "value": "index-pattern",
-          "view": "index-pattern (1)",
+          "view": "index-pattern (0)",
         },
         Object {
           "name": "visualization",
           "value": "visualization",
-          "view": "visualization (1)",
+          "view": "visualization (0)",
         },
         Object {
           "name": "dashboard",
           "value": "dashboard",
-          "view": "dashboard (1)",
+          "view": "dashboard (0)",
         },
         Object {
           "name": "search",
           "value": "search",
-          "view": "search (1)",
+          "view": "search (0)",
         },
       ]
     }

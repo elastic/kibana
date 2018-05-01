@@ -113,6 +113,7 @@ exports[`Table should render normally 1`] = `
           "totalItemCount": 3,
         }
       }
+      responsive={true}
       selection={
         Object {
           "itemId": "id",

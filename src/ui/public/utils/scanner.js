@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import chrome from '../chrome';
 
-export const Scanner = function ($http, { index, type, typesToInclude } = {}) {
+export const Scanner = function ($http, { index, type } = {}) {
   if (!index) throw new Error('Expected index');
+  if (!type) throw new Error('Expected type');
   if (!$http) throw new Error('Expected $http');
 
   this.$http = $http;
   this.index = index;
   this.type = type;
-  this.typesToInclude = typesToInclude;
 };
 
 Scanner.prototype.start = function (searchBody) {
@@ -55,18 +55,6 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
     });
   }
 
-  if (this.typesToInclude) {
-    bool.filter.push({
-      bool: {
-        should: this.typesToInclude.map(type => ({
-          term: {
-            type,
-          }
-        })),
-      }
-    });
-  }
-
   if (searchString) {
     bool.must.push({
       simple_query_string: {
@@ -95,12 +83,11 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         .slice(0, allResults.total - allResults.hits.length);
 
       hits = hits.map(hit => {
-        const type = this.type || hit._source.type;
         if (hit._type === 'doc') {
           return {
-            _id: hit._id.replace(`${type}:`, ''),
-            _type: type,
-            _source: hit._source[type],
+            _id: hit._id.replace(`${this.type}:`, ''),
+            _type: this.type,
+            _source: hit._source[this.type],
             _meta: {
               savedObjectVersion: 2
             }

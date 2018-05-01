@@ -14,12 +14,8 @@ jest.mock('ui/errors', () => ({
   },
 }));
 
-jest.mock('ui/utils/scanner', () => ({
-  Scanner: class {
-    constructor() {
-      this.scanAndMap = () => {};
-    }
-  },
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => ''
 }));
 
 import { Table } from '../table';

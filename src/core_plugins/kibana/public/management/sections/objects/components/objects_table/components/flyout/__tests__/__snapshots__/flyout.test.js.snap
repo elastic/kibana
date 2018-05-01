@@ -6,7 +6,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle>
+    <EuiTitle
+      size="m"
+    >
       <h2>
         Import saved objects
       </h2>
@@ -90,6 +92,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           ],
         }
       }
+      responsive={true}
       sorting={false}
     />
   </EuiFlyoutBody>
@@ -157,7 +160,9 @@ exports[`Flyout should render import step 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle>
+    <EuiTitle
+      size="m"
+    >
       <h2>
         Import saved objects
       </h2>

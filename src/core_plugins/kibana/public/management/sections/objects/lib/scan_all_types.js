@@ -1,13 +1,7 @@
-import { Scanner } from 'ui/utils/scanner';
+import chrome from 'ui/chrome';
 
-export async function scanAllTypes($http, kbnIndex, typesToInclude) {
-  const scanner = new Scanner($http, {
-    index: kbnIndex,
-    typesToInclude,
-  });
-  const results = await scanner.scanAndMap('', {
-    pageSize: 1000,
-    docCount: Infinity
-  });
-  return results;
+const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
+export async function scanAllTypes($http, typesToInclude) {
+  const results = await $http.post(`${apiBase}/export`, { typesToInclude });
+  return results.data;
 }

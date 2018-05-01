@@ -20,12 +20,8 @@ jest.mock('ui/errors', () => ({
   },
 }));
 
-jest.mock('ui/utils/scanner', () => ({
-  Scanner: class {
-    constructor() {
-      this.scanAndMap = () => {};
-    }
-  },
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => ''
 }));
 
 jest.mock('../../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time', () => ({
@@ -43,6 +39,17 @@ jest.mock('../../../lib/retrieve_and_export_docs', () => ({
 
 jest.mock('../../../lib/scan_all_types', () => ({
   scanAllTypes: jest.fn(),
+}));
+
+jest.mock('../../../lib/get_saved_object_counts', () => ({
+  getSavedObjectCounts: jest.fn().mockImplementation(() => {
+    return {
+      'index-pattern': 0,
+      'visualization': 0,
+      'dashboard': 0,
+      'search': 0,
+    };
+  })
 }));
 
 jest.mock('../../../lib/save_to_file', () => ({
@@ -84,6 +91,8 @@ const allSavedObjects = [
   },
 ];
 
+const $http = () => {};
+$http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
   savedObjectsClient: {
     find: jest.fn().mockImplementation(({ type }) => {
@@ -114,7 +123,7 @@ const defaultProps = {
       clearAll: jest.fn(),
     }
   },
-  $http: () => {},
+  $http,
   basePath: '',
   newIndexPatternUrl: '',
   kbnIndex: '',
@@ -220,13 +229,11 @@ describe('ObjectsTable', () => {
       component.update();
 
       // Set up mocks
-      scanAllTypes.mockImplementation(() => ({
-        hits: allSavedObjects,
-      }));
+      scanAllTypes.mockImplementation(() => allSavedObjects);
 
       await component.instance().onExportAll();
 
-      expect(scanAllTypes).toHaveBeenCalledWith(defaultProps.$http, defaultProps.kbnIndex, INCLUDED_TYPES);
+      expect(scanAllTypes).toHaveBeenCalledWith(defaultProps.$http, INCLUDED_TYPES);
       expect(saveToFile).toHaveBeenCalledWith(JSON.stringify(allSavedObjects, null, 2));
     });
   });
@@ -399,7 +406,7 @@ describe('ObjectsTable', () => {
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);
       expect(component.state('selectedSavedObjects').length).toBe(0);
-      expect(defaultProps.savedObjectsClient.find.mock.calls.length).toBe(10);
+      expect(defaultProps.savedObjectsClient.find.mock.calls.length).toBe(2);
     });
   });
 });

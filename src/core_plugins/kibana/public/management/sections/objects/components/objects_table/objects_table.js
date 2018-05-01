@@ -20,11 +20,13 @@ import {
   retrieveAndExportDocs,
   scanAllTypes,
   saveToFile,
-  getQueryText,
+  parseQuery,
   getSavedObjectIcon,
+  getSavedObjectCounts,
   getRelationships,
 } from '../../lib';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
+import { isSameQuery } from '../../lib/is_same_query';
 
 export const INCLUDED_TYPES = [
   'index-pattern',
@@ -41,7 +43,6 @@ export class ObjectsTable extends Component {
     basePath: PropTypes.string.isRequired,
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
-    kbnIndex: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
     getEditUrl: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
@@ -70,6 +71,7 @@ export class ObjectsTable extends Component {
       relationshipTitle: undefined,
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
+      isDeleting: false,
       exportAllOptions: INCLUDED_TYPES.map(type => ({
         id: type,
         label: type,
@@ -87,25 +89,12 @@ export class ObjectsTable extends Component {
   }
 
   fetchCounts = async () => {
-    const fetches = INCLUDED_TYPES.map(type =>
-      this.props.savedObjectsClient.find({
-        perPage: 1,
-        type,
-        page: 1,
-        fields: ['id'],
-      })
+    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
+    const includeTypes = INCLUDED_TYPES.filter(
+      type => !visibleTypes || visibleTypes.includes(type)
     );
-    const result = await Promise.all(fetches);
 
-    const savedObjectCounts = result.reduce(
-      (accum, { total, savedObjects }) => {
-        if (savedObjects && savedObjects.length) {
-          accum[savedObjects[0].type] = total;
-        }
-        return accum;
-      },
-      this.state.savedObjectCounts
-    );
+    const savedObjectCounts = await getSavedObjectCounts(this.props.$http, includeTypes, queryText);
 
     this.setState(state => ({
       ...state,
@@ -130,11 +119,7 @@ export class ObjectsTable extends Component {
 
     this.setState({ isSearching: true });
 
-    const queryText = getQueryText(activeQuery);
-    const visibleTypes =
-      activeQuery && activeQuery.ast.getFieldClauses('type')
-        ? activeQuery.ast.getFieldClauses('type')[0].value
-        : undefined;
+    const { queryText, visibleTypes } = parseQuery(activeQuery);
 
     let savedObjects = [];
     let totalItemCount = 0;
@@ -183,12 +168,20 @@ export class ObjectsTable extends Component {
   };
 
   onQueryChange = query => {
+    // TODO: investigate why this happens at EUI level
+    if (isSameQuery(query, this.state.activeQuery)) {
+      return;
+    }
+
     this.setState(
       {
         activeQuery: query,
         page: 0, // Reset this on each query change
       },
-      () => this.fetchSavedObjects(query)
+      () => {
+        this.fetchSavedObjects();
+        this.fetchCounts();
+      },
     );
   };
 
@@ -224,7 +217,7 @@ export class ObjectsTable extends Component {
   };
 
   onExportAll = async () => {
-    const { kbnIndex, $http } = this.props;
+    const { $http } = this.props;
     const { exportAllSelectedOptions } = this.state;
 
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
@@ -233,8 +226,8 @@ export class ObjectsTable extends Component {
       }
       return accum;
     }, []);
-    const results = await scanAllTypes($http, kbnIndex, exportTypes);
-    saveToFile(JSON.stringify(flattenDeep(results.hits), null, 2));
+    const results = await scanAllTypes($http, exportTypes);
+    saveToFile(JSON.stringify(flattenDeep(results), null, 2));
   };
 
   finishImport = () => {
@@ -257,7 +250,13 @@ export class ObjectsTable extends Component {
 
   delete = async () => {
     const { savedObjectsClient } = this.props;
-    const { selectedSavedObjects } = this.state;
+    const { selectedSavedObjects, isDeleting } = this.state;
+
+    if (isDeleting) {
+      return;
+    }
+
+    this.setState({ isDeleting: true });
 
     const indexPatterns = selectedSavedObjects.filter(
       object => object.type === 'index-pattern'
@@ -276,6 +275,7 @@ export class ObjectsTable extends Component {
     this.setState({
       selectedSavedObjects: [],
       isShowingDeleteConfirmModal: false,
+      isDeleting: false,
     });
 
     // Fetching all data
@@ -339,7 +339,7 @@ export class ObjectsTable extends Component {
           onCancel={() => this.setState({ isShowingDeleteConfirmModal: false })}
           onConfirm={this.delete}
           cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          confirmButtonText={this.state.isDeleting ? 'Deleting...' : 'Delete'}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>This action will delete the following saved objects:</p>

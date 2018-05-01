@@ -1,28 +1,17 @@
 import { scanAllTypes } from '../scan_all_types';
 
-let mockScanAndMapCallCount = 0;
-
-jest.mock('ui/utils/scanner', () => ({
-  Scanner: class {
-    constructor() {
-      this.scanAndMap = () => {
-        mockScanAndMapCallCount++;
-      };
-    }
-  },
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => 'apiUrl',
 }));
 
 describe('scanAllTypes', () => {
-  beforeEach(() => {
-    mockScanAndMapCallCount = 0;
-  });
-
-  it('should use the scanner utility', async () => {
-    const $http = {};
-    const kbnIndex = '.kibana';
+  it('should call the api', async () => {
+    const $http = {
+      post: jest.fn().mockImplementation(() => ([]))
+    };
     const typesToInclude = ['index-pattern', 'dashboard'];
 
-    await scanAllTypes($http, kbnIndex, typesToInclude);
-    expect(mockScanAndMapCallCount).toBe(1);
+    await scanAllTypes($http, typesToInclude);
+    expect($http.post).toBeCalledWith('apiUrl/export', { typesToInclude });
   });
 });
