@@ -1,13 +1,57 @@
 import { uiModules } from '../../../modules';
-import template from './loading_indicator.html';
+import 'ngreact';
+import React from 'react';
+import chrome from 'ui/chrome';
 import './loading_indicator.less';
 
+class LoadingIndicator extends React.Component {
+  state = {
+    visible: false,
+    error: null
+  }
+
+  componentDidMount() {
+    this._sub = chrome.loadingCount.count$.subscribe({
+      next: (count) => {
+        this.setState({
+          visible: count > 0
+        });
+      },
+      error: (error) => {
+        this.setState({
+          error
+        });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this._sub.unsubscribe();
+    this._sub = null;
+  }
+
+  render() {
+    const { error, visible } = this.state;
+
+    if (error) {
+      throw error;
+    }
+
+    if (!visible) {
+      return null;
+    }
+
+    return (
+      <div
+        className="loadingIndicator"
+        data-test-subj="globalLoadingIndicator"
+      >
+        <div className="loadingIndicator__bar" />
+      </div>
+    );
+  }
+}
+
 uiModules
-  .get('ui/kibana')
-  .directive('kbnLoadingIndicator', function () {
-    return {
-      restrict: 'E',
-      replace: true,
-      template,
-    };
-  });
+  .get('app/kibana', ['react'])
+  .directive('kbnLoadingIndicator', reactDirective => reactDirective(LoadingIndicator));
