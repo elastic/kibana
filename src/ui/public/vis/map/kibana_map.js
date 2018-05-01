@@ -417,7 +417,10 @@ export class KibanaMap extends EventEmitter {
   }
 
   getUntrimmedBounds() {
-    const bounds = this._getLeafletBounds(true);
+
+    const boundsRaw = this._getLeafletBounds(true);
+    const bounds = this._leafletMap.wrapLatLngBounds(boundsRaw);
+
     if (!bounds) {
       return null;
     }
