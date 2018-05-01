@@ -96,7 +96,12 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
     // the max mml
     if (runEstimateGreaterThenMml && mml !== null) {
       const mmlBytes = numeral(mml).value();
-      if (mmlEstimateBytes > mmlBytes) {
+      if (mmlBytes === 0) {
+        messages.push({
+          id: 'mml_value_invalid',
+          mml
+        });
+      } else if (mmlEstimateBytes > mmlBytes) {
         messages.push({
           id: 'estimated_mml_greater_than_mml',
           maxModelMemoryLimit,
