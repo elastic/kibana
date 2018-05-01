@@ -40,46 +40,48 @@ Building:
 
 
 ```
-docker build -t kbn-sandbox/build -f docker/Dockerfile.build .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/build:latest bash -c 'cd /kbn-sandbox && npm run build'
+vagrant up centos-7 && vagrant ssh centos-7 -c 'cd /kbn-sandbox && npm run build' && vagrant halt centos-7
 ```
 
 Testing:
 
 ```
+# CentOS 6 - Not supported, tests will fail
+vagrant up centos-6 && vagrant ssh centos-6 -c 'cd /kbn-sandbox && npm run test' && vagrant halt centos-6
+
 # CentOS 7
-docker build -t kbn-sandbox/centos7 -f docker/Dockerfile.centos7 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/centos7:latest bash -c 'cd /kbn-sandbox && npm run test'
+vagrant up centos-7 && vagrant ssh centos-7 -c 'cd /kbn-sandbox && npm run test' && vagrant halt centos-7
+
+# OEL 6 - Not supported, tests will fail
+vagrant up oel-6 && vagrant ssh oel-6 -c 'cd /kbn-sandbox && npm run test' && vagrant halt oel-6
+
+# OEL 7
+vagrant up oel-7 && vagrant ssh oel-7 -c 'cd /kbn-sandbox && npm run test' && vagrant halt oel-7
+
+# Fedora 26
+vagrant up fedora-26 && vagrant ssh fedora-26 -c 'cd /kbn-sandbox && npm run test' && vagrant halt fedora-26
+
+# Fedora 27
+vagrant up fedora-27 && vagrant ssh fedora-27 -c 'cd /kbn-sandbox && npm run test' && vagrant halt fedora-27
 
 # Ubuntu 14.04
-docker build -t kbn-sandbox/ubuntu1404 -f docker/Dockerfile.ubuntu1404 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/ubuntu1404:latest bash -c 'cd /kbn-sandbox && npm run test'
+vagrant up ubuntu-1404 && vagrant ssh ubuntu-1404 -c 'cd /kbn-sandbox && npm run test' && vagrant halt ubuntu-1404
 
 # Ubuntu 16.04
-docker build -t kbn-sandbox/ubuntu1604 -f docker/Dockerfile.ubuntu1604 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/ubuntu1604:latest bash -c 'cd /kbn-sandbox && npm run test'
+vagrant up ubuntu-1604 && vagrant ssh ubuntu-1604 -c 'cd /kbn-sandbox && npm run test' && vagrant halt ubuntu-1604
 
-# openSUSE 42.1
-docker build -t kbn-sandbox/opensuse421 -f docker/Dockerfile.opensuse421 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/opensuse421:latest bash -c 'cd /kbn-sandbox && npm run test'
+# openSUSE 42
+vagrant up opensuse-42 && vagrant ssh opensuse-42 -c 'cd /kbn-sandbox && npm run test' && vagrant halt opensuse-42
 
-# openSUSE LEAP
-docker build -t kbn-sandbox/opensuseleap -f docker/Dockerfile.opensuseleap .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/opensuseleap:latest bash -c 'cd /kbn-sandbox && npm run test'
-
-# Debian 7
-docker build -t kbn-sandbox/debian7 -f docker/Dockerfile.debian7 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian7:latest bash -c 'cd /kbn-sandbox && npm run test'
+# Debian 7 - Not supported, tests will fail
+vagrant up debian-7 && vagrant ssh debian-7 -c 'cd /kbn-sandbox && npm run test' && vagrant halt debian-7
 
 # Debian 8
-docker build -t kbn-sandbox/debian8 -f docker/Dockerfile.debian8 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian8:latest bash -c 'cd /kbn-sandbox && npm run test'
-
-# Debian 8 i386
-docker build -t kbn-sandbox/debian8-i386 -f docker/Dockerfile.debian8-i386 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian8-i386:latest bash -c 'cd /kbn-sandbox && npm run test'
+vagrant up debian-8 && vagrant ssh debian-8 -c 'cd /kbn-sandbox && npm run test' && vagrant halt debian-8
 
 # Debian 9
-docker build -t kbn-sandbox/debian9 -f docker/Dockerfile.debian9 .
-docker run -it --rm -v `pwd`:/kbn-sandbox kbn-sandbox/debian9:latest bash -c 'cd /kbn-sandbox && npm run test'
+vagrant up debian-9 && vagrant ssh debian-9 -c 'cd /kbn-sandbox && npm run test' && vagrant halt debian-9
+
+# SLES 12
+vagrant up sles-12 && vagrant ssh sles-12 -c 'cd /kbn-sandbox && npm run test' && vagrant halt sles-12
 ```
