@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 export const Queue = ({ vertexSelected }) => (
-  <li className="queueStatement">
+  <li className="statement">
     <div>
       <EuiPanel
         className="statement__content"
