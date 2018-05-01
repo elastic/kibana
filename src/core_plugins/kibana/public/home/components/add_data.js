@@ -131,6 +131,22 @@ export function AddData({ apmUiEnabled }) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <span style={{ height: 38 }}>
+              Fresh Elastic stack installation?
+            </span>
+            <EuiLink
+              style={{ marginLeft: 8 }}
+              href="#/home/tutorial_directory/sampleData"
+            >
+              Try some sample data sets
+            </EuiLink>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
     </EuiPanel>
   );
 }
