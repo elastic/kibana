@@ -159,6 +159,10 @@ export class TutorialDirectory extends React.Component {
             launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
             isInstalled={sampleDataSet.isInstalled}
             onRequestComplete={this.loadSampleDataSets}
+            getConfig={this.props.getConfig}
+            setConfig={this.props.setConfig}
+            clearIndexPatternsCache={this.props.clearIndexPatternsCache}
+            defaultIndex={sampleDataSet.defaultIndex}
           />
         </EuiFlexItem>
       );
@@ -196,4 +200,7 @@ TutorialDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
+  getConfig: PropTypes.func.isRequired,
+  setConfig: PropTypes.func.isRequired,
+  clearIndexPatternsCache: PropTypes.func.isRequired,
 };

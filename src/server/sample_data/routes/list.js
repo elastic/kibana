@@ -8,14 +8,12 @@ export const createListRoute = () => ({
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
       const sampleDataSets = request.server.getSampleDataSets().map(sampleDataSet => {
-        const overviewDashboard = sampleDataSet.savedObjects.find(savedObjectJson => {
-          return savedObjectJson.type === 'dashboard';
-        });
         return {
           id: sampleDataSet.id,
           name: sampleDataSet.name,
           description: sampleDataSet.description,
-          overviewDashboard: overviewDashboard.id,
+          overviewDashboard: sampleDataSet.overviewDashboard,
+          defaultIndex: sampleDataSet.defaultIndex,
         };
       });
 

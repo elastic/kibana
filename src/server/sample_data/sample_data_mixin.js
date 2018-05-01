@@ -24,7 +24,23 @@ export function sampleDataMixin(kbnServer, server) {
     const { error, value } = Joi.validate(specProvider(server), dataSetSchema);
 
     if (error) {
-      throw new Error(`Unable to register data set spec because its invalid. ${error}`);
+      throw new Error(`Unable to register sample data set spec because its invalid. ${error}`);
+    }
+
+    const defaultIndexSavedObjectJson = value.savedObjects.find(savedObjectJson => {
+      return savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex;
+    });
+    if (!defaultIndexSavedObjectJson) {
+      throw new Error(
+        `Unable to register sample data set spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`);
+    }
+
+    const dashboardSavedObjectJson = value.savedObjects.find(savedObjectJson => {
+      return savedObjectJson.type === 'dashboard' && savedObjectJson.id === value.overviewDashboard;
+    });
+    if (!dashboardSavedObjectJson) {
+      throw new Error(
+        `Unable to register sample data set spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObjects list.`);
     }
 
     sampleDataSets.push(value);

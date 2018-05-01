@@ -21,17 +21,28 @@ export class SampleDataSetCard extends React.Component {
   }
 
   startRequest = async () => {
+    const {
+      getConfig,
+      setConfig,
+      id,
+      name,
+      isInstalled,
+      onRequestComplete,
+      defaultIndex,
+      clearIndexPatternsCache,
+    } = this.props;
+
     this.setState({
       isProcessingRequest: true,
     });
 
-    if (this.props.isInstalled) {
-      await uninstallSampleDataSet(this.props.id, this.props.name);
+    if (isInstalled) {
+      await uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
     } else {
-      await installSampleDataSet(this.props.id, this.props.name);
+      await installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache);
     }
 
-    this.props.onRequestComplete();
+    onRequestComplete();
 
     this.setState({
       isProcessingRequest: false,
@@ -86,4 +97,8 @@ SampleDataSetCard.propTypes = {
   launchUrl: PropTypes.string.isRequired,
   isInstalled: PropTypes.bool.isRequired,
   onRequestComplete: PropTypes.func.isRequired,
+  getConfig: PropTypes.func.isRequired,
+  setConfig: PropTypes.func.isRequired,
+  clearIndexPatternsCache: PropTypes.func.isRequired,
+  defaultIndex: PropTypes.string.isRequired,
 };

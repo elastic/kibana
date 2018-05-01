@@ -5,6 +5,8 @@ export function flightsSpecProvider() {
     id: 'flights',
     name: 'Flights',
     description: 'Fictional flight data.',
+    overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     dataPath: './sample_data/flights.json',
     fields: {
       timestamp: {

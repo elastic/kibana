@@ -28,7 +28,7 @@ export async function listSampleDataSets() {
   }
 }
 
-export async function installSampleDataSet(id, name) {
+export async function installSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
   try {
     const response = await fetch(`${sampleDataUrl}/${id}`, {
       method: 'post',
@@ -46,12 +46,19 @@ export async function installSampleDataSet(id, name) {
     return;
   }
 
+  const existingDefaultIndex = await getConfig('defaultIndex');
+  if (existingDefaultIndex === null) {
+    await setConfig('defaultIndex', defaultIndex);
+  }
+
+  clearIndexPatternsCache();
+
   toastNotifications.addSuccess({
     title: `${name} sample data set successfully installed`,
   });
 }
 
-export async function uninstallSampleDataSet(id, name) {
+export async function uninstallSampleDataSet(id, name, defaultIndex, getConfig, setConfig, clearIndexPatternsCache) {
   try {
     const response = await fetch(`${sampleDataUrl}/${id}`, {
       method: 'delete',
@@ -68,6 +75,14 @@ export async function uninstallSampleDataSet(id, name) {
     });
     return;
   }
+
+  const existingDefaultIndex = await getConfig('defaultIndex');
+  if (existingDefaultIndex && existingDefaultIndex === defaultIndex) {
+    await setConfig('defaultIndex', null);
+  }
+
+  clearIndexPatternsCache();
+
   toastNotifications.addSuccess({
     title: `${name} sample data set successfully uninstalled`,
   });

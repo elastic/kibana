@@ -4,6 +4,8 @@ export const dataSetSchema = {
   id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
   name: Joi.string().required(),
   description: Joi.string().required(),
+  overviewDashboard: Joi.string().required(), // saved object id of main dashboard for sample data set
+  defaultIndex: Joi.string().required(), // saved object id of default index-pattern for sample data set
   dataPath: Joi.string().required(), // path to newline delimented JSON file containing data relative to KIBANA_HOME
   fields: Joi.object().required(), // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
 
