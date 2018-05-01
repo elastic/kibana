@@ -22,7 +22,7 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
-      statusCheck: [],  // array holding instruction set status check state
+      statusCheck: [],
       tutorial: null
     };
 
@@ -118,41 +118,47 @@ export class Tutorial extends React.Component {
   }
 
   checkInstructionSetStatus = async (instructionSetIndex) => {
-    let isComplete = false;
-    let hasFailed  = false;
     const instructions = this.getInstructions();
     const esHitsCheckConfig = _.get(instructions, `instructionSets[${instructionSetIndex}].statusCheck.esHitsCheck`);
-    if (esHitsCheckConfig) {
-      const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
-      const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
-      const body = `${searchHeader}\n${searchBody}\n`;
-
-      const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
-        method: 'post',
-        body: body,
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/x-ndjson',
-          'kbn-xsrf': 'kibana',
-        },
-        credentials: 'same-origin'
-      });
-
-      if (response.status < 300) {
-        const results = await response.json();
-        if (_.get(results, 'responses.[0].hits.hits.length', 0) > 0) {
-          isComplete = true;
-        }
-      }
-      hasFailed = !isComplete;
-    }
+    const { hasFailed, isComplete } = await this.fetchEsHitsStatus(esHitsCheckConfig);
 
     this.setState((prevState) => {
-      prevState.statusCheck[instructionSetIndex].isComplete = isComplete;
-      prevState.statusCheck[instructionSetIndex].hasFailed = hasFailed;
-      prevState.statusCheck[instructionSetIndex].isFetchingStatus = false;
-      return { statusCheck: prevState.statusCheck };
+      const statusCheck = _.cloneDeep(prevState.statusCheck);
+      statusCheck[instructionSetIndex].isComplete = isComplete;
+      statusCheck[instructionSetIndex].hasFailed = hasFailed;
+      statusCheck[instructionSetIndex].isFetchingStatus = false;
+      return { statusCheck };
     });
+  }
+
+  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+    if (!esHitsCheckConfig) {
+      return { hasFailed: false, isComplete: false };
+    }
+
+    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
+    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
+    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
+      method: 'post',
+      body: `${searchHeader}\n${searchBody}\n`,
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/x-ndjson',
+        'kbn-xsrf': 'kibana',
+      },
+      credentials: 'same-origin'
+    });
+
+    if (response.status > 300) {
+      return { hasFailed: true, isComplete: false };
+    }
+
+    const results = await response.json();
+    const numHits = _.get(results, 'responses.[0].hits.hits.length', 0);
+    return {
+      hasFailed: numHits === 0,
+      isComplete: numHits > 0
+    };
   }
 
   onPrem = () => {

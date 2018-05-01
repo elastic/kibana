@@ -102,7 +102,7 @@ export class InstructionSet extends React.Component {
               onClick={this.props.onStatusCheck}
               isLoading={this.props.isCheckingStatus}
             >
-              {this.props.statusCheckConfig.btnLabel ? this.props.statusCheckConfig.btnLabel : 'Check status'}
+              {this.props.statusCheckConfig.btnLabel || 'Check status'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -113,7 +113,7 @@ export class InstructionSet extends React.Component {
       </Fragment>
     );
     return {
-      title: this.props.statusCheckConfig.title ? this.props.statusCheckConfig.title : 'Status Check',
+      title: this.props.statusCheckConfig.title || 'Status Check',
       status: this.props.statusCheckState,
       children: checkStausStep,
       key: 'checkStatusStep'
