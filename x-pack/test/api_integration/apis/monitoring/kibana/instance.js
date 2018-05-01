@@ -5,13 +5,13 @@
  */
 
 import expect from 'expect.js';
-import overviewFixture from './fixtures/overview';
+import instanceFixture from './fixtures/instance';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', () => {
+  describe('instance detail', () => {
     const archive = 'monitoring/singlecluster-yellow-platinum';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
@@ -26,14 +26,14 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should summarize kibana instances with stats', async () => {
+    it('should summarize single kibana instance with metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
+        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana/de3b8f2a-7bb9-4931-9bf3-997ba7824cf9')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
 
-      expect(body).to.eql(overviewFixture);
+      expect(body).to.eql(instanceFixture);
     });
   });
 }
