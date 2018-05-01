@@ -17,6 +17,7 @@ import rison from 'rison-node';
 import { notify } from 'ui/notify';
 import { ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
+import { formatValue } from 'plugins/ml/formatters/format_value';
 import { getUrlForRecord } from 'plugins/ml/util/custom_url_utils';
 import { replaceStringTokens, mlEscape } from 'plugins/ml/util/string_utils';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
@@ -35,8 +36,7 @@ import template from './anomalies_table.html';
 
 import 'plugins/ml/components/controls';
 import 'plugins/ml/components/paginated_table';
-import 'plugins/ml/filters/format_value';
-import 'plugins/ml/filters/metric_change_description';
+import 'plugins/ml/formatters/metric_change_description';
 import './expanded_row/expanded_row_directive';
 import './influencers_cell/influencers_cell_directive';
 
@@ -53,8 +53,7 @@ module.directive('mlAnomaliesTable', function (
   Private,
   mlAnomaliesTableService,
   mlSelectIntervalService,
-  mlSelectSeverityService,
-  formatValueFilter) {
+  mlSelectSeverityService) {
 
   return {
     restrict: 'E',
@@ -854,9 +853,11 @@ module.directive('mlAnomaliesTable', function (
         if (addActual !== undefined) {
           if (_.has(record, 'actual')) {
             tableRow.push({
-              markup: formatValueFilter(record.actual, record.source.function, fieldFormat),
+              markup: formatValue(record.actual, record.source.function, fieldFormat),
               // Store the unformatted value as a number so that sorting works correctly.
-              value: Number(record.actual),
+              // actual and typical values in anomaly record results will be arrays.
+              value: Array.isArray(record.actual) && record.actual.length === 1 ?
+                Number(record.actual[0]) : String(record.actual),
               scope: rowScope });
           } else {
             tableRow.push({ markup: '', value: '' });
@@ -864,9 +865,10 @@ module.directive('mlAnomaliesTable', function (
         }
         if (addTypical !== undefined) {
           if (_.has(record, 'typical')) {
-            const typicalVal = Number(record.typical);
+            const typicalVal = Array.isArray(record.typical) && record.typical.length === 1 ?
+              Number(record.typical[0]) : String(record.typical);
             tableRow.push({
-              markup: formatValueFilter(record.typical, record.source.function, fieldFormat),
+              markup: formatValue(record.typical, record.source.function, fieldFormat),
               value: typicalVal,
               scope: rowScope });
 
@@ -875,10 +877,15 @@ module.directive('mlAnomaliesTable', function (
               // and add a description cell if not time_of_week/day.
               const detectorFunc = record.source.function;
               if (detectorFunc !== 'time_of_week' && detectorFunc !== 'time_of_day') {
-                const actualVal = Number(record.actual);
-                const factor = (actualVal > typicalVal) ? actualVal / typicalVal : typicalVal / actualVal;
+                let factor = 0;
+                if (Array.isArray(record.typical) && record.typical.length === 1 &&
+                  Array.isArray(record.actual) && record.actual.length === 1) {
+                  const actualVal = Number(record.actual[0]);
+                  factor = (actualVal > typicalVal) ? actualVal / typicalVal : typicalVal / actualVal;
+                }
+
                 tableRow.push({
-                  markup: `<span ng-bind-html="${actualVal} | metricChangeDescription:${typicalVal}"></span>`,
+                  markup: `<span ng-bind-html="[${record.actual}] | metricChangeDescription:[${typicalVal}]"></span>`,
                   value: Math.abs(factor),
                   scope: rowScope });
               } else {
