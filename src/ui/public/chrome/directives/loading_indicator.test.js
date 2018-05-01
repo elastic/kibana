@@ -4,13 +4,6 @@ import chrome from 'ui/chrome';
 
 import { LoadingIndicator } from './loading_indicator';
 
-const rendered = new Set();
-function render() {
-  const wrapper = shallow(<LoadingIndicator />);
-  rendered.add(wrapper);
-  return wrapper;
-}
-
 jest.mock('ui/chrome', () => {
   return {
     loadingCount: {
@@ -25,17 +18,9 @@ beforeEach(() => {
   chrome.loadingCount.subscribe.mockClear();
 });
 
-afterEach(() => {
-  for (const wrapper of rendered) {
-    wrapper.unmount();
-    rendered.delete(wrapper);
-  }
-});
-
 describe('kbnLoadingIndicator', function () {
   it('is hidden by default', function () {
-    const wrapper = render();
-
+    const wrapper = shallow(<LoadingIndicator />);
     expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator-hidden');
     expect(wrapper).toMatchSnapshot();
   });
@@ -46,8 +31,7 @@ describe('kbnLoadingIndicator', function () {
       return () => {};
     });
 
-    const wrapper = render();
-
+    const wrapper = shallow(<LoadingIndicator />);
     expect(wrapper.prop('data-test-subj')).toBe('globalLoadingIndicator');
     expect(wrapper).toMatchSnapshot();
   });
