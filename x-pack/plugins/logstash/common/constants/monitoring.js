@@ -11,5 +11,5 @@ export const MONITORING = {
    * also, deliberately, the same duration we give Monitoring to pick up and report on a recently-deleted pipeline before we
    * are safe to stop tracking that pipeline as recently-deleted.
    */
-  PIPELINE_RECENCY_DURATION_S: 30
+  ACTIVE_PIPELINE_RANGE_S: 30
 };
