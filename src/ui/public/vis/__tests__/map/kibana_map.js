@@ -151,7 +151,47 @@ describe('kibana_map tests', function () {
         expect(bounds.top_left.lat.toFixed(2)).to.equal('0.18');
       });
     });
+
+
+    describe('wrapping', function () {
+      beforeEach(async function () {
+        setupDOM('1600px', '1024px');
+        kibanaMap = new KibanaMap(domNode, {
+          minZoom: 1,
+          maxZoom: 10,
+          center: [0, -800], //swing the map over two earth-rotations west
+          zoom: 2
+        });
+      });
+
+      it('coordinates should be corrected to  center the -180,180 range', function () {
+        const bounds = kibanaMap.getUntrimmedBounds();
+        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('201.09');
+        expect(bounds.top_left.lon.toFixed(2)).to.equal('-361.41');
+      });
+    });
+
+    describe('wrapping - zoomed in', function () {
+      beforeEach(async function () {
+        setupDOM('1600px', '1024px');
+        kibanaMap = new KibanaMap(domNode, {
+          minZoom: 1,
+          maxZoom: 10,
+          center: [0, -800], //swing the map over two earth-rotations west
+          zoom: 8
+        });
+      });
+
+      it('coordinates should be corrected to fall within the -180,180 range', function () {
+        const bounds = kibanaMap.getUntrimmedBounds();
+        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('-75.61');
+        expect(bounds.top_left.lon.toFixed(2)).to.equal('-84.40');
+      });
+    });
+
   });
+
+
 
 
   describe('KibanaMap - attributions', function () {
