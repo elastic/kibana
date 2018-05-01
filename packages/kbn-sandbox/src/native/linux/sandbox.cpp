@@ -50,7 +50,7 @@ Sandbox::Result Sandbox::activate() {
     return { false, err + strerror(errno) };
   }
 
-  if (seccomp(SECCOMP_SET_MODE_FILTER, 0, &prog)) {
+  if (seccomp(SECCOMP_SET_MODE_FILTER, SECCOMP_FILTER_FLAG_TSYNC, &prog)) {
     if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog)) {
       static const std::string err = "prctl(PR_SET_SECCOMP, ...) failed: ";
       return { false, err + strerror(errno) };
