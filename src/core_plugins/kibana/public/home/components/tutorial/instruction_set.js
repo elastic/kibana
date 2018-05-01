@@ -99,7 +99,7 @@ export class InstructionSet extends React.Component {
             grow={false}
           >
             <EuiButton
-              onClick={() => {this.props.onStatusCheck();}}
+              onClick={this.props.onStatusCheck}
               isLoading={this.props.isCheckingStatus}
             >
               {this.props.statusCheckConfig.btnLabel ? this.props.statusCheckConfig.btnLabel : 'Check status'}
