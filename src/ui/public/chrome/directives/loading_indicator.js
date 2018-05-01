@@ -1,5 +1,6 @@
 import 'ngreact';
 import React from 'react';
+import classNames from 'classnames';
 
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
@@ -8,7 +9,7 @@ import './loading_indicator.less';
 
 class LoadingIndicator extends React.Component {
   state = {
-    visible: false,
+    hidden: false,
     error: null
   }
 
@@ -16,7 +17,7 @@ class LoadingIndicator extends React.Component {
     this._sub = chrome.loadingCount.count$.subscribe({
       next: (count) => {
         this.setState({
-          visible: count > 0
+          hidden: count === 0
         });
       },
       error: (error) => {
@@ -33,20 +34,20 @@ class LoadingIndicator extends React.Component {
   }
 
   render() {
-    const { error, visible } = this.state;
+    const { error, hidden } = this.state;
 
     if (error) {
       throw error;
     }
 
-    if (!visible) {
-      return null;
-    }
-
     return (
       <div
-        className="loadingIndicator"
-        data-test-subj="globalLoadingIndicator"
+        className={classNames('loadingIndicator', hidden && 'hidden')}
+        data-test-subj={
+          hidden
+            ? 'globalLoadingIndicator-hidden'
+            : 'globalLoadingIndicator'
+        }
       >
         <div className="loadingIndicator__bar" />
       </div>

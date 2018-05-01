@@ -246,7 +246,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isGlobalLoadingIndicatorHidden() {
       log.debug('isGlobalLoadingIndicatorHidden');
-      return await find.byCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide', defaultFindTimeout * 10);
+      return await testSubjects.exists('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
     }
 
     async getPrettyDuration() {
