@@ -28,8 +28,8 @@ const getNativeControllers = async (settings) => {
     });
 
   const nativeController$ = spec$
-    .map(spec => {
-      const process = spawnNativeController(settings, spec.path, spec.config);
+    .mergeMap(async spec => {
+      const process = await spawnNativeController(settings, spec.path, spec.config);
       return new NativeController(spec.pluginId, process);
     });
 

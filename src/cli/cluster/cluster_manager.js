@@ -8,7 +8,7 @@ import BasePathProxy from './base_path_proxy';
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  constructor(opts = {}, settings = {}) {
+  static async create(opts = {}, settings = {}) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
@@ -19,7 +19,7 @@ export default class ClusterManager {
     ];
 
     if (opts.basePath) {
-      this.basePathProxy = new BasePathProxy(this, settings);
+      this.basePathProxy = await BasePathProxy.create(this, settings);
 
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,

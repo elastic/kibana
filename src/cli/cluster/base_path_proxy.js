@@ -14,12 +14,12 @@ import { transformDeprecations } from '../../server/config/transform_deprecation
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export default class BasePathProxy {
-  constructor(clusterManager, userSettings) {
+  static async create(clusterManager, userSettings) {
     this.clusterManager = clusterManager;
     this.server = new Server();
 
     const settings = transformDeprecations(userSettings);
-    const config = Config.withDefaultSchema(settings);
+    const config = await Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');

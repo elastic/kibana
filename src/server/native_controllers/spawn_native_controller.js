@@ -1,8 +1,8 @@
 import { fork } from 'child_process';
 import { transformDeprecations, Config } from '../config';
 
-function defaultConfig(settings) {
-  return Config.withDefaultSchema(
+async function defaultConfig(settings) {
+  return await Config.withDefaultSchema(
     transformDeprecations(settings)
   );
 }
@@ -34,9 +34,9 @@ const getExecArgv = () => {
   return execArgv;
 };
 
-export function spawnNativeController(settings, nativeControllerPath, nativeControllerConfig = []) {
+export async function spawnNativeController(settings, nativeControllerPath, nativeControllerConfig = []) {
 
-  const config = defaultConfig(settings);
+  const config = await defaultConfig(settings);
 
   const configParams = nativeControllerConfig.reduce((acc, key) => {
     return [...acc, `${key}=${config.get(key)}`];

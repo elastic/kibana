@@ -1,11 +1,12 @@
 import Joi from 'joi';
 import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
+import { getSystemCallFiltersEnabledDefault } from '../system_call_filters';
 
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
-export default () => Joi.object({
+export default async () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     branch: Joi.string().default(Joi.ref('$branch')),
@@ -90,7 +91,7 @@ export default () => Joi.object({
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
     systemCallFilters: Joi.object({
-      enabled: Joi.boolean().default(true)
+      enabled: Joi.boolean().default(await getSystemCallFiltersEnabledDefault())
     }).default()
   }).default(),
 
