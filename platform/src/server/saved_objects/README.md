@@ -3,74 +3,68 @@ Saved Objects Service
 Avoid request scoped services https://github.com/elastic/kibana/pull/14482
 Saved object service https://github.com/elastic/kibana/pull/15739
 
-History: when we last worked on saved objects client
+History:
 ---------
-  - tribe support + compatibility layer
-  - first time we ever made an effort to create one set of abstractions for saved objects
+These were times we made an effort to create one set of abstractions for saved objects.
+  - tribe node support
+  - compatibility layer for Kibana 5.6 and 6+ to work with single and multiple type indices
 
 Why now?
 ---------
- - new things need a standard set of abstractions for SOs
-   - Global extensions to SOS:
-     - OLS
+ - new things need a standard set of abstractions for saved objects
+   - Global extensions to SOS (Saved Objects Service):
+     - OLS (object level security)
      - migrations
-     - tagging (newer)
-   - Users of SOS that should receive global extensions:
-     - logstash pipelines (a new type)
+     - tags
+   - Users of SOS that should be able to consume those global extensions:
+     - logstash pipelines
      - canvas workpads
      - reporting jobs
- - Close the gaping holes leaking the abstractions into the rest of kibana
-     - When we create tagging/ols/etc, let's do it through the new abstractions
+ - Close the gaping holes that leak abstractions into the rest of Kibana
+     - When we create taga/ols/etc, let's do it through the new abstractions
      - We solve the problem of new features without clobbering each other
 
 Security
 ---------
-Any time you do a find, you decorate the request with auth. Doesn't want to load all possible results into memory from ES. Wants to put an extra filter on the request to ES.
+When Security uses the `find` method in current saved objects client, it decorates the request to Elasticsearch with authorization information, such that only the subset of objects return that the user has access to. (Rather than retrieve all the possible results from Elasticsearch, load them into memory, and then filter on that result set.)
 
-But, people can access Kibana saved objects bypassing the SOS. Blown wide open.
-
-So that means security plugin needs to always go through the SOS.
+If people were to bypass the SOS, then security is no longer involved in the process, and access is blown wide open. So that means security plugin needs to always go through the SOS.
 
 Migrations
 ---------
-Migrations need to be able to work across the complete life cycle of all saved objects, because it needs to make assumptions about the current state of saved objects in order to make viable changes to them. At no time should a user be able to do anything the migration system doesn't anticipate.
+The Migrations client needs to be able to work across the complete life cycle of all saved objects, because it needs to make assumptions about the current state of saved objects in order to make viable changes to them. At no time should a user be able to do anything the migration system doesn't anticipate.
 
 Security + Migrations
 ---------
-Security needs to apply its own metadata, global mappings for all saved objects. When the plugin starts up, it needs to apply mappings on all existing object types.
+Security needs to apply its own metadata and global mappings for all saved objects. When the plugin starts up, it needs to apply mappings on all existing object types. We don't know in advance of the plugin starting up if we need to write this metadata. It makes sense that it has to happen when X-Pack Security starts.
 
-We don't know in advance of the plugin starting up if we need to write this metadata. It makes sense that it has to happen when X-Pack Security starts.
+Security owns these mappings. In the current world, before the new Saved Objects System is built, Security will deal directly with Elasticsearch mappings, applying those mappings directly into the `.kibana` index. Essentially we're allowing the type details to leak into the security plugin from the current saved objects client.
 
-Security owns these mappings. Deal directly with ES mappings, have the plugin apply those mappings directly into the kibana index. No mechanism through the SOS. Leak the abstraction type details into the security plugin from the current SOS.
+Yes, Elasticsearch mappings are the language we provide today. Our saved object details are leaking outside of their abstractions because that's the only way to make real changes to them.
 
-ES mappings is the language we provide today. Our SO details are leaking outside of the SO abstractions because it's the only way to make real changes to them.
+The new Saved Object System needs to solve the problem of leaky abstractions and not allow any consumer to make changes to Kibana-managed indices directly via Elasticsearch--all consumers should pass through the Saved Object System.
 
-Canvas
+Canvas example using Security + Migrations
 ---------
-Workpad type.
-Apply the OLS metadata, ok.
-Canvas has to add a new field in a new version.
-Canvas would have to say, "use these mappings for my canvas workpad instead"
-Now the OLS mappings are gone.
-Or maybe Security needs to re-apply its mapping changes after all the plugins are done making changes.
+Canvas has a new workpad type. Consider this scenario. X-Pack Security starts up and applies the OLS metadata. Canvas starts up and adds a new field in Canvas's current version of itself. Canvas applies new mappings for all canvas workpads. Now the OLS mappings for canvas workpads are gone. So should Security re-apply its mapping changes after all the plugins are done making changes?
 
-Either way, a plugin version change that triggers Migrations to make changes to mappings could break the SO mappings.
+Either way, a plugin version change that triggers Migrations could break the saved object mappings.
 
-But this is the case only because both OLS and Migrations are making changes to the same ES mappings. What if we could have a protective mechanism within SOS that gracefully handles mapping changes before they are committed to ES?
+This is the case because both OLS and Migrations are making changes to the same Elasticsearch mappings. What if we could have a protective mechanism within the new Saved Objects System that gracefully handles mapping changes before they are committed to Elasticsearch?
 
-Initial definition of saved objects, maybe they're the same as the mapping abstraction of saved objects.
+We need a mapping abstraction for Kibana saved objects. Maybe the initial definition of a saved object _is_ its mapping abstraction. Maybe something else.
 
-Hm... a proper order that plugins make changes could solve the problem of clobbering mappings, before they get applied on the ES side.
+A proper _order in which plugins make changes_ could solve the problem of clobbering mappings, before they get applied on the Elasticsearch side.
 
 Tags
 ---------
-We want to apply tags globally. Tagging feature that other plugins opt-in to them? Or maybe if they're in X-Pack, they have to be applied to al saved objects and choose how to expose them? Either way, modifications to underlying objects applied broadly. It can tag any type, but it cannot know about all the types that need to be tagged. Just has the capability to tag any type.
+What is this new tagging feature? Basically, we want to apply tags globally. Maybe it's a tagging feature that other plugins opt into. Or maybe if the Tag plugin is in X-Pack, tags have to be applied to all saved objects and the tagging features chooses how to expose them? Either way, modifications to underlying objects are applied broadly. The tagging features _can tag any type_, but it cannot know about _all the types that need to be tagged_.
 
-You could still ultimately lose data with security and migrations in play with tags, unless all are brought together into the same system.
+The same kind of clobbering of mappings could happen if Security and Migrations made changes to mappings along with Tagging. You could still ultimately lose data unless all are brought together into the same system.
 
 Saved Objects System
 ---------
-Exposes a saved objects service that runs, has lifecycle methods, and manages all the operations and extension points and config options.
+We envision a new system that exposes a saved objects service that runs, has life-cycle methods, and manages all the operations, extension points, and config options associated with saved objects.
 
 It exposes three clients for use by plugins. These three interfaces encompass _all_ saved object access.
 
@@ -80,11 +74,11 @@ It exposes three clients for use by plugins. These three interfaces encompass _a
 
 Storage - Logstash, Beats(, Monitoring?)
 ---------
-If all that is done gracefully, then storage becomes just an implementation detail. We don't need to limit ourselves to just a single `.kibana` index. We have a system that migrates, applies OLS, has reliable abstractions for saved objects.
+If all that is done gracefully, then storage becomes an implementation detail. We don't need to limit ourselves to a single `.kibana` index. We have a system that migrates, applies OLS, has reliable abstractions for saved objects.
 
-When you define a type through our saved object system, as part of that type configuration, you describe the storage behaviors for that type. Certain types, like reporting jobs (noisy) can be balanced across weekly indices, and less noisy dashboards can be dumped into the `.kibana` index. But it doesn't matter where these objects are stored because that's just an implementation detail. That storage strategy/location is locked to the consumer specifying the behavior and type (in this case, the plugin).
+When you define a type through our saved object system, as part of that type configuration, you describe the storage behaviors for that type. Certain types, like reporting jobs (noisy) can be balanced across weekly indices, and less noisy dashboards can be dumped into the `.kibana` index, for example. The index where these things are stored are up to us. That storage strategy or location is then locked to the consumer specifying the behavior and type (in this case, the plugin).
 
-You, the user, can access your data, but all your admin stuff stored for the sake of consuming Kibana features, is all done through the Saved Object Service. The whole index needs to opt into being managed by Kibana; it cannot just be some part of documents of an index. An index is either managed by Kibana or not. The benefit is you get OLS, migration support, tags, whether in Kibana index or other index.
+The user can access their data, but all their admin data, for the sake of consuming Kibana features, is done through the Saved Object Service. A whole index needs to opt into being managed by Kibana; it cannot be some part of documents of an index. An index is either managed by Kibana or not. That index then gets OLS, migration support, tags, all the features that the Saved Object System can incorporate.
 
 Some implementation questions
 ---------
@@ -107,20 +101,22 @@ This approach makes it really easy to test the clients exposed by the Saved Obje
 The three clients themselves
 ---------
 The migrations client and saved object client probably share important internal details.
+
 The plugin contract exposes some extension points that give you the migration client or give you the saved object client.
+
 Each plugin can configure that it depends on these two clients, and they are made available from the saved object service, which is exposed on probably Kibana core.
 
-I think this means the plugin contract is always available globally, so that plugins can use it. So would it be outside of the Saved Object Service?
+_I think this means the plugin contract is always available globally, so that plugins can use it. So would it be outside of the Saved Object Service?_
 
 The different things we want plugins to configure for saved objects:
 
-**Migrations.** You give us a function which takes in a migration client, and it has a registerMigration function that takes in a name and an action to run, for example.
+**Migrations.** The plugin provides a function which takes in a migration client, and that client exposes a `registerMigration` function that takes in a name and an action to run, for example.
 
 **Http service.** The plugin system could wire itself into the Http service, so every single handler gets pre-seeded with the relevant information from the request to map to a Kibana user so we can do auth for OLS.
 
-Hmmmm. This is the thing I think we should do more cleanly. There's got to be a way to provide the relevant information without passing in the huge request object to middleware, and without exposing the `getSavedObjectsClient` on the server object or the request object. You register an endpoint along with the handler for that endpoint. You define the handler to explicitly pass headers from the request to the saved object client factory, which then provides a client bound to those headers.
+Hmmmm. This is the thing I think we should do more cleanly. There's a way to provide the relevant information without passing in the huge request object to middleware, and without exposing the `getSavedObjectsClient` on the server object or the request object. Register an endpoint along with the handler for that endpoint. Define the handler to explicitly pass headers from the request to the saved object client factory, which then provides a client bound to those headers.
 
-Define a plugin that has only dependencies on Kibana core, and no other plugin dependencies.
+For example, define a plugin that has only dependencies on Kibana core, and no other plugin dependencies.
 
 ```js
 // baz/index.js
@@ -280,8 +276,7 @@ Spaces
 ---------
 [Spaces issue](https://github.com/elastic/x-pack-kibana/issues/774)
 
-From a saved object standpoint, Spaces will be represented as individual saved objects of type `space`
-and things like dashboards will have a `space id` stored on them.
+From a saved object standpoint, Spaces will be represented as individual saved objects of type `space` and things like dashboards will have a `space id` stored on them.
 
 X-Pack Security will extend the saved object client to take into account `space id` in all relevant places.
 
