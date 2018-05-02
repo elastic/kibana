@@ -103,7 +103,7 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
+        expect(ids).to.eql([]);
       }
     );
   });
@@ -188,6 +188,34 @@ describe('ML - validateModelMemoryLimit', () => {
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['success_mml']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "0mb"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '0mb';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "asdf"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = 'asdf';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
       }
     );
   });
