@@ -8,7 +8,12 @@ export async function migrateKibanaIndex(kbnServer) {
   const { status } = await Migration.migrate({ ...opts, force });
 
   if (status !== MigrationStatus.migrated) {
-    // eslint-disable-next-line max-len
-    throw new Error(`The Kibana index is ${status}. If a previous migration failed, you can force migrations to run by starting Kibana with the --force-migration option.`);
+    kbnServer.server.log(
+      ['fatal', 'migration'],
+      `The Kibana index is ${status}. Most likely an other instance of Kibana is currently migrating the index. ` +
+        'If a previous migration failed, you can reattempt the migration by starting Kibana with the --force-migration option.'
+    );
+
+    throw new Error(`Failed to start because the Kibana index is ${status}.`);
   }
 }
