@@ -558,11 +558,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async saveVisualization(vizName) {
+    async saveVisualization(vizName, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
+      if (saveAsNew) {
+        await testSubjects.click('saveAsNewCheckbox');
+      }
       await PageObjects.header.waitUntilLoadingHasFinished();
       return await testSubjects.exists('saveVisualizationSuccess');
     }
@@ -753,9 +756,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await dataTable.getVisibleText();
     }
 
-    async getDataTableHeaders() {
+    async getDataTableHeaders(parent) {
       const dataTableHeader = await retry.try(
-        async () => testSubjects.find('paginated-table-header'));
+        async () => (
+          parent ?
+            testSubjects.findDescendant('paginated-table-header', parent) :
+            testSubjects.find('paginated-table-header')
+        ));
       return await dataTableHeader.getVisibleText();
     }
 
