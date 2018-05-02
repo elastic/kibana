@@ -486,8 +486,15 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (!overwriteAll) {
         await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
       }
-      await (await testSubjects.find('importSavedObjectsImportBtn')).click();
+      const importBtn = await this.getImportButton();
+      await importBtn.click();
       log.debug('importFile done');
+    }
+
+    async getImportButton() {
+      return retry.try(async () => {
+        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsImportBtn"]`);
+      });
     }
 
     async clickImportDone() {
