@@ -25,7 +25,7 @@ describe('ML - validateModelMemoryLimit', () => {
       }
     },
     limits: {
-      max_model_memory_limit: '20mb'
+      max_model_memory_limit: '30mb'
     }
   };
 
@@ -111,7 +111,7 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit', () => {
     const job = getJobConfig();
     const duration = undefined;
-    job.analysis_limits.model_memory_limit = '21mb';
+    job.analysis_limits.model_memory_limit = '31mb';
 
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
@@ -139,7 +139,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    job.analysis_limits.model_memory_limit = '20mb';
+    job.analysis_limits.model_memory_limit = '30mb';
 
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
