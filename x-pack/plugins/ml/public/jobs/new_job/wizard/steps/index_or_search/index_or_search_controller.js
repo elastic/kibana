@@ -34,7 +34,7 @@ uiRoutes
       indexPatterns: loadIndexPatterns,
       preConfiguredJobRedirect,
       checkMlNodesAvailable,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

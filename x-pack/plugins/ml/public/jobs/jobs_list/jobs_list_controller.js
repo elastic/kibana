@@ -46,7 +46,7 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
       loadNewJobDefaults,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

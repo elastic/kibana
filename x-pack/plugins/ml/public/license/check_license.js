@@ -15,7 +15,6 @@ import chrome from 'ui/chrome';
 let licenseHasExpired = true;
 
 export function checkLicense(Private, kbnBaseUrl) {
-  // Private(initPromise);
   const xpackInfo = Private(XPackInfoProvider);
   const features = xpackInfo.get('features.ml');
 

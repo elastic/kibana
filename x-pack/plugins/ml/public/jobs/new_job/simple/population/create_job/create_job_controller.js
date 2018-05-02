@@ -53,7 +53,7 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

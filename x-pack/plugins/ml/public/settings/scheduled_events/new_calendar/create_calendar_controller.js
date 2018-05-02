@@ -33,7 +33,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise
+      initPromise: initPromise(true)
     }
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
@@ -42,7 +42,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

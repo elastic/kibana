@@ -45,7 +45,7 @@ uiRoutes
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

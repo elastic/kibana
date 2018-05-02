@@ -42,7 +42,7 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise
+      initPromise: initPromise(true)
     }
   })
   .when('/jobs/new_job/advanced/:jobId', {
@@ -55,7 +55,7 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

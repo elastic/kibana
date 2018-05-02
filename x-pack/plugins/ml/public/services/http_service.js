@@ -13,9 +13,13 @@ import 'isomorphic-fetch';
 
 import { addSystemApiHeader } from 'ui/system_api';
 
-export function initPromise($q) {
-  window.Promise = $q;
-  return Promise.resolve();
+const promise = window.Promise;
+
+export function initPromise(replacePromise) {
+  return function ($q) {
+    window.Promise = replacePromise ? $q : promise;
+    return Promise.resolve();
+  };
 }
 
 export function http(options) {

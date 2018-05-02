@@ -44,7 +44,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 

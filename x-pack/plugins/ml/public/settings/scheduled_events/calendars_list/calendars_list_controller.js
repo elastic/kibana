@@ -29,7 +29,7 @@ uiRoutes
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise
+      initPromise: initPromise(true)
     }
   });
 
