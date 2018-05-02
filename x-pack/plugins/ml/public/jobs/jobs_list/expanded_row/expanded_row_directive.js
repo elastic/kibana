@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
+import 'ace';
 import { toLocaleString, detectorToString } from 'plugins/ml/util/string_utils';
 import { copyTextToClipboard } from 'plugins/ml/util/clipboard_utils';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
@@ -45,6 +46,7 @@ module.directive('mlJobListExpandedRow', function ($location, Private) {
       $scope.permissions = {
         canPreviewDatafeed: checkPermission('canPreviewDatafeed')
       };
+      $scope.jobJson = '';
 
       $scope.toLocaleString = toLocaleString; // add toLocaleString to the scope to display nicer numbers
 
@@ -237,6 +239,10 @@ module.directive('mlJobListExpandedRow', function ($location, Private) {
         return url;
       }
 
+      $scope.aceLoaded = function (editor) {
+        editor.setReadOnly(true);
+        $scope.$applyAsync();
+      };
     },
   };
 })
