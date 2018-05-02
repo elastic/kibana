@@ -34,7 +34,7 @@ function MarkdownVisualization(props) {
     if (reversed) className += ' reversed';
     const markdownError = markdownSource instanceof Error ? markdownSource : null;
     markdown = (
-      <div className={className}>
+      <div className={className} data-test-subj="tsvbMarkdown">
         {markdownError && <ErrorComponent error={markdownError} />}
         <style type="text/css">{model.markdown_css}</style>
         <div className={contentClassName}>

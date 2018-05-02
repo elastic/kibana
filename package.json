@@ -76,7 +76,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "v0.0.38",
+    "@elastic/eui": "v0.0.44",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -130,8 +130,8 @@
     "handlebars": "4.0.5",
     "hapi": "14.2.0",
     "hjson": "3.1.0",
-    "http-proxy-agent": "1.0.0",
-    "https-proxy-agent": "2.1.1",
+    "http-proxy-agent": "^2.1.0",
+    "https-proxy-agent": "^2.2.1",
     "inert": "4.0.2",
     "jade": "1.11.0",
     "jade-loader": "0.8.0",
@@ -205,6 +205,7 @@
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "^3.3.1",
     "vega-lite": "^2.4.0",
+    "vega-tooltip": "^0.9.14",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",

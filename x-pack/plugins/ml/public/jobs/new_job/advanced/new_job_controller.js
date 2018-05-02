@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'ace';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 
@@ -1154,6 +1155,13 @@ module.controller('MlNewJob',
 
       return _.sortBy(influencers, (inf) => inf);
     }
+
+    $scope.aceLoaded = function (editor) {
+      $scope.$applyAsync();
+      if (editor.container.id === 'datafeed-preview') {
+        editor.setReadOnly(true);
+      }
+    };
 
     init();
 

@@ -6,7 +6,7 @@
         <!-- Title -->
         <h1 class="kuiTitle">
           <span ng-if="editUser.isNewUser">
-            New User
+            Add user
           </span>
           <span ng-if="!editUser.isNewUser">
             &ldquo;{{ user.username }}&rdquo; User
@@ -31,7 +31,7 @@
         <div
           ng-if="user.metadata._reserved"
           class="kuiBadge kuiBadge--default"
-          tooltip="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
+          tooltip="Reserved users are built-in and cannot be removed. Only the password can be changed."
         >
           <span class="kuiIcon fa-lock"></span>
           Reserved
@@ -64,13 +64,13 @@
           class="kuiInputNote kuiInputNote--danger"
           ng-show="form.username.$error.pattern"
         >
-          Username must begin with a letter or underscore and contain only letters, underscores, and numbers.
+          Username must begin with a letter or underscore and contain only letters, underscores, and numbers
         </div>
         <div
           class="kuiInputNote kuiInputNote--danger"
           ng-show="form.username.$touched && form.username.$error.required"
         >
-          Username is required.
+          Username is required
         </div>
       </div>
 
@@ -83,7 +83,7 @@
       <!-- Full name -->
       <div class="kuiFormSection" ng-if="!user.metadata._reserved">
         <label for="fullname" class="kuiFormLabel">
-          Full Name
+          Full name
         </label>
         <input
           type="text"
@@ -101,7 +101,7 @@
           class="kuiInputNote kuiInputNote--danger"
           ng-show="form.fullname.$touched && form.fullname.$error.required"
         >
-          Full Name is required.
+          Full name is required
         </div>
       </div>
 
@@ -126,7 +126,7 @@
           class="kuiInputNote kuiInputNote--danger"
           ng-show="form.email.$touched && form.email.$error.required"
         >
-          Email is required.
+          Email is required
         </div>
       </div>
 
@@ -141,7 +141,7 @@
           ng-disabled="user.metadata._reserved"
           data-test-subj="userFormRolesDropdown"
         >
-          <ui-select-match placeholder="Add a role...">
+          <ui-select-match placeholder="Start typing for suggestions">
             <span data-test-subj="userRole userRole-{{$item}}">{{$item}}</span>
           </ui-select-match>
           <ui-select-choices repeat="role as role in availableRoles | filter:$select.search">
@@ -160,7 +160,7 @@
         ng-click="saveUser(user)"
         data-test-subj="userFormSaveButton"
       >
-        Save
+        Add user
       </button>
 
       <a

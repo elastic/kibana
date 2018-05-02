@@ -151,6 +151,10 @@
     "status": "ERROR",
     "text": "The model memory limit is greater than the max model memory limit configured for this cluster."
   },
+  "mml_value_invalid": {
+    "status": "ERROR",
+    "text": "{{mml}} is not a valid value for model memory limit. The value should be specified in bytes e.g. 10MB"
+  },
   "estimated_mml_greater_than_mml": {
     "status": "INFO",
     "text": "The estimated model memory limit is greater than the model memory limit you have configured."
