@@ -12,20 +12,25 @@ import { delay, fromNode as fcb } from 'bluebird';
 export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
 
 async function updateCredentials(port, auth, username, password, retries = 10) {
-  const result = await fcb(cb => request({
-    method: 'PUT',
-    uri: formatUrl({
-      protocol: 'http:',
-      auth,
-      hostname: 'localhost',
-      port,
-      pathname: `/_xpack/security/user/${username}/_password`,
-    }),
-    json: true,
-    body: { password }
-  }, (err, httpResponse, body) => {
-    cb(err, { httpResponse, body });
-  }));
+  const result = await fcb(cb =>
+    request(
+      {
+        method: 'PUT',
+        uri: formatUrl({
+          protocol: 'http:',
+          auth,
+          hostname: 'localhost',
+          port,
+          pathname: `/_xpack/security/user/${username}/_password`,
+        }),
+        json: true,
+        body: { password },
+      },
+      (err, httpResponse, body) => {
+        cb(err, { httpResponse, body });
+      }
+    )
+  );
 
   const { body, httpResponse } = result;
   const { statusCode } = httpResponse;
@@ -38,7 +43,9 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
     return await updateCredentials(port, auth, username, password, retries - 1);
   }
 
-  throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
+  throw new Error(
+    `${statusCode} response, expected 200 -- ${JSON.stringify(body)}`
+  );
 }
 
 export async function setupUsers(log, config) {

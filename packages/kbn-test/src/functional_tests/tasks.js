@@ -1,15 +1,11 @@
 import { relative, resolve } from 'path';
 import Rx from 'rxjs/Rx';
-import getopts from 'getopts';
 import { withProcRunner } from '@kbn/dev-utils';
 
 import {
-  withTmpDir,
-  runKibanaServer,
   runElasticsearch,
+  runKibanaServer,
   runFtr,
-  log,
-  KIBANA_ROOT,
   KIBANA_FTR_SCRIPT,
 } from './lib';
 
@@ -24,116 +20,89 @@ in another terminal session by running this command from this directory:
 
 `;
 
-
 /**
  * Run servers and tests for each config
- * @param {configPaths}     array of paths to configs
- * @param {options}         optional
- * @param {options.runEs}   method to start elasticsearch
- * @param {options.runKbn}  method to start kibana
- * }
+ * @param {string[]} configPaths   Array of paths to configs
+ * @param {boolean}  bail          Whether to exit test run at the first failure
+ * @param {Log}      log           Optional logger
  */
-export async function runTests(
-  configPaths,
-  options = {
-    runEs: runElasticsearch,
-    runKbn: runKibanaServer,
-  }
-) {
+export async function runTests(configPaths, { bail, log }) {
   if (!configPaths || configPaths.length === 0) {
-    throw new Error('runTests requires configPaths to contain at least one item');
+    log.error(`runTests requires configPaths to contain at least one item`);
+    process.exit(1);
   }
 
   for (const configPath of configPaths) {
     try {
-      await runSingleConfig(resolve(KIBANA_ROOT, configPath), options);
+      await runSingleConfig(resolve(process.cwd(), configPath), { bail, log });
     } catch (err) {
-      fatalErrorHandler(err);
+      fatalErrorHandler(err, { log });
     }
   }
 }
 
-
 /**
  * Start only servers using single config
- * @param {configPath}      path to a config file
- * @param {options}         optional
- * @param {options.runEs}   method to start elasticsearch
- * @param {options.runKbn}  method to start kibana
+ * @param {string}  configPath   Path to a config file
  */
-export async function startServers(
-  configPath,
-  options = {
-    runEs: runElasticsearch,
-    runKbn: runKibanaServer,
-  }
-) {
+export async function startServers(configPath, { log }) {
   if (!configPath) {
-    throw new Error('startServers requires configPath');
+    log.error(`startServers requires configPath`);
+    process.exit(1);
   }
 
-  const configOption = getopts(process.argv.slice(2)).config;
-
-  configPath = await resolve(KIBANA_ROOT, configOption || configPath);
+  configPath = resolve(process.cwd(), configPath);
 
   try {
-    await withTmpDir(async tmpDir => {
-      await withProcRunner(async procs => {
-        const config = await readConfigFile(log, configPath);
-        const { runEs, runKbn } = options;
+    await withProcRunner(log, async procs => {
+      const config = await readConfigFile(log, configPath);
 
-        const es = await runEs({ tmpDir, config });
-        await runKbn({ procs, config });
+      const es = await runElasticsearch({ config, log });
+      await runKibanaServer({ procs, config, log });
 
-        // wait for 5 seconds of silence before logging the success message
-        // so that it doesn't get buried
-        await Rx.Observable.fromEvent(log, 'data')
-          .switchMap(() => Rx.Observable.timer(5000))
-          .first()
-          .toPromise();
+      // wait for 5 seconds of silence before logging the success message
+      // so that it doesn't get buried
+      await Rx.Observable.fromEvent(log, 'data')
+        .switchMap(() => Rx.Observable.timer(5000))
+        .first()
+        .toPromise();
 
-        log.info(SUCCESS_MESSAGE);
-        await procs.waitForAllToStop();
-        await es.cleanup();
-      });
+      log.info(SUCCESS_MESSAGE);
+      await procs.waitForAllToStop();
+      await es.cleanup();
     });
   } catch (err) {
     fatalErrorHandler(err);
   }
 }
-
 
 /*
  * Start servers and run tests for single config
  */
-async function runSingleConfig(
-  configPath,
-  options = {
-    runEs: runElasticsearch,
-    runKbn: runKibanaServer,
-  }
-) {
-  try {
-    await withTmpDir(async tmpDir => {
-      await withProcRunner(async procs => {
-        const config = await readConfigFile(log, configPath);
-        const { runEs, runKbn } = options;
+async function runSingleConfig(configPath, { bail, log }) {
+  await withProcRunner(log, async procs => {
+    const config = await readConfigFile(log, configPath);
 
-        const es = await runEs({ tmpDir, config });
-        await runKbn({ procs, config });
-        await runFtr({ procs, configPath, cwd: process.cwd() });
+    const es = await runElasticsearch({ config, log });
+    await runKibanaServer({ procs, config });
 
-        await procs.stop('kibana');
-        await es.cleanup();
-      });
+    // Note: When solving how to incorporate functional_test_runner
+    // clean this up
+    const logLevel = log.getLevel();
+    await runFtr({
+      procs,
+      configPath,
+      bail,
+      logLevel,
+      cwd: process.cwd(),
     });
-  } catch (err) {
-    fatalErrorHandler(err);
-  }
+
+    await procs.stop('kibana');
+    await es.cleanup();
+  });
 }
 
-
-function fatalErrorHandler(err) {
+function fatalErrorHandler(err, { log }) {
   log.error('FATAL ERROR');
   log.error(err);
   process.exit(1);

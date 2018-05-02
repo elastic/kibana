@@ -1,11 +1,7 @@
+import dedent from 'dedent';
 import getopts from 'getopts';
+import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { runTests } from '../../';
-import {
-  FUNCTIONAL_CONFIG_PATH,
-  API_CONFIG_PATH,
-} from '../../functional_tests/lib';
-
-const defaultConfigPaths = [FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH];
 
 /**
  * Run servers and tests for each config
@@ -14,50 +10,58 @@ const defaultConfigPaths = [FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH];
  * --bail, --verbose, etc.
  * In the future, this method will accept --tests-only,
  * --servers-only.
- * @param {configPaths}     array of paths to configs
+ * @param {string[]} defaultConfigPaths  Array of paths to configs to use
+ *                                       if no config option is passed
  */
-export function runTestsCli() {
-  const {
-    configs,
-    help,
-  } = processArgv();
+export function runTestsCli(defaultConfigPaths) {
+  const { configs, help, bail, log } = processArgv(defaultConfigPaths);
 
   if (help) return displayHelp();
 
-  runTests(configs);
+  runTests(configs, { bail, log });
 }
 
-
-function processArgv() {
+function processArgv(defaultConfigPaths) {
+  // If no args are passed, use {}
   const options = getopts(process.argv.slice(2)) || {};
-  const configs = [];
 
-  try {
-    let configOptions = options.config;
-    configOptions = typeof configOptions === 'string'
-      ? [configOptions]
-      : configOptions;
-    configs.push(...configOptions);
-  } catch (err) {
-    configs.push(...defaultConfigPaths);
-  }
+  // If --config is passed without paths, it's "true", so use default
+  const configs =
+    typeof options.config === 'string' || Array.isArray(options.config)
+      ? [].concat(options.config)
+      : defaultConfigPaths;
+
+  const log = createToolingLog(pickLevelFromFlags(options));
+  log.pipe(process.stdout);
 
   return {
     configs,
+    log,
     help: options.help,
+    bail: options.bail,
     rest: options._,
   };
 }
 
-
 function displayHelp() {
-  console.log();
-  console.log('Functional Tests');
-  console.log('Usage:  node scripts/functional_tests [options]');
-  console.log();
-  console.log('--config      Option to pass in a config');
-  console.log('              Can pass in multiple configs with');
-  console.log('              --config file1 --config file2 --config file3');
-  console.log('--help        Displays this menu and exits');
-  console.log();
+  console.log(
+    dedent(`
+    Run Functional Tests
+
+    Usage:  node scripts/functional_tests [options]
+
+    --config      Option to pass in a config
+                  Can pass in multiple configs with
+                  --config file1 --config file2 --config file3
+    --bail        Stop the test run at the first failure
+    --help        Display this menu and exit
+
+    Log level options:
+
+    --verbose
+    --debug
+    --quiet       Log errors
+    --silent
+    `)
+  );
 }

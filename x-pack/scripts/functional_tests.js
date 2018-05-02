@@ -5,10 +5,8 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
-require('@kbn/test').runTests(
-  [
-    'x-pack/test/functional/config.js',
-    'x-pack/test/api_integration/config.js',
-    'x-pack/test/saml_api_integration/config.js',
-  ],
-);
+require('@kbn/test').runTestsCli([
+  'test/functional/config.js',
+  'test/api_integration/config.js',
+  'test/saml_api_integration/config.js',
+]);

@@ -1,4 +1,4 @@
-import url, {  format as formatUrl } from 'url';
+import url, { format as formatUrl } from 'url';
 import pkg from '../../../../package.json';
 import { adminTestUser } from '../kbn';
 
@@ -30,7 +30,7 @@ export const esTestConfig = new class EsTestConfig {
         port: parseInt(testEsUrl.port, 10),
         username: testEsUrl.auth.split(':')[0],
         password: testEsUrl.auth.split(':')[1],
-        auth: testEsUrl.auth
+        auth: testEsUrl.auth,
       };
     }
 
@@ -47,4 +47,4 @@ export const esTestConfig = new class EsTestConfig {
       password: password,
     };
   }
-};
+}();

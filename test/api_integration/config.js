@@ -6,6 +6,7 @@ import {
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     testFiles: [
@@ -26,7 +27,7 @@ export default async function ({ readConfigFile }) {
     env: commonConfig.get('env'),
     esTestCluster: commonConfig.get('esTestCluster'),
     kibanaServerArgs: [
-      ...commonConfig.get('kibanaServerArgs'),
+      ...functionalConfig.get('kibanaServerArgs'),
       '--optimize.enabled=false',
       '--elasticsearch.healthCheck.delay=3600000',
       '--server.xsrf.disableProtection=true',

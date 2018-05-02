@@ -5,9 +5,11 @@ import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
-import { log as defaultLog } from '../functional_tests/lib';
+import { KIBANA_ROOT } from '../';
+import { createToolingLog } from '@kbn/dev-utils';
 import elasticsearch from 'elasticsearch';
-import { KIBANA_ROOT } from '../functional_tests/lib/paths';
+
+const defaultLog = createToolingLog('debug');
 
 export function createEsTestCluster(options = {}) {
   const {
@@ -20,7 +22,9 @@ export function createEsTestCluster(options = {}) {
     from = esTestConfig.getBuildFrom(),
   } = options;
 
-  const randomHash = Math.random().toString(36).substring(2);
+  const randomHash = Math.random()
+    .toString(36)
+    .substring(2);
   const clusterName = `test-${randomHash}`;
   const config = {
     version: esTestConfig.getVersion(),
@@ -52,7 +56,7 @@ export function createEsTestCluster(options = {}) {
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           `discovery.zen.ping.unicast.hosts=localhost:${port}`,
-          ...esArgs
+          ...esArgs,
         ],
       });
     }
@@ -87,7 +91,7 @@ export function createEsTestCluster(options = {}) {
 
       return format(parts);
     }
-  };
+  }();
 }
 
 /**
@@ -108,4 +112,3 @@ function createCallCluster(esClient) {
     return action.call(context, params);
   };
 }
-

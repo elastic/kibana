@@ -16,12 +16,14 @@ export const kbnTestConfig = new class KbnTestConfig {
         port: parseInt(testKibanaUrl.port, 10),
         auth: testKibanaUrl.auth,
         username: testKibanaUrl.auth.split(':')[0],
-        password: testKibanaUrl.auth.split(':')[1]
+        password: testKibanaUrl.auth.split(':')[1],
       };
     }
 
-    const username = process.env.TEST_KIBANA_USERNAME || kibanaTestUser.username;
-    const password = process.env.TEST_KIBANA_PASSWORD || kibanaTestUser.password;
+    const username =
+      process.env.TEST_KIBANA_USERNAME || kibanaTestUser.username;
+    const password =
+      process.env.TEST_KIBANA_PASSWORD || kibanaTestUser.password;
     return {
       protocol: process.env.TEST_KIBANA_PROTOCOL || 'http',
       hostname: process.env.TEST_KIBANA_HOSTNAME || 'localhost',
@@ -31,4 +33,4 @@ export const kbnTestConfig = new class KbnTestConfig {
       password,
     };
   }
-};
+}();

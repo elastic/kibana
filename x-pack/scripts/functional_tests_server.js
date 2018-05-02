@@ -5,6 +5,4 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
-require('@kbn/test').startServers(
-  'x-pack/test/functional/config.js',
-);
+require('@kbn/test').startServersCli('test/functional/config.js');

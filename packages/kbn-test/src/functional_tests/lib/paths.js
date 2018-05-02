@@ -14,7 +14,10 @@ export const KIBANA_FTR_SCRIPT = resolve(
   'scripts/functional_test_runner'
 );
 export const PROJECT_ROOT = resolve(__dirname, '../../../../../../');
-export const FUNCTIONAL_CONFIG_PATH = resolve(KIBANA_ROOT, 'test/functional/config');
+export const FUNCTIONAL_CONFIG_PATH = resolve(
+  KIBANA_ROOT,
+  'test/functional/config'
+);
 export const API_CONFIG_PATH = resolve(
   KIBANA_ROOT,
   'test/api_integration/config'

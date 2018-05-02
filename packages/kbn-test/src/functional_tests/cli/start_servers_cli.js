@@ -1,43 +1,51 @@
+import chalk from 'chalk';
+import dedent from 'dedent';
 import getopts from 'getopts';
 import { startServers } from '../../';
-import { FUNCTIONAL_CONFIG_PATH } from '../../functional_tests/lib';
-
-const defaultConfigPath = FUNCTIONAL_CONFIG_PATH;
 
 /**
  * Start servers
- * @param {configPath}     path to config
+ * @param {string} configPath path to config
  */
-export function startServersCli() {
-  const {
-    config,
-    help,
-  } = processArgv();
+export function startServersCli(defaultConfigPath) {
+  const { config, help } = processArgv(defaultConfigPath);
 
   if (help) return displayHelp();
 
   startServers(config);
 }
 
-
-function processArgv() {
+function processArgv(defaultConfigPath) {
   const options = getopts(process.argv.slice(2)) || {};
 
+  if (Array.isArray(options.config)) {
+    console.log(
+      chalk.red(
+        `Starting servers requires a single config path. Multiple were passed.`
+      )
+    );
+    process.exit(1);
+  }
+
+  const config =
+    typeof options.config === 'string' ? options.config : defaultConfigPath;
+
   return {
-    config: options.config || defaultConfigPath,
+    config,
     help: options.help,
     rest: options._,
   };
 }
 
-
 function displayHelp() {
-  console.log();
-  console.log('Functional Tests\' Servers');
-  console.log('Usage:  node scripts/functional_tests_server [options]');
-  console.log();
-  console.log('--config      Option to pass in a config');
-  console.log('--help        Displays this menu and exits');
-  console.log();
-}
+  console.log(
+    dedent(`
+    Start Functional Test Servers
 
+    Usage:  node scripts/functional_tests_server [options]
+
+    --config      Option to pass in a config
+    --help        Display this menu and exit
+    `)
+  );
+}
