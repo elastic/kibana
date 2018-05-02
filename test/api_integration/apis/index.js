@@ -10,5 +10,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./migrations'));
+    loadTestFile(require.resolve('./stats'));
   });
 }

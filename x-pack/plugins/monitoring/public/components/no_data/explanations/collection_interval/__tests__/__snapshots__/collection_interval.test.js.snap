@@ -30,7 +30,9 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <div
       className="euiText"
     >
@@ -85,7 +87,9 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText>
+        <EuiText
+          grow={true}
+        >
           <div
             className="euiText"
           >
@@ -105,7 +109,9 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <div
       className="euiText"
     >
@@ -248,7 +254,9 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       <span
         className="euiTextColor euiTextColor--subdued"
       >
-        <EuiText>
+        <EuiText
+          grow={true}
+        >
           <div
             className="euiText"
           >
@@ -268,7 +276,9 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       className="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
     />
   </EuiHorizontalRule>
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <div
       className="euiText"
     >

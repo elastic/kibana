@@ -149,8 +149,14 @@ export default class WatcherFlyout extends Component {
 
     const timeRange =
       this.state.schedule === 'interval'
-        ? `now-${this.state.interval.value}${this.state.interval.unit}`
-        : 'now-24h';
+        ? {
+            value: this.state.interval.value,
+            unit: this.state.interval.unit
+          }
+        : {
+            value: 24,
+            unit: 'h'
+          };
 
     return createErrorGroupWatch({
       emails,

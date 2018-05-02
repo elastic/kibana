@@ -18,7 +18,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
         component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
             <img
               className="lspvDetailDrawerIcon"
@@ -44,7 +46,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <div>
         <p>
           This is a conditional statement in your pipeline.
@@ -84,7 +88,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
         component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
             <img
               className="lspvDetailDrawerIcon"
@@ -110,7 +116,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <div>
         <p>
           This 
@@ -127,7 +135,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           size="l"
         />
       </div>
-      <EuiTable>
+      <EuiTable
+        responsive={true}
+      >
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
@@ -370,7 +380,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
         component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
             <img
               className="lspvDetailDrawerIcon"
@@ -396,7 +408,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <p>
         This 
         plugin
@@ -406,7 +420,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
         </strong>
         .
       </p>
-      <EuiTable>
+      <EuiTable
+        responsive={true}
+      >
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
@@ -649,7 +665,9 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
         component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
             <img
               className="lspvDetailDrawerIcon"
@@ -675,7 +693,9 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <p>
         This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline.
       </p>
@@ -705,7 +725,9 @@ exports[`DetailDrawer component shows vertex title 1`] = `
         component="div"
         grow={true}
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h2>
             <img
               className="lspvDetailDrawerIcon"
@@ -730,7 +752,9 @@ exports[`DetailDrawer component shows vertex title 1`] = `
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText />
+    <EuiText
+      grow={true}
+    />
   </EuiFlyoutBody>
 </EuiFlyout>
 `;

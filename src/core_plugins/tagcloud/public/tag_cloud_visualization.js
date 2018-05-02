@@ -16,6 +16,7 @@ export class TagCloudVisualization {
 
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tagcloud-vis');
+    cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
     this._containerNode.appendChild(cloudContainer);
 
     this._vis = vis;
