@@ -31,6 +31,12 @@ yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc
 #### Running single test file
 Edit test file, changing top level `describe` to `describe.only`. Run tests with normal commands.
 
+#### Running Jest Unit Tests
+```bash
+# from x-pack folder
+node scripts/jest
+```
+
 #### Debugging browser tests
 ```
 yarn test:browser:dev
