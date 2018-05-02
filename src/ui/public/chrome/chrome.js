@@ -23,6 +23,7 @@ import themeApi from './api/theme';
 import translationsApi from './api/translations';
 import { initChromeXsrfApi } from './api/xsrf';
 import { initUiSettingsApi } from './api/ui_settings';
+import { initLoadingCountApi } from './api/loading_count';
 
 export const chrome = {};
 const internals = _.defaults(
@@ -44,6 +45,7 @@ initUiSettingsApi(chrome);
 appsApi(chrome, internals);
 initChromeXsrfApi(chrome, internals);
 initChromeNavApi(chrome, internals);
+initLoadingCountApi(chrome, internals);
 initAngularApi(chrome, internals);
 controlsApi(chrome, internals);
 templateApi(chrome, internals);

@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.clickGo();
         })
         .then(function () {
-          return PageObjects.header.isGlobalLoadingIndicatorHidden();
+          return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         });
     });
 
