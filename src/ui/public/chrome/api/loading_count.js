@@ -4,6 +4,10 @@ export function initLoadingCountApi(chrome, internals) {
   const counts = { angular: 0, manual: 0 };
   const handlers = new Set();
 
+  function getCount() {
+    return counts.angular + counts.manual;
+  }
+
   // update counts and call handlers with sum if there is a change
   function update(name, count) {
     if (counts[name] === count) {
@@ -11,9 +15,8 @@ export function initLoadingCountApi(chrome, internals) {
     }
 
     counts[name] = count;
-    const sum = counts.angular + counts.manual;
     for (const handler of handlers) {
-      handler(sum);
+      handler(getCount());
     }
   }
 
@@ -42,6 +45,10 @@ export function initLoadingCountApi(chrome, internals) {
      */
     subscribe(handler) {
       handlers.add(handler);
+
+      // send the current count to the handler
+      handler(getCount());
+
       return () => {
         handlers.delete(handler);
       };
