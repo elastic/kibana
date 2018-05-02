@@ -285,8 +285,7 @@ describe('ML - validateJob', () => {
           'job_id_valid',
           'detectors_function_not_empty',
           'index_fields_valid',
-          'time_field_invalid',
-          'success_mml'
+          'time_field_invalid'
         ]);
       }
     );

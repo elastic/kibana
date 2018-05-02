@@ -103,7 +103,7 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
+        expect(ids).to.eql([]);
       }
     );
   });
