@@ -75,11 +75,11 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
           let mmlKB = 0;
           if (i === 0) {
             // first in the list is the basic calculation.
-            // a base of 10MB plus 32KB per series per detector
-            // i.e. 10000KB + (32KB * cardinality of split field * number or detectors)
+            // a base of 10MB plus 64KB per series per detector
+            // i.e. 10000KB + (64KB * cardinality of split field * number or detectors)
             const cardinality = resp[splitFieldName];
             mmlKB = 10000;
-            const SERIES_MULTIPLIER = 32;
+            const SERIES_MULTIPLIER = 64;
             const numberOfFields = fieldNames.length;
 
             if (cardinality !== undefined) {
