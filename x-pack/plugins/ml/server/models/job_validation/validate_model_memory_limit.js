@@ -120,7 +120,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
     }
   }
 
-  if (messages.length === 0) {
+  if (messages.length === 0 && runCalcModelMemoryTest === true) {
     messages.push({ id: 'success_mml' });
   }
 
