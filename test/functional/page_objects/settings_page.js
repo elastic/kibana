@@ -520,25 +520,27 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async waitUntilSavedObjectsTableIsNotLoading() {
-      await retry.try(async () => {
+      return retry.try(async () => {
         try {
-          await remote.setFindTimeout(defaultFindTimeout)
-            .findByCssSelector(`*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading`);
-        } catch (e) {
+          await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading`);
+        } catch (err) {
+          // Was not found, we're good
           return;
         }
-        throw 'Found';
+        throw new Error('Waiting');
       });
     }
 
     async getSavedObjectsInTable() {
-      const table = await testSubjects.findAll('savedObjectsTable');
-      const cells = await table[0].findAll('css selector', 'td:nth-child(3)');
+      const table = await remote.setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`*[data-test-subj="savedObjectsTable"]`);
+      const cells = await table.findAll('css selector', 'td:nth-child(3)');
 
       const objects = [];
       for (const cell of cells) {
         objects.push(await cell.getVisibleText());
       }
+
       return objects;
     }
   }
