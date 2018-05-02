@@ -33,11 +33,13 @@ app.directive('customPatternsInput', function () {
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
           editor.getSession().setUseWrapMode(true);
+          editor.renderer.setScrollMargin(7, 7, 0, 0);
           editor.setOptions({
             highlightActiveLine: false,
             highlightGutterLine: false,
             minLines: 3,
-            maxLines: 25
+            maxLines: 5,
+            autoScrollEditorIntoView: true
           });
           editor.$blockScrolling = Infinity;
         };
