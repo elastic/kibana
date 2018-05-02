@@ -8,6 +8,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
+  EuiToolTip
 } from '@elastic/eui';
 import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
 
@@ -91,11 +92,16 @@ export class Table extends PureComponent {
         sortable: false,
         render: type => {
           return (
-            <EuiIcon
-              aria-label={getSavedObjectLabel(type)}
-              type={getSavedObjectIcon(type)}
-              size="s"
-            />
+            <EuiToolTip
+              position="top"
+              content={getSavedObjectLabel(type)}
+            >
+              <EuiIcon
+                aria-label={getSavedObjectLabel(type)}
+                type={getSavedObjectIcon(type)}
+                size="s"
+              />
+            </EuiToolTip>
           );
         },
       },

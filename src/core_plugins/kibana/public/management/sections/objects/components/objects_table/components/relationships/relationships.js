@@ -17,11 +17,9 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
   EuiInMemoryTable,
+  EuiToolTip
 } from '@elastic/eui';
-import {
-  getSavedObjectIcon,
-  getSavedObjectLabel,
-} from '../../../../lib';
+import { getSavedObjectIcon, getSavedObjectLabel } from '../../../../lib';
 
 export class Relationships extends Component {
   static propTypes = {
@@ -158,12 +156,17 @@ export class Relationships extends Component {
                 {
                   name: 'Type',
                   render: () => (
-                    <EuiIcon
-                      aria-label={getSavedObjectLabel(type)}
-                      size="s"
-                      type={getSavedObjectIcon(type)}
-                    />
-                  )
+                    <EuiToolTip
+                      position="top"
+                      content={getSavedObjectLabel(type)}
+                    >
+                      <EuiIcon
+                        aria-label={getSavedObjectLabel(type)}
+                        size="s"
+                        type={getSavedObjectIcon(type)}
+                      />
+                    </EuiToolTip>
+                  ),
                 },
                 {
                   name: 'Title',
@@ -172,7 +175,7 @@ export class Relationships extends Component {
                     <EuiLink href={`#${getEditUrl(item.id, type)}`}>
                       {title}
                     </EuiLink>
-                  )
+                  ),
                 },
                 {
                   name: 'Actions',
@@ -184,39 +187,10 @@ export class Relationships extends Component {
                       onClick: object => goInApp(object.id, type),
                     },
                   ],
-                }
+                },
               ]}
               pagination={true}
             />
-            {/* {list.map(item => (
-                <EuiDescriptionListDescription key={item.id}>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <EuiLink href={`#${getEditUrl(item.id, type)}`}>
-                        <EuiIcon
-                          aria-label={getSavedObjectLabel(type)}
-                          size="s"
-                          type={getSavedObjectIcon(type)}
-                        />
-                        &nbsp;
-                        {item.title}
-                      </EuiLink>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiLink href={`#${getInAppUrl(item.id, type)}`}>
-                        <EuiIcon
-                          aria-label={getSavedObjectLabel(type)}
-                          size="s"
-                          type="eye"
-                        />
-                        &nbsp;
-                        View in app
-                      </EuiLink>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiDescriptionListDescription>
-              ))} */}
-            {/* </Fragment> */}
           </Fragment>
         );
       }
@@ -233,11 +207,13 @@ export class Relationships extends Component {
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>
-              <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
-                size="m"
-                type={getSavedObjectIcon(type)}
-              />
+              <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                <EuiIcon
+                  aria-label={getSavedObjectLabel(type)}
+                  size="m"
+                  type={getSavedObjectIcon(type)}
+                />
+              </EuiToolTip>
               &nbsp;&nbsp;
               {title}
             </h2>

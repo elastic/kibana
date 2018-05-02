@@ -15,6 +15,7 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
+  EuiToolTip
 } from '@elastic/eui';
 import {
   retrieveAndExportDocs,
@@ -24,6 +25,7 @@ import {
   getSavedObjectIcon,
   getSavedObjectCounts,
   getRelationships,
+  getSavedObjectLabel,
 } from '../../lib';
 import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
 import { isSameQuery } from '../../lib/is_same_query';
@@ -94,15 +96,19 @@ export class ObjectsTable extends Component {
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
-    const savedObjectCounts = await getSavedObjectCounts(this.props.$http, includeTypes, queryText);
+    const savedObjectCounts = await getSavedObjectCounts(
+      this.props.$http,
+      includeTypes,
+      queryText
+    );
 
     this.setState(state => ({
       ...state,
       savedObjectCounts,
       exportAllOptions: state.exportAllOptions.map(option => ({
         ...option,
-        label: `${option.id} (${savedObjectCounts[option.id]})`
-      }))
+        label: `${option.id} (${savedObjectCounts[option.id]})`,
+      })),
     }));
   };
 
@@ -181,7 +187,7 @@ export class ObjectsTable extends Component {
       () => {
         this.fetchSavedObjects();
         this.fetchCounts();
-      },
+      }
     );
   };
 
@@ -220,12 +226,15 @@ export class ObjectsTable extends Component {
     const { $http } = this.props;
     const { exportAllSelectedOptions } = this.state;
 
-    const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
-      if (selected) {
-        accum.push(id);
-      }
-      return accum;
-    }, []);
+    const exportTypes = Object.entries(exportAllSelectedOptions).reduce(
+      (accum, [id, selected]) => {
+        if (selected) {
+          accum.push(id);
+        }
+        return accum;
+      },
+      []
+    );
     const results = await scanAllTypes($http, exportTypes);
     saveToFile(JSON.stringify(flattenDeep(results), null, 2));
   };
@@ -351,13 +360,18 @@ export class ObjectsTable extends Component {
                 name: 'Type',
                 width: '50px',
                 render: type => (
-                  <EuiIcon type={getSavedObjectIcon(type)}/>
-                )
+                  <EuiToolTip
+                    position="top"
+                    content={getSavedObjectLabel(type)}
+                  >
+                    <EuiIcon type={getSavedObjectIcon(type)} />
+                  </EuiToolTip>
+                ),
               },
               {
                 field: 'id',
                 name: 'Id/Name',
-              }
+              },
             ]}
             pagination={true}
             sorting={false}
@@ -376,20 +390,28 @@ export class ObjectsTable extends Component {
       <EuiOverlayMask>
         <EuiConfirmModal
           title="Export All"
-          onCancel={() => this.setState({ isShowingExportAllOptionsModal: false })}
+          onCancel={() =>
+            this.setState({ isShowingExportAllOptionsModal: false })
+          }
           onConfirm={this.onExportAll}
           cancelButtonText="Cancel"
           confirmButtonText="Export All"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>Select which types to export. The number in parentheses indicates how many of this type are available to export.</p>
+          <p>
+            Select which types to export. The number in parentheses indicates
+            how many of this type are available to export.
+          </p>
           <EuiCheckboxGroup
             options={this.state.exportAllOptions}
             idToSelectedMap={this.state.exportAllSelectedOptions}
             onChange={optionId => {
-              const exportAllSelectedOptions = ({ ...this.state.exportAllSelectedOptions, ...{
-                [optionId]: !this.state.exportAllSelectedOptions[optionId],
-              } });
+              const exportAllSelectedOptions = {
+                ...this.state.exportAllSelectedOptions,
+                ...{
+                  [optionId]: !this.state.exportAllSelectedOptions[optionId],
+                },
+              };
 
               this.setState({
                 exportAllSelectedOptions: exportAllSelectedOptions,
@@ -430,7 +452,9 @@ export class ObjectsTable extends Component {
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         <Header
-          onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
+          onExportAll={() =>
+            this.setState({ isShowingExportAllOptionsModal: true })
+          }
           onImport={this.showImportFlyout}
           onRefresh={this.refreshData}
           totalCount={totalItemCount}
