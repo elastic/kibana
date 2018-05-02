@@ -5,17 +5,17 @@
  */
 
 import expect from 'expect.js';
-import overviewFixture from './fixtures/overview';
+import nodesFixture from './fixtures/nodes';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', () => {
-    const archive = 'monitoring/singlecluster-yellow-platinum';
+  describe('node listing', () => {
+    const archive = 'monitoring/logstash-pipelines';
     const timeRange = {
-      min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z'
+      min: '2018-01-22T09:33:13.000Z',
+      max: '2018-01-22T09:41:04.000Z'
     };
 
     before('load archive', () => {
@@ -26,14 +26,14 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should summarize kibana instances with stats', async () => {
+    it('should summarize the Logstash nodes with stats', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
+        .post('/api/monitoring/v1/clusters/1rhApLfQShSh3JsNqYCkmA/logstash/nodes')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
 
-      expect(body).to.eql(overviewFixture);
+      expect(body).to.eql(nodesFixture);
     });
   });
 }
