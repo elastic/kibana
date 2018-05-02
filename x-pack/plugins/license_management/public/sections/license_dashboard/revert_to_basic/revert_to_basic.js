@@ -26,6 +26,7 @@ export class RevertToBasic extends React.PureComponent {
       needsAcknowledgement,
       messages: [firstLine, ...messages] = [],
       startBasicLicense,
+      cancelStartBasicLicense,
       licenseType
     } = this.props;
     if (!needsAcknowledgement) {
@@ -35,7 +36,7 @@ export class RevertToBasic extends React.PureComponent {
       <EuiOverlayMask>
         <EuiConfirmModal
           title="Confirm Revert to Basic License"
-          onCancel={this.cancel}
+          onCancel={cancelStartBasicLicense}
           onConfirm={() => startBasicLicense(licenseType, HTMLMarqueeElement)}
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
