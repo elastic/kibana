@@ -102,6 +102,7 @@ function discoverController(
   $scope,
   $timeout,
   $window,
+  $log,
   AppState,
   Notifier,
   Private,
@@ -176,6 +177,45 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
   const queryManager = Private(QueryManagerProvider)($state);
+
+  // fetchQueue
+  $scope.fetchQueue = [];
+
+  /**
+   * Captures all the data needed by updateDataSourceForFetch and
+   * enqueues them.
+   */
+  $scope.fetchQueue.enqueue = function () {
+    $scope.fetchQueue.push({
+      size: $scope.opts.sampleSize,
+      sort: getSort($state.sort, $scope.indexPattern),
+      query: !$state.query ? null : $state.query,
+      filter: queryFilter.getFilters()
+    });
+  };
+
+  /**
+   * @return Front of the queue without dequeue.
+   */
+  $scope.fetchQueue.peekFront = function () {
+    return $scope.fetchQueue[0];
+  };
+
+  /**
+   * @return Dequeue the $scope.fetchQueue.
+   */
+  $scope.fetchQueue.dequeue = function () {
+    return $scope.fetchQueue.shift();
+  };
+
+  /**
+   * @return True if $scope.fetchQueue is empty.
+   */
+  $scope.fetchQueue.isEmpty = function () {
+    return $scope.fetchQueue.length === 0;
+  };
+
+  $scope.currentSegmentedReq = null;
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -446,13 +486,20 @@ function discoverController(
 
     $scope.updateTime();
 
-    $scope.updateDataSource()
-    .then(setupVisualization)
-    .then(function () {
-      $state.save();
-      return courier.fetch();
-    })
-    .catch(notify.error);
+    const noOnGoingFetch = $scope.fetchQueue.isEmpty();
+    $scope.fetchQueue.enqueue();
+
+    if (noOnGoingFetch) {
+      $scope.updateDataSourceForFetch()
+        .then(setupVisualization)
+        .then(function () {
+          $state.save();
+          return courier.fetch();
+        })
+        .catch(notify.error);
+    } else if (_.isObject($scope.currentSegmentedReq)) {
+      $scope.currentSegmentedReq.skip.resolve();
+    }
   };
 
   $scope.updateQueryAndFetch = function (query) {
@@ -465,6 +512,8 @@ function discoverController(
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
+    $scope.currentSegmentedReq = this;
+
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -572,6 +621,24 @@ function discoverController(
 
       $scope.fetchStatus = null;
     });
+  }, () => {
+    $scope.currentSegmentedReq = null;
+
+    try {
+      $scope.fetchQueue.dequeue();
+    } catch (e) {
+      $log.error('Request in in $scope.fetchQueue was dequeued before being completed.');
+    }
+
+    if (!$scope.fetchQueue.isEmpty()) {
+      $scope.updateDataSourceForFetch()
+        .then(setupVisualization)
+        .then(function () {
+          $state.save();
+          return courier.fetch();
+        })
+        .catch(notify.error);
+    }
   }).catch(notify.fatal);
 
   $scope.updateTime = function () {
@@ -589,12 +656,31 @@ function discoverController(
     kbnUrl.change('/discover');
   };
 
-  $scope.updateDataSource = Promise.method(function updateDataSource() {
+  $scope.updateDataSourceFromCurrent = function () {
     $scope.searchSource
-    .size($scope.opts.sampleSize)
-    .sort(getSort($state.sort, $scope.indexPattern))
-    .query(!$state.query ? null : $state.query)
-    .set('filter', queryFilter.getFilters());
+      .size($scope.opts.sampleSize)
+      .sort(getSort($state.sort, $scope.indexPattern))
+      .query(!$state.query ? null : $state.query)
+      .set('filter', queryFilter.getFilters());
+  };
+
+  $scope.updateDataSource = Promise.method(function updateDataSource() {
+    $scope.updateDataSourceFromCurrent();
+  });
+
+  $scope.updateDataSourceForFetch = Promise.method(function updateDataSourceForFetch() {
+    if ($scope.fetchQueue.isEmpty()) {
+      // Should never be called. Just here for fail safe.
+      $log.error('$scope.updateDataSourceForFetch is called with empty $scope.fetchQueue.');
+      $scope.updateDataSourceFromCurrent();
+    } else {
+      const fetchQueueData = $scope.fetchQueue.peekFront();
+      $scope.searchSource
+        .size(fetchQueueData.size)
+        .sort(fetchQueueData.sort)
+        .query(fetchQueueData.query)
+        .set('filter', fetchQueueData.filter);
+    }
   });
 
   $scope.setSortOrder = function setSortOrder(columnName, direction) {

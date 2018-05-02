@@ -171,14 +171,14 @@ export function SearchSourceProvider(Promise, Private, config) {
     this._fetchDisabled = false;
   };
 
-  SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
+  SearchSource.prototype.onBeginSegmentedFetch = function (initFunction, nextFn) {
     const self = this;
     return Promise.try(function addRequest() {
       const req = new SegmentedRequest(self, Promise.defer(), initFunction);
 
-      // return promises created by the completion handler so that
+      // return promises created by the completion or abort handler so that
       // errors will bubble properly
-      return req.getCompletePromise().then(addRequest);
+      return req.getCompleteOrSkippedPromise().then(nextFn).then(addRequest);
     });
   };
 
