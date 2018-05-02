@@ -15,6 +15,7 @@ export {
 } from './kbn_field_types';
 
 export {
+  concatStreamProviders,
   createConcatStream,
   createIntersperseStream,
   createJsonParseStream,
