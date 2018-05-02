@@ -153,7 +153,6 @@ export default async function ({ readConfigFile }) {
       license: 'trial',
       from: 'source',
       serverArgs: [
-        'xpack.monitoring.enabled=false',
         'xpack.license.self_generated.type=trial',
         'xpack.security.enabled=true',
       ],

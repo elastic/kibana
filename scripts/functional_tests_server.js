@@ -1,2 +1,2 @@
 require('../src/babel-register');
-require('../packages/kbn-test').startServers();
+require('../packages/kbn-test').startServersCli();

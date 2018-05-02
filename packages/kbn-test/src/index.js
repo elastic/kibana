@@ -1,4 +1,9 @@
 export {
+  runTestsCli,
+  startServersCli,
+} from './functional_tests/cli';
+
+export {
   runTests,
   startServers,
 } from './functional_tests/tasks';

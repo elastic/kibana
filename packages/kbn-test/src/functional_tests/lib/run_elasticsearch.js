@@ -6,7 +6,7 @@ import { createEsTestCluster } from '../../es';
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
 export async function runElasticsearch({ config }) {
-  const isOss = config.get('elasticsearchClusterArgs.license') === 'oss';
+  const isOss = config.get('esTestCluster.license') === 'oss';
 
   const cluster = createEsTestCluster({
     port: config.get('servers.elasticsearch.port'),

@@ -11,8 +11,6 @@ import {
   log,
   KIBANA_ROOT,
   KIBANA_FTR_SCRIPT,
-  FUNCTIONAL_CONFIG_PATH,
-  API_CONFIG_PATH,
 } from './lib';
 
 import { readConfigFile } from '../../../../src/functional_test_runner/lib';
@@ -27,32 +25,26 @@ in another terminal session by running this command from this directory:
 `;
 
 
-/*
- * With multiple configs, comma separated,
- * run servers and tests for each config
+/**
+ * Run servers and tests for each config
+ * @param {configPaths}     array of paths to configs
+ * @param {options}         optional
+ * @param {options.runEs}   method to start elasticsearch
+ * @param {options.runKbn}  method to start kibana
+ * }
  */
 export async function runTests(
-  configPaths = [FUNCTIONAL_CONFIG_PATH, API_CONFIG_PATH],
+  configPaths,
   options = {
     runEs: runElasticsearch,
     runKbn: runKibanaServer,
   }
 ) {
-  const configs = [];
-
-  // Use list of config paths from --config or default
-  try {
-    let configOptions = getopts(process.argv.slice(2)).config;
-    configOptions = typeof configOptions === 'string'
-      ? [configOptions]
-      : configOptions;
-    configs.push(...configOptions);
-  } catch (err) {
-    configs.push(...configPaths);
+  if (!configPaths || configPaths.length === 0) {
+    throw new Error('runTests requires configPaths to contain at least one item');
   }
 
-  // Run servers and tests for each
-  for (const configPath of configs) {
+  for (const configPath of configPaths) {
     try {
       await runSingleConfig(resolve(KIBANA_ROOT, configPath), options);
     } catch (err) {
@@ -62,16 +54,24 @@ export async function runTests(
 }
 
 
-/*
+/**
  * Start only servers using single config
+ * @param {configPath}      path to a config file
+ * @param {options}         optional
+ * @param {options.runEs}   method to start elasticsearch
+ * @param {options.runKbn}  method to start kibana
  */
 export async function startServers(
-  configPath = FUNCTIONAL_CONFIG_PATH,
+  configPath,
   options = {
     runEs: runElasticsearch,
     runKbn: runKibanaServer,
   }
 ) {
+  if (!configPath) {
+    throw new Error('startServers requires configPath');
+  }
+
   const configOption = getopts(process.argv.slice(2)).config;
 
   configPath = await resolve(KIBANA_ROOT, configOption || configPath);
@@ -107,7 +107,7 @@ export async function startServers(
  * Start servers and run tests for single config
  */
 async function runSingleConfig(
-  configPath = FUNCTIONAL_CONFIG_PATH,
+  configPath,
   options = {
     runEs: runElasticsearch,
     runKbn: runKibanaServer,

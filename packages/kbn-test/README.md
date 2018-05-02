@@ -12,27 +12,29 @@ Integration testing methods exist in the `src/functional_tests` directory. They 
 
 ### Exposed methods
 
-#### runTests(configPaths: Array<string>, runEs: function, runKbn: function)
+#### runTests(configPaths: Array<string>, options: { runEs: function, runKbn: function })
 For each config file specified in configPaths, starts Elasticsearch and Kibana once, runs tests specified in that config file, and shuts down Elasticsearch and Kibana once completed. (Repeats for every config file.)
 
 `configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
-`runEs`: [optional] function that starts Elasticsearch server
+`options`: [optional] object containing:
 
-`runKbn`: [optional] function that starts Kibana server
+  `runEs`: [optional] function that starts Elasticsearch server
 
-The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
+  `runKbn`: [optional] function that starts Kibana server
 
-#### startServers(configPath: string, runEs: function, runKbn: function)
+The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana if they need to do so differently. Internally the default method that starts Elasticsearch comes from [kbn-es](../../packages/kbn-es).
+
+#### startServers(configPath: string, options: { runEs: function, runKbn: function })
 Starts Elasticsearch and Kibana servers given a specified config.
 
 `configPath`: absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
-`runEs`: [optional] function that starts Elasticsearch server
+`options`: [optional] object containing:
 
-`runKbn`: [optional] function that starts Kibana server
+  `runEs`: [optional] function that starts Elasticsearch server
 
-The optional functions are so that users of this method can inject functions that start Elasticsearch and Kibana with x-pack or other plugin configuration.
+  `runKbn`: [optional] function that starts Kibana server
 
 Allows users to start another process to run just the tests while keeping the servers running with this method. Running just the tests against these servers with
 
