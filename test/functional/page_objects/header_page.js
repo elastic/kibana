@@ -20,27 +20,27 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickManagement() {
       log.debug('click Management tab');
       await this.clickSelector('a[href*=\'management\']');
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
@@ -158,7 +158,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('--Setting To Time : ' + toTime);
       await this.setToTime(toTime);
       await this.clickGoButton();
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async setQuickTime(quickTime) {
@@ -225,7 +225,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
           throw exception;
         }
       }
-      await this.isGlobalLoadingIndicatorHidden();
+      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async isGlobalLoadingIndicatorVisible() {
@@ -233,9 +233,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('globalLoadingIndicator');
     }
 
-    async isGlobalLoadingIndicatorHidden() {
-      log.debug('isGlobalLoadingIndicatorHidden');
-      return await find.byCssSelector('[data-test-subj="globalLoadingIndicator"].ng-hide', defaultFindTimeout * 10);
+    async awaitGlobalLoadingIndicatorHidden() {
+      log.debug('awaitGlobalLoadingIndicatorHidden');
+      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
     }
 
     async getPrettyDuration() {
