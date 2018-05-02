@@ -26,21 +26,17 @@ export class LoadingIndicator extends React.Component {
   }
 
   render() {
-    const { error, visible } = this.state;
+    const className = classNames(
+      'loadingIndicator',
+      this.state.visible ? null : 'hidden'
+    );
 
-    if (error) {
-      throw error;
-    }
+    const testSubj = this.state.visible
+      ? 'globalLoadingIndicator'
+      : 'globalLoadingIndicator-hidden';
 
     return (
-      <div
-        className={classNames('loadingIndicator', visible ? null : 'hidden')}
-        data-test-subj={
-          visible
-            ? 'globalLoadingIndicator'
-            : 'globalLoadingIndicator-hidden'
-        }
-      >
+      <div className={className} data-test-subj={testSubj}>
         <div className="loadingIndicator__bar" />
       </div>
     );
