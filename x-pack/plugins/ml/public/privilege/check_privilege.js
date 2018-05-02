@@ -8,7 +8,6 @@
 
 import { privilegesProvider } from 'plugins/ml/privilege/get_privileges';
 import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
-// import { initPromise } from 'plugins/ml/services/http_service';
 
 let privileges = {};
 
