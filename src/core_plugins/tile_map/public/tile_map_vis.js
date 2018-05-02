@@ -9,7 +9,7 @@ import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
-
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
@@ -25,6 +25,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visConfig: {
       canDesaturate: !!supports.cssFilters,
       defaults: {
+        colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
         addTooltip: true,
@@ -40,6 +41,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
+        colorSchemas: Object.keys(truncatedColorMaps),
         legendPositions: [{
           value: 'bottomleft',
           text: 'bottom left',

@@ -26,7 +26,7 @@
               <input
                 class="kuiToolBarSearchBox__input"
                 type="text"
-                placeholder="Search..."
+                placeholder="Search"
                 aria-label="Filter"
                 ng-model="query"
               >
@@ -56,7 +56,7 @@
             >
               <span class="kuiButton__inner">
                 <span class="kuiButton__icon kuiIcon fa-plus"></span>
-                <span>Create user</span>
+                <span>Add user</span>
               </span>
             </a>
           </div>
@@ -69,7 +69,7 @@
         <!-- NoResults -->
         <div class="kuiPanel kuiPanel--centered" ng-show="!(users | filter:query).length">
           <div class="kuiNoItems">
-            No <span ng-show="query">matching</span> users found.
+            No users <span ng-show="query">match</span> your search criteria
           </div>
         </div>
 
@@ -100,7 +100,7 @@
                   aria-label="{{sort.reverse ? 'Sort full name ascending' : 'Sort full name descending'}}"
                 >
                   <span class="kuiTableHeaderCell__liner">
-                    Full Name
+                    Full name
                     <span
                       aria-hidden="true"
                       class="kuiTableSortIcon kuiIcon"
@@ -157,8 +157,8 @@
                   Reserved
                   <span
                     class="kuiIcon fa-question-circle"
-                    tooltip="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
-                    aria-label="Reserved users are built-in and cannot be removed or modified. Only the password may be changed."
+                    tooltip="Reserved users are built-in and cannot be removed. Only the password can be changed."
+                    aria-label="Reserved users are built-in and cannot be removed. Only the password can be changed."
                   ></span>
                 </span>
               </th>

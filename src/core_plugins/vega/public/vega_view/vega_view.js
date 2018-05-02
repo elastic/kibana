@@ -17,11 +17,12 @@ export class VegaView extends VegaBaseView {
     if (this._parser.useHover) view.hover();
 
     this._addDestroyHandler(() => {
-      this._view = null;
+      this.setView(null);
       view.finalize();
     });
 
+    this.setView(view);
+
     await view.runAsync();
-    this._view = view;
   }
 }

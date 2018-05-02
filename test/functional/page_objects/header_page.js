@@ -16,6 +16,15 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => await remote.findByCssSelector(selector).click());
     }
 
+    async confirmTopNavTextContains(text) {
+      await retry.try(async () => {
+        const topNavText = await PageObjects.common.getTopNavText();
+        if (topNavText.toLowerCase().indexOf(text.toLowerCase()) < 0) {
+          throw new Error(`Top nav text ${topNavText} does not contain ${text} (case insensitive)`);
+        }
+      });
+    }
+
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
@@ -27,6 +36,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Visualize tab');
       await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
+      await this.confirmTopNavTextContains('visualize');
       await this.isGlobalLoadingIndicatorHidden();
     }
 
@@ -34,6 +44,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('click Dashboard tab');
       await this.clickSelector('a[href*=\'dashboard\']');
       await PageObjects.common.waitForTopNavToBeVisible();
+      await this.confirmTopNavTextContains('dashboard');
       await this.isGlobalLoadingIndicatorHidden();
     }
 

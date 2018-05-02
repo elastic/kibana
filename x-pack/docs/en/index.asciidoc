@@ -9,9 +9,6 @@ include::setup/setup-xkb.asciidoc[]
 :edit_url:
 include::{kib-repo-dir}/index-shared2.asciidoc[]
 
-:edit_url!:
-include::release-notes/breaking-changes-xpack.asciidoc[]
-
 :edit_url:
 include::{kib-repo-dir}/index-shared3.asciidoc[]
 
@@ -56,6 +53,3 @@ include::reporting/index.asciidoc[]
 
 :edit_url:
 include::{kib-repo-dir}/index-shared6.asciidoc[]
-
-:edit_url!:
-include::release-notes/index.asciidoc[]

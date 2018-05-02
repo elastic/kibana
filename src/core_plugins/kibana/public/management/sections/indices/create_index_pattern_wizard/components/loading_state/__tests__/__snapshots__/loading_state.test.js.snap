@@ -18,7 +18,9 @@ exports[`LoadingState should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiTitle>
+      <EuiTitle
+        size="m"
+      >
         <EuiTextColor
           color="subdued"
         >
@@ -58,6 +60,7 @@ exports[`LoadingState should render normally 1`] = `
         >
           <EuiText
             color="subdued"
+            grow={true}
             size="s"
           >
             Reticulating splines...

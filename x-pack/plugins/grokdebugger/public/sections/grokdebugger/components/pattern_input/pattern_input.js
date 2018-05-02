@@ -7,6 +7,7 @@
 import { uiModules } from 'ui/modules';
 import template from './pattern_input.html';
 import './pattern_input.less';
+import { GrokMode } from '../../../../lib/ace';
 
 const app = uiModules.get('xpack/grokdebugger');
 
@@ -34,6 +35,7 @@ app.directive('patternInput', function () {
             maxLines: 10
           });
           editor.$blockScrolling = Infinity;
+          editor.getSession().setMode(new GrokMode());
         };
       }
     }
