@@ -3,7 +3,7 @@
 
 const _ = require('lodash');
 const objectHash = require('object-hash');
-const Plugins = require('./plugins');
+const Plugin = require('./plugin');
 const MigrationPlan = require('./migration_plan');
 const MigrationState = require('./migration_state');
 const Persistence = require('./persistence');
@@ -18,7 +18,7 @@ async function fetch(opts) {
     Persistence.getCurrentIndex(callCluster, index),
     MigrationState.fetch(callCluster, index),
   ]);
-  const sanitizedPlugins = Plugins.validate(plugins, migrationState);
+  const sanitizedPlugins = Plugin.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
   const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex, migrationState);
   const sha = objectHash(nextMigrationState.plugins);

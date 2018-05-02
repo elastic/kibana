@@ -4,10 +4,10 @@
 
 const _ = require('lodash');
 const objectHash = require('object-hash');
-const Plugins = require('./plugins');
+const Plugin = require('./plugin');
 const MigrationStatus = require('./migration_status');
 const Persistence = require('./persistence');
-const { DOC_TYPE } = require('./documents');
+const { DOC_TYPE } = require('./document');
 
 const TYPE = 'migration';
 const ID = `${TYPE}:migration-state`;
@@ -72,7 +72,7 @@ function trimForExport({ plugins }) {
 // Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
 // around even if the plugin is disabled / removed.
 function build(plugins, previousIndex, previousState = empty) {
-  const isDisabled = Plugins.disabledIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
+  const isDisabled = Plugin.disabledIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
   const disabledPlugins = previousState.plugins.filter(({ id }) => isDisabled[id]);
   const enabledPlugins = plugins.map((plugin) => {
     const { id, mappings, migrations } = plugin;

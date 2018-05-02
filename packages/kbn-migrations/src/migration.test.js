@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { migrate, fetchStatus } = require('./migration');
 const { mockCluster } = require('./test');
-const { MigrationState, Plugins, MigrationContext, MigrationStatus } = require('./lib');
+const { MigrationState, Plugin, MigrationContext, MigrationStatus } = require('./lib');
 
 describe('Migration.fetchStatus', () => {
   test('is migrated, if the stored migration state matches the plugin state', async () => {
@@ -492,7 +492,7 @@ describe('Migration.migrate', () => {
         quote: { properties: { text: { type: 'text' }, author: { type: 'keyword' }, }, },
       },
     }];
-    const originalMigrationState = MigrationState.build(Plugins.sanitize(pluginsV1));
+    const originalMigrationState = MigrationState.build(Plugin.sanitize(pluginsV1));
     const existingData = assocMigrationState({}, existingIndex, originalMigrationState);
     _.set(existingData, [existingIndex, 'quote:q1', '_source'], {
       type: 'quote',

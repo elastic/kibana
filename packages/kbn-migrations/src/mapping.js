@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { MigrationPlan, Plugins, Opts } = require('./lib');
+const { MigrationPlan, Plugin, Opts } = require('./lib');
 
 module.exports = {
   fromPlugins,
@@ -14,5 +14,5 @@ module.exports = {
  */
 function fromPlugins(plugins) {
   Joi.assert(plugins, Opts.pluginArraySchema);
-  return MigrationPlan.buildMappings(Plugins.sanitize(plugins));
+  return MigrationPlan.buildMappings(Plugin.sanitize(plugins));
 }

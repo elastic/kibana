@@ -1,6 +1,6 @@
 module.exports = {
-  Documents: require('./documents'),
-  Plugins: require('./plugins'),
+  Document: require('./document'),
+  Plugin: require('./plugin'),
   MigrationContext: require('./migration_context'),
   MigrationStatus: require('./migration_status'),
   MigrationState: require('./migration_state'),

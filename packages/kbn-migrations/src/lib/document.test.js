@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { seededDocs, buildTransformFunction, toObjectClient, toRaw } = require('./documents');
+const { seededDocs, buildTransformFunction, toObjectClient, toRaw } = require('./document');
 
 // Test if id is not specified by seed, it will be generated
 // Test that seeds blow up, maybe, if type isn't specified, etc?

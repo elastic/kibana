@@ -1,6 +1,6 @@
 // A set of helper functions for calling Elasticsearch
 
-const { DOC_TYPE, buildTransformFunction, seededDocs, toRaw } = require('./documents');
+const { DOC_TYPE, buildTransformFunction, seededDocs, toRaw } = require('./document');
 
 module.exports = {
   applyTransforms,

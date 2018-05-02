@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const MigrationState = require('./migration_state');
-const Plugins = require('./plugins');
+const Plugin = require('./plugin');
 
 module.exports = {
   build,
@@ -48,7 +48,7 @@ function buildMappings(plugins) {
 
 function disabledPluginMappings(plugins, migrationState) {
   const mappingsById = _.indexBy(migrationState.plugins, 'id');
-  return Plugins.disabledIds(plugins, migrationState)
+  return Plugin.disabledIds(plugins, migrationState)
     .map(id => ({ id, mappings: JSON.parse(mappingsById[id].mappings) }));
 }
 

@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Joi = require('joi');
-const { MigrationPlan, MigrationContext, Plugins, Documents, Opts } = require('./lib');
+const { MigrationPlan, MigrationContext, Plugin, Document, Opts } = require('./lib');
 
 module.exports = {
   transform,
@@ -32,7 +32,7 @@ async function transform(opts) {
 function buildImportFunction(plugins, exportedState, migrationState) {
   const { migrations } = MigrationPlan.build(plugins, exportedState);
   const validateDoc = buildValidationFunction(plugins, exportedState, migrationState);
-  const transformDoc = Documents.buildTransformFunction(migrations);
+  const transformDoc = Document.buildTransformFunction(migrations);
 
   return (doc) => transformDoc(validateDoc(doc));
 }
@@ -45,7 +45,7 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
   const previousPlugins = _.indexBy(exportedState.plugins, 'id');
   const currentPlugins = _.indexBy(migrationState.plugins, 'id');
   const propToPlugin = mapPropsToPlugin(previousPlugins, currentPlugins);
-  const disabledIds = new Set(Plugins.disabledIds(plugins, migrationState));
+  const disabledIds = new Set(Plugin.disabledIds(plugins, migrationState));
 
   return (doc) => {
     const { id } = propToPlugin[doc.type];
