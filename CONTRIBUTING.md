@@ -275,7 +275,7 @@ Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exi
 Mocha tests are contained in `__tests__` directories.
 
 #### Jest
-Jest tests are stored in the same directy as source code files with the `.test.js` suffix.
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
 
 ### Running Jest Unit Tests
 
