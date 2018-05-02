@@ -16,11 +16,16 @@ export function createJsonParseStream() {
     writableObjectMode: true,
     readableObjectMode: true,
     transform(json, enc, callback) {
+      let parsed;
+      let error;
+
       try {
-        callback(null, JSON.parse(json));
-      } catch (err) {
-        callback(err);
+        parsed = JSON.parse(json);
+      } catch (_error) {
+        error = _error;
       }
+
+      callback(error, parsed);
     }
   });
 }
