@@ -35,7 +35,7 @@ describe('migrateKibanaIndex', () => {
     };
 
     expect(migrateKibanaIndex(kbnServer))
-      .rejects.toThrow('The Kibana index is migrating');
+      .rejects.toThrow('Failed to start because the Kibana index is migrating');
   });
 
   test('respects the force option', async () => {
