@@ -123,7 +123,8 @@ describe('buildRequestBody(req)', () => {
             bucketSize: 10,
             intervalString: '10s',
             to: '2017-01-26T20:52:35.881Z',
-            from: '2017-01-26T20:37:35.881Z'
+            from: '2017-01-26T20:37:35.881Z',
+            offset: '-5s'
           },
           aggs: {
             timeseries: {
@@ -132,6 +133,7 @@ describe('buildRequestBody(req)', () => {
                 interval: '10s',
                 min_doc_count: 0,
                 time_zone: 'UTC',
+                offset: '-5s',
                 extended_bounds: {
                   min: 1485463055881,
                   max: 1485463955881
