@@ -30,7 +30,7 @@ import {
 // because it won't work with the jest tests
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 import { getMostSevereMessageStatus } from '../../../common/util/validation_utils';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlJobService } from '../../services/job_service';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({
