@@ -1,10 +1,10 @@
 import { get } from 'lodash';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
-const TERMINAL_SNAPSHOT_STATUSES = [
-  'SUCCESS',
-  'FAILED',
-  'ABORTED'
+const PENDING_SNAPSHOT_STATUSES = [
+  'INIT',
+  'STARTED',
+  'WAITING',
 ];
 
 /**
@@ -23,18 +23,17 @@ export function isDeleteWhileSnapshotInProgressError(error) {
  * snapshotting this index to complete.
  *
  * @param  {EsClient} client
- * @param  {EsArchiverStats} stats
  * @param  {string} index the name of the index to look for
  * @return {Promise<undefined>}
  */
-export async function waitForSnapshotCompletion(client, stats, index) {
-  const isSnapshotInProgress = async (repository, snapshot) => {
+export async function waitForSnapshotCompletion(client, index) {
+  const isSnapshotPending = async (repository, snapshot) => {
     const { snapshots: [status] } = await client.snapshot.status({
       repository,
       snapshot,
     });
 
-    return !TERMINAL_SNAPSHOT_STATUSES.includes(status.state);
+    return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 
   const getInProgressSnapshots = async (repository) => {
@@ -53,8 +52,7 @@ export async function waitForSnapshotCompletion(client, stats, index) {
       continue;
     }
 
-    stats.waitingForInProgressSnapshot(index);
-    while (await isSnapshotInProgress(repository, found.snapshot)) {
+    while (await isSnapshotPending(repository, found.snapshot)) {
       // wait a bit before getting status again
       await new Promise(resolve => setTimeout(resolve, 500));
     }
