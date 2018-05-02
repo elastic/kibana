@@ -1,0 +1,32 @@
+<div class="influencers-selection">
+  <div>
+    <h4 class="euiTitle euiTitle--small">Key Fields (Influencers)</h4>
+    <div class="euiSpacer euiSpacer--s"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <div class='selection-list-container'>
+          <ui-select
+            ng-model="formConfig.influencerFields"
+            ng-disabled="ui.formValid === false || jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
+            on-select="toggleInfluencerChange()"
+            on-remove="toggleInfluencerChange()"
+            multiple
+            append-to-body=true
+          >
+            <ui-select-match placeholder="Key fields">
+              <span ng-class="{'default-influencer': isDefaultInfluencer($item)}">
+                <ml-field-type-icon type="$item.mlType"></ml-field-type-icon>{{$item.name}}
+              </span>
+            </ui-select-match>
+            <ui-select-choices repeat="field in ui.splitFields | filter: { name: $select.search }" group-by="'mlType'">
+              <ml-field-type-icon type="field.mlType"></ml-field-type-icon>
+              <span class="select-item" ng-bind-html="(field.name | highlight: $select.search)"></span>
+            </ui-select-choices>
+          </ui-select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

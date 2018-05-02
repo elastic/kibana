@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
+import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 
 describe('hit sort function', function () {
   let createHitSortFn;

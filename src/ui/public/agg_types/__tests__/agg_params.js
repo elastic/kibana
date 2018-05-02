@@ -1,30 +1,11 @@
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
-import { BaseParamTypeProvider } from '../param_types/base';
-import { FieldParamTypeProvider } from '../param_types/field';
-import { OptionedParamTypeProvider } from '../param_types/optioned';
-import { RegexParamTypeProvider } from '../param_types/regex';
+import { AggParams } from '../agg_params';
+import { BaseParamType } from '../param_types/base';
+import { FieldParamType } from '../param_types/field';
+import { OptionedParamType } from '../param_types/optioned';
+import { RegexParamType } from '../param_types/regex';
 
 describe('AggParams class', function () {
-
-  let AggParams;
-  let BaseParamType;
-  let FieldParamType;
-  let OptionedParamType;
-  let RegexParamType;
-
-  beforeEach(ngMock.module('kibana'));
-  // stub out the param classes before we get the AggParams
-  beforeEach(ngMock.inject(require('./utils/_stub_agg_params')));
-  // fetch out deps
-  beforeEach(ngMock.inject(function (Private) {
-    AggParams = Private(AggTypesAggParamsProvider);
-    BaseParamType = Private(BaseParamTypeProvider);
-    FieldParamType = Private(FieldParamTypeProvider);
-    OptionedParamType = Private(OptionedParamTypeProvider);
-    RegexParamType = Private(RegexParamTypeProvider);
-  }));
 
   describe('constructor args', function () {
     it('accepts an array of param defs', function () {
@@ -93,10 +74,6 @@ describe('AggParams class', function () {
         }
       ];
       const aggParams = new AggParams(params);
-
-      expect(BaseParamType).to.have.property('callCount', params.length);
-      expect(FieldParamType).to.have.property('callCount', 0);
-      expect(OptionedParamType).to.have.property('callCount', 0);
 
       expect(aggParams).to.have.length(params.length);
       aggParams.forEach(function (aggParam) {

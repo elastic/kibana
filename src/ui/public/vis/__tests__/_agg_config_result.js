@@ -1,7 +1,7 @@
-import AggConfigResult from 'ui/vis/agg_config_result';
+import AggConfigResult from '../agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('AggConfigResult', function () {
   let indexPattern;

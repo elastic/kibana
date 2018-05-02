@@ -25,15 +25,25 @@ export class IndexMappings {
     mappingExtensions.forEach(({ properties, pluginId }) => {
       const rootProperties = getRootProperties(this._dsl);
 
-
       const conflicts = Object.keys(properties)
         .filter(key => rootProperties.hasOwnProperty(key));
+
+      const illegal = Object.keys(properties)
+        .filter(key => key.startsWith('_'));
 
       if (conflicts.length) {
         const props = formatListAsProse(conflicts);
         const owner = pluginId ? `registered by plugin ${pluginId} ` : '';
         throw new Error(
           `Mappings for ${props} ${owner}have already been defined`
+        );
+      }
+
+      if (illegal.length) {
+        const props = formatListAsProse(illegal);
+        const owner = pluginId ? `registered by plugin ${pluginId} ` : '';
+        throw new Error(
+          `Property name${props.length > 1 ? 's' : ''} ${props} ${owner}are not allowed to start with an underscore (_)`
         );
       }
 

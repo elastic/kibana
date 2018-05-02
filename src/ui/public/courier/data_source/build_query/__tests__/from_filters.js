@@ -1,18 +1,10 @@
 import { buildQueryFromFilters } from '../from_filters';
-import { DecorateQueryProvider } from '../../_decorate_query.js';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
 
-let decorateQuery;
-
 describe('build query', function () {
-
   describe('buildQueryFromFilters', function () {
-
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      decorateQuery = Private(DecorateQueryProvider);
-    }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildQueryFromFilters([]);
@@ -29,20 +21,20 @@ describe('build query', function () {
       const filters = [
         {
           match_all: {},
-          meta: { type: 'match_all' }
+          meta: { type: 'match_all' },
         },
         {
           exists: { field: 'foo' },
-          meta: { type: 'exists' }
-        }
+          meta: { type: 'exists' },
+        },
       ];
 
       const expectedESQueries = [
         { match_all: {} },
-        { exists: { field: 'foo' } }
+        { exists: { field: 'foo' } },
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
@@ -51,15 +43,13 @@ describe('build query', function () {
       const filters = [
         {
           match_all: {},
-          meta: { type: 'match_all', negate: true }
+          meta: { type: 'match_all', negate: true },
         },
       ];
 
-      const expectedESQueries = [
-        { match_all: {} },
-      ];
+      const expectedESQueries = [{ match_all: {} }];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must_not, expectedESQueries);
     });
@@ -68,17 +58,17 @@ describe('build query', function () {
       const filters = [
         {
           query: { exists: { field: 'foo' } },
-          meta: { type: 'exists' }
-        }
+          meta: { type: 'exists' },
+        },
       ];
 
       const expectedESQueries = [
         {
-          exists: { field: 'foo' }
-        }
+          exists: { field: 'foo' },
+        },
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
@@ -87,21 +77,33 @@ describe('build query', function () {
       const filters = [
         {
           query: { match: { extension: { query: 'foo', type: 'phrase' } } },
-          meta: { type: 'phrase' }
-        }
+          meta: { type: 'phrase' },
+        },
       ];
 
       const expectedESQueries = [
         {
           match_phrase: { extension: { query: 'foo' } },
-        }
+        },
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
 
-  });
+    it('should not add query:queryString:options to query_string filters', function () {
+      const filters = [
+        {
+          query: { query_string: { query: 'foo' } },
+          meta: { type: 'query_string' },
+        },
+      ];
+      const expectedESQueries = [{ query_string: { query: 'foo' } }];
 
+      const result = buildQueryFromFilters(filters);
+
+      expectDeepEqual(result.must, expectedESQueries);
+    });
+  });
 });

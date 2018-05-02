@@ -1,0 +1,20 @@
+<div class="dropdown-group" dropdown dropdown-append-to-body>
+  <a href='' class="dropdown-toggle" dropdown-toggle>
+    Open link  <span class="caret"></span>
+  </a>
+  <ul class="ml-anomalies-table dropdown-menu dropdown-menu-right" role="menu">
+    <li ng-repeat="customUrl in customUrls"><a href="" ng-click="openCustomUrl(customUrl, source)">
+    	{{customUrl.url_name}}
+    	<i class="fa fa-external-link" aria-hidden="true"></i></a>
+    </li>
+    <li ng-if="showViewSeriesLink"><a href="" ng-click="viewSeries(source)">
+    	View series
+    	<i class="fa fa-external-link" aria-hidden="true"></i></a>
+    </li>
+    <li ng-if="showViewExamplesLink"><a href="" ng-click="viewExamples(source)">
+      View examples
+      <i class="fa fa-external-link" aria-hidden="true"></i></a>
+    </li>
+  </ul>
+</div>
+

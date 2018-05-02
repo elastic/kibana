@@ -13,7 +13,7 @@
  */
 
 import angular from 'angular';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import './kbn_ui_ace_keyboard_mode.less';
 import { keyCodes } from '@elastic/eui';
 

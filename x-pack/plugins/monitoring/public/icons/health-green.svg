@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-health-green</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <ellipse id="path-1" cx="7" cy="93" rx="7" ry="7"></ellipse>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="14" height="14" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="UI-KIT" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="QuickSummary-NG" transform="translate(-425.000000, -4087.000000)" stroke="#1AAB2F" stroke-width="2" fill="#2ACC43">
+            <g id="Icons" transform="translate(150.000000, 3950.000000)">
+                <g id="Status-Icons" transform="translate(30.000000, 51.000000)">
+                    <g id="Health" transform="translate(245.000000, 0.000000)">
+                        <use id="icon-health-green" mask="url(#mask-2)" xlink:href="#path-1"></use>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

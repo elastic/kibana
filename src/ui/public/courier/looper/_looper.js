@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-import 'ui/promises';
-import { fatalError } from 'ui/notify';
+import '../../promises';
+import { fatalError } from '../../notify';
 
 export function LooperProvider($timeout, Promise) {
   function Looper(ms, fn) {

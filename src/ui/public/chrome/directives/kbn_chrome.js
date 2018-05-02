@@ -4,19 +4,19 @@ import $ from 'jquery';
 import { remove } from 'lodash';
 
 import './kbn_chrome.less';
-import { uiModules } from 'ui/modules';
-import { isSystemApiRequest } from 'ui/system_api';
+import { uiModules } from '../../modules';
+import { isSystemApiRequest } from '../../system_api';
 import {
   getUnhashableStatesProvider,
   unhashUrl,
-} from 'ui/state_management/state_hashing';
+} from '../../state_management/state_hashing';
 import {
   notify,
   GlobalToastList,
   toastNotifications,
   GlobalBannerList,
   banners,
-} from 'ui/notify';
+} from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {

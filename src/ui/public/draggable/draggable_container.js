@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import dragula from 'dragula';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
+import { move } from '../utils/collection';
 
 uiModules
   .get('kibana')
@@ -82,7 +82,7 @@ uiModules
           const siblingIndex = getItemIndexFromElement(list, sibling);
 
           const toIndex = getTargetIndex(list, fromIndex, siblingIndex);
-          _.move(list, item, toIndex);
+          move(list, item, toIndex);
         }
 
         function getTargetIndex(list, fromIndex, siblingIndex) {

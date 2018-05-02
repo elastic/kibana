@@ -1,4 +1,4 @@
-import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
+import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 
 const noneRequestHandlerProvider = function () {
   return {

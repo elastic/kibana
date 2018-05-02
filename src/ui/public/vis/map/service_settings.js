@@ -1,7 +1,7 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { modifyUrl } from 'ui/url';
+import { modifyUrl } from '../../url';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -13,8 +13,6 @@ uiModules.get('kibana')
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
-
-    //todo: also configure min/max zoom levels if they are missing
 
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
@@ -135,14 +133,18 @@ uiModules.get('kibana')
        * It also includes the service configured in tilemap (override)
        */
       async getTMSServices() {
-        const allServices = await this._loadTMSServices();
+
+        const allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
           tmsService.url = tilemapsConfig.deprecated.config.url;
-          tmsService.id = 'Tilemap layer in yml';
+          tmsService.id = 'TMS in config/kibana.yml';
           allServices.push(tmsService);
         }
-        return allServices;
+
+        const servicesFromManifest = await this._loadTMSServices();
+        return allServices.concat(servicesFromManifest);
+
       }
 
       /**

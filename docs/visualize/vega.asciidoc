@@ -1,34 +1,32 @@
 [[vega-graph]]
 == Vega Graphs
+experimental[]
 
-__________________________________________________________________________________________________________________________________________________________________________________
-Build https://vega.github.io/vega/examples/[Vega] and
+You can build https://vega.github.io/vega/examples/[Vega] and
 https://vega.github.io/vega-lite/examples/[VegaLite] data visualizations
-into Kibana.
-__________________________________________________________________________________________________________________________________________________________________________________
+into Kibana, either standalone, or on top of a map.  To see Vega in action,
+watch this
+https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
 
-[[vega-introduction-video]]
-=== Watch a short introduction video
-
-https://www.youtube.com/watch?v=lQGCipY3th8[Kibana Vega Visualization Video]
 
 [[vega-quick-demo]]
-=== Quick Demo
+=== Getting Started with Vega
 
-* In Kibana, choose Visualize, and add Vega visualization.
-* You should immediately see a default graph
-* Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
+Follow these steps to create your first Vega visualization.
+
+. In Kibana, choose Visualize, and add Vega visualization. You should see a default graph.
+. Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
 `square`, ... (see
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[docs])
-* Try other https://vega.github.io/vega/examples/[Vega] or
+. Try other https://vega.github.io/vega/examples/[Vega] or
 https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. You
 may need to make URLs absolute, e.g. replace
 `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. (see
 link:#Using%20Vega%20and%20VegaLite%20examples[notes below])
-* Using https://www.npmjs.com/package/makelogs[makelogs util], generate
+. Using https://www.npmjs.com/package/makelogs[makelogs util], generate
 some logstash data and try link:public/examples/logstash[logstash
-examples].  *(Do not use makelogs on a production cluster!)*
+examples].  *(Do not use makelogs on a production cluster.)*
 
 [[vega-vs-vegalite]]
 === Vega vs VegaLite
@@ -36,21 +34,22 @@ examples].  *(Do not use makelogs on a production cluster!)*
 VegaLite is a simplified version of Vega, useful to quickly get started,
 but has a number of limitations. VegaLite is automatically converted
 into Vega before rendering. Compare
-link:public/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
 and
-link:public/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
-(both use the same ElasticSearch logstash data). You may use
+https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
+(both use the same Elasticsearch logstash data). You may use
 https://vega.github.io/editor/[this editor] to convert VegaLite into
 Vega.
 
+
 [[vega-querying-elasticsearch]]
-== Querying ElasticSearch
+=== Querying Elasticsearch
 
 By default, Vega's https://vega.github.io/vega/docs/data/[data] element
-can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct ElasticSearch queries by overloading
+can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct Elasticsearch queries by overloading
 the `"url"` value.
 
-Here is an example of an ES query that counts the number of documents in all indexes. The query uses *@timestamp* field to filter the time range, and break it into histogram buckets.
+Here is an example of an Elasticsearch query that counts the number of documents in all indexes. The query uses *@timestamp* field to filter the time range, and break it into histogram buckets.
 
 [source,yaml]
 ----
@@ -91,7 +90,7 @@ url: {
 }
 ----
 
-The full ES result has this kind of structure:
+The full result has this kind of structure:
 
 [source,yaml]
 ----
@@ -185,11 +184,60 @@ url: {
 format: {property: "features"}
 ----
 
+[[vega-with-a-map]]
+=== Vega with a Map
+
+Kibana's default map can be used as a base of the Vega graph. To enable,
+the graph must specify `type=map` in the host configuration:
+
+[source,yaml]
+----
+{
+  "config": {
+    "kibana": {
+      "type": "map",
+
+      // Initial map position
+      "latitude": 40.7,   // default 0
+      "longitude": -74,   // default 0
+      "zoom": 7,          // default 2
+
+      // defaults to "default". Use false to disable base layer.
+      "mapStyle": false,
+
+      // default 0
+      "minZoom": 5,
+
+      // defaults to the maximum for the given style,
+      // or 25 when base is disabled
+      "maxZoom": 13,
+
+      // defaults to true, shows +/- buttons to zoom in/out
+      "zoomControl": false,
+
+      // defaults to true, disables mouse wheel zoom
+      "scrollWheelZoom": false,
+
+      // When false, repaints on each move frame.
+      // Makes the graph slower when moving the map
+      "delayRepaint": true, // default true
+    }
+  },
+  /* the rest of Vega JSON */
+}
+----
+
+This visualization will automatically inject a projection called
+`"projection"`. Use it to calculate positioning of all geo-aware marks.
+Additionally, you may use `latitude`, `longitude`, and `zoom` signals.
+These signals can be used in the graph, or can be updated to modify the
+positioning of the map.
+
 [[vega-debugging]]
-== Debugging
+=== Debugging
 
 [[vega-browser-debugging-console]]
-=== Browser Debugging console
+==== Browser Debugging console
 
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
@@ -202,9 +250,9 @@ of VegaLite, this is the output of the VegaLite compiler.
 VegaLite compilation.
 
 [[vega-data]]
-=== Data
+==== Data
 
-If you are using ElasticSearch query, make sure your resulting data is
+If you are using Elasticsearch query, make sure your resulting data is
 what you expected. The easiest way to view it is by using "networking"
 tab in the browser debugging tools (e.g. F12). Modify the graph slightly
 so that it makes a search request, and view the response from the
@@ -223,14 +271,12 @@ To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: f
 to your kibana.yml file.
 
 [[vega-notes]]
-== Notes
-
 [[vega-useful-links]]
 === Useful Links
 
 * https://vega.github.io/editor/[Editor] - includes examples for Vega &
 VegaLite, but does not support any Kibana-specific features like
-ElasticSearch requests and interactive base maps.
+Elasticsearch requests and interactive base maps.
 * VegaLite
 https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials],
 https://vega.github.io/vega-lite/docs/[docs], and
@@ -254,7 +300,8 @@ values. See link:#sizing-and-positioning[sizing and positioning] below.
 [[vega-additional-configuration-options]]
 ==== Additional configuration options
 
-These options are specific to the Kibana.
+These options are specific to the Kibana. link:#vega-with-a-map[Map support] has
+additional configuration options.
 
 [source,yaml]
 ----
@@ -287,3 +334,9 @@ By default, Kibana Vega graphs will use
 and VegaLite graphs. The `fit` model uses all available space, ignores
 `width` and `height` values, but respects the padding values. You may
 override this behaviour by specifying a different `autosize` value.
+
+[[vega-on-a-map]]
+Vega on a map
+
+All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
+values, using `fit` model with zero padding.

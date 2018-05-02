@@ -1,10 +1,10 @@
 <doc-table
-  search-source="savedObj.searchSource"
+  search-source="searchSource"
   sorting="sort"
   columns="columns"
   data-shared-item
   data-title="{{sharedItemTitle}}"
-  data-description="{{savedObj.description}}"
+  data-description="{{description}}"
   render-complete
   class="panel-content"
   filter="filter"
@@ -12,5 +12,6 @@
   on-change-sort-order="setSortOrder"
   on-move-column="moveColumn"
   on-remove-column="removeColumn"
+  data-test-subj="embeddedSavedSearchDocTable"
 >
 </doc-table>

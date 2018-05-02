@@ -11,7 +11,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from './modules';
 
 const app = uiModules.get('app/kibana', ['react']);
 

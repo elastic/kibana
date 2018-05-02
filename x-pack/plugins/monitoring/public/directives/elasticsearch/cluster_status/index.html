@@ -1,0 +1,33 @@
+<div class="monitoring-summary-status" role="status">
+  <div class="monitoring-summary-status__content" data-test-subj="elasticsearchSummaryStatus">
+    <div>Nodes:
+      <strong data-test-subj="nodesCount">{{ status.nodesCount }}</strong>
+    </div>
+    <div>Indices:
+      <strong data-test-subj="indicesCount">{{ status.indicesCount }}</strong>
+    </div>
+    <div>Memory:
+      <strong data-test-subj="memory">{{ status.memUsed|formatNumber:'byte' }} / {{ status.memMax|formatNumber:'byte' }}</strong>
+    </div>
+    <div>Total Shards:
+      <strong data-test-subj="totalShards">{{ status.totalShards }}</strong>
+    </div>
+    <div>Unassigned Shards:
+      <strong data-test-subj="unassignedShards">{{ status.unassignedShards }}</strong>
+    </div>
+    <div>Documents:
+      <strong data-test-subj="documentCount">{{ status.documentCount|formatNumber:'int_commas' }}</strong>
+    </div>
+    <div>Data:
+      <strong data-test-subj="dataSize">{{ status.dataSize|formatNumber:'byte' }}</strong>
+    </div>
+    <div class="monitoring-summary-status__status-indicator">
+      Health:
+      <monitoring-elasticsearch-status-icon
+        status="status.status"
+        title="Status of the Elasticsearch cluster: {{ status.status }}"
+      ></monitoring-elasticsearch-status-icon>
+      {{ status.status|capitalize }}
+    </div>
+  </div>
+</div>

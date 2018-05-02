@@ -2,7 +2,7 @@ import { getFields } from '../../utils/get_fields';
 import expect from 'expect.js';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
-import { nodeTypes } from 'ui/kuery';
+import { nodeTypes } from '../../..';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal';
 
 let indexPattern;

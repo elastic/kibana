@@ -1,0 +1,76 @@
+<form name="watchEditDetail.form" novalidate>
+  <div class="kuiFormSection">
+    <label
+      for="id"
+      class="kuiFormLabel"
+    >
+      ID
+    </label>
+    <input
+      type="text"
+      id="id"
+      name="id"
+      class="fullWidth"
+      ng-class="::watchEditDetail.watch.isNew ? 'kuiTextInput' : 'kuiStaticInput'"
+      ng-model="watchEditDetail.watch.id"
+      ng-trim="false"
+      ng-disabled="!watchEditDetail.watch.isNew"
+      pattern="[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*"
+      required
+    >
+    <div
+      class="kuiInputNote kuiInputNote--danger"
+      ng-show="watchEditDetail.form.id.$error.pattern"
+    >
+      ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers.
+    </div>
+    <div
+      class="kuiInputNote kuiInputNote--danger"
+      ng-show="watchEditDetail.form.id.$touched && watchEditDetail.form.id.$error.required"
+    >
+      ID is required.
+    </div>
+  </div>
+
+  <div class="kuiFormSection">
+    <label
+      for="name"
+      class="kuiFormLabel"
+    >
+      Name
+    </label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="kuiTextInput fullWidth"
+      ng-model="watchEditDetail.watch.name"
+    >
+  </div>
+</form>
+
+<div class="kuiFormSection">
+  <label class="kuiFormLabel">
+    Watch JSON
+    (<a
+      href="{{ watchEditDetail.documentationLinks.watcher.putWatchApi }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-test-subj="lnkPutWatchApiDoc"
+    >
+    Syntax
+    </a>)
+  </label>
+  <json-editor
+    json="watchEditDetail.watch.watch"
+    on-change="watchEditDetail.onJsonChange"
+    on-valid="watchEditDetail.onJsonValid"
+    on-invalid="watchEditDetail.onJsonInvalid"
+  ></json-editor>
+  <div
+    class="kuiInputNote kuiInputNote--danger"
+    ng-show="!watchEditDetail.isJsonValid"
+  >
+    Invalid JSON
+  </div>
+</div>

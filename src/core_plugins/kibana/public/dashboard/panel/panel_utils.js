@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
@@ -8,6 +9,12 @@ export class PanelUtils {
 
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
   static convertPanelDataPre_6_1(panel) { // eslint-disable-line camelcase
+    ['col', 'row'].forEach(key => {
+      if (!_.has(panel, key)) {
+        throw new Error(`Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected field: ${key}`);
+      }
+    });
+
     panel.gridData = {
       x: panel.col - 1,
       y: panel.row - 1,
@@ -30,6 +37,12 @@ export class PanelUtils {
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
   static convertPanelDataPre_6_3(panel) { // eslint-disable-line camelcase
+    ['w', 'x', 'h', 'y'].forEach(key => {
+      if (!_.has(panel.gridData, key)) {
+        throw new Error(`Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: ${key}`);
+      }
+    });
+
     panel.gridData.w = panel.gridData.w * PANEL_WIDTH_SCALE_FACTOR;
     panel.gridData.x = panel.gridData.x * PANEL_WIDTH_SCALE_FACTOR;
     panel.gridData.h = panel.gridData.h * PANEL_HEIGHT_SCALE_FACTOR;

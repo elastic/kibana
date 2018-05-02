@@ -1,0 +1,27 @@
+<div class="ml-job-group-select">
+  <ui-select
+    ng-model="mlGroupSelect.selectedGroups"
+    on-select="mlGroupSelect.onGroupsChanged()"
+    on-remove="mlGroupSelect.onGroupsChanged()"
+    ng-disabled="mlGroupSelect.disabled"
+    multiple
+    tagging='mlGroupSelect.createNewItem'
+    append-to-body=true
+  >
+    <ui-select-match placeholder="Job Group">
+      {{$item.id}}
+    </ui-select-match>
+    <ui-select-choices
+      repeat="group in mlGroupSelect.groups | filter: { id: $select.search }"
+      group-by="mlGroupSelect.groupTypes"
+    >
+      <div ng-if="group.isTag"  class="select-item" ng-bind-html="(group.id | highlight: $select.search) +' <small>(new group)</small>'"></div>
+      <div ng-if="!group.isTag" class="select-item" >
+        <div ng-bind-html="group.id | highlight: $select.search"></div>
+        <small>
+          Other jobs in this group: {{group.count}}
+        </small>
+      </div>
+    </ui-select-choices>
+  </ui-select>
+</div>

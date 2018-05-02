@@ -19,13 +19,13 @@ import { toastNotifications, getPainlessError } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
-import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
+import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import indexTemplate from 'plugins/kibana/discover/index.html';
+import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -138,7 +138,7 @@ function discoverController(
   });
 
   $scope.getDocLink = getDocLink;
-  $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+  $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
 
@@ -339,12 +339,11 @@ function discoverController(
         // fetch data when filters fire fetch event
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
+        timefilter.enableAutoRefreshSelector();
         $scope.$watch('opts.timefield', function (timefield) {
           if (!!timefield) {
-            timefilter.enableAutoRefreshSelector();
             timefilter.enableTimeRangeSelector();
           } else {
-            timefilter.disableAutoRefreshSelector();
             timefilter.disableTimeRangeSelector();
           }
         });
@@ -710,6 +709,10 @@ function discoverController(
         return $scope.vis.getAggConfig().toDsl();
       });
     }
+
+    $scope.vis.filters = {
+      timeRange: timefilter.time
+    };
   }
 
   function resolveIndexPatternLoading() {

@@ -1,4 +1,4 @@
-import { uiRegistry } from 'ui/registry/_registry';
+import { uiRegistry } from '../_registry';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 

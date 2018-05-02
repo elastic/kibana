@@ -2,7 +2,7 @@ import { resolve } from 'path';
 
 export type ProjectPathOptions = {
   'skip-kibana-extra'?: boolean;
-  'skip-kibana'?: boolean;
+  'oss'?: boolean;
 };
 
 /**
@@ -10,12 +10,13 @@ export type ProjectPathOptions = {
  */
 export function getProjectPaths(rootPath: string, options: ProjectPathOptions) {
   const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
-  const skipKibana = Boolean(options['skip-kibana']);
+  const ossOnly = Boolean(options.oss);
 
-  const projectPaths = [resolve(rootPath, 'packages/*')];
+  const projectPaths = [rootPath, resolve(rootPath, 'packages/*')];
 
-  if (!skipKibana) {
-    projectPaths.push(rootPath);
+  if (!ossOnly) {
+    projectPaths.push(resolve(rootPath, 'x-pack'));
+    projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
   }
 
   if (!skipKibanaExtra) {

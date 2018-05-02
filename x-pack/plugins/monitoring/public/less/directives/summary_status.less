@@ -1,0 +1,33 @@
+.monitoring-summary-status {
+  background-color: tint(@globalColorBlue, 90%);
+  border-bottom: solid 1px @globalColorLightGray;
+}
+
+.monitoring-summary-status__content {
+  display: flex;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  padding: 8px 0;
+
+  > div {
+    align-self: center;
+    margin: 0 5px;
+    padding: 2px 5px;
+  }
+}
+
+.monitoring-summary-status__status-indicator {
+  flex-grow: 2;
+  text-align: right;
+
+  * {
+    display: inline; // status icon component is a div
+  }
+}
+
+.euiFlexItem.monitoring-summary-status__eui-content {
+  margin: 0 5px;
+  padding: 2px 5px;
+  flex-direction: row;
+  display: -webkit-box;
+}

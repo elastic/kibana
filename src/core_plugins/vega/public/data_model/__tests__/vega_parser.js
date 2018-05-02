@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import { VegaParser } from '../vega_parser';
+import { bypassExternalUrlCheck } from '../../vega_view/vega_base_view';
 
 describe(`VegaParser._setDefaultValue`, () => {
 
@@ -34,22 +35,22 @@ describe(`VegaParser._setDefaultColors`, () => {
   it(`vegalite`, test({}, true, {
     config: {
       range: { category: { scheme: 'elastic' } },
-      mark: { color: '#00A69B' }
+      mark: { color: '#00B3A4' }
     }
   }));
 
   it(`vega`, test({}, false, {
     config: {
       range: { category: { scheme: 'elastic' } },
-      arc: { fill: '#00A69B' },
-      area: { fill: '#00A69B' },
-      line: { stroke: '#00A69B' },
-      path: { stroke: '#00A69B' },
-      rect: { fill: '#00A69B' },
-      rule: { stroke: '#00A69B' },
-      shape: { stroke: '#00A69B' },
-      symbol: { fill: '#00A69B' },
-      trail: { fill: '#00A69B' }
+      arc: { fill: '#00B3A4' },
+      area: { fill: '#00B3A4' },
+      line: { stroke: '#00B3A4' },
+      path: { stroke: '#00B3A4' },
+      rect: { fill: '#00B3A4' },
+      rule: { stroke: '#00B3A4' },
+      shape: { stroke: '#00B3A4' },
+      symbol: { fill: '#00B3A4' },
+      trail: { fill: '#00B3A4' }
     }
   }));
 
@@ -62,6 +63,7 @@ describe('VegaParser._resolveEsQueries', () => {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }]
       });
       await vp._resolveDataUrls();
+
       expect(vp.spec).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount || 0);
     };
@@ -73,7 +75,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
   it('es', test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
   it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('emsfile', test({ data: { url: { '%type%': 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
+  it('emsfile', test(
+    { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
+    { data: { url: bypassExternalUrlCheck('url1') } }));
 });
 
 describe('VegaParser._parseSchema', () => {
@@ -98,6 +102,40 @@ describe('VegaParser._parseSchema', () => {
   it('vega-lite old', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
 });
 
+describe('VegaParser._parseTooltips', () => {
+  function test(tooltips, position, padding, centerOnMark) {
+    return () => {
+      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      vp._config = vp._parseConfig();
+      if (position === undefined) {
+        // error
+        expect(() => vp._parseTooltips()).to.throwError();
+      } else if (position === false) {
+        expect(vp._parseTooltips()).to.eql(false);
+      } else {
+        expect(vp._parseTooltips()).to.eql({ position, padding, centerOnMark });
+      }
+    };
+  }
+
+  it('undefined', test(undefined, 'top', 16, 50));
+  it('{}', test({}, 'top', 16, 50));
+  it('left', test({ position: 'left' }, 'left', 16, 50));
+  it('padding', test({ position: 'bottom', padding: 60 }, 'bottom', 60, 50));
+  it('padding2', test({ padding: 70 }, 'top', 70, 50));
+  it('centerOnMark', test({}, 'top', 16, 50));
+  it('centerOnMark=10', test({ centerOnMark: 10 }, 'top', 16, 10));
+  it('centerOnMark=true', test({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
+  it('centerOnMark=false', test({ centerOnMark: false }, 'top', 16, -1));
+
+  it('false', test(false, false));
+
+  it('err1', test(true, undefined));
+  it('err2', test({ position: 'foo' }, undefined));
+  it('err3', test({ padding: 'foo' }, undefined));
+  it('err4', test({ centerOnMark: {} }, undefined));
+});
+
 describe('VegaParser._parseMapConfig', () => {
   function test(config, expected, warnCount) {
     return () => {
@@ -113,7 +151,8 @@ describe('VegaParser._parseMapConfig', () => {
     latitude: 0,
     longitude: 0,
     mapStyle: 'default',
-    zoomControl: true
+    zoomControl: true,
+    scrollWheelZoom: true,
   }, 0));
 
   it('filled', test({
@@ -122,6 +161,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
+    scrollWheelZoom: true,
     maxBounds: [1, 2, 3, 4],
   }, {
     delayRepaint: true,
@@ -129,6 +169,7 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
+    scrollWheelZoom: true,
     maxBounds: [1, 2, 3, 4],
   }, 0));
 
@@ -139,6 +180,7 @@ describe('VegaParser._parseMapConfig', () => {
     zoom: 'abc', // ignored
     mapStyle: 'abc',
     zoomControl: 'abc',
+    scrollWheelZoom: 'abc',
     maxBounds: [2, 3, 4],
   }, {
     delayRepaint: true,
@@ -146,7 +188,8 @@ describe('VegaParser._parseMapConfig', () => {
     longitude: 0,
     mapStyle: 'default',
     zoomControl: true,
-  }, 4));
+    scrollWheelZoom: true,
+  }, 5));
 });
 
 describe('VegaParser._parseConfig', () => {

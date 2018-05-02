@@ -1,0 +1,30 @@
+{
+  "serverTestPatterns": [
+    "server/**/__tests__/**/*.js",
+    "plugins/**/__tests__/**/*.js",
+    "!plugins/**/server/**/__tests__/**/*"
+  ],
+  "buildSourcePatterns": [
+    "LICENSE.txt",
+    "NOTICE.txt",
+    "package.json",
+    "yarn.lock",
+    "index.js",
+    "plugins/reporting/.phantom/*",
+    "plugins/reporting/.chromium/*",
+    "common/**/*",
+    "plugins/**/*",
+    "server/**/*",
+    "webpackShims/*",
+    "!**/README.md",
+    "!__tests__",
+    "!__tests__/**/*",
+    "!**/__tests__",
+    "!**/__tests__/**/*",
+    "!plugins/**/*.test.js",
+    "!plugins/**/__snapshots__",
+    "!plugins/**/__snapshots__/*",
+    "!plugins/**/__mocks__/*"
+  ],
+  "skipInstallDependencies": true
+}

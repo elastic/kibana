@@ -10,6 +10,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
   const retry = getService('retry');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
@@ -19,6 +20,125 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
+
+    it('Overriding colors on an area chart is preserved', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+
+      await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
+      await PageObjects.dashboard.saveDashboard('Overridden colors');
+
+      await PageObjects.dashboard.clickEdit();
+
+      // Opening legend colors has been flaky.
+      retry.try(async () => {
+        await PageObjects.visualize.clickLegendOption('Count');
+        await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
+      });
+
+      await PageObjects.dashboard.saveDashboard('Overridden colors');
+
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
+      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist('#EA6460');
+
+      expect(colorChoiceRetained).to.be(true);
+    });
+
+    it('Saved search with no changes will update when the saved object changes', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('my search');
+      await PageObjects.dashboard.saveDashboard('No local edits');
+
+      const inViewMode = await testSubjects.exists('dashboardEditMode');
+      expect(inViewMode).to.be(true);
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(3);
+      expect(headers[1]).to.be('bytes');
+      expect(headers[2]).to.be('agent');
+    });
+
+    it('Saved search with column changes will not update when the saved object changes', async () => {
+      await PageObjects.discover.removeHeaderColumn('bytes');
+      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.saveDashboard('Has local edits');
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('clientip');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(2);
+      expect(headers[1]).to.be('agent');
+    });
+
+    it('Tile map with no changes will update with visualization changes', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+
+      await dashboardAddPanel.addVisualization('Visualization TileMap');
+      await PageObjects.dashboard.saveDashboard('No local edits');
+
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.openSpyPanel();
+      const tileMapData = await PageObjects.visualize.getDataTableData();
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.closeSpyPanel();
+
+      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.clickEditVisualization();
+
+      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.visualize.clickMapZoomIn();
+
+      await PageObjects.visualize.saveVisualization('Visualization TileMap');
+
+      await PageObjects.header.clickDashboard();
+
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.openSpyPanel();
+      const changedTileMapData = await PageObjects.visualize.getDataTableData();
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.closeSpyPanel();
+      expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+    });
+
+    it('retains dark theme', async function () {
+      await PageObjects.dashboard.useDarkTheme(true);
+      await PageObjects.header.clickVisualize();
+      await PageObjects.header.clickDashboard();
+      const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
+      expect(isDarkThemeOn).to.equal(true);
     });
 
     describe('Directly modifying url updates dashboard state', () => {
@@ -38,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('for panel size parameters', async function () {
-        await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await remote.getCurrentUrl();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
@@ -59,9 +179,20 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      it('when removing a panel', async function () {
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
+        await remote.get(newUrl.toString(), false);
+
+        await retry.try(async () => {
+          const newPanelCount = await PageObjects.dashboard.getPanelCount();
+          expect(newPanelCount).to.be(0);
+        });
+      });
+
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function () {
-          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
+          await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visualize.clickLegendOption('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await remote.getCurrentUrl();
@@ -111,113 +242,6 @@ export default function ({ getService, getPageObjects }) {
           });
         });
       });
-    });
-
-    it('Overriding colors on an area chart is preserved', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
-
-      await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
-
-      await PageObjects.dashboard.clickEdit();
-      await PageObjects.visualize.clickLegendOption('Count');
-      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
-      await PageObjects.dashboard.saveDashboard('Overridden colors');
-
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
-      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist('#EA6460');
-
-      expect(colorChoiceRetained).to.be(true);
-    });
-
-    it('Saved search with no changes will update when the saved object changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await PageObjects.header.clickDiscover();
-      await PageObjects.dashboard.setTimepickerInDataRange();
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.clickNewDashboard();
-
-      await PageObjects.dashboard.addSavedSearch('my search');
-      await PageObjects.dashboard.saveDashboard('No local edits');
-
-      const inViewMode = await testSubjects.exists('dashboardEditMode');
-      expect(inViewMode).to.be(true);
-
-      await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('agent');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await PageObjects.header.clickDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(3);
-      expect(headers[1]).to.be('bytes');
-      expect(headers[2]).to.be('agent');
-    });
-
-    it('Saved search with column changes will not update when the saved object changes', async () => {
-      await PageObjects.discover.removeHeaderColumn('bytes');
-      await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.saveDashboard('Has local edits');
-
-      await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('clientip');
-      await PageObjects.discover.saveSearch('my search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await PageObjects.header.clickDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(2);
-      expect(headers[1]).to.be('agent');
-    });
-
-    it('Tile map with no changes will update with visualization changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
-
-      await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
-      await PageObjects.dashboard.saveDashboard('No local edits');
-
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
-      const tileMapData = await PageObjects.visualize.getDataTableData();
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
-
-      await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.clickEditVisualization();
-
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
-      await PageObjects.visualize.clickMapZoomIn();
-
-      await PageObjects.visualize.saveVisualization('Visualization TileMap');
-
-      await PageObjects.header.clickDashboard();
-
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
-      const changedTileMapData = await PageObjects.visualize.getDataTableData();
-      await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
-
-      expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
   });
 }

@@ -3,10 +3,10 @@ import moment from 'moment';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { VisProvider } from 'ui/vis';
+import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
-import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { createFilterDateHistogram } from '../../../buckets/create_filter/date_histogram';
+import { intervalOptions } from '../../../buckets/_interval_options';
 
 describe('AggConfig Filters', function () {
   describe('date_histogram', function () {
@@ -16,7 +16,6 @@ describe('AggConfig Filters', function () {
     let filter;
     let bucketKey;
     let bucketStart;
-    let intervalOptions;
 
     let init;
 
@@ -24,8 +23,6 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
       const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
-      intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
       init = function (interval, duration) {
         interval = interval || 'auto';
@@ -54,7 +51,7 @@ describe('AggConfig Filters', function () {
         });
         agg.buckets.setInterval(interval);
 
-        filter = createFilter(agg, bucketKey);
+        filter = createFilterDateHistogram(agg, bucketKey);
       };
     }));
 

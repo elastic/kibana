@@ -4,7 +4,9 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover']);
+  const log = getService('log');
+  const es = getService('es');
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
   describe('discover app', function describeIndexTests() {
     before(async function () {
@@ -68,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it.skip('doc view should show oldest time first', function () {
+      it('doc view should show oldest time first', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
           'September 22nd 2015, 23:50:13.253\ntype:apache index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'
@@ -114,8 +116,36 @@ export default function ({ getService, getPageObjects }) {
           + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
           + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
         return PageObjects.discover.getDocTableIndex(1)
-          .then(function (rowData) {
-            expect(rowData).to.be(ExpectedDoc);
+          .then(async function (rowData) {
+            try {
+              expect(rowData).to.be(ExpectedDoc);
+            }
+            catch (e) {
+              log.info('Attemping to get more debug info on this flaky test. Ping @bargs if you see this fail');
+
+              log.info('Actual doc from ES ====================');
+              const response = await es.search({
+                index: 'logstash-2015.09.22',
+                body: {
+                  query: {
+                    term: { _id: 'AU_x3_g4GFA8no6QjkYX' }
+                  },
+                  _source: true,
+                  docvalue_fields: ['relatedContent.article:modified_time', 'relatedContent.article:published_time']
+                }
+              });
+              log.info(JSON.stringify(response));
+
+              log.info('Doc from response in spy panel ========');
+              const esResponse = JSON.parse(await PageObjects.visualize.getVisualizationResponse());
+              const spyPanelDoc = esResponse.hits.hits.find(function (hit) {
+                return hit._id === 'AU_x3_g4GFA8no6QjkYX' && hit._index === 'logstash-2015.09.22';
+              });
+              log.info(JSON.stringify(spyPanelDoc));
+              await PageObjects.visualize.closeSpyPanel();
+
+              throw e;
+            }
           });
       });
 

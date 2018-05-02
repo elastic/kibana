@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
+import { getHeatmapColors } from '../../components/color/heatmap_color';
 
 describe('Vislib Heatmap Color Module Test Suite', function () {
   const emptyObject = {};

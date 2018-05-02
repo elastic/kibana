@@ -1,11 +1,7 @@
 /* global jest */
 export function getEmbeddableFactoryMock(config) {
   const embeddableFactoryMockDefaults = {
-    getEditPath: () => {},
-    getTitleFor: () => {},
-    render: jest.fn(() => Promise.resolve({})),
-    destroy: () => {},
-    addDestroyEmeddable: () => {},
+    create: jest.fn(() => Promise.resolve({})),
   };
   return Object.assign(embeddableFactoryMockDefaults, config);
 }

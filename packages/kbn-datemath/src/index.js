@@ -82,7 +82,7 @@ function parseDateMath(mathString, time, roundUp) {
       const numFrom = i;
       while (!isNaN(mathString.charAt(i))) {
         i++;
-        if (i > 10) return;
+        if (i >= len) return;
       }
       num = parseInt(mathString.substring(numFrom, i), 10);
     }

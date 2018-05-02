@@ -1,0 +1,193 @@
+@import (reference) "~ui/styles/variables";
+
+.recognizer-job-container {
+  font-size: 14px;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+
+
+  .job-state-info {
+    margin-bottom: 10px;
+  }
+
+  .form-controls, .charts-container {
+    margin: 0px;
+    margin-right: -10px;
+
+    & > div {
+      border: 1px solid #E4E4E3;
+      border-top: 0px;
+    }
+
+    & > h4 {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      padding: 10px;
+      background-color: @kibanaBlue3;
+      color: #FFFFFF;
+    }
+
+    .btn-load-vis {
+      border-radius: 4px !important;
+      margin-top: -2px;
+    }
+  }
+
+  .advanced-button {
+    min-width: 23px;
+  }
+  .advanced-button-container {
+    label {
+      cursor: pointer;
+      display: inline-block;
+    }
+  }
+  .advanced-group {
+    padding: 10px;
+    background-color: #F9F9F9;
+    label {
+      font-weight: normal;
+      margin-bottom: 0px;
+    }
+  }
+
+  .charts-container {
+    margin-left: -10px;
+    margin-bottom: 10px;
+    margin-right: 0px;
+    line-height: 20px;
+
+    .jobs-list, .save-objects-list {
+      padding: 5px;
+
+      .job-container {
+        border: 1px solid #D9D9D9;
+        // padding: 5px;
+        margin: 5px;
+        border-radius: 3px;
+        display: flex;
+
+        .labels {
+          flex: auto;
+          margin: 5px;
+          .title {
+            color: #0079a5;
+            // font-size: 16px;
+          }
+         .exists {
+           color: #999999;
+           font-style: italic;
+           span {
+             font-size: 12px;
+           }
+          }
+          .sub-title {
+            color: #999999;
+            font-size: 12px;
+            margin-top: 2px;
+            font-style: italic;
+          }
+        }
+        .results {
+          flex-grow: 0;
+          flex-shrink: 0;
+          // width: 200px;
+          border-left: 1px solid #D9D9D9;
+          background-color: #F9F9F9;
+          // padding: 10px;
+          padding-top: 4px;
+
+          opacity: 0;
+          transition: opacity 0.5s;
+
+          .result-box {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+
+            width: 50px;
+
+            .result-box-title {
+              color: #999999;
+              font-size: 12px;
+              font-style: italic;
+              margin-bottom: 3px;
+            }
+
+            .result-box-inner {
+              // border: 1px solid #D9D9D9;
+              // background-color: #efefef;
+              // border-radius: 3px;
+              // font-size: 20px;
+              // width: 40px;
+              // height: 40px;
+              width: 20px;
+              height: 20px;
+              font-size: 15px;
+              margin: 0px;
+              align-items: center;
+              justify-content: center;
+              display: inline-flex;
+              vertical-align: top;
+            }
+          }
+        }
+      }
+    }
+    .jobs-list {
+      .result-box {
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .form-section {
+    margin: 0px 0px 0px 0px;
+    border-bottom: 1px solid #E4E4E3;
+    padding: 10px;
+    overflow: hidden;
+
+    & > h4, & > h5 {
+      margin-top: 0px;
+      display: inline-block;
+    }
+    .form-group:last-child {
+      margin-bottom: 0px;
+    }
+
+    .help-text {
+      border: 1px solid #e8e8e8;
+      padding: 5px;
+      background-color: #f1f1f1;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+
+  }
+
+  .form-section:last-of-type {
+    margin: 0px;
+    border-bottom: 0px solid #E4E4E3;
+  }
+
+  .form-section-collapsed {
+    height: 46px;
+  }
+
+
+  div.validation-error {
+    color: #fe5050;
+    font-size: 12px;
+  }
+}
+
+
+// hide the default es loading indicator bar as it can't be switched off
+// for standard es searches using the http header.
+.loadingIndicator__bar {
+  display: none;
+}

@@ -1,17 +1,18 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_sum';
-import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
-import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
-import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
-import { VisProvider } from 'ui/vis';
+import { bucketSumMetricAgg } from '../../metrics/bucket_sum';
+import { bucketAvgMetricAgg } from '../../metrics/bucket_avg';
+import { bucketMinMetricAgg } from '../../metrics/bucket_min';
+import { bucketMaxMetricAgg } from '../../metrics/bucket_max';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
-  { name: 'sum_bucket', title: 'Overall Sum', provider: AggTypesMetricsBucketSumProvider },
-  { name: 'avg_bucket', title: 'Overall Average', provider: AggTypesMetricsBucketAvgProvider },
-  { name: 'min_bucket', title: 'Overall Min', provider: AggTypesMetricsBucketMinProvider },
-  { name: 'max_bucket', title: 'Overall Max', provider: AggTypesMetricsBucketMaxProvider },
+  { name: 'sum_bucket', title: 'Overall Sum', provider: bucketSumMetricAgg },
+  { name: 'avg_bucket', title: 'Overall Average', provider: bucketAvgMetricAgg },
+  { name: 'min_bucket', title: 'Overall Min', provider: bucketMinMetricAgg },
+  { name: 'max_bucket', title: 'Overall Max', provider: bucketMaxMetricAgg },
 ];
 
 describe('sibling pipeline aggs', function () {
@@ -28,7 +29,7 @@ describe('sibling pipeline aggs', function () {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
-          metricAgg = Private(metric.provider);
+          metricAgg = metric.provider;
 
           const params = settings || {
             customMetric: {
@@ -120,6 +121,26 @@ describe('sibling pipeline aggs', function () {
           }
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
+      });
+
+      it('should call modifyAggConfigOnSearchRequestStart for nested aggs\' parameters', () => {
+        init();
+
+        const searchSource = {};
+        const request = {};
+        const customMetricSpy = sinon.spy();
+        const customBucketSpy = sinon.spy();
+        const { customMetric, customBucket } = aggConfig.params;
+
+        // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
+        customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
+        customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
+
+        aggConfig.type.params.forEach(param => {
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, request);
+        });
+        expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
+        expect(customBucketSpy.calledWith(customBucket, searchSource, request)).to.be(true);
       });
 
     });

@@ -1,9 +1,9 @@
-import 'ui/field_format_editor/pattern/pattern';
-import 'ui/field_format_editor/samples/samples';
+import './pattern/pattern';
+import './samples/samples';
 import _ from 'lodash';
 import $ from 'jquery';
-import { uiModules } from 'ui/modules';
-import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
+import { uiModules } from '../modules';
+import { RegistryFieldFormatEditorsProvider } from '../registry/field_format_editors';
 
 uiModules
   .get('app/management')

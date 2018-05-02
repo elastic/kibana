@@ -1,0 +1,132 @@
+{
+  "id": "apache2",
+  "title": "Filebeat apache2",
+  "description": "Find unusual activity in Apache web access logs.",
+  "type": "Web Access Logs",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "fileset.module": "apache2"
+          }
+        },
+        {
+          "term": {
+            "fileset.name": "access"
+          }
+        },
+        {
+          "exists": {
+            "field": "apache2.access.remote_ip"
+          }
+        },
+        {
+          "exists": {
+            "field": "apache2.access.url"
+          }
+        },
+        {
+          "exists": {
+            "field": "apache2.access.response_code"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "visitor_rate",
+      "file": "visitor_rate.json"
+    },
+    {
+      "id": "response_code",
+      "file": "response_code.json"
+    },
+    {
+      "id": "remote_ip_url_count",
+      "file": "remote_ip_url_count.json"
+    },
+    {
+      "id": "remote_ip_request_rate",
+      "file": "remote_ip_request_rate.json"
+    },
+    {
+      "id": "low_request_rate",
+      "file": "low_request_rate.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-visitor_rate",
+      "file": "datafeed_visitor_rate.json",
+      "job_id": "visitor_rate"
+    },
+    {
+      "id": "datafeed-response_code",
+      "file": "datafeed_response_code.json",
+      "job_id": "response_code"
+    },
+    {
+      "id": "datafeed-remote_ip_url_count",
+      "file": "datafeed_remote_ip_url_count.json",
+      "job_id": "remote_ip_url_count"
+    },
+    {
+      "id": "datafeed-remote_ip_request_rate",
+      "file": "datafeed_remote_ip_request_rate.json",
+      "job_id": "remote_ip_request_rate"
+    },
+    {
+      "id": "datafeed-low_request_rate",
+      "file": "datafeed_low_request_rate.json",
+      "job_id": "low_request_rate"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ML-Apache2-Access-Remote-IP-Count-Explorer",
+        "file": "ML-Apache2-Access-Remote-IP-Count-Explorer.json"
+      },
+      {
+        "id": "ML-Apache2-Remote-IP-URL-Explorer",
+        "file": "ML-Apache2-Remote-IP-URL-Explorer.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ML-Filebeat-Apache2-Access",
+        "file": "ML-Filebeat-Apache2-Access.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ML-Apache2-Access-Map",
+        "file": "ML-Apache2-Access-Map.json"
+      },
+      {
+        "id": "ML-Apache2-Access-Remote-IP-Timechart",
+        "file": "ML-Apache2-Access-Remote-IP-Timechart.json"
+      },
+      {
+        "id": "ML-Apache2-Access-Response-Code-Timechart",
+        "file": "ML-Apache2-Access-Response-Code-Timechart.json"
+      },
+      {
+        "id": "ML-Apache2-Access-Top-Remote-IPs-Table",
+        "file": "ML-Apache2-Access-Top-Remote-IPs-Table.json"
+      },
+      {
+        "id": "ML-Apache2-Access-Top-URLs-Table",
+        "file": "ML-Apache2-Access-Top-URLs-Table.json"
+      },
+      {
+        "id": "ML-Apache2-Access-Unique-Count-URL-Timechart",
+        "file": "ML-Apache2-Access-Unique-Count-URL-Timechart.json"
+      }
+    ]
+  }
+}

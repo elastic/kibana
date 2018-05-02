@@ -47,7 +47,7 @@ class TopN extends Component {
               style={styles.innerBar}
             />
           </td>
-          <td width="1*" className="rhythm_top_n__value">{ value }</td>
+          <td width="1*" className="rhythm_top_n__value" data-test-subj="tsvbTopNValue">{ value }</td>
         </tr>
       );
     };

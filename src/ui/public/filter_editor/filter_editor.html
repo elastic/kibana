@@ -7,6 +7,7 @@
     </div>
 
     <button
+      data-test-subj="filterEditorModalCloseButton"
       class="kuiModalHeaderCloseButton kuiIcon fa-times"
       ng-click="filterEditor.onCancel()"
       aria-label="Close filter popover"
@@ -45,6 +46,7 @@
       >
         <div class="kuiFieldGroupSection filterEditor__wideField">
           <filter-field-select
+            data-test-subj="filterfieldSuggestionList"
             index-patterns="filterEditor.indexPatterns"
             field="filterEditor.field"
             on-select="filterEditor.onFieldSelect(field)"
