@@ -38,7 +38,7 @@ app.directive('customPatternsInput', function () {
             highlightActiveLine: false,
             highlightGutterLine: false,
             minLines: 3,
-            maxLines: 5,
+            maxLines: 25,
             autoScrollEditorIntoView: true
           });
           editor.$blockScrolling = Infinity;
