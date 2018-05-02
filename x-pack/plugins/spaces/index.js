@@ -76,7 +76,10 @@ export const spaces = (kibana) => new kibana.Plugin({
         console.log('rewriting ', JSON.stringify(newUrl));
 
         request.setUrl(newUrl);
-        request.app._space = 'test';
+        request.app._space = spaceContextUrl;
+      } else {
+        // No space identified in path. Assume the default space.
+        request.app._space = 'default';
       }
 
       return reply.continue();
