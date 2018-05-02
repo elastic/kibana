@@ -43,7 +43,7 @@ export async function getStats(req, beatsIndexPattern, clusterUuid) {
       query: createBeatsQuery({
         start,
         end,
-        uuid: clusterUuid,
+        clusterUuid,
       }),
       aggs: beatsUuidsAgg(maxBucketSize)
     }

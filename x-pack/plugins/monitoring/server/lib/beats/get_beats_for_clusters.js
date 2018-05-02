@@ -5,6 +5,7 @@
  */
 
 import { checkParam } from '../error_missing_required';
+import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query.js';
 import {
   beatsAggFilterPath,
@@ -49,8 +50,8 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
       body: {
         query: createBeatsQuery({
           start,
-          end,
-          uuid: clusterUuid,
+          clusterUuid,
+          metric: BeatsClusterMetric.getMetricFields()
         }),
         aggs: beatsUuidsAgg(maxBucketSize)
       }
