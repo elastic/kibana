@@ -13,7 +13,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Throughput",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_cluster_output_events_ack_rate": Object {
     "aggs": Object {
@@ -519,7 +519,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "CPU Utilization",
     "units": "%",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_mem_alloc": Object {
     "app": "beats",
@@ -532,7 +532,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Memory",
     "units": "B",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_mem_gc_next": Object {
     "app": "beats",
@@ -545,7 +545,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Memory",
     "units": "B",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_mem_rss": Object {
     "app": "beats",
@@ -558,7 +558,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Memory",
     "units": "B",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_events_ack_rate": Object {
     "app": "beats",
@@ -571,7 +571,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Events Rate",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_events_dropped_rate": Object {
     "app": "beats",
@@ -584,7 +584,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Fail Rates",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_events_total": Object {
     "app": "beats",
@@ -597,7 +597,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Events Rate",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_receiving_errors": Object {
     "app": "beats",
@@ -610,7 +610,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Output Errors",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_sending_errors": Object {
     "app": "beats",
@@ -623,7 +623,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Output Errors",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_output_write_bytes_rate": Object {
     "app": "beats",
@@ -636,7 +636,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Throughput",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_pipeline_events_dropped_rate": Object {
     "app": "beats",
@@ -649,7 +649,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Fail Rates",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_pipeline_events_emitted_rate": Object {
     "app": "beats",
@@ -662,7 +662,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Events Rate",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_pipeline_events_failed_rate": Object {
     "app": "beats",
@@ -675,7 +675,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Fail Rates",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_pipeline_events_retry_rate": Object {
     "app": "beats",
@@ -688,7 +688,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Fail Rates",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_pipeline_events_total_rate": Object {
     "app": "beats",
@@ -701,7 +701,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "Events Rate",
     "units": "/s",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_system_os_load_1": Object {
     "app": "beats",
@@ -714,7 +714,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "System Load",
     "units": "",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_system_os_load_15": Object {
     "app": "beats",
@@ -727,7 +727,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "System Load",
     "units": "",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "beat_system_os_load_5": Object {
     "app": "beats",
@@ -740,7 +740,7 @@ Object {
     "timestampField": "beats_stats.timestamp",
     "title": "System Load",
     "units": "",
-    "uuidField": "cluster_uuid",
+    "uuidField": "beats_stats.beat.uuid",
   },
   "cluster_index_latency": Object {
     "aggs": Object {
@@ -1719,6 +1719,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "logstash_stats.timestamp",
     "units": "/s",
+    "uuidField": "cluster_uuid",
   },
   "logstash_cluster_events_latency": Object {
     "aggs": Object {
@@ -1777,6 +1778,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "logstash_stats.timestamp",
     "units": "ms",
+    "uuidField": "cluster_uuid",
   },
   "logstash_cluster_events_output_rate": Object {
     "aggs": Object {
@@ -1816,6 +1818,7 @@ Object {
     "metricAgg": "max",
     "timestampField": "logstash_stats.timestamp",
     "units": "/s",
+    "uuidField": "cluster_uuid",
   },
   "logstash_cluster_pipeline_nodes_count": Object {
     "app": "logstash",
