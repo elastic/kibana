@@ -487,6 +487,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
       }
       await (await testSubjects.find('importSavedObjectsImportBtn')).click();
+      log.debug('importFile done');
     }
 
     async clickImportDone() {
