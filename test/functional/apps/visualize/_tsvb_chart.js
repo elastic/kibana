@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('56');
+        expect(actualCount).to.be('116');
       });
 
       it('should show the correct count in the legend with 2h offset', async function () {
@@ -41,14 +41,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('379');
+        expect(actualCount).to.be('403');
       });
 
       it('should show the correct count in the legend with -2h offset', async function () {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('31');
+        expect(actualCount).to.be('68');
       });
 
       after(async () => {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickSeriesOption();
         await PageObjects.visualBuilder.selectDataFormat('percent');
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('75.08%');
+        expect(actualCount).to.be('98.68%');
       });
 
     });
@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }) {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-        expect(gaugeCount).to.be('56');
+        expect(gaugeCount).to.be('116');
       });
     });
 
@@ -220,8 +220,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
-          expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('3');
+          expect(timestamp).to.be('1442901300000');
+          expect(value).to.be('0');
         });
 
         it('allow negative time offsets', async () => {
@@ -229,8 +229,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           const [timestamp, value] = text.split('#');
-          expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('23');
+          expect(timestamp).to.be('1442908800000');
+          expect(value).to.be('40');
         });
       });
 
