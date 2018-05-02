@@ -1,13 +1,16 @@
 [[tutorial-define-index]]
 == Defining Your Index Patterns
 
-An index pattern tells Kibana which Elasticsearch indices you want to explore.
-Your index pattern can include a wildcard to match multiple indices.  For example,
-in the common logging use case, an Elasticsearch index name typically contains the date in
-YYYY.MMM.DD format.  The matching index pattern for May 2018 might
-be `logstash-2018.05*`.
+Index patterns tell Kibana which Elasticsearch indices you want to explore.
+An index pattern can match the name of a single index, or include a wildcard
+(*) to match multiple indices.
 
-Start by creating patterns for the Shakespeare data set, which has an
+For example, Logstash typically creates a
+series of indices in the format `logstash-YYYY.MMM.DD`. To explore all
+of the log data from May 2018, you could specify the index pattern
+`logstash-2018.05*`.
+
+Create patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank.` These data sets don't contain time-series data.
 
@@ -18,17 +21,21 @@ Otherwise, click *Create index pattern* in the upper left.
 +
 [role="screenshot"]
 image::images/tutorial-pattern-1.png[]
+
 . Click *Next step*.
 . In *Configure settings*, click *Create index pattern*.  For this pattern,
 you don't need to configure any settings.
 . Define a second index pattern named  `ba*`.
 
-Next, create an index pattern for the Logstash data set. This time,
-you must configure the time-series data.
+Now create an index pattern for the Logstash data set. This data set
+contains time-series data.
 
-. Define an index pattern named `logstash*`.
+. Define an index pattern named `logstash*.`
+. Click *Next step*.
 . In *Configure settings*, select *@timestamp* in the *Time Filter field name* dropdown menu.
 . Click *Create index pattern*.
+
+
 
 
 NOTE: When you define an index pattern, the indices that match that pattern must

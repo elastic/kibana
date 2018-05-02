@@ -1,7 +1,7 @@
 [[tutorial-load-dataset]]
 == Loading Sample Data
 
-The Getting Started tutorial requires three data sets:
+This tutorial requires three data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields. Download
   https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[shakespeare.json].
@@ -77,7 +77,7 @@ PUT /shakespeare
 
 //CONSOLE
 
-This mapping specifies the following qualities for the data set:
+This mapping specifies field characteristics for the data set:
 
 * The _speaker_ and _play_name_ fields are keyword fields. These fields are not analyzed.
 The strings are treated as a single unit even if they contain multiple words.
@@ -146,8 +146,10 @@ PUT /logstash-2015.05.20
 
 //CONSOLE
 
-The accounts data set doesn't require any mappings. At this point you're ready
-to use the Elasticsearch {ref}/docs-bulk.html[`bulk`] API to load the data sets:
+The accounts data set doesn't require any mappings.
+
+At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[`bulk`]
+API to load the data sets:
 
 [source,shell]
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
@@ -169,7 +171,7 @@ GET /_cat/indices?v
 
 //CONSOLE
 
-You should see output similar to this:
+Your output should look similar to this:
 
 [source,shell]
 health status index               pri rep docs.count docs.deleted store.size pri.store.size

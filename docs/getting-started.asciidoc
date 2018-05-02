@@ -8,8 +8,8 @@ This tutorial shows you how to:
 
 * Load a sample data set into Elasticsearch
 * Define an index pattern
-* Explore the sample data
-* Set up visualizations of the sample data
+* Discover and explore the sample data
+* Visualize the data
 * Assemble visualizations into a dashboard
 
 Before you begin, make sure you've <<install, installed Kibana>> and established

@@ -6,18 +6,16 @@ of charts, tables, and maps, and more. You'll create four
 visualizations: a pie chart, bar chart, coordinate map, and Markdown widget.
 
 . Open *Visualize.*
-. Click *Create a visualization* or the *+* button. You'll see the visualization
-types that Kibana has to offer.
-. Click *Pie*.  You'll use this chart to gain insight into the account balances
-in the bank account data.
-
+. Click *Create a visualization* or the *+* button. You'll see all the visualization
+types in Kibana.
++
 [role="screenshot"]
 image::images/tutorial-visualize-wizard-step-1.png[]
+. Click *Pie*.
 
-You can build visualizations from saved searches, or enter new search criteria.
-The account data is new in Kibana so in *New Search*, select the `ba*` index
-pattern.
-
+. In *New Search*, select the `ba*` index pattern. You'll use the pie chart to
+gain insight into the account balances in the bank account data.
++
 [role="screenshot"]
 image::images/tutorial-visualize-wizard-step-2.png[]
 
@@ -83,9 +81,9 @@ and enter `Pie Example`.
 You'll use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-Create a *Vertical Bar* chart and set the search source to *shakes**.
-The initial chart is a single bar that shows the total count of documents
-that match the default wildcard query.
+Create a *Vertical Bar* chart and set the search source to `shakes*`.
+Initially, the chart is a single bar that shows the total count
+of documents that match the default wildcard query.
 
 [role="screenshot"]
 image::images/tutorial-visualize-bar-1.png[]
@@ -115,7 +113,7 @@ Show the plays along the X-axis.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
 [role="screenshot"]
-image::images/tutorial-visualize-bar-2.png[]
+image::images/0[]
 
 Hovering over a bar shows a tooltip with the number of speaking parts for
 that play.
@@ -173,8 +171,9 @@ The map now looks like this:
 [role="screenshot"]
 image::images/tutorial-visualize-map-2.png[]
 
-You can navigate the map by clicking and dragging.  Using the controls
-on the top left of the map, you can zoom the map and set filters.  Give them a try.
+You can navigate the map by clicking and dragging.  The controls
+on the top left of the map enable you to zoom the map and set filters.
+Give them a try.
 
 ////
 - Zoom image:images/viz-zoom.png[] buttons,

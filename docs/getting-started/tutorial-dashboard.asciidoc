@@ -11,7 +11,7 @@ this tutorial.
 . Click `Bar Example`, `Map Example`, `Markdown Example`, and `Pie Example`.
 
 
-Your sample dashboard should be similar to this:
+Your sample dashboard look like this:
 
 [role="screenshot"]
 image::images/tutorial-dashboard.png[]

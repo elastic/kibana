@@ -1,12 +1,12 @@
 [[tutorial-discovering]]
 == Discovering Your Data
 
-In the Discover application, you can enter
+Using the Discover application, you can enter
 an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
 query] to search your data and filter the results.
 
-. Open *Discover*. The shakes* pattern is the current index pattern.
-. Click the caret to the right of shakes*, and select `ba*`.
+. Open *Discover*. The `shakes*` pattern is the current index pattern.
+. Click the caret to the right of `shakes*`, and select `ba*`.
 . In the search field, enter the following string:
 +
 [source,text]
