@@ -464,12 +464,14 @@
         <ml-job-tab-4 ng-show="ui.currentTab === 4" class="ml_json_tab">
           <div class="tab_contents">
             <label class="kuiFormLabel" id="ml_aria_label_new_job_json">JSON</label>
-            <textarea
-              aria-labelledby="ml_aria_label_new_job_json"
+            <div
+              class="form-control json-textarea"
+              ui-ace="{
+                mode: 'json',
+                onChange: jsonTextChange
+              }"
               ng-model="ui.jsonText"
-              class="form-control ml-pre json-textarea"
-              ng-change="jsonTextChange()" >
-            </textarea>
+              ></div>
           </div>
         </ml-job-tab-4>
 
@@ -482,11 +484,15 @@
               is-loading="(ui.dataPreview === '')"
             />
             <div ng-hide="(ui.dataPreview === '')">
-              <textarea
-                aria-labelledby="ml_aria_label_new_job_data_preview"
-                aria-describedby="ml_aria_description_new_job_data_preview"
-                readonly
-                class="form-control ml-pre json-textarea">{{ui.dataPreview}}</textarea>
+              <div
+                id="datafeed-preview"
+                class="form-control json-textarea"
+                ui-ace="{
+                  mode: 'json',
+                  onLoad: aceLoaded
+                }"
+                ng-model="ui.dataPreview"
+                ></div>
                 <div class="note">
                   Preview returns the content of the _source field only.
                 </div>
