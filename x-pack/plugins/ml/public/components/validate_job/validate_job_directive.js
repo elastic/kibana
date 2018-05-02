@@ -13,11 +13,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { ValidateJob } from './validate_job_view';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
 module.directive('mlValidateJob', function (reactDirective) {
   return reactDirective(
     ValidateJob,
     undefined,
-    { restrict: 'E' }
+    { restrict: 'E' },
+    { mlJobService }
   );
 });
