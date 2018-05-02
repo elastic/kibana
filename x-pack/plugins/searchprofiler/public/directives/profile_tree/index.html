@@ -1,0 +1,77 @@
+<div class="panel panel-default index" ng-repeat="index in profileResponse">
+  <div class="shard-details-right">
+    <span
+      tooltip-placement="bottom"
+      tooltip="The cumulative time of all shards in the index. Note: this is not wall-clock time, as shards can execute in parallel.">
+      <h3>Cumulative Time: {{index.time[target] | msToPretty: 3}}</h3>
+    </span><br/>
+  </div>
+  <div class="shard-details"  style="margin-left:5px">
+    <h3><b>Index:</b> {{index.name}}</h3>
+  </div>
+  <div ng-repeat="shard in index.shards">
+    <div class="panel shard">
+      <div class="shard-body">
+        <div class="shard-details-right" style="width:150px">
+          <div class="graph progress">
+            <div class="bar" style="width:{{shard.relative[target]}}%"></div>
+            <p>{{shard.time[target] | msToPretty: 3}}</p>
+          </div>
+
+        </div>
+        <div class="shard-details">
+          <span class="glyphicon" aria-hidden="true"
+                  ng-click="shardVisibility = !shardVisibility"
+                  ng-class="visible[row.id].visible ? 'glyphicon-menu-down' : 'glyphicon-menu-right'"
+                  style="font-size:9px">
+                </span>
+                <b>[{{shard.id[0]}}][{{shard.id[2]}}]</b>
+        </div>
+        <div class="treeviewwrapper"
+            ng-repeat="search in shard[target]"
+            ng-hide="!shardVisibility"
+            ng-class="{'panel-body-underline' : shardVisibility}">
+          <div class="tv-row-header">
+            <div class="cell description">Type</div>
+            <div class="cell time">Self Time</div>
+            <div class="cell totaltime">Total Time</div>
+            <div class="cell percentage">% Time</div>
+          </div>
+          <div class="tv-row"
+            ng-repeat="row in search.flat"
+            ng-show="row.depth === 0 ? true : visible[row.parentId].visible"
+            style="background-color:{{row.absoluteColor}}"
+            ng-mouseenter="updateDetail(row, index.name, shard.id[0], shard.id[2])"
+            ng-class="row.id == getHighlightedRow() ? 'tv-row-last-hover' : ''">
+            <div class="cell description" style="padding-left:{{row.depth * 10}}px;">
+              <div style="display:inline;" ng-class="row.hasChildren ? '' : 'glyphicon-menu-pad'">
+                <span class="glyphicon" aria-hidden="true"
+                  ng-click="toggle(row.id)"
+                  ng-class="visible[row.id].visible ? 'glyphicon-menu-down' : 'glyphicon-menu-right'"
+                  ng-hide="!row.hasChildren"
+                  style="font-size:9px">
+                </span>&nbsp;
+              </div>
+              {{row.query_type}}
+              <span class='detail'>
+              <span
+                tooltip-placement="top"
+                tooltip="{{row.lucene.length > 40 ? row.lucene : ''}}">
+              {{row.lucene | limitTo : 40}}{{row.lucene.length > 40 ? '...' : ''}}
+              </span>
+              </span>
+            </div>
+            <div class="cell time">{{row.selfTime | msToPretty: 1}}</div>
+            <div class="cell totaltime">{{row.time | msToPretty: 1}}</div>
+            <div class="cell percentage">
+              <div class="graph progress">
+                <div class="bar" style="width:{{row.timePercentage}}%"></div>
+                <p>{{row.timePercentage}}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

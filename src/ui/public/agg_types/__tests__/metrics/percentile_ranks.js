@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsPercentileRanksProvider } from 'ui/agg_types/metrics/percentile_ranks';
-import { VisProvider } from 'ui/vis';
+import { AggTypesMetricsPercentileRanksProvider } from '../../metrics/percentile_ranks';
+import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function () {

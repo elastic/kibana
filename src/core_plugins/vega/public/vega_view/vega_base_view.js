@@ -2,11 +2,17 @@ import $ from 'jquery';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
+import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { TooltipHandler } from './vega_tooltip';
 
-//https://github.com/elastic/kibana/issues/13327
-vega.scheme('elastic',
-  ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
-);
+vega.scheme('elastic', VISUALIZATION_COLORS);
+
+const bypassToken = Symbol();
+
+export function bypassExternalUrlCheck(url) {
+  // processed in the  loader.sanitize  below
+  return { url, bypassToken };
+}
 
 export class VegaBaseView {
   constructor(vegaConfig, editorMode, parentEl, vegaParser, serviceSettings) {
@@ -48,36 +54,51 @@ export class VegaBaseView {
         .appendTo(this._$parentEl);
 
       this._addDestroyHandler(() => {
-        this._$container.remove();
-        this._$container = null;
-        this._$controls.remove();
-        this._$controls = null;
+        if (this._$container) {
+          this._$container.remove();
+          this._$container = null;
+        }
+        if (this._$controls) {
+          this._$controls.remove();
+          this._$controls = null;
+        }
         if (this._$messages) {
           this._$messages.remove();
           this._$messages = null;
         }
       });
 
-      this._vegaViewConfig = {
-        logLevel: vega.Warn,
-        renderer: this._parser.renderer,
-      };
-      if (!this._vegaConfig.enableExternalUrls) {
-        // Override URL loader and sanitizer to disable all URL-based requests
-        const errorFunc = () => {
-          throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
-        };
-        const loader = vega.loader();
-        loader.load = errorFunc;
-        loader.sanitize = errorFunc;
-        this._vegaViewConfig.loader = loader;
-      }
+      this._vegaViewConfig = this.createViewConfig();
 
       // The derived class should create this method
       await this._initViewCustomizations();
     } catch (err) {
       this.onError(err);
     }
+  }
+
+  createViewConfig() {
+    const config = {
+      logLevel: vega.Warn,
+      renderer: this._parser.renderer,
+    };
+
+    // Override URL sanitizer to prevent external data loading (if disabled)
+    const loader = vega.loader();
+    const originalSanitize = loader.sanitize.bind(loader);
+    loader.sanitize = (uri, options) => {
+      if (uri.bypassToken === bypassToken) {
+        // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
+        // because user can only supply pure JSON data structure.
+        uri = uri.url;
+      } else if (!this._vegaConfig.enableExternalUrls) {
+        throw new Error('External URLs are not enabled. Add   vega.enableExternalUrls: true   to kibana.yml');
+      }
+      return originalSanitize(uri, options);
+    };
+    config.loader = loader;
+
+    return config;
   }
 
   onError() {
@@ -119,6 +140,20 @@ export class VegaBaseView {
       return true;
     }
     return false;
+  }
+
+  setView(view) {
+    this._view = view;
+
+    if (view && this._parser.tooltips) {
+      // position and padding can be specified with
+      // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
+      const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+
+      // Vega bug workaround - need to destroy tooltip by hand
+      this._addDestroyHandler(() => tthandler.hideTooltip());
+
+    }
   }
 
   /**

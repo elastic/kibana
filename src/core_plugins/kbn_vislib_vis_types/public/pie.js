@@ -1,12 +1,11 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
+import pieTemplate from './editors/pie.html';
 import image from './images/icon-pie.svg';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'pie',

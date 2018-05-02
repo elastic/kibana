@@ -2,7 +2,7 @@ import Stream from 'stream';
 import moment from 'moment';
 import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
-import ansicolors from 'ansicolors';
+import chalk from 'chalk';
 import stringify from 'json-stringify-safe';
 import querystring from 'querystring';
 import applyFiltersToKeys from './apply_filters_to_keys';
@@ -19,10 +19,10 @@ function serializeError(err = {}) {
 }
 
 const levelColor = function (code) {
-  if (code < 299) return ansicolors.green(code);
-  if (code < 399) return ansicolors.yellow(code);
-  if (code < 499) return ansicolors.magenta(code);
-  return ansicolors.red(code);
+  if (code < 299) return chalk.green(code);
+  if (code < 399) return chalk.yellow(code);
+  if (code < 499) return chalk.magentaBright(code);
+  return chalk.red(code);
 };
 
 
@@ -100,8 +100,8 @@ export default class TransformObjStream extends Stream.Transform {
       data.message += ' ';
       data.message += levelColor(data.res.statusCode);
       data.message += ' ';
-      data.message += ansicolors.brightBlack(data.res.responseTime + 'ms');
-      data.message += ansicolors.brightBlack(' - ' + numeral(contentLength).format('0.0b'));
+      data.message += chalk.gray(data.res.responseTime + 'ms');
+      data.message += chalk.gray(' - ' + numeral(contentLength).format('0.0b'));
     }
     else if (data.type === 'ops') {
       _.defaults(data, _.pick(event, [
@@ -110,19 +110,19 @@ export default class TransformObjStream extends Stream.Transform {
         'proc',
         'load'
       ]));
-      data.message  = ansicolors.brightBlack('memory: ');
+      data.message  = chalk.gray('memory: ');
       data.message += numeral(get(data, 'proc.mem.heapUsed')).format('0.0b');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('uptime: ');
+      data.message += chalk.gray('uptime: ');
       data.message += numeral(get(data, 'proc.uptime')).format('00:00:00');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('load: [');
+      data.message += chalk.gray('load: [');
       data.message += get(data, 'os.load', []).map(function (val) {
         return numeral(val).format('0.00');
       }).join(' ');
-      data.message += ansicolors.brightBlack(']');
+      data.message += chalk.gray(']');
       data.message += ' ';
-      data.message += ansicolors.brightBlack('delay: ');
+      data.message += chalk.gray('delay: ');
       data.message += numeral(get(data, 'proc.delay')).format('0.000');
     }
     else if (data.type === 'error') {

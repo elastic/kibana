@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {
   EuiIcon,
   EuiInMemoryTable,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 export class Table extends PureComponent {
@@ -14,8 +14,8 @@ export class Table extends PureComponent {
     editField: PropTypes.func.isRequired
   }
 
-  renderBooleanTemplate(value) {
-    return value ? <EuiIcon type="dot" color="secondary" /> : <span/>;
+  renderBooleanTemplate(value, label) {
+    return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
   }
 
   renderFieldName(name, isTimeField) {
@@ -25,9 +25,12 @@ export class Table extends PureComponent {
         {isTimeField ? (
           <span>
             &nbsp;
-            <EuiToolTip content="This field represents the time that events occurred.">
-              <EuiIcon type="clock" color="primary" />
-            </EuiToolTip>
+            <EuiIconTip
+              type="clock"
+              color="primary"
+              aria-label="Primary time field"
+              content="This field represents the time that events occurred."
+            />
           </span>
         ) : ''}
       </span>
@@ -41,9 +44,12 @@ export class Table extends PureComponent {
         {isConflict ? (
           <span>
             &nbsp;
-            <EuiToolTip content="The type of this field changes across indices. It is unavailable for many analysis functions.">
-              <EuiIcon type="alert" color="warning" />
-            </EuiToolTip>
+            <EuiIconTip
+              type="alert"
+              color="warning"
+              aria-label="Multiple type field"
+              content="The type of this field changes across indices. It is unavailable for many analysis functions."
+            />
           </span>
         ) : ''}
       </span>
@@ -92,7 +98,7 @@ export class Table extends PureComponent {
         description: `These fields can be used in the filter bar`,
         dataType: 'boolean',
         sortable: true,
-        render: this.renderBooleanTemplate,
+        render: (value) => this.renderBooleanTemplate(value, 'Is searchable'),
       },
       {
         field: 'aggregatable',
@@ -100,7 +106,7 @@ export class Table extends PureComponent {
         description: `These fields can be used in visualization aggregations`,
         dataType: 'boolean',
         sortable: true,
-        render: this.renderBooleanTemplate,
+        render: (value) => this.renderBooleanTemplate(value, 'Is aggregatable'),
       },
       {
         field: 'excluded',
@@ -108,7 +114,7 @@ export class Table extends PureComponent {
         description: `Fields that are excluded from _source when it is fetched`,
         dataType: 'boolean',
         sortable: true,
-        render: this.renderBooleanTemplate,
+        render: (value) => this.renderBooleanTemplate(value, 'Is excluded'),
       },
       {
         name: '',

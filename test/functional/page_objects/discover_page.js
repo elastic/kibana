@@ -53,9 +53,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await Promise.all(headerElements.map(el => el.getVisibleText()));
     }
 
-    async hasSavedSearch(searchName) {
+    async openSavedSearch() {
       await this.clickLoadSavedSearchButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.exists('loadSearchForm');
+    }
+
+    async hasSavedSearch(searchName) {
       const searchLink = await find.byPartialLinkText(searchName);
       return searchLink.isDisplayed();
     }
@@ -284,6 +287,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return getRemote()
         .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
         .click();
+    }
+
+    async selectIndexPattern(indexPattern) {
+      await getRemote().findByClassName('index-pattern-selection').click();
+      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
     }
 
     async removeAllFilters() {

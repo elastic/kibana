@@ -10,10 +10,6 @@ The Kibana plugin interfaces are in a state of constant development.  We cannot 
 This list of plugins is not guaranteed to work on your version of Kibana. Instead, these are plugins that were known to work at some point with Kibana *5.x*. The Kibana installer will reject any plugins that haven't been published for your specific version of Kibana.
 
 [float]
-=== Packs
-* https://www.elastic.co/downloads/x-pack[X-Pack] - security, monitoring, reporting, alerts, graph
-
-[float]
 === Apps
 * https://github.com/sivasamyk/logtrail[LogTrail] - View, analyze, search and tail log events in realtime with a developer/sysadmin friendly interface
 * https://github.com/wtakase/kibana-own-home[Own Home] (wtakase) - enables multi-tenancy
@@ -30,6 +26,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 === Visualizations
 * https://github.com/virusu/3D_kibana_charts_vis[3D Charts] (virusu)
 * https://github.com/JuanCarniglia/area3d_vis[3D Graph] (JuanCarniglia)
+* https://github.com/TrumanDu/bmap[Bmap](TrumanDu) - integrated echarts for map visualization
 * https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
 * https://github.com/elo7/cohort[Cohort analysis] (elo7)
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)

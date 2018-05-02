@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { AggResponseIndexProvider } from '../../agg_response';
+import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
 const TabifyResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
@@ -10,9 +10,10 @@ const TabifyResponseHandlerProvider = function (Private) {
     handler: function (vis, response) {
       return new Promise((resolve) => {
 
-        const tableGroup = aggResponse.tabify(vis, response, {
+        const tableGroup = aggResponse.tabify(vis.getAggConfig().getResponseAggs(), response, {
           canSplit: true,
-          asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false)
+          asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false),
+          isHierarchical: vis.isHierarchical()
         });
 
         resolve(tableGroup);

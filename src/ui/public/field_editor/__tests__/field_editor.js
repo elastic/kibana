@@ -2,7 +2,7 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
+import { IndexPatternsFieldProvider } from '../../index_patterns/_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 

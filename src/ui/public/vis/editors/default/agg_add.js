@@ -1,11 +1,10 @@
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { uiModules } from 'ui/modules';
+import { AggConfig } from '../../agg_config';
+import { uiModules } from '../../../modules';
 import aggAddTemplate from './agg_add.html';
 
 uiModules
   .get('kibana')
-  .directive('visEditorAggAdd', function (Private) {
-    const AggConfig = Private(VisAggConfigProvider);
+  .directive('visEditorAggAdd', function () {
 
     return {
       restrict: 'E',

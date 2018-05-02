@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../../modules';
 import template from './loading_indicator.html';
 import './loading_indicator.less';
 

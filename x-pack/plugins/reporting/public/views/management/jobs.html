@@ -1,0 +1,84 @@
+<kbn-management-app section="kibana">
+  <div class="euiPage">
+    <h1 class="euiTitle">Generated reports</h1>
+
+    <table class="table table-striped job-list" ng-class="{ loading: jobsCtrl.loading }">
+      <thead>
+        <tr>
+          <th scope="col">Document</th>
+          <th scope="col">Added</th>
+          <th scope="col">Status</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-if="!jobsCtrl.reportingJobs.jobs.length">
+          <td colspan="5">No reports have been created</td>
+        </tr>
+        <tr ng-if="jobsCtrl.reportingJobs.jobs.length" ng-repeat="job in jobsCtrl.reportingJobs.jobs">
+          <td>
+            <div>{{ job.object_title }}</div>
+            <div class="metadata">{{ job.object_type }}</div>
+          </td>
+          <td>
+            <div>{{ job.created_at | date : 'yyyy-MM-dd @ h:mm a' }}</div>
+            <div class="metadata" ng-if="job.created_by">{{ job.created_by }}</div>
+          </td>
+          <td>
+            <div ng-class="{kuiStatusText: true, 'kuiStatusText--warning': job.max_size_reached}">
+              {{ job.status }}<span ng-if="job.max_size_reached">&nbsp;- max size reached</span>
+            </div>
+            <div
+              class="metadata"
+              ng-if="job.status !== 'pending'"
+              >
+              {{ job.started_at | date : 'yyyy-MM-dd @ h:mm a' }}
+            </div>
+          </td>
+          <td class="actions">
+            <button
+              class="kuiButton kuiButton--danger"
+              ng-if="job.status === 'failed' && jobsCtrl.errorMessage.job_id !== job.id"
+              ng-click=jobsCtrl.showError(job.id)
+              aria-label="Show report-generation error"
+            >
+              <span class="kuiIcon fa-question-circle"></span>
+            </button>
+
+            <div
+              class="error-message"
+              ng-if="jobsCtrl.errorMessage.job_id === job.id"
+            >
+              {{ jobsCtrl.errorMessage.message }}
+            </div>
+
+            <button
+              ng-if="job.status === 'completed'"
+              ng-click=jobsCtrl.download(job.id)
+              ng-class="{ kuiButton: true,
+                'kuiButton--basic': !job.max_size_reached,
+                'kuiButton--warning': job.max_size_reached}"
+              aria-label="Download report"
+              ng-attr-tooltip="{{
+                job.max_size_reached ? 'Max size reached, contains partial data.' : null
+              }}"
+            >
+              <span class="kuiIcon fa-download"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="text-align: center;">
+      <paging
+        page="jobsCtrl.currentPage"
+        page-size="10"
+        total="jobsCtrl.reportingJobs.total"
+        show-prev-next="true"
+        show-first-last="true"
+        paging-action="jobsCtrl.setPage(page)">
+      </paging>
+    </div>
+  </div>
+</kbn-management-app>

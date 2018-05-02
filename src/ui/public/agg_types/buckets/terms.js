@@ -1,17 +1,15 @@
 import _ from 'lodash';
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/create_filter/terms';
-import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
-import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
-import { RouteBasedNotifierProvider } from 'ui/route_based_notifier';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
+import { AggConfig } from '../../vis/agg_config';
+import { Schemas } from '../../vis/editors/default/schemas';
+import { AggTypesBucketsCreateFilterTermsProvider } from './create_filter/terms';
+import orderAggTemplate from '../controls/order_agg.html';
+import orderAndSizeTemplate from '../controls/order_and_size.html';
+import { RouteBasedNotifierProvider } from '../../route_based_notifier';
 import { OtherBucketHelperProvider } from './_terms_other_bucket_helper';
 
 export function AggTypesBucketsTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
-  const AggConfig = Private(VisAggConfigProvider);
-  const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(RouteBasedNotifierProvider);
   const { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } = Private(OtherBucketHelperProvider);
@@ -152,6 +150,12 @@ export function AggTypesBucketsTermsProvider(Private) {
             return aggFilter.includes(`!${agg.type.name}`);
           };
 
+          $scope.$watch('agg.params.field.type', (type) => {
+            if (type !== 'string') {
+              $scope.agg.params.missingBucket = false;
+            }
+          });
+
           function updateOrderAgg() {
             // abort until we get the responseValueAggs
             if (!$scope.responseValueAggs) return;
@@ -201,7 +205,7 @@ export function AggTypesBucketsTermsProvider(Private) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
-          if (agg.params.missingBucket) {
+          if (agg.params.missingBucket && agg.params.field.type === 'string') {
             output.params.missing = '__missing__';
           }
 

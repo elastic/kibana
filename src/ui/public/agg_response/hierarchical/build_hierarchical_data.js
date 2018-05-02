@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
-import { createRawData } from 'ui/agg_response/hierarchical/_create_raw_data';
-import { arrayToLinkedList } from 'ui/agg_response/hierarchical/_array_to_linked_list';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import { AggResponseHierarchicalBuildSplitProvider } from 'ui/agg_response/hierarchical/_build_split';
-import { HierarchicalTooltipFormatterProvider } from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import { extractBuckets } from './_extract_buckets';
+import { createRawData } from './_create_raw_data';
+import { arrayToLinkedList } from './_array_to_linked_list';
+import AggConfigResult from '../../vis/agg_config_result';
+import { AggResponseHierarchicalBuildSplitProvider } from './_build_split';
+import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
 
 export function BuildHierarchicalDataProvider(Private, Notifier) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
@@ -32,7 +32,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
 
     // If buckets is falsy then we should just return the aggs
     if (!buckets) {
-      const label = 'Count';
+      const label = raw.columns[0].label;
       const value = resp.aggregations
         && resp.aggregations[metric.id]
         && resp.aggregations[metric.id].value

@@ -322,6 +322,10 @@ describe('dateMath', function() {
         .valueOf();
       expect(val).to.eql(anchored.startOf('s').valueOf());
     });
+
+    it('should parse long expressions', () => {
+      expect(dateMath.parse('now-1d/d+8h+50m')).to.be.ok();
+    });
   });
 
   describe('used momentjs instance', function() {

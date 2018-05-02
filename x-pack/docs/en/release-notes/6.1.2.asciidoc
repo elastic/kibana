@@ -1,0 +1,37 @@
+[role="xpack"]
+[[xkb-6.1.2]]
+== {kib} {xpack} 6.1.2 Release Notes
+++++
+<titleabbrev>6.1.2 Release Notes</titleabbrev>
+++++
+
+[[xkb-bug-6.1.2]]
+[float]
+=== Bug fixes
+
+Machine Learning::
+* Disabled the ability to create forecasts for jobs that were created before
+6.1.0.
+//Repo: x-pack-kibana
+//Pull: 3793
+* Fixed the **Anomaly Explorer** such that it retains the chosen swim lane
+limits when you reload the page.
+//Repo: x-pack-kibana
+//Pull: 3760
+* Fixed incorrect line positions in the **Single Metric Viewer**. When all data
+points had the same value, the Y-axis offset was not calculated correctly and
+the line was drawn in the wrong position or was invisible in the line chart.
+//Repo: x-pack-kibana
+//Pull: 3813
+
+Monitoring::
+* Fixed situations where {kib} was showing the same information for different
+clusters in the Logstash Overview.
+//Repo: x-pack-kibana
+//Pull: 3856
+
+Watcher::
+* Fixed error that prevented users from creating threshold alerts with email
+actions.
+//Repo: x-pack-kibana
+//Pull: 3823

@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
-import topSortEditor from 'ui/agg_types/controls/top_sort.html';
-import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size.html';
+import { AggTypesMetricsMetricAggTypeProvider } from './metric_agg_type';
+import topSortEditor from '../controls/top_sort.html';
+import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 
 export function AggTypesMetricsTopHitProvider(Private) {
   const MetricAggType = Private(AggTypesMetricsMetricAggTypeProvider);

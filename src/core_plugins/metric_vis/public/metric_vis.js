@@ -1,8 +1,8 @@
-import 'plugins/metric_vis/metric_vis.less';
-import 'plugins/metric_vis/metric_vis_params';
+import './metric_vis.less';
+import './metric_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { MetricVisComponent } from './metric_vis_controller';
@@ -15,7 +15,6 @@ import image from './images/icon_number.svg';
 VisTypesRegistryProvider.register(MetricVisProvider);
 
 function MetricVisProvider(Private) {
-  const Schemas = Private(VisSchemasProvider);
   const VisFactory = Private(VisFactoryProvider);
 
   // return the visType object, which kibana will use to display and configure new

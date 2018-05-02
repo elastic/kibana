@@ -34,8 +34,7 @@ Elastic website or from our RPM repository.
 `docker`::
 
 Images are available for running Kibana as a Docker container. They may be
-downloaded from the Elastic Docker Registry. The default image ships with
-{xpack-ref}/index.html[X-Pack] pre-installed.
+downloaded from the Elastic Docker Registry. 
 +
 <<docker,Running Kibana on Docker>>
 

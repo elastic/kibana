@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { ErrorAllowExplicitIndexProvider } from 'ui/error_allow_explicit_index';
+import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';

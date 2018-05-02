@@ -1,0 +1,36 @@
+<div ng-if="card.existsInDocs === true" class="card-contents">
+  <div class="stats euiText">
+    <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
+      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+      ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
+    </div>
+    <div class="stat"><i class="fa fa-cubes" aria-hidden="true"></i> {{ card.stats.cardinality }} distinct
+      <ng-pluralize count="card.stats.cardinality" when="{'1':'value', 'other':'values'}">values</ng-pluralize>
+    </div>
+    <div>
+      <div class="stat min heading">min</div>
+      <div class="stat median heading">median</div>
+      <div class="stat max heading">max</div>
+    </div>
+    <div>
+      <div class="stat min">{{ card.stats.min | formatField:card.fieldFormat }}</div>
+      <div class="stat median">{{ card.stats.median | formatField:card.fieldFormat }}</div>
+      <div class="stat max">{{ card.stats.max | formatField:card.fieldFormat }}</div>
+    </div>
+  </div>
+
+  <div class="details-select">
+    <select class="kuiSelect" ng-model="detailsMode" ng-change="detailsModeChanged(detailsMode)">
+      <option value="distribution">distribution of values</option>
+      <option value="top">top values</option>
+    </select>
+  </div>
+  <div class="details-container" ng-switch on="detailsMode">
+    <ml-metric-distribution-chart ng-switch-when="distribution" width="325" height="220">
+      <div class="content-wrapper" />
+    </ml-metric-distribution-chart>
+    <div ng-switch-default>
+      <ml-top-values></ml-top-values>
+    </div>
+  </div>
+</div>

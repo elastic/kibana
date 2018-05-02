@@ -4,10 +4,10 @@ import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import 'ui/visualize/visualize_legend';
+import '../../visualize/visualize_legend';
 import { VisTypeProvider } from './base_vis_type';
-import { AggResponsePointSeriesProvider } from 'ui/agg_response/point_series/point_series';
-import VislibProvider from 'ui/vislib';
+import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
+import VislibProvider from '../../vislib';
 import $ from 'jquery';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {

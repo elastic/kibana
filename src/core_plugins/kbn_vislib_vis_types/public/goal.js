@@ -1,13 +1,12 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import gaugeTemplate from 'plugins/kbn_vislib_vis_types/editors/gauge.html';
+import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import image from './images/icon-goal.svg';
 
 export default function GoalVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'goal',

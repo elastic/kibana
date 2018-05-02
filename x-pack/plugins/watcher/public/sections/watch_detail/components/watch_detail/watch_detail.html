@@ -1,0 +1,81 @@
+<kbn-management-app
+  section="elasticsearch/watcher/watch"
+  omit-breadcrumb-pages="{{ watchDetail.omitBreadcrumbPages }}"
+  page-title="watchDetail.breadcrumb"
+>
+  <div class="kuiViewContent kuiViewContent--constrainedWidth">
+    <!-- Header and buttons -->
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <div class="kuiBar">
+
+        <!-- Watch Details -->
+        <div class="kuiBarSection">
+          <h1 class="kuiTitle">
+            Current Status
+          </h1>
+        </div>
+
+        <div class="kuiBarSection">
+          <div class="kuiButtonGroup">
+            <button
+              ng-if="watchDetail.watch.watchStatus.isActive"
+              ng-click="watchDetail.onWatchDeactivate()"
+              class="kuiButton kuiButton--basic"
+              data-test-subj="btnDeactivateWatch"
+            >
+              Deactivate
+            </button>
+            <button
+              ng-if="!watchDetail.watch.watchStatus.isActive"
+              ng-click="watchDetail.onWatchActivate()"
+              class="kuiButton kuiButton--basic"
+              data-test-subj="btnActivateWatch"
+            >
+              Activate
+            </button>
+            <button
+              ng-click="watchDetail.onWatchDelete()"
+              class="kuiButton kuiButton--danger"
+              data-test-subj="btnDeleteWatch"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Watch Details -->
+
+    <!-- Watch action status -->
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <!-- Action status table -->
+      <action-status-table
+        action-statuses="watchDetail.sortedActionStatuses"
+        on-action-acknowledge="watchDetail.onActionAcknowledge"
+        sort-field="watchDetail.actionStatusTableSortField"
+        sort-reverse="watchDetail.actionStatusTableSortReverse"
+        on-sort-change="watchDetail.onActionSortChange"
+      ></action-status-table>
+      <table-info ng-show="!watchDetail.hasActionStatusTableActions">No actions found.</table-info>
+    </div>
+
+    <!-- Watch History -->
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <h1 class="kuiTitle">
+        Watch History
+      </h1>
+    </div>
+
+    <div class="kuiViewContentItem kuiVerticalRhythm">
+      <watch-history
+        xpack-watch="watchDetail.watch"
+        history-items="watchDetail.watchHistoryItems"
+        initial-range="watchDetail.historyRange"
+        on-range-change="watchDetail.onHistoryRangeChange"
+        is-loading="watchDetail.isHistoryLoading"
+      ></watch-history>
+    </div>
+    <!-- End Watch History -->
+
+  </div>
+</kbn-management-app>

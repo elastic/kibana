@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import execa from 'execa';
 import { statSync } from 'fs';
 
 import Rx from 'rxjs/Rx';
@@ -10,7 +10,7 @@ const treeKillAsync = promisify(treeKill);
 
 import { log } from './log';
 import { observeLines } from './observe_lines';
-import { observeChildProcess } from './observe_child_process';
+import { createCliError } from './errors';
 
 const SECOND = 1000;
 const STOP_TIMEOUT = 30 * SECOND;
@@ -50,14 +50,16 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
     }
   }
 
-  const childProcess = spawn(cmd, args, {
+  const childProcess = execa(cmd, args, {
     cwd,
     env,
-    stdio: [stdin ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
 
   if (stdin) {
     childProcess.stdin.end(stdin, 'utf8');
+  } else {
+    childProcess.stdin.end();
   }
 
   return new class Proc {
@@ -70,14 +72,31 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
       .do(line => log.write(` ${gray('proc')}  [${gray(name)}] ${line}`))
       .share();
 
-    outcome$ = observeChildProcess(name, childProcess).share();
+    outcome$ = Rx.Observable.defer(() => {
+      // observe first exit event
+      const exit$ = Rx.Observable.fromEvent(childProcess, 'exit')
+        .take(1)
+        .map(code => {
+          // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
+          if (code > 0 && !(code === 143 || code === 130)) {
+            throw createCliError(`[${name}] exitted with code ${code}`);
+          }
+
+          return code;
+        });
+
+      // observe first error event until there is a close event
+      const error$ = Rx.Observable.fromEvent(childProcess, 'error')
+        .take(1)
+        .mergeMap(err => Rx.Observable.throw(err));
+
+      return Rx.Observable.race(exit$, error$);
+    }).share()
 
     outcomePromise = Rx.Observable.merge(
       this.lines$.ignoreElements(),
       this.outcome$
     ).toPromise();
-
-    closedPromise = this.outcomePromise.then(() => {}, () => {});
 
     async stop(signal) {
       await withTimeout(
@@ -93,11 +112,15 @@ export function createProc(name, { cmd, args, cwd, env, stdin }) {
 
       await withTimeout(
         async () => {
-          await this.closedPromise;
+          try {
+            await this.outcomePromise;
+          } catch (error) {
+            // ignore
+          }
         },
         STOP_TIMEOUT,
         async () => {
-          throw new Error(`Proc "${name}" was stopped but never emiited either the "close" or "exit" events after ${STOP_TIMEOUT} ms`);
+          throw new Error(`Proc "${name}" was stopped but never emiited either the "exit" or "error" event after ${STOP_TIMEOUT} ms`);
         }
       );
     }

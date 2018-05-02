@@ -1,0 +1,309 @@
+[role="xpack"]
+[[xkb-6.1.0]]
+== {kib} {xpack} 6.1.0 Release Notes
+++++
+<titleabbrev>6.1.0 Release Notes</titleabbrev>
+++++
+
+[float]
+[[xkb-enhancements-6.1.0]]
+=== Enhancements
+
+////
+APM::
+* Add apm
+//Repo: x-pack-kibana
+//Pull: 2179
+////
+
+Machine Learning::
+
+* Added the ability to create and display forecasts for {ml} jobs in {kib}.
+//Repo: x-pack-kibana
+//Pull: 3370, 2639, 2673, 2722, 2738, 3062, 3097, 3207, 3265, 3327, 3339
+* Simplified job creation for certain recognizable data sources, such as
+Filebeat access logs from Nginx and Apache HTTP servers.
+//Repo: x-pack-kibana
+//Pull: 2182, 2291, 2293, 2910, 3020, 3063, 3098, 3116, 3162, 3256
+* Added a Data Visualizer, which enables you to learn more about the
+characteristics of your data and identify fields for {ml} analysis. For more
+information, see <<ml-jobs>>.
+//Repo: x-pack-kibana
+//Pull: 2193, 2237, 2273, 2273, 2329, 2485, 2508, 2514, 2519, 2550, 2829, 2844,
+//2858, 2875, 3004, 3042, 3049, 3236
+* Added bucket span to the chart labels in the Single Metric Viewer.
+//Repo: x-pack-kibana
+//Pull: 2822
+* Added support for job groups when managing jobs in {kib}.
+//Repo: x-pack-kibana
+//Pull: 2223, 2308, 2457, 2427, 2615, 2659, 3064
+* Added the ability to show or hide the Anomaly Explorer charts by selecting a
+checkbox. The choice is saved in the URL, so it persists if you re-open the
+view from a bookmarked URL.
+//Repo: x-pack-kibana
+//Pull: 3278
+* Added a new job creation wizard for population jobs, which detect activity
+that is unusual compared to the behavior of the population. For more information,
+see {xpack-ref}/ml-configuring-pop.html[Performing Population Analysis].
+//Repo: x-pack-kibana
+//Pull: 2520, 2690, 2780, 2834, 2843, 2873, 3454
+* Added the ability to control the maximum number of rows in the Anomaly
+Explorer view by swimlane, with options of `5`, `10`, `25`, or `50`. Previously,
+it was fixed to a maximum of 10 rows.
+//Repo: x-pack-kibana
+//Pull: 2606
+* Changed the job creation wizards such that you select an index pattern or
+saved search before you select the type of job.
+//Repo: x-pack-kibana
+//Pull: 3133, 3158
+* Added licensing checks to the job creation features in {kib}. If the license
+is expired, for example, the create job, edit job, clone job, and start {dfeed}
+buttons are disabled.
+//Repo: x-pack-kibana
+//Pull: 3214
+* Added the ability to set the model memory limit in job creation wizards. For
+more information about the `model_memory_limit` property, see
+{ref}/ml-job-resource.html#ml-apilimits[Job Resource Analysis Limits].
+//Repo: x-pack-kibana
+//Pull: 3243, 3248, 3317, 3485
+* Added a **Close Job** button that enables you to force the closure of a job
+when it fails. The button is disabled if the job is running, closed, or does not
+have a {dfeed}.
+//Repo: x-pack-kibana
+//Pull: 3378
+* Added the ability to display jobs with multiple detectors in the Single Metric
+Viewer when the `model_plot_config` property is enabled. Previously, this
+functionality was only possible for jobs with a single detector.
+//Repo: x-pack-kibana
+//Pull: 3521
+////
+Management::
+* License management
+//Repo: x-pack-kibana
+//Pull: 2579
+////
+
+Monitoring::
+
+* Added Cross Cluster Search (CCS) to efficiently retrieve monitoring data from
+local and remote clusters.
+//Repo: x-pack-kibana
+//Pull: 2075
+* Improved handling of health check errors. If there is a problem making a query,
+for example, an error is returned and extra information is provided in the logs.
+As part of this change, the `monitoring` plugin for {kib} will never cause {kib}
+to go `red`.
+//Repo: x-pack-kibana
+//Pull: 2587
+// * Replace index listing aggregation query with simple query and field collapsing
+//TBD: Too low-level?
+//Repo: x-pack-kibana
+//Pull: 2202
+* Improved logging when X-Pack is not installed on the monitoring cluster.
+//Repo: x-pack-kibana
+//Pull: 2268
+* Saved table interaction states such that if you leave the {kib} page and
+subsequently return, your filters persist.
+//Repo: x-pack-kibana
+//Pull: 2656, 2588
+
+Reporting::
+* Added support for a HTTP Proxy to be configured when using Chromium as the
+browser. For more information, see <<reporting-chromium-settings>>.
+//Repo: x-pack-kibana
+//Pull: 2918
+* Added headless build of Chromium that can be used instead of PhantomJS for
+capturing Reporting screenshots. To enable Chromium, set the following setting
+in your `kibana.yml` file: `xpack.reporting.capture.browser.type: chromium`. For
+now PhantomJS will remain the default. In the future, however, Chromium will
+become the default.
+//Repo: x-pack-kibana
+//Pull: 2604
+* Added an option for PDF reports that preserves the existing layout and size of
+the Visualization or Dashboard.
+//Repo: x-pack-kibana
+//Pull: 2966
+
+Security::
+* Added `manage_index_templates` cluster privileges to the `kibana_system` role,
+which enables the {kib} system user to create and manage the index template for
+the `.kibana` index. For more information, see
+{xpack-ref}/security-privileges.html[Security Privileges] and
+{xpack-ref}/built-in-roles.html[Built-in Roles].
+//https://github.com/elastic/x-pack-elasticsearch/pull/3009
+
+[float]
+[[xkb-bugs-6.1.0]]
+=== Bug fixes
+
+////
+APM::
+* [Backport][APM] Add trace timeline (#2621)
+Repo: x-pack-kibana
+Pull: 2638
+* [APM] use explicit args (#2663)
+Repo: x-pack-kibana
+Pull: 2686
+* [APM] Style stacktrace (#2662)
+Repo: x-pack-kibana
+Pull: 2687
+* [Backport] [APM] Optimized custom plot (#2827)
+Repo: x-pack-kibana
+Pull: 2867
+* [Backport] [APM] Add d3-scale as explicit dependency (#2865)
+Repo: x-pack-kibana
+Pull: 2871
+* [Backport] Deterministic transaction details urls (#2881)
+Repo: x-pack-kibana
+Pull: 2905
+* [Backport] [APM] Consistent link styling + refactor Tab component (#2630)
+Repo: x-pack-kibana
+Pull: 2637
+////
+
+Machine Learning::
+
+* Updated the dates and times on the {ml} pages in {kib}, such that they use the
+time zone information that is set in the `dateFormat.tz` property in the {kib}
+Management Advanced Settings.  Previously, dates and times were displayed in the
+time zone of the web browser.
+//Repo: x-pack-kibana
+//Pull: 2577
+* Added support for `keyword` and `ip` fields in multi-metric and population
+job creation wizards.
+//Repo: x-pack-kibana
+//Pull: 2963
+* Shortened custom urls to remove unnecessary information.
+//Repo: x-pack-kibana
+//Pull: 3099
+* Added warning messages and disabled job creation when the index pattern does
+not contain time series data.
+//Repo: x-pack-kibana
+//Pull: 3300
+* Fixed situation where the watch generated by the job creation wizard was
+generating an e-mail that contained incorrect time information.
+//Repo: x-pack-kibana
+//Pull: 3444
+* Fixed memory leak in the overall swimlane for multi-metric and population
+jobs.
+//Repo: x-pack-kibana
+//Pull: 3544
+* Fixed the **View examples** link that is provided for categorization anomalies.
+In particular, fixed the link for {dfeeds} that use wildcards in their index
+patterns and jobs that have nested fields in the `categorization_field_name`
+property.
+//Repo: x-pack-kibana
+//Pull: 2976
+* Ensured that the aggregation interval that is used in the Single Metric charts
+is a multiple of the job's bucket span.
+//Repo: x-pack-kibana
+//Pull: 3407
+* Improved the X-axis tick labels for {ml} charts and swimlanes, such that they
+take into account the available chart width or screen space.
+//Repo: x-pack-kibana
+//Pull: 2373, 2249
+* Added the median, high_median, and low_median functions to the single- and
+multi-metric job creation wizards in {kib}.
+//Repo: x-pack-kibana
+//Pull: 2417
+* Applied severity threshold settings to the Anomaly Explorer charts, such that
+individual anomalies that do not meet the threshold are hidden.
+//Repo: x-pack-kibana
+//Pull: 3291
+//* [ML] Changed factories to use names exports.
+//Too low-level?
+//Repo: x-pack-kibana
+//Pull: 3405
+
+Monitoring::
+
+* Updated the dates and times on the {monitoring} pages in {kib}, such that they
+use the time zone information that is set in the `dateFormat.tz` property in the
+{kib} Management Advanced Settings. Previously, dates and times were displayed
+in the time zone of the web browser.
+//Repo: x-pack-kibana
+//Pull: 2339
+//* Decouple MonitoringTimeseries component from Angular
+//TBD: Too low-level?
+//Repo: x-pack-kibana
+//Pull: 2523
+* Fixed ability to show or hide the legend in monitoring charts.
+//Repo: x-pack-kibana
+//Pull: 2704
+//* [Monitoring] Fix calculating the node type for node listing
+//TBD: Too low-level?
+//Repo: x-pack-kibana
+//Pull: 2205
+//* [Monitoring] use xpackInfo off the admin cluster to determine if Kibana Monitoring should be enabled
+//TBD: Too low-level?
+//Repo: x-pack-kibana
+//Pull: 2263
+
+Reporting::
+* Fixed internal server errors in {watcher} that were caused by undefined job
+identifiers.
+//Repo: x-pack-kibana
+//Pull: 3196
+
+////
+Security::
+* Don't expose privileged info when login fails
+  - Ensured that privileged information does not appear in the error message when a {kib} login attempt fails.
+
+Repo: x-pack-kibana
+Pull: 2754
+////
+////
+Watcher::
+* Update Watcher expression directives to use new KuiExpression, KuiPanelSimple, and KuiPopover classes
+
+Repo: x-pack-kibana
+Pull: 2681
+
+* [Watcher] Respect the high level state of the watch response
+  - Fixed incorrect watch states in {kib}. In particular, the UI now respects the actual state of the watch when exceptions occur in its input or condition.
+
+Repo: x-pack-kibana
+Pull: 2394
+
+* [Management] Listen for clicks on watcher expression builder buttons
+  - Fixed problem related to creating a threshold-based alert in {kib} with a Safari web browser. For example, the dialogs related to choosing fields and aggregations were not shown in that browser.
+
+Repo: x-pack-kibana
+Pull: 2853
+
+* [Watcher UI] Adds server watch model tests
+
+Repo: x-pack-kibana
+Pull: 2108
+
+* [Watcher UI] Remove auto-refresh of visualization when navigating off page
+
+Repo: x-pack-kibana
+Pull: 2191
+
+* [Watcher UI] Use snake-case to store metadata
+
+Repo: x-pack-kibana
+Pull: 2192
+
+* [Watcher UI] Watch-Action defaults framework
+
+Repo: x-pack-kibana
+Pull: 2052
+
+* [Watcher UI] Creates the xpack-aria-describes directive
+
+Repo: x-pack-kibana
+Pull: 2198
+
+* [Watcher UI] Fix variable casing of JSON
+
+Repo: x-pack-kibana
+Pull: 2242
+
+* [Watcher UI] Made the watch history index pattern more broad
+
+Repo: x-pack-kibana
+Pull: 2758
+////

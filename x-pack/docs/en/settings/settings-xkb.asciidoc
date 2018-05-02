@@ -1,0 +1,16 @@
+[role="xpack"]
+[[settings-xpack-kb]]
+== {xpack} Settings in {kib}
+++++
+<titleabbrev>{xpack} Settings</titleabbrev>
+++++
+
+include::{asciidoc-dir}/../../shared/settings61.asciidoc[]
+
+For more {kib} configuration settings, see <<settings>>.
+
+include::apm-settings.asciidoc[]
+include::dev-settings.asciidoc[]
+include::graph-settings.asciidoc[]
+include::ml-settings.asciidoc[]
+include::reporting-settings.asciidoc[]

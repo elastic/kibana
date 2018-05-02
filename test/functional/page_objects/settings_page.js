@@ -174,9 +174,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldsTabCount() {
-      return await retry.try(async () => {
+      return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        // the value has () around it, remove them
         return text.replace(/\((.*)\)/, '$1');
       });
     }
@@ -188,12 +187,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
           .findByCssSelector(selector).getVisibleText();
         return theText.replace(/\((.*)\)/, '$1');
       });
-    }
-
-    getPageSize() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('div.euiPopover button.euiButtonEmpty span.euiButtonEmpty__content span')
-        .getVisibleText();
     }
 
     async getFieldNames() {
@@ -229,18 +222,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .click();
     }
 
-    async goToPage(pageNum) {
-      const pageButtons = await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.euiPagination button.euiPaginationButton')
-        .getVisibleText();
-
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`.euiPagination button.euiPaginationButton:nth-child(${pageButtons.indexOf(pageNum + '') + 2})`)
-        .click();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async filterField(name) {
       const input = await testSubjects.find('indexPatternFieldFilter');
       await input.clearValue();
@@ -248,12 +229,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async openControlsByName(name) {
+      await this.filterField(name);
       const tableFields = await remote.setFindTimeout(defaultFindTimeout)
         .findAllByCssSelector('table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child')
         .getVisibleText();
 
       await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector(`table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1}) 
+        .findAllByCssSelector(`table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
           td:last-child button`)
         .click();
     }
@@ -279,33 +261,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async setPageSize(size) {
-      try {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector('div.euiPopover button.euiButtonEmpty')
-          .click();
-
-        const sizeButtons = await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector('div.euiPopover .euiContextMenuPanel button.euiContextMenuItem')
-          .getVisibleText();
-
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel 
-          button.euiContextMenuItem:nth-child(${sizeButtons.indexOf(size + ' rows') + 1})`)
-          .click();
-      } catch(e) {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-          .click();
-      } finally {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
-    }
-
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await this.clickOptionalAddNewButton();
         await this.setIndexPatternField(indexPatternName);
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -327,6 +287,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
 
       return await this.getIndexPatternIdFromUrl();
+    }
+
+    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
+
+    async clickOptionalAddNewButton() {
+      const buttonParent = await testSubjects.find('createIndexPatternParent');
+      const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes('createIndexPatternButton');
+      log.debug('found the button ' + buttonVisible);
+      if(buttonVisible) {
+        await testSubjects.click('createIndexPatternButton');
+      }
     }
 
     async getIndexPatternIdFromUrl() {

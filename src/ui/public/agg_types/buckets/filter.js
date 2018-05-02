@@ -1,4 +1,4 @@
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
 
 export function AggTypesBucketsFilterProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);

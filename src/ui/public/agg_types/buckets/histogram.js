@@ -1,11 +1,11 @@
 import _ from 'lodash';
 
-import 'ui/validate_date_interval';
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggTypesBucketsCreateFilterHistogramProvider } from 'ui/agg_types/buckets/create_filter/histogram';
-import intervalTemplate from 'ui/agg_types/controls/number_interval.html';
-import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
-import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
+import '../../validate_date_interval';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
+import { AggTypesBucketsCreateFilterHistogramProvider } from './create_filter/histogram';
+import intervalTemplate from '../controls/number_interval.html';
+import minDocCountTemplate from '../controls/min_doc_count.html';
+import extendedBoundsTemplate from '../controls/extended_bounds.html';
 
 export function AggTypesBucketsHistogramProvider(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);

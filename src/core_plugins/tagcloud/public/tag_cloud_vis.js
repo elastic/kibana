@@ -1,8 +1,8 @@
-import 'plugins/tagcloud/tag_cloud.less';
-import 'plugins/tagcloud/tag_cloud_vis_params';
+import './tag_cloud.less';
+import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
+import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-tagcloud.svg';
@@ -11,7 +11,6 @@ import { Status } from 'ui/vis/update_status';
 VisTypesRegistryProvider.register(function (Private) {
 
   const VisFactory = Private(VisFactoryProvider);
-  const Schemas = Private(VisSchemasProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tagcloud',
@@ -56,7 +55,7 @@ VisTypesRegistryProvider.register(function (Private) {
           title: 'Tags',
           min: 1,
           max: 1,
-          aggFilter: ['terms']
+          aggFilter: ['terms', 'significant_terms']
         }
       ])
     }

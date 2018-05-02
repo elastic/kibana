@@ -1,0 +1,31 @@
+[role="xpack"]
+[[xkb-6.2.2]]
+== {kib} {xpack} 6.2.2 Release Notes
+++++
+<titleabbrev>6.2.2 Release Notes</titleabbrev>
+++++
+
+[float]
+[[xkb-bug-6.2.2]]
+=== Bug fixes
+
+Machine Learning::
+* Fixed issue where jobs created by the data recognizer used the default job
+groups instead of the specified job groups.
+// Repo: x-pack-kibana
+// Pull: 4277
+* Added leading slashes to calendar endpoints to address problems using calendars
+in {kib} on Cloud and behind proxies.
+// Repo: x-pack-kibana
+// Pull: 4554
+* Fixed a scenario where a "no results found" message was returned in the
+*Single Metric Viewer* when an entity contained a special URL character such as
+`+`.
+// Repo: x-pack-kibana
+// Pull: 4571
+
+Security::
+* Enabled users that have the `kibana_dashboard_only_user` role to change their
+passwords in {kib}. For more information, see <<xpack-dashboard-only-mode>>.
+//Repo: x-pack-kibana
+//Pull: 4605

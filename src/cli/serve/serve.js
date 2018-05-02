@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { statSync } from 'fs';
+import { statSync, lstatSync, realpathSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
 
@@ -10,13 +10,39 @@ import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
-let canCluster;
-try {
-  require.resolve('../cluster/cluster_manager');
-  canCluster = true;
-} catch (e) {
-  canCluster = false;
+function canRequire(path) {
+  try {
+    require.resolve(path);
+    return true;
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      return false;
+    } else {
+      throw error;
+    }
+  }
 }
+
+function isSymlinkTo(link, dest) {
+  try {
+    const stat = lstatSync(link);
+    return stat.isSymbolicLink() && realpathSync(link) === dest;
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+}
+
+const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
+const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
+
+// xpack is installed in both dev and the distributable, it's optional if
+// install is a link to the source, not an actual install
+const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
+const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
+const XPACK_INSTALLED = canRequire(XPACK_INSTALLED_DIR);
+const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
 
 const pathCollector = function () {
   const paths = [];
@@ -40,6 +66,14 @@ function readServerSettings(opts, extraCliOptions) {
   if (opts.dev) {
     set('env', 'development');
     set('optimize.watch', true);
+
+    if (!has('elasticsearch.username')) {
+      set('elasticsearch.username', 'elastic');
+    }
+
+    if (!has('elasticsearch.password')) {
+      set('elasticsearch.password', 'changeme');
+    }
 
     if (opts.ssl) {
       set('server.ssl.enabled', true);
@@ -66,7 +100,11 @@ function readServerSettings(opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(
     get('plugins.paths'),
-    opts.pluginPath
+    opts.pluginPath,
+
+    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
+      ? [XPACK_INSTALLED_DIR]
+      : [],
   )));
 
   merge(readKeystore());
@@ -98,7 +136,7 @@ export default function (program) {
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +
-    'times to specify multiple directories',
+      'times to specify multiple directories',
       pluginDirCollector,
       [
         fromRoot('plugins'),
@@ -114,7 +152,12 @@ export default function (program) {
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
 
-  if (canCluster) {
+  if (XPACK_OPTIONAL) {
+    command
+      .option('--oss', 'Start Kibana without X-Pack');
+  }
+
+  if (CAN_CLUSTER) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
@@ -138,9 +181,9 @@ export default function (program) {
       const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
       const settings = getCurrentSettings();
 
-      if (canCluster && opts.dev && !isWorker) {
-      // stop processing the action and handoff to cluster manager
-        const ClusterManager = require('../cluster/cluster_manager');
+      if (CAN_CLUSTER && opts.dev && !isWorker) {
+        // stop processing the action and handoff to cluster manager
+        const ClusterManager = require(CLUSTER_MANAGER_PATH);
         new ClusterManager(opts, settings);
         return;
       }
@@ -187,7 +230,8 @@ export default function (program) {
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
-  } else {
-    console.error('FATAL', message);
   }
+
+  // It's possible for the Hapi logger to not be setup
+  console.error('FATAL', message);
 }

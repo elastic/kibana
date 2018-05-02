@@ -1,10 +1,11 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_sum';
-import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
-import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
-import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
-import { VisProvider } from 'ui/vis';
+import { AggTypesMetricsBucketSumProvider } from '../../metrics/bucket_sum';
+import { AggTypesMetricsBucketAvgProvider } from '../../metrics/bucket_avg';
+import { AggTypesMetricsBucketMinProvider } from '../../metrics/bucket_min';
+import { AggTypesMetricsBucketMaxProvider } from '../../metrics/bucket_max';
+import { VisProvider } from '../../../vis';
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [
@@ -120,6 +121,26 @@ describe('sibling pipeline aggs', function () {
           }
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
+      });
+
+      it('should call modifyAggConfigOnSearchRequestStart for nested aggs\' parameters', () => {
+        init();
+
+        const searchSource = {};
+        const request = {};
+        const customMetricSpy = sinon.spy();
+        const customBucketSpy = sinon.spy();
+        const { customMetric, customBucket } = aggConfig.params;
+
+        // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
+        customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
+        customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
+
+        aggConfig.type.params.forEach(param => {
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, request);
+        });
+        expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
+        expect(customBucketSpy.calledWith(customBucket, searchSource, request)).to.be(true);
       });
 
     });

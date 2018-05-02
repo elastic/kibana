@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { parseInterval } from 'ui/utils/parse_interval';
-import { TimeBucketsCalcAutoIntervalProvider } from 'ui/time_buckets/calc_auto_interval';
-import { TimeBucketsCalcEsIntervalProvider } from 'ui/time_buckets/calc_es_interval';
-import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
+import { parseInterval } from '../utils/parse_interval';
+import { TimeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
+import { TimeBucketsCalcEsIntervalProvider } from './calc_es_interval';
+import { fieldFormats } from '../registry/field_formats';
 
 export function TimeBucketsProvider(Private, timefilter, config) {
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
   const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
-  const fieldFormats = Private(RegistryFieldFormatsProvider);
+
   const getConfig = (...args) => config.get(...args);
 
   function isValidMoment(m) {

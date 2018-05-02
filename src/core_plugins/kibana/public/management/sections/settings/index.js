@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
-import 'plugins/kibana/management/sections/settings/advanced_row';
+import { toEditableConfig } from './lib/to_editable_config';
+import './advanced_row';
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
+import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes

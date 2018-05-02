@@ -1,0 +1,8 @@
+[role="xpack"]
+[[xkb-6.2.1]]
+== {kib} {xpack} 6.2.1 Release Notes
+++++
+<titleabbrev>6.2.1 Release Notes</titleabbrev>
+++++
+
+There are no user-facing changes in this release.

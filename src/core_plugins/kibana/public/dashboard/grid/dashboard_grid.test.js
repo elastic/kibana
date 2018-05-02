@@ -3,13 +3,18 @@ import { shallow } from 'enzyme';
 import sizeMe from 'react-sizeme';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+import { getEmbeddableFactoryMock } from '../__tests__';
 
 import { DashboardGrid } from './dashboard_grid';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
+jest.mock('ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    }
+  }), { virtual: true });
 
 function getProps(props = {}) {
   const defaultTestProps = {
@@ -31,7 +36,6 @@ function getProps(props = {}) {
       }
     },
     getEmbeddableFactory: () => getEmbeddableFactoryMock(),
-    getContainerApi: () => getContainerApiMock(),
     onPanelsUpdated: () => {},
     useMargins: true,
   };

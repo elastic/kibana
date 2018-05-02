@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
-import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { stateMonitorFactory } from '../state_monitor_factory';
+import { SimpleEmitter } from '../../utils/simple_emitter';
 
 describe('stateMonitorFactory', function () {
   const noop = () => {};

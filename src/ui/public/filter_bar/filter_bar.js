@@ -1,17 +1,17 @@
 import _ from 'lodash';
-import template from 'ui/filter_bar/filter_bar.html';
-import 'ui/directives/json_input';
+import template from './filter_bar.html';
+import '../directives/json_input';
 import '../filter_editor';
 import './filter_pill/filter_pill';
-import { filterAppliedAndUnwrap } from 'ui/filter_bar/lib/filter_applied_and_unwrap';
-import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
-import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
-import { FilterBarLibExtractTimeFilterProvider } from 'ui/filter_bar/lib/extract_time_filter';
-import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/filter_out_time_based_filter';
-import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { filterAppliedAndUnwrap } from './lib/filter_applied_and_unwrap';
+import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
+import { FilterBarLibMapFlattenAndWrapFiltersProvider } from './lib/map_flatten_and_wrap_filters';
+import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
+import { FilterBarLibFilterOutTimeBasedFilterProvider } from './lib/filter_out_time_based_filter';
+import { FilterBarLibChangeTimeFilterProvider } from './lib/change_time_filter';
+import { FilterBarQueryFilterProvider } from './query_filter';
 import { compareFilters } from './lib/compare_filters';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
 
@@ -30,9 +30,10 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
     template,
     restrict: 'E',
     scope: {
-      indexPatterns: '='
+      indexPatterns: '=',
+      tooltipContent: '=',
     },
-    link: function ($scope) {
+    link: function ($scope, $elem) {
       // bind query filter actions to the scope
       [
         'addFilters',
@@ -49,6 +50,32 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
+
+      $scope.showCollapseLink = () => {
+        const pill = $elem.find('filter-pill');
+        return pill[pill.length - 1].offsetTop > 10;
+      };
+
+      $scope.filterNavToggle = {
+        isOpen: true,
+        tooltipContent: 'Collapse to hide filters'
+      };
+
+      $scope.toggleFilterShown = () => {
+        const collapser = $elem.find('.filter-nav-link__collapser');
+        const filterPanelPill = $elem.find('.filter-panel__pill');
+        if ($scope.filterNavToggle.isOpen) {
+          $scope.filterNavToggle.tooltipContent = 'Expand to show filters';
+          collapser.attr('aria-expanded', 'false');
+          filterPanelPill.attr('style', 'width: calc(100% - 80px)');
+        } else {
+          $scope.filterNavToggle.tooltipContent = 'Collapse to hide filters';
+          collapser.attr('aria-expanded', 'true');
+          filterPanelPill.attr('style', 'width: auto');
+        }
+
+        $scope.filterNavToggle.isOpen = !$scope.filterNavToggle.isOpen;
+      };
 
       $scope.applyFilters = function (filters) {
         addAndInvertFilters(filterAppliedAndUnwrap(filters));

@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
+import { AggTypesAggTypeProvider } from '../agg_type';
+import { createLegacyClass } from '../../utils/legacy_class';
 
 export function AggTypesBucketsBucketAggTypeProvider(Private) {
   const AggType = Private(AggTypesAggTypeProvider);
 
-  _.class(BucketAggType).inherits(AggType);
+  createLegacyClass(BucketAggType).inherits(AggType);
   function BucketAggType(config) {
     BucketAggType.Super.call(this, config);
 

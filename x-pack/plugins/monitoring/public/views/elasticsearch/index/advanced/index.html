@@ -1,0 +1,23 @@
+<monitoring-main
+  product="elasticsearch" name="indices"
+  instance="{{ indexName }}"
+  resolver="{{ indexName }}"
+  page="advanced"
+>
+  <monitoring-index-summary summary="pageData.indexSummary"></monitoring-index-summary>
+
+  <div class="page-row">
+    <div class="row" ng-if="pageData.metrics">
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_1"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_2"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_3"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_4"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_total"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_time"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_refresh"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_throttling"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_disk"/></div>
+      <div class="col-md-6"><monitoring-chart series="pageData.metrics.index_segment_count"/></div>
+    </div>
+  </div>
+</monitoring-main>

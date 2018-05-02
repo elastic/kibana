@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
-import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
-import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
-import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
-import { EventsProvider } from 'ui/events';
-import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
+import { onlyDisabled } from './lib/only_disabled';
+import { onlyStateChanged } from './lib/only_state_changed';
+import { uniqFilters } from './lib/uniq_filters';
+import { compareFilters } from './lib/compare_filters';
+import { EventsProvider } from '../events';
+import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);

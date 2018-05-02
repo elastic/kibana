@@ -19,7 +19,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:browser', [
     'checkPlugins',
-    'run:testServer',
+    'run:browserTestServer',
     'karma:unit',
   ]);
 
@@ -31,7 +31,7 @@ module.exports = function (grunt) {
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
 
     grunt.task.run([
-      'run:testServer',
+      'run:browserTestServer',
       ...ciShardTasks
     ]);
   });
@@ -50,32 +50,32 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:dev', [
     'checkPlugins',
-    'run:devTestServer',
+    'run:devBrowserTestServer',
     'karma:dev'
   ]);
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
     'run:testEsServer',
-    'run:testUIServer',
+    'run:funcTestServer',
     'functional_test_runner:functional',
     'stop:testEsServer',
-    'stop:testUIServer'
+    'stop:funcTestServer'
   ]);
 
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
     'run:testEsServer',
-    'run:testUIReleaseServer',
+    'run:ossDistFuncTestServer',
     'functional_test_runner:functional',
     'stop:testEsServer',
-    'stop:testUIReleaseServer'
+    'stop:ossDistFuncTestServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
     'run:testEsServer',
-    'run:testUIDevServer:keepalive'
+    'run:devFuncTestServer:keepalive'
   ]);
 
   grunt.registerTask('test:api', [
@@ -116,7 +116,7 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--skip-kibana', '--skip-kibana-extra'],
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
       opts: { stdio: 'inherit' }
     };
 

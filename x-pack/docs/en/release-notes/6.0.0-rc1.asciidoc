@@ -1,0 +1,51 @@
+[float]
+[[xkb-6.0.0-rc1]]
+=== 6.0.0-rc1
+
+[float]
+[[xkb-bug-6.0.0-rc1]]
+==== Bug fixes
+
+Dev Tools::
+* Clarified field labels in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2171[#2171] (issues: https://github.com/elastic/x-pack-kibana/issues/2096[#2096], https://github.com/elastic/x-pack-kibana/issues/2121[#2121])
+* Added auto-sizing to the input, pattern, and output text areas in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2174[#2174] (issues: https://github.com/elastic/x-pack-kibana/issues/1941[#1941], https://github.com/elastic/x-pack-kibana/issues/2102[#2102])
+* Added auto-sizing of the custom patterns text area in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2102[#2102] (issues: https://github.com/elastic/x-pack-kibana/issues/2089[#2089], https://github.com/elastic/x-pack-kibana/issues/2100[#2100])
+* Enabled users to specify custom patterns in a well-known format in the Grok Debugger.
+// https://github.com/elastic/x-pack-kibana/pull/2100[#2100] (issue: https://github.com/elastic/x-pack-kibana/issues/2096[#2096])
+
+Machine Learning::
+* Fixed job creation failure that occurred when using saved searches with filters.
+// https://github.com/elastic/x-pack-kibana/pull/2648
+////
+Monitoring::
+* Fixed table column alignment.
+// https://github.com/elastic/x-pack-kibana/pull/2433[#2433] (issues: https://github.com/elastic/x-pack-kibana/issues/1891[#1891], https://github.com/elastic/x-pack-kibana/issues/2430[#2430])
+* Fixed message text when cluster alerts are disabled due to the type of license.
+// https://github.com/elastic/x-pack-kibana/pull/2528[#2528] (issue: https://github.com/elastic/x-pack-kibana/issues/2527[#2527])
+//The following PRs are included in the Logstash Release Notes too:
+* Added a tooltip to show the full text for truncated titles in the Pipeline Viewer UI.
+// https://github.com/elastic/x-pack-kibana/pull/2605[#2605] (issues: https://github.com/elastic/x-pack-kibana/issues/2515[#2515], https://github.com/elastic/x-pack-kibana/issues/2538[#2538])
+* Fixed pagination in the Logstash Pipeline Management UI.
+// https://github.com/elastic/x-pack-kibana/pull/2541[#2541] (issue: https://github.com/elastic/x-pack-kibana/issues/2540[#2540])
+* Fixed rendering of Pipeline Viewer UI in Firefox web browser.
+// https://github.com/elastic/x-pack-kibana/pull/2534[#2534] (issue: https://github.com/elastic/x-pack-kibana/issues/2532[#2532])
+* Fixed calculation of slowness and time consumption in the Pipeline Viewer UI.
+// https://github.com/elastic/x-pack-kibana/pull/2201[#2201]
+* Added appropriate message if there are no pipelines to monitor.
+// https://github.com/elastic/x-pack-kibana/pull/2066[#2066] (issue: https://github.com/elastic/x-pack-kibana/issues/2041[#2041])
+* Fixed large graph performance in the Pipeline Viewer UI.
+// https://github.com/elastic/x-pack-kibana/pull/2435[#2435] (issue: https://github.com/elastic/x-pack-kibana/issues/2396[#2396])
+* Fixed several layout issues in the Pipeline Viewer UI.
+// https://github.com/elastic/x-pack-kibana/pull/2267[#2267]
+* Added boolean labeling for true and false edges in the Pipeline Viewer UI.
+// https://github.com/elastic/x-pack-kibana/pull/2188[#2188] (issue: https://github.com/elastic/x-pack-kibana/issues/1967[#1967])
+* Sorted pipeline versions from newer to older in the Pipelines view.
+// https://github.com/elastic/x-pack-kibana/pull/2177[#2177] (issue: https://github.com/elastic/x-pack-kibana/issues/2175[#2175])
+////
+Reporting::
+* Fixed generated reports such that they show the time zone on the client, as
+specified in the `dateFormat` field in the Advanced Settings.
+// https://github.com/elastic/x-pack-kibana/pull/2403[#2403] (issues: https://github.com/elastic/x-pack-kibana/issues/2368[#2368], https://github.com/elastic/x-pack-kibana/issues/2377[#2377])

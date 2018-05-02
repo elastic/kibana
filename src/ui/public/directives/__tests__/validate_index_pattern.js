@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/validate_index_pattern';
+import '../validate_index_pattern';
 
 // Load the kibana app dependencies.
 

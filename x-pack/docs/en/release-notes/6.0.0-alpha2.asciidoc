@@ -1,0 +1,42 @@
+[float]
+[[xkb-6.0.0-alpha2]]
+=== 6.0.0-alpha2
+
+[float]
+[[xkb-breaking-6.0.0-alpha2]]
+==== Breaking Changes
+
+Watcher::
+* The watch `_status` field has been renamed to `status`, as underscores in
+field names will not be allowed.
+
+[float]
+[[xkb-features-6.0.0-alpha2]]
+==== New Features
+
+Reporting::
+* Enabled export as CSV.
+
+Security::
+* Added a View Dashboards Only setting to the roles section under
+Security management. If a user is assigned a role that has this setting
+enabled, when they access Kibana it presents Dashboard Only mode.
+
+[float]
+[[xkb-enhancements-6.0.0-alpha2]]
+==== Enhancements
+
+Machine Learning::
+* Added a Datefeed Preview tab to expanded rows in the jobs list under
+Job Management. This displays the JSON response from the preview endpoint.
+
+Watcher::
+* Watcher indices no longer use multiple types.
+
+[float]
+[[xkb-bugs-6.0.0-alpha2]]
+==== Bug Fixes
+
+Graph::
+* Reinstated `_xpack/graph/_explore` as the correct graph endpoint.
+`_xpack/_graph/_explore` is deprecated and will be removed in v7.0.

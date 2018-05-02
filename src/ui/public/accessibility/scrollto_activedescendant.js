@@ -5,7 +5,7 @@
  * method.
  */
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules.get('kibana')
   .directive('scrolltoActivedescendant', () => ({

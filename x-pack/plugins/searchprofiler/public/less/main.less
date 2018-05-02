@@ -1,0 +1,220 @@
+.profilerDevTool {
+
+  .wrapper {
+    //margin-left:350px;
+    display: flex;
+    flex-flow: row wrap;
+    width:100%;
+    position: absolute;
+    height:100%;
+  }
+
+  .main {
+    overflow-y: auto;
+    height:100%;
+    padding-left:5px;
+    padding-right:5px;
+    flex: 3 0 0;
+    order: 2;
+  }
+
+  .details {
+    padding:10px;
+    width: 250px;
+    order: 3;
+  }
+
+  .sense {
+    height:100%;
+    min-width:300px;
+    flex: 1 0 0;
+    order: 1;
+  }
+
+  .panel {
+    background-color: inherit;
+    margin: 0px;
+    padding:0px;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: 1px solid #444;
+  }
+
+  .shard-body {
+    padding-top: 5px;
+    margin: 0px;
+    margin-left: 5px;
+  }
+
+  .panel-body-underline {
+    border-bottom: 1px solid #eee;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    padding-top:20px;
+    padding:5px;
+    margin-top: 20px;
+    margin-left:10px;
+  }
+
+  // Ace Editor
+  .ace_editor {
+    height: 100%;
+    padding-bottom: 50px;
+    outline: solid 1px #D9D9D9;
+  }
+
+  .errorMarker {
+    position:absolute;
+    background:rgba(255,175,175,0.5);
+    z-index:20
+  }
+
+  // Profile details treeview
+  .shard-details {
+    color: black;
+    font-size: 14px;
+    float: left;
+    margin-bottom: 5px;
+  }
+
+  .shard-details-right {
+    color: #777;
+    font-size: 14px;
+    float: right;
+    text-align: right;
+    margin-bottom: 10px;
+  }
+
+  .shard {
+    margin-top:10px;
+    min-width: 100%;
+    display:inline-block;
+    border: none;
+  }
+
+  .index {
+    margin-top:15px;
+    min-width: 100%;
+    padding: 6px;
+    padding-right:15px;
+    display:inline-block;
+  }
+
+  .tv-row:hover {
+    outline:solid 1px #aaa;
+  }
+
+  .tv-row-last-hover {
+    outline:solid 1px #aaa;
+  }
+
+  .tv-row,
+  .tv-row-header {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+  }
+
+  .tv-row-header {
+     > .cell {
+      font-weight: bold;
+      color: #777;
+    }
+  }
+
+  .cell {
+      display: table-cell;
+      vertical-align: middle;
+
+      > .detail {
+        font-style: italic;
+        font-size: 0.8em;
+        padding-left:15px;
+      }
+  }
+
+  .description {
+    background-color:white;
+  }
+
+  .time {
+      width: 10%;
+      text-align: center;
+  }
+  .totaltime {
+      width: 10%;
+      text-align: center;
+  }
+  .percentage {
+      width: 15%;
+      text-align: center;
+      background-color:white;
+  }
+
+  .glyphicon-menu-pad {
+    padding-left:10px;
+  }
+
+  // Progressbar
+  .graph {
+      height: 20px;
+      border: 1px solid #888;
+      background: linear-gradient(to top, rgba(168,168,168,1) 0%,rgba(252,252,252,1) 23%);
+      position: relative;
+      vertical-align: middle;
+      margin: 2px;
+
+      p {
+        position: absolute;
+        text-align: center;
+        width: 100%;
+        margin: 0;
+        line-height: 16px;
+        vertical-align: middle;
+        font-size: small;
+        order:5;
+      }
+  }
+  .bar {
+      height: 20px; /* Not 30px because the 1px top-border brings it up to 30px to match #graph */
+      background: rgb(255,216,216);
+      background: linear-gradient(to top, rgba(255,216,216,1) 0%,rgba(255,175,175,1) 100%);
+      border-top: 1px solid #fceabb;
+      vertical-align: middle;
+      float:right;
+  }
+
+  .error {
+      /* These styles are arbitrary */
+      background-color: #fceabb;
+      padding: 1em;
+      font-weight: bold;
+      color: red;
+      border: 1px solid red;
+  }
+
+  // Breakdown table
+  .breakdown {
+    width:100%
+  }
+
+  .breakdown {
+    >tbody {
+      >tr {
+        >td {
+          padding-right: 5px;
+        }
+      }
+    }
+  }
+
+}
+
+  .profilerDevTool__container {
+    overflow: auto;
+    height:100%;
+    width:100%;
+    display: flex;
+    flex: 1 0 auto;
+  }

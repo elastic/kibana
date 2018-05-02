@@ -61,8 +61,6 @@ image:images/tsvb-gauge.png["Gauge Visualization"]
 
 This visualization allows you to enter Markdown text and embed Mustache
 template syntax to customize the Markdown with data based on a set of series.
-This visualization also supports HTML markup along with the ability to define
-a custom stylesheet.
 
 image:images/tsvb-markdown.png["Markdown Visualization"]
 
@@ -211,4 +209,3 @@ syntax uses the Handlebar.js processor which is an extended version of the Musta
 template language.
 
 image:images/tsvb-markdown-tab.png["Markdown Tab"]
-

@@ -1,8 +1,8 @@
-import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
-import { AggTypesBucketsCreateFilterRangeProvider } from 'ui/agg_types/buckets/create_filter/range';
+import { AggTypesBucketsBucketAggTypeProvider } from './_bucket_agg_type';
+import { AggTypesBucketsCreateFilterRangeProvider } from './create_filter/range';
 import { FieldFormat } from '../../../field_formats/field_format';
 import { RangeKeyProvider } from './range_key';
-import rangesTemplate from 'ui/agg_types/controls/ranges.html';
+import rangesTemplate from '../controls/ranges.html';
 
 export function AggTypesBucketsRangeProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);

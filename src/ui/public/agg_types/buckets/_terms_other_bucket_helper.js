@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
-import { buildExistsFilter } from 'ui/filter_manager/lib/exists';
-import { buildQueryFromFilters } from 'ui/courier/data_source/build_query/from_filters';
+import { AggConfig } from '../../vis/agg_config';
+import { buildPhrasesFilter } from '../../filter_manager/lib/phrases';
+import { buildExistsFilter } from '../../filter_manager/lib/exists';
+import { buildQueryFromFilters } from '../../courier/data_source/build_query/from_filters';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -84,8 +84,7 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 };
 
 
-export const OtherBucketHelperProvider = (Private) => {
-  const AggConfig = Private(VisAggConfigProvider);
+export const OtherBucketHelperProvider = () => {
 
   const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
