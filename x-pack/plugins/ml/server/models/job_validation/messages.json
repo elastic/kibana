@@ -153,7 +153,7 @@
   },
   "mml_value_invalid": {
     "status": "ERROR",
-    "text": "{{mml}} is not a valid value for model memory limit. e.g. 10MB"
+    "text": "{{mml}} is not a valid value for model memory limit. The value should be specified in bytes e.g. 10MB"
   },
   "estimated_mml_greater_than_mml": {
     "status": "INFO",
