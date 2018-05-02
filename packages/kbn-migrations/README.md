@@ -2,12 +2,12 @@
 
 Kibana migrations provide a systematic and predictable way to upgrade data from one version of Kibana / plugins to a later version. The system has been designed in such a way that upgrading from one version of Kibana to any other should be possible in one go (at least from the standpoint of upgrading documents in the Kibana index).
 
-The core logic for migrations is index agnostic, but it does make an assumption that the index documents are compatible with the Kibana saved-object-client conventions.
+The core logic for migrations is index / alias (refered to simply as index from here on) agnostic, but it does make an assumption that the index documents are compatible with the Kibana saved-object-client conventions.
 
 
 ## How it works
 
-There are two primary use-cases for migrations. The first is migrating an index (e.g. from Kibana 6.4 -> 7.0). The second is migrating documents that are being imported into an index.
+There are two primary use-cases for migrations. The first is migrating all documents in an index from one version to another (e.g. from Kibana 6.4 -> 7.2). The second is migrating documents that are being imported into an index.
 
 
 ### Types of migrations
@@ -18,9 +18,9 @@ There are two types of migrations: seed and transform.
 - transform - takes an old document (e.g. from `myplugin-1.0`) and transforms it into a new new shape (e.g. for `myplugin-2.0`)
 
 
-### Migrating an index
+### Determining if migration is needed
 
-When an index is migrated, the first thing the migration engine does is check to see if the index has a special document with id `migration:migration-state`. This is referred to as the index's `migrationState`, and it contains metadata that is used to determine what migrations / mappings have already been applied to an index. It has several properties:
+In each index that the migration system controls, it stores a document with id `migration:migration-state`. This document is referred to as the index's `migrationState`, and it contains metadata that is used to determine what migrations / mappings have already been applied to an index. It has several properties:
 
 - `status` - is the index migrating or migrated
 - `previousIndex` - the name of the previous index (if any), which can be used to rollback or trace the history of migrations
@@ -30,9 +30,22 @@ When an index is migrated, the first thing the migration engine does is check to
   - migration ids the plugins have applied to the current index
   - checksums of the mappings and migration ids used to quickly determine if the mappings / migration list has changed
 
-If the index has a `migrationState` with a status of 'migrating', the migration will be skipped, as some other Kibana instance is currently migrating the index. Note: There is a `force` option which will force migrations to run, even if the migration status is already 'migrating'.
+To determine if an index needs to be migrated, the migration system compares the plugins in migrationState with the current plugins in the system. If any of the checksums don't match, a migration is needed. Plugins which exist in migrationState but are no longer in the live system are ignored. Their documents and mappings are retained in the index, so removing / disabling a plugin won't require a migration.
 
-If the migration system determines that the index needs to be migrated, it performs (roughly) the following steps. Here, `index` is the name of the index being migrated.
+A migration is required if *any* one of the following statements is true:
+
+- The index doesn't exist
+- The index exists but has no migrationState
+- The index exists but is not an alias
+- The index exists, has a migrationState, the index's migrationState.status is 'migrated', but one or more of the active plugins' mappings / migrations are missing from it
+- The `force` option is true and the index's migrationState.status is 'migrating'
+
+Note: We don't store and compare a single checksum, because the migration system supports disabling and plugins without requiring a migration. If we were to use a single checksum of all plugins, then any change-- including disable / removal of a plugin-- requires a migration.
+
+
+### Migrating an index
+
+When a migration is attempted on an index, the first thing the migration index does is determine if migrations need to be run at all (using the rules outlined in the previous section). If the migration system determines that the index needs to be migrated, it performs (roughly) the following steps. Here, `index` is the name of the index being migrated.
 
 - If `index` does not exist, it will be created
 - If `index` is an index and not an alias, it will be converted to an alias
@@ -70,10 +83,17 @@ If you want to import data from a file into an index, it's possible that the fil
 
 To do this, the migration engine exposes functions that allow the migration state to be exported. When importing, the migration engine can be given a migration state and a list of documents. It will then run any necessary transform migrations on those documents to ensure they are up-to-date with the current index.
 
-If it cannot successfully transform the documents, it will give a descriptive error.
-
 The tranform function is accessed via: `Document.transform` exported by the `kbn-migrations` package.
 
+
+### Migration failures
+
+Migrations can fail for a number of reasons
+
+- One of the seeds / transforms throws an exception
+- The index migrationState document has been tampered with and is invalid
+- If any plugins in the index's migrationState are newer than the current, active plugins (e.g. if you try to run Kibana 6.4 against a Kibana 7.0 index)
+- Connectivity errors between Kibana and Elasticsearch
 
 
 ## Adding migrations to a plugin
@@ -273,16 +293,26 @@ It should now be possible to start the previous version of Kibana.
 
 
 
-## Limitations, assumptions, and constraints
+## Design choices and constraints
 
 - Not intended to be used to migrate large indices, as it pulls documents from Elasticsearch into Node and then back to Elasticsearch
 - The index is assumed to only have documents which conform to the saved-object-client conventions
 - Does not attempt to recover from failure of an individual migration
   - If an individual migration (transform or seed) fails, the migration fails
+- Plugin ids are assumed to be stable. If a plugin's id changes, the migration system will:
+  - Will think that it has been removed and a brand new plugin has been added
+  - Will attempt to run all migrations for the "new" plugin
+- Migration order is assumed to be stable within a plugin
+  - So, the system will error in a scenario like this:
+    - A plugin defines migrations 'a', 'b', and 'c'
+    - Those migrations have been applied to an index
+    - The plugin is upgraded to a later version, which defines migrations 'a', 'c', 'b'
+    - In this case, the plugin's migrations have been reordered
+
 
 
 ## Kibana-index specific notes
 
-Apart from the core migration logic in `kbn-migrations`, there is logic which is specific to the Kibana index itself.
+Apart from the core migration logic in the `kbn-migrations` package, there is logic which is specific to the Kibana index itself.
 
-When Kibana starts, it will check to see if it needs to migrate its index, and if so, it will run migrations. Only one instance of Kibana will run migrations at any given time-- all other instances will fail to start until Kibana's index has been migrated.
+When Kibana starts, it will check to see if it needs to migrate its index. If it does, it will perform the migration prior to serving any HTTP requests. Only one instance of Kibana will perform migrations at any given time. All other Kibana instances will fail to start and will log an error indicating that the Kibana index is migrating. Once the Kibana index migration has completed, the other instances will be able to start successfully.
