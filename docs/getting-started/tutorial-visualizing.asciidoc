@@ -1,21 +1,21 @@
 [[tutorial-visualizing]]
 == Visualizing Your Data
 
-Using the Visualize application, you can shape your data using a variety
-of charts, tables, and maps, and more. In this tutorial, we'll create four
+In the Visualize application, you can shape your data using a variety
+of charts, tables, and maps, and more. You'll create four
 visualizations: a pie chart, bar chart, coordinate map, and Markdown widget.
 
 . Open *Visualize.*
-. Click *Create a visualization* or the *+* button.
-
-You'll see the visualization types that Kibana has to offer. Let’s use a
-*Pie* chart to gain insight into the account balances in the bank account data.
+. Click *Create a visualization* or the *+* button. You'll see the visualization
+types that Kibana has to offer.
+. Click *Pie*.  You'll use this chart to gain insight into the account balances
+in the bank account data.
 
 [role="screenshot"]
 image::images/tutorial-visualize-wizard-step-1.png[]
 
 You can build visualizations from saved searches, or enter new search criteria.
-We want a new search of our account data so in *New Search*, select the `ba*` index
+The account data is new in Kibana so in *New Search*, select the `ba*` index
 pattern.
 
 [role="screenshot"]
@@ -23,8 +23,8 @@ image::images/tutorial-visualize-wizard-step-2.png[]
 
 === Pie Chart
 
-Initially, our pie contains a single "slice."
-That's because our default search matched all documents.
+Initially, the pie contains a single "slice."
+That's because the default search matched all documents.
 
 [role="screenshot"]
 image::images/tutorial-visualize-pie-1.png[]
@@ -32,7 +32,9 @@ image::images/tutorial-visualize-pie-1.png[]
 To specify which slices to display in the pie, you use an Elasticsearch
 {ref}/search-aggregations.html[bucket aggregation]. This aggregation
 sorts the documents that match your search criteria into different
-categories, also known as _buckets_. We'll use a bucket aggregation to establish
+categories, also known as _buckets_.
+
+Use a bucket aggregation to establish
 multiple ranges of account balances and find out how many accounts fall into
 each range.
 
@@ -58,8 +60,8 @@ range.
 [role="screenshot"]
 image::images/tutorial-visualize-pie-2.png[]
 
-Let's take a look at another dimension of the data, the ages of the account
-holders.  We do this by adding another bucket aggregation.
+Add another bucket aggregation that looks at the ages of the account
+holders.
 
 . At the bottom of the *Buckets* pane, click *Add sub-buckets*.
 . In *Select buckets type,* click *Split Slices*.
@@ -67,29 +69,29 @@ holders.  We do this by adding another bucket aggregation.
 . In the *Field* dropdown, select *age*.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
-Now you can see the break down of the account holders' ages displayed
+Now you can see the break down of the account holders' ages, displayed
 in a ring around the balance ranges.
 
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
 
-To save this chart so we can use it later, click *Save* in the top menu bar
+To save this chart so you can use it later, click *Save* in the top menu bar
 and enter `Pie Example`.
 
 === Bar Chart
 
-Next, we'll use a bar chart to look at the Shakespeare data set. Let's find out how the
-plays compare when it comes to the number of speaking parts.
+You'll use a bar chart to look at the Shakespeare data set and compare
+the number of speaking parts in the plays.
 
-Create a *Vertical Bar* chart and set the search source to *shakes*.
-You'll see a single bar that shows the total count of documents that match
-the default wildcard query.
+Create a *Vertical Bar* chart and set the search source to *shakes**.
+The initial chart is a single bar that shows the total count of documents
+that match the default wildcard query.
 
 [role="screenshot"]
 image::images/tutorial-visualize-bar-1.png[]
 
-We want to show the number of speaking parts per play along the Y-axis.
-This requires us to configure the Y-axis
+Show the number of speaking parts per play along the Y-axis.
+This requires you to configure the Y-axis
 {ref}/search-aggregations.html[metric aggregation,]
 which computes metrics based on values extracted from the search results.
 
@@ -104,7 +106,7 @@ which computes metrics based on values extracted from the search results.
 image::images/tutorial-visualize-bar-1.5.png[]
 
 
-Now let's show the plays long the X-axis.
+Show the plays along the X-axis.
 
 . In the *Buckets* pane, click *X-Axis*.
 . Set *Aggregation* to `Terms` and *Field* to `play_name`.
@@ -120,7 +122,7 @@ that play.
 
 Notice how the individual play names show up as whole phrases, instead of
 broken into individual words. This is the result of the mapping
-we did at the beginning of the tutorial, when we marked the `play_name` field
+you did at the beginning of the tutorial, when your marked the `play_name` field
 as `not analyzed`.
 
 
@@ -147,7 +149,7 @@ make the differences stand out, starting the Y-axis at a value closer to the min
 
 === Coordinate Map
 
-We'll use a coordinate map to visualize geographic information in our log file sample data.
+Using a coordinate map, you can visualize geographic information in the log file sample data.
 
 . Create a *Coordinate map* and set the search source to `logstash*`.
 . In the top menu bar, click the time picker on the far right.
@@ -155,18 +157,18 @@ We'll use a coordinate map to visualize geographic information in our log file s
 . Set the start time to May 18, 2015 and the end time to May 20, 2015.
 . Click *Go*.
 
-We haven't defined any buckets yet, so our visualization is a map of the world.
+You haven't defined any buckets yet, so the visualization is a map of the world.
 
 [role="screenshot"]
 image::images/tutorial-visualize-map-1.png[]
 
-Now let's map the geo coordinates from the log files.
+Now map the geo coordinates from the log files.
 
 . In the *Buckets* pane, click *Geo Coordinates*.
 . Set *Aggregation* to *Geohash* and *Field* to *geo.coordinates*.
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
-Our map now looks like this:
+The map now looks like this:
 
 [role="screenshot"]
 image::images/tutorial-visualize-map-2.png[]
@@ -193,7 +195,7 @@ image::images/tutorial-visualize-map-3.png[]
 
 === Markdown
 
-Our final visualization is a Markdown widget that renders formatted text.
+The final visualization is a Markdown widget that renders formatted text.
 
 . Create a *Markdown* visualization.
 . In the text box, enter the following:
@@ -205,7 +207,7 @@ The Markdown widget uses **markdown** syntax.
 
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
-The Markdown renders in the preview pane as follows:
+The Markdown renders in the preview pane:
 
 [role="screenshot"]
 image::images/tutorial-visualize-md-2.png[]

@@ -2,7 +2,8 @@
 == Putting it Together in a Dashboard
 
 A dashboard is a collection of visualizations that you can arrange and share.
-Let's build a dashboard that contains the visualizations you saved during this tutorial.
+Here you'll build a dashboard that contains the visualizations you saved during
+this tutorial.
 
 . Open *Dashboard*.
 . Click *Create new dashboard*.
@@ -15,10 +16,10 @@ Your sample dashboard should be similar to this:
 [role="screenshot"]
 image::images/tutorial-dashboard.png[]
 
-You can rearrange the visualizations by clicking a visualization header and dragging.
-The gear icon in the top right of a visualization displays controls
-for editing and deleting the visualization.  A resize control is
-on the lower right.
+You can rearrange the visualizations by clicking a the header of a
+visualization and dragging. The gear icon in the top right of a visualization
+displays controls for editing and deleting the visualization.  A resize control
+is on the lower right.
 
 To get a link to share or HTML code to embed the dashboard in a web page, save
 the dashboard and click  *Share*.

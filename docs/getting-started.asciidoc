@@ -4,7 +4,7 @@
 [partintro]
 --
 Ready to get some hands-on experience with Kibana?
-This tutorial shows you how to perform the following steps:
+This tutorial shows you how to:
 
 * Load a sample data set into Elasticsearch
 * Define an index pattern

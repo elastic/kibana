@@ -1,7 +1,7 @@
 [[tutorial-load-dataset]]
 == Loading Sample Data
 
-The Getting Started tutorial requires the following data sets:
+The Getting Started tutorial requires three data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields. Download
   https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[shakespeare.json].
@@ -16,7 +16,7 @@ Two of the data sets are compressed. To extract the files, use these commands:
 unzip accounts.zip
 gunzip logs.jsonl.gz
 
-The Shakespeare data set has the following structure:
+The Shakespeare data set has this structure:
 
 [source,json]
 {
@@ -58,7 +58,7 @@ Before you load the Shakespeare and logs data sets, you must set up {ref}/mappin
 Mappings divide the documents in the index into logical groups and specify a field's characteristics, such as the
 field's searchability or whether it's _tokenized_, or broken up into separate words.
 
-In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set using the following command:
+In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
 
 [source,js]
 PUT /shakespeare
@@ -84,8 +84,7 @@ The strings are treated as a single unit even if they contain multiple words.
 * The _line_id_ and _speech_number_ fields are integers.
 
 The logs data set requires a mapping to label the latitude and longitude pairs
-as geographic locations by applying the `geo_point` type. Use the following
-commands:
+as geographic locations by applying the `geo_point` type.
 
 [source,js]
 PUT /logstash-2015.05.18
@@ -163,14 +162,14 @@ Invoke-RestMethod "http://localhost:9200/_bulk?pretty" -Method Post -ContentType
 
 These commands might take some time to execute, depending on the available computing resources.
 
-Verify successful loading with the following command:
+Verify successful loading:
 
 [source,js]
 GET /_cat/indices?v
 
 //CONSOLE
 
-You should see output similar to the following:
+You should see output similar to this:
 
 [source,shell]
 health status index               pri rep docs.count docs.deleted store.size pri.store.size

@@ -7,7 +7,7 @@ in the common logging use case, an Elasticsearch index name typically contains t
 YYYY.MMM.DD format.  The matching index pattern for May 2018 might
 be `logstash-2018.05*`.
 
-We'll start by creating patterns for the Shakespeare data set, which has an
+Start by creating patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank.` These data sets don't contain time-series data.
 
@@ -23,8 +23,8 @@ image::images/tutorial-pattern-1.png[]
 you don't need to configure any settings.
 . Define a second index pattern named  `ba*`.
 
-Next, we'll create an index pattern for the Logstash data set. This time,
-you'll need to configure the time-series data.
+Next, create an index pattern for the Logstash data set. This time,
+you must configure the time-series data.
 
 . Define an index pattern named `logstash*`.
 . In *Configure settings*, select *@timestamp* in the *Time Filter field name* dropdown menu.

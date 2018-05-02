@@ -1,11 +1,11 @@
 [[tutorial-discovering]]
 == Discovering Your Data
 
-Now let's use the Discover application to explore the accounts index.  We'll submit
+In the Discover application, you can enter
 an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
-query] and filter our results.
+query] to search your data and filter the results.
 
-. Open *Discover*. You'll see that shakes* is the current index pattern.
+. Open *Discover*. The shakes* pattern is the current index pattern.
 . Click the caret to the right of shakes*, and select `ba*`.
 . In the search field, enter the following string:
 +
@@ -19,7 +19,7 @@ excess of 47,500. It returns results for account numbers 8, 32, 78, 85, and 97.
 image::images/tutorial-discover-2.png[]
 
 By default, all fields are shown for each matching document. To choose which
-fields to display, hover your mouse over the the list of *Available Fields*
+fields to display, hover the mouse over the the list of *Available Fields*
 and then click *add* next to each field you want include.
 
 For example, if you add the `account_number` field, the display changes to a list of five
