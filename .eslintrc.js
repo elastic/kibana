@@ -61,7 +61,7 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'ui'],
+        'import/core-modules': ['plugins', 'ui', 'uiExports'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {

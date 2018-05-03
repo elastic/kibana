@@ -5,6 +5,9 @@
  */
 
 
+// import the uiExports that we want to "use"
+import 'uiExports/fieldFormats';
+import 'uiExports/savedObjectTypes';
 
 import 'ui/courier';
 import 'ui-bootstrap';
@@ -47,4 +50,3 @@ uiRoutes
   .otherwise({
     redirectTo: '/jobs'
   });
-

@@ -54,6 +54,12 @@ translationsApi(chrome, internals);
 
 const waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function () {
+    // import chrome nav controls and hacks now so that they are executed after
+    // everything else, can safely import the chrome, and interact with services
+    // and such setup by all other modules
+    require('uiExports/chromeNavControls');
+    require('uiExports/hacks');
+
     chrome.setupAngular();
     angular.bootstrap(document.body, ['kibana']);
     resolve();
