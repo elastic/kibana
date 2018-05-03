@@ -5,6 +5,8 @@ import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiRange,
   EuiSpacer,
@@ -33,8 +35,13 @@ export class MarkdownOptionsTab extends Component {
     return (
       <EuiForm>
 
-        <EuiPanel>
-          <EuiTitle><h1>Markdown</h1></EuiTitle>
+        <EuiPanel className="markdown-vis-options">
+          <div>
+            <EuiTitle className="markdown-vis--title"><h1>Markdown</h1></EuiTitle>
+            <EuiLink className="markdown-vis--help" href="https://www.markdownguide.org/cheat-sheet" target="_blank">
+              <EuiIcon type="help" /> Syntax help
+            </EuiLink>
+          </div>
           <EuiSpacer />
 
           <EuiFormRow
@@ -42,9 +49,9 @@ export class MarkdownOptionsTab extends Component {
             label={`Font Size (${params.fontSize}pt)`}
           >
             <EuiRange
-              checked={params.fontSize}
               min={8}
               max={36}
+              value={params.fontSize}
               onChange={this.handleUpdate('fontSize')}
               data-test-subj="markdownEditorFontSize"
             />
@@ -63,8 +70,9 @@ export class MarkdownOptionsTab extends Component {
 
           <EuiFormRow
             id="markdown"
-            label="Markdown"
+            label="Content"
             fullWidth={true}
+            className="markdown-vis--editor"
           >
             <EuiTextArea
               value={params.markdown}
