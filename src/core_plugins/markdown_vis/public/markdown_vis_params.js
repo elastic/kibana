@@ -77,7 +77,6 @@ export class MarkdownOptionsTab extends Component {
             <EuiTextArea
               value={params.markdown}
               fullWidth={true}
-              rows="20"
               onChange={this.handleUpdate('markdown')}
               data-test-subj="markdownEditorMarkdown"
             />
