@@ -5,52 +5,97 @@
  */
 
 import expect from 'expect.js';
-import indicesFixture from './fixtures/indices';
-import indicesAllFixture from './fixtures/indices_all';
+import relocatingShardsFixture from './fixtures/indices_shards_relocating';
+import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all';
+import indicesRedClusterFixture from './fixtures/indices_red_cluster';
+import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('index listing', () => {
-    const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
-    const timeRange = {
-      min: '2017-10-05T20:31:48.000Z',
-      max: '2017-10-05T20:35:12.000Z'
-    };
+  describe('indices', () => {
+    describe('shard-relocation', () => {
+      const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
+      const timeRange = {
+        min: '2017-10-05T20:31:48.000Z',
+        max: '2017-10-05T20:35:12.000Z'
+      };
 
-    before('load archive', () => {
-      return esArchiver.load(archive);
+      before('load archive', () => {
+        return esArchiver.load(archive);
+      });
+
+      after('unload archive', () => {
+        return esArchiver.unload(archive);
+      });
+
+      it('should summarize the non-system indices with stats', async () => {
+        const { body } = await supertest
+          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            timeRange,
+            showSystemIndices: false
+          })
+          .expect(200);
+
+        expect(body).to.eql(relocatingShardsFixture);
+      });
+
+      it('should summarize all indices with stats', async () => {
+        const { body } = await supertest
+          .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            timeRange,
+            showSystemIndices: true
+          })
+          .expect(200);
+
+        expect(body).to.eql(relocationShardsAllFixture);
+      });
     });
+    describe('health-red', () => {
+      const archive = 'monitoring/singlecluster-red-platinum';
+      const timeRange = {
+        min: '2017-10-06T19:53:06.000Z',
+        max: '2017-10-06T20:15:30.000Z'
+      };
 
-    after('unload archive', () => {
-      return esArchiver.unload(archive);
-    });
+      before('load clusters archive', () => {
+        return esArchiver.load(archive);
+      });
 
-    it('should summarize the non-system indices with stats', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          timeRange,
-          showSystemIndices: false
-        })
-        .expect(200);
+      after('unload clusters archive', () => {
+        return esArchiver.unload(archive);
+      });
 
-      expect(body).to.eql(indicesFixture);
-    });
+      it('should summarize the non-system indices with stats', async () => {
+        const { body } = await supertest
+          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            timeRange,
+            showSystemIndices: false
+          })
+          .expect(200);
 
-    it('should summarize all indices with stats', async () => {
-      const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          timeRange,
-          showSystemIndices: true
-        })
-        .expect(200);
+        expect(body).to.eql(indicesRedClusterFixture);
+      });
 
-      expect(body).to.eql(indicesAllFixture);
+      it('should summarize all indices with stats', async () => {
+        const { body } = await supertest
+          .post('/api/monitoring/v1/clusters/1LYuyvCCQFS3FAO_h65PQw/elasticsearch/indices')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            timeRange,
+            showSystemIndices: true
+          })
+          .expect(200);
+
+        expect(body).to.eql(indicesRedClusterAllFixture);
+      });
     });
   });
 }
