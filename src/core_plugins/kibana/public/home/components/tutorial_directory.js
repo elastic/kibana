@@ -49,7 +49,7 @@ export class TutorialDirectory extends React.Component {
     }
     this.state = {
       selectedTabId: openTab,
-      tutorials: [],
+      tutorialCards: [],
       sampleDataSets: [],
     };
   }
@@ -65,22 +65,44 @@ export class TutorialDirectory extends React.Component {
   async componentDidMount() {
     this.loadSampleDataSets();
 
-    let tutorials = await getTutorials();
-    if (this.props.isCloudEnabled) {
-      tutorials = tutorials.filter(tutorial => {
-        return _.has(tutorial, 'elasticCloud');
-      });
-    }
-    tutorials.sort((a, b) => {
-      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-    });
+    const tutorialConfigs = await getTutorials();
 
     if (!this._isMounted) {
       return;
     }
 
+    let tutorialCards = tutorialConfigs.map(tutorialConfig => {
+      return {
+        category: tutorialConfig.category,
+        icon: tutorialConfig.euiIconType,
+        name: tutorialConfig.name,
+        description: tutorialConfig.shortDescription,
+        url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
+        elasticCloud: tutorialConfig.elasticCloud,
+      };
+    });
+
+    // Add card for sample data that only gets show in "all" tab
+    tutorialCards.push({
+      name: 'Sample Data',
+      description: 'Get started exploring Kibana with these "one click" data sets.',
+      url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
+      elasticCloud: true,
+      onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
+    });
+
+    if (this.props.isCloudEnabled) {
+      tutorialCards = tutorialCards.filter(tutorial => {
+        return _.has(tutorial, 'elasticCloud');
+      });
+    }
+
+    tutorialCards.sort((a, b) => {
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
-      tutorials: tutorials,
+      tutorialCards: tutorialCards,
     });
   }
 
@@ -126,7 +148,7 @@ export class TutorialDirectory extends React.Component {
   }
 
   renderTutorialsTab = () => {
-    return this.state.tutorials
+    return this.state.tutorialCards
       .filter((tutorial) => {
         if (this.state.selectedTabId === ALL_TAB_ID) {
           return true;
@@ -137,11 +159,12 @@ export class TutorialDirectory extends React.Component {
         return (
           <EuiFlexItem key={tutorial.name}>
             <Synopsis
-              iconType={tutorial.euiIconType}
-              description={tutorial.shortDescription}
+              iconType={tutorial.icon}
+              description={tutorial.description}
               title={tutorial.name}
               wrapInPanel
-              url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
+              url={tutorial.url}
+              onClick={tutorial.onClick}
             />
           </EuiFlexItem>
         );
