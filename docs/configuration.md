@@ -63,7 +63,7 @@ Example:
 ```json
 {
   "upstream": "elastic/kibana",
-  "branches": [{ "name": "6.x", "checked": true }, "6.0"],
+  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
   "own": true,
   "multipleCommits": false,
   "multipleBranches": true,

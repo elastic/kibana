@@ -50,7 +50,7 @@ Create a file `.backportrc.json` in the root of the project with a similar struc
 ```json
 {
   "upstream": "elastic/kibana",
-  "branches": [{ "name": "6.x", "checked": true }, "6.0"],
+  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
   "labels": ["backport"]
 }
 ```
