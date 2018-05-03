@@ -6,7 +6,7 @@ import Bluebird from 'bluebird';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-export function parseConfig(serverConfig = {}) {
+export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}) {
   const config = {
     keepAlive: true,
     ...pick(serverConfig, [
@@ -56,7 +56,7 @@ export function parseConfig(serverConfig = {}) {
   }
 
   // Add client certificate and key if required by elasticsearch
-  if (get(serverConfig, 'ssl.certificate') && get(serverConfig, 'ssl.key')) {
+  if (!ignoreCertAndKey && get(serverConfig, 'ssl.certificate') && get(serverConfig, 'ssl.key')) {
     config.ssl.cert = readFile(serverConfig.ssl.certificate);
     config.ssl.key = readFile(serverConfig.ssl.key);
     config.ssl.passphrase = serverConfig.ssl.keyPassphrase;

@@ -10,5 +10,5 @@ export default function (config) {
 
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
-  return new https.Agent(parseConfig(config).ssl);
+  return new https.Agent(parseConfig(config, { ignoreCertAndKey: true }).ssl);
 }
