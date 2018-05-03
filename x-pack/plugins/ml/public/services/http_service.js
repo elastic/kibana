@@ -39,7 +39,11 @@ export function http(options) {
 
       fetch(url, payload)
         .then((resp) => {
-          resolve(resp.json());
+          if (resp.ok === true) {
+            resolve(resp.json());
+          } else {
+            reject(resp);
+          }
         })
         .catch((resp) => {
           reject(resp);

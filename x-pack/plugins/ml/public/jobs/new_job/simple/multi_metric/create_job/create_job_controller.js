@@ -19,7 +19,6 @@ import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { CalculateModelMemoryLimitProvider } from 'plugins/ml/jobs/new_job/simple/components/utils/calculate_memory_limit';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { filterAggTypes } from 'plugins/ml/jobs/new_job/simple/components/utils/filter_agg_types';
 import { validateJob } from 'plugins/ml/jobs/new_job/simple/components/utils/validate_job';
@@ -27,7 +26,7 @@ import { adjustIntervalDisplayed } from 'plugins/ml/jobs/new_job/simple/componen
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { CHART_STATE, JOB_STATE } from 'plugins/ml/jobs/new_job/simple/components/constants/states';
 import { createFields } from 'plugins/ml/jobs/new_job/simple/components/utils/create_fields';
-import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ChartDataUtilsProvider } from 'plugins/ml/jobs/new_job/simple/components/utils/chart_data_utils.js';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
@@ -37,10 +36,12 @@ import {
   createResultsUrl,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { initPromise } from 'plugins/ml/util/promise';
+import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 
 uiRoutes
@@ -49,10 +50,11 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkCreateJobsPrivilege,
-      indexPattern: getIndexPatternWithRoute,
-      savedSearch: getSavedSearchWithRoute,
+      indexPattern: loadCurrentIndexPattern,
+      savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
-      loadNewJobDefaults
+      loadNewJobDefaults,
+      initPromise: initPromise(true)
     }
   });
 
@@ -72,9 +74,7 @@ module
     const msgs = mlMessageBarService;
     const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
-    const calculateModelMemoryLimit = Private(CalculateModelMemoryLimitProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
-    const mlJobService = Private(JobServiceProvider);
     const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
     const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
@@ -643,18 +643,18 @@ module
 
     $scope.setModelMemoryLimit = function () {
       const formConfig = $scope.formConfig;
-      calculateModelMemoryLimit(
-        formConfig.indexPattern.title,
-        formConfig.splitField.name,
-        formConfig.query,
-        Object.keys(formConfig.fields),
-        formConfig.influencerFields.map(f => f.name),
-        formConfig.timeField,
-        formConfig.start,
-        formConfig.end
-      )
+      ml.calculateModelMemoryLimit({
+        indexPattern: formConfig.indexPattern.title,
+        splitFieldName: formConfig.splitField.name,
+        query: formConfig.query,
+        fieldNames: Object.keys(formConfig.fields),
+        influencerNames: formConfig.influencerFields.map(f => f.name),
+        timeFieldName: formConfig.timeField,
+        earliestMs: formConfig.start,
+        latestMs: formConfig.end
+      })
         .then((resp) => {
-          formConfig.modelMemoryLimit = resp;
+          formConfig.modelMemoryLimit = resp.modelMemoryLimit;
         })
         .catch(() => {
           formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;

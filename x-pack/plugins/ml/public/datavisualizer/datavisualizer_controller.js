@@ -30,9 +30,10 @@ import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
-import { getIndexPatternWithRoute, getSavedSearchWithRoute, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
+import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './datavisualizer.html';
 
 uiRoutes
@@ -41,9 +42,10 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicenseExpired,
       privileges: checkGetJobsPrivilege,
-      indexPattern: getIndexPatternWithRoute,
-      savedSearch: getSavedSearchWithRoute,
-      checkMlNodesAvailable
+      indexPattern: loadCurrentIndexPattern,
+      savedSearch: loadCurrentSavedSearch,
+      checkMlNodesAvailable,
+      initPromise: initPromise(true)
     }
   });
 
@@ -56,7 +58,6 @@ module
     $route,
     $timeout,
     $window,
-    $q,
     Private,
     timefilter,
     AppState) {
@@ -462,7 +463,7 @@ module
       buckets.setBarTarget(BAR_TARGET);
       const aggInterval = buckets.getInterval();
 
-      $q.when(ml.getVisualizerFieldStats({
+      ml.getVisualizerFieldStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -471,7 +472,7 @@ module
         samplerShardSize: $scope.samplerShardSize,
         interval: aggInterval.expression,
         fields: numberFields
-      }))
+      })
         .then((resp) => {
           // Add the metric stats to the existing stats in the corresponding card.
           _.each($scope.metricCards, (card) => {
@@ -493,7 +494,7 @@ module
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
-          if (err.statusCode === 500) {
+          if (err.status === 500) {
             notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}. ` +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
             { lifetime: 30000 });
@@ -521,7 +522,7 @@ module
 
       if (fields.length > 0) {
 
-        $q.when(ml.getVisualizerFieldStats({
+        ml.getVisualizerFieldStats({
           indexPatternTitle: indexPattern.title,
           query: $scope.searchQuery,
           fields: fields,
@@ -530,7 +531,7 @@ module
           latest: $scope.latest,
           samplerShardSize: $scope.samplerShardSize,
           maxExamples: 10
-        }))
+        })
           .then((resp) => {
             // Add the metric stats to the existing stats in the corresponding card.
             _.each($scope.fieldCards, (card) => {
@@ -544,7 +545,7 @@ module
           .catch((err) => {
             // TODO - display error in cards saying data could not be loaded.
             console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
-            if (err.statusCode === 500) {
+            if (err.status === 500) {
               notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
             'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
               { lifetime: 30000 });
@@ -576,7 +577,7 @@ module
       // 2. List of aggregatable fields that do not exist in docs
       // 3. List of non-aggregatable fields that do exist in docs.
       // 4. List of non-aggregatable fields that do not exist in docs.
-      $q.when(ml.getVisualizerOverallStats({
+      ml.getVisualizerOverallStats({
         indexPatternTitle: indexPattern.title,
         query: $scope.searchQuery,
         timeFieldName: indexPattern.timeFieldName,
@@ -585,7 +586,7 @@ module
         latest: $scope.latest,
         aggregatableFields: aggregatableFields,
         nonAggregatableFields: nonAggregatableFields
-      }))
+      })
         .then((resp) => {
           $scope.overallStats = resp;
           createMetricCards();
@@ -594,7 +595,7 @@ module
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
-          if (err.statusCode === 500) {
+          if (err.status === 500) {
             notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
             { lifetime: 30000 });

@@ -24,7 +24,7 @@ import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import loadingIndicatorWrapperTemplate from 'plugins/ml/components/loading_indicator/loading_indicator_wrapper.html';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -35,7 +35,6 @@ module.directive('mlExplorerChart', function (
   mlSelectSeverityService) {
 
   function link(scope, element) {
-    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     console.log('ml-explorer-chart directive link series config:', scope.seriesConfig);
     if (typeof scope.seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
