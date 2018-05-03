@@ -96,6 +96,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.loading = true;
   $scope.loadCounter = 0;
   $scope.hasResults = false;
+  $scope.anomalyRecords = [];
 
   $scope.modelPlotEnabled = false;
   $scope.forecastingDisabled = false;
@@ -362,20 +363,21 @@ module.controller('MlTimeSeriesExplorerController', function (
       if (awaitingCount === 0) {
         // Tell the results container directives to render the focus chart.
         // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
-        $timeout(() => {
-          processDataForFocusAnomalies(
-            $scope.focusChartData,
-            $scope.anomalyRecords,
-            $scope.timeFieldName);
+        let updatedFocusChartData = processDataForFocusAnomalies(
+          $scope.focusChartData,
+          $scope.anomalyRecords,
+          $scope.timeFieldName);
 
-          processScheduledEventsForChart(
-            $scope.focusChartData,
-            $scope.scheduledEvents);
+        updatedFocusChartData = processScheduledEventsForChart(
+          $scope.focusChartData,
+          $scope.scheduledEvents);
 
+        $scope.$evalAsync(() => {
+          $scope.focusChartData = updatedFocusChartData;
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
-        }, 0);
+        });
       }
     }
 
