@@ -186,6 +186,7 @@ export class TutorialDirectory extends React.Component {
             setConfig={this.props.setConfig}
             clearIndexPatternsCache={this.props.clearIndexPatternsCache}
             defaultIndex={sampleDataSet.defaultIndex}
+            previewUrl={this.props.addBasePath(sampleDataSet.previewImagePath)}
           />
         </EuiFlexItem>
       );

@@ -12,6 +12,7 @@ export const createListRoute = () => ({
           id: sampleDataSet.id,
           name: sampleDataSet.name,
           description: sampleDataSet.description,
+          previewImagePath: sampleDataSet.previewImagePath,
           overviewDashboard: sampleDataSet.overviewDashboard,
           defaultIndex: sampleDataSet.defaultIndex,
         };

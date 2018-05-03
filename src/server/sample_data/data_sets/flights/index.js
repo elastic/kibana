@@ -3,8 +3,9 @@ import { savedObjects } from './saved_objects';
 export function flightsSpecProvider() {
   return {
     id: 'flights',
-    name: 'Flights',
-    description: 'Fictional flight data.',
+    name: 'Sample flight data',
+    description: 'Installs fictional flight tracking data, visualizations and dashboards to monitor plane routes.',
+    previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     dataPath: './sample_data/flights.json',
