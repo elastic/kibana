@@ -35,40 +35,44 @@ export function fatalErrorHandler(err) {
 }
 
 export async function runFunctionTests() {
-  const cmd = new Command('node scripts/functional_tests');
+  try {
+    const cmd = new Command('node scripts/functional_tests');
 
-  cmd
-    .option(
-      '--bail',
-      'Stop the functional_test_runner as soon as a failure occurs'
-    )
-    .option(
-      '--kibana-install-dir <path>',
-      'Run Kibana from an existing install directory'
-    )
-    .option(
-      '--es-from <from>',
-      'Run ES from either source or snapshot [default: snapshot]'
-    )
-    .parse(process.argv);
+    cmd
+      .option(
+        '--bail',
+        'Stop the functional_test_runner as soon as a failure occurs'
+      )
+      .option(
+        '--kibana-install-dir <path>',
+        'Run Kibana from an existing install directory'
+      )
+      .option(
+        '--es-from <from>',
+        'Run ES from either source or snapshot [default: snapshot]'
+      )
+      .parse(process.argv);
 
-  await withProcRunner(async procs => {
-    const ftrConfig = await getFtrConfig();
+    await withProcRunner(async procs => {
+      const ftrConfig = await getFtrConfig();
 
-    const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
-    await runKibanaServer({
-      procs,
-      ftrConfig,
-      existingInstallDir: cmd.kibanaInstallDir,
+      const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
+      await runKibanaServer({
+        procs,
+        ftrConfig,
+        existingInstallDir: cmd.kibanaInstallDir,
+      });
+      await runFtr({
+        procs,
+        bail: cmd.bail,
+      });
+
+      await procs.stop('kibana');
+      await es.cleanup();
     });
-    await runFtr({
-      procs,
-      bail: cmd.bail,
-    });
-
-    await procs.stop('kibana');
-    await es.cleanup();
-  });
+  } catch (err) {
+    fatalErrorHandler(err);
+  }
 }
 
 export async function runApiTests() {
