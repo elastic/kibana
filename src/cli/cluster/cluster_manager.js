@@ -28,7 +28,7 @@ export default class ClusterManager {
     ];
 
     if (opts.basePath) {
-      this.basePathProxy = BasePathProxy.create(this, config);
+      this.basePathProxy = new BasePathProxy(this, config);
 
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
