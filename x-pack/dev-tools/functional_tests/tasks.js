@@ -169,14 +169,15 @@ export async function runFunctionalTestsServer() {
         useSAML,
       });
 
-      // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get burried
+      // wait for 5 seconds of silence before logging the
+      // success message so that it doesn't get burried
       await Rx.Observable.fromEvent(log, 'data')
+        .startWith(null)
         .switchMap(() => Rx.Observable.timer(5000))
-        .first()
+        .take(1)
         .toPromise();
 
-      log.info(SUCCESS_MESSAGE);
+      log.success(SUCCESS_MESSAGE);
       await procs.waitForAllToStop();
     });
   } catch (err) {
