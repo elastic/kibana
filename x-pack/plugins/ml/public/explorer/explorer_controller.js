@@ -84,6 +84,7 @@ module.controller('MlExplorerController', function (
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   let disableDragSelectOnMouseLeave = true;
   $scope.queryFilters = [];
+  $scope.anomalyRecords = [];
 
   const dragSelect = new DragSelect({
     selectables: document.querySelectorAll('.sl-cell'),
@@ -173,11 +174,11 @@ module.controller('MlExplorerController', function (
     )
       .then((resp) => {
         // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
-        $timeout(() => {
+        $scope.$evalAsync(() => {
           // Sort in descending time order before storing in scope.
           $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
           console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
-        }, 0);
+        });
       });
   };
 
