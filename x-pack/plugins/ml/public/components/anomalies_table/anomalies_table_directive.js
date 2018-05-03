@@ -86,7 +86,6 @@ module.directive('mlAnomaliesTable', function (
       scope.table.columns = [];
       scope.table.rows = [];
       scope.rowScopes = [];
-      scope.anomalyRecords = [];
 
       scope.influencersLimit = 5;
 
@@ -503,9 +502,9 @@ module.directive('mlAnomaliesTable', function (
         // Aggregate the anomaly data by time, detector, and entity (by/over/partition).
         // TODO - do we want to aggregate by job too, in cases where different jobs
         // have detectors with the same description.
-        console.log('aggregateAnomalies(): number of anomalies to aggregate:', scope.anomalyRecords.length);
+        console.log('aggregateAnomalies(): number of anomalies to aggregate:', scope.anomalyRecords && scope.anomalyRecords.length);
 
-        if (scope.anomalyRecords.length === 0) {
+        if (typeof scope.anomalyRecords === 'undefined' || scope.anomalyRecords.length === 0) {
           return [];
         }
 
