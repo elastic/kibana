@@ -16,7 +16,28 @@ import { setupXsrf } from './xsrf';
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
+  const getAuthChallengeResponse = async (req) => {
+    if (req.auth.strategy || req.auth.mode) {
+      return null;
+    }
+
+    try {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      await callWithRequest(req, 'indices.exists', {
+        index: config.get('kibana.index'),
+      });
+      return null;
+    } catch (err) {
+      if (err.statusCode !== 401) {
+        return null;
+      }
+
+      return err;
+    }
+  };
+
   const shortUrlLookup = shortUrlLookupProvider(server);
+
 
   setupConnection(server, config);
   setupBasePathRewrite(server, config);
@@ -75,8 +96,18 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, reply) {
+    async handler(req, reply) {
+      const authChallengeResponse = await getAuthChallengeResponse(req);
+      if (authChallengeResponse) {
+        return reply(authChallengeResponse);
+      }
+
       const basePath = config.get('server.basePath');
+      if (req.query.redirectApp) {
+        reply.redirect(`${basePath}/app/${encodeURIComponent(req.query.redirectApp)}`);
+        return;
+      }
+
       const defaultRoute = config.get('server.defaultRoute');
       reply.redirect(`${basePath}${defaultRoute}`);
     }

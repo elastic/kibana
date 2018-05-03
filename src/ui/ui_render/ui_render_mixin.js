@@ -4,7 +4,24 @@ import Boom from 'boom';
 import { resolve } from 'path';
 import { AppBootstrap } from './bootstrap';
 
+
 export function uiRenderMixin(kbnServer, server, config) {
+
+  const shouldAuthRedirect = async (req) => {
+    if (req.auth.strategy || req.auth.mode) {
+      return false;
+    }
+
+    try {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+      await callWithRequest(req, 'indices.exists', {
+        index: config.get('kibana.index')
+      });
+      return false;
+    } catch (err) {
+      return err.statusCode === 401;
+    }
+  };
 
   function replaceInjectedVars(request, injectedVars) {
     const { injectedVarsReplacers = [] } = kbnServer.uiExports;
@@ -74,6 +91,11 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       try {
         if (kbnServer.status.isGreen()) {
+          if (await shouldAuthRedirect(req)) {
+            const basePath = config.get('server.basePath');
+            return reply.redirect(`${basePath}/?redirectApp=${id}`);
+          }
+
           await reply.renderApp(app);
         } else {
           await reply.renderStatusPage();
