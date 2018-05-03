@@ -481,18 +481,27 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async importFile(path, overwriteAll = true) {
       log.debug(`importFile(${path})`);
+
+      log.debug(`Clicking importObjects`);
       await (await testSubjects.find('importObjects')).click();
+      log.debug(`Setting the path on the file input`);
       await retry.try(async () => {
         await remote.setFindTimeout(100).findByCssSelector('.euiFilePicker__input').type(path);
       });
       if (!overwriteAll) {
+        log.debug(`Toggling overwriteAll`);
         await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
+      } else {
+        log.debug(`Leaving overwriteAll alone`);
       }
       const importBtn = await this.getImportButton();
+      log.debug(`got the import button`);
       await importBtn.click();
+      log.debug(`done importing the file`);
     }
 
     async getImportButton() {
+      log.debug(`getImportButton()`);
       return retry.try(async () => {
         return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsImportBtn"]`);
       });
