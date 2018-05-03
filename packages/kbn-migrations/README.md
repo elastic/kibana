@@ -49,9 +49,9 @@ When a migration is attempted on an index, the first thing the migration index d
 
 - If `index` does not exist, it will be created
 - If `index` is an index and not an alias, it will be converted to an alias
-  - It will be reindexed to a name like `index-original-SHAOFMIGRATIONSTATE`
+  - It will be reindexed to a name like `index-7.0.0-original`
   - `index` will be deleted
-  - An alias `index` will be created, pointing to `index-original-SHAOFMIGRATIONSTATE`
+  - An alias `index` will be created, pointing to `index-7.0.0-original`
 - The migration state document will be written to / updated to `index`, with status 'migrating'
 - `index` will be made read-only
 - A destination index will be created with a name like `index-7.0.0-SHAOFMIGRATIONSTATE`

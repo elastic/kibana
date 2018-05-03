@@ -17,7 +17,7 @@ describe('migrationContext', () => {
     expect(actual.destIndex)
       .toEqual('dang-2.0.4-989db2448f309bfdd99b513f37c84b8f5794d2b5');
     expect(actual.initialIndex)
-      .toEqual('dang-original-989db2448f309bfdd99b513f37c84b8f5794d2b5');
+      .toEqual('dang-2.0.4-original');
   });
 
   test('creates a logger that logs info', async () => {

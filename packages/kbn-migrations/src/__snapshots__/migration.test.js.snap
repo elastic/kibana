@@ -16,7 +16,7 @@ Object {
                 "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": ".mufasa-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -24,7 +24,7 @@ Object {
         "_version": 1,
       },
     },
-    ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+    ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -102,7 +102,7 @@ Object {
           },
         },
       },
-      ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".mufasa-9.8.7-original": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -164,7 +164,7 @@ Object {
           "number_of_shards": "5",
         },
       },
-      ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".mufasa-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "1",
@@ -467,7 +467,7 @@ Object {
                 "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": "gentleman-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -475,7 +475,7 @@ Object {
         "_version": 1,
       },
     },
-    "gentleman-original-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
+    "gentleman-9.8.7-original": Object {
       "baz:fred": Object {
         "_source": Object {
           "baz": Object {
@@ -565,7 +565,7 @@ Object {
           },
         },
       },
-      "gentleman-original-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
+      "gentleman-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "baz": Object {
@@ -630,7 +630,7 @@ Object {
           "number_of_shards": undefined,
         },
       },
-      "gentleman-original-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
+      "gentleman-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -669,7 +669,7 @@ Object {
                 "migrationsChecksum": "67d77399db16823739150691b6102b31d5c77d8e",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": "groovystuff-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -717,7 +717,7 @@ Object {
         },
       },
     },
-    "groovystuff-original-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
+    "groovystuff-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -837,7 +837,7 @@ Object {
           },
         },
       },
-      "groovystuff-original-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
+      "groovystuff-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -910,7 +910,7 @@ Object {
           "number_of_shards": undefined,
         },
       },
-      "groovystuff-original-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
+      "groovystuff-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -938,7 +938,7 @@ Object {
                 "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": ".mufasa-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -946,7 +946,7 @@ Object {
         "_version": 1,
       },
     },
-    ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+    ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1024,7 +1024,7 @@ Object {
           },
         },
       },
-      ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".mufasa-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1089,7 +1089,7 @@ Object {
           "number_of_shards": undefined,
         },
       },
-      ".mufasa-original-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".mufasa-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -1138,7 +1138,7 @@ Object {
                 "migrationsChecksum": "a54ec64d9b3feaf81ea3095662211f1c27fb1f17",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": "aquatica-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -1146,7 +1146,7 @@ Object {
         "_version": 1,
       },
     },
-    "aquatica-original-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+    "aquatica-9.8.7-original": Object {
       "fish:f1": Object {
         "_source": Object {
           "fish": Object {
@@ -1255,7 +1255,7 @@ Object {
           },
         },
       },
-      "aquatica-original-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+      "aquatica-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1320,7 +1320,7 @@ Object {
           "number_of_shards": undefined,
         },
       },
-      "aquatica-original-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+      "aquatica-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -1406,7 +1406,7 @@ Object {
                 "migrationsChecksum": "4820cce3d2954e10c2fe5cf4d1b19df403b51e43",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": "skippy-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -1414,7 +1414,7 @@ Object {
         "_version": 1,
       },
     },
-    "skippy-original-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+    "skippy-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1496,7 +1496,7 @@ Object {
           },
         },
       },
-      "skippy-original-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+      "skippy-9.8.7-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1561,7 +1561,7 @@ Object {
           "number_of_shards": undefined,
         },
       },
-      "skippy-original-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+      "skippy-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -1591,7 +1591,7 @@ Object {
                 "migrationsChecksum": "6c349fa63409939239bfeb893123ebd6dc5ef474",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": ".mufasa-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -1610,7 +1610,7 @@ Object {
         },
       },
     },
-    ".mufasa-original-df9934795ce1f24822920ad398d915201a10ffe3": Object {
+    ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1692,7 +1692,7 @@ Object {
           },
         },
       },
-      ".mufasa-original-df9934795ce1f24822920ad398d915201a10ffe3": Object {
+      ".mufasa-9.8.7-original": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1758,7 +1758,7 @@ Object {
           "number_of_shards": "5",
         },
       },
-      ".mufasa-original-df9934795ce1f24822920ad398d915201a10ffe3": Object {
+      ".mufasa-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "1",
@@ -1800,7 +1800,7 @@ Object {
                 "migrationsChecksum": "46c6402e887c1d479266848e5c409e4e9f814c8b",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": ".music-9.8.7-original",
             "status": "migrated",
           },
           "type": "migration",
@@ -1808,7 +1808,7 @@ Object {
         "_version": 1,
       },
     },
-    ".music-original-24807dac952a960402f3e039b380068bc1cf6897": Object {
+    ".music-9.8.7-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1893,7 +1893,7 @@ Object {
           },
         },
       },
-      ".music-original-24807dac952a960402f3e039b380068bc1cf6897": Object {
+      ".music-9.8.7-original": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1962,7 +1962,7 @@ Object {
           "number_of_shards": "5",
         },
       },
-      ".music-original-24807dac952a960402f3e039b380068bc1cf6897": Object {
+      ".music-9.8.7-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "1",

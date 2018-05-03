@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import _ from 'lodash';
-import { migrate } from '@kbn/migrations';
+import { Migration } from '@kbn/migrations';
 import { waitUntilExists } from './test_helpers';
 
 export function migrateExistingTest({ callCluster }) {
@@ -63,11 +63,11 @@ export function migrateExistingTest({ callCluster }) {
       ],
     }];
 
-    await migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: pluginsV1 });
+    const initialMigration = await Migration.migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: pluginsV1 });
     await waitUntilExists(() => callCluster('cat.count', { index, format: 'json' }).then(([{ count }]) => parseInt(count) === 3));
     await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'migration:migration-state' }));
 
-    const { destIndex } = await migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: pluginsV2 });
+    const { destIndex } = await Migration.migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: pluginsV2 });
 
     await waitUntilExists(() => callCluster('indices.getAlias', { name: index }).then((alias) => alias[destIndex]));
     await waitUntilExists(() => callCluster('cat.count', { index, format: 'json' }).then(([{ count }]) => parseInt(count) === 3));
@@ -76,8 +76,8 @@ export function migrateExistingTest({ callCluster }) {
     const { _source: { migration } } = await callCluster('get', { index, type: 'doc', id: 'migration:migration-state' });
     const book = await callCluster('get', { index, type: 'doc', id: 'book:lyonsulgard' });
     const admin = await callCluster('get', { index, type: 'doc', id: 'user:admin' });
-    const originalBook = await callCluster('get', { index: `${index}-9.8.7-original`, type: 'doc', id: 'book:lyonsulgard' });
-    const originalAdmin = await callCluster('get', { index: `${index}-9.8.7-original`, type: 'doc', id: 'user:admin' });
+    const originalBook = await callCluster('get', { index: initialMigration.destIndex, type: 'doc', id: 'book:lyonsulgard' });
+    const originalAdmin = await callCluster('get', { index: initialMigration.destIndex, type: 'doc', id: 'user:admin' });
 
     assert.equal(migration.plugins.length, 2);
     assert.deepEqual(migration.plugins[0].migrationIds, ['make_admin_user', 'prefix_user_names', 'ensure_city']);

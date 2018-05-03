@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import _ from 'lodash';
-import { migrate } from '@kbn/migrations';
+import { Migration } from '@kbn/migrations';
 import { waitUntilExists } from './test_helpers';
 
 export function migrateOldIndexTest({ callCluster }) {
@@ -71,7 +71,7 @@ export function migrateOldIndexTest({ callCluster }) {
 
     await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'muzak:jessecook' }));
 
-    const { destIndex } = await migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: [plugin] });
+    const { destIndex } = await Migration.migrate({ callCluster, index, log: _.noop, elasticVersion: '9.8.7', plugins: [plugin] });
 
     await waitUntilExists(() => callCluster('get', { index, type: 'doc', id: 'muzak:mars' }));
 
@@ -79,7 +79,7 @@ export function migrateOldIndexTest({ callCluster }) {
     const { _source: { migration } } = await callCluster('get', { index, type: 'doc', id: 'migration:migration-state' });
     const jesseCook = await callCluster('get', { index, type: 'doc', id: 'muzak:jessecook' });
     const mars = await callCluster('get', { index: destIndex, type: 'doc', id: 'muzak:mars' });
-    const originalDoc = await callCluster('get', { index: `${index}-9.8.7-original`, type: 'doc', id: 'muzak:jessecook' });
+    const originalDoc = await callCluster('get', { index: migration.previousIndex, type: 'doc', id: 'muzak:jessecook' });
 
     assert.equal(migration.plugins.length, 1);
     assert.deepEqual(migration.plugins[0].migrationIds, ['add_mars', 'ensure_album']);

@@ -14,13 +14,14 @@ module.exports = {
 
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
+  const initialIndex = `${index}-${elasticVersion}-original`;
   const [currentIndex, { migrationState, migrationStateVersion }] = await Promise.all([
     Persistence.getCurrentIndex(callCluster, index),
     MigrationState.fetch(callCluster, index),
   ]);
   const sanitizedPlugins = Plugin.validate(plugins, migrationState);
   const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
-  const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex, migrationState);
+  const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex || initialIndex, migrationState);
   const sha = objectHash(nextMigrationState.plugins);
   return {
     index,
@@ -30,9 +31,9 @@ async function fetch(opts) {
     nextMigrationState,
     migrationPlan,
     force,
+    initialIndex,
     plugins: sanitizedPlugins,
     destIndex: `${index}-${elasticVersion}-${sha}`,
-    initialIndex: `${index}-original-${sha}`,
     log: log ? migrationLogger(log) : _.noop,
   };
 }
