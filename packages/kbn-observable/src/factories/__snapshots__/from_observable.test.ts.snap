@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws for "null" 1`] = `"null is not an object"`;
+
+exports[`throws for "undefined" 1`] = `"undefined is not an object"`;
+
+exports[`throws if no argument specified 1`] = `"undefined is not an object"`;
+
+exports[`throws if return value of Symbol.observable method is an object with no subscribe 1`] = `"The returned value does not contain a 'subscribe' function which is required to correctly implement Symbol.observable, received [undefined]"`;
+
+exports[`throws if the return value of Symbol.observable method is not an object 1`] = `"The returned value is not an object which is required to correctly implement Symbol.observable, received [number]"`;
+
+exports[`throws if the return value of Symbol.observable method is not an object 2`] = `"Cannot read property 'subscribe' of null"`;
+
+exports[`throws if the return value of Symbol.observable method is not an object 3`] = `"The returned value is not an object which is required to correctly implement Symbol.observable, received [undefined]"`;

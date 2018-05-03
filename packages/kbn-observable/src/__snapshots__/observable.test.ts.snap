@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#subscribe throws if more than one argument is specified 1`] = `"Specifying multiple arguments to \\"subscribe\\" is not allowed. If you want to specify \\"error\\" or \\"complete\\" handler, pass in an object instead."`;
+
+exports[`SubscriptionObserver#complete catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from complete],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#complete cleanup function is called when method throws: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from complete],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#error catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from error],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#error cleanup function is called when method throws: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from error],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#next catches errors thrown from the observer: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from next],
+  ],
+]
+`;
+
+exports[`SubscriptionObserver#next subscription is not closed when next throws an error: logs 1`] = `
+Array [
+  Array [
+    [Error: thrown from next],
+  ],
+]
+`;
+
+exports[`constructor cannot be called as a function 1`] = `"Class constructor Observable cannot be invoked without 'new'"`;
+
+exports[`constructor the first argument cannot be a non-callable object 1`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primitive value 1`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primitive value 2`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primitive value 3`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`constructor the first argument cannot be a primitive value 4`] = `"\`_onSubscribe\` must be a function"`;
+
+exports[`observable#toPromise rejects if error received 1`] = `
+Array [
+  Array [
+    [Error: fail],
+  ],
+]
+`;
+
+exports[`subscriber function throws if returning "null" 1`] = `"Cannot read property 'unsubscribe' of null"`;
+
+exports[`subscriber function throws if returning a boolean 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [boolean]"`;
+
+exports[`subscriber function throws if returning a primitive 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [number]"`;
+
+exports[`subscriber function throws if returning an object 1`] = `"The result of calling \\"onSubscribe\\" must be a function, found [object]"`;

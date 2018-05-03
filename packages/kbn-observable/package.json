@@ -1,0 +1,24 @@
+{
+  "name": "@kbn/observable",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "private": true,
+  "main": "target/index.js",
+  "types": "target/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build",
+    "watch": "yarn build --watch",
+    "kbn:watch": "yarn watch",
+    "prettier": "prettier --write './src/**/*.ts'"
+  },
+  "dependencies": {
+    "symbol-observable": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.1.4",
+    "prettier": "^1.11.1",
+    "rxjs": "^5.5.7",
+    "typescript": "^2.7.1"
+  }
+}

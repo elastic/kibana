@@ -32,7 +32,10 @@
 
     // Generate an external source map. There's also an `--inlineSourceMap` for
     // emitting a single file with source maps instead of having a separate file.
-    "sourceMap": true
+    "sourceMap": true,
+
+    // Skip type checking of all declaration files (*.d.ts).
+    "skipLibCheck": true
   },
 
   "exclude": [
