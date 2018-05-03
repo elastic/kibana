@@ -5,21 +5,16 @@ import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
-import { Config } from '../../server/config/config';
 import { setupConnection } from '../../server/http/setup_connection';
 import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
 import { setupLogging } from '../../server/logging';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export default class BasePathProxy {
-  static async create(clusterManager, userSettings) {
+  constructor(clusterManager, config) {
     this.clusterManager = clusterManager;
     this.server = new Server();
-
-    const settings = transformDeprecations(userSettings);
-    const config = await Config.withDefaultSchema(settings);
 
     this.targetPort = config.get('dev.basePathProxyTarget');
     this.basePath = config.get('server.basePath');
