@@ -488,7 +488,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       const importBtn = await this.getImportButton();
       await importBtn.click();
-      log.debug('importFile done');
     }
 
     async getImportButton() {
@@ -498,11 +497,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickImportDone() {
-      await (await testSubjects.find('importSavedObjectsDoneBtn')).click();
+      const doneBtn = await retry.try(async () => {
+        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsDoneBtn"]`);
+      });
+      await doneBtn.click();
     }
 
     async clickConfirmConflicts() {
-      await (await testSubjects.find('importSavedObjectsConfirmBtn')).click();
+      const confirmBtn = await retry.try(async () => {
+        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsConfirmBtn"]`);
+      });
+      await confirmBtn.click();
     }
 
     async setImportIndexFieldOption(child) {
