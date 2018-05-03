@@ -135,7 +135,13 @@ class Metric extends Component {
           <div ref={(el) => this.inner = el} className="rhythm_metric__inner" style={styles.inner}>
             <div className="rhythm_metric__primary">
               { primaryLabel }
-              <div style={styles.primary_value} className="rhythm_metric__primary-value">{ primaryValue }</div>
+              <div
+                style={styles.primary_value}
+                data-test-subj="tsvbMetricValue"
+                className="rhythm_metric__primary-value"
+              >
+                { primaryValue }
+              </div>
             </div>
             { secondarySnippet }
             {additionalLabel}

@@ -12,19 +12,13 @@ import { parseInterval } from 'ui/utils/parse_interval';
 
 import { ML_MEDIAN_PERCENTS } from 'plugins/ml/../common/util/job_utils';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
 import { createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function SingleMetricJobServiceProvider(
-  $q,
-  es,
-  Private) {
-
-  const mlJobService = Private(JobServiceProvider);
-  const mlResultsService = Private(ResultsServiceProvider);
-  const fieldFormatService = Private(FieldFormatServiceProvider);
+export function SingleMetricJobServiceProvider() {
 
   class SingleMetricJobService {
 
@@ -43,7 +37,7 @@ export function SingleMetricJobServiceProvider(
     }
 
     getLineChartResults(formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         this.chartData.line = [];
         this.chartData.model = [];
@@ -56,7 +50,7 @@ export function SingleMetricJobServiceProvider(
 
         const aggType = formConfig.agg.type.dslName;
         if (formConfig.field && formConfig.field.id) {
-          this.chartData.fieldFormat = fieldFormatService.getFieldFormatFromIndexPattern(
+          this.chartData.fieldFormat = mlFieldFormatService.getFieldFormatFromIndexPattern(
             formConfig.indexPattern,
             formConfig.field.id,
             aggType);
@@ -71,7 +65,7 @@ export function SingleMetricJobServiceProvider(
 
         const searchJson = getSearchJsonFromConfig(formConfig);
 
-        es.search(searchJson)
+        ml.esSearch(searchJson)
           .then((resp) => {
 
             const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
@@ -271,7 +265,7 @@ export function SingleMetricJobServiceProvider(
     }
 
     createJob(formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         this.job = this.getJobFromConfig(formConfig);
         const job = createJobForSaving(this.job);
@@ -304,7 +298,7 @@ export function SingleMetricJobServiceProvider(
     }
 
     loadModelData(formConfig) {
-      return $q((resolve, reject) => {
+      return new Promise((resolve, reject) => {
 
         let start = formConfig.start;
 
@@ -362,7 +356,7 @@ export function SingleMetricJobServiceProvider(
     }
 
     loadSwimlaneData(formConfig) {
-      return $q((resolve) => {
+      return new Promise((resolve) => {
 
         mlResultsService.getScoresByBucket(
           [formConfig.jobId],

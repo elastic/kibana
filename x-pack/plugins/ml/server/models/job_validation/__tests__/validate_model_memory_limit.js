@@ -25,7 +25,7 @@ describe('ML - validateModelMemoryLimit', () => {
       }
     },
     limits: {
-      max_model_memory_limit: '20mb'
+      max_model_memory_limit: '30mb'
     }
   };
 
@@ -103,7 +103,7 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
+        expect(ids).to.eql([]);
       }
     );
   });
@@ -111,7 +111,7 @@ describe('ML - validateModelMemoryLimit', () => {
   it('Called with no duration or split and mml above limit', () => {
     const job = getJobConfig();
     const duration = undefined;
-    job.analysis_limits.model_memory_limit = '21mb';
+    job.analysis_limits.model_memory_limit = '31mb';
 
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
@@ -139,7 +139,7 @@ describe('ML - validateModelMemoryLimit', () => {
     const dtrs = createDetectors(2);
     const job = getJobConfig(['instance'], dtrs);
     const duration = { start: 0, end: 1 };
-    job.analysis_limits.model_memory_limit = '20mb';
+    job.analysis_limits.model_memory_limit = '30mb';
 
     return validateModelMemoryLimit(callWithRequest, job, duration).then(
       (messages) => {
@@ -188,6 +188,34 @@ describe('ML - validateModelMemoryLimit', () => {
       (messages) => {
         const ids = messages.map(m => m.id);
         expect(ids).to.eql(['success_mml']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "0mb"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = '0mb';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
+      }
+    );
+  });
+
+  it('Called with specified invalid mml of "asdf"', () => {
+    const dtrs = createDetectors(1);
+    const job = getJobConfig(['instance'], dtrs);
+    const duration = { start: 0, end: 1 };
+    job.analysis_limits.model_memory_limit = 'asdf';
+
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(
+      (messages) => {
+        const ids = messages.map(m => m.id);
+        expect(ids).to.eql(['mml_value_invalid']);
       }
     );
   });

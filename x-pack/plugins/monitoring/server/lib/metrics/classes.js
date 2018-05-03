@@ -71,14 +71,12 @@ export class ElasticsearchMetric extends Metric {
     super({
       ...opts,
       app: 'elasticsearch',
-      uuidField: 'source_node.uuid',
-      timestampField: 'timestamp'
+      ...ElasticsearchMetric.getMetricFields()
     });
 
     this.checkRequiredParams({ type: opts.type });
   }
 
-  // helper method
   static getMetricFields() {
     return {
       uuidField: 'source_node.uuid',
@@ -92,9 +90,7 @@ export class KibanaEventsRateClusterMetric extends Metric {
     super({
       ...opts,
       app: 'kibana',
-      uuidField: 'cluster_uuid',
-      timestampField: 'kibana_stats.timestamp',
-      metricAgg: 'max'
+      ...KibanaEventsRateClusterMetric.getMetricFields(),
     });
 
     this.aggs = {
@@ -127,9 +123,9 @@ export class KibanaEventsRateClusterMetric extends Metric {
     };
   }
 
-  // helper method
   static getMetricFields() {
     return {
+      metricAgg: 'max',
       uuidField: 'cluster_uuid',
       timestampField: 'kibana_stats.timestamp'
     };
@@ -495,13 +491,13 @@ export class LogstashClusterMetric extends Metric {
     super({
       ...opts,
       app: 'logstash',
-      timestampField: 'logstash_stats.timestamp'
+      ...LogstashClusterMetric.getMetricFields()
     });
   }
 
-  // helper method
   static getMetricFields() {
     return {
+      uuidField: 'cluster_uuid',
       timestampField: 'logstash_stats.timestamp'
     };
   }
@@ -840,14 +836,13 @@ export class BeatsClusterMetric extends Metric {
     super({
       ...opts,
       app: 'beats',
-      timestampField: 'beats_stats.timestamp',
-      uuidField: 'cluster_uuid'
+      ...BeatsClusterMetric.getMetricFields()
     });
   }
 
-  // helper method
   static getMetricFields() {
     return {
+      uuidField: 'cluster_uuid',
       timestampField: 'beats_stats.timestamp'
     };
   }
@@ -908,15 +903,13 @@ export class BeatsMetric extends Metric {
     super({
       ...opts,
       app: 'beats',
-      uuidField: 'cluster_uuid',
-      timestampField: 'beats_stats.timestamp'
+      ...BeatsMetric.getMetricFields()
     });
   }
 
-  // helper method
   static getMetricFields() {
     return {
-      uuidField: 'cluster_uuid',
+      uuidField: 'beats_stats.beat.uuid',
       timestampField: 'beats_stats.timestamp'
     };
   }

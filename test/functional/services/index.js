@@ -6,4 +6,6 @@ export { RemoteProvider } from './remote';
 export { DocTableProvider } from './doc_table';
 export { ScreenshotsProvider } from './screenshots';
 export { FailureDebuggingProvider } from './failure_debugging';
+export { VisualizeListingTableProvider } from './visualize_listing_table';
+
 export * from './dashboard';
