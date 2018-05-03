@@ -11,6 +11,7 @@ import { setupConnection } from './setup_connection';
 import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathRewrite } from './setup_base_path_rewrite';
+import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
@@ -20,6 +21,7 @@ export default async function (kbnServer, server, config) {
 
   setupConnection(server, config);
   setupBasePathRewrite(server, config);
+  setupBasePathProvider(server, config);
   await setupRedirectServer(config);
   registerHapiPlugins(server);
 

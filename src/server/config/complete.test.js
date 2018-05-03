@@ -49,7 +49,6 @@ describe('server/config completeMixin()', function () {
       callCompleteMixin();
       sinon.assert.callCount(server.decorate, 2);
       sinon.assert.calledWithExactly(server.decorate, 'server', 'config', sinon.match.func);
-      sinon.assert.calledWithExactly(server.decorate, 'request', 'getBasePath', sinon.match.func);
     });
   });
 

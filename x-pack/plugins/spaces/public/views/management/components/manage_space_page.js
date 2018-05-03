@@ -23,6 +23,8 @@ import { PageHeader } from './page_header';
 import { DeleteSpacesButton } from './delete_spaces_button';
 
 import { Notifier, toastNotifications } from 'ui/notify';
+import { UrlContext } from './url_context';
+import { toUrlContext, isValidUrlContext } from '../lib/url_context_utils';
 
 export class ManageSpacePage extends React.Component {
   state = {
@@ -105,6 +107,13 @@ export class ManageSpacePage extends React.Component {
               />
             </EuiFormRow>
 
+            <UrlContext
+              space={this.state.space}
+              editingExistingSpace={this.editingExistingSpace()}
+              editable={true}
+              onChange={this.onUrlContextChange}
+            />
+
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton fill onClick={this.saveSpace}>Save</EuiButton>
@@ -146,10 +155,21 @@ export class ManageSpacePage extends React.Component {
   };
 
   onNameChange = (e) => {
+    const canUpdateContext = !this.editingExistingSpace();
+
+    let {
+      urlContext
+    } = this.state.space;
+
+    if (canUpdateContext) {
+      urlContext = toUrlContext(e.target.value);
+    }
+
     this.setState({
       space: {
         ...this.state.space,
-        name: e.target.value
+        name: e.target.value,
+        urlContext
       }
     });
   };
@@ -159,6 +179,15 @@ export class ManageSpacePage extends React.Component {
       space: {
         ...this.state.space,
         description: e.target.value
+      }
+    });
+  };
+
+  onUrlContextChange = (e) => {
+    this.setState({
+      space: {
+        ...this.state.space,
+        urlContext: toUrlContext(e.target.value)
       }
     });
   };
@@ -176,8 +205,9 @@ export class ManageSpacePage extends React.Component {
   _performSave = () => {
     const {
       name = '',
-      id = name.toLowerCase().replace(/\s/g, '-'),
-      description
+      id = toUrlContext(name),
+      description,
+      urlContext
     } = this.state.space;
 
     const { httpAgent, chrome } = this.props;
@@ -185,7 +215,8 @@ export class ManageSpacePage extends React.Component {
     const params = {
       name,
       id,
-      description
+      description,
+      urlContext
     };
 
     const overwrite = this.editingExistingSpace();
@@ -249,12 +280,39 @@ export class ManageSpacePage extends React.Component {
     return {};
   };
 
+  validateUrlContext = () => {
+    if (!this.state.validate) {
+      return {};
+    }
+
+    const {
+      urlContext
+    } = this.state.space;
+
+    if (!urlContext) {
+      return {
+        isInvalid: true,
+        error: 'URL Context is required'
+      };
+    }
+
+    if (!isValidUrlContext(urlContext)) {
+      return {
+        isInvalid: true,
+        error: 'URL Context only allows a-z, 0-9, and the "-" character'
+      };
+    }
+
+    return {};
+
+  };
+
   validateForm = () => {
     if (!this.state.validate) {
       return {};
     }
 
-    const validations = [this.validateName(), this.validateDescription()];
+    const validations = [this.validateName(), this.validateDescription(), this.validateUrlContext()];
     if (validations.some(validation => validation.isInvalid)) {
       return {
         isInvalid: true

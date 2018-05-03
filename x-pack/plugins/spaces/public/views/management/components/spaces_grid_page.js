@@ -155,6 +155,10 @@ export class SpacesGridPage extends Component {
       field: 'description',
       name: 'Description',
       sortable: true
+    }, {
+      field: 'urlContext',
+      name: 'URL Context',
+      sortable: true
     }];
   }
 

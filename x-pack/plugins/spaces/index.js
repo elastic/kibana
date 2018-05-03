@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
+import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import mappings from './mappings.json';
 
@@ -36,7 +37,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     mappings,
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
-      return { };
+      return {
+        spaces: []
+      };
     }
   },
 
@@ -53,5 +56,7 @@ export const spaces = (kibana) => new kibana.Plugin({
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
 
     initSpacesApi(server);
+
+    initSpacesRequestInterceptors(server);
   }
 });

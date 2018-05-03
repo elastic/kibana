@@ -44,21 +44,23 @@ export function initSpacesApi(server) {
     method: 'GET',
     path: '/api/spaces/v1/spaces/{id}',
     async handler(request, reply) {
-      const id = request.params.id;
+      const spaceId = request.params.id;
 
       const client = request.getSavedObjectsClient();
 
-      let space;
       try {
-        space = await client.get('space', id);
+        const {
+          id,
+          attributes
+        } = await client.get('space', spaceId);
+
+        return reply({
+          id,
+          ...attributes
+        });
       } catch (e) {
         return reply(wrapError(e));
       }
-
-      return reply({
-        ...space.attributes,
-        id: space.id
-      });
     },
     config: {
       pre: [routePreCheckLicenseFn]

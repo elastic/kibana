@@ -6,9 +6,9 @@
 
 import Joi from 'joi';
 
-export const spaceSchema = {
+export const spaceSchema = Joi.object({
   id: Joi.string(),
   name: Joi.string().required(),
   description: Joi.string().required(),
-  metadata: Joi.object(),
-};
+  urlContext: Joi.string().regex(/[a-z0-9\-]+/, `lower case, a-z, 0-9, and "-" are allowed`).required()
+}).default();
