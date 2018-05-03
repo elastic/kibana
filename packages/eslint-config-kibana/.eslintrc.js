@@ -118,8 +118,9 @@ module.exports = {
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
-    'react/no-did-mount-set-state': 'error',
-    'react/no-did-update-set-state': 'error',
+    // Off as of React 16.3, see https://github.com/yannickcr/eslint-plugin-react/issues/1754
+    'react/no-did-mount-set-state': 'off',
+    'react/no-did-update-set-state': 'off',
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],
