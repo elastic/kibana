@@ -171,13 +171,11 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
-      // Sort in descending time order before storing in scope.
-        $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
-        console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
-
-        // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
+        // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
         $timeout(() => {
-          $scope.$broadcast('renderTable');
+          // Sort in descending time order before storing in scope.
+          $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
+          console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
         }, 0);
       });
   };

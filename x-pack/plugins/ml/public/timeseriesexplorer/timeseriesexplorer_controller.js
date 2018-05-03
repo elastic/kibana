@@ -360,22 +360,19 @@ module.controller('MlTimeSeriesExplorerController', function (
     function finish() {
       awaitingCount--;
       if (awaitingCount === 0) {
-        processDataForFocusAnomalies(
-          $scope.focusChartData,
-          $scope.anomalyRecords,
-          $scope.timeFieldName);
-
-        processScheduledEventsForChart(
-          $scope.focusChartData,
-          $scope.scheduledEvents);
-
-        console.log('Time series explorer focus chart data set:', $scope.focusChartData);
-
         // Tell the results container directives to render the focus chart.
         // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
         $timeout(() => {
-          $scope.$broadcast('renderFocusChart');
-          $scope.$broadcast('renderTable');
+          processDataForFocusAnomalies(
+            $scope.focusChartData,
+            $scope.anomalyRecords,
+            $scope.timeFieldName);
+
+          processScheduledEventsForChart(
+            $scope.focusChartData,
+            $scope.scheduledEvents);
+
+          console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
         }, 0);
@@ -559,16 +556,14 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   $scope.toggleShowModelBounds = function () {
-    $scope.showModelBounds = !$scope.showModelBounds;
     $timeout(() => {
-      $scope.$broadcast('renderFocusChart');
+      $scope.showModelBounds = !$scope.showModelBounds;
     }, 0);
   };
 
   $scope.toggleShowForecast = function () {
-    $scope.showForecast = !$scope.showForecast;
     $timeout(() => {
-      $scope.$broadcast('renderFocusChart');
+      $scope.showForecast = !$scope.showForecast;
     }, 0);
   };
 
