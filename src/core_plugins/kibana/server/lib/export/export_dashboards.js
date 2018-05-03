@@ -7,9 +7,9 @@ export async function exportDashboards(req) {
   const config = req.server.config();
 
   const savedObjectsClient = req.getSavedObjectsClient();
-
   const objects = await collectDashboards(savedObjectsClient, ids);
   const migrationState = await savedObjectsClient.get('migration', 'migration-state');
+
   return {
     version: config.get('pkg.version'),
     migrationState: MigrationState.trimForExport(migrationState.attributes),

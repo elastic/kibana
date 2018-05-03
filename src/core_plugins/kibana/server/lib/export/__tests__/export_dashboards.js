@@ -20,7 +20,29 @@ describe('exportDashboards(req)', () => {
         },
       },
       getSavedObjectsClient() {
-        return null;
+        return {
+          get(type, id) {
+            if (type === 'migration' && id === 'migration-state') {
+              return {
+                attributes: {
+                  plugins: [{
+                    id: 'hello',
+                    mappingsChecksum: 'map-check',
+                    mappings: '{"something": "grand"}',
+                    migrationIds: ['hi1', 'hi2'],
+                    migrationsChecksum: 'mig-check'
+                  }, {
+                    id: 'goodbye',
+                    mappingsChecksum: 'bye-map-check',
+                    mappings: '{"bye": "hasta"}',
+                    migrationIds: ['by1', 'by2'],
+                    migrationsChecksum: 'bye-mig-check'
+                  }],
+                },
+              };
+            }
+          },
+        };
       }
     };
 
@@ -39,6 +61,24 @@ describe('exportDashboards(req)', () => {
   it('should return a response object with version', () => {
     return exportDashboards(req).then((resp) => {
       expect(resp).to.have.property('version', '6.0.0');
+    });
+  });
+
+  it('should return a response object migration state', () => {
+    return exportDashboards(req).then((resp) => {
+      expect(resp.migrationState).to.deep.equal({
+        plugins: [{
+          id: 'hello',
+          mappingsChecksum: 'map-check',
+          migrationIds: ['hi1', 'hi2'],
+          migrationsChecksum: 'mig-check'
+        }, {
+          id: 'goodbye',
+          mappingsChecksum: 'bye-map-check',
+          migrationIds: ['by1', 'by2'],
+          migrationsChecksum: 'bye-mig-check'
+        }]
+      });
     });
   });
 

@@ -40,7 +40,16 @@ describe('importDashboards(req)', () => {
     req.query = { force: 'true' };
     return importDashboards(req).then(() => {
       expect(bulkCreateStub.calledOnce).to.equal(true);
-      expect(bulkCreateStub.args[0][1]).to.eql({ overwrite: true });
+      expect(bulkCreateStub.args[0][1]).to.eql({ migrationState: {}, overwrite: true });
+    });
+  });
+
+  it('should call bulkCreate with migrationState if it is provided', () => {
+    req.query = { force: 'true' };
+    req.payload.migrationState = { plugins: [{ id: 'shazm' }] };
+    return importDashboards(req).then(() => {
+      expect(bulkCreateStub.calledOnce).to.equal(true);
+      expect(bulkCreateStub.args[0][1]).to.eql({ migrationState: req.payload.migrationState, overwrite: true });
     });
   });
 
