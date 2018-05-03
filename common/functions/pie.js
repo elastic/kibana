@@ -46,11 +46,6 @@ export const pie = () => ({
       default: 0,
       help: 'Weight of stroke in pixels',
     },
-    combine: {
-      types: ['number'],
-      default: 3,
-      help: 'Combine slices that represent less than this percent, into one big "Other" slice',
-    },
     font: {
       types: ['style'],
       help: 'Label font',
@@ -103,9 +98,6 @@ export const pie = () => ({
               stroke: {
                 color: args.strokeColor,
                 width: args.strokeWidth,
-              },
-              combine: {
-                threshold: args.combine / 100,
               },
               label: {
                 show: args.labels,
