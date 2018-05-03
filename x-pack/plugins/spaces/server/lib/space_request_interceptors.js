@@ -7,11 +7,13 @@
 import { wrapError } from './errors';
 
 export function initSpacesRequestInterceptors(server) {
+  const contextCache = new WeakMap();
+
   server.ext('onRequest', async function spacesOnRequestHandler(request, reply) {
     const path = request.path;
 
-    // If navigating within the context of a space, then we store the Space's URL Cpntext on the request,
-    // and rewrire the request to not include the space identifier in the URL.
+    // If navigating within the context of a space, then we store the Space's URL Context on the request,
+    // and rewrite the request to not include the space identifier in the URL.
 
     if (path.startsWith('/s/')) {
       const pathParts = path.split('/');
@@ -29,7 +31,7 @@ export function initSpacesRequestInterceptors(server) {
       };
 
       request.setUrl(newUrl);
-      request.app._spaceUrlContext = spaceUrlContext;
+      contextCache.set(request, spaceUrlContext);
     }
 
     return reply.continue();
@@ -39,12 +41,12 @@ export function initSpacesRequestInterceptors(server) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
-    const { _spaceUrlContext } = request.app;
+    const urlContext = contextCache.get(request);
 
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth scope,
     // which is not available at the time of "onRequest".
-    if (isRequestingKibanaRoot && !_spaceUrlContext) {
+    if (isRequestingKibanaRoot && !urlContext) {
       try {
         const client = request.getSavedObjectsClient();
         const { total, saved_objects: spaceObjects } = await client.find({
