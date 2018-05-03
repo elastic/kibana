@@ -18,7 +18,7 @@ import d3 from 'd3';
 
 import template from './job_select_list.html';
 import { isTimeSeriesViewJob } from 'plugins/ml/../common/util/job_utils';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
 import { uiModules } from 'ui/modules';
@@ -31,7 +31,6 @@ module.directive('mlJobSelectList', function (Private, timefilter) {
     transclude: true,
     template,
     controller: function ($scope) {
-      const mlJobService = Private(JobServiceProvider);
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
