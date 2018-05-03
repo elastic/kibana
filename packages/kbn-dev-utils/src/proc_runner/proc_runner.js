@@ -88,7 +88,7 @@ export class ProcRunner {
 
       // wait for process to complete
       if (wait === true) {
-        await proc.outcomePromise;
+        await proc.getOutcomePromise();
       }
     } finally {
       // while the procRunner closes promises will resolve/reject because
@@ -120,7 +120,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this._procs.map(proc => proc.closedPromise));
+    await Promise.all(this._procs.map(proc => proc.getOutcomePromise()));
   }
 
   /**

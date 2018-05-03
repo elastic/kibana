@@ -91,10 +91,14 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       return Rx.Observable.race(exit$, error$);
     }).share();
 
-    outcomePromise = Rx.Observable.merge(
+    _outcomePromise = Rx.Observable.merge(
       this.lines$.ignoreElements(),
       this.outcome$
     ).toPromise();
+
+    getOutcomePromise() {
+      return this._outcomePromise;
+    }
 
     async stop(signal) {
       await withTimeout(
@@ -113,7 +117,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       await withTimeout(
         async () => {
           try {
-            await this.outcomePromise;
+            await this.getOutcomePromise();
           } catch (error) {
             // ignore
           }
