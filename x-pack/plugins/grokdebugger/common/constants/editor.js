@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ROUTES } from './routes';
-export { PLUGIN } from './plugin';
-export { EDITOR } from './editor';
+export const EDITOR = {
+  SCROLL_MARGIN_TOP: 4,
+  SCROLL_MARGIN_BOTTOM: 4,
+};

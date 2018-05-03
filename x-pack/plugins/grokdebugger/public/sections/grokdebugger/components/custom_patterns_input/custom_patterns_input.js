@@ -6,6 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
+import { EDITOR } from '../../../../../common/constants';
 import template from './custom_patterns_input.html';
 import './custom_patterns_input.less';
 import 'ui/toggle_panel';
@@ -33,13 +34,24 @@ app.directive('customPatternsInput', function () {
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
           editor.getSession().setUseWrapMode(true);
-          editor.renderer.setScrollMargin(7, 7, 0, 0);
+
+          /*
+           * This sets the space between the editor's borders and the
+           * edges of the top/bottom lines to make for a less-crowded
+           * typing experience.
+          */
+          editor.renderer.setScrollMargin(
+            EDITOR.SCROLL_MARGIN_TOP,
+            EDITOR.SCROLL_MARGIN_BOTTOM,
+            0,
+            0
+          );
+
           editor.setOptions({
             highlightActiveLine: false,
             highlightGutterLine: false,
             minLines: 3,
-            maxLines: 25,
-            autoScrollEditorIntoView: true
+            maxLines: 10,
           });
           editor.$blockScrolling = Infinity;
         };
