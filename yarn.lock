@@ -122,6 +122,10 @@
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
 
+"@types/json-stable-stringify@^1.0.32":
+  version "1.0.32"
+  resolved "https://registry.yarnpkg.com/@types/json-stable-stringify/-/json-stable-stringify-1.0.32.tgz#121f6917c4389db3923640b2e68de5fa64dda88e"
+
 "@types/node@*":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
@@ -2823,19 +2827,19 @@ d3-request@1:
     d3-dsv "1"
     xmlhttprequest "1"
 
-d3-scale-chromatic@^1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/d3-scale-chromatic/-/d3-scale-chromatic-1.1.1.tgz#811406e8e09dab78a49dac4a32047d5d3edd0c44"
+d3-scale-chromatic@^1.2:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/d3-scale-chromatic/-/d3-scale-chromatic-1.2.0.tgz#25820d059c0eccc33e85f77561f37382a817ab58"
   dependencies:
+    d3-color "1"
     d3-interpolate "1"
 
-d3-scale@1:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-1.0.7.tgz#fa90324b3ea8a776422bd0472afab0b252a0945d"
+d3-scale@2:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.0.0.tgz#fd8ac78381bc2ed741d8c71770437a5e0549a5a5"
   dependencies:
     d3-array "^1.2.0"
     d3-collection "1"
-    d3-color "1"
     d3-format "1"
     d3-interpolate "1"
     d3-time "1"
@@ -9115,6 +9119,10 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
+prettier@^1.10.2:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.12.1.tgz#c1ad20e803e7749faf905a409d2367e06bbe7325"
+
 pretty-bytes@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-4.0.2.tgz#b2bf82e7350d65c6c33aa95aaa5a4f6327f61cd9"
@@ -11780,7 +11788,7 @@ vega-event-selector@2, vega-event-selector@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/vega-event-selector/-/vega-event-selector-2.0.0.tgz#6af8dc7345217017ceed74e9155b8d33bad05d42"
 
-vega-expression@2:
+vega-expression@2, vega-expression@^2.3:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-2.3.1.tgz#d802a329190bdeb999ce6d8083af56b51f686e83"
   dependencies:
@@ -11794,9 +11802,9 @@ vega-force@2:
     vega-dataflow "3"
     vega-util "1"
 
-vega-geo@^2.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/vega-geo/-/vega-geo-2.1.1.tgz#eaf128927cd146e1c0843d15f25a0a08d5dbf524"
+vega-geo@^2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/vega-geo/-/vega-geo-2.2.2.tgz#d45dd6b843696618e9b6bd646ebcc711029975dc"
   dependencies:
     d3-array "1"
     d3-contour "1"
