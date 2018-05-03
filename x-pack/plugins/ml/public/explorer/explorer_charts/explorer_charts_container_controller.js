@@ -21,16 +21,13 @@ const module = uiModules.get('apps/ml');
 import { explorerChartConfigBuilder } from './explorer_chart_config_builder';
 import { chartLimits } from 'plugins/ml/util/chart_utils';
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 
 module.controller('MlExplorerChartsContainerController', function ($scope, $injector) {
   const Private = $injector.get('Private');
   const mlExplorerDashboardService = $injector.get('mlExplorerDashboardService');
   const mlSelectSeverityService = $injector.get('mlSelectSeverityService');
-  const $q = $injector.get('$q');
-  const mlResultsService = Private(ResultsServiceProvider);
-  const mlJobService = Private(JobServiceProvider);
 
   $scope.seriesToPlot = [];
 
@@ -124,7 +121,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
     // only after that trigger data processing and page render.
     // TODO - if query returns no results e.g. source data has been deleted,
     // display a message saying 'No data between earliest/latest'.
-    const seriesPromises = seriesConfigs.map(seriesConfig => $q.all([
+    const seriesPromises = seriesConfigs.map(seriesConfig => Promise.all([
       getMetricData(seriesConfig, chartRange),
       getRecordsForCriteria(seriesConfig, chartRange),
       getScheduledEvents(seriesConfig, chartRange)
@@ -243,7 +240,7 @@ module.controller('MlExplorerChartsContainerController', function ($scope, $inje
       return chartPoint;
     }
 
-    $q.all(seriesPromises)
+    Promise.all(seriesPromises)
       .then(response => {
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);

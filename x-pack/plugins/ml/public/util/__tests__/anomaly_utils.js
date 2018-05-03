@@ -265,6 +265,7 @@ describe('ML - anomaly utils', () => {
     it('returns true for expected function descriptions', () => {
       expect(showTypicalForFunction('count')).to.be(true);
       expect(showTypicalForFunction('distinct_count')).to.be(true);
+      expect(showTypicalForFunction('lat_long')).to.be(true);
       expect(showTypicalForFunction('mean')).to.be(true);
       expect(showTypicalForFunction('max')).to.be(true);
       expect(showTypicalForFunction('min')).to.be(true);
@@ -276,7 +277,6 @@ describe('ML - anomaly utils', () => {
     });
 
     it('returns false for expected function descriptions', () => {
-      expect(showTypicalForFunction('lat_long')).to.be(false);
       expect(showTypicalForFunction('rare')).to.be(false);
     });
 

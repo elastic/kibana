@@ -11,16 +11,16 @@ import moment from 'moment';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function FullTimeRangeSelectorServiceProvider(timefilter, Notifier, $q) {
+export function FullTimeRangeSelectorServiceProvider(timefilter, Notifier) {
   const notify = new Notifier();
 
   function setFullTimeRange(indexPattern, query) {
     // load the earliest and latest time stamps for the index
-    $q.when(ml.getTimeFieldRange({
+    ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       query
-    }))
+    })
       .then((resp) => {
         timefilter.time.from = moment(resp.start.epoch).toISOString();
         timefilter.time.to = moment(resp.end.epoch).toISOString();

@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { checkParam } from '../../../error_missing_required';
-import { createQuery } from '../../../create_query.js';
+import { createQuery } from '../../../create_query';
 import { calculateAuto } from '../../../calculate_auto';
 import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';

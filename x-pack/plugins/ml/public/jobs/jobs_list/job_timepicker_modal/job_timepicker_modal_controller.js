@@ -9,9 +9,9 @@
 import moment from 'moment';
 import angular from 'angular';
 
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { CreateWatchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/watcher/create_watch_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
+import { xpackFeatureProvider } from 'plugins/ml/license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -23,10 +23,9 @@ module.controller('MlJobTimepickerModal', function (
   params,
   Private) {
   const msgs = mlMessageBarService;
-  const mlJobService = Private(JobServiceProvider);
-  const mlCreateWatchService = Private(CreateWatchServiceProvider);
   $scope.saveLock = false;
-  $scope.watcherEnabled = mlCreateWatchService.isWatcherEnabled();
+  const xpackFeature = Private(xpackFeatureProvider);
+  $scope.watcherEnabled = xpackFeature.isAvailable('watcher');
 
   const job = angular.copy(params.job);
   $scope.jobId = job.job_id;
@@ -96,10 +95,10 @@ module.controller('MlJobTimepickerModal', function (
         doStart();
       })
       .catch((resp) => {
-        if (resp.statusCode === 409) {
+        if (resp.status === 409) {
           doStart();
         } else {
-          if (resp.statusCode === 500) {
+          if (resp.status === 500) {
             if (doStartCalled === false) {
             // doStart hasn't been called yet, this 500 has returned before 10s,
             // so it's not due to a timeout

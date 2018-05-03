@@ -6,7 +6,9 @@ exports[`render 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <p>
       <EuiTextColor
         color="subdued"
@@ -70,7 +72,9 @@ exports[`render 1`] = `
             component="div"
             grow={false}
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <EuiIcon
                 color="subdued"
                 size="m"

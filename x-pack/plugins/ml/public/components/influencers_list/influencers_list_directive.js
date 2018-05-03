@@ -13,7 +13,7 @@
 import _ from 'lodash';
 
 import 'plugins/ml/lib/angular_bootstrap_patch';
-import 'plugins/ml/filters/abbreviate_whole_number';
+import 'plugins/ml/formatters/abbreviate_whole_number';
 
 import template from './influencers_list.html';
 import { getSeverity } from 'plugins/ml/util/anomaly_utils';
