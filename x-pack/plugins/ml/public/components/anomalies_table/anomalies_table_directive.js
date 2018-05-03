@@ -85,6 +85,7 @@ module.directive('mlAnomaliesTable', function (
       scope.table.columns = [];
       scope.table.rows = [];
       scope.rowScopes = [];
+      scope.anomalyRecords = [];
 
       scope.influencersLimit = 5;
 
@@ -94,7 +95,7 @@ module.directive('mlAnomaliesTable', function (
       mlSelectIntervalService.state.watch(updateTableData);
       mlSelectSeverityService.state.watch(updateTableData);
 
-      scope.$on('renderTable', updateTableData);
+      scope.$watch('anomalyRecords', updateTableData);
 
       element.on('$destroy', () => {
         mlSelectIntervalService.state.unwatch(updateTableData);
