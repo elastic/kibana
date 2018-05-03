@@ -113,9 +113,7 @@ module.directive('mlTimeseriesChart', function (
       drawContextChartSelection();
     });
 
-    scope.$watch('focusChartData', renderFocusChart);
-    scope.$watch('showModelBounds', renderFocusChart);
-    scope.$watch('showForecast', renderFocusChart);
+    scope.$watchGroup(['focusChartData', 'showModelBounds', 'showForecast'], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));
