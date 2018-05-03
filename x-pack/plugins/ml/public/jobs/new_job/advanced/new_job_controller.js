@@ -29,7 +29,7 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/jobs/new_job/advanced', {

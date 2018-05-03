@@ -23,7 +23,7 @@ import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';

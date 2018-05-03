@@ -40,7 +40,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { PopulationJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
 
 uiRoutes

@@ -46,7 +46,7 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {

@@ -10,7 +10,7 @@ import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './settings.html';
 

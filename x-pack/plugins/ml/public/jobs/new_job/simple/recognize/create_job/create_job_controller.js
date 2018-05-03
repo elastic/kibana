@@ -23,7 +23,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './create_job.html';
 
 uiRoutes

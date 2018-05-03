@@ -21,7 +21,7 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 import template from './create_calendar.html';

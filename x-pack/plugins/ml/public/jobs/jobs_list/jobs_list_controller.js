@@ -36,7 +36,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { jobMessagesService } from 'plugins/ml/services/job_messages_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/services/http_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/jobs/?', {
