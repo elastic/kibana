@@ -7,6 +7,24 @@ const PENDING_SNAPSHOT_STATUSES = [
   'WAITING',
 ];
 
+export async function deleteIndex(client, stats, index, retryIfSnapshotInProgress = true) {
+  try {
+    await client.indices.delete({ index });
+    stats.deletedIndex(index);
+  } catch (error) {
+
+    if (retryIfSnapshotInProgress && isDeleteWhileSnapshotInProgressError(error)) {
+      stats.waitingForInProgressSnapshot(index);
+      await waitForSnapshotCompletion(client, index);
+      return await deleteIndex(client, stats, index, false);
+    }
+
+    if (get(error, 'body.error.type') !== 'index_not_found_exception') {
+      throw error;
+    }
+  }
+}
+
 /**
  * Determine if an error is complaining about a delete while
  * a snapshot is in progress

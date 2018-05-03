@@ -2,6 +2,8 @@ import { Transform } from 'stream';
 
 import { get } from 'lodash';
 
+import { deleteIndex } from './delete_index';
+
 export function createCreateIndexStream({ client, stats, skipExisting }) {
   const skipDocsFromIndices = new Set();
 
@@ -35,8 +37,7 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
           return;
         }
 
-        await client.indices.delete({ index });
-        stats.deletedIndex(index);
+        await deleteIndex(client, stats, index);
         await attemptToCreate(attemptNumber + 1);
         return;
       }
