@@ -12,7 +12,7 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { InfluencersList } from './influencers_list';
 
-module.directive('mlInfluencersListReact', function ($injector) {
+module.directive('mlInfluencersList', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
 
   return reactDirective(
