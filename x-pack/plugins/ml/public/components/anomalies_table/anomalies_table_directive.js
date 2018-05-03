@@ -95,7 +95,7 @@ module.directive('mlAnomaliesTable', function (
       mlSelectIntervalService.state.watch(updateTableData);
       mlSelectSeverityService.state.watch(updateTableData);
 
-      scope.$watch('anomalyRecords', updateTableData);
+      scope.$watchCollection('anomalyRecords', updateTableData);
 
       element.on('$destroy', () => {
         mlSelectIntervalService.state.unwatch(updateTableData);
@@ -502,9 +502,9 @@ module.directive('mlAnomaliesTable', function (
         // Aggregate the anomaly data by time, detector, and entity (by/over/partition).
         // TODO - do we want to aggregate by job too, in cases where different jobs
         // have detectors with the same description.
-        console.log('aggregateAnomalies(): number of anomalies to aggregate:', scope.anomalyRecords && scope.anomalyRecords.length);
+        console.log('aggregateAnomalies(): number of anomalies to aggregate:', scope.anomalyRecords.length);
 
-        if (typeof scope.anomalyRecords === 'undefined' || scope.anomalyRecords.length === 0) {
+        if (scope.anomalyRecords.length === 0) {
           return [];
         }
 
