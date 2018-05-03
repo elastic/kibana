@@ -53,7 +53,7 @@ export async function runFunctionTests() {
       )
       .parse(process.argv);
 
-    await withProcRunner(async procs => {
+    await withProcRunner(log, async procs => {
       const ftrConfig = await getFtrConfig();
 
       const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
@@ -94,7 +94,7 @@ export async function runApiTests() {
     .parse(process.argv);
 
   try {
-    await withProcRunner(async procs => {
+    await withProcRunner(log, async procs => {
       const ftrConfig = await getFtrConfig();
 
       const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
@@ -159,7 +159,7 @@ export async function runFunctionalTestsServer() {
   const useSAML = cmd.saml;
 
   try {
-    await withProcRunner(async procs => {
+    await withProcRunner(log, async procs => {
       const ftrConfig = await getFtrConfig();
       await runEsWithXpack({ ftrConfig, useSAML, from: cmd.esFrom });
       await runKibanaServer({

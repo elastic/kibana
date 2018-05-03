@@ -1,6 +1,5 @@
 import moment from 'moment';
 
-import { log } from './log';
 import { createCliError } from './errors';
 import { createProc } from './proc';
 import { observeSignals } from './observe_signals';
@@ -15,9 +14,12 @@ const noop = () => {};
  *  @class ProcRunner
  */
 export class ProcRunner {
-  constructor() {
+  constructor(options) {
+    const { log } = options;
+
     this._closing = false;
     this._procs = [];
+    this._log = log;
     this._signalSubscription = observeSignals(process).subscribe({
       next: async signal => {
         await this.teardown(signal);
@@ -109,7 +111,7 @@ export class ProcRunner {
     if (proc) {
       await proc.stop(signal);
     } else {
-      log.warning('[%s] already stopped', name);
+      this._log.warning('[%s] already stopped', name);
     }
   }
 
@@ -136,7 +138,7 @@ export class ProcRunner {
     this._signalSubscription = null;
 
     if (!signal && this._procs.length > 0) {
-      log.warning(
+      this._log.warning(
         '%d processes left running, stop them with procs.stop(name):',
         this._procs.length,
         this._procs.map(proc => proc.name)
@@ -153,7 +155,10 @@ export class ProcRunner {
 
   _createProc(name, options) {
     const startMs = Date.now();
-    const proc = createProc(name, options);
+    const proc = createProc(name, {
+      ...options,
+      log: this._log,
+    });
 
     this._procs.push(proc);
     const remove = () => {
@@ -164,7 +169,7 @@ export class ProcRunner {
     proc.outcome$.subscribe({
       next: code => {
         const duration = moment.duration(Date.now() - startMs);
-        log.info(
+        this._log.info(
           '[%s] exitted with %s after %s',
           name,
           code,
@@ -176,7 +181,7 @@ export class ProcRunner {
       },
       error: error => {
         if (this._closing) {
-          log.error(error);
+          this._log.error(error);
         }
         remove();
       },
