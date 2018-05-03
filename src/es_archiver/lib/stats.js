@@ -35,7 +35,7 @@ export function createStats(name, log) {
 
     waitingForInProgressSnapshot(index) {
       getOrCreate(index).waitForSnapshot += 1;
-      info('Waiting for snapshot of %j to complete');
+      info('Waiting for snapshot of %j to complete', index);
     }
 
     deletedIndex(index) {
