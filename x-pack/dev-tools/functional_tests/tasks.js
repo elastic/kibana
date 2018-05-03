@@ -170,7 +170,7 @@ export async function runFunctionalTestsServer() {
       });
 
       // wait for 5 seconds of silence before logging the
-      // success message so that it doesn't get burried
+      // success message so that it doesn't get buried
       await Rx.Observable.fromEvent(log, 'data')
         .startWith(null)
         .switchMap(() => Rx.Observable.timer(5000))
