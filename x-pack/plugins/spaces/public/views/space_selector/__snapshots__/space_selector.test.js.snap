@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<div
+  className="euiPage"
+>
+  <div
+    className="euiPageHeader"
+  >
+    <div
+      className="euiPageHeaderSection logoHeader"
+    >
+      <svg
+        className="euiIcon euiIcon--xxLarge"
+        height="40"
+        style={
+          Object {
+            "fill": undefined,
+          }
+        }
+        viewBox="0 0 30 40"
+        width="30"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M.874 40H30c0-8.046-4.566-15.197-11.652-19.768L.874 40z"
+          fill="#3EBEB0"
+        />
+        <path
+          d="M0 26v14h1.873L18.35 20.229a31.291 31.291 0 0 0-3.562-1.974L0 26z"
+          fill="#37A595"
+        />
+        <path
+          d="M0 13v23l14.79-17.748C10.424 16.186 15.38 14 10 14L0 13z"
+          fill="#353535"
+        />
+        <path
+          d="M30 0H0v15c5.38 0 10.424 1.186 14.79 3.252L30 0z"
+          fill="#E9478B"
+        />
+      </svg>
+    </div>
+  </div>
+  <div
+    className="euiPageBody"
+  >
+    <div
+      className="euiPanel euiPanel--paddingLarge euiPageContent"
+    >
+      <div
+        className="euiText spaceWelcomeText"
+      >
+        <p
+          className="welcomeLarge"
+        >
+          Welcome to Kibana.
+        </p>
+        <p
+          className="welcomeMedium"
+        >
+          Select a space to begin.
+        </p>
+      </div>
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--responsive spacesGroup"
+      />
+      <div
+        className="euiText spaceProfileText"
+      >
+        <p>
+          You can change your workspace at anytime by accessing your profile within Kibana.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiPage,
   EuiPageHeader,
@@ -24,8 +25,17 @@ export class SpaceSelector extends Component {
     spaces: []
   };
 
+  constructor(props) {
+    super(props);
+    if (Array.isArray(props.spaces)) {
+      this.state.spaces = [...props.spaces];
+    }
+  }
+
   componentDidMount() {
-    this.loadSpaces();
+    if (this.state.spaces.length === 0) {
+      this.loadSpaces();
+    }
   }
 
   loadSpaces() {
@@ -81,7 +91,7 @@ export class SpaceSelector extends Component {
           icon={<EuiIcon size="xxl" type={space.logo} />}
           title={this.renderSpaceTitle(space)}
           description={space.description}
-          onClick={() => window.alert('Card clicked')}
+          onClick={this.createSpaceClickHandler(space)}
         />
       </EuiFlexItem>
     );
@@ -96,4 +106,16 @@ export class SpaceSelector extends Component {
     );
   };
 
+  createSpaceClickHandler = (space) => {
+    return () => {
+      window.location = this.props.chrome.addBasePath(`/s/${space.urlContext}`);
+    };
+  }
+
 }
+
+SpaceSelector.propTypes = {
+  spaces: PropTypes.array,
+  httpAgent: PropTypes.func.isRequired,
+  chrome: PropTypes.object.isRequired,
+};

@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { validateConfig } from './server/lib/validate_config';
 import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
+import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import mappings from './mappings.json';
 
@@ -36,7 +37,9 @@ export const spaces = (kibana) => new kibana.Plugin({
     mappings,
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
-      return { };
+      return {
+        spaces: []
+      };
     }
   },
 
@@ -54,35 +57,6 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     initSpacesApi(server);
 
-    server.ext('onRequest', function spacesOnRequestHandler(request, reply) {
-      const path = request.path;
-      const url = request.url;
-      console.log(`Intercepting request to ${path} with url ${JSON.stringify(url)}`);
-
-      if (path.startsWith('/s/')) {
-        const pathParts = path.split('/');
-        const spaceContextUrl = pathParts[2];
-
-        console.log('got space context', spaceContextUrl);
-
-        request.setBasePath(`/s/${spaceContextUrl}`);
-
-        const newUrl = {
-          ...request.url,
-          path: path.substr(7),
-          pathname: path.substr(7),
-          href: path.substr(7)
-        };
-        console.log('rewriting ', JSON.stringify(newUrl));
-
-        request.setUrl(newUrl);
-        request.app._space = spaceContextUrl;
-      } else {
-        // No space identified in path. Assume the default space.
-        request.app._space = 'default';
-      }
-
-      return reply.continue();
-    });
+    initSpacesRequestInterceptors(server);
   }
 });

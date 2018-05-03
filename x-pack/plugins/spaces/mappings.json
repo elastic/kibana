@@ -7,7 +7,7 @@
       "name": {
         "type": "text"
       },
-      "context_path": {
+      "urlContext": {
         "type": "keyword"
       },
       "description": {
