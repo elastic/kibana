@@ -1,4 +1,5 @@
 import chrome from 'ui/chrome';
+import { metadata } from 'ui/metadata';
 
 export async function sendRequest({ method, path, body }) {
   chrome.loadingCount.increment();
@@ -9,7 +10,7 @@ export async function sendRequest({ method, path, body }) {
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        'kbn-xsrf': 'kibana',
+        'kbn-version': metadata.version,
       },
       credentials: 'same-origin'
     });
