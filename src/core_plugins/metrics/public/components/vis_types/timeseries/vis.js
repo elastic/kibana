@@ -71,6 +71,11 @@ class TimeseriesVisualization extends Component {
 
     if (model.axis_min) mainAxis.min = model.axis_min;
     if (model.axis_max) mainAxis.max = model.axis_max;
+    if (model.axis_scale === 'log') {
+      mainAxis.mode = 'log';
+      mainAxis.transform = value => value > 0 ? Math.log(value) / Math.LN10 : null;
+      mainAxis.inverseTransform = value => Math.pow(10, value);
+    }
 
     const yaxes = [mainAxis];
 

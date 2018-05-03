@@ -10,6 +10,7 @@ export {
   ElasticsearchMetric,
   LogstashClusterMetric,
   BeatsMetric,
+  BeatsClusterMetric,
 } from './classes';
 export { metrics } from './metrics';
 export { serializeMetric } from './serialize_metric';

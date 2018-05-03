@@ -9,31 +9,58 @@
 import { notify } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-export function getIndexPatterns(Private) {
+let indexPatterns = [];
+let fullIndexPatterns = [];
+let currentIndexPattern = null;
+let currentSavedSearch = null;
+
+export function loadIndexPatterns(Private, courier) {
+  fullIndexPatterns = courier.indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['title'],
     perPage: 10000
-  }).then(response => response.savedObjects);
+  }).then((response) => {
+    indexPatterns = response.savedObjects;
+    return indexPatterns;
+  });
 }
 
-export function getIndexPattern(courier, indexPatternId) {
-  return courier.indexPatterns.get(indexPatternId);
+export function getIndexPatterns() {
+  return indexPatterns;
 }
 
-export function getIndexPatternWithRoute(courier, $route) {
-  return getIndexPattern(courier, $route.current.params.index);
+export function getIndexPatternIdFromName(name) {
+  for (let j = 0; j < indexPatterns.length; j++) {
+    if (indexPatterns[j].get('title') === name) {
+      return indexPatterns[j].id;
+    }
+  }
+  return name;
 }
 
-export function getIndexPatternProvider(courier) {
-  return function (indexPatternId) {
-    return getIndexPattern(courier, indexPatternId);
-  };
+export function loadCurrentIndexPattern(courier, $route) {
+  fullIndexPatterns = courier.indexPatterns;
+  currentIndexPattern = fullIndexPatterns.get($route.current.params.index);
+  return currentIndexPattern;
 }
 
-export function getSavedSearchWithRoute(courier, $route, savedSearches) {
-  return savedSearches.get($route.current.params.savedSearchId);
+export function getIndexPatternById(id) {
+  return fullIndexPatterns.get(id);
+}
+
+export function loadCurrentSavedSearch(courier, $route, savedSearches) {
+  currentSavedSearch = savedSearches.get($route.current.params.savedSearchId);
+  return currentSavedSearch;
+}
+
+export function getCurrentIndexPattern() {
+  return currentIndexPattern;
+}
+
+export function getCurrentSavedSearch() {
+  return currentSavedSearch;
 }
 
 // returns true if the index passed in is time based
