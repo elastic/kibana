@@ -84,7 +84,7 @@ error messages.
 
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output.
 
-[logging-verbose]`logging.verbose:`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage information and all requests. Supported on Elastic Cloud Enterprise.
+[[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage information and all requests. Supported on Elastic Cloud Enterprise.
 
 `logging.useUTC`:: *Default: true* Set the value of this setting to `false` to log events using the timezone of the server, rather than UTC.
 
