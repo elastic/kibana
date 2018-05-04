@@ -11,7 +11,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 
 async function callApi(options) {
-  const { pathname, query, camelcase, compact, ...urlOptions } = {
+  const { pathname, query, camelcase, compact, ...requestOptions } = {
     compact: true, // remove empty query args
     camelcase: true,
     credentials: 'same-origin',
@@ -29,7 +29,7 @@ async function callApi(options) {
   });
 
   try {
-    const response = await fetch(fullUrl, urlOptions);
+    const response = await fetch(fullUrl, requestOptions);
     const json = await response.json();
     if (!response.ok) {
       throw new Error(JSON.stringify(json, null, 4));
@@ -65,18 +65,17 @@ export async function loadAgentStatus() {
   });
 }
 
-export async function loadServiceList({ start, end, query }) {
+export async function loadServiceList({ start, end }) {
   return callApi({
     pathname: chrome.addBasePath(`/api/apm/services`),
     query: {
       start,
-      end,
-      query
+      end
     }
   });
 }
 
-export async function loadService({ start, end, serviceName }) {
+export async function loadServiceDetails({ start, end, serviceName }) {
   return callApi({
     pathname: chrome.addBasePath(`/api/apm/services/${serviceName}`),
     query: {
@@ -199,7 +198,7 @@ export async function loadErrorGroupList({
   });
 }
 
-export async function loadErrorGroup({
+export async function loadErrorGroupDetails({
   serviceName,
   errorGroupId,
   start,

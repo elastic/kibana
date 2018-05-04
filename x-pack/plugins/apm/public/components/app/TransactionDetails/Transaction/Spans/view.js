@@ -17,7 +17,7 @@ import Timeline from '../../../../shared/charts/Timeline';
 import EmptyMessage from '../../../../shared/EmptyMessage';
 import { getFeatureDocs } from '../../../../../utils/documentation';
 import { ExternalLink } from '../../../../../utils/url';
-import { getKey } from '../../../../../store/apiHelpers';
+import { SpansRequest } from '../../../../../store/reduxRequest/spans';
 
 const Container = styled.div`
   transition: 0.1s padding ease;
@@ -42,91 +42,82 @@ const TIMELINE_MARGINS = {
 };
 
 class Spans extends PureComponent {
-  componentDidMount() {
-    loadSpans(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    loadSpans(nextProps);
-  }
-
   render() {
-    const { spans, agentName, urlParams, location } = this.props;
-    if (isEmpty(spans.data.spans)) {
-      return (
-        <EmptyMessage
-          heading="No spans available for this transaction."
-          hideSubheading
-        />
-      );
-    }
-
-    const spanTypes = uniq(
-      spans.data.spanTypes.map(({ type }) => getPrimaryType(type))
-    );
-
-    const getSpanColor = getColorByType(spanTypes);
-
-    const totalDuration = spans.data.duration;
-    const spanContainerHeight = 58;
-    const timelineHeight = spanContainerHeight * spans.data.spans.length;
-
+    const { agentName, urlParams, location, droppedSpans } = this.props;
     return (
-      <div>
-        <Container>
-          <StickyContainer>
-            <Timeline
-              header={
-                <TimelineHeader
-                  legends={spanTypes.map(type => ({
-                    label: getSpanLabel(type),
-                    color: getSpanColor(type)
-                  }))}
-                  transactionName={urlParams.transactionName}
-                />
-              }
-              duration={totalDuration}
-              height={timelineHeight}
-              margins={TIMELINE_MARGINS}
-            />
-            <div
-              style={{
-                paddingTop: TIMELINE_MARGINS.top
-              }}
-            >
-              {spans.data.spans.map(span => (
-                <Span
-                  location={location}
-                  timelineMargins={TIMELINE_MARGINS}
-                  key={get({ span }, SPAN_ID)}
-                  color={getSpanColor(getPrimaryType(span.type))}
-                  span={span}
-                  spanTypeLabel={getSpanLabel(getPrimaryType(span.type))}
-                  totalDuration={totalDuration}
-                  isSelected={get({ span }, SPAN_ID) === urlParams.spanId}
-                />
-              ))}
+      <SpansRequest
+        urlParams={urlParams}
+        render={spans => {
+          if (isEmpty(spans.data.spans)) {
+            return (
+              <EmptyMessage
+                heading="No spans available for this transaction."
+                hideSubheading
+              />
+            );
+          }
+
+          const spanTypes = uniq(
+            spans.data.spanTypes.map(({ type }) => getPrimaryType(type))
+          );
+
+          const getSpanColor = getColorByType(spanTypes);
+
+          const totalDuration = spans.data.duration;
+          const spanContainerHeight = 58;
+          const timelineHeight = spanContainerHeight * spans.data.spans.length;
+
+          return (
+            <div>
+              <Container>
+                <StickyContainer>
+                  <Timeline
+                    header={
+                      <TimelineHeader
+                        legends={spanTypes.map(type => ({
+                          label: getSpanLabel(type),
+                          color: getSpanColor(type)
+                        }))}
+                        transactionName={urlParams.transactionName}
+                      />
+                    }
+                    duration={totalDuration}
+                    height={timelineHeight}
+                    margins={TIMELINE_MARGINS}
+                  />
+                  <div
+                    style={{
+                      paddingTop: TIMELINE_MARGINS.top
+                    }}
+                  >
+                    {spans.data.spans.map(span => (
+                      <Span
+                        location={location}
+                        timelineMargins={TIMELINE_MARGINS}
+                        key={get({ span }, SPAN_ID)}
+                        color={getSpanColor(getPrimaryType(span.type))}
+                        span={span}
+                        spanTypeLabel={getSpanLabel(getPrimaryType(span.type))}
+                        totalDuration={totalDuration}
+                        isSelected={get({ span }, SPAN_ID) === urlParams.spanId}
+                      />
+                    ))}
+                  </div>
+                </StickyContainer>
+              </Container>
+
+              {droppedSpans > 0 && (
+                <DroppedSpansContainer>
+                  {droppedSpans} spans dropped due to limit of{' '}
+                  {spans.data.spans.length}.{' '}
+                  <DroppedSpansDocsLink agentName={agentName} />
+                </DroppedSpansContainer>
+              )}
             </div>
-          </StickyContainer>
-        </Container>
-
-        {this.props.droppedSpans > 0 && (
-          <DroppedSpansContainer>
-            {this.props.droppedSpans} spans dropped due to limit of{' '}
-            {spans.data.spans.length}.{' '}
-            <DroppedSpansDocsLink agentName={agentName} />
-          </DroppedSpansContainer>
-        )}
-      </div>
+          );
+        }}
+      />
     );
-  }
-}
-
-function loadSpans(props) {
-  const { serviceName, start, end, transactionId } = props.urlParams;
-  const key = getKey({ serviceName, start, end, transactionId });
-  if (key && props.spans.key !== key) {
-    props.loadSpans({ serviceName, start, end, transactionId });
   }
 }
 
@@ -185,7 +176,10 @@ function getPrimaryType(type) {
 }
 
 Spans.propTypes = {
-  location: PropTypes.object.isRequired
+  location: PropTypes.object.isRequired,
+  agentName: PropTypes.string.isRequired,
+  urlParams: PropTypes.object.isRequired,
+  droppedSpans: PropTypes.number.isRequired
 };
 
 export default Spans;

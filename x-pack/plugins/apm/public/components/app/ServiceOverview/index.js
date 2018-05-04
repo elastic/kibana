@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import ServiceOverview from './view';
-import { loadServiceList, getServiceList } from '../../../store/serviceList';
+import { getServiceList } from '../../../store/reduxRequest/serviceList';
 import { getUrlParams } from '../../../store/urlParams';
 import sorting, { changeServiceSorting } from '../../../store/sorting';
 
@@ -19,7 +19,6 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {
-  loadServiceList,
   changeServiceSorting
 };
 export default connect(mapStateToProps, mapDispatchToProps)(ServiceOverview);
