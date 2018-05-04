@@ -8,9 +8,17 @@ import { omit } from 'lodash';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
+import { getSpaceUrlContext } from '../../../../common/spaces_url_parser';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
+
+  function convertSavedObjectToSpace(savedObject) {
+    return {
+      id: savedObject.id,
+      ...savedObject.attributes
+    };
+  }
 
   server.route({
     method: 'GET',
@@ -25,10 +33,7 @@ export function initSpacesApi(server) {
           type: 'space'
         });
 
-        spaces = result.saved_objects.map(space => ({
-          ...space.attributes,
-          id: space.id
-        }));
+        spaces = result.saved_objects.map(convertSavedObjectToSpace);
       } catch(e) {
         return reply(wrapError(e));
       }
@@ -42,6 +47,41 @@ export function initSpacesApi(server) {
 
   server.route({
     method: 'GET',
+    path: '/api/spaces/v1/spaces/_active',
+    async handler(request, reply) {
+      const basePath = request.getBasePath();
+
+      const spaceContext = getSpaceUrlContext(basePath);
+
+      if (!spaceContext) {
+        return reply();
+      }
+
+      try {
+        const client = request.getSavedObjectsClient();
+
+        const {
+          saved_objects: spaces = []
+        } = await client.find({
+          type: 'space',
+          search: `"${spaceContext}"`,
+          search_fields: ['urlContext'],
+        });
+
+        if (spaces.length === 0) {
+          return reply();
+        }
+
+        return reply(convertSavedObjectToSpace(spaces[0]));
+
+      } catch (e) {
+        return reply(wrapError(e));
+      }
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/api/spaces/v1/spaces/{id}',
     async handler(request, reply) {
       const spaceId = request.params.id;
@@ -49,15 +89,9 @@ export function initSpacesApi(server) {
       const client = request.getSavedObjectsClient();
 
       try {
-        const {
-          id,
-          attributes
-        } = await client.get('space', spaceId);
+        const response = await client.get('space', spaceId);
 
-        return reply({
-          id,
-          ...attributes
-        });
+        return reply(convertSavedObjectToSpace(response));
       } catch (e) {
         return reply(wrapError(e));
       }
@@ -87,7 +121,7 @@ export function initSpacesApi(server) {
         return reply(wrapError(e));
       }
 
-      return reply(result);
+      return reply(convertSavedObjectToSpace(result));
     },
     config: {
       validate: {

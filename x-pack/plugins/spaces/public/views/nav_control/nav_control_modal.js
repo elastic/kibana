@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiModal,
   EuiModalHeader,
@@ -12,6 +13,7 @@ import {
   EuiModalBody,
   EuiOverlayMask,
   EuiAvatar,
+  EuiLoadingSpinner
 } from '@elastic/eui';
 import { SpaceCards } from '../components/space_cards';
 
@@ -19,7 +21,8 @@ export class NavControlModal extends Component {
     state = {
       isOpen: false,
       loading: false,
-      spaces: []
+      spaces: [],
+      activeSpace: null
     };
 
     componentDidMount() {
@@ -35,31 +38,27 @@ export class NavControlModal extends Component {
         loading: true
       });
 
-      spacesManager.getSpaces()
-        .then(spaces => {
-          this.setState({
-            spaces,
-            loading: false
-          });
+      Promise.all([
+        spacesManager.getSpaces(),
+        spacesManager.getActiveSpace()
+      ]).then(([spaces, activeSpace]) => {
+        this.setState({
+          spaces,
+          activeSpace,
+          loading: false
         });
+      });
     }
 
     render() {
-      const button = (
-        <div className="global-nav-link">
-          <a className="global-nav-link__anchor" onClick={this.togglePortal}>
-            <div className="global-nav-link__icon"><EuiAvatar size={'s'} name={'Engineering'} /></div>
-            <div className="global-nav-link__title">Engineering</div>
-          </a>
-        </div>
-      );
-
       let modal;
       if (this.state.isOpen) {
         modal = (
           <EuiOverlayMask>
             <EuiModal onClose={this.closePortal} className={'selectSpaceModal'}>
-              <EuiModalHeader><EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle></EuiModalHeader>
+              <EuiModalHeader>
+                <EuiModalHeaderTitle>Select a space</EuiModalHeaderTitle>
+              </EuiModalHeader>
               <EuiModalBody>
                 <SpaceCards spaces={this.state.spaces} />
               </EuiModalBody>
@@ -69,9 +68,43 @@ export class NavControlModal extends Component {
       }
 
       return (
-        <div>{button}{modal}</div>
+        <div>{this.getActiveSpaceButton()}{modal}</div>
       );
     }
+
+    getActiveSpaceButton = () => {
+      const {
+        loading,
+        activeSpace
+      } = this.state;
+
+      if (loading) {
+        return this.getButton(
+          <EuiLoadingSpinner size={'m'} className={'spaceNavGraphic'}/>,
+          ''
+        );
+      }
+
+      if (activeSpace && activeSpace.hasOwnProperty('name')) {
+        return this.getButton(
+          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={activeSpace.name} />,
+          activeSpace.name
+        );
+      }
+
+      return null;
+    };
+
+    getButton = (linkIcon, linkTitle) => {
+      return (
+        <div className="global-nav-link">
+          <a className="global-nav-link__anchor" onClick={this.togglePortal}>
+            <div className="global-nav-link__icon">{linkIcon}</div>
+            <div className="global-nav-link__title">{linkTitle}</div>
+          </a>
+        </div>
+      );
+    };
 
     togglePortal = () => {
       const isOpening = !this.state.isOpen;
@@ -90,3 +123,7 @@ export class NavControlModal extends Component {
       });
     }
 }
+
+NavControlModal.propTypes = {
+  spacesManager: PropTypes.object.isRequired
+};

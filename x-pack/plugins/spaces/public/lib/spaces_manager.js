@@ -7,7 +7,9 @@
 export class SpacesManager {
   constructor(httpAgent, chrome) {
     this._httpAgent = httpAgent;
+    this.chrome = chrome;
     this._baseUrl = chrome.addBasePath(`/api/spaces/v1/spaces`);
+    this._activeSpace = null;
   }
 
   async getSpaces() {
@@ -20,6 +22,16 @@ export class SpacesManager {
     return await this._httpAgent
       .get(`${this._baseUrl}/${id}`)
       .then(response => response.data);
+  }
+
+  async getActiveSpace() {
+    if (!this._activeSpace) {
+      this._activeSpace = await this._httpAgent
+        .get(`${this._baseUrl}/_active`)
+        .then(response => response.data);
+    }
+
+    return { ...this._activeSpace };
   }
 
   async createSpace(space) {

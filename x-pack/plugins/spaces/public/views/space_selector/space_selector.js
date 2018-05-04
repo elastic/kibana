@@ -82,6 +82,5 @@ export class SpaceSelector extends Component {
 
 SpaceSelector.propTypes = {
   spaces: PropTypes.array,
-  httpAgent: PropTypes.func.isRequired,
-  chrome: PropTypes.object.isRequired,
+  spacesManager: PropTypes.object.isRequired
 };
