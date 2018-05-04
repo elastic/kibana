@@ -1,4 +1,7 @@
 const { dirname, resolve } = require('path');
+const { readFileSync } = require('fs');
+
+const stripJsonComments = require('strip-json-comments');
 
 const glob = require('glob-all');
 
@@ -20,8 +23,8 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   ];
 
   const globPatterns = [
-    ...pluginDirs.map(dir => resolve(dir, '*/package.json')),
-    ...pluginPaths.map(path => resolve(path, 'package.json')),
+    ...pluginDirs.map(dir => resolve(dir, '*/kibana.json')),
+    ...pluginPaths.map(path => resolve(path, 'kibana.json')),
   ];
 
   const pluginsFromMap = Object.keys(config.pluginMap || {}).map(name => {
@@ -34,11 +37,14 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   });
 
   return pluginsFromMap.concat(
-    glob.sync(globPatterns).map(pkgJsonPath => {
-      const path = dirname(pkgJsonPath);
-      const pkg = require(pkgJsonPath);
+    glob.sync(globPatterns).map(kibanaJsonPath => {
+      const path = dirname(kibanaJsonPath);
+      const kibanaJson = JSON.parse(
+        stripJsonComments(readFileSync(kibanaJsonPath, 'utf8'))
+      );
+
       return {
-        name: pkg.name,
+        name: kibanaJson.id,
         directory: path,
         publicDirectory: resolve(path, 'public'),
       };
