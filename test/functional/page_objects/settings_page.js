@@ -486,7 +486,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await (await testSubjects.find('importObjects')).click();
       log.debug(`Setting the path on the file input`);
       await retry.try(async () => {
-        await remote.setFindTimeout(100).findByCssSelector('.euiFilePicker__input').type(path);
+        await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.euiFilePicker__input').type(path);
       });
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
@@ -503,20 +503,20 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getImportButton() {
       log.debug(`getImportButton()`);
       return retry.try(async () => {
-        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsImportBtn"]`);
+        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsImportBtn"]`);
       });
     }
 
     async clickImportDone() {
       const doneBtn = await retry.try(async () => {
-        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsDoneBtn"]`);
+        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsDoneBtn"]`);
       });
       await doneBtn.click();
     }
 
     async clickConfirmConflicts() {
       const confirmBtn = await retry.try(async () => {
-        return await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="importSavedObjectsConfirmBtn"]`);
+        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsConfirmBtn"]`);
       });
       await confirmBtn.click();
     }
