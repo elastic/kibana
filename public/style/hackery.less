@@ -56,3 +56,15 @@ button:focus {
 .popover {
   max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
 }
+
+// fix modal focus index, set to bootstrap values
+// broken upstream by focus mixin: https://github.com/elastic/kibana/blob/d77cc5676bc534c1d1de1f160e213bd66fb8a78c/packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+[role="dialog"] {
+  .modal-backdrop {
+    z-index: 1040;
+  }
+
+  .modal {
+    z-index: 1050;
+  }
+}

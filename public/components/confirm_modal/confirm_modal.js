@@ -30,6 +30,7 @@ export const ConfirmModal = props => {
       show
       className={`canvas__confirm_modal ${className || ''}`}
       onHide={cancel}
+      backdrop="static"
       aria-labelledby="confirm-modal-title"
     >
       <Modal.Header>
