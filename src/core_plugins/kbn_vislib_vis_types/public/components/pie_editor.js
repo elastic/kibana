@@ -34,7 +34,7 @@ export class PieOptionsTab extends Component {
     return (
       <EuiForm>
 
-        <EuiPanel>
+        <EuiPanel grow={false}>
           <EuiTitle size="s"><span>Pie settings</span></EuiTitle>
 
           <EuiSpacer />
@@ -73,7 +73,9 @@ export class PieOptionsTab extends Component {
             />
           </EuiFormRow>
 
-          <EuiSpacer />
+        </EuiPanel>
+
+        <EuiPanel grow={false}>
 
           <EuiTitle size="s"><span>Label settings</span></EuiTitle>
 
