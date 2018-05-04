@@ -124,7 +124,6 @@ export class AdvancedSettings extends Component {
           <EuiFlexItem>
             <Search
               query={query}
-              settings={this.settings}
               categories={this.categories}
               onQueryChange={this.onQueryChange}
             />

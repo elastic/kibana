@@ -3,19 +3,19 @@ import { shallow } from 'enzyme';
 
 import { AdvancedSettings } from './advanced_settings';
 
-jest.mock('../components/field', () => ({
+jest.mock('./components/field', () => ({
   Field: () => {
     return 'field';
   }
 }));
 
-jest.mock('../components/call_outs', () => ({
+jest.mock('./components/call_outs', () => ({
   CallOuts: () => {
     return 'callOuts';
   }
 }));
 
-jest.mock('../components/search', () => ({
+jest.mock('./components/search', () => ({
   Search: () => {
     return 'search';
   }
@@ -100,6 +100,17 @@ describe('AdvancedSettings', () => {
     const component = shallow(
       <AdvancedSettings
         config={config}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render specific setting if given setting key', async () => {
+    const component = shallow(
+      <AdvancedSettings
+        config={config}
+        query="test:string:setting"
       />
     );
 

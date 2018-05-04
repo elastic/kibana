@@ -10,7 +10,6 @@ import { getCategoryName } from '../../lib';
 export class Search extends PureComponent {
 
   static propTypes = {
-    settings: PropTypes.array.isRequired,
     categories: PropTypes.array.isRequired,
     query: PropTypes.object.isRequired,
     onQueryChange: PropTypes.func.isRequired,
