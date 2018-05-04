@@ -7,6 +7,8 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiRange,
   EuiSpacer,
@@ -32,16 +34,24 @@ export class MarkdownOptionsTab extends Component {
   render() {
     const params = this.props.scope.vis.params;
 
+    const markdownLabel = (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          Content
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink className="markdown-vis--help" href="https://www.markdownguide.org/cheat-sheet" target="_blank">
+            <EuiIcon type="help" /> Syntax help
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
     return (
       <EuiForm>
 
         <EuiPanel className="markdown-vis-options">
-          <div>
-            <EuiTitle className="markdown-vis--title"><h1>Markdown</h1></EuiTitle>
-            <EuiLink className="markdown-vis--help" href="https://www.markdownguide.org/cheat-sheet" target="_blank">
-              <EuiIcon type="help" /> Syntax help
-            </EuiLink>
-          </div>
+          <EuiTitle className="markdown-vis--title"><h1>Markdown</h1></EuiTitle>
           <EuiSpacer />
 
           <EuiFormRow
@@ -51,7 +61,7 @@ export class MarkdownOptionsTab extends Component {
             <EuiRange
               min={8}
               max={36}
-              value={params.fontSize}
+              value={params.fontSize.toString()}
               onChange={this.handleUpdate('fontSize')}
               data-test-subj="markdownEditorFontSize"
             />
@@ -70,7 +80,7 @@ export class MarkdownOptionsTab extends Component {
 
           <EuiFormRow
             id="markdown"
-            label="Content"
+            label={markdownLabel}
             fullWidth={true}
             className="markdown-vis--editor"
           >
