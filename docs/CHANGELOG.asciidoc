@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.3.0>>
 * <<release-notes-6.2.4>>
 * <<release-notes-6.2.3>>
 * <<release-notes-6.2.2>>
@@ -46,6 +47,7 @@ This section summarizes the changes in each release.
 // == {kib} n.n.n
 
 //[float]
+//[[breaking-n.n.n]]
 //=== Breaking Changes
 
 //[float]
@@ -70,6 +72,41 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.3.0]]
+== {kib} 6.3.0
+
+coming[6.3.0]
+
+//[float]
+//[[breaking-6.3.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Machine learning::
+* You can now use {ref}/modules-cross-cluster-search.html[cross cluster search]
+in the {ml} features in {kib}. If you have configured a cross cluster index
+pattern in {kib}, you can use that index pattern when you create jobs.
+
+//[float]
+//=== Bug Fixes
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
 [[release-notes-6.2.4]]
 == {kib} 6.2.4
 
@@ -89,14 +126,34 @@ This section summarizes the changes in each release.
 [float]
 === Enhancements
 
+Machine Learning::
+* Adds bucket span to the chart labels in the Single Metric Viewer.
+* Adds checks for web URLs prior to adding to the links menu in the anomalies 
+table.
+
 Visualization::
 * Upgraded Vega libraries:  `vega-lib` to 3.2.1 and `vega-lite` to 2.3.1 {pull}17314[#17314]
 
 [float]
 === Bug Fixes
 
+Logstash::
+* Fixes unhandled rejection error in {kib} server log. 
+* Fixes Pipeline Viewer to correctly format percentages.  
+
+Machine Learning::
+* Fixes the formatting of HTML characters so that text is rendered correctly.
+* Formats the field name in the tooltip for swimlane labels.
+* Fixes the formatting of partition titles in multi-metric and population job 
+wizards. 
+
 Management::
 * Added better support for discarding results of older queries {pull}17148[#17148]
+
+Monitoring::
+* Fixes some {kib} metrics which are not derivatives. 
+* Fixed the handing of window resizing to more smoothly resize charts whenever 
+the window size changes.
 
 Platform::
 * Fixed an issue with the numeric formatter to handle small exponential numbers {pull}17508[#17508]
@@ -169,11 +226,24 @@ Visualization::
 Design::
 * [Fixes #4475] Removing flex-basis: 0 to make items size properly in IE11 {pull}16557[#16557]
 
+Machine Learning::
+* Fixed issue where jobs created by the data recognizer used the default job
+groups instead of the specified job groups.
+* Added leading slashes to calendar endpoints to address problems using calendars
+in {kib} on Cloud and behind proxies.
+* Fixed a scenario where a "no results found" message was returned in the
+*Single Metric Viewer* when an entity contained a special URL character such as
+`+`.
+
 Management::
 * [Fixes #16304] [Management] Prevent react warnings in index pattern creation {pull}16520[#16520]
 
 Platform::
 * Destroying socket when we get a clientError {pull}16700[#16700]
+
+Security::
+* Enabled users that have the `kibana_dashboard_only_user` role to change their
+passwords in {kib}. For more information, see <<xpack-dashboard-only-mode>>.
 
 //[float]
 //=== Regressions
@@ -224,8 +294,20 @@ There were no changes for this release.
 //[float]
 //=== Deprecations
 
-//[float]
-//=== New Features
+[float]
+=== New Features
+
+APM::
+* The Elastic APM is generally available as part of the 6.2.0 release of the
+Elastic Stack. For more information about the APM functionality in {kib}, see
+<<xpack-apm>>.
+
+Machine Learning::
+* Added the ability to create
+{stack-ov}/ml-calendars.html[calendars and scheduled events].
+
+Monitoring::
+* Added monitoring information for Beats in {kib}. See <<beats-page>>.
 
 [float]
 === Enhancements
@@ -233,10 +315,44 @@ There were no changes for this release.
 Discover::
 * [Fixes #15642] Introduce simple kibana query language {pull}15646[#15646]
 
+Machine Learning::
+* Enhanced the creation of custom URLs for existing jobs. When you edit jobs,
+there is a new *Custom URLs* tab, which provides options for creating a link to
+a {kib} dashboard or a different URL.
+// Repo: x-pack-kibana
+// Pull: 4130
+
+Management::
+* Renamed the *Save* button *Save &amp; Deploy*. This change makes it clearer
+that when you click the button the pipeline is saved to an {es} index and
+deployed to any Logstash instances that are configured to run it.
+// Repo: x-pack-kibana
+// Pull: 3599
+* Added the ability to clone pipelines in {kib}. When you click the *Clone*
+button, data from the original pipeline is used to pre-populate the new pipeline
+form.
+// Repo: x-pack-kibana
+// Pull: 3786
+* Enabled auto-sizing of the pipeline configuration text area. The text area
+automatically grows or shrinks as you type out a pipeline definition.
+// Repo: x-pack-kibana
+// Pull: 4026
+
 Management::
 * [Fixes #9228, #8983] add support for number format internationalization {pull}14019[#14019]
 * [Fixes #15922] [Management] Index pattern step in React! {pull}15936[#15936]
 * Advanced Settings - Image Input {pull}15342[#15342]
+
+Monitoring::
+* Added resolved alerts to the list of alerts that are visible during a selected
+time frame in {kib}.
+* Added the interval size for aggregated metrics in the tooltip for each chart.
+* Improved error handling such that generic `500` errors provide better messages.
+* Redesigned the Logstash Pipelines view to provide more actionable information
+in a tabular format.
+* Added a basic detail drawer to the Logstash Pipeline Viewer. When you click on
+any vertex in the Pipeline Viewer, the drawer slides open. It shows basic
+information about the vertex that was clicked and any metrics, if available.
 
 Operations::
 * Use auto_expand_replicas to stay green on 1 node clusters {pull}15694[#15694]
@@ -249,6 +365,12 @@ Operations::
 Platform::
 * [Fixes #6520] [optimizer] allow http caching for bundles {pull}15880[#15880]
 * Make it possible to disable CSRF check for the specified list of paths. {pull}13904[#13904]
+
+Reporting::
+* By default, weekly `.reporting` indices created after upgrading to 6.2 use a
+single primary shard and have the `auto_expand_replicas: 0-1` setting rather
+than a fixed setting of 1 replica. As a result, these indices can have a green
+status on single node clusters. There is no impact in multi-node clusters.
 
 Sharing::
 * [Fixes #2758] Add advanced setting to control quick ranges {pull}15975[#15975]
@@ -284,10 +406,53 @@ Discover::
 * [Fixes #15364] Truncate long names in the discover index pattern selection {pull}15510[#15510]
 * Add missing discover labels {pull}16030[#16030]
 
+Machine Learning::
+* The job selection control now remembers the state of the `Also apply time range`
+checkbox, such that the previous selection is restored when the control is
+re-opened.
+* Fixed issues where lines were drawn over the Y-axis in the event rate charts
+for multimetric and population jobs.
+* Removed scripted fields from job wizards.
+* Added type-ahead filtering to the job group and influencer selection controls
+in the job wizards.
+* Updated the data preview to use the index pattern or the list of indices that
+were selected.
+* Disabled the start button for jobs that do not have {dfeeds}.
+* Fixed issue where jobs created by the data recognizer used the default job
+groups instead of the specified job groups.
+* Updated the actual and typical values for anomalies in {kib}, such that they
+are formatted according to their magnitude.
+* Fixed the handling of anomalies when field values contain backslashes.
+* Ensured Anomaly Explorer swimlane rows are sorted by score.
+* Disabled the Forecast button for jobs that were created before 6.1.0 and for
+jobs that contain an `over_field_name` property.
+* Added support for field names with non-alphanumeric characters in the
+*Data Visualizer*.
+* Fixed problems creating jobs from saved searches that have `exists` filters.
+
 Management::
 * [Fixes #16098] [Management] Allow wildcard anywhere in the search query {pull}16109[#16109]
 * [Fixes #16192] [Management] Update pager with new props in Index Pattern Creation {pull}16195[#16195]
 * [Fixes #15922] Hide caret when indices has no time fields, remove indices object containing unused string {pull}16412[#16412]
+
+Monitoring::
+* Added the ability to navigate between the pipeline versions in the Logstash
+Pipeline Viewer.
+* Updated the Logstash Pipeline Viewer such that you can change the refresh
+interval but you cannot select the time range.
+* Added Logstash version information back in the node list.
+* Improved logging when the {kib} monitoring collectors stop or resume and
+downgraded the log level for these log messages to `info`.
+
+Reporting::
+* Resolved issue with horizontal metric visualizations being displayed
+incorrectly in PDF reports.
+* Fixed bug where the title of the Dashboard panels was hidden when creating
+PDFs with the preserve layout option.
+* Fixed issue with certain characters in the job parameters which caused CSV
+reports to fail.
+* Resolved issue with preserve layout PDF reports intermittently having blank
+visualizations.
 
 Sharing::
 * [Fixes #16307] link to dashboards by id instead of title {pull}16319[#16319]
@@ -399,6 +564,11 @@ There are no user-facing changes in this release.
 [float]
 === Bug Fixes
 
+Machine Learning::
+* Improved error messages for forecasts in {kib}.
+* Removed forecasts that were not created successfully from the list of
+forecasts in {kib}.
+
 Visualization::
 * Use textContent and jQuery to set label and title {pull}16178[#16178]
 
@@ -439,12 +609,29 @@ Dev Tools::
 [float]
 === Bug Fixes
 
+Machine Learning::
+* Disabled the ability to create forecasts for jobs that were created before
+6.1.0.
+* Fixed the **Anomaly Explorer** such that it retains the chosen swim lane
+limits when you reload the page.
+* Fixed incorrect line positions in the **Single Metric Viewer**. When all data
+points had the same value, the Y-axis offset was not calculated correctly and
+the line was drawn in the wrong position or was invisible in the line chart.
+
+Monitoring::
+* Fixed situations where {kib} was showing the same information for different
+clusters in the Logstash Overview.
+
+Platform::
+* Update color field formatter {pull}15837[#15837]
+
 Visualization::
 * [Fixes #15843] Fix broken loader in 6.1 {pull}15885[#15885]
 * [Fixes #15594] fixes pie chart size to normal if labels are not applied {pull}15641[#15641]
 
-Platform::
-* Update color field formatter {pull}15837[#15837]
+Watcher::
+* Fixed error that prevented users from creating threshold alerts with email
+actions.
 
 //[float]
 //=== Regressions
@@ -473,6 +660,13 @@ Platform::
 [float]
 === Bug Fixes
 
+Machine Learning::
+* Removed incorrect job group information from the URL when linking to the
+results page after job creation. 
+* Fixed bug related to cloning jobs that do not have {dfeeds}.
+* Fixed issues with the first and last buckets in the Anomaly Explorer swimlanes
+and in the Single Metric Viewer charts.
+
 Management::
 * Allow pasting into index pattern field using keyboard shortcut {pull}15500[#15500]
 * Typing a CCS pattern into the index pattern field no longer triggers an error {pull}15372[#15372]
@@ -481,9 +675,18 @@ Operations::
 * Bump node.js version to 6.12.2 {pull}15612[#15612]
 * Kibana indices are no longer flagged as out-of-date just because they include `_default_` {pull}15432[#15432]
 
+Reporting::
+* Resolved issue with the preserve layout option occasionally causing Chromium
+to crash when it was given partial pixels for the viewport.
+
 Visualizations::
 * Disable math aggregation in Time Series Visual Builder {pull}15653[#15653]
 * Bucket paths for overall aggregations now use syntax compatible with Elasticsearch 6+ {pull}15322[#15322]
+
+Watcher::
+* Removed error messages that were appearing when you created an email action
+for a watch without a body or subject. For more information, see
+{stack-ov}/actions-email.html[Email Action].
 
 //[float]
 //=== Regressions
@@ -522,12 +725,56 @@ Discover::
 * [Fixes #12633, #12641] Improve accessibility of the discover app {pull}13498[#13498]
 * [Fixes #14456] [Accessibility] Improve filter bar accessibility {pull}14474[#14474]
 
+Machine Learning::
+* Added the ability to create and display forecasts for {ml} jobs in {kib}.
+* Simplified job creation for certain recognizable data sources, such as
+Filebeat access logs from Nginx and Apache HTTP servers.
+* Added a Data Visualizer, which enables you to learn more about the
+characteristics of your data and identify fields for {ml} analysis. For more
+information, see <<ml-jobs>>.
+* Added bucket span to the chart labels in the Single Metric Viewer.
+* Added support for job groups when managing jobs in {kib}.
+* Added the ability to show or hide the Anomaly Explorer charts by selecting a
+checkbox. The choice is saved in the URL, so it persists if you re-open the
+view from a bookmarked URL.
+* Added a new job creation wizard for population jobs, which detect activity
+that is unusual compared to the behavior of the population. For more information,
+see {stack-ov}/ml-configuring-pop.html[Performing Population Analysis].
+* Added the ability to control the maximum number of rows in the Anomaly
+Explorer view by swimlane, with options of `5`, `10`, `25`, or `50`. Previously,
+it was fixed to a maximum of 10 rows.
+* Changed the job creation wizards such that you select an index pattern or
+saved search before you select the type of job.
+* Added licensing checks to the job creation features in {kib}. If the license
+is expired, for example, the create job, edit job, clone job, and start {dfeed}
+buttons are disabled.
+* Added the ability to set the model memory limit in job creation wizards. For
+more information about the `model_memory_limit` property, see
+{ref}/ml-job-resource.html#ml-apilimits[Job Resource Analysis Limits].
+* Added a **Close Job** button that enables you to force the closure of a job
+when it fails. The button is disabled if the job is running, closed, or does not
+have a {dfeed}.
+* Added the ability to display jobs with multiple detectors in the Single Metric
+Viewer when the `model_plot_config` property is enabled. Previously, this
+functionality was only possible for jobs with a single detector.
+
 Management::
 * [Fixes #12867] &quot;Create index pattern&quot; wizard.  {pull}13454[#13454]
   - Introducing a new wizard to create index patterns that makes index discovery and matching much easier than before.
 * [Fixes #12668] add an option for url types so that it can be opened in current tab (master branch) {pull}13209[#13209]
 * [Fixes #12869, #12873, #13803] Improve Management section accessibility {pull}14243[#14243]
 * Add rel=&quot;noopener noreferrer&quot; to external links {pull}14440[#14440]
+
+Monitoring::
+* Added Cross Cluster Search (CCS) to efficiently retrieve monitoring data from
+local and remote clusters.
+* Improved handling of health check errors. If there is a problem making a query,
+for example, an error is returned and extra information is provided in the logs.
+As part of this change, the `monitoring` plugin for {kib} will never cause {kib}
+to go `red`.
+* Improved logging when X-Pack is not installed on the monitoring cluster.
+* Saved table interaction states such that if you leave the {kib} page and
+subsequently return, your filters persist.
 
 Operations::
 * [Fixes #11091] Adds keystore for storing settings {pull}14714[#14714]
@@ -546,6 +793,24 @@ Operations::
 Platform::
 * [Fixes #8499] [server/logging] Allow opting out of UTC {pull}14705[#14705]
 * Improve performance of sort_prefix_first for large arrays {pull}14974[#14974]
+
+Reporting::
+* Added support for a HTTP Proxy to be configured when using Chromium as the
+browser. For more information, see <<reporting-chromium-settings>>.
+* Added headless build of Chromium that can be used instead of PhantomJS for
+capturing Reporting screenshots. To enable Chromium, set the following setting
+in your `kibana.yml` file: `xpack.reporting.capture.browser.type: chromium`. For
+now PhantomJS will remain the default. In the future, however, Chromium will
+become the default.
+* Added an option for PDF reports that preserves the existing layout and size of
+the Visualization or Dashboard.
+
+Security::
+* Added `manage_index_templates` cluster privileges to the `kibana_system` role,
+which enables the {kib} system user to create and manage the index template for
+the `.kibana` index. For more information, see
+{stack-ov}/security-privileges.html[Security Privileges] and
+{stack-ov}/built-in-roles.html[Built-in Roles].
 
 Sharing::
 * Add a feature for custom panel titles {pull}14831[#14831]
@@ -608,9 +873,23 @@ Dev Tools::
 * [Fixes #14586] [console] Remove cluster/_nodes/stats {pull}14757[#14757]
 * [Fixes #10841, #10840, #10071, #8930, #9651, #8790] [console] assorted autocomplete fixes {pull}14770[#14770]
 
+Machine Learning::
+* Fixed scenarios where clicking the "View examples" link in the Anomalies
+section of the Single Metric Viewer or Anomaly Explorer caused the browser to hang.
+* Fixed scenarios where the Anomaly Explorer or Single Metric Viewer failed to
+plot metric data in the charts due to a blank field name in a detector. This
+problem was specific to jobs that were originally created in 5.4.
+
 Management::
 * [Fixes #12612] Create keyboard mode for ui-ace editor {pull}13339[#13339]
   - Our code editor in several places won't trap keyboard focus anymore, by using the Tab key. When navigating by keyboard, you first need to Enter editing mode in the code editor and you can leave it by pressing Escape.
+
+Monitoring::
+* Fixed problems viewing pipelines in {kib} from a Firefox web browser.
+For more information, see
+{logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
+* The `xpack.monitoring.node_resolver` setting, which was deprecated in 5.5.0,
+now allows only the `uuid` value to be used. This setting will be removed in 7.0. 
 
 Operations::
 * Removes webpack-directory-name-as-main dependency {pull}13584[#13584]
@@ -720,8 +999,30 @@ Visualization::
 [[release-notes-6.0.0]]
 == {kib} 6.0.0
 
-//[float]
-//=== Breaking Changes
+[float]
+=== Breaking Changes
+
+Reporting::
+* When {security} is enabled, reports will only be accessible to the user that created them.
+* When {security} is enabled, user authorization is controlled by the
+`xpack.reporting.roles.allow` setting in the `kibana.yml` which defaults to
+`['reporting_user']`. Users will no longer have access to the underlying {reporting}
+indices in {es} when assigned to the built-in `reporting_user` role. If using
+custom reporting roles, the privileges to the indices will need to be removed, and the
+role will need to be added to the `xpack-reporting.roles.allow` setting.
+
+Security::
+* The built-in users (`elastic`, `kibana`, and `logstash_system`) no longer have
+default passwords. You must create passwords for these users and configure {kib}
+to use this information. For more information, see
+{stack-ov}/setting-up-authentication.html[Setting Up User Authentication].
+
+Watcher::
+* The built-in HTTP client used in webhooks, the http input and the http email attachment has been replaced.
+This results in the need to always escape all parts of an URL.
+* The new built-in HTTP client also enforces a maximum request size, which defaults to 10mb.
+* The watch `_status` field has been renamed to `status`, as underscores in
+field names will not be allowed.
 
 //[float]
 //=== Breaking Java Changes
@@ -741,6 +1042,22 @@ Core::
 * Only support 64 bit operating systems {pull}11941[#11941]
 * Remove field_stats pre-flight option for index patterns {pull}12814[#12814]
 * [Fixes #13439] Upgrade Angular to 1.6.5 {pull}13543[#13543]
+
+Dashboard::
+*  If you had a chance to check out the new Dashboard Only Mode in 6.0.0-beta1,
+we've changed things up a bit for 6.0.0-beta2. Previously we required you to
+flag every role a user belonged to as being in the View dashboards only mode
+in order for that user to be flagged as a Dashboard only mode user. In this
+new set up, we created a reserved role, `kibana_dashboard_only_user`, that is
+already pre-configured with read only access to the .kibana index, and set up
+to be in Dashboard Only Mode. All you have to add is this one role to any user
+and they will now be a Dashboard Only Mode user. We also got rid of this new
+setting in the Roles UI, as this one role should suffice for most user's setups.
+If you have a more complicated setup, such as multi-tenancy with multiple
+`.kibana` indexes, you can create more dashboard only mode roles by adding
+role names to the `xpackDashboardMode:roles` advanced setting. For more
+information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
 
 Design::
 * Palette swap for accessibility / kibana 6 {pull}12085[#12085]
@@ -781,6 +1098,16 @@ Discover::
   - The new "Skip to bottom"-button in Discover is invisible unless focused. When activated it displays all remaining rows that were already loaded and focuses an anchor located below the table.
 * Timepicker on the right {pull}11980[#11980]
 
+Machine Learning::
+* Added a Datafeed Preview tab to expanded rows in the jobs list under
+Job Management. This displays the JSON response from the preview endpoint.
+* Added an option to create a watch when you start a {dfeed} in {kib}. After the
+{dfeed} starts, you are prompted to specify details such as the interval and the
+anomaly severity threshold. If {watcher} is disabled, this option does not appear.
+* Updated the bucket span estimator, which suggests bucket span values when you
+create jobs in {kib}. The estimator now suggests a minimum bucket span value
+of 15 minutes.
+
 Management::
 * [indexPatterns] remove support for time patterns {pull}12158[#12158]
   - Removes ability to create index patterns based on time patterns/intervals  - Adds a warning that informs users when they are using an index pattern that is now unsupported (disabled by default until #10442 is done, #12322)  - Does not address editing/remapping index patterns, see last task in #12242
@@ -789,6 +1116,20 @@ Management::
 * [Management] More universal solution for fetching indices and aliases {pull}12405[#12405]
 * Add breadcrumb-page-title to management-app {pull}12765[#12765]
   - The bread-crumbs component allows for the consumer to pass in a page-title value which is appended as the final breadcrumb in the chain. This PR adds a scope argument to the management-app to take advantage of it.
+
+Monitoring::
+* The Logstash Pipeline viewer in {kib} displays an information icon and a
+corresponding tip for every plugin that does not define an ID explicitly.
+Defining an ID for plugins enables you to track differences across pipeline
+changes. For more information, see
+{logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
+* Added an alert in clusters that have trial licenses and have enabled {security}
+but do not have TLS/SSL configured. The message provides information about the
+steps that are required to enable {security} when they obtain a non-trial license.
+* Added support for cluster alerts, for example to provide information about
+license expiration.
+* Added an advanced setting for a default admin e-mail, which is the recipient
+of {xpack} admin operations such as cluster alert e-mail notifications.
 
 Operations::
 * Updates to status API, re-align status page {pull}10180[#10180]
@@ -815,6 +1156,17 @@ Platform::
 * Refactor commaList filter logic into common util {pull}12553[#12553]
 * [kbnServer/extensions] formalize request factories with helper {pull}12697[#12697]
 * Allow plugins to turn off the "link to last URL" navigation helper {pull}13044[#13044]
+
+Reporting::
+* Enabled export as CSV.
+
+Security::
+* Added a View Dashboards Only setting to the roles section under
+Security management. If a user is assigned a role that has this setting
+enabled, when they access Kibana it presents Dashboard Only mode.
+* Added reserved `kibana_dashboard_only_user` role. For more information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
+
 Sharing::
 * Add label and clear link to color picker {pull}12422[#12422]
 * Expose the variables for dynamically building doc links {pull}12513[#12513]
@@ -844,6 +1196,10 @@ Visualize::
 * [Fixes #12491, #12904, #12887] Improve accessibility of visualizations {pull}13507[#13507]
 * [Fixes #11856, #12888, #12900] Improve accessibility of visualization view {pull}13726[#13726]
 
+Watcher::
+* Watcher indices no longer use multiple types.
+
+
 [float]
 === Bug Fixes
 
@@ -859,6 +1215,12 @@ Design::
 * Remove truncate from viz form text, remove additional wrapper {pull}14311[#14311]
 
 Dev Tools::
+* Clarified field labels in the Grok Debugger.
+* Added auto-sizing to the input, pattern, and output text areas in the Grok Debugger.
+* Added auto-sizing of the custom patterns text area in the Grok Debugger.
+* Enabled users to specify custom patterns in a well-known format in the Grok Debugger.
+* Fixed issue with input not being accepted in the *Sample Data* or
+*Grok Pattern* fields in the Grok Debugger.
 * [Fix for #10504] [console] Replace text/plain fallback with application/json {pull}12294[#12294]
 * [Fixes #13142] Allow console to send multiline strings with CRLF line endings {pull}14094[#14094]
   - Console will now allow sending multiline strings on Windows.
@@ -879,6 +1241,19 @@ Discover::
 * [Fixes #14270] Handle strings in source mapped as numbers in filter editor {pull}14318[#14318]
 * [Fixes #7767] Fix invisible filters caused by missing index pattern {pull}14131[#14131]
 * [Fixes #14319] Loosen check for dashboard queries in filters array {pull}14338[#14338]
+
+Graph::
+* Reinstated `_xpack/graph/_explore` as the correct graph endpoint.
+`_xpack/_graph/_explore` is deprecated and will be removed in v7.0.
+
+Machine Learning::
+* Fixed the position of text that appears when you hover over anomalies in {ml}
+charts in a Safari web browser.
+* Fixed {ml} charts so that they plot nulls as gaps rather than zeroes. This
+change provides a more accurate visual indication of gaps in the data.
+* Added support for periods in field names when you create jobs or datafeeds in
+{kib}.
+* Fixed job creation failure that occurred when using saved searches with filters.
 
 Management::
 * Limit scripted fields to painless and expression langs {pull}9172[#9172]
@@ -916,6 +1291,16 @@ Platform::
 * [vis/requesting] only call when actually requesting {pull}14017[#14017]
 * [Fixes #14255] Use Boom.boomify instead of deprecated Boom.wrap {pull}14325[#14325]
 * [Fixes #14497] Import Babel polyfill when running Jest tests {pull}14508[#14508]
+
+Reporting::
+* Fixed generated reports such that they show the time zone on the client, as
+specified in the `dateFormat` field in the Advanced Settings.
+* Resolved intermittent issue with Firefox logging users out of {kib} after
+they download a PDF report.
+
+Security::
+* Ensured that privileged information does not appear in the error message when
+a {kib} login attempt fails.
 
 Sharing::
 * Restoring the dashboard-grid padding to appease Gridster {pull}12613[#12613]
@@ -1038,6 +1423,14 @@ Visualize::
 * [TSVB] Allow negative time offsets {pull}14494[#14494]
 * [Fixes #14565] Fix tagcloud sync issues, fix #14565 {pull}14566[#14566]
 
+Watcher::
+* Fixed problem related to creating a threshold-based alert in {kib} with a
+Safari web browser. For example, the dialogs related to choosing fields and
+aggregations were not shown in that browser.
+* Fixed incorrect watch states in {kib}. In particular, the UI now respects the
+actual state of the watch when exceptions occur in its input or condition.
+* The HTTP client respects timeouts now and does not get stuck leading to stuck watches.
+
 //[float]
 //=== Regressions
 
@@ -1069,10 +1462,23 @@ Design::
 * [UI Framework] Fix margin for KuiLocalTabs which are applied to typographic elements. {pull}14451[#14451]
 * [DESIGN]: Remove truncate from viz form text, remove additional wrapper {pull}14311[#14311]
 
+
+Dev Tools::
+* Fixed issue with input not being accepted in the *Sample Data* or
+*Grok Pattern* fields in the Grok Debugger.
+
 Discover::
 * [Fixes #14270] Handle strings in source mapped as numbers in filter editor {pull}14318[#14318]
 * [Fixes #7767] Fix invisible filters caused by missing index pattern {pull}14131[#14131]
 * [Fixes #14319] Loosen check for dashboard queries in filters array {pull}14338[#14338]
+
+Machine Learning::
+* Fixed the position of text that appears when you hover over anomalies in {ml}
+charts in a Safari web browser.
+* Fixed {ml} charts so that they plot nulls as gaps rather than zeroes. This
+change provides a more accurate visual indication of gaps in the data.
+* Added support for periods in field names when you create jobs or datafeeds in
+{kib}.
 
 Management::
 * [Fixes #14350] [Management] Fix FF quirk with max width in the import saved object modal {pull}14352[#14352]
@@ -1086,6 +1492,10 @@ Operations::
 Platform::
 * [Fixes #14255] Use Boom.boomify instead of deprecated Boom.wrap {pull}14325[#14325]
 * [Fixes #14497] Import Babel polyfill when running Jest tests {pull}14508[#14508]
+
+Security::
+* Ensured that privileged information does not appear in the error message when
+a {kib} login attempt fails.
 
 Sharing::
 * Set pie chart border to match background in dark mode {pull}14375[#14375]
@@ -1126,6 +1536,13 @@ Visualization::
 * [TSVB] Allow negative time offsets {pull}14494[#14494]
 * [Fixes #14565] Fix tagcloud sync issues, fix #14565 {pull}14566[#14566]
 * Add tooltip to long title. {pull}14167[#14167]
+
+Watcher::
+* Fixed problem related to creating a threshold-based alert in {kib} with a
+Safari web browser. For example, the dialogs related to choosing fields and
+aggregations were not shown in that browser.
+* Fixed incorrect watch states in {kib}. In particular, the UI now respects the
+actual state of the watch when exceptions occur in its input or condition.
 
 //[float]
 //=== Regressions
@@ -1233,6 +1650,10 @@ Design::
 * [Fixes #12634] Improve date picker accessibility {pull}12676[#12676]
 
 Dev Tools::
+* Clarified field labels in the Grok Debugger.
+* Added auto-sizing to the input, pattern, and output text areas in the Grok Debugger.
+* Added auto-sizing of the custom patterns text area in the Grok Debugger.
+* Enabled users to specify custom patterns in a well-known format in the Grok Debugger.
 * [Fixes #10504] [console] Replace text/plain fallback with application/json {pull}12294[#12294]
 * [Fixes #13142] Allow console to send multiline strings with CRLF line endings {pull}14094[#14094]
   - Console will now allow sending multiline strings on Windows.
@@ -1250,6 +1671,9 @@ Discover::
 * Fix relative z-index of spy panel and filter editor {pull}13717[#13717]
 * [Fixes #5164] Check sort:options for Discover default sort order {pull}13708[#13708]
 * [Fixes #13075] Improve missing index pattern error message {pull}13915[#13915]
+
+Machine Learning::
+* Fixed job creation failure that occurred when using saved searches with filters.
 
 Management::
 * [Fixes #9352] Change mapping of index-pattern fields to text {pull}9353[#9353]
@@ -1314,6 +1738,10 @@ Platform::
   * [ftr/config] prevent mochaOpts and timeouts conflict {pull}14060[#14060]
   * create babel-preset and babel-register modules {pull}13973[#13973]
   * [vis/requesting] only call when actually requesting {pull}14017[#14017]
+    
+Reporting::
+* Fixed generated reports such that they show the time zone on the client, as
+specified in the `dateFormat` field in the Advanced Settings.
     
 Sharing::
 * [Fixes #13421] Dashboard dark-theme fixes {pull}13690[#13690]
@@ -1382,7 +1810,6 @@ Visualization::
 * wrap responsehandler in angular promise {pull}14095[#14095]
 * [Fixes #13572] Show a warning for non accessible charts for screen readers {pull}13573[#13573]
 
-
 //[float]
 //=== Regressions
 
@@ -1413,6 +1840,22 @@ Visualization::
 [float]
 === Enhancements
 
+Dashboard::
+*  If you had a chance to check out the new Dashboard Only Mode in 6.0.0-beta1,
+we've changed things up a bit for 6.0.0-beta2. Previously we required you to
+flag every role a user belonged to as being in the View dashboards only mode
+in order for that user to be flagged as a Dashboard only mode user. In this
+new set up, we created a reserved role, `kibana_dashboard_only_user`, that is
+already pre-configured with read only access to the .kibana index, and set up
+to be in Dashboard Only Mode. All you have to add is this one role to any user
+and they will now be a Dashboard Only Mode user. We also got rid of this new
+setting in the Roles UI, as this one role should suffice for most user's setups.
+If you have a more complicated setup, such as multi-tenancy with multiple
+`.kibana` indexes, you can create more dashboard only mode roles by adding
+role names to the `xpackDashboardMode:roles` advanced setting. For more
+information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
+
 Discover::
 * [Fix for #12343] Remove custom keyboard navigation in datepicker {pull}13644[#13644]
 
@@ -1421,8 +1864,19 @@ Management::
   - This PR adds another method to the indexPatterns service to fetch index patterns titles. Since the code was nearly identical to how index pattern ids are fetched, I decided to slightly refactor the function to accept a parameter for which property to fetch from the index pattern. I've updated all usages to the new approach.
 * [Fix for #11526, #8225] Move build info from management section to status page {pull}13341[#13341]
 
+Monitoring::
+* Added a tip in the pipeline viewer in {kib} when a pipeline contains a plugin
+that does not have an id explicitly set in its configuration options. If you
+specify an ID, you can track differences across pipeline changes. For more
+information, see
+{logstash-ref}/logstash-pipeline-viewer.html[Pipeline Viewer UI].
+
 Platform::
 * [server/indexPatterns] expose indexPatternService getter/factory {pull}13012[#13012]
+
+Security::
+* Added reserved `kibana_dashboard_only_user` role. For more information, see
+{kibana-ref}/xpack-dashboard-only-mode.html[Kibana Dashboard Only Mode].
 
 Visualization::
 * Upgrade kibana to leaflet 1.x {pull}12367[#12367]
@@ -1531,6 +1985,15 @@ Platform::
   - When a config file includes invalid keys or values, Kibana usually logs a message describing the issue and fails to start. There has been an exception to this rule since 4.2 that allowed top-level keys to be unknown/misspelled and only caused a warning to be logged. That exception has been removed and now any unknown or misspelled config key passed to Kibana (via the config file or command line flags) will prevent it from starting.
 * Remove the es_admin proxy {pull}13000[#13000]
 * Restrict ES data proxy to msearch and search {pull}13020[#13020]
+
+Reporting::
+* When {security} is enabled, reports will only be accessible to the user that created them.
+* When {security} is enabled, user authorization is controlled by the
+`xpack.reporting.roles.allow` setting in the `kibana.yml` which defaults to
+`['reporting_user']`. Users will no longer have access to the underlying {reporting}
+indices in {es} when assigned to the built-in `reporting_user` role. If using
+custom reporting roles, the privileges to the indices will need to be removed, and the
+role will need to be added to the `xpack-reporting.roles.allow` setting.
 
 Visualization::
 * [Fix for #10907] allows more flexible timelion queries {pull}10961[#10961]
@@ -1791,6 +2254,10 @@ Core::
 * NODE_ENV no longer has an impact on Kibana {pull}12010[#12010]
 * Only support 64 bit operating systems {pull}11941[#11941]
 
+Watcher::
+* The watch `_status` field has been renamed to `status`, as underscores in
+field names will not be allowed.
+
 //[float]
 //=== Breaking Java Changes
 
@@ -1806,6 +2273,14 @@ Core::
 Dashboard::
 * Clone dashboard from view mode {pull}10925[#10925]
 
+Reporting::
+* Enabled export as CSV.
+
+Security::
+* Added a View Dashboards Only setting to the roles section under
+Security management. If a user is assigned a role that has this setting
+enabled, when they access Kibana it presents Dashboard Only mode.
+
 Visualize::
 * Region map {pull}10937[#10937]
 * Gauge chart {pull}10336[#10336]
@@ -1819,6 +2294,10 @@ Core::
 Discover::
 * Apply filters to the event context view {pull}11466[#11466]
 
+Machine Learning::
+* Added a Datefeed Preview tab to expanded rows in the jobs list under
+Job Management. This displays the JSON response from the preview endpoint.
+
 Timelion::
 * Support multiline Timelion queries {pull}11972[#11972]
 
@@ -1829,8 +2308,15 @@ Time series visual builder::
 Timepicker::
 * Improve accessibility of the datepicker {pull}11753[#11753]
 
+Watcher::
+* Watcher indices no longer use multiple types.
+
 [float]
 === Bug Fixes
+
+Graph::
+* Reinstated `_xpack/graph/_explore` as the correct graph endpoint.
+`_xpack/_graph/_explore` is deprecated and will be removed in v7.0.
 
 Timelion::
 * Timelion tutorial now persists until you close it {pull}11962[#11962]
@@ -1850,8 +2336,13 @@ Visualize::
 [[release-notes-6.0.0-alpha1]]
 == {kib} 6.0.0-alpha1
 
-//[float]
-//=== Breaking Changes
+[float]
+=== Breaking Changes
+
+Watcher::
+* The built-in HTTP client used in webhooks, the http input and the http email attachment has been replaced.
+This results in the need to always escape all parts of an URL.
+* The new built-in HTTP client also enforces a maximum request size, which defaults to 10mb.
 
 //[float]
 //=== Breaking Java Changes
@@ -1885,9 +2376,7 @@ Core::
 * Updates to status API, re-align status page {pull}10180[#10180]
 * [status] 15m load average should use the 3rd index {pull}11202[#11202]
 * Sets ES mapping to single_type=false {pull}11451[#11451]
-Dev Tools::
-* Adding autocomplete rules for reindex API to Console {pull}10150[#10150]
-* minimum_number_should_match was deprecated {pull}11316[#11316]
+
 Dashboard::
 * Improve Dashboard screen-reader accessibility. {pull}11600[#11600]
 * Update angular-bootstrap DatePicker with UI Framework classes. {pull}11378[#11378]
@@ -1896,18 +2385,25 @@ Dashboard::
 * Don't kill an entire dashboard because of one bad request {pull}11337[#11337]
 * Add back dashboard descriptions {pull}11552[#11552]
 * Hide the second toast when adding a new visualization straight from dashboard {pull}11621[#11621]
+
+Dev Tools::
+* Adding autocomplete rules for reindex API to Console {pull}10150[#10150]
+* minimum_number_should_match was deprecated {pull}11316[#11316]
+
 Discover::
 * Add ignore_unmapped to geo filters to prevent exceptions {pull}11461[#11461]
 * Create CollapseButton component class to standardize appearance of this button. {pull}11462[#11462]
 * Migrate deprecated match query syntax {pull}11554[#11554]
 * Remove the _source field toggle button which was accidentally reinstated {pull}11485[#11485]
 * Search bar drop-down for managing filters {pull}10976[#10976]
+
 Management::
 * Convert Index Pattern Creation form UI to use UI Framework components. {pull}11419[#11419]
 * Convert ScriptedFieldsTable and SourceFiltersTable to UI Framework components. {pull}11401[#11401]
 * Removes the "Index contains time-based events" checkbox {pull}11409[#11409]
 * Update Settings page with UI Framework components. {pull}11272[#11272]
 * Report shard failures in the field_capabilities response {pull}11450[#11450]
+
 Visualize::
 * Fix spelling in time series visual builder {pull}11212[#11212]
 * Adding label templates to legend keys for TSVB {pull}11266[#11266]
@@ -1934,6 +2430,9 @@ Visualize::
 * [Fix for #9053] [timelion/fit/carry] do nothing if there is not any data {pull}9054[#9054]
 * [Fix for #8763] [vislib/tilemap/heatmap] scale the heatmap maxZoom with map zoom {pull}8765[#8765]
 * [Fix for #9184] fixes error with custom interval in datetime aggregation {pull}9427[#9427]
+
+Watcher::
+* The HTTP client respects timeouts now and does not get stuck leading to stuck watches.
 
 //[float]
 //=== Regressions
