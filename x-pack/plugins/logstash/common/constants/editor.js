@@ -5,6 +5,15 @@
  */
 
 export const EDITOR = {
+  /*
+   * The space between the top of the editor's first-line characters
+   * and the top border of the editor.
+   */
   PIPELINE_EDITOR_SCROLL_MARGIN_TOP: 4,
+
+  /*
+   * The space between the bottom of the editor's last-line characters
+   * and the bottom border of the editor.
+   */
   PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM: 12,
 };
