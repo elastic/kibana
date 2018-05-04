@@ -5,6 +5,8 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { EDITOR } from '../../../../../common/constants';
+import { applyEditorOptions } from '../../../../lib/ace/apply_editor_options';
 import template from './event_input.html';
 import './event_input.less';
 import 'ace';
@@ -27,14 +29,7 @@ app.directive('eventInput', function () {
         });
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 10
-          });
-          editor.$blockScrolling = Infinity;
+          applyEditorOptions(editor, EDITOR.SAMPLE_DATA_MIN_LINES, EDITOR.SAMPLE_DATA_MAX_LINES);
         };
       }
     }

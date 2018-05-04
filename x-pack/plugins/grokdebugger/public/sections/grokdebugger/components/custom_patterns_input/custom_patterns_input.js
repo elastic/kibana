@@ -6,6 +6,8 @@
 
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
+import { EDITOR } from '../../../../../common/constants';
+import { applyEditorOptions } from '../../../../lib/ace/apply_editor_options';
 import template from './custom_patterns_input.html';
 import './custom_patterns_input.less';
 import 'ui/toggle_panel';
@@ -32,14 +34,7 @@ app.directive('customPatternsInput', function () {
         });
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 25
-          });
-          editor.$blockScrolling = Infinity;
+          applyEditorOptions(editor, EDITOR.PATTERN_MIN_LINES, EDITOR.PATTERN_MAX_LINES);
         };
       }
 

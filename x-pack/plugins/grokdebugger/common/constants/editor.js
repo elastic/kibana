@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ROUTES } from './routes';
-export { PLUGIN } from './plugin';
-export { EDITOR } from './editor';
+export const EDITOR = {
+  PATTERN_MIN_LINES: 3,
+  PATTERN_MAX_LINES: 10,
+  SAMPLE_DATA_MIN_LINES: 3,
+  SAMPLE_DATA_MAX_LINES: 50,
+  SCROLL_MARGIN_TOP: 4,
+  SCROLL_MARGIN_BOTTOM: 4,
+};
