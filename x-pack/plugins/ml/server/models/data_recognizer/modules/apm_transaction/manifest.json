@@ -9,8 +9,23 @@
     "bool": {
       "filter": [
         {
-          "term": {
-            "context.service.name": "opbeans-node"
+          "exists": {
+            "field": "processor.name"
+          }
+        },
+        {
+          "exists": {
+            "field": "context.service.name"
+          }
+        },
+        {
+          "exists": {
+            "field": "context.service.agent.name"
+          }
+        },
+        {
+          "exists": {
+            "field": "context.service.agent.version"
           }
         }
       ]
