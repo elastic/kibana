@@ -14,7 +14,10 @@ import 'plugins/logstash/services/license';
 import 'plugins/logstash/services/security';
 import './pipeline_edit.less';
 import '../../../../components/tooltip';
-import { TOOLTIPS } from '../../../../../common/constants';
+import {
+  EDITOR,
+  TOOLTIPS
+} from '../../../../../common/constants';
 import 'ace';
 
 const app = uiModules.get('xpack/logstash');
@@ -48,6 +51,19 @@ app.directive('pipelineEdit', function ($injector) {
         }
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
+
+          /*
+           * This sets the space between the editor's borders and the
+           * edges of the top/bottom lines to make for a less-crowded
+           * typing experience.
+           */
+          editor.renderer.setScrollMargin(
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_TOP,
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM,
+            0,
+            0
+          );
+
           editor.setReadOnly(this.isReadOnly);
           editor.setOptions({
             minLines: 25,
