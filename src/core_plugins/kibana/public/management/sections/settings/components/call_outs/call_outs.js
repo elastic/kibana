@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
   EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
 
 export const CallOuts = () => {
@@ -22,7 +21,6 @@ export const CallOuts = () => {
           Deleting a custom setting will permanently remove it from Kibana&apos;s config.
         </p>
       </EuiCallOut>
-      <EuiSpacer size="m"/>
     </div>
   );
 };

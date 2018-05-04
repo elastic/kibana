@@ -5,6 +5,8 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
+  EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
   EuiFilePicker,
@@ -14,9 +16,9 @@ import {
   EuiIconTip,
   EuiImage,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiTextColor,
   EuiSelect,
   EuiSwitch,
   keyCodes,
@@ -282,6 +284,7 @@ export class Field extends PureComponent {
       case 'boolean':
         return (
           <EuiSwitch
+            label={!!unsavedValue ? 'On' : 'Off'}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
             disabled={loading}
@@ -363,57 +366,84 @@ export class Field extends PureComponent {
 
   renderLabel(setting) {
     return(
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem>
-          <span aria-label={setting.ariaName}>
-            {setting.name}
-          </span>
-        </EuiFlexItem>
-        {setting.isCustom ?
-          <EuiFlexItem grow={false}>
-            <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
-          </EuiFlexItem>
-          : ''}
-      </EuiFlexGroup>
+      <span aria-label={setting.ariaName}>
+        {setting.name}
+      </span>
     );
   }
 
   renderHelpText(setting) {
+    const defaultLink = this.renderResetToDefaultLink(setting);
+    const imageLink = this.renderChangeImageLink(setting);
+
+    if(defaultLink || imageLink) {
+      return (
+        <span>
+          {defaultLink}
+          {imageLink}
+        </span>
+      );
+    }
+
+    return null;
+  }
+
+  renderTitle(setting) {
     return (
-      <EuiText size="s">
-        <h3>{setting.displayName || setting.name}</h3>
-        <EuiTextColor color="subdued">
-          <p
-            /*
-             * Justification for dangerouslySetInnerHTML:
-             * Setting description may contain formatting and links to documentation.
-             */
-            dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
-          />
-        </EuiTextColor>
+      <h3>
+        {setting.displayName || setting.name}
+        {setting.isCustom ?
+          <EuiIconTip type="asterisk" color="primary" aria-label="Custom setting" content="Custom setting" />
+          : ''}
+      </h3>
+    );
+  }
+
+  renderDescription(setting) {
+    return (
+      <Fragment>
+        <div
+          /*
+           * Justification for dangerouslySetInnerHTML:
+           * Setting description may contain formatting and links to documentation.
+           */
+          dangerouslySetInnerHTML={{ __html: setting.description }} //eslint-disable-line react/no-danger
+        />
         {this.renderDefaultValue(setting)}
-        {this.renderChangeImageLink(setting)}
-      </EuiText>
+      </Fragment>
     );
   }
 
   renderDefaultValue(setting) {
-    const { type, defVal, ariaName, name } = setting;
+    const { type, defVal } = setting;
+    if(isDefaultValue(setting)) {
+      return;
+    }
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          Default: <EuiCode>{this.getDisplayedDefaultValue(type, defVal)}</EuiCode>
+        </EuiText>
+      </Fragment>
+    );
+  }
+
+  renderResetToDefaultLink(setting) {
+    const { ariaName, name } = setting;
     if(isDefaultValue(setting)) {
       return;
     }
     return (
       <span>
-        Default: <em>{this.getDisplayedDefaultValue(type, defVal)}</em>
-        &nbsp;&nbsp;
         <EuiLink
-          aria-label={`Reset ${ariaName}`}
+          aria-label={`Reset ${ariaName} to default`}
           onClick={this.resetField}
           data-test-subj={`advancedSetting-resetField-${name}`}
         >
-          Reset
+          Reset to default
         </EuiLink>
-        &nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;
       </span>
     );
   }
@@ -431,7 +461,7 @@ export class Field extends PureComponent {
           onClick={this.changeImage}
           data-test-subj={`advancedSetting-changeImage-${name}`}
         >
-          Change
+          Change image
         </EuiLink>
       </span>
     );
@@ -444,33 +474,31 @@ export class Field extends PureComponent {
       return;
     }
     return (
-      <EuiFlexItem>
-        <EuiFormRow hasEmptyLabelSpace>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                aria-label={`Save ${ariaName}`}
-                onClick={this.saveEdit}
-                disabled={loading || isInvalid}
-                data-test-subj={`advancedSetting-saveEditField-${name}`}
-              >
-                Save
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                aria-label={`Cancel editing ${ariaName}`}
-                onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
-                disabled={loading}
-                data-test-subj={`advancedSetting-cancelEditField-${name}`}
-              >
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiFlexItem>
+      <EuiFormRow className="advancedSettings__field__actions" hasEmptyLabelSpace>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              aria-label={`Save ${ariaName}`}
+              onClick={this.saveEdit}
+              disabled={loading || isInvalid}
+              data-test-subj={`advancedSetting-saveEditField-${name}`}
+            >
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={`Cancel editing ${ariaName}`}
+              onClick={() => changeImage ? this.cancelChangeImage() : this.cancelEdit()}
+              disabled={loading}
+              data-test-subj={`advancedSetting-cancelEditField-${name}`}
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     );
   }
 
@@ -479,37 +507,29 @@ export class Field extends PureComponent {
     const { error, isInvalid } = this.state;
 
     return (
-      <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem grow={false} style={{ width: 350 }}>
-          {this.renderHelpText(setting)}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 400 }}>
-          <EuiFormRow
-            isInvalid={isInvalid}
-            error={error}
-            label={this.renderLabel(setting)}
+      <EuiFlexGroup className="advancedSettings__field">
+        <EuiFlexItem grow={false}>
+          <EuiDescribedFormGroup
+            className="advancedSettings__field__wrapper"
+            title={this.renderTitle(setting)}
+            description={this.renderDescription(setting)}
+            idAria={`${setting.name}-aria`}
           >
-            {this.renderField(setting)}
-          </EuiFormRow>
+            <EuiFormRow
+              isInvalid={isInvalid}
+              error={error}
+              label={this.renderLabel(setting)}
+              helpText={this.renderHelpText(setting)}
+              describedByIds={[`${setting.name}-aria`]}
+            >
+              {this.renderField(setting)}
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
         </EuiFlexItem>
-        {this.renderActions(setting)}
+        <EuiFlexItem grow={false}>
+          {this.renderActions(setting)}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
-
-    // return(
-    //   <EuiFlexGroup gutterSize="m">
-    //     <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
-    //       <EuiFormRow
-    //         isInvalid={isInvalid}
-    //         error={error}
-    //         label={this.renderLabel(setting)}
-    //         helpText={this.renderHelpText(setting)}
-    //       >
-    //         {this.renderField(setting)}
-    //       </EuiFormRow>
-    //     </EuiFlexItem>
-    //     {this.renderActions(setting)}
-    //   </EuiFlexGroup>
-    // );
   }
 }

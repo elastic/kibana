@@ -2,84 +2,63 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
+  EuiLink,
   EuiPanel,
-  EuiSearchBar,
   EuiSpacer,
   EuiText,
-  Query,
 } from '@elastic/eui';
 
-import { getAriaName, getCategoryName, DEFAULT_CATEGORY } from '../../lib';
+import { getCategoryName } from '../../lib';
 import { Field } from '../field';
 
 export class Form extends PureComponent {
 
   static propTypes = {
-    settings: PropTypes.array.isRequired,
+    settings: PropTypes.object.isRequired,
+    categories: PropTypes.array.isRequired,
+    categoryCounts: PropTypes.object.isRequired,
+    clearQuery: PropTypes.func.isRequired,
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
-    query: PropTypes.string,
   }
 
-  constructor(props) {
-    super(props);
-    const { settings, query } = this.props;
-    const parsedQuery = query ? Query.parse(`ariaName:"${getAriaName(query)}"`) : null;
-    const groupedSettings = this.mapSettings(parsedQuery ? Query.execute(parsedQuery, settings) : settings);
+  renderClearQueryLink(totalSettings, currentSettings) {
+    const { clearQuery } = this.props;
 
-    this.state = {
-      query: parsedQuery,
-      settings: groupedSettings,
-      categories: this.getCategories(groupedSettings),
-    };
+    if(totalSettings !== currentSettings) {
+      return (
+        <EuiFlexItem grow={false}>
+          <em>
+            Search terms are hiding {totalSettings - currentSettings} settings {(
+              <EuiLink onClick={clearQuery}>
+                <em>(clear search)</em>
+              </EuiLink>
+            )}
+          </em>
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { query } = this.state;
-    const { settings } = nextProps;
-    this.setState({
-      settings: this.mapSettings(query ? Query.execute(query, settings) : settings),
-    });
-  }
-
-  mapSettings(settings) {
-    return settings.reduce((groupedSettings, setting) => {
-      // We will want to change this logic when we put each category on its
-      // own page aka allowing a setting to be included in multiple categories.
-      const category = setting.category[0];
-      (groupedSettings[category] = groupedSettings[category] || []).push(setting);
-      return groupedSettings;
-    }, {});
-  }
-
-  getCategories(groupedSettings) {
-    return Object.keys(groupedSettings).sort((a, b) => {
-      if(a === DEFAULT_CATEGORY) return -1;
-      if(b === DEFAULT_CATEGORY) return 1;
-      if(a > b) return 1;
-      return a === b ? 0 : -1;
-    });
-  }
-
-  onQueryChange = (query) => {
-    this.setState({
-      query,
-      settings: this.mapSettings(Query.execute(query, this.props.settings)),
-    });
-  }
-
-  renderCategory(category, settings) {
+  renderCategory(category, settings, totalSettings) {
     return (
       <Fragment key={category}>
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
-              <h2>{getCategoryName(category)}</h2>
+              <EuiFlexGroup alignItems="baseline">
+                <EuiFlexItem grow={false}>
+                  <h2>{getCategoryName(category)}</h2>
+                </EuiFlexItem>
+                {this.renderClearQueryLink(totalSettings, settings.length)}
+              </EuiFlexGroup>
             </EuiText>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
             {settings.map(setting => {
               return (
                 <Field
@@ -98,48 +77,28 @@ export class Form extends PureComponent {
   }
 
   render() {
-    const { query, categories, settings } = this.state;
-    const currentCategories = this.getCategories(settings);
+    const { settings, categories, categoryCounts, clearQuery } = this.props;
+    const currentCategories = [];
 
-    const box = {
-      incremental: true,
-    };
-
-    const filters = [
-      {
-        type: 'field_value_selection',
-        field: 'category',
-        name: 'Category',
-        multiSelect: 'or',
-        options: categories.map(category => {
-          return {
-            value: category,
-            name: getCategoryName(category),
-          };
-        })
+    categories.forEach(category => {
+      if(settings[category] && settings[category].length) {
+        currentCategories.push(category);
       }
-    ];
+    });
 
     return (
       <Fragment>
-        <EuiPanel paddingSize="l">
-          <EuiForm>
-            <EuiFormRow>
-              <EuiSearchBar
-                box={box}
-                filters={filters}
-                onChange={this.onQueryChange}
-                defaultQuery={query}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiPanel>
-        <EuiSpacer />
-        {currentCategories.map((category) => {
-          return (
-            this.renderCategory(category, settings[category])
-          );
-        })}
+        {
+          currentCategories.length ? currentCategories.map((category) => {
+            return (
+              this.renderCategory(category, settings[category], categoryCounts[category]) // fix this
+            );
+          }) : (
+            <EuiPanel paddingSize="l">
+              No settings found <EuiLink onClick={clearQuery}>(Clear search)</EuiLink>
+            </EuiPanel>
+          )
+        }
       </Fragment>
     );
   }

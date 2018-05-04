@@ -10,7 +10,21 @@
     margin: 0 auto;
   }
 
-  .euiForm > .euiFlexGroup + * {
-    margin-top: 16px;
+  .advancedSettings__field {
+    + * {
+      margin-top: 24px;
+    }
+
+    &__wrapper {
+      width: 720px;
+    }
+
+    &__actions {
+      padding-top: 30px;
+    }
+
+    .euiFormHelpText {
+      padding-bottom: 0;
+    }
   }
 }
