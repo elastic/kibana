@@ -41,6 +41,7 @@ describe('UiExports', function () {
         },
       });
 
+      kbnServer.listen = noop;
       await kbnServer.ready();
 
       // TODO: hopefully we can add better support for something

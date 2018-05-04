@@ -1,6 +1,7 @@
 import { SavedObjectsClient } from './client';
 import { Mapping, Document } from '@kbn/migrations';
 import { optsFromKbnServer } from '../migrations';
+import { once } from 'lodash';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -10,8 +11,11 @@ import {
   createUpdateRoute,
 } from './routes';
 
+// Computing isn't terribly expensive, but it's not 100% free,
+// so, we may as well cache them.
+const cachedMappings = once(Mapping.fromPlugins);
+
 export function savedObjectsMixin(kbnServer, server) {
-  const mappings = Mapping.fromPlugins(optsFromKbnServer(kbnServer, () => {}).plugins);
   const prereqs = {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
@@ -30,9 +34,10 @@ export function savedObjectsMixin(kbnServer, server) {
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     const opts = optsFromKbnServer(kbnServer, callCluster);
+
     return new SavedObjectsClient({
-      mappings,
       callCluster,
+      mappings: cachedMappings(opts.plugins),
       transformDocuments: ({ migrationState, docs }) => Document.transform({ ...opts, migrationState, docs }),
       index: server.config().get('kibana.index'),
     });
