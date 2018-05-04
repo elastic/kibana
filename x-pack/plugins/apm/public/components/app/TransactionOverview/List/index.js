@@ -129,11 +129,11 @@ class List extends Component {
 }
 
 List.propTypes = {
-  agentName: PropTypes.string.isRequired,
+  agentName: PropTypes.string,
   changeTransactionSorting: PropTypes.func.isRequired,
   items: PropTypes.array,
   transactionSorting: PropTypes.object.isRequired,
-  type: PropTypes.string.isRequired
+  type: PropTypes.string
 };
 
 export default List;
