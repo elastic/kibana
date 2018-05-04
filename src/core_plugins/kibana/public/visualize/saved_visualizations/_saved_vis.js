@@ -85,7 +85,7 @@ uiModules
           });
 
           self.searchSource.aggs(function () {
-            return self.vis.aggs.toDsl();
+            return self.vis.getAggConfig().toDsl();
           });
 
           return self;
