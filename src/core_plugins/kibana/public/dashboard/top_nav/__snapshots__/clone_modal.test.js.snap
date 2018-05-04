@@ -13,7 +13,9 @@ exports[`renders DashboardCloneModal 1`] = `
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Please enter a new name for your dashboard.
         </p>

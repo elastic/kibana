@@ -14,7 +14,7 @@ import { ml } from 'plugins/ml/services/ml_api_service';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlBucketSpanEstimator', function ($q) {
+module.directive('mlBucketSpanEstimator', function () {
   return {
     restrict: 'AE',
     replace: false,
@@ -78,7 +78,7 @@ module.directive('mlBucketSpanEstimator', function ($q) {
           });
         }
 
-        $q.when(ml.estimateBucketSpan(data))
+        ml.estimateBucketSpan(data)
           .then((interval) => {
             if (interval.error) {
               errorHandler(interval.message);

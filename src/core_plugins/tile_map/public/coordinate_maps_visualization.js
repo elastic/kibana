@@ -23,7 +23,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+      this.vis.sessionState.mapBounds = this._kibanaMap.getBounds();
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
@@ -133,6 +133,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
+        colorRamp: newParams.colorSchema,
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }

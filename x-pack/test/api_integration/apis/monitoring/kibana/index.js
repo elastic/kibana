@@ -7,6 +7,8 @@
 export default function ({ loadTestFile }) {
   describe('Kibana', () => {
     loadTestFile(require.resolve('./overview'));
+    loadTestFile(require.resolve('./listing'));
+    loadTestFile(require.resolve('./instance'));
   });
 }
 

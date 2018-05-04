@@ -44,6 +44,8 @@ export class UiBundlesController {
       matchBase: true
     });
 
+    this._appExtensions = uiExports.appExtensions || {};
+
     this._webpackAliases = {
       ...getWebpackAliases(pluginSpecs),
       ...uiExports.webpackAliases
@@ -101,6 +103,10 @@ export class UiBundlesController {
 
   getAliases() {
     return this._webpackAliases;
+  }
+
+  getAppExtensions() {
+    return this._appExtensions;
   }
 
   isDevMode() {

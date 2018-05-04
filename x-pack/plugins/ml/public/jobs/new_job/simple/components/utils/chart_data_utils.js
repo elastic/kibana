@@ -11,16 +11,14 @@
 import _ from 'lodash';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { calculateTextWidth } from 'plugins/ml/util/string_utils';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
-import { SimpleJobSearchServiceProvider } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlSimpleJobSearchService } from 'plugins/ml/jobs/new_job/simple/components/utils/search_service';
 
-export function ChartDataUtilsProvider($q, Private, timefilter) {
+export function ChartDataUtilsProvider(Private, timefilter) {
   const TimeBuckets = Private(IntervalHelperProvider);
-  const mlResultsService = Private(ResultsServiceProvider);
-  const mlSimpleJobSearchService = Private(SimpleJobSearchServiceProvider);
 
   function loadDocCountData(formConfig, chartData) {
-    return $q((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // set doc count chart to be 10x less than detector charts
       const BAR_TARGET = Math.ceil(formConfig.chartInterval.barTarget / 10);
       const MAX_BARS = BAR_TARGET + (BAR_TARGET / 100) * 100; // 100% larger that bar target
@@ -79,7 +77,7 @@ export function ChartDataUtilsProvider($q, Private, timefilter) {
   }
 
   function loadJobSwimlaneData(formConfig, chartData) {
-    return $q((resolve) => {
+    return new Promise((resolve) => {
       mlResultsService.getScoresByBucket(
         [formConfig.jobId],
         formConfig.start,
@@ -119,7 +117,7 @@ export function ChartDataUtilsProvider($q, Private, timefilter) {
   }
 
   function loadDetectorSwimlaneData(formConfig, chartData) {
-    return $q((resolve) => {
+    return new Promise((resolve) => {
       mlSimpleJobSearchService.getScoresByRecord(
         formConfig.jobId,
         formConfig.start,

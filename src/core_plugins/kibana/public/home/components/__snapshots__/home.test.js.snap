@@ -5,7 +5,6 @@ exports[`directories should not render directory entry when showOnHomePage is fa
   className="home"
 >
   <AddData
-    addBasePath={[Function]}
     apmUiEnabled={true}
   />
   <EuiSpacer
@@ -28,7 +27,9 @@ exports[`directories should not render directory entry when showOnHomePage is fa
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Visualize and Explore Data
           </h3>
@@ -51,7 +52,9 @@ exports[`directories should not render directory entry when showOnHomePage is fa
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Manage and Administer the Elastic Stack
           </h3>
@@ -81,7 +84,9 @@ exports[`directories should not render directory entry when showOnHomePage is fa
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Didn’t find what you were looking for?
         </p>
@@ -108,7 +113,6 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
   className="home"
 >
   <AddData
-    addBasePath={[Function]}
     apmUiEnabled={true}
   />
   <EuiSpacer
@@ -131,7 +135,9 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Visualize and Explore Data
           </h3>
@@ -154,7 +160,9 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Manage and Administer the Elastic Stack
           </h3>
@@ -202,7 +210,9 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Didn’t find what you were looking for?
         </p>
@@ -229,7 +239,6 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
   className="home"
 >
   <AddData
-    addBasePath={[Function]}
     apmUiEnabled={true}
   />
   <EuiSpacer
@@ -252,7 +261,9 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Visualize and Explore Data
           </h3>
@@ -293,7 +304,9 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Manage and Administer the Elastic Stack
           </h3>
@@ -323,7 +336,9 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Didn’t find what you were looking for?
         </p>
@@ -350,7 +365,6 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
   className="home"
 >
   <AddData
-    addBasePath={[Function]}
     apmUiEnabled={true}
   />
   <EuiSpacer
@@ -373,7 +387,9 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Visualize and Explore Data
           </h3>
@@ -396,7 +412,9 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Manage and Administer the Elastic Stack
           </h3>
@@ -426,7 +444,9 @@ exports[`should not contain RecentlyAccessed panel when there is no recentlyAcce
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Didn’t find what you were looking for?
         </p>
@@ -469,7 +489,6 @@ exports[`should render home component 1`] = `
     />
   </React.Fragment>
   <AddData
-    addBasePath={[Function]}
     apmUiEnabled={true}
   />
   <EuiSpacer
@@ -492,7 +511,9 @@ exports[`should render home component 1`] = `
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Visualize and Explore Data
           </h3>
@@ -515,7 +536,9 @@ exports[`should render home component 1`] = `
         hasShadow={false}
         paddingSize="l"
       >
-        <EuiTitle>
+        <EuiTitle
+          size="m"
+        >
           <h3>
             Manage and Administer the Elastic Stack
           </h3>
@@ -545,7 +568,9 @@ exports[`should render home component 1`] = `
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           Didn’t find what you were looking for?
         </p>

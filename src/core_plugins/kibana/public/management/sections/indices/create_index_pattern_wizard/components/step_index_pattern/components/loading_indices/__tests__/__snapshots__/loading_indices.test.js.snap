@@ -21,7 +21,9 @@ exports[`LoadingIndices should render normally 1`] = `
     component="div"
     grow={false}
   >
-    <EuiText>
+    <EuiText
+      grow={true}
+    >
       <EuiTextColor
         color="subdued"
       >
@@ -29,6 +31,7 @@ exports[`LoadingIndices should render normally 1`] = `
       </EuiTextColor>
     </EuiText>
     <EuiText
+      grow={true}
       size="s"
       style={
         Object {

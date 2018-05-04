@@ -57,7 +57,6 @@ export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed 
       {recentlyAccessedPanel}
 
       <AddData
-        addBasePath={addBasePath}
         apmUiEnabled={apmUiEnabled}
       />
 

@@ -7,6 +7,8 @@ import { ImageComparator } from 'test_utils/image_comparator';
 import sinon from 'sinon';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
+import blues from './blues.png';
+import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
 
 function mockRawData() {
@@ -180,7 +182,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
-
     });
 
     it('should toggle back&forth OK between mapTypes', async function () {
@@ -213,6 +214,61 @@ describe('CoordinateMapsVisualizationTest', function () {
       });
 
       const mismatchedPixels = await compareImage(initial, 0);
+      coordinateMapVisualization.destroy();
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
+    });
+
+    it('should toggle to different color schema ok', async function () {
+
+      const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+
+      vis.params.colorSchema = 'Blues';
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixels = await compareImage(blues, 0);
+      coordinateMapVisualization.destroy();
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
+    });
+
+    it('should toggle to different color schema and maptypes ok', async function () {
+
+      const coordinateMapVisualization = new CoordinateMapsVisualization(domNode, vis);
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+
+      vis.params.colorSchema = 'Greens';
+      vis.params.mapType = 'Shaded Geohash Grid';
+      await coordinateMapVisualization.render(dummyESResponse, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixels = await compareImage(shadedGeohashGrid, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 

@@ -53,6 +53,7 @@
     "jest-cli": "^22.4.3",
     "jest-styled-components": "^5.0.1",
     "mocha": "^5.0.5",
+    "mustache": "^2.3.0",
     "node-fetch": "^2.1.2",
     "pdf-image": "1.1.0",
     "pixelmatch": "4.0.2",
@@ -74,7 +75,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "v0.0.44",
+    "@elastic/eui": "0.0.44",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",

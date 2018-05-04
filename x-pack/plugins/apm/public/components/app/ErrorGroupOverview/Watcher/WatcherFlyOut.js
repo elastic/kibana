@@ -149,8 +149,14 @@ export default class WatcherFlyout extends Component {
 
     const timeRange =
       this.state.schedule === 'interval'
-        ? `now-${this.state.interval.value}${this.state.interval.unit}`
-        : 'now-24h';
+        ? {
+            value: this.state.interval.value,
+            unit: this.state.interval.unit
+          }
+        : {
+            value: 24,
+            unit: 'h'
+          };
 
     return createErrorGroupWatch({
       emails,
@@ -438,7 +444,7 @@ export default class WatcherFlyout extends Component {
 
     return (
       <React.Fragment>
-        {this.props.isFlyoutOpen && flyout}
+        {this.props.isOpen && flyout}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={this.removeToasts}
@@ -450,7 +456,7 @@ export default class WatcherFlyout extends Component {
 }
 
 WatcherFlyout.propTypes = {
-  isFlyoutOpen: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired
 };

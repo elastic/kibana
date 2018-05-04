@@ -48,9 +48,9 @@ export function TestSubjectsProvider({ getService }) {
       return await find.byCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async findAll(selector) {
+    async findAll(selector, timeout) {
       log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await find.allByCssSelector(testSubjSelector(selector));
+      const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
       return await filterAsync(all, el => el.isDisplayed());
     }
 

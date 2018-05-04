@@ -18,7 +18,7 @@ const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean',
   'median', 'varp', 'info_content', 'time'];
 
 // List of function descriptions for which typical values from record level results should be displayed.
-const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'mean', 'max', 'min', 'sum',
+const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
   'median', 'varp', 'info_content', 'time'];
 
 // Returns a severity label (one of critical, major, minor, warning or unknown)

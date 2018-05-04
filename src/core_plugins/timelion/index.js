@@ -8,10 +8,6 @@ export default function (kibana) {
         description: 'Time series expressions for everything',
         icon: 'plugins/timelion/icon.svg',
         main: 'plugins/timelion/app',
-        uses: [
-          'fieldFormats',
-          'savedObjectTypes'
-        ]
       },
       hacks: [
         'plugins/timelion/lib/panel_registry',
