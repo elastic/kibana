@@ -14,6 +14,7 @@ export const markdown = () => ({
     const html = { __html: md.render(String(config.content)) };
     const fontStyle = config.font ? config.font.spec : {};
 
+    /* eslint-disable react/no-danger */
     ReactDOM.render(
       <div
         className="canvas__element__markdown"
@@ -23,6 +24,7 @@ export const markdown = () => ({
       domNode,
       () => handlers.done()
     );
+    /* eslint-enable */
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
