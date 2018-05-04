@@ -5,6 +5,7 @@ import { Schemas } from '../../vis/editors/default/schemas';
 import { AggTypesBucketsCreateFilterTermsProvider } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
+import otherBucketTemplate from 'ui/agg_types/controls/other_bucket.html';
 import { RouteBasedNotifierProvider } from '../../route_based_notifier';
 import { OtherBucketHelperProvider } from './_terms_other_bucket_helper';
 
@@ -76,37 +77,6 @@ export function AggTypesBucketsTermsProvider(Private) {
       {
         name: 'field',
         filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
-      },
-      {
-        name: 'otherBucket',
-        default: false,
-        write: _.noop
-      }, {
-        name: 'otherBucketLabel',
-        default: 'Other',
-        write: _.noop
-      }, {
-        name: 'missingBucket',
-        default: false,
-        write: _.noop
-      }, {
-        name: 'missingBucketLabel',
-        default: 'Missing',
-        write: _.noop
-      },
-      {
-        name: 'exclude',
-        type: 'string',
-        advanced: true,
-        disabled: isNotType('string'),
-        ...migrateIncludeExcludeFormat
-      },
-      {
-        name: 'include',
-        type: 'string',
-        advanced: true,
-        disabled: isNotType('string'),
-        ...migrateIncludeExcludeFormat
       },
       {
         name: 'size',
@@ -245,7 +215,39 @@ export function AggTypesBucketsTermsProvider(Private) {
       {
         name: 'orderBy',
         write: _.noop // prevent default write, it's handled by orderAgg
-      }
+      },
+      {
+        name: 'otherBucket',
+        default: false,
+        editor: otherBucketTemplate,
+        write: _.noop
+      }, {
+        name: 'otherBucketLabel',
+        default: 'Other',
+        write: _.noop
+      }, {
+        name: 'missingBucket',
+        default: false,
+        write: _.noop
+      }, {
+        name: 'missingBucketLabel',
+        default: 'Missing',
+        write: _.noop
+      },
+      {
+        name: 'exclude',
+        type: 'string',
+        advanced: true,
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
+      },
+      {
+        name: 'include',
+        type: 'string',
+        advanced: true,
+        disabled: isNotType('string'),
+        ...migrateIncludeExcludeFormat
+      },
     ]
   });
 }
