@@ -1,5 +1,4 @@
 const ci = process.env.CI && process.env.CI === 'true';
-const path = require('path');
 
 //#TODO: Find out why this resolution fails in FF, { width: 1200, height: 1024 }],
 
@@ -29,7 +28,7 @@ exports.config = {
   user: process.env.SAUCE_USERNAME,
   key: process.env.SAUCE_ACCESS_KEY,
   sauceConnect: true,
-  baseUrl: 'http://localhost:5620' ,
+  baseUrl: 'http://localhost:5620',
   capabilities: [{
     browserName: 'chrome',
     version: ci ? '58' : '65',
@@ -54,18 +53,19 @@ exports.config = {
     }
   },
   before: function (capabilities, specs) {
-    const sinon = require('sinon');
-    const chai = require('chai');
-    global.expect = chai.expect;
-    const chaiWebdriver = require('chai-webdriverio').default;
-    chai.use(chaiWebdriver(browser));
-
-    global.fetch = require('node-fetch');
-
-    chai.config.includeStack = true;
-    global.AssertionError = chai.AssertionError;
-    global.Assertion = chai.Assertion;
-    global.assert = chai.assert;
-    chai.Should();
+    console.log(specs);
+    // const sinon = require('sinon');
+    // const chai = require('chai');
+    // global.expect = chai.expect;
+    // const chaiWebdriver = require('chai-webdriverio').default;
+    // chai.use(chaiWebdriver(browser));
+    //
+    // global.fetch = require('node-fetch');
+    //
+    // chai.config.includeStack = true;
+    // global.AssertionError = chai.AssertionError;
+    // global.Assertion = chai.Assertion;
+    // global.assert = chai.assert;
+    // chai.Should();
   }
 };

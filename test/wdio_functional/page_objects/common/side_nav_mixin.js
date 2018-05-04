@@ -2,7 +2,7 @@ import { PageRegion } from './base_page';
 
 export default class SideNav extends PageRegion {
 
-  _discover_link_selector = '[data-test-subj="appLink"] ';
+  discoverLinkSelector = '[data-test-subj="appLink"] ';
   navigateToApp(app) {
     switch (app) {
       case 'Discover':
