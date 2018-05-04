@@ -32,7 +32,12 @@
   <div ng-if="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <div class="influencers-list-container column col-xs-2 euiText">
+      <div ng-if="noInfluencersConfigured === true" class="no-influencers-warning">
+        <i aria-hidden="true" class="fa fa-info-circle" tooltip-placement="right" tooltip-append-to-body="true"
+          tooltip-html-unsafe="The Top Influencers list is hidden because no influencers have been configured for the selected jobs." ></i>
+      </div>
+
+      <div ng-if="noInfluencersConfigured === false" class="column col-xs-2 euiText">
         <span class="panel-title">
           Top Influencers
         </span>
@@ -41,7 +46,7 @@
         />
       </div>
 
-      <div class="column col-xs-10">
+      <div class="column" ng-class="noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10'">
         <span class="panel-title euiText">
           Anomaly timeline
         </span>
