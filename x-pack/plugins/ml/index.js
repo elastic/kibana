@@ -5,8 +5,6 @@
  */
 
 
-
-import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -24,7 +22,6 @@ import { fieldsService } from './server/routes/fields_service';
 export default (kibana) => {
   return new kibana.Plugin({
     configPrefix: 'xpack.ml',
-    publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
       app: {

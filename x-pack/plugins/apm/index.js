@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { initTransactionsApi } from './server/routes/transactions';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
@@ -13,7 +12,6 @@ import { initStatusApi } from './server/routes/status_check';
 export default function(kibana) {
   return new kibana.Plugin({
     configPrefix: 'xpack.apm',
-    publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
       app: {

@@ -13,7 +13,6 @@ import mappings from './mappings.json';
 export default function (kibana) {
   return new kibana.Plugin({
     configPrefix: 'xpack.graph',
-    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
         title: 'Graph',

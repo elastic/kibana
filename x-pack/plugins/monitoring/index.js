@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { init } from './init';
 import { config } from './config';
 import { deprecations } from './deprecations';
@@ -17,7 +16,6 @@ import { uiExports } from './ui_exports';
  */
 export default (kibana) => new kibana.Plugin({
   configPrefix: 'xpack.monitoring',
-  publicDir: resolve(__dirname, 'public'),
   init(server, _options) { init(this, server); },
   config,
   deprecations,

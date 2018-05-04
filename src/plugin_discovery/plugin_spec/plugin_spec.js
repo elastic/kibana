@@ -1,10 +1,9 @@
-import { isAbsolute as isAbsolutePath, basename } from 'path';
+import { resolve } from 'path';
 
 import Joi from 'joi';
 import toPath from 'lodash/internal/toPath';
 
 import { validate } from './lib';
-import { createInvalidPluginError } from '../errors';
 import { isVersionCompatible } from './is_version_compatible';
 
 const PluginSpecOptionsSchema = Joi.object().keys({
@@ -12,7 +11,7 @@ const PluginSpecOptionsSchema = Joi.object().keys({
   configPrefix: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
   config: Joi.func(),
   deprecations: Joi.func(),
-  publicDir: Joi.alternatives().try(Joi.boolean(), Joi.string()).default(Joi.ref('$defaultPublicDir')),
+  publicDir: Joi.boolean().default(true),
   preInit: Joi.func(),
   init: Joi.func(),
   isEnabled: Joi.func(),
@@ -72,19 +71,6 @@ export class PluginSpec {
     this._preInit = preInit;
     this._init = init;
     this._isEnabled = isEnabled;
-
-    if (this._publicDir) {
-      if (!isAbsolutePath(this._publicDir)) {
-        throw createInvalidPluginError(this._id, this._path, 'plugin.publicDir must be an absolute path');
-      }
-      if (basename(this._publicDir) !== 'public') {
-        throw createInvalidPluginError(
-          this._id,
-          this._path,
-          `publicDir for plugin ${this.getId()} must end with a "public" directory.`
-        );
-      }
-    }
   }
 
   getPack() {
@@ -132,7 +118,9 @@ export class PluginSpec {
   }
 
   getPublicDir() {
-    return this._publicDir || null;
+    return this._publicDir
+      ? resolve(this._path, 'public')
+      : null;
   }
 
   getExportSpecs() {

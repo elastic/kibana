@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { registerFieldsRoutes } from './server/routes/api/fields';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerHistoryRoutes } from './server/routes/api/history';
@@ -16,7 +15,6 @@ import { registerLicenseChecker } from './server/lib/register_license_checker';
 
 export const pluginDefinition = {
   configPrefix: 'xpack.watcher',
-  publicDir: resolve(__dirname, 'public'),
   uiExports: {
     managementSections: [
       'plugins/watcher/sections/testbed',

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
-
 import {
   CONFIG_DASHBOARD_ONLY_MODE_ROLES
 } from './common';
@@ -21,7 +19,6 @@ import {
 export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
-    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {

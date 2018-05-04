@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
@@ -20,7 +19,6 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 
 export default (kibana) => new kibana.Plugin({
   configPrefix: 'xpack.security',
-  publicDir: resolve(__dirname, 'public'),
 
   config(Joi) {
     return Joi.object({

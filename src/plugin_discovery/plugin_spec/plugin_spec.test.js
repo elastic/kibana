@@ -200,13 +200,23 @@ describe('plugin discovery/plugin spec', () => {
         });
       });
 
-      describe('options.publicDir is an absolute path', () => {
-        it('returns the path', () => {
+      describe('options.publicDir is true', () => {
+        it('returns absolute public path', () => {
           const spec = new PluginSpec('/', KIBANA_JSON, {
-            publicDir: '/var/www/public'
+            publicDir: true
           });
 
-          expect(spec.getPublicDir()).toBe('/var/www/public');
+          expect(spec.getPublicDir()).toBe('/public');
+        });
+      });
+
+      describe('options.publicDir is an absolute path', () => {
+        it('throws because of invalid setting', () => {
+          expect(() => {
+            new PluginSpec('/', KIBANA_JSON, {
+              publicDir: '/var/www'
+            });
+          }).toThrowErrorMatchingSnapshot();
         });
       });
     });

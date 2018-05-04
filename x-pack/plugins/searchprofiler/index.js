@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { profileRoute } from './server/routes/profile';
 
 // License
@@ -16,7 +15,6 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 export default (kibana) => {
   return new kibana.Plugin({
     configPrefix: 'xpack.searchprofiler',
-    publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
       devTools: ['plugins/searchprofiler/app'],

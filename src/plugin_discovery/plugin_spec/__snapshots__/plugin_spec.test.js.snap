@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`plugin discovery/plugin spec PluginSpec #getPublicDir() options.publicDir is an absolute path throws because of invalid setting 1`] = `"Plugin foo at / is invalid because Plugin(options) validation failure: child \\"publicDir\\" fails because [\\"publicDir\\" must be a boolean]"`;
+
 exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is defined throws if not passed a config service 1`] = `"PluginSpec#isEnabled() must be called with a config service"`;
 
 exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is defined throws if not passed a config service 2`] = `"PluginSpec#isEnabled() must be called with a config service"`;

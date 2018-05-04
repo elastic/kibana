@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { registerGrokdebuggerRoutes } from './server/routes/api/grokdebugger';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 
 export default (kibana) => new kibana.Plugin({
-  publicDir: resolve(__dirname, 'public'),
   configPrefix: 'xpack.grokdebugger',
   config(Joi) {
     return Joi.object({

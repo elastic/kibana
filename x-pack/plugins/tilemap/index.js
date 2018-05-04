@@ -6,12 +6,10 @@
 
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { inspectSettings } from './server/lib/inspect_settings';
-import { resolve } from 'path';
 
 export default (kibana) => {
   return new kibana.Plugin({
     configPrefix: 'xpack.tilemap',
-    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       visTypeEnhancers: [ 'plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],
     },
