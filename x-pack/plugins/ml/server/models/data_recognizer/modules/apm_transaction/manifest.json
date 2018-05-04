@@ -1,0 +1,32 @@
+{
+  "id": "apm_transaction",
+  "title": "APM",
+  "description": "Detect anomalies in high mean of transaction duration",
+  "type": "Transaction data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "apm-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "context.service.name": "opbeans-node"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "transaction_duration",
+      "file": "transaction_duration.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-transaction_duration",
+      "file": "datafeed_transaction_duration.json",
+      "job_id": "transaction_duration"
+    }
+  ]
+}
