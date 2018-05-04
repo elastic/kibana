@@ -9,6 +9,11 @@
     "bool": {
       "filter": [
         {
+          "term": {
+            "processor.name": "transaction"
+          }
+        },
+        {
           "exists": {
             "field": "processor.name"
           }
