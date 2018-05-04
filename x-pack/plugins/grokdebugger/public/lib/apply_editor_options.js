@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EDITOR } from '../../../../common/constants';
+import { EDITOR } from '../../common/constants';
 
-export const applyEditorOptions = (editor, minLines, maxLines) => {
+export function applyEditorOptions(editor, minLines, maxLines) {
   editor.getSession().setUseWrapMode(true);
 
   /*
@@ -29,4 +29,4 @@ export const applyEditorOptions = (editor, minLines, maxLines) => {
   });
 
   editor.$blockScrolling = Infinity;
-};
+}
