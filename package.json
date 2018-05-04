@@ -33,7 +33,7 @@
   "dependencies": {
     "@elastic/datemath": "^4.0.2",
     "@elastic/numeral": "^2.3.2",
-    "@scant/router": "^0.0.4",
+    "@scant/router": "^0.1.0",
     "axios": "^0.18.0",
     "base64-js": "^1.2.1",
     "boom": "^5.2.0",
