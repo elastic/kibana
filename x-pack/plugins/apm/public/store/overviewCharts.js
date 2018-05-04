@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { createSelector } from 'reselect';
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
 import { getCharts } from './selectors/chartSelectors';
 import { getUrlParams } from './urlParams';
+import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadCharts } from '../services/rest';
 
-const actionTypes = createActionTypes('OVERVIEW_CHARTS');
-
+const ID = 'overviewCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
@@ -20,11 +21,22 @@ const INITIAL_DATA = {
   weightedAverage: null
 };
 
-export default createReducer(actionTypes, INITIAL_DATA);
-export const loadOverviewCharts = createAction(actionTypes, rest.loadCharts);
-
 export const getOverviewCharts = createSelector(
   getUrlParams,
-  state => state.overviewCharts,
+  state => withInitialData(state.reduxRequest[ID], INITIAL_DATA),
   getCharts
 );
+
+export function OverviewChartsRequest({ urlParams, render }) {
+  const { serviceName, start, end, transactionType, kuery } = urlParams;
+  return (
+    <ReduxRequest
+      id={ID}
+      shouldInvoke={Boolean(serviceName && start && end && transactionType)}
+      fn={loadCharts}
+      args={[{ serviceName, start, end, transactionType, kuery }]}
+      selector={getOverviewCharts}
+      render={render}
+    />
+  );
+}

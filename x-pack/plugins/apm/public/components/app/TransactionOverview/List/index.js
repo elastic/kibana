@@ -15,7 +15,6 @@ import { AlignmentKuiTableHeaderCell } from '../../../shared/APMTable/APMTable';
 import FilterableAPMTable from '../../../shared/APMTable/FilterableAPMTable';
 import ListItem from './ListItem';
 import ImpactTooltip from './ImpactTooltip';
-import withService from '../../../shared/withService';
 
 const getRelativeImpact = (impact, impactMin, impactMax) =>
   Math.max((impact - impactMin) / Math.max(impactMax - impactMin, 1) * 100, 1);
@@ -32,7 +31,7 @@ class List extends Component {
   render() {
     const {
       serviceName,
-      service,
+      agentName,
       type,
       items,
       changeTransactionSorting,
@@ -46,7 +45,7 @@ class List extends Component {
           key: 'avg',
           sortable: true,
           alignRight: true,
-          label: avgLabel(service.data.agentName)
+          label: avgLabel(agentName)
         },
         {
           key: 'p95',
@@ -129,4 +128,4 @@ class List extends Component {
   }
 }
 
-export default withService(List);
+export default List;

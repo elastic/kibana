@@ -3,18 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { STATUS } from '../../../../constants/index';
+import { LicenceRequest } from '../../../../store/license';
 
-import { connect } from 'react-redux';
-import LicenseChecker from './view';
-import { loadLicense } from '../../../../store/license';
-
-function mapStateToProps(state = {}) {
-  return {
-    license: state.license
-  };
+function LicenseChecker() {
+  return (
+    <LicenceRequest
+      render={({ data, status }) => {
+        if (status === STATUS.SUCCESS && !data.license.isActive) {
+          window.location = '#/invalid-license';
+        }
+        return null;
+      }}
+    />
+  );
 }
 
-const mapDispatchToProps = {
-  loadLicense
-};
-export default connect(mapStateToProps, mapDispatchToProps)(LicenseChecker);
+export default LicenseChecker;

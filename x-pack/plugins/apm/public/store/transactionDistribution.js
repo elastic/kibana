@@ -4,26 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
-
-const actionTypes = createActionTypes('TRANSACTION_DISTRIBUTION');
-export const [
-  TRANSACTION_DISTRIBUTION_LOADING,
-  TRANSACTION_DISTRIBUTION_SUCCESS,
-  TRANSACTION_DISTRIBUTION_FAILURE
-] = actionTypes;
+import React from 'react';
+import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadTransactionDistribution } from '../services/rest';
 
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
-const transactionDistribution = createReducer(actionTypes, INITIAL_DATA);
-
-export const loadTransactionDistribution = createAction(
-  actionTypes,
-  rest.loadTransactionDistribution
-);
 
 export function getTransactionDistribution(state) {
-  return state.transactionDistribution;
+  return withInitialData(
+    state.reduxRequest.transactionDistribution,
+    INITIAL_DATA
+  );
 }
 
 export function getDefaultTransactionId(state) {
@@ -31,4 +23,16 @@ export function getDefaultTransactionId(state) {
   return _distribution.data.defaultTransactionId;
 }
 
-export default transactionDistribution;
+export function TransactionDistributionRequest({ urlParams, render }) {
+  const { serviceName, start, end, transactionName, kuery } = urlParams;
+  return (
+    <ReduxRequest
+      id="transactionDistribution"
+      shouldInvoke={Boolean(serviceName && start && end && transactionName)}
+      fn={loadTransactionDistribution}
+      args={[{ serviceName, start, end, transactionName, kuery }]}
+      selector={getTransactionDistribution}
+      render={render}
+    />
+  );
+}

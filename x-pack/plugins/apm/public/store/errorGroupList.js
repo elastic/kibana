@@ -4,24 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
+import React from 'react';
+import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadErrorGroupList } from '../services/rest';
 
-const actionTypes = createActionTypes('ERROR_GROUP_LIST');
-export const [
-  ERROR_GROUP_LIST_LOADING,
-  ERROR_GROUP_LIST_SUCCESS,
-  ERROR_GROUP_LIST_FAILURE
-] = actionTypes;
-
+const ID = 'errorGroupList';
 const INITIAL_DATA = [];
-export default createReducer(actionTypes, INITIAL_DATA);
 
-export const loadErrorGroupList = createAction(
-  actionTypes,
-  rest.loadErrorGroupList
-);
+export function getErrorGroupList(state) {
+  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+}
 
-export const getErrorGroupList = state => {
-  return state.errorGroupList;
-};
+export function ErrorGroupDetailsRequest({ urlParams, render }) {
+  const { serviceName, start, end, q, sortBy, sortOrder, kuery } = urlParams;
+
+  return (
+    <ReduxRequest
+      id={ID}
+      fn={loadErrorGroupList}
+      shouldInvoke={Boolean(serviceName && start && end)}
+      args={[{ serviceName, start, end, q, sortBy, sortOrder, kuery }]}
+      selector={getErrorGroupList}
+      render={render}
+    />
+  );
+}

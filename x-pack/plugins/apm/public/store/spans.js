@@ -4,18 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
+import React from 'react';
+import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadSpans } from '../services/rest';
 
-const actionTypes = createActionTypes('SPANS');
-export const [SPANS_LOADING, SPANS_SUCCESS, SPANS_FAILURE] = actionTypes;
-
+const ID = 'spans';
 const INITIAL_DATA = {};
-const spans = createReducer(actionTypes, INITIAL_DATA);
-export const loadSpans = createAction(actionTypes, rest.loadSpans);
 
 export function getSpans(state) {
-  return state.spans;
+  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
 }
 
-export default spans;
+export function SpansRequest({ urlParams, render }) {
+  const { serviceName, start, end, transactionId, kuery } = urlParams;
+  return (
+    <ReduxRequest
+      id={ID}
+      shouldInvoke={Boolean(serviceName && start && end && transactionId)}
+      fn={loadSpans}
+      selector={getSpans}
+      args={[{ serviceName, start, end, transactionId, kuery }]}
+      render={render}
+    />
+  );
+}

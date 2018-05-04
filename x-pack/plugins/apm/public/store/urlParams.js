@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { LOCATION_UPDATE } from './location';
 import { toQuery, legacyDecodeURIComponent } from '../utils/url';
 import { getDefaultTransactionId } from './transactionDistribution';
-import { getDefaultTransactionType } from './service';
+import { getDefaultTransactionType } from './serviceDetails';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
@@ -39,7 +39,8 @@ function urlParams(state = {}, action) {
         page,
         sortBy,
         sortOrder,
-        q
+        q,
+        kuery
       } = toQuery(action.location.search);
 
       return {
@@ -53,6 +54,7 @@ function urlParams(state = {}, action) {
         transactionId,
         detailTab,
         spanId: toNumber(spanId),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
         serviceName,

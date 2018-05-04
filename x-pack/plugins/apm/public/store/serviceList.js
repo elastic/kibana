@@ -4,29 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rest from '../services/rest';
+import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
+import { loadServiceList } from '../services/rest';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
 
-const actionTypes = createActionTypes('SERVICE_LIST');
-export const [
-  SERVICE_LIST_LOADING,
-  SERVICE_LIST_SUCCESS,
-  SERVICE_LIST_FAILURE
-] = actionTypes;
+const ID = 'serviceList';
+const INITIAL_STATE = { data: [] };
 
-const INITIAL_DATA = [];
-
-const serviceList = createReducer(actionTypes, INITIAL_DATA);
-
-export const loadServiceList = createAction(actionTypes, rest.loadServiceList);
-
-// SELECTORS
 export const getServiceList = createSelector(
-  state => state.serviceList,
+  state => state.reduxRequest[ID],
   state => state.sorting.service,
-  (serviceList, serviceSorting) => {
+  (serviceList = INITIAL_STATE, serviceSorting) => {
     const { key: sortKey, descending } = serviceSorting;
 
     return {
@@ -36,4 +26,15 @@ export const getServiceList = createSelector(
   }
 );
 
-export default serviceList;
+export function ServiceListRequest({ urlParams, render }) {
+  const { start, end, kuery } = urlParams;
+  return (
+    <ReduxRequest
+      id={ID}
+      fn={loadServiceList}
+      args={[{ start, end, kuery }]}
+      selector={getServiceList}
+      render={render}
+    />
+  );
+}

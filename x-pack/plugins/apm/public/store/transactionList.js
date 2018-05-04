@@ -4,37 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadTransactionList } from '../services/rest';
 
-const actionTypes = createActionTypes('TRANSACTIONS_LIST');
-export const [
-  TRANSACTIONS_LIST_LOADING,
-  TRANSACTIONS_LIST_SUCCESS,
-  TRANSACTIONS_LIST_FAILURE
-] = actionTypes;
-
+const ID = 'transactionList';
 const INITIAL_DATA = [];
-const transactionList = createReducer(actionTypes, INITIAL_DATA);
-
-export const loadTransactionList = createAction(
-  actionTypes,
-  rest.loadTransactionList
-);
 
 export const getTransactionList = createSelector(
-  state => state.transactionList,
+  state => state.reduxRequest[ID],
   state => state.sorting.transaction,
-  (transactionList, transactionSorting) => {
+  (transactionList = {}, transactionSorting) => {
     const { key: sortKey, descending } = transactionSorting;
 
     return {
       ...transactionList,
-      data: orderBy(transactionList.data, sortKey, descending ? 'desc' : 'asc')
+      data: orderBy(
+        transactionList.data || INITIAL_DATA,
+        sortKey,
+        descending ? 'desc' : 'asc'
+      )
     };
   }
 );
 
-export default transactionList;
+export function TransactionListRequest({ urlParams, render }) {
+  const { serviceName, start, end, transactionType, kuery } = urlParams;
+  return (
+    <ReduxRequest
+      id={ID}
+      shouldInvoke={Boolean(serviceName && start && end && transactionType)}
+      fn={loadTransactionList}
+      args={[
+        {
+          serviceName,
+          start,
+          end,
+          transactionType,
+          kuery
+        }
+      ]}
+      selector={getTransactionList}
+      render={render}
+    />
+  );
+}

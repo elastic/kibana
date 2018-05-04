@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { createSelector } from 'reselect';
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
 import { getCharts } from './selectors/chartSelectors';
 import { getUrlParams } from './urlParams';
+import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadCharts } from '../services/rest';
 
-const actionTypes = createActionTypes('DETAILS_CHARTS');
-
+const ID = 'detailsCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
@@ -20,11 +21,34 @@ const INITIAL_DATA = {
   weightedAverage: null
 };
 
-export default createReducer(actionTypes, INITIAL_DATA);
-export const loadDetailsCharts = createAction(actionTypes, rest.loadCharts);
-
 export const getDetailsCharts = createSelector(
   getUrlParams,
-  state => state.detailsCharts,
+  state => withInitialData(state.reduxRequest[ID], INITIAL_DATA),
   getCharts
 );
+
+export function DetailsChartsRequest({ urlParams, render }) {
+  const {
+    serviceName,
+    start,
+    end,
+    transactionType,
+    transactionName,
+    kuery
+  } = urlParams;
+
+  return (
+    <ReduxRequest
+      id={ID}
+      fn={loadCharts}
+      shouldInvoke={Boolean(
+        serviceName && start && end && transactionType && transactionName
+      )}
+      args={[
+        { serviceName, start, end, transactionType, transactionName, kuery }
+      ]}
+      selector={getDetailsCharts}
+      render={render}
+    />
+  );
+}

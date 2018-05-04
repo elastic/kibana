@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rest from '../services/rest';
-import { createActionTypes, createAction, createReducer } from './apiHelpers';
+import React from 'react';
+import { ReduxRequest } from '../components/shared/ReduxRequest';
+import { loadErrorDistribution } from '../services/rest';
+import { withInitialData } from './selectorHelpers';
 
-const actionTypes = createActionTypes('ERROR_DISTRIBUTION');
-export const [
-  ERROR_DISTRIBUTION_LOADING,
-  ERROR_DISTRIBUTION_SUCCESS,
-  ERROR_DISTRIBUTION_FAILURE
-] = actionTypes;
-
+const ID = 'errorDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 
-export default createReducer(actionTypes, INITIAL_DATA);
-
-export const loadErrorDistribution = createAction(
-  actionTypes,
-  rest.loadErrorDistribution
-);
-
 export function getErrorDistribution(state) {
-  return state.errorDistribution;
+  return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
+}
+
+export function ErrorDistributionRequest({ urlParams, render }) {
+  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
+
+  return (
+    <ReduxRequest
+      id={ID}
+      fn={loadErrorDistribution}
+      shouldInvoke={Boolean(serviceName, start, end, errorGroupId)}
+      args={[{ serviceName, start, end, errorGroupId, kuery }]}
+      selector={getErrorDistribution}
+      render={render}
+    />
+  );
 }
