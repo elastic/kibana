@@ -7,7 +7,7 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import DiffEditor from 'react-ace/lib/diff';
+// import DiffEditor from 'react-ace/lib/diff';
 import './review.less';
 
 import 'brace/theme/github';
@@ -27,6 +27,7 @@ import {
   EuiButtonEmpty
 } from '@elastic/eui';
 import { getAffectedIndices } from '../../../../api';
+import { DiffView } from './diff_view';
 
 export class Review extends Component {
   static propTypes = {
@@ -145,7 +146,10 @@ export class Review extends Component {
               </h4>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <DiffEditor
+            <DiffView
+              templateDiff={templateDiff}
+            />
+            {/* <DiffEditor
               editorProps={{
                 $blockScrolling: Infinity,
                 autoScrollEditorIntoView: false,
@@ -158,7 +162,7 @@ export class Review extends Component {
               height="300px"
               width="100%"
               mode="json"
-            />
+            /> */}
 
             <EuiHorizontalRule className="ilmHrule" />
           </Fragment>

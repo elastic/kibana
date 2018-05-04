@@ -24,6 +24,8 @@ import {
   STRUCTURE_INDEX_TEMPLATE,
   STRUCTURE_POLICY_CONFIGURATION,
 } from '../../store/constants';
+// import { DiffView } from './components/review/diff_view';
+// import diff from './diff.json';
 
 export class Wizard extends Component {
   static propTypes = {
@@ -154,6 +156,8 @@ export class Wizard extends Component {
       },
     ];
 
+    // const templateDiff = diff;
+
     return (
       <EuiPage>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -166,6 +170,9 @@ export class Wizard extends Component {
         <EuiSpacer size="s" />
         <EuiStepsHorizontal steps={steps} />
         <EuiSpacer size="m" />
+        {/* <DiffView
+          templateDiff={templateDiff}
+        /> */}
         {this.renderContent()}
       </EuiPage>
     );
