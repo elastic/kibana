@@ -6,10 +6,12 @@
 
 import { uiModules } from 'ui/modules';
 import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/ace/apply_editor_options';
 import template from './pattern_input.html';
 import './pattern_input.less';
-import { GrokMode } from '../../../../lib/ace';
+import {
+  applyEditorOptions,
+  GrokMode
+} from '../../../../lib/ace';
 
 const app = uiModules.get('xpack/grokdebugger');
 
