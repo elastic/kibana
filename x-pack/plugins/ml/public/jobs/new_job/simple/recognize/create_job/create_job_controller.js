@@ -472,6 +472,8 @@ module
         } else {
           $scope.overallState = SAVE_STATE.PARTIAL_FAILURE;
         }
+      } else {
+        $scope.overallState = SAVE_STATE.SAVED;
       }
 
       $scope.resultsUrl = createResultsUrl(
