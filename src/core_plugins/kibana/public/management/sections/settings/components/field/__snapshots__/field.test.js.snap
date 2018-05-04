@@ -862,16 +862,31 @@ exports[`Field for json setting should render custom setting icon if it is custo
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-json:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value="{\\"foo\\": \\"bar\\"}"
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>
@@ -918,7 +933,7 @@ exports[`Field for json setting should render default value if there is no user 
             >
               Default: 
               <EuiCode>
-                null
+                {}
               </EuiCode>
             </EuiText>
           </UNDEFINED>
@@ -969,16 +984,31 @@ exports[`Field for json setting should render default value if there is no user 
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-json:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value="{\\"foo\\": \\"bar\\"}"
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"foo\\": \\"bar\\"}"
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>
@@ -1025,7 +1055,7 @@ exports[`Field for json setting should render user value if there is user value 
             >
               Default: 
               <EuiCode>
-                null
+                {}
               </EuiCode>
             </EuiText>
           </UNDEFINED>
@@ -1076,16 +1106,31 @@ exports[`Field for json setting should render user value if there is user value 
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-json:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value="{\\"hello\\": \\"world\\"}"
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="json"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="{\\"hello\\": \\"world\\"}"
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>
@@ -1159,16 +1204,31 @@ exports[`Field for markdown setting should render custom setting icon if it is c
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value=""
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>
@@ -1237,16 +1297,31 @@ exports[`Field for markdown setting should render default value if there is no u
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value=""
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value=""
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>
@@ -1344,16 +1419,31 @@ exports[`Field for markdown setting should render user value if there is user va
           </span>
         }
       >
-        <EuiTextArea
+        <div
           data-test-subj="advancedSetting-editField-markdown:test:setting"
-          disabled={false}
-          fullWidth={false}
-          isInvalid={false}
-          onChange={[Function]}
-          onKeyDown={[Function]}
-          rows={6}
-          value="**bold**"
-        />
+        >
+          <EuiCodeEditor
+            editorProps={
+              Object {
+                "$blockScrolling": Infinity,
+              }
+            }
+            height="auto"
+            maxLines={30}
+            minLines={6}
+            mode="markdown"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "showLineNumbers": false,
+                "tabSize": 2,
+              }
+            }
+            theme="textmate"
+            value="**bold**"
+            width="100%"
+          />
+        </div>
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiFlexItem>

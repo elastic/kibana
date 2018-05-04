@@ -48,10 +48,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await setting.getProperty('checked');
     }
 
-    async getNotificationsBannerText() {
-      return await testSubjects.getVisibleText(`banner-notifications:banner`);
-    }
-
     async clearAdvancedSettings(propertyName) {
       await testSubjects.click(`advancedSetting-resetField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -1,11 +1,15 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
+import 'brace/theme/textmate';
+import 'brace/mode/markdown';
+
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
+  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -18,7 +22,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiSelect,
   EuiSwitch,
   keyCodes,
@@ -46,6 +49,7 @@ export class Field extends PureComponent {
       changeImage: false,
       savedValue: editableValue,
       unsavedValue: editableValue,
+      isJsonArray: type === 'json' ? Array.isArray(JSON.parse(defVal || '{}')) : false,
     };
     this.changeImageForm = null;
   }
@@ -102,24 +106,17 @@ export class Field extends PureComponent {
     });
   }
 
-  onFieldChange = (e) => {
-    const value = e.target.value;
+  onCodeEditorChange = (value) => {
     const { type } = this.props.setting;
-    const { unsavedValue } = this.state;
+    const { isJsonArray } = this.state;
 
     let newUnsavedValue = undefined;
     let isInvalid = false;
     let error = null;
 
     switch (type) {
-      case 'boolean':
-        newUnsavedValue = !unsavedValue;
-        break;
-      case 'number':
-        newUnsavedValue = Number(value);
-        break;
       case 'json':
-        newUnsavedValue = value.trim() || '{}';
+        newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
         } catch (e) {
@@ -130,9 +127,32 @@ export class Field extends PureComponent {
       default:
         newUnsavedValue = value;
     }
+
     this.setState({
       error,
       isInvalid,
+      unsavedValue: newUnsavedValue,
+    });
+  }
+
+  onFieldChange = (e) => {
+    const value = e.target.value;
+    const { type } = this.props.setting;
+    const { unsavedValue } = this.state;
+
+    let newUnsavedValue = undefined;
+
+    switch (type) {
+      case 'boolean':
+        newUnsavedValue = !unsavedValue;
+        break;
+      case 'number':
+        newUnsavedValue = Number(value);
+        break;
+      default:
+        newUnsavedValue = value;
+    }
+    this.setState({
       unsavedValue: newUnsavedValue,
     });
   }
@@ -226,7 +246,7 @@ export class Field extends PureComponent {
 
   saveEdit = async () => {
     const { name, defVal, type } = this.props.setting;
-    const { changeImage, savedValue, unsavedValue } = this.state;
+    const { changeImage, savedValue, unsavedValue, isJsonArray } = this.state;
 
     if(savedValue === unsavedValue) {
       return;
@@ -241,7 +261,8 @@ export class Field extends PureComponent {
         isSameValue = valueToSave.join(',') === defVal.join(',');
         break;
       case 'json':
-        valueToSave = valueToSave.trim() ? valueToSave.trim() : '{}';
+        valueToSave = valueToSave.trim();
+        valueToSave = valueToSave || (isJsonArray ? '[]' : '{}');
       default:
         isSameValue = valueToSave === defVal;
     }
@@ -277,7 +298,7 @@ export class Field extends PureComponent {
   }
 
   renderField(setting) {
-    const { loading, changeImage, unsavedValue, isInvalid } = this.state;
+    const { loading, changeImage, unsavedValue } = this.state;
     const { name, value, type, options } = setting;
 
     switch(type) {
@@ -295,14 +316,26 @@ export class Field extends PureComponent {
       case 'markdown':
       case 'json':
         return (
-          <EuiTextArea
-            isInvalid={isInvalid}
-            value={unsavedValue}
-            onChange={this.onFieldChange}
-            disabled={loading}
-            onKeyDown={this.onFieldEscape}
-            data-test-subj={`advancedSetting-editField-${name}`}
-          />
+          <div data-test-subj={`advancedSetting-editField-${name}`}>
+            <EuiCodeEditor
+              mode={type}
+              theme="textmate"
+              value={unsavedValue}
+              onChange={this.onCodeEditorChange}
+              width="100%"
+              height="auto"
+              minLines={6}
+              maxLines={30}
+              setOptions={{
+                showLineNumbers: false,
+                tabSize: 2,
+              }}
+              editorProps={{
+                $blockScrolling: Infinity
+              }}
+
+            />
+          </div>
         );
       case 'image':
         if(!isDefaultValue(setting) && !changeImage) {

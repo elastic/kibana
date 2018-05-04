@@ -10,6 +10,9 @@ jest.mock('ui/notify', () => ({
   }
 }));
 
+jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
+jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+
 const settings = {
   array: {
     name: 'array:test:setting',
@@ -57,7 +60,7 @@ const settings = {
     description: 'Description for Json test setting',
     type: 'json',
     value: '{"foo": "bar"}',
-    defVal: '',
+    defVal: '{}',
     isCustom: false,
     options: null,
   },
@@ -214,6 +217,52 @@ describe('Field', () => {
           } });
           component.update();
         });
+
+        it('should be able to reset to default value', async () => {
+          findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          expect(clear).toBeCalled();
+        });
+      });
+    } else if(type === 'markdown' || type === 'json') {
+      describe(`for changing ${type} setting`, () => {
+        const component = mount(
+          <Field
+            setting={setting}
+            save={save}
+            clear={clear}
+          />
+        );
+
+        const userValue = userValues[type];
+        const fieldUserValue = userValue;
+
+        it('should be able to change value and cancel', async () => {
+          component.instance().onCodeEditorChange(fieldUserValue);
+          component.update();
+          findTestSubject(component, `advancedSetting-cancelEditField-${setting.name}`).simulate('click');
+          expect(component.instance().state.unsavedValue === component.instance().state.savedValue).toBe(true);
+        });
+
+        it('should be able to change value and save', async () => {
+          component.instance().onCodeEditorChange(fieldUserValue);
+          component.update();
+          findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
+          expect(save).toBeCalled();
+          component.setState({ savedValue: fieldUserValue });
+          await component.setProps({ setting: {
+            ...component.instance().props.setting,
+            value: userValue,
+          } });
+          component.update();
+        });
+
+        if(type === 'json') {
+          it('should be able to clear value and have empty object populate', async () => {
+            component.instance().onCodeEditorChange('');
+            component.update();
+            expect(component.instance().state.unsavedValue).toEqual('{}');
+          });
+        }
 
         it('should be able to reset to default value', async () => {
           findTestSubject(component, `advancedSetting-resetField-${setting.name}`).simulate('click');
