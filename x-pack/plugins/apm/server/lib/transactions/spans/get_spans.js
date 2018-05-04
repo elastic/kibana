@@ -12,7 +12,7 @@ import {
 } from '../../../../common/constants';
 
 async function getSpans({ transactionId, setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
@@ -46,6 +46,10 @@ async function getSpans({ transactionId, setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
   return {

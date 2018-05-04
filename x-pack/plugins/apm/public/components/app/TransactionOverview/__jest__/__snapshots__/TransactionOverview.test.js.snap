@@ -5,6 +5,7 @@ exports[`TransactionOverview should not call loadTransactionList without any pro
   <styled.h1>
     MyServiceName
   </styled.h1>
+  <Connect(KueryBarView) />
   <Connect(TabNavigation) />
   <OverviewChartsRequest
     render={[Function]}

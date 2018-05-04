@@ -12,11 +12,14 @@ import { DetailsChartsRequest } from '../../../store/reactReduxRequest/detailsCh
 import Charts from '../../shared/charts/TransactionCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
+import { KueryBar } from '../../shared/KueryBar';
 
 function TransactionDetails({ urlParams }) {
   return (
     <div>
       <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
+
+      <KueryBar />
 
       <DetailsChartsRequest
         urlParams={urlParams}

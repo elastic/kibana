@@ -13,43 +13,49 @@ import {
 import { get } from 'lodash';
 
 export async function getServices({ setup }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
+
+  const query = {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                term: {
+                  [PROCESSOR_EVENT]: 'transaction'
+                }
+              },
+              {
+                term: {
+                  [PROCESSOR_EVENT]: 'error'
+                }
+              }
+            ]
+          }
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: start,
+              lte: end,
+              format: 'epoch_millis'
+            }
+          }
+        }
+      ]
+    }
+  };
+
+  if (esFilterQuery) {
+    query.bool.filter.push(esFilterQuery);
+  }
 
   const params = {
     index: config.get('xpack.apm.indexPattern'),
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      [PROCESSOR_EVENT]: 'transaction'
-                    }
-                  },
-                  {
-                    term: {
-                      [PROCESSOR_EVENT]: 'error'
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
-      },
+      query,
       aggs: {
         services: {
           terms: {
@@ -71,6 +77,10 @@ export async function getServices({ setup }) {
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
 

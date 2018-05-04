@@ -13,6 +13,7 @@ import List from './List';
 import { OverviewChartsRequest } from '../../../store/reactReduxRequest/overviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
+import { KueryBar } from '../../shared/KueryBar';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (
@@ -45,6 +46,9 @@ export default function TransactionOverview({
   return (
     <div>
       <HeaderLarge>{serviceName}</HeaderLarge>
+
+      <KueryBar />
+
       <TabNavigation />
 
       <OverviewChartsRequest

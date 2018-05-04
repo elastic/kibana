@@ -32,7 +32,8 @@ export function initErrorsApi(server) {
           end: dateValidation,
           q: Joi.string().allow(''),
           sortBy: Joi.string(),
-          sortOrder: Joi.string()
+          sortOrder: Joi.string(),
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },
@@ -61,7 +62,8 @@ export function initErrorsApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },
@@ -82,7 +84,8 @@ export function initErrorsApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },

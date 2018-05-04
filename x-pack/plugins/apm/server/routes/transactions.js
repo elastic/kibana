@@ -33,6 +33,7 @@ export function initTransactionsApi(server) {
         query: Joi.object().keys({
           start: dateValidation,
           end: dateValidation,
+          esFilterQuery: Joi.string().allow(''),
           transaction_type: Joi.string().default('request'),
           query: Joi.string()
         })
@@ -61,7 +62,8 @@ export function initTransactionsApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },
@@ -82,7 +84,8 @@ export function initTransactionsApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },
@@ -107,6 +110,7 @@ export function initTransactionsApi(server) {
         query: Joi.object().keys({
           start: dateValidation,
           end: dateValidation,
+          esFilterQuery: Joi.string().allow(''),
           transaction_type: Joi.string().default('request'),
           transaction_name: Joi.string(),
           query: Joi.string()
@@ -139,6 +143,7 @@ export function initTransactionsApi(server) {
         query: Joi.object().keys({
           start: dateValidation,
           end: dateValidation,
+          esFilterQuery: Joi.string().allow(''),
           transaction_name: Joi.string().required()
         })
       }

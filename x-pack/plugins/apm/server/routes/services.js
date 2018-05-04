@@ -27,7 +27,8 @@ export function initServicesApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },
@@ -47,7 +48,8 @@ export function initServicesApi(server) {
       validate: {
         query: Joi.object().keys({
           start: dateValidation,
-          end: dateValidation
+          end: dateValidation,
+          esFilterQuery: Joi.string().allow('')
         })
       }
     },

@@ -34,23 +34,19 @@ export const getEmptySerie = memoize(
 
 export function getCharts(urlParams, charts) {
   const { start, end, transactionType } = urlParams;
-  const chartsData = charts.data;
-  const noHits = chartsData.totalHits === 0;
+  const noHits = charts.totalHits === 0;
   const tpmSeries = noHits
     ? getEmptySerie(start, end)
-    : getTpmSeries(chartsData, transactionType);
+    : getTpmSeries(charts, transactionType);
 
   const responseTimeSeries = noHits
     ? getEmptySerie(start, end)
-    : getResponseTimeSeries(chartsData);
+    : getResponseTimeSeries(charts);
 
   return {
-    ...charts,
-    data: {
-      noHits,
-      tpmSeries,
-      responseTimeSeries
-    }
+    noHits,
+    tpmSeries,
+    responseTimeSeries
   };
 }
 

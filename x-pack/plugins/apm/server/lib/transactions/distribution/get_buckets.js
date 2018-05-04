@@ -19,7 +19,7 @@ export async function getBuckets({
   bucketSize = 100,
   setup
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, esFilterQuery, client, config } = setup;
 
   const bucketTargetCount = config.get('xpack.apm.bucketTargetCount');
 
@@ -68,6 +68,10 @@ export async function getBuckets({
       }
     }
   };
+
+  if (esFilterQuery) {
+    params.body.query.bool.filter.push(esFilterQuery);
+  }
 
   const resp = await client('search', params);
 
