@@ -15,11 +15,6 @@
         },
         {
           "exists": {
-            "field": "processor.name"
-          }
-        },
-        {
-          "exists": {
             "field": "context.service.name"
           }
         },
