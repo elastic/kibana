@@ -30,7 +30,7 @@ export function getMlNodeCount() {
       })
       .catch((error) => {
         mlNodeCount = 0;
-        if (error.status === 403) {
+        if (error.statusCode === 403) {
           userHasPermissionToViewMlNodeCount = false;
         } else {
           console.error(error);

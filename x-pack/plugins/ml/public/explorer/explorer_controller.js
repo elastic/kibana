@@ -588,8 +588,8 @@ module.controller('MlExplorerController', function (
       MAX_INFLUENCER_FIELD_VALUES
     ).then((resp) => {
       // TODO - sort the influencers keys so that the partition field(s) are first.
-      $scope.influencersData = resp.influencers;
-      console.log('Explorer top influencers data set:', $scope.influencersData);
+      $scope.influencers = resp.influencers;
+      console.log('Explorer top influencers data set:', $scope.influencers);
       finish(counter);
     });
 

@@ -493,7 +493,7 @@ module
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
-          if (err.status === 500) {
+          if (err.statusCode === 500) {
             notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}. ` +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
             { lifetime: 30000 });
@@ -544,7 +544,7 @@ module
           .catch((err) => {
             // TODO - display error in cards saying data could not be loaded.
             console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
-            if (err.status === 500) {
+            if (err.statusCode === 500) {
               notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
             'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
               { lifetime: 30000 });
@@ -594,7 +594,7 @@ module
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
-          if (err.status === 500) {
+          if (err.statusCode === 500) {
             notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
           'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
             { lifetime: 30000 });
