@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
-import { map, includes } from 'lodash';
+import { map, includes, sortBy } from 'lodash';
 import lowerCase from 'lodash.lowercase';
 import { MediaCard } from '../../media_card';
 import './element_types.less';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
+  elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
   const elementList = map(elements, (element, name) => {
     const { help, image, displayName, expression, filter } = element;
     const whenClicked = () => onClick({ expression, filter });
