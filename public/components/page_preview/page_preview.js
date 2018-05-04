@@ -17,6 +17,11 @@ export class PagePreview extends PureComponent {
     setWidth: PropTypes.func,
   };
 
+  confirmDelete = pageId => ev => {
+    ev.preventDefault();
+    this.props.confirmDelete(pageId);
+  };
+
   render() {
     const {
       page,
@@ -25,7 +30,6 @@ export class PagePreview extends PureComponent {
       selectedPage,
       movePage,
       duplicatePage,
-      confirmDelete,
       width,
       setWidth,
     } = this.props;
@@ -45,7 +49,7 @@ export class PagePreview extends PureComponent {
         </div>
         <RemoveIcon
           className="canvas__page-manager--page-remove"
-          onClick={confirmDelete(page.id)}
+          onClick={this.confirmDelete(page.id)}
         />
         <PageControls
           pageId={page.id}

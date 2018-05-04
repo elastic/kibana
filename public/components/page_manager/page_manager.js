@@ -18,7 +18,9 @@ export class PageManager extends React.PureComponent {
     setDeleteId: PropTypes.func.isRequired,
   };
 
-  confirmDelete = pageId => () => this.props.setDeleteId(pageId);
+  confirmDelete = pageId => {
+    this.props.setDeleteId(pageId);
+  };
 
   resetDelete = () => this.props.setDeleteId(null);
 
