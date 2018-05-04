@@ -394,5 +394,13 @@ export const ml = {
       method: 'POST',
       data
     });
-  }
+  },
+
+  esSearch(obj) {
+    return http({
+      url: `${basePath}/es_search`,
+      method: 'POST',
+      data: obj
+    });
+  },
 };

@@ -49,7 +49,6 @@ app.directive('pipelineEdit', function ($injector) {
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
           editor.setReadOnly(this.isReadOnly);
-          editor.getSession().setMode("ace/mode/ruby");
           editor.setOptions({
             minLines: 25,
             maxLines: Infinity

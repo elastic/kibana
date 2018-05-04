@@ -51,6 +51,21 @@ export function mountWithRouterAndStore(
   return mount(Component, options);
 }
 
+export function mountWithStore(Component, storeState = {}) {
+  const store = createMockStore(storeState);
+
+  const options = {
+    context: {
+      store
+    },
+    childContextTypes: {
+      store: PropTypes.object.isRequired
+    }
+  };
+
+  return mount(Component, options);
+}
+
 export function mockMoment() {
   // avoid timezone issues
   jest.spyOn(moment.prototype, 'format').mockImplementation(function() {

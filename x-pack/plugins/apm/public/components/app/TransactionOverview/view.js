@@ -4,57 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import withErrorHandler from '../../shared/withErrorHandler';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { HeaderLarge, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
-import Charts from './Charts';
+import Charts from '../../shared/charts/TransactionCharts';
 import List from './List';
-import { getKey } from '../../../store/apiHelpers';
+import { OverviewChartsRequest } from '../../../store/reduxRequest/overviewCharts';
+import { TransactionListRequest } from '../../../store/reduxRequest/transactionList';
+import { ServiceDetailsRequest } from '../../../store/reduxRequest/serviceDetails';
 
-function loadTransactionList(props) {
-  const { serviceName, start, end, transactionType } = props.urlParams;
-  const key = getKey({ serviceName, start, end, transactionType });
-
-  if (key && props.transactionList.key !== key) {
-    props.loadTransactionList({ serviceName, start, end, transactionType });
-  }
+function ServiceDetailsAndTransactionList({ urlParams, render }) {
+  return (
+    <ServiceDetailsRequest
+      urlParams={urlParams}
+      render={serviceDetails => {
+        return (
+          <TransactionListRequest
+            urlParams={urlParams}
+            render={transactionList => {
+              return render({
+                transactionList: transactionList.data,
+                serviceDetails: serviceDetails.data
+              });
+            }}
+          />
+        );
+      }}
+    />
+  );
 }
 
-export class TransactionOverview extends Component {
-  componentDidMount() {
-    loadTransactionList(this.props);
-  }
+export default function TransactionOverview({
+  changeTransactionSorting,
+  transactionSorting,
+  urlParams
+}) {
+  const { serviceName, transactionType } = urlParams;
 
-  componentWillReceiveProps(nextProps) {
-    loadTransactionList(nextProps);
-  }
+  return (
+    <div>
+      <HeaderLarge>{serviceName}</HeaderLarge>
+      <TabNavigation />
 
-  render() {
-    const { serviceName, transactionType } = this.props.urlParams;
-    const {
-      changeTransactionSorting,
-      transactionSorting,
-      transactionList
-    } = this.props;
+      <OverviewChartsRequest
+        urlParams={urlParams}
+        render={({ data }) => <Charts charts={data} urlParams={urlParams} />}
+      />
 
-    return (
-      <div>
-        <HeaderLarge>{serviceName}</HeaderLarge>
-        <TabNavigation />
-        <Charts />
-        <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>
-        <List
-          serviceName={serviceName}
-          type={transactionType}
-          items={transactionList.data}
-          changeTransactionSorting={changeTransactionSorting}
-          transactionSorting={transactionSorting}
-        />
-      </div>
-    );
-  }
+      <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>
+
+      <ServiceDetailsAndTransactionList
+        urlParams={urlParams}
+        render={({ serviceDetails, transactionList }) => {
+          return (
+            <List
+              agentName={serviceDetails.agentName}
+              serviceName={serviceName}
+              type={transactionType}
+              items={transactionList}
+              changeTransactionSorting={changeTransactionSorting}
+              transactionSorting={transactionSorting}
+            />
+          );
+        }}
+      />
+    </div>
+  );
 }
+
+TransactionOverview.propTypes = {
+  urlParams: PropTypes.object.isRequired
+};
 
 // TODO: This is duplicated in TabNavigation
 function transactionTypeLabel(type) {
@@ -67,5 +88,3 @@ function transactionTypeLabel(type) {
       return type;
   }
 }
-
-export default withErrorHandler(TransactionOverview, ['transactionList']);

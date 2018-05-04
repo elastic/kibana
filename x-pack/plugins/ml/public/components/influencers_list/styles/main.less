@@ -1,48 +1,15 @@
 .ml-influencers-list {
-  width: 100%;
-  padding: 0px 0px;
   line-height: 1.45;
-
-  .visualize-error {
-    display: inline;
-
-    h4 {
-      font-size: 16px;
-      margin-top: 65px;
-    }
-  }
-
-  .section-label {
-    background-color: #9c9fa6;
-    color: #ffffff;
-    font-size:13px;
-    /* eui h3 equivalent font-weight */
-    font-weight: 500;
-    margin-bottom: 5px;
-    padding: 2px 5px;
-  }
-
-  .influencer-content {
-    padding-right: 4px;
-    padding-left: 4px;
-  }
 
   .field-label {
     font-size: 12px;
-    padding-left: 2px;
     text-align: left;
 
-    .influencerfieldvalue {
-      max-width: calc(~"100% - 40px");
+    .field-value {
+      max-width: calc(~"100% - 34px");
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      display: inline-block;
-      vertical-align: bottom;
-    }
-
-    .filter-buttons {
-      padding-left: 5px;
       display: inline-block;
       vertical-align: bottom;
     }
@@ -50,10 +17,10 @@
 
   .progress {
     display:inline-block;
-    width: calc(~"100% - 40px");
-    height: 20px;
+    width: calc(~"100% - 34px");
+    height: 22px;
     min-width: 70px;
-    margin-bottom: 2px;
+    margin-bottom: 0px;
     color: #555;
     background-color : transparent;
 
@@ -62,63 +29,76 @@
     }
 
     .progress-bar {
-      height: 6px;
-      margin: 6px 0px;
+      height: 2px;
+      margin-top: 8px;
       text-align: right;
       line-height: 18px;
-      border-radius: 5px;
       display: inline-block;
 
     }
+  }
 
-    .progress-bar.critical {
+  .progress.critical {
+    .progress-bar {
       background-color: #fe5050;
     }
+    .score-label {
+      border-color: #fe5050;
+    }
+  }
 
-    .progress-bar.major {
+  .progress.major {
+    .progress-bar {
       background-color: #fba740;
     }
+    .score-label {
+      border-color: #fba740;
+    }
+  }
 
-    .progress-bar.minor {
+  .progress.minor {
+    .progress-bar {
       background-color: #ffdd00;
     }
+    .score-label {
+      border-color: #ffdd00;
+    }
+  }
 
-    .progress-bar.warning {
+  .progress.warning {
+    .progress-bar {
       background-color: #8bc8fb;
     }
-
+    .score-label {
+      border-color: #8bc8fb;
+    }
   }
 
   .score-label {
-    margin-left: 3px;
     text-align: center;
-    color: #444444;
-    padding: 2px 2px 2px 2px;
-    border-radius: 4px;
     line-height: 14px;
     white-space: nowrap;
     font-size: 12px;
-    display: inline-block;
+    display: inline;
+    margin-left: 4px;
   }
 
-  .score-label.total-score-label {
+  .total-score-label {
     width: 32px;
     vertical-align: top;
-    background-color: #444444;
-    color: white;
+    text-align: center;
+    color: #555;
     font-size: 11px;
+    line-height: 14px;
+    border-radius: 4px;
+    padding: 2px;
+    margin-top: 1px;
+    display: inline-block;
+    border: 1px solid #bbbbbb;
   }
 }
 
 .ml-influencers-list-tooltip {
-  color: #ffffff;
-  font-family: Roboto, Droid, Helvetica Neue, Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  text-align: left;
-
-  hr {
-    margin-top: 3px;
-    margin-bottom: 3px;
-    border-color: #95a5a6;
-  }
+  word-break: break-all;
 }
+
