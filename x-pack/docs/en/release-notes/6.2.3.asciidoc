@@ -1,8 +1,0 @@
-[role="xpack"]
-[[xkb-6.2.3]]
-== {kib} {xpack} 6.2.3 Release Notes
-++++
-<titleabbrev>6.2.3 Release Notes</titleabbrev>
-++++
-
-coming[6.2.3]
