@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/apply_editor_options';
+import { applyEditorOptions } from '../../../../lib/ace/apply_editor_options';
 import template from './pattern_input.html';
 import './pattern_input.less';
 import { GrokMode } from '../../../../lib/ace';

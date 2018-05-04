@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { EDITOR } from '../../../../../common/constants';
-import { applyEditorOptions } from '../../../../lib/apply_editor_options';
+import { applyEditorOptions } from '../../../../lib/ace/apply_editor_options';
 import template from './event_input.html';
 import './event_input.less';
 import 'ace';
