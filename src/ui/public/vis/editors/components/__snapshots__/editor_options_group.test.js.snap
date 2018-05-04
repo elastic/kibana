@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<EditorOptionsGroup/> renders as expected 1`] = `
+<div
+  class="euiPanel euiPanel--paddingMedium euiPanel--flexGrowZero editorOptionsGroup__panel"
+>
+  <h2
+    class="euiTitle euiTitle--xsmall"
+  >
+    Some options
+  </h2>
+  <div
+    class="euiSpacer euiSpacer--m"
+  />
+  <span>
+    Children
+  </span>
+  <span>
+    within the editor group
+  </span>
+</div>
+`;
