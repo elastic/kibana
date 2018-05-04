@@ -3,6 +3,10 @@
 
 [partintro]
 --
+// To add a release, copy and paste the template text
+// and add a link to the new section. Note that release subheads must
+// be floated and sections cannot be empty.
+
 // Use these for links to issue and pulls. Note issues and pulls redirect one to
 // each other on Github, so don't worry too much on using the right prefix.
 :issue: https://github.com/elastic/kibana/issues/
@@ -10,15 +14,52 @@
 
 This section summarizes the changes in each release.
 
-* <<release-notes-7.0.0>>
+* <<release-notes-5.6.9>>
+* <<release-notes-5.6.8>>
+* <<release-notes-5.6.7>>
+* <<release-notes-5.6.6>>
+* <<release-notes-5.6.5>>
+* <<release-notes-5.6.4>>
+* <<release-notes-5.6.3>>
+* <<release-notes-5.6.2>>
+* <<release-notes-5.6.1>>
+* <<release-notes-5.6.0>>
+* <<release-notes-5.5.3>>
+* <<release-notes-5.5.2>>
+* <<release-notes-5.5.1>>
+* <<release-notes-5.5.0>>
+* <<release-notes-5.4.3>>
+* <<release-notes-5.4.2>>
+* <<release-notes-5.4.1>>
+* <<release-notes-5.4.0>>
+* <<release-notes-5.3.3>>
+* <<release-notes-5.3.2>>
+* <<release-notes-5.3.1>>
+* <<release-notes-5.3.0>>
+* <<release-notes-5.2.2>>
+* <<release-notes-5.2.1>>
+* <<release-notes-5.2.0>>
+* <<release-notes-5.1.2>>
+* <<release-notes-5.1.1>>
+* <<release-notes-5.1.0>>
+* <<release-notes-5.0.2>>
+* <<release-notes-5.0.1>>
+* <<release-notes-5.0.0>>
 
 --
 
-[[release-notes-7.0.0]]
-== {kib} 7.0.0
+////
+// To add a release, copy and paste the following text,  uncomment the relevant
+// sections, and add a link to the new section in the list of releases at the
+// top of the page. Note that release subheads must be floated and sections
+// cannot be empty.
+// TEMPLATE:
+
+// [[release-notes-n.n.n]]
+// == {kib} n.n.n
 
 //[float]
-//[[breaking-7.0.0]]
+//[[breaking-n.n.n]]
 //=== Breaking Changes
 
 //[float]
@@ -35,6 +76,1916 @@ This section summarizes the changes in each release.
 
 //[float]
 //=== Bug Fixes
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+////
+
+[[release-notes-5.6.9]]
+== {kib} 5.6.9
+
+//[float]
+//[[breaking-5.6.9]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Platform::
+* Fixed deprecation logging warnings {pull}17439[#17439]
+
+Visualization::
+* Fixed Spy Panel so it works when Legend is set to Bottom {pull}16120[#16120]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.8]]
+== {kib} 5.6.8
+
+There are no changes for Kibana in this version.
+
+//[float]
+//[[breaking-5.6.8]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+//[float]
+//=== Bug Fixes
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.7]]
+== {kib} 5.6.7
+
+//[float]
+//[[breaking-5.6.7]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Visualization::
+* Use textContent and jQuery to set label and title {pull}16178[#16178]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.6]]
+== {kib} 5.6.6
+
+//[float]
+//[[breaking-5.6.6]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+[[security-5.6.6]]
+=== Security Issues
+* Kibana versions 5.1.1 to 6.1.2 and 5.6.6 had a cross-site scripting (XSS) vulnerability via the colored fields formatter that could allow an attacker to obtain sensitive information from or perform destructive actions on behalf of other Kibana users. CVE ID: CVE-2018-3818
+
+Users should upgrade to Kibana version 6.1.2 or 5.6.6. There are no known workarounds for this issue.
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+* Update color field formatter {pull}15837[#15837]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.5]]
+== {kib} 5.6.5
+
+//[float]
+//[[breaking-5.6.5]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+[[security-5.6.5]]
+=== Security Issues
+
+* ​Kibana cross site scripting issue (ESA-2017-22): Kibana versions prior to 6.0.1 and 5.6.5 had a cross-site scripting (XSS) vulnerability via URL fields that could allow an attacker to obtain sensitive information from or perform destructive actions on behalf of other Kibana users. CVE ID: CVE-2017-11481
+* Kibana open redirect flaw (ESA-2017-23) : The Kibana fix for CVE-2017-8451 was found to be incomplete. With X-Pack installed, Kibana versions before 6.0.1 and 5.6.5 have an open redirect vulnerability on the login page that would enable an attacker to craft a link that redirects to an arbitrary website. CVE ID: CVE-2017-11482
+
+Users should upgrade to Kibana version 6.0.1 or 5.6.5. There are no known workarounds for these issues.
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Operations::
+* Fixes broken path to babel register {pull}14979[#14979]
+
+Platform::
+* Prepend relative urls {pull}14994[#14994]
+* Fix: exponent values in table view {pull}15309[#15309]
+* [eslint] add eslint dev script {pull}14889[#14889]
+* [dev/ci_setup] generalize jenkins_setup script for other CI environments {pull}15178[#15178]
+
+Sharing::
+* [Fixes #15336] Add parsedUrl to the code driving viz/dashboards {pull}15335[#15335]
+
+Visualization::
+* [Fixes #13436] allows to hide warnings in gauge {pull}15139[#15139]
+* [Fixes #13947] uses maximum space for arc gauge and center aligns it {pull}15140[#15140]
+* fixing field formatters for gauge {pull}15145[#15145]
+* [Fixes #13947] fix metric align and size {pull}15141[#15141]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.4]]
+== {kib} 5.6.4
+
+//[float]
+//[[breaking-5.6.4]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Management::
+* Improve handling of saved object import to process saved searches before other objects {pull}14625[#14625]
+
+Operations::
+* Fix crash when hitting shift+return in console {pull}14478[#14478]
+
+Sharing::
+* Fix dark theme issues with spy toggle and spy pane {pull}13345[#13345]
+
+Visualizations::
+* Long titles on visualizations now show the complete title in a tooltip on mouseover {pull}14167[#14167]
+* Fixed issue where labels would not appear in reports in Internet Explorer {pull}14458[#14458]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[float]
+=== Other
+
+Operations::
+* Bump node.js to version 6.11.5 {pull}14568[#14568]
+
+[[release-notes-5.6.3]]
+== {kib} 5.6.3
+
+//[float]
+//[[breaking-5.6.3]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Management::
+* [Management] Allows for imports to select existing index {pull}14137[#14137]
+
+Platform::
+* [index patterns] Don't attempt to wrap Boom errors {pull}14253[#14253]
+* [cli/dev] rely on commander for deduping argv {pull}14181[#14181]
+
+Visualization::
+* [TSVB] Remove field_stats calls from 5.6 for TSVB {pull}14152[#14152]
+
+[float]
+=== Bug Fixes
+
+Management::
+* [Fixes #14350] [Management] [5.6] Fix FF quirk with max width in the import saved object modal {pull}14362[#14362]
+* [Fixes #14267] [index patterns] Fallback to id if title does not exist {pull}14302[#14302]
+
+Sharing::
+* [Fixes #13455] Avoid a wrapped retry and use exists instead of find, which will take up all the time allotted for the retry if it fails once {pull}13467[#13467]
+
+Visualization::
+* Fixes #14171 - Handle boom errors properly for vis data requests {pull}14174[#14174]
+* [Fixes #13765] limit wait time for baselayer {pull}14047[#14047]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.2]]
+== {kib} 5.6.2
+
+//[float]
+//[[breaking-5.6.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Visualization::
+* When upgrading metric visualizations from 5.4 to later versions, all style properties are now preserved {pull}13974[#13974]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.1]]
+== {kib} 5.6.1
+
+Important Note::
+* The 5.6.1 release of the Elastic Stack has an important fix for an issue 
+affecting users upgrading with indexes created in Elasticsearch 2.x and earlier 
+where Kibana becomes unavailable. We recommend that you upgrade to 5.6.1 to 
+avoid the issue. You can read the details of the problem and about mitigation 
+if you are already experiencing the issue in this https://discuss.elastic.co/t/upgrade-issue-with-elastic-stack-5-6-0-workaround-option-until-fix-is-available/100595[forum post]. If you are an Elastic Cloud user then Elastic Cloud support is working 
+to mitigate this issue for you.
+
+//[float]
+//[[breaking-5.6.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Operations::
+* Sets update_all_types when setting mapping {pull}13991[#13991]
+
+Visualization::
+* Allow user to select any field for cardinality in filter ratio aggregation for TSVB {pull}13762[#13762]
+* [Fix for #13648] [5.6] ensure vector layer combo box displays options {pull}13931[#13931]
+  - The combobox for the vector layers in the Region Map Visualizations now correctly displays the available options.
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.6.0]]
+== {kib} 5.6.0
+
+//[float]
+//[[breaking-5.6.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Management::
+* Uses SavedObjectsClient for UI Settings {pull}12747[#12747]
+* [Management] Provide a way to fetch index pattern titles {pull}13030[#13030]
+  - This PR adds another method to the indexPatterns service to fetch index patterns titles. Since the code was nearly identical to how index pattern ids are fetched, I decided to slightly refactor the function to accept a parameter for which property to fetch from the index pattern. I've updated all usages to the new approach.
+
+Operations::
+* Saved objects compatibility layer {pull}12648[#12648]
+* [Fix for #10779] Support v6 mappings for saved objects import/export {pull}12792[#12792]
+* [Fix for #11388] [5.x] Allow running Kibana against the next major version of Elasticsearch {pull}11803[#11803]
+* [elasticsearch/migrateConfig] use server.savedObjectsClientFactory() {pull}12767[#12767]
+* Adds bulk_get to SavedObjects {pull}12426[#12426]
+* Uses SavedObjects API in Courier Saved Object {pull}12407[#12407]
+* [elasticsearch] patch mappings that are missing types {pull}12783[#12783]
+
+Platform::
+* Use SavedObjectsClient for Courier Index Pattern {pull}12719[#12719]
+* Use node instead of webpack config for jest {pull}12974[#12974]
+* add api tag to api routes {pull}12948[#12948]
+* Move Jest config to json {pull}12402[#12402]
+* [Fix for #12669] ES Healthcheck v6 mapping compatibility {pull}12714[#12714]
+* Configurable custom response headers for server {pull}13045[#13045]
+
+Sharing::
+* Uses SavedObjectsClient for Short URL Lookup {pull}12787[#12787]
+* Use saved object client for saved_object_loader find function {pull}12083[#12083]
+
+Visualization::
+* Adding ability to configure grid for TSVB {pull}12385[#12385]
+* Adding option for controlling if last bucket is dropped for TSVB {pull}12379[#12379]
+  - This PR creates an option in "Panel Options" and the metric index pattern override to allow the user to control if the last bucket should be dropped. By default TSVB will drop the last bucket since most of the time it's incomplete. This also changes the method for dropping the last bucket to a more reliable method.
+* Fixes #12602 - Change TSVB Fields API to use fieldCaps API {pull}12611[#12611]
+
+[float]
+=== Bug Fixes
+
+Dev Tools::
+* [Fix for #10677] Keep top line in view when resizing Console to avoid losing user context {pull}13695[#13695]
+
+Discover::
+* Fix call to suggestions API to correctly use index pattern title {pull}12917[#12917]
+* [Fix for #12745] Handle booleans in filter editor {pull}13406[#13406]
+* [Fix for #12416] Fix fixed-scroll on Discover page {pull}13516[#13516]
+* [Fix for #12955] Improves dark theme support in the filter editor {pull}13522[#13522]
+* [Fix for #13080] Fix blank index pattern selector in Discover {pull}13715[#13715]
+* [Fix for #13486] Hide errors due to unsupported _field_stats api {pull}13670[#13670]
+
+Management::
+* Remove translations from management section {pull}13049[#13049]
+
+Platform::
+* Remove Version Check for Dashboard Import API {pull}12476[#12476]
+* Toast Notification should handle connection failed {pull}12609[#12609]
+* [Fix for #12933] [chrome/nav/lastUrl] do not track redirect routes {pull}13432[#13432]
+  - When you navigate to a URL that Kibana doesn't recognize it tries to be helpful and send you to discover. At the same time it tries to remember the URL you were last using in each app and bring back where you left off when you come back. Unfortunately, these two features recently collided. If you somehow ended up at an unknown URL that looked like the URL for an app other than discover Kibana would get confused and remember the bad URL and immediately redirect you to discover. If you didn't give up right away you would probably try to go back to the app, but since it Kibana is trying to be helpful it would send you right back to the bad URL and then back to discover... Stupid right?! Well, it won't happen anymore!
+
+Sharing::
+* [Fix for #12600] Fix search issue on listing page + tests {pull}12618[#12618]
+* [Fix for #12627] do not allow registration of undefined indexpatterns in dashboard state {pull}12684[#12684]
+
+Visualization::
+* Date histogram axis label not getting updated when time interval changes {pull}12950[#12950]
+* Fixes #11721 - Fix bug with axis updating when data format is changed in TSVB {pull}12386[#12386]
+  - Axes in the Time Series Visual Builder now correctly update when changing a data formatter.
+* [Fix for #12866] Use devicePixelRatio to scale up and down canvas values in TSVB for Tooltip {pull}13565[#13565]
+* [Fix for #9530] Don't declare empty properties in Timelion's bool query {pull}9573[#9573]
+* [Fix for #11490] fix range agg label on heatmap y axis {pull}12754[#12754]
+* [Fix for #12838] fix gauge field formatters {pull}12913[#12913]
+  - metric/goal/gauge now correctly respect the fieldFormatters when multiple metrics are defined.
+* don't hide metric if show labels is false {pull}13637[#13637]
+  - goal/gauge show labels option should only hide the labels not the metric value
+* [Fix for #13546] custom value axis title should not be overiden {pull}13639[#13639]
+* [Fix for #12856, #13438] Fix/upgrade vis {pull}13659[#13659]
+  - fixes issues with upgrading visualizations to 5.4/5.5/5.6
+* [Fix for #12623, #13147, #12713] fix metric wrapping and legend {pull}13242[#13242]
+  - metric visualization should wrap multiple metrics in multiple lines when horizontal space is not available
+* ensure spy panel obscures underlying visualization {pull}12502[#12502]
+* [Fix for #13267, #13517] fix available metric aggs {pull}13518[#13518]
+* [Fix for #12693] Fixes #12693 - Fixing a spelling error in TSVB {pull}12695[#12695]
+* [Fix for #13244] [visualize spy] Pull index title instead of id {pull}13254[#13254]
+* [Fix for #13562] gauge/goal should not try to display negative values {pull}13638[#13638]
+* [Fix for #13622] fix IE11 vislib error {pull}13830[#13830]
+* use new staging server for catalogue manifest {pull}12521[#12521]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.5.3]]
+== {kib} 5.5.3
+
+//[float]
+//[[breaking-5.5.3]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Visualization::
+* [Fix for #13622] fix IE11 vislib error {pull}13830[#13830]
+* don't hide metric if show labels is false {pull}13637[#13637]
+  - goal/gauge show labels option should only hide the labels not the metric value
+* [Fix for #12856, #13438] Fix/upgrade vis {pull}13659[#13659]
+  - fixes issues with upgrading visualizations to 5.4/5.5/5.6
+* [Fix for #12623, #13147, #12713] fix metric wrapping and legend {pull}13242[#13242]
+  - metric visualization should wrap multiple metrics in multiple lines when horizontal space is not available
+* [Fix for #13267, #13517] fix available metric aggs {pull}13518[#13518]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.5.2]]
+== {kib} 5.5.2
+
+//[float]
+//[[breaking-5.5.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+[[security-5.5.2]]
+=== Security Fixes
+.Kibana markdown parser Cross Site Scripting (XSS) error (ESA-2017-16)
+
+
+Kibana versions prior to 5.5.2 had a cross-site scripting (XSS) vulnerability in the markdown parser that could allow an attacker to obtain sensitive information from or perform destructive actions on behalf of other Kibana users.
+
+Affected Versions: All prior to 5.5.2 and 4.6.6
+
+Solutions and Mitigations:
+
+Users should upgrade to Kibana version 5.5.2 or 4.6.6
+
+.Reporting impersonation error (ESA-2017-17)
+
+
+The Reporting feature in X-Pack in versions prior to 5.5.2 and standalone Reporting plugin versions versions prior to 2.4.6 had an impersonation vulnerability. A user with the reporting_user role could execute a report with the permissions of another reporting user, possibly gaining access to sensitive data.
+
+Affected Versions: All prior to 5.5.2 and 2.4.6
+
+Solutions and Mitigations:
+
+Reporting users should upgrade to X-Pack version 5.5.2 or Reporting Plugin version 2.4.6. A mitigation for this issue is to remove the reporting_user role from any untrusted users of your Elastic Stack.
+
+CVE ID: CVE-2017-8446
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Discover::
+* [Fix for #13365] Truncate long field names in filter editor {pull}13379[#13379]
+
+Management::
+* [Fix for #12728] Ensure conflicted fields can be searchable and/or aggregatable {pull}13070[#13070]
+
+Visualization::
+* [Fix for #13255] Ensure we are working with data-series to avoid tooltip errors {pull}13266[#13266]
+* [Fix for #12724] by default metric should not define color {pull}12993[#12993]
+* [Fix for #12391] in percentage mode tooltip should also show percentages {pull}13217[#13217]
+  - Tooltips now correctly display the percentage-value in area charts where the Y-Axis is formatted in percentage mode.
+* Use the customMetric's formatter for pipeline aggregations {pull}11933[#11933]
+* [Fix for #12220] Should only fit on shapes that are part of the result {pull}12881[#12881]
+  - When clicking the fit-data button in a Region Map, the map now zooms correctly to the relevant data instead of showing the entire layer.
+* [Fix for #12172] Save layer setting in the region map UI {pull}12956[#12956]
+  - The layer selection is now preserved in the UI dropdown when saving a Region Map.
+* [Fix for #12189] Region map should respect saved center and zoom {pull}12883[#12883]
+  - The location of the map is now stored correctly when saving a Region Map.
+* [Fix for #12963] Exclude stacktrace from error response of Timelion backend {pull}12973[#12973]
+  - the Timelion backend no longer includes the stacktrace as part of the server response. This stacktrace is now logged to the server console.
+
+//[float]
+//=== Regressions
+
+[float]
+=== Known Issues
+
+.Visualization regression in Internet Explorer 11 causes fatal errors
+
+A bug was introduced in Kibana version 5.5.2, when a user is using Internet Explorer 11
+a full-page fatal error occurs when mousing over buckets in a bar or line chart. A
+workaround for this issue is to use any of the other supported browsers until a fix is
+released.
+
+[[release-notes-5.5.1]]
+== {kib} 5.5.1
+
+//[float]
+//[[breaking-5.5.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+[[security-5.5.1]]
+=== Security Fixes
+
+Kibana Node.js security flaw ({security-ref}[ESA-2017-14] {pull}12776[#12776])::
+The version of Node.js shipped in all versions of Kibana prior to 5.5.1
+contains a Denial of Service flaw in it's HashTable random seed. This
+flaw could allow a remote attacker to consume resources within Node.js
+preventing Kibana from servicing requests.
+
+[float]
+=== Enhancements
+
+Visualization::
+* Display regionmap attribution {pull}12647[#12647]
+
+[float]
+=== Bug Fixes
+
+Design::
+* [Fix for #12738] [UI Framework] Update LocalNav layout to fix menu button hover state. {pull}12739[#12739]
+
+Platform::
+* Bump node.js to version 6.11.1 {pull}12776[#12776]
+* [Fix for #10546] Update regex used to detect  IE for long length warnings {pull}12617[#12617]
+
+Other::
+* [Fix for #12692] Make filter editor suggestions opt-in {pull}12710[#12710]
+* [Fix for #12627] do not allow registration of undefined indexpatterns in dashboard state {pull}12628[#12628]
+
+Visualization::
+* [Fix for #12645] fixing point series chart margins {pull}12663[#12663]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.5.0]]
+== {kib} 5.5.0
+
+//[float]
+//[[breaking-5.5.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Core::
+* [IndexPatterns] Support cross cluster search {pull}11114[#11114]
+  - Index Patterns can now point to indices from remote clusters when using Elasticsearch's cross cluster search feature. After setting it up in elasticsearch, just mention the remote cluster alias in the index name like so: remoteCluster:indexName.
+* Import / Export API for Dashboards {pull}10858[#10858]
+* Disable dynamic/Implement static mappings {pull}10638[#10638]
+* Adds an API for managing saved objects {pull}11632[#11632]
+* Rely on `kbn-xsrf` header for CSRF protection {pull}12547[#12547]
+
+Dashboard::
+* Introduce Clone feature in view mode {pull}10925[#10925]
+  - Introducing the ability to easily clone dashboards in view mode.  Just click the new button in the top navigation, and enter in a new dashboard name.
+* Update angular-bootstrap DatePicker with UI Framework classes. {pull}11378[#11378]
+* Improve Dashboard screen-reader accessibility. {pull}11600[#11600]
+* Improve accessibility of the Datepicker. {pull}11753[#11753]
+* Add back dashboard descriptions {pull}11552[#11552]
+  - In pre 5.0 versions of Kibana, we showed dashboard descriptions in theOpen listing, but the only place to edit or set them was in Saved Object Management. When we first introduced the new listing pages, we took out the dashboard description portion since the UI was pretty poor.  We've now added it back in, along with a more convenient place to add and edit the description for each dashboard.
+* Hide the second toast when adding a new visualization straight from dashboard {pull}11621[#11621]
+  - Previously using the Add new visualization button straight from dashboard caused two notifications to appear - one for successfully saving the visualization and one for successfully adding the visualization to the dashboard.  Two were unnecessary and since our notifications move elements around, we will now only show the notification about successfully saving the visualization.
+* In case of a save error, use notify.error, not a full screen fatal page {pull}12381[#12381]
+
+Design::
+* Adding a warning button and making the notifier use it for warnings {pull}11829[#11829]
+* [UI Framework] Apply elastic.co look and feel to UI Framework docs site. {pull}11174[#11174]
+* [UI Framework] Add support for selects and secondary inputs to LocalNavSearch component of UI Framework. {pull}11287[#11287]
+* [UI Framework] Add example of disabled kuiSelect. {pull}11345[#11345]
+* [UI Framework] Add support for dark theme links. {pull}11344[#11344]
+* [UI Framework] Add AssistedInput. {pull}11343[#11343]
+* [UI Framework] Add kuiButton--fullWidth kuiButton--small, and kuiButtonGroup--fullWidth modifiers. {pull}11365[#11365]
+* [UI Framework] Vertical align children in a FieldGroup. {pull}11374[#11374]
+* [UI Framework] Make CardGroup split apart by default. Add kuiCardGroup--united modifier. {pull}11580[#11580]
+* [UI Framework] Add Elastic logo to UI Framework doc site. {pull}11686[#11686]
+* [UI Framework] Improve UI Framework Home Page and 404 Page. {pull}11715[#11715]
+* [UI Framework] Display React logo next to React components in the nav. {pull}11746[#11746]
+* [UI Framework] Wrap Cards within a non-united CardGroup. {pull}11704[#11704]
+* [UI Framework] Update CardGroup component example to exhibit stacking on smaller screens. {pull}11751[#11751]
+* [UI Framework] Add KuiKeyboardAccessible component to UI Framework. {pull}11743[#11743]
+* [UI Framework] Add isInvalid states for TextInput, TextArea, and SearchInput components. {pull}11995[#11995]
+* Add small text input to UI framework {pull}11354[#11354]
+* Adding table_info component {pull}11778[#11778]
+* [UI Framework] Add KuiInfoButton component {pull}11811[#11811]
+* [UI Framework] Allow kuiLocalNavRow to expand vertically if the content wraps. {pull}12606[#12606]
+
+Dev Tools::
+* Improve Console screen-reader accessibility. {pull}11602[#11602]
+* Adding autocomplete rules for reindex API to Console {pull}10150[#10150]
+
+Discover::
+* [context view] Apply filters to the context query {pull}11466[#11466]
+  - This adds the ability to display a filter bar in the Context view and to apply those filters to the queries. It also modifies the link from the Discover view to the Context view to copy the currently defined filters when switching. New filters can be added from within the Context view using the icons in the expanded detail rows.
+* Filter editors {pull}11375[#11375]
+  - We've added more helpful input controls for editing filters. When you edit a filter, you'll get drop-downs and text boxes with suggestions from your data instead of just a JSON editor. We've also added the ability to add custom filters without having to click on a visualization.
+* Improve Discover screen-reader accessibility: {pull}11598[#11598]
+* Make Discover field chooser items keyboard accessible. {pull}11591[#11591]
+* Make Discover table keyboard accessible. {pull}11604[#11604]
+* Improve Filter Editor UI {pull}12161[#12161]
+* Add Lucene query syntax help {pull}10928[#10928]
+* 11851 a11y discover field chooser headers (rebased version) {pull}12211[#12211]
+
+Management::
+* Update Settings page with UI Framework components. {pull}11272[#11272]
+* Improve Management screen-reader accessibility. {pull}11601[#11601]
+* [Index pattern creation] Move the error message to below the input field {pull}11801[#11801]
+* Removes the "Index contains time-based events" checkbox {pull}11409[#11409]
+
+Visualize::
+* Gauge Chart {pull}10336[#10336]
+  - The gauge and goals charts are two new visualization types that allow people to track a metric and display the in context of a set of reference values. Gauges are useful to indicate how a metric compares to a range of threshold values, for example, to show whether a server load is within a normal range or instead has reach critical capacity. Goal visualizations are similar, but are primarily used to indicate how far a metric is removed from a certain target value.
+* Region Map {pull}10937[#10937]
+  - Kibana now has the Region Map Visualization. These are thematic maps in which boundary vector shapes are colored using a gradient, with higher intensity colors indicating larger values and lower intensity colors indicating smaller values. These are also known as choropleth maps. In order to color these layers, users specify a terms aggregation that matches a field in the vector layer. Kibana offers two vector layers by default; one for countries of the world and one for US Shapes. Users can also bring in their own vector layers by configuring the Kibana-configuration file to point to any GeoJson file that is hosted on a CORS-enabled server.
+* Update illegible vis type icons with legible ones. {pull}11317[#11317]
+* Improve Visualize screen-reader accessibility. {pull}11599[#11599]
+* Improve Visualize sidebar accessibility. {pull}11754[#11754]
+* [Fix for #11415] Add new config option to control the amount of items in listing pages {pull}11674[#11674]
+* Adding label templates to legend keys for TSVB {pull}11266[#11266]
+* Static Series for Time Series Visual Builder {pull}11496[#11496]
+* Show bucket size for Time Series Visual Builder on X-Axis {pull}11639[#11639]
+* Removing the auto-apply feature from Time Series Visual Builder {pull}11460[#11460]
+* Add Help Text to Painless Script for Time Series Visual Builder {pull}11936[#11936]
+* using ui-select for field selection in visualize {pull}10998[#10998]
+* Add support for timelion:min_interval {pull}11476[#11476]
+* Add .aggregate() function to timelion {pull}11556[#11556]
+* Add support for date math in Timelion's .movingaverage() {pull}11555[#11555]
+* Call out latitude/longitue in map tooltip {pull}11718[#11718]
+
+[float]
+=== Bug Fixes
+
+Design::
+* [UI Framework] Fix appearance of some form components in Firefox {pull}11589[#11589]
+* [UI Framework] Fix some flexbox errors with the UI Framework docs. {pull}11719[#11719]
+* [UI Framework] Update Notice sandbox to use correct classes. {pull}11869[#11869]
+* [UI Framework] Fix bug with UI Framework background height not expanding to fit content. {pull}11880[#11880]
+* [UI Framework] Fix appearance of united CardGroup. {pull}12132[#12132]
+* Fix visualize sort icon bug {pull}11568[#11568]
+  - A recent refactor cause the sort icons in the visualize landing page to disappear.
+* [UI Framework] Fix React Warning in Demo Site {pull}11822[#11822]
+
+Dashboard::
+* [Fix for #10128] Adding an app for redirects when storing state in session storage {pull}10822[#10822]
+* [Fix for #9747] Don't kill an entire dashboard because of one bad request {pull}11337[#11337]
+  - Previously if a visualization caused a request error to be thrown, the entire dashboard would fail to load. We changed that so now the rest of the visualizations will continue to load successfully, helping you narrow down which visualizations the errors are coming from.
+* [Fix for #11090] Fix bug in dashboard Add panel pager where it always said `x of x` {pull}11617[#11617]
+  - There were a few places where the pager text would always say 'x of x' - the first number was always equal to the second. This fixes that and uses a style closer to the listing page pager style.
+* [Fix for #11681] Fix modals in react {pull}11714[#11714]
+* [Fix for #10588] Fix firefox scroll issue {pull}12031[#12031]
+  - We fixed an issue that prevented scrolling inside panels that are too long, when using the Firefox browser.
+* [Fix for #11078] Preserve the saved vis url when using the add new vis link from dashboard {pull}11932[#11932]
+  - Previously using the Add new visualization link failed to set the correct last visited link for the app, so that navigating back to visualize would show you the same visualization, with the same title, but in an unsaved state. This could lead to confusion, as the only way to tell that you aren't modifying the visualization you just created is by looking at the url.  If you attempted to modify and save, you would get a duplicate title warning.  Now, you will correctly modify the existing visualization and the save will work seamlessly.
+* [Fix for #12177] Remove encoding dashboard listing links {pull}12195[#12195]
+
+Dev Tools::
+* minimum_number_should_match was deprecated {pull}11316[#11316]
+
+Discover::
+* Create CollapseButton component class to standardize appearance of this button. {pull}11462[#11462]
+* [Fix for #12061] [Discover] Hide the whole filter div instead of just the icons {pull}11819[#11819]
+* [Fix for #12124] [context view] Fix courier exception handling {pull}12144[#12144]
+* [Fix for #11483] Remove the _source field toggle button which was accidentally reinstated {pull}11485[#11485]
+* [Fix for #10653] Migrate deprecated match query syntax {pull}11554[#11554]
+* [Fix for #12248] Fix filter bar appearing above other elements {pull}12480[#12480]
+
+Management::
+* [Fix for #12308] Adding an explicit larger max-width for advanced settings actions {pull}12311[#12311]
+* Fix documentation links on scripted field creation page {pull}11912[#11912]
+* [Fix for #11663] Fix default time field selection {pull}11664[#11664]
+* [indexPatterns] update field in place {pull}11966[#11966]
+
+Visualize::
+* Discover and visualization set appStatus.dirty before saving new {pull}11156[#11156]
+* Fix suggestions in Timelion Visualization. {pull}11638[#11638]
+* Refine behavior of spy panel in Discover, Visualize, and Dashboard {pull}12353[#12353]
+* Fixing the fields for the numbers for percentile aggs for Time Series Visual Builder {pull}11169[#11169]
+* [Fix for #11289] Fixes #11289 - Change top_n to not use split colors for TSVB {pull}11342[#11342]
+* [Fix for #11232] Fixes #11232 - Add option for panel and global filters to annotations for TSVB {pull}11260[#11260]
+* [Fix for #11763] Fixes error in Percentile for Time Series Visual Builder {pull}11772[#11772]
+* Fix dirty checking for changes to Time Series Visual Builder {pull}12114[#12114]
+* [Fix for #8678] Don't prevent filterable rows from being filterable {pull}11628[#11628]
+  - Data tables using the "Filters" aggregation now allow you to click on a row to create a filter.
+* [Fix for #11488] Tooltip gets cutoff when tooltip is larger than chart container {pull}11769[#11769]
+* [Fix for #10473] area chart should render even with single data point {pull}12057[#12057]
+* [Fix for #10328] vislib container too small error message {pull}11951[#11951]
+* [Fix for #11874] Fix timelion doc page persistence {pull}11962[#11962]
+* [metricVis] Add support for html field formatters {pull}11008[#11008]
+* [Fix for #11947] Fix tag cloud resize issue when panel is minimized from full screen mode {pull}12002[#12002]
+  - Fixes a bug when using panel full screen mode with a tag cloud. Upon minimization, the tag cloud was not resized correctly.
+* [Fix for #11575] disable save button if visualization is dirty {pull}11576[#11576]
+* heatNormalizeData is true/false, not a float {pull}11799[#11799]
+* [Fix for #9343] [discover/aggSize] define config in defaults {pull}11818[#11818]
+* fix typo {pull}12297[#12297]
+* [Fix for #8341] Ensure no scroll-bar pops up inside timelion viz {pull}12298[#12298]
+* [Fix for #12187] Do not normalize keys when joining results to region map {pull}12371[#12371]
+* change manifest service url to new production server url {pull}12383[#12383]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]
+* [Fix for #12082] Revert "disable save button if visualization is dirty (#11576)" {pull}12152[#12152]
+* [Fix for #12490] fixes gauge chart width calculation {pull}12499[#12499]
+* [Fix for #12535] fixing labels in heatmap {pull}12537[#12537]
+* [Fix for #12601] goal-type should be discoverable {pull}12603[#12603]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.4.3]]
+== {kib} 5.4.3
+
+//[float]
+//[[breaking-5.4.3]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Core::
+* [licenses] Bump ua-parser-js override {pull}12474[#12474]
+
+[float]
+=== Bug Fixes
+
+Visualize::
+* [Fix for #10328] vislib container too small error message {pull}11951[#11951]
+* [Fix for #8341] Ensure no scroll-bar pops up inside timelion viz {pull}12298[#12298]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.4.2]]
+== {kib} 5.4.2
+
+//[float]
+//[[breaking-5.4.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Dashboard::
+* [Fix for #12121] Update dashboard based on url changes {pull}12123[#12123]
+  - We fixed a bug where certain modifications made directly to the dashboard url, such as changing panel sizes and modifying the query, failed to update dashboard without a hard refresh.
+
+Discover::
+* [Fix for #11925] [context view] Use _doc for tie-breaking instead of _uid {pull}12096[#12096]
+  - To avoid filling up Elasticsearch's fielddata cache by sorting on the _uid field in the context view, the field _doc is now used as a tiebreaker by default. The field to be used can now be configured using the context:tieBreakingFields advanced setting.
+  
+Visualize::
+* [Fix for #11982] Fixed point series label ids {pull}12065[#12065]
+* [Fix for #12000] Hid the last bucket error when switching from parent pipeline agg {pull}12066[#12066]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.4.1]]
+== {kib} 5.4.1
+
+//[float]
+//[[breaking-5.4.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+[[security-5.4.1]]
+=== Security Fixes
+
+The time series visual builder that was released in 5.4.0 is vulnerable to
+a cross-site scripting attack (XSS), where a malicious user could embed
+HTML into markdown documents that could result in JavaScript being
+executed in other users' browsers. This could be abused to steal sensitive
+information or to perform destructive actions on behalf of other users.
+5.4.1 fixes this vulnerability by no longer allowing HTML in markdown documents. +
+{security}[ESA-2017-07] ({pull}11770[#11770])
+
+Beginning in Kibana 5.3.0, the discovery app in Kibana is vulnerable to an
+cross-site scripting attack (XSS) that would allow an attacker to inject
+JavaScript into other user's browsers via Elasticsearch documents. This was
+made possible by the field formatters plugin API and how it handled
+compiling of template values in the discover doc table.
+Versions 5.3.3 and 5.4.1 include a fix for this vulnerability
+by changing the binding and compilation behavior for field formatters.
+Thanks to Thomas Gøytil for reporting this issue. +
+{security}[ESA-2017-08] ({pull}11911[#11911])
+
+[float]
+=== Bug Fixes
+
+Core::
+* Formatted output is now non-bindable {pull}11911[#11911]
+
+Dashboard::
+* Fix a bug that prevented the dashboard from loading if any visualizations on the dashboard could not be found {pull}11324[#11324]
+  - A bug was introduced in 5.2 where if a visualization on a dashboard could not be found, it would throw an error and prevent the entire dashboard from loading. We've fixed this so the rest of your dashboard will continue to load and function properly.
+
+Dev Tools::
+* [console] Properly check for existence of deprecated console configs {pull}11670[#11670]
+* [console] If using an https agent, set rejectUnauthorized in the agent {pull}11700[#11700]
+
+Discover::
+* Show long index pattern names in selector {pull}11907[#11907]
+* Add ignore_unmapped to geo filters to prevent exceptions {pull}11461[#11461]
+* Only use day, month, year provided by datepicker {pull}11773[#11773]
+
+Management::
+* Report shard failures in the field_capabilities response {pull}11450[#11450]
+  - The Kibana field_capabilities API will now include any shard failures in its response so that the user is notified when an error has occurred while creating an index pattern or refreshing a pattern's fields.
+* Prevent refresh fields error from breaking index patterns management page {pull}11885[#11885]
+
+Visualize::
+* Fix spelling in time series visual builder {pull}11212[#11212]
+* Fix missing icons in Visualize listing. {pull}11243[#11243]
+  - When we implemented the new Visualization Wizard UI, we switched from using font icons to SVG images to represent each visualization type. However, we forgot to update the Visualize landing page table to use these SVG images.
+* Fix missing border of PaginatedTable rows in Firefox {pull}11452[#11452]
+  - When we added the ability to select filters from within a table, we applied relative positioning to the table rows. This isn't supported in Firefox, and had some odd visual results.
+* Return Boom errors directly to the browser for Time Series Visual Builder {pull}11656[#11656]
+* Fixing heatmap black squares {pull}11489[#11489]
+* Fix duplicate chart title {pull}11594[#11594]
+* Should not throw error when fitting on empty data. {pull}11620[#11620]
+* fix zoom settings {pull}11707[#11707]
+* geo_centroid should not be available as a metric {pull}11630[#11630]
+* Disable scroll zooming on the map. {pull}11825[#11825]
+* Remove HTML support from Markdown for Time Series Visual Builder {pull}11770[#11770]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.4.0]]
+== {kib} 5.4.0
+
+//[float]
+//[[breaking-5.4.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Core::
+* Kibana Globalization - Phase 1 {pull}7545[#7545] - community contribution by @hickeyma
+* Kibana Globalization - Phase 2 {pull}8766[#8766] - community contribution by @hickeyma
+* Navbarextensions improvements {pull}9871[#9871] - community contribution by @scampi
+
+CLI::
+* Replaces zip library and additional performance improvements {pull}11145[#11145]
+* Make dirs in correct location {pull}11188[#11188]
+
+Dashboard::
+* Warn if the title is a duplicate {pull}10321[#10321]
+* Introducing view and edit modes {pull}10585[#10585]
+
+Dev Tools::
+* Replace zeroclipboard with native copy {pull}10639[#10639]
+* Console support for HEAD requests {pull}10611[#10611]
+
+Discover::
+* Introduce autocompleting input as index pattern selector {pull}10144[#10144]
+* Do not expand index patterns by default {pull}11155[#11155]
+* When a date is selected in absolute mode, set to start/end of day {pull}10433[#10433]
+* Add link to switch to a view of an entrys surrounding documents {pull}9198[#9198]
+
+Management::
+* Indexed fields type filter {pull}10708[#10708] - community contribution by @coverslide
+* Update Index Pattern header to use UI Framework components. {pull}10390[#10390]
+
+Timepicker::
+* Add Set To Now button to from field in absolute mode {pull}10985[#10985]
+* Allow setting a custom to interval in relative mode {pull}10990[#10990]
+
+Visualize::
+* Re-implement Visualize Wizard using Gallery component for selecting visualization type {pull}10972[#10972]
+* Highlight area chart when hovered {pull}10460[#10460] - community contribution by @coverslide
+* Add percent tick formatter to Timelion {pull}10917[#10917]
+* Add advanced display options for Line, Bar, and Area Charts, such as overlaying multiple chart types, supporting horizontal layouts, and styling of axes and gridlines {pull}9642[#9642]
+* Add geocentroid support to Kibana. {pull}10871[#10871]
+* Add support for parent and sibling pipeline aggregations {pull}10070[#10070], {pull}10020[#10020], {pull}10033[#10033]
+* Add the Time Series Visual Builder UI {pull}9725[#9725]
+* Use unit formatters for y-axis labels in Timelion {pull}9065[#9065]
+* You can now zoom out to level 0 for WMS services {pull}11399[#11399]
+
+Miscellaneous::
+* Add shard allocation plugin {pull}10482[#10482]
+* adds missing editor param to vis-options {pull}10564[#10564]
+* Apply kui framework styles to single doc view {pull}10200[#10200]
+* babel 6 upgrade {pull}9702[#9702] - community contribution by @coverslide
+* Bump jquery from 2.1.4 -> 2.2.4 (latest in 2.x line) {pull}10950[#10950]
+* Bump makelogs to 3.2.3 {pull}10510[#10510]
+* do not use the jquery submit method since it makes a page reload and  {pull}11100[#11100] - community contribution by @scampi
+* Don't add $$hashKey to filter objects {pull}11064[#11064]
+
+[float]
+=== Bug Fixes
+
+Core::
+* [Fix for #10129] only check for url overflows when not hashing states {pull}10878[#10878]
+* [Fix for #10558 and #10255] Improve the design of the Tab components focused and selected states. {pull}10560[#10560]
+* [Fix for #10656] Rename Side Nav Link title and href attributes to label and url. Now hovering over a navigation item in the Side Nav wont display a browser tooltip. {pull}10660[#10660]
+* [Fix for #3430, #7505] Update document table when auto refresh contains document updates {pull}10385[#10385]
+* [Fix for #8449] ensure that multi.allow_explicit_index=true {pull}10855[#10855]
+* Fix focus states of Buttons inside of the ToolBar. Now these buttons display the correct focus state. {pull}11129[#11129]
+* Fix incorrect background-color when Basic Button in ToolBar was in a hover state. {pull}10772[#10772]
+* Force kuiLink to have cursor: pointer, even if there's no href. Now the cursor will behave correctly when hovering over a link. {pull}10625[#10625]
+* Fix visual bugs with SavedObjectFinder UI. Replaces visually broken search input with the SearchInput component from the UI Framework. {pull}11029[#11029]
+
+Dashboard::
+* [Fix for #10121] Absolute time selection is now preserved when opening a dashboard  {pull}10152[#10152]
+* [Fix part of #8633] Add info notifications when adding visualizations or searches to the dashboard {pull}10310[#10310]
+* [Fix for #4161] where the pager in a saved search would indicate the wrong number of total items {pull}10827[#10827]
+
+Dev Tools::
+* [Fix for #10241] Add _open and _close autosuggestions for indices in console {pull}10614[#10614] - community contribution by @coverslide
+
+Discover::
+* [Fix for #10233] Fix issue where selected columns would persist when creating a new search {pull}10357[#10357]
+* [Fix for #6295, #10351] Fix interval drop-down for date histogram in discover {pull}10384[#10384]
+* [Fix for #5684] Allow sorting and filtering on _type field {pull}10254[#10254]
+
+Management::
+* [Fix for #4040] Use better logic for detecting non-default values {pull}11036[#11036]
+* [Fix for #5694, #6789, #7404, #7667, #8682, #9116, #9624 in Saved Object Importing] Fix the myriad problems with saved object importing related to order, errors, and formatting {pull}10521[#10521] {pull}10663[#10663] {pull}10666[#10666] {pull}10740[#10740] {pull}10788[#10788] {pull}11059[#11059]
+* [Fix for #5826] where an error is displayed when saving a new scripted field {pull}10820[#10820]
+* [Fix for #8682] Prompt about overwriting existing saved objects {pull}10663[#10663]
+* [Fix for #9678] Breadcrumb urls in management flow {pull}10084[#10084] - community contribution by @coverslide
+
+Visualize::
+* [Fix for #10202] Format the totals row correctly {pull}10414[#10414] - community contribution by @trevan
+* [Fix for #10294] fixing heatmap rotate checkbox {pull}10333[#10333]
+* [Fix for #10296] fixing heatmap labels to use field formatters {pull}10334[#10334]
+* [Fix for #10419] Tooltip no longer flickers on heatmaps 10467[#10467] - community contribution by @coverslide
+* [Fix for #10423] Correctly clean up the tooltip when removing a filter {pull}11146[#11146] - community contribution by @scampi
+* [Fix for #10476] Ensure Timelion charts do not go blank or continually flash {pull}10486[#10486]
+* [Fix for #10508] Use field formatters for heatmap legend {pull}10529[#10529]
+* [Fix for #6605] fixing pie chart tooltip custom label bug {pull}10219[#10219]
+* [Fix for #9156] fixes error with saving hidden metrics {pull}10220[#10220]
+* [Fix for #9492] Do not generate unnecessary requests to Elasticsearch {pull}9658[#9658] - community contribution by @nreese
+
+Miscellaneous::
+* Fixes URL image formatters when using a basePath {pull}11082[#11082]
+* Indicate if index is time-based or not {pull}10790[#10790]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.3.3]]
+== {kib} 5.3.3
+
+//[float]
+//[[breaking-5.3.3]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+[[security-5.3.3]]
+=== Security Fixes
+
+Beginning in Kibana 5.3.0, the discovery app in Kibana is vulnerable to an
+cross-site scripting attack (XSS) that would allow an attacker to inject
+JavaScript into other user's browsers via Elasticsearch documents. This was
+made possible by the field formatters plugin API and how it handled
+compiling of template values in the discover doc table.
+Versions 5.3.3 and 5.4.1 include a fix for this vulnerability
+by changing the binding and compilation behavior for field formatters.
+Thanks to Thomas Gøytil for reporting this issue. +
+{security}[ESA-2017-08] ({pull}11911[#11911])
+
+[float]
+=== Bug Fixes
+
+Core::
+* Formatted output is now non-bindable {pull}11911[#11911]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.3.2]]
+== {kib} 5.3.2
+
+Version 5.3.2 of the Elastic Stack doesn't have any changes for Kibana.
+
+//[float]
+//[[breaking-5.3.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+//[float]
+//=== Bug Fixes
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.3.1]]
+== {kib} 5.3.1
+
+//[float]
+//[[breaking-5.3.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Dashboard::
+* Dashboards no longer trigger an error when top hits aggregations are present with no matching data {issue}10905[#10905]
+* Fixed regression where certain unsaved dashboard links, including links to a dashboard in edit mode, no longer worked {pull}11062[#11062]
+
+Management::
+* Saved object import will no longer occasionally fail due to visualizations being imported before searches {pull}10740[#10740]
+* Improved error messages when no indices match the default index pattern {pull}10788[#10788]
+
+Timepicker::
+* Time ranges no longer overlap when using the time based navigation controls  {pull}11131[#11131]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.3.0]]
+== {kib} 5.3.0
+
+//[float]
+//[[breaking-5.3.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+[float]
+=== Deprecations
+
+Server::
+* Multiple SSL configurations have been renamed and will now trigger a deprecation notice in logs. The old configurations will continue to work until 6.0. {pull}9823[#9823]
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Core::
+* Native confirmation modals have been replaced by more flexible and aesthetically pleasing custom modals {pull}9859[#9859]
+
+Dev Tools::
+* Deprecation headers from Elasticsearch are now rendered above responses in Console {pull}9874[#9874]
+* Add content-type when using copy-as-curl feature in Console {pull}10086[#10086]
+* Adding autocomplete rules for ingest APIs for Console {pull}10098[#10098]
+* Set multi-line json content type to application/x-ndjson for requests through Console {pull}10201[#10201]
+
+Dashboard::
+* Improved Dashboard landing page {pull}10003[#10003]
+* Reduced number of clicks necessary to add a visualization to a dashboard {issue}9554[#9554]
+* Ability to temporarily expand a visualization to the size of the full dashboard {pull}9666[#9666]
+* Improved performance on dashboard by making fewer HTTP requests and caching some of the results {pull}10081[#10081]
+
+Discover::
+* Improve highlighting by using highlight_query with all_fields enabled {pull}9671[#9671]
+* Click to filter values directly from doc tables {pull}9989[#9989]
+
+Management::
+* Default index pattern is now configurable in Advanced Settings {pull}6453[#6453]
+* Improved usability of index pattern creation form {pull}9991[#9991]
+* Title fields now appear at the top of saved object forms {pull}9992[#9992]
+* Scroll-to-top link at the bottom of certain paginated tables {pull}9997[#9997]
+
+Server::
+* Support for configuring SSL key passphrases, certificate authorities, supported protocols, and cipher suites {pull}9823[#9823]
+
+Timepicker::
+* Ability to step forward or backward in time via timepicker controls {pull}9253[#9253]
+* Close timepicker when a filter/interval is selected {pull}9618[#9618]
+
+Visualize::
+* Improved Visualize landing page {pull}9605[#9605]
+* Support for top_hits metric aggregation {pull}7302[#7302]
+
+[float]
+=== Bug Fixes
+
+CLI::
+* Offline plugin install on Windows now properly supports 3 slashes {pull}10083[#10083]
+
+Dashboard::
+* Doc tables are now scrollable again in FireFox {pull}10592[#10592]
+
+Discover::
+* Fix highlight config so it doesn't require a refresh to apply {pull}10346[#10346]
+* Empty lines in saved search now has proper background color on dark theme {pull}10167[#10167]
+* Clicking fields with periods in the data no longer triggers an error in Discover {pull}9825[#9825]
+* Existing filters are now updated when negated via data tables {pull}10778[#10778]
+
+Management::
+* Unknown types are now handled more gracefully when importing saved objects {pull}10666[#10666]
+* Auto-filtering of fields in index pattern no longer has false-misses in certain circumstances {pull}10089[#10089]
+* Blank rows no longer appear at the bottom of index pattern tables {pull}9814[#9814]
+
+Visualize::
+* Tooltip is properly hidden when "show tooltip" checkbox is selected on tilemaps {pull}10260[#10260]
+* Selecting median metric no longer clears order-by {pull}9787[#9787]
+* 0 (zero) is now properly allowed for minimum Y-Axis extent {pull}10528[#10528]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.2.2]]
+== {kib} 5.2.2
+
+//[float]
+//[[breaking-5.2.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Build::
+* Kibana builds now include a NOTICE file {issue}9652[#9652]
+
+Console::
+* Literal strings in JSON editor are now more clearly identifiable {pull}10244[#10244]
+
+Management::
+* Attempting to import a missing type now results in a warning {pull}10521[#10521]
+
+Visualize::
+* Fixed regression where include and exclude patterns triggered an error {issue}10153[#10153]
+* Fixed regression where grouped bar charts did not properly scale down their y-axis {issue}10295[#10295]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.2.1]]
+== {kib} 5.2.1
+
+//[float]
+//[[breaking-5.2.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+[[security-5.2.1]]
+=== Security Fixes
+
+When previous versions of Kibana 5 are configured for SSL client access, file
+descriptors will fail to be cleaned up after certain requests and will
+accumulate over time until the process crashes. Requests that are canceled
+before data is sent can also crash the process. +
+{security-ref}[ESA-2017-02] ({pull}10225[#10225])
+
+[float]
+=== Bug Fixes
+
+Core::
+* Bump Node.js to version 6.9.5. This was a low severity security release for Node.js, which has minimal impact to Kibana, but is still worth upgrading. {pull}10135[#10135]
+
+Discover::
+* Prevented a background action that was causing unnecessary CPU cycles {pull}10036[#10036]
+
+Management::
+* Delete button for color formatters no longer overlaps format dropdown {issue}8864[#8864]
+
+Visualize::
+* Fixed regression where certain visualizations were being limited to 25 series {issue}10132[#10132]
+* Fixed typo on a tag cloud warning message {pull}10092[#10092]
+* Fixed a bug where data table visualizations would incorrectly appear empty in certain circumstances {issue}9757[#9757]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.2.0]]
+== {kib} 5.2.0
+
+//[float]
+//[[breaking-5.2.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Console::
+* Scripts can now use proper syntax highlighting {pull}9433[#9433]
+
+Core::
+* Support for searching against tribe nodes {pull}9132[#9132]
+* Automatically select default index pattern if there is only one {pull}9679[#9679]
+* Remove "will be cached for next time" message from loading screen {pull}9383[#9383]
+
+Discover::
+* Improved consistency with the sidebar interface {pull}7958[#7958]
+
+Saved Objects::
+* Dashboards, visualizations, and saved searches can now be renamed while saving {pull}9087[#9087]
+* Improved UI when editing saved objects {pull}9543[#9543]
+* Improved UI when viewing saved objects {pull}9535[#9535]
+
+Status::
+* Status API now includes the Kibana version and build number {pull}9195[#9195]
+
+Timelion::
+* Timelion sheets can now be deleted {pull}9191[#9191]
+
+Visualize::
+* Heatmap visualization {pull}9403[#9403]
+* Line and area charts now support stepped lines {pull}9425[#9425]
+* Tilemap zoom capabilities are now determined automatically when using the default Elastic Tile Service {pull}8630[#8630]
+
+[float]
+=== Bug Fixes
+
+Core::
+* The Kibana logo in the loading screen now shows properly in IE11 {pull}9921[#9921]
+* Browser-specific style overrides are now properly being handled for legacy browsers {pull}9899[#9899]
+
+Dev Tools::
+* The link to the Dev Tools app is now hidden when no developer tools are enabled {pull}9489[#9489]
+
+Discover::
+* Reduce lag experienced when expanding doc table rows {pull}9326[#9326]
+
+Plugins::
+* Calling another API route via .inject() no longer fails due to a missing socket {pull}9332[#9332]
+
+Timelion::
+* Specifying yaxis() no longer forces a minimum value of 0 {pull}9428[#9428]
+* Improved dark theme support for Timelion axis and legend labels {pull}9422[#9422]
+
+Visualize::
+* Metric visualizations now show scrollbars when the value overflows the container {pull}9481[#9481]
+* Axis custom extents now support decimal values {pull}9426[#9426]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.1.2]]
+== {kib} 5.1.2
+
+//[float]
+//[[breaking-5.1.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+=== Bug Fixes
+
+Discover::
+* Improve spy tab performance on Discover {issue}9464[#9464]
+
+Timepicker::
+* Timepicker now has a collapse button again {issue}9381[#9381]
+
+Visualize::
+* Using a secondary datetime field no longer triggers an error {issue}9458[#9458]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.1.1]]
+== {kib} 5.1.1
+
+//[float]
+//[[breaking-5.1.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+Core::
+* Improved rendering performance and responsiveness across the whole product {pull}7929[#7929]
+* Improved CPU usage when the progress indicator is present {pull}8842[#8842]
+* New loading screen {pull}8970[#8970]
+
+Discover::
+* Improved rendering performance on Discover app with large numbers of fields {pull}9014[#9014]
+
+Filters::
+* Allow more than match queries in custom filters {pull}8614[#8614]
+
+Management::
+* Ability to exclude specific source fields for an index pattern {pull}7402[#7402]
+* Conflicting field types of an index pattern are now visually flagged in index pattern management {pull}7990[#7990]
+* Color formatter for string fields {pull}8597[#8597]
+* Histogram interval now supports decimal {pull}8566[#8566]
+* Advanced setting for opacity when for point-series charts  {pull}8448[#8448]
+* Advanced setting to ignore filters if index does not contain field {pull}8181[#8181]
+
+Visualize::
+* Tag Cloud visualization {pull}8104[#8104]
+* Brush can now be used to select a subsection of a histogram {pull}9039[#9039]
+* Ability to select legend position for tile map visualizations {pull}8176[#8176]
+
+
+[float]
+=== Bug Fixes
+
+CLI::
+* Plugin install will now fire EPERM errors in Windows less frequently {pull}9260[#9260]
+
+Console::
+* Console now autocompletes indexes {pull}8557[#8557]
+
+Core::
+* Fix bug where the loading indicator was wider than the screen {pull}8854[#8854]
+
+Dashboard::
+* Dashboard no longer set to dirty on load in some situations {pull}9307[#9307]
+
+Discover::
+* Field visualize button no longer loads incorrect URL in some situations {pull}8721[#8721]
+* Sorting on scripted date or boolean fields no longer triggers an error {pull}9261[#9261]
+
+Management::
+* Painless scripted fields are now wrapped in a lambda so more complex scripts are possible {pull}9171[#9171]
+* Correctly renders error when scripted field languages fail to load {pull}8639[#8639]
+
+Server::
+* Downgrade EPIPE errors to debug level {pull}9023[#9023]
+
+Timelion::
+* The "new" action no longer requires two clicks {pull}8815[#8815]
+* Secondary y-axis no longer removes config on first axis {pull}9197[#9197]
+* Correct padding for Timelion title {pull}8919[#8919]
+
+Visualize::
+* Bar graph order is now correct with double split terms {pull}8397[#8397]
+* Proper handling of small slices in pie chart {pull}8986[#8986]
+* Fix label on scripted field date histograms {pull}8638[#8638]
+* UTF-8 charset when exporting aggregate tables {pull}8662[#8662]
+* Fixed various typos in visualization descriptions {pull}8943[#8943]
+* Toggling spy panel no longer throws an error {pull}8877[#8877]
+* Fullscreen spy panel is no longer cut off {pull}8844[#8844]
+* Remove scripted fields from significant terms since they are unsupported {pull}8734[#8734]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.1.0]]
+== {kib} 5.1.0
+
+Version 5.1.0 doesn't exist because, for a short period of time, the Elastic
+Yum and Apt repositories included unreleased binaries labeled 5.1.0. To avoid
+confusion and upgrade issues for the people that have installed these without
+realizing, we decided to skip the 5.1.0 version and release 5.1.1 instead.
+
+//[float]
+//[[breaking-5.1.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+//[float]
+//=== Bug Fixes
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.0.2]]
+== {kib} 5.0.2
+
+//[float]
+//[[breaking-5.0.2]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+[[security-5.0.2]]
+=== Security Fixes
+
+Kibana 5.0.0 and 5.0.1 were making requests to advanced settings and the short
+URL service on behalf of the kibana server rather than the current user, which
+means that being authenticated at all was sufficient to have both read and
+write access to the advanced settings and short URLs. +
+Kibana 5.0.2 now authenticates requests for each service on behalf of the
+current user. +
+{security-ref}[ESA-2016-10] ({pull}9214[#9214])
+
+[float]
+=== Bug Fixes
+
+Core::
+* Elasticsearch version checking no longer causes startup error for non-HTTP nodes {pull}9181[#9181]
+* Favicons are now embedded as links rather than as data {pull}8961[#8961]
+
+CLI::
+* Spaces are now accepted in plugin URLs and paths during installation {pull}8945[#8945]
+
+Visualize::
+* Visualizations without spy panels no longer trigger errors in browser console {pull}9115[#9115]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.0.1]]
+== {kib} 5.0.1
+
+//[float]
+//[[breaking-5.0.1]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+//[float]
+//=== Deprecations
+
+//[float]
+//=== New Features
+
+//[float]
+//=== Enhancements
+
+[float]
+[[security-5.0.1]]
+=== Security Fixes
+
+An Open Redirect vulnerability has been fixed with the short URL feature.
+Previously, a malicious user could use the internal API that powers the short
+URL feature to create a short URL in kibana that redirected to a different
+domain. +
+{security-ref}[ESA-2016-08] ({commit}92ae3ae[92ae3ae])
+
+[float]
+=== Bug Fixes
+
+Core::
+* Improved error message when sessionStorage is disabled in the browser {pull}8343[#8343]
+* Trailing slash redirects now include the basepath configuration {pull}8966[#8966]
+
+Sharing::
+* Share UI now properly honors the dark theme {issue}8819[#8819]
+
+Visualize::
+* Tile map bounding boxes no longer create filters with invalid bounds {issue}8946[#8946]
+
+//[float]
+//=== Regressions
+
+//[float]
+//=== Known Issues
+
+[[release-notes-5.0.0]]
+== {kib} 5.0.0
+
+The lists below cover changes between 4.6.2 and 5.0.0 only.
+
+//[float]
+//[[breaking-5.0.0]]
+//=== Breaking Changes
+
+//[float]
+//=== Breaking Java Changes
+
+[float]
+=== Deprecations
+
+Visualize::
+* Remove "Exclude Pattern Flags" and "Include Pattern Flags" from terms and significant terms aggregations {issue}6714[#6714]
+* Deprecate ascending sort for terms aggregations {pull}8167[#8167]
+* Deprecate split chart option for tile map visualization {pull}6001[#6001]
+
+
+//[float]
+//=== New Features
+
+[float]
+=== Enhancements
+
+CLI::
+* New plugin installer: `bin/kibana-plugin` {pull}6402[#6402]
+* Ability to specify multiple config files as CLI arguments {pull}6825[#6825]
+* Display plugins versions {pull}7221[#7221]
+
+Core::
+* Bind Kibana server to localhost by default {pull}8013[#8013]
+* Only proxy whitelisted request headers to Elasticsearch {pull}6896[#6896]
+* Remove client node filtering in the Elasticsearch version check {pull}6840[#6840]
+* A new design  {pull}6239[#6239]
+* Friendly error message when Kibana is already running {pull}6735[#6735]
+* Logging configuration can be reloaded with `SIGHUP` {pull}6720[#6720]
+* Abortable timeout counter to notifications {pull}6364[#6364]
+* Upgrade Node.js to version 6.9.0 for improved memory use and a segfault fix {pull}8733[#8733]
+* Warn on startup if plugins don't support the version of Kibana {pull}8283[#8283]
+* Add additional verification to ensure supported Elasticsearch version {pull}8229[#8229]
+* Add unique instance identifier {pull}6378[#6378]
+* Add state:storeInSessionState option enabling shorter URLs and enhancing Internet Explorer support {pull}8022[#8022]
+* Improve user experience when query returns no results {pull}7286[#7286]
+* Display message when "Export All" request fails {pull}6976[#6976]
+
+Dashboard::
+* Dashboard refresh interval persisted on save {pull}7365[#7365]
+
+Dev Tools::
+* Add Dev Tools application, including Console (previously known as Sense) {pull}8171[#8171]
+
+Discover::
+* Default columns are configurable {pull}5696[#5696]
+* Render field type in tooltip when mousing over name {pull}6243[#6243]
+* Add field-exists filter button to doc table {pull}6166[#6166]
+* Enable better caching of time-based requests by Elasticsearch {pull}6643[#6643]
+
+Filters::
+* Automatic filter pinning option in advanced settings {pull}5730[#5730]
+
+Management::
+* Rename Settings to Management {pull}7284[#7284]
+* Add boolean field formatter {pull}7935[#7935]
+* Add painless support for scripted fields {pull}7700[#7700]
+* Custom notification banner configured via advanced settings {pull}6791[#6791]
+* Duration field formatter for numbers {pull}6499[#6499]
+* Title case field formatter for strings {pull}6413[#6413]
+
+Plugins::
+* Add support for apps to specify their order in the left navigation bar {pull}8767[#8767]
+* Separate plugin version and supported version of Kibana {pull}8222[#8222]
+* Expose the Kibana app base URL, no more hardcoding '/app/kibana' in urls {pull}8072[#8072]
+* Add requireDefaultIndex route option, enabling index pattern independent plugins {pull}7516[#7516]
+* Add plugin preInit extension point {pull}7069[#7069]
+* Plugins can prefix their config values {pull}6554[#6554]
+
+Server::
+* Add basePath to server's defaultRoute {pull}6953[#6953]
+* Do not render directory listings for static assets {pull}6764[#6764]
+* Automatically redirect http traffic to https {pull}5959[#5959]
+* Write process pid file as soon as it is known {pull}4680[#4680]
+* Log most events by default and only errors when in quiet mode {pull}5952[#5952]
+
+Sharing::
+* Improve user interface to emphasize difference between Original URLs and Snapshot URLs. {pull}8172[#8172]
+
+Status::
+* Emit new state and message, on status change {pull}7513[#7513]
+
+Timelion::
+* Add Timelion to Kibana core {pull}7994[#7994]
+
+Visualize::
+* Add y-axis logarithmic scale for bar charts {pull}7939[#7939]
+* Add option to set legend position {pull}7931[#7931]
+* Add legend tooltips {pull}7890[#7890]
+* Add x-axis title labels {pull}7845[#7845]
+
+[float]
+=== Bug Fixes
+
+Core::
+* Fix alias support when fetching types {pull}8338[#8338]
+* Report useful error message when sessionStorage is unavailable {pull}8343[#8343]
+
+Dashboard::
+* Prevent dashboard title tooltip from being cut off {pull}6464[#6464]
+
+Discover::
+* Only display Visualize button when a field is aggregatable {pull}8694[#8694]
+
+Filters::
+* Use lt instead of lte for safer upper bound in range filter {pull}7129[#7129]
+* Fix date histogram filtering {pull}7126[#7126]
+
+Management::
+* No longer remove selection when refreshing fields {pull}8312[#8312]
+* Notify user of failures when deleting saved objects {pull}7345[#7345]
+* Add title to visState when the visualization is saved {pull}7185[#7185]
+* Back button now works {pull}5982[#5982]
+* Show no value instead of interpolating 'undefined' with empty values in URL string formatters {pull}6291[#6291]
+
+Server::
+* Console logs display date/time in UTC {pull}8534[#8534]
+
+Status::
+* Plugins without init function no longer show statuses {pull}7953[#7953]
+
+Timepicker::
+* Absolute time picker updates when time selection changes {pull}8383[#8383]
+* Prevent relative timepicker values from being negative {pull}6607[#6607]
+
+Visualize::
+* Remove average from standard deviation metrics {pull}7827[#7827]
+* Always set output.params.min_doc_count on Histograms {pull}8349[#8349]
+* Set minimum aggregation size to 1, Elasticsearch returns an error for 0 {pull}8339[#8339]
+* Add milliseconds to Date Histogram interval options {pull}6796[#6796]
+* Do not perform unnecessary round-trip to Elasticsearch when there are no changes in request parameters {pull}7960[#7960]
+* Tile map dots no longer shrink to extreme tiny size on some zooms {pull}8000[#8000]
+* Table visualizations display correctly when changing paging options {pull}8422[#8422]
+* Filter non-aggregatable fields from visualization editor {pull}8421[#8421]
+* Prevent charts from unnecessarily rendering twice {pull}8371[#8371]
+* Display custom label for percentile ranks aggregation {pull}7123[#7123]
+* Display custom label for percentile and median metric visualizations {pull}7021[#7021]
+* Back button now works {pull}5986[#5986]
+* Fix extraneous bounds for tilemap {pull}7068[#7068]
+* Median visualization properly shows value rather than `?` {pull}7003[#7003]
+* Map zoom is persisted when saving visualization {pull}6835[#6835]
+* Drag aggregations to sort {pull}6566[#6566]
+* Table sort is persisted on save {pull}5953[#5953]
+* Ignore extended bounds when "Show empty buckets" unselected {pull}5960[#5960]
+* Using custom label for standard deviation aggregation {pull}6407[#6407]
+
 
 //[float]
 //=== Regressions
