@@ -20,7 +20,7 @@ export const revealImage = () => ({
     },
     origin: {
       types: ['string'],
-      help: 'Where to start from, top, left, bottom or right',
+      help: 'Where to start from. Eg, top, left, bottom or right',
       default: 'bottom',
     },
   },

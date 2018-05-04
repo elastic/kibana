@@ -34,10 +34,4 @@ export const image = () => ({
       },
     },
   ],
-  // TODO: add the url input and handling
-  // {
-  //   name: 'url',
-  //   displayName: 'Image URL',
-  //   argType: 'url',
-  // },
 });

@@ -1,6 +1,6 @@
 import { get, map, groupBy, sortBy } from 'lodash';
 import keyBy from 'lodash.keyby';
-import chroma from 'chroma-js';
+import { getColorsFromPalette } from '../lib/get_colors_from_palette';
 
 export const pie = () => ({
   name: 'pie',
@@ -72,10 +72,6 @@ export const pie = () => ({
       return item;
     });
 
-    const colors = args.palette.gradient
-      ? chroma.scale(args.palette.colors).colors(data.length)
-      : args.palette.colors;
-
     return {
       type: 'render',
       as: 'pie',
@@ -84,7 +80,7 @@ export const pie = () => ({
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
-          colors: colors,
+          colors: getColorsFromPalette(args.palette, data.length),
           legend: {
             show: false,
           },
@@ -94,14 +90,14 @@ export const pie = () => ({
           series: {
             pie: {
               show: true,
-              innerRadius: args.hole / 100,
+              innerRadius: Math.max(args.hole, 0) / 100,
               stroke: {
                 color: args.strokeColor,
-                width: args.strokeWidth,
+                width: Math.max(args.strokeWidth, 0),
               },
               label: {
                 show: args.labels,
-                radius: args.labelRadius / 100,
+                radius: (args.labelRadius >= 0 ? args.labelRadius : 100) / 100,
               },
             },
             bubbles: {

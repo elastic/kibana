@@ -23,12 +23,11 @@ export const render = () => ({
     },
   },
   fn: (context, args) => {
-    if (args.css.length === 0) args.css = '* > * {}';
-    context.css = args.css;
-    context.containerStyle = args.containerStyle;
-
-    if (args.as) context.as = args.as;
-
-    return context;
+    return {
+      ...context,
+      as: args.as || context.as,
+      css: args.css,
+      containerStyle: args.containerStyle,
+    };
   },
 });

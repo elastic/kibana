@@ -14,7 +14,7 @@ export const markdown = () => ({
       types: ['string'],
       help:
         'A string containing markdown. You can pass this multiple times to achieve concatenation',
-      default: '',
+      default: '""',
       multi: true,
     },
     font: {

@@ -1,5 +1,4 @@
 import { includes } from 'lodash';
-import { fetchImage } from '../../lib/fetch_image';
 import { elasticLogo } from './elastic_logo';
 
 export const image = () => ({
@@ -16,37 +15,27 @@ export const image = () => ({
       types: ['string', 'null'],
       help: 'Base64 encoded image',
       aliases: ['_'],
-      default: `'${elasticLogo}'`,
-    },
-    url: {
-      types: ['string', 'null'],
-      help: 'URL to an image',
+      default: elasticLogo,
     },
     mode: {
       types: ['string', 'null'],
       help:
         '"contain" will show the entire image, scaled to fit.' +
-        '"cover" will fill the container with the image, cropping from the sides or bottom as needed.',
+        '"cover" will fill the container with the image, cropping from the sides or bottom as needed.' +
+        '"stretch" will resize the height and width of the image to 100% of the container',
+      default: 'contain',
     },
   },
   fn: (context, args) => {
-    function wrapImage(dataurl) {
-      const mode = args.mode === 'stretch' ? '100% 100%' : args.mode;
-      return {
-        type: 'image',
-        mode: mode,
-        dataurl,
-      };
-    }
-
     if (!includes(['contain', 'cover', 'stretch'], args.mode))
       throw '"mode" must be "contain", "cover", or "stretch"';
-    // return image object
-    // TODO: validate data type
-    if (args.url) {
-      return fetchImage(args.url).then(wrapImage);
-    }
 
-    return wrapImage(args.dataurl);
+    const mode = args.mode === 'stretch' ? '100% 100%' : args.mode;
+
+    return {
+      type: 'image',
+      mode,
+      dataurl: args.dataurl,
+    };
   },
 });

@@ -14,7 +14,7 @@ export const table = () => ({
     },
     paginate: {
       types: ['boolean'],
-      default: 'true',
+      default: true,
       help: 'Show pagination controls. If set to false only the first page will be displayed.',
     },
     perPage: {
