@@ -8,7 +8,7 @@ const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset
 
 export const BorderForm = ({ className, value, radius, onChange, colors }) => {
   const border = value || '';
-  const [borderWidth, borderStyle, borderColor] = border.split(' ');
+  const [borderWidth = '', borderStyle = '', borderColor = ''] = border.split(' ');
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
   const radiusVal = radius ? radius.replace('px', '') : '';
 
