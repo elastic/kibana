@@ -35,7 +35,7 @@ function ServiceDetailsAndTransactionList({ urlParams, render }) {
   );
 }
 
-export function TransactionOverview({
+export default function TransactionOverview({
   changeTransactionSorting,
   transactionSorting,
   urlParams
@@ -88,5 +88,3 @@ function transactionTypeLabel(type) {
       return type;
   }
 }
-
-export default TransactionOverview;

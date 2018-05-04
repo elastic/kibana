@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-
+import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { TRANSACTION_ID } from '../../../../../common/constants';
 
@@ -30,12 +30,12 @@ function avgLabel(agentName) {
 class List extends Component {
   render() {
     const {
-      serviceName,
       agentName,
-      type,
-      items,
       changeTransactionSorting,
-      transactionSorting
+      items,
+      serviceName,
+      transactionSorting,
+      type
     } = this.props;
 
     const renderHead = () => {
@@ -127,5 +127,13 @@ class List extends Component {
     );
   }
 }
+
+List.propTypes = {
+  agentName: PropTypes.string.isRequired,
+  changeTransactionSorting: PropTypes.func.isRequired,
+  items: PropTypes.array,
+  transactionSorting: PropTypes.object.isRequired,
+  type: PropTypes.string.isRequired
+};
 
 export default List;

@@ -4,52 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  loadServiceList,
-  SERVICE_LIST_LOADING,
-  SERVICE_LIST_SUCCESS
-} from '../serviceList';
-import { getKey } from '../apiHelpers';
-import fetchMock from 'fetch-mock';
-import response from './services-response.json';
+import React from 'react';
+import * as rest from '../../services/rest';
+import { getServiceList, ServiceListRequest } from '../serviceList';
+import { mountWithStore } from '../../utils/testHelpers';
 
-describe('loadServiceList', () => {
-  const key = getKey({ start: 'myStart', end: 'myEnd' });
-  const dispatch = jest.fn();
-  const matcherName = /\/api\/apm\/services/;
+describe('serviceList', () => {
+  describe('getServiceList', () => {
+    it('should return default value when empty', () => {
+      const state = { reduxRequest: {}, sorting: { service: {} } };
+      expect(getServiceList(state)).toEqual({ data: [] });
+    });
 
-  beforeEach(() => {
-    fetchMock.get(matcherName, response);
-    return loadServiceList({
-      start: 'myStart',
-      end: 'myEnd'
-    })(dispatch);
-  });
-
-  afterEach(() => {
-    fetchMock.restore();
-  });
-
-  it('should make a http request', () => {
-    expect(fetchMock.lastUrl(matcherName)).toContain(
-      '/api/apm/services?start=myStart&end=myEnd'
-    );
-  });
-
-  it('should dispatch SERVICE_LIST_LOADING', () => {
-    expect(dispatch).toHaveBeenCalledWith({
-      keyArgs: { start: 'myStart', end: 'myEnd' },
-      type: SERVICE_LIST_LOADING,
-      key
+    it('should return serviceList when not empty', () => {
+      const state = {
+        reduxRequest: { serviceList: { data: [{ foo: 'bar' }] } },
+        sorting: { service: {} }
+      };
+      expect(getServiceList(state)).toEqual({ data: [{ foo: 'bar' }] });
     });
   });
 
-  it('should dispatch SERVICE_LIST_SUCCESS with http response', () => {
-    expect(dispatch).toHaveBeenCalledWith({
-      keyArgs: { start: 'myStart', end: 'myEnd' },
-      response,
-      type: SERVICE_LIST_SUCCESS,
-      key
+  describe('ServiceListRequest', () => {
+    let loadSpy;
+    let renderSpy;
+    let wrapper;
+
+    beforeEach(() => {
+      const state = {
+        reduxRequest: {
+          serviceList: { status: 'my-status', data: [{ foo: 'bar' }] }
+        },
+        sorting: { service: {} }
+      };
+
+      loadSpy = jest.spyOn(rest, 'loadServiceList').mockReturnValue();
+      renderSpy = jest.fn().mockReturnValue(<div>rendered</div>);
+
+      wrapper = mountWithStore(
+        <ServiceListRequest
+          urlParams={{ start: 'myStart', end: 'myEnd' }}
+          render={renderSpy}
+        />,
+        state
+      );
+    });
+
+    it('should call render method', () => {
+      expect(renderSpy).toHaveBeenCalledWith({
+        data: [{ foo: 'bar' }],
+        status: 'my-status'
+      });
+    });
+
+    it('should call "loadServiceList"', () => {
+      expect(loadSpy).toHaveBeenCalledWith({
+        start: 'myStart',
+        end: 'myEnd'
+      });
+    });
+
+    it('should render component', () => {
+      expect(wrapper.html()).toEqual('<div>rendered</div>');
     });
   });
 });
