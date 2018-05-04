@@ -495,7 +495,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         log.debug(`Leaving overwriteAll alone`);
       }
       const importBtn = await this.getImportButton();
-      log.debug(`got the import button`);
+      log.debug(`got the import button`, await importBtn.isDisplayed());
       await importBtn.click();
       log.debug(`done importing the file`);
     }
