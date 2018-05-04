@@ -25,11 +25,9 @@ module.directive('filterFieldSelect', function () {
         return field.indexPattern.title;
       };
 
-      $scope.limit = 50;
-
-      $scope.increaseLimit = () => {
-        $scope.limit += 50;
-      };
+      $scope.increaseLimit = () => $scope.limit += 50;
+      $scope.resetLimit = () => $scope.limit = 50;
+      $scope.resetLimit();
     }
   };
 });
