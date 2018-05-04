@@ -1,7 +1,0 @@
-[[release-notes-6.2.1]]
-== 6.2.1 Release Notes
-
-Also see <<breaking-changes-6.0>>.
-
-There were no changes for this release.
-

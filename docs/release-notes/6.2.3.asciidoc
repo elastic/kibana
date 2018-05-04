@@ -1,8 +1,0 @@
-[[release-notes-6.2.3]]
-== 6.2.3 Release Notes
-
-Also see <<breaking-changes-6.0>>.
-
-There are no changes for Kibana in this release.
-
-There is one known issue, [#17139] Cross cluster search index pattern won't go to next step.
