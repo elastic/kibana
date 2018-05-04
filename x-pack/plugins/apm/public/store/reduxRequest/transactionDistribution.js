@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { withInitialData } from './selectorHelpers';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadTransactionDistribution } from '../services/rest';
+import { withInitialData } from './helpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadTransactionDistribution } from '../../services/rest';
 
 const INITIAL_DATA = { buckets: [], totalHits: 0 };
 

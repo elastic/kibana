@@ -19,7 +19,7 @@ import {
 import { isEmpty } from 'lodash';
 
 import TooltipOverlay from '../../shared/TooltipOverlay';
-import { ServiceDetailsRequest } from '../../../store/serviceDetails';
+import { ServiceDetailsRequest } from '../../../store/reduxRequest/serviceDetails';
 
 const Container = styled.div`
   display: flex;

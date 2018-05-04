@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { withInitialData } from './selectorHelpers';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadLicense } from '../services/rest';
+import { withInitialData } from './helpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadLicense } from '../../services/rest';
 
 const ID = 'license';
 const INITIAL_DATA = {

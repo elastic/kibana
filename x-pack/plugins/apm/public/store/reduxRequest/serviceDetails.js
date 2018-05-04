@@ -7,9 +7,9 @@
 import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { withInitialData } from './selectorHelpers';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadServiceDetails } from '../services/rest';
+import { withInitialData } from './helpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadServiceDetails } from '../../services/rest';
 
 const ID = 'serviceDetails';
 const INITIAL_DATA = { types: [] };

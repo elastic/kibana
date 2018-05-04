@@ -7,9 +7,9 @@
 import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
-import { loadServiceList } from '../services/rest';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { withInitialData } from './selectorHelpers';
+import { loadServiceList } from '../../services/rest';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { withInitialData } from './helpers';
 
 const ID = 'serviceList';
 const INITIAL_DATA = [];

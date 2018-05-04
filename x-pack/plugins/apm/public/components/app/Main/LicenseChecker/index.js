@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { STATUS } from '../../../../constants/index';
-import { LicenceRequest } from '../../../../store/license';
+import { LicenceRequest } from '../../../../store/reduxRequest/license';
 
 function LicenseChecker() {
   return (

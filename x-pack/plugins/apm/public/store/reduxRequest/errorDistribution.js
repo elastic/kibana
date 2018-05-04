@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadErrorDistribution } from '../services/rest';
-import { withInitialData } from './selectorHelpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadErrorDistribution } from '../../services/rest';
+import { withInitialData } from './helpers';
 
 const ID = 'errorDistribution';
 const INITIAL_DATA = { buckets: [], totalHits: 0 };

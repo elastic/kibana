@@ -5,25 +5,25 @@
  */
 
 import React from 'react';
-import { withInitialData } from './selectorHelpers';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadTransaction } from '../services/rest';
+import { withInitialData } from './helpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadSpans } from '../../services/rest';
 
-const ID = 'transactionDetails';
+const ID = 'spans';
 const INITIAL_DATA = {};
 
-export function getTransactionDetails(state) {
+export function getSpans(state) {
   return withInitialData(state.reduxRequest[ID], INITIAL_DATA);
 }
 
-export function TransactionDetailsRequest({ urlParams, render }) {
+export function SpansRequest({ urlParams, render }) {
   const { serviceName, start, end, transactionId, kuery } = urlParams;
   return (
     <ReduxRequest
       id={ID}
       shouldInvoke={Boolean(serviceName && start && end && transactionId)}
-      fn={loadTransaction}
-      selector={getTransactionDetails}
+      fn={loadSpans}
+      selector={getSpans}
       args={[{ serviceName, start, end, transactionId, kuery }]}
       render={render}
     />

@@ -7,8 +7,8 @@
 import React from 'react';
 import orderBy from 'lodash.orderby';
 import { createSelector } from 'reselect';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadTransactionList } from '../services/rest';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadTransactionList } from '../../services/rest';
 
 const ID = 'transactionList';
 const INITIAL_DATA = [];

@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { createSelector } from 'reselect';
-import { getCharts } from './selectors/chartSelectors';
-import { getUrlParams } from './urlParams';
-import { withInitialData } from './selectorHelpers';
-import { ReduxRequest } from '../components/shared/ReduxRequest';
-import { loadCharts } from '../services/rest';
+import { getCharts } from '../selectors/chartSelectors';
+import { getUrlParams } from '../urlParams';
+import { withInitialData } from './helpers';
+import { ReduxRequest } from '../../components/shared/ReduxRequest';
+import { loadCharts } from '../../services/rest';
 
 const ID = 'overviewCharts';
 const INITIAL_DATA = {

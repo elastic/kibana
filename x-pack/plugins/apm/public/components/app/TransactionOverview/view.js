@@ -10,9 +10,9 @@ import { HeaderLarge, HeaderMedium } from '../../shared/UIComponents';
 import TabNavigation from '../../shared/TabNavigation';
 import Charts from '../../shared/charts/TransactionCharts';
 import List from './List';
-import { OverviewChartsRequest } from '../../../store/overviewCharts';
-import { TransactionListRequest } from '../../../store/transactionList';
-import { ServiceDetailsRequest } from '../../../store/serviceDetails';
+import { OverviewChartsRequest } from '../../../store/reduxRequest/overviewCharts';
+import { TransactionListRequest } from '../../../store/reduxRequest/transactionList';
+import { ServiceDetailsRequest } from '../../../store/reduxRequest/serviceDetails';
 
 function ServiceDetailsAndTransactionList({ urlParams, render }) {
   return (
