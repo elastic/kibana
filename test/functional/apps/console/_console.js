@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.console.setFontSizeSetting(20);
       await retry.try(async () => {
         // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('20px');
+        expect(await PageObjects.console.etRequestFontSize()).to.be('20px');
       });
 
       await PageObjects.console.setFontSizeSetting(24);

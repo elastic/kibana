@@ -63,6 +63,14 @@ module.exports = function (grunt) {
     'stop:testUIServer'
   ]);
 
+  grunt.registerTask('test:ui:wdio', [
+    'checkPlugins',
+    'run:testEsServer',
+    'run:testUIServer',
+    'webdriver',
+    'stop:testEsServer',
+    'stop:testUIServer'
+  ]);
   grunt.registerTask('test:uiRelease', [
     'checkPlugins',
     'run:testEsServer',
