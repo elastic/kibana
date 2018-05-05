@@ -11,10 +11,6 @@ import { loadPluginProvider } from './plugin_provider';
 import { createPluginsInDirectory$ } from './create_plugins_in_directory';
 
 async function createPluginAtPath(pluginPath) {
-  if (!await isDirectory(pluginPath)) {
-    throw createInvalidPluginError(null, pluginPath, 'must be a directory');
-  }
-
   const kibanaJson = await parseKibanaJson(pluginPath);
   const pluginProvider = loadPluginProvider(kibanaJson, pluginPath);
 
@@ -42,6 +38,10 @@ async function createPluginAtPath(pluginPath) {
 export const createPluginAtPath$ = (pluginPath) => (
   Observable
     .defer(async () => {
+      if (!await isDirectory(pluginPath)) {
+        throw createInvalidPluginError(null, pluginPath, 'must be a directory');
+      }
+
       const hasKibanaJson = await isFile(resolve(pluginPath, 'kibana.json'));
       const hasChildPlugins = !hasKibanaJson && await isDirectory(resolve(pluginPath, 'plugins'));
 
