@@ -30,7 +30,9 @@ function createToolingLog(level) {
 }
 
 function readFtrConfigFile(log, path, settingOverrides) {
-  return require(resolveKibanaPath('src/functional_test_runner')).readConfigFile(log, path, settingOverrides);
+  return require(resolveKibanaPath(
+    'src/functional_test_runner'
+  )).readConfigFile(log, path, settingOverrides);
 }
 
 module.exports = {
