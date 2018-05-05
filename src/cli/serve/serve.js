@@ -23,6 +23,19 @@ function canRequire(path) {
   }
 }
 
+function isDirectory(path) {
+  try {
+    const stat = statSync(path);
+    return stat.isDirectory();
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    } else {
+      return false;
+    }
+  }
+}
+
 function isSymlinkTo(link, dest) {
   try {
     const stat = lstatSync(link);
@@ -41,7 +54,7 @@ const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 // install is a link to the source, not an actual install
 const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
 const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(resolve(XPACK_INSTALLED_DIR, 'package.json'));
+const XPACK_INSTALLED = isDirectory(XPACK_INSTALLED_DIR);
 const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
 
 
@@ -97,15 +110,15 @@ function readServerSettings(opts, extraCliOptions) {
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
     opts.pluginDir,
-
-    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
-      ? [resolve(XPACK_INSTALLED_DIR, 'plugins')]
-      : [],
   )));
 
   set('plugins.paths', _.compact([].concat(
     get('plugins.paths'),
     opts.pluginPath,
+
+    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
+      ? [XPACK_INSTALLED_DIR]
+      : [],
   )));
 
   merge(readKeystore());

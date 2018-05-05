@@ -1,12 +1,14 @@
 import { inspect } from 'util';
+import { resolve } from 'path';
 
 import { Observable } from 'rxjs';
 
 import { createInvalidPluginError } from '../errors';
-import { isDirectory } from './lib';
+import { isDirectory, isFile } from './lib';
 import { PluginSpec } from './plugin_spec';
 import { parseKibanaJson } from './kibana_json';
 import { loadPluginProvider } from './plugin_provider';
+import { createPluginsInDirectory$ } from './create_plugins_in_directory';
 
 async function createPluginAtPath(pluginPath) {
   if (!await isDirectory(pluginPath)) {
@@ -38,7 +40,19 @@ async function createPluginAtPath(pluginPath) {
 }
 
 export const createPluginAtPath$ = (pluginPath) => (
-  Observable.defer(async () => createPluginAtPath(pluginPath))
-    .map(plugin => ({ plugin }))
-    .catch(error => [{ error }])
+  Observable
+    .defer(async () => {
+      const hasKibanaJson = await isFile(resolve(pluginPath, 'kibana.json'));
+      const hasChildPlugins = !hasKibanaJson && await isDirectory(resolve(pluginPath, 'plugins'));
+
+      if (hasChildPlugins) {
+        return createPluginsInDirectory$(resolve(pluginPath, 'plugins'));
+      }
+
+      return Observable
+        .fromPromise(createPluginAtPath(pluginPath))
+        .map(plugin => ({ plugin }))
+        .catch(error => [{ error }]);
+    })
+    .mergeAll()
 );

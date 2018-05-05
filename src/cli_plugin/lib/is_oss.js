@@ -1,12 +1,15 @@
+import { resolve } from 'path';
+import { statSync } from 'fs';
+
 export function isOSS() {
   try {
-    require.resolve('x-pack/package.json');
+    statSync(resolve(__dirname, '../../../node_modules/x-pack'));
     return false;
   } catch (error) {
-    if (error.code !== 'MODULE_NOT_FOUND') {
-      throw error;
+    if (error.code === 'ENOENT') {
+      return true;
     }
 
-    return true;
+    throw error;
   }
 }
