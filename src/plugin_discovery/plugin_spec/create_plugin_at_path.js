@@ -51,8 +51,8 @@ export const createPluginAtPath$ = (pluginPath) => (
 
       return Observable
         .fromPromise(createPluginAtPath(pluginPath))
-        .map(plugin => ({ plugin }))
-        .catch(error => [{ error }]);
+        .map(plugin => ({ plugin }));
     })
     .mergeAll()
+    .catch(error => [{ error }])
 );
