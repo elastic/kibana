@@ -17,6 +17,7 @@ exports[`parentCandidates 1`] = `
     value="keywordField"
   />
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText="Options are based on the value of parent control. Disabled if parent is not set."
@@ -47,6 +48,7 @@ exports[`parentCandidates 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="multiselect-0"
@@ -59,6 +61,7 @@ exports[`parentCandidates 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="size-0"
@@ -93,6 +96,7 @@ exports[`renders ListControlEditor 1`] = `
     value="keywordField"
   />
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="multiselect-0"
@@ -105,6 +109,7 @@ exports[`renders ListControlEditor 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="size-0"

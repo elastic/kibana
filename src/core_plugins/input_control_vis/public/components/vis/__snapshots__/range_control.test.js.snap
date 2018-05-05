@@ -27,6 +27,7 @@ exports[`renders RangeControl 1`] = `
 >
   <EuiFormRow
     data-test-subj="rangeControlFormRow"
+    describedByIds={Array []}
     error={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
@@ -35,6 +36,7 @@ exports[`renders RangeControl 1`] = `
     <EuiFlexGroup
       alignItems="stretch"
       component="div"
+      direction="row"
       gutterSize="l"
       justifyContent="flexStart"
       responsive={true}

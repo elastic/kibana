@@ -23,6 +23,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -36,6 +37,7 @@ exports[`render 1`] = `
       <EuiFlexGroup
         alignItems="stretch"
         component="div"
+        direction="row"
         gutterSize="l"
         justifyContent="flexStart"
         responsive={true}
