@@ -57,7 +57,6 @@ const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
 const XPACK_INSTALLED = isDirectory(XPACK_INSTALLED_DIR);
 const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
 
-
 const pathCollector = function () {
   const paths = [];
   return function (path) {
@@ -109,7 +108,7 @@ function readServerSettings(opts, extraCliOptions) {
 
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
-    opts.pluginDir,
+    opts.pluginDir
   )));
 
   set('plugins.paths', _.compact([].concat(
