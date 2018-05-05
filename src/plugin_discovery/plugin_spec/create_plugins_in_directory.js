@@ -1,3 +1,4 @@
+import { basename } from 'path';
 import { isInvalidDirectoryError } from '../errors';
 
 import { createChildDirectory$ } from './lib';
@@ -18,6 +19,10 @@ import { createPluginAtPath$ } from './create_plugin_at_path';
  */
 export const createPluginsInDirectory$ = (scanDirectory) => (
   createChildDirectory$(scanDirectory)
+    .filter(directory => !(
+      basename(directory).startsWith('_') ||
+      basename(directory).startsWith('.')
+    ))
     .mergeMap(createPluginAtPath$)
     .catch(error => {
       // this error is produced by createChildDirectory$() when the path
