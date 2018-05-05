@@ -9,6 +9,7 @@ exports[`apmUiEnabled 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -40,6 +41,7 @@ exports[`apmUiEnabled 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="none"
     justifyContent="flexStart"
     responsive={true}
@@ -169,6 +171,7 @@ exports[`apmUiEnabled 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="center"
     responsive={true}
@@ -217,6 +220,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -248,6 +252,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="none"
     justifyContent="flexStart"
     responsive={true}
@@ -347,6 +352,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="center"
     responsive={true}
