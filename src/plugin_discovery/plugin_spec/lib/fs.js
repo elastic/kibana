@@ -21,11 +21,12 @@ async function statTest(path, test) {
     const stats = await fcb(cb => stat(path, cb));
     return Boolean(test(stats));
   } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
+    if (error.code === 'ENOENT' || error.code === 'ENOTDIR') {
+      return false;
     }
+
+    throw error;
   }
-  return false;
 }
 
 /**
