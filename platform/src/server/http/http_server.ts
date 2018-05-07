@@ -36,7 +36,7 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.server.route({
           method: route.method,
-          path: `${router.path}${route.path}`,
+          path: this.getRouteFullPath(router.path, route.path),
           handler: route.handler,
         });
       }
@@ -150,7 +150,10 @@ export class HttpServer {
       });
 
       if (!newURL) {
-        return responseToolkit.response('Not Found').code(404);
+        return responseToolkit
+          .response('Not Found')
+          .code(404)
+          .takeover();
       }
 
       request.setUrl(newURL);
@@ -160,5 +163,12 @@ export class HttpServer {
 
       return responseToolkit.continue;
     });
+  }
+
+  private getRouteFullPath(routerPath: string, routePath: string) {
+    // If router's path ends with slash and route's path starts with slash,
+    // we should omit one of them to have a valid concatenated path.
+    const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
+    return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 }

@@ -2,7 +2,8 @@ import http from 'http';
 import supertest from 'supertest';
 import Chance from 'chance';
 
-import { Env } from '../../../config/env';
+import { ByteSizeValue } from '@kbn/utils';
+import { Env } from '../../../config';
 import { Router } from '../router';
 import { HttpServer } from '../http_server';
 import { HttpConfig } from '../http_config';
@@ -13,18 +14,23 @@ const chance = new Chance();
 let server: HttpServer;
 let config: HttpConfig;
 
+function getServerListener(server: HttpServer) {
+  return (server as any).server.listener;
+}
+
 beforeEach(() => {
   config = {
     port: chance.integer({ min: 10000, max: 15000 }),
     host: '127.0.0.1',
+    maxPayload: new ByteSizeValue(1024),
     ssl: {},
   } as HttpConfig;
 
   server = new HttpServer(logger.get(), new Env('/kibana', {}));
 });
 
-afterEach(() => {
-  server && server.stop();
+afterEach(async () => {
+  await server.stop();
   logger._clear();
 });
 
@@ -47,8 +53,8 @@ test('200 OK with body', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo')
+  await supertest(getServerListener(server))
+    .get('/foo/')
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ key: 'value' });
@@ -66,8 +72,8 @@ test('202 Accepted with body', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo')
+  await supertest(getServerListener(server))
+    .get('/foo/')
     .expect(202)
     .then(res => {
       expect(res.body).toEqual({ location: 'somewhere' });
@@ -85,8 +91,8 @@ test('204 No content', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo')
+  await supertest(getServerListener(server))
+    .get('/foo/')
     .expect(204)
     .then(res => {
       expect(res.body).toEqual({});
@@ -106,8 +112,8 @@ test('400 Bad request with error', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo')
+  await supertest(getServerListener(server))
+    .get('/foo/')
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({ error: 'some message' });
@@ -119,7 +125,7 @@ test('valid params', async () => {
 
   router.get(
     {
-      path: '/:test',
+      path: '/{test}',
       validate: schema => ({
         params: schema.object({
           test: schema.string(),
@@ -135,7 +141,7 @@ test('valid params', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
+  await supertest(getServerListener(server))
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
@@ -148,7 +154,7 @@ test('invalid params', async () => {
 
   router.get(
     {
-      path: '/:test',
+      path: '/{test}',
       validate: schema => ({
         params: schema.object({
           test: schema.number(),
@@ -164,7 +170,7 @@ test('invalid params', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
+  await supertest(getServerListener(server))
     .get('/foo/some-string')
     .expect(400)
     .then(res => {
@@ -196,8 +202,8 @@ test('valid query', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo?bar=test&quux=123')
+  await supertest(getServerListener(server))
+    .get('/foo/?bar=test&quux=123')
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ bar: 'test', quux: 123 });
@@ -225,8 +231,8 @@ test('invalid query', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo?bar=test')
+  await supertest(getServerListener(server))
+    .get('/foo/?bar=test')
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
@@ -257,8 +263,8 @@ test('valid body', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .post('/foo')
+  await supertest(getServerListener(server))
+    .post('/foo/')
     .send({
       bar: 'test',
       baz: 123,
@@ -290,8 +296,8 @@ test('invalid body', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .post('/foo')
+  await supertest(getServerListener(server))
+    .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
     .then(res => {
@@ -322,8 +328,8 @@ test('handles putting', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .put('/foo')
+  await supertest(getServerListener(server))
+    .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
     .then(res => {
@@ -336,7 +342,7 @@ test('handles deleting', async () => {
 
   router.delete(
     {
-      path: '/:id',
+      path: '/{id}',
       validate: schema => ({
         params: schema.object({
           id: schema.number(),
@@ -352,7 +358,7 @@ test('handles deleting', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
+  await supertest(getServerListener(server))
     .delete('/foo/3')
     .expect(200)
     .then(res => {
@@ -371,8 +377,8 @@ test('returns 200 OK if returning object', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo')
+  await supertest(getServerListener(server))
+    .get('/foo/')
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ key: 'value' });
@@ -396,14 +402,129 @@ test('filtered headers', async () => {
 
   await server.start(config);
 
-  await supertest((server as any).server)
-    .get('/foo?bar=quux')
+  await supertest(getServerListener(server))
+    .get('/foo/?bar=quux')
     .set('x-kibana-foo', 'bar')
     .set('x-kibana-bar', 'quux');
 
   expect(filteredHeaders).toEqual({
     'x-kibana-foo': 'bar',
     host: `127.0.0.1:${config.port}`,
+  });
+});
+
+describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
+  let configWithBasePath: HttpConfig;
+
+  beforeEach(async () => {
+    configWithBasePath = {
+      ...config,
+      basePath: '/bar',
+      rewriteBasePath: false,
+    } as HttpConfig;
+
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async () => ({ key: 'value:/' }));
+    router.get({ path: '/foo', validate: false }, async () => ({ key: 'value:/foo' }));
+
+    server.registerRouter(router);
+
+    await server.start(configWithBasePath);
+  });
+
+  test('/bar => 404', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar')
+      .expect(404);
+  });
+
+  test('/bar/ => 404', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar/')
+      .expect(404);
+  });
+
+  test('/bar/foo => 404', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar/foo')
+      .expect(404);
+  });
+
+  test('/ => /', async () => {
+    await supertest(getServerListener(server))
+      .get('/')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'value:/' });
+      });
+  });
+
+  test('/foo => /foo', async () => {
+    await supertest(getServerListener(server))
+      .get('/foo')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'value:/foo' });
+      });
+  });
+});
+
+describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
+  let configWithBasePath: HttpConfig;
+
+  beforeEach(async () => {
+    configWithBasePath = {
+      ...config,
+      basePath: '/bar',
+      rewriteBasePath: true,
+    } as HttpConfig;
+
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async () => ({ key: 'value:/' }));
+    router.get({ path: '/foo', validate: false }, async () => ({ key: 'value:/foo' }));
+
+    server.registerRouter(router);
+
+    await server.start(configWithBasePath);
+  });
+
+  test('/bar => /', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'value:/' });
+      });
+  });
+
+  test('/bar/ => /', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar/')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'value:/' });
+      });
+  });
+
+  test('/bar/foo => /foo', async () => {
+    await supertest(getServerListener(server))
+      .get('/bar/foo')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'value:/foo' });
+      });
+  });
+
+  test('/ => 404', async () => {
+    await supertest(getServerListener(server))
+      .get('/')
+      .expect(404);
+  });
+
+  test('/foo => 404', async () => {
+    await supertest(getServerListener(server))
+      .get('/foo')
+      .expect(404);
   });
 });
 
@@ -434,7 +555,7 @@ describe('when run within legacy platform', () => {
     newPlatformProxyListenerMock.proxy.mockImplementation(
       (req: http.IncomingMessage, res: http.ServerResponse) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ key: 'legacy-platform' }));
+        res.end(JSON.stringify({ key: `legacy-platform:${req.url}` }));
       }
     );
   });
@@ -449,18 +570,42 @@ describe('when run within legacy platform', () => {
       expect.any((http as any).Server)
     );
     expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(
-      (server as any).server
+      getServerListener(server)
     );
   });
 
   test('forwards request to legacy platform if new one can not handle it', async () => {
     await server.start(config);
 
-    await supertest((server as any).server)
+    await supertest(getServerListener(server))
       .get('/legacy')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'legacy-platform' });
+        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
+        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
+        expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
+          expect.any((http as any).IncomingMessage),
+          expect.any((http as any).ServerResponse)
+        );
+      });
+  });
+
+  test('forwards request to legacy platform and rewrites base path if needed', async () => {
+    await server.start({
+      ...config,
+      basePath: '/bar',
+      rewriteBasePath: true,
+    });
+
+    await supertest(getServerListener(server))
+      .get('/legacy')
+      .expect(404);
+
+    await supertest(getServerListener(server))
+      .get('/bar/legacy')
+      .expect(200)
+      .then(res => {
+        expect(res.body).toEqual({ key: 'legacy-platform:/legacy' });
         expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
         expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
           expect.any((http as any).IncomingMessage),
@@ -472,8 +617,8 @@ describe('when run within legacy platform', () => {
   test('do not forward request to legacy platform if new one can handle it', async () => {
     await server.start(config);
 
-    await supertest((server as any).server)
-      .get('/new')
+    await supertest(getServerListener(server))
+      .get('/new/')
       .expect(200)
       .then(res => {
         expect(res.body).toEqual({ key: 'new-platform' });
