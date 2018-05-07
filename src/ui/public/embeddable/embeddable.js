@@ -44,5 +44,7 @@ export class Embeddable {
    */
   render(/*domNode*/) {}
 
+  async getEsQuery() {}
+
   destroy() {}
 }

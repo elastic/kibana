@@ -29,6 +29,9 @@ export const ml = (kibana) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
+      dashboardPanelActions: [
+        'plugins/ml/panel_action',
+      ],
       app: {
         title: 'Machine Learning',
         description: 'Machine Learning for the Elastic Stack',

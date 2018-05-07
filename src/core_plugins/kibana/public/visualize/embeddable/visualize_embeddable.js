@@ -54,6 +54,10 @@ export class VisualizeEmbeddable extends Embeddable  {
     };
   }
 
+  async getEsQuery() {
+    return await this.savedVisualization.searchSource._flatten();
+  }
+
   onContainerStateChanged(containerState) {
     const customization = containerState.embeddableCustomization;
     let isDirty = false;
