@@ -200,6 +200,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.clearValue();
       await input.type(value);
       await find.clickByCssSelector('.euiComboBoxOption');
+      await this.closeComboBoxOptionsList(comboBox);
       await remote.pressKeys('\uE004');
     }
 
@@ -208,7 +209,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const menu = await retry.try(
         async () => await testSubjects.find('comboBoxOptionsList'));
       const optionsText = await menu.getVisibleText();
-      await remote.pressKeys('\uE004'); // tab out of combo box to close menu
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      await this.closeComboBoxOptionsList(comboBox);
       return optionsText;
     }
 
@@ -233,13 +235,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clearComboBox(comboBoxSelector) {
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill');
-      selectedOptions.forEach(async (optionElement) => {
-        const closeIcon = await optionElement.findByClassName('euiIcon');
-        await closeIcon.click();
-        await remote.pressKeys('\uE004');
-        await PageObjects.common.sleep(5000);
-      });
+      const clearBtn = await comboBox.findByCssSelector('button.euiFormControlLayout__clear');
+      await clearBtn.click();
+    }
+
+    async closeComboBoxOptionsList(comboBoxElement) {
+      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      if (isOptionsListOpen) {
+        const closeBtn = await comboBoxElement.findByCssSelector('button.euiFormControlLayout__icon');
+        await closeBtn.click();
+      }
     }
 
     async addInputControl() {
