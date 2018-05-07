@@ -1,6 +1,5 @@
-
-import { toEditableConfig } from '../to_editable_config';
 import expect from 'expect.js';
+import { toEditableConfig } from '../to_editable_config';
 
 describe('Settings', function () {
   describe('Advanced', function () {

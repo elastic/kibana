@@ -1,6 +1,5 @@
-
-import { getValType } from '../get_val_type';
 import expect from 'expect.js';
+import { getValType } from '../get_val_type';
 
 describe('Settings', function () {
   describe('Advanced', function () {

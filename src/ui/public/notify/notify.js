@@ -62,7 +62,7 @@ function applyConfig(config) {
   const banner = config.get('notifications:banner');
 
   if (typeof banner === 'string' && banner.trim()) {
-    notify.banner(banner);
+    notify.banner(banner, 'notifications:banner');
   }
 }
 

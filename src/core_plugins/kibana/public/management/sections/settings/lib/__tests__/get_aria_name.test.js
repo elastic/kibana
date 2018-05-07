@@ -1,6 +1,5 @@
-
-import { getAriaName } from '../get_aria_name';
 import expect from 'expect.js';
+import { getAriaName } from '../get_aria_name';
 
 describe('Settings', function () {
   describe('Advanced', function () {
