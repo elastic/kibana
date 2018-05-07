@@ -5,6 +5,7 @@ import { Schemas } from '../../vis/editors/default/schemas';
 import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
+import otherBucketTemplate from '../controls/other_bucket.html';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
 import { toastNotifications } from '../../notify';
 

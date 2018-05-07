@@ -8,7 +8,7 @@ import moment from 'moment';
 import 'ui/filters/moment';
 import { isNumber, forEach, merge } from 'lodash';
 import { uiModules } from 'ui/modules';
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets } from 'ui/time_buckets';
 import 'plugins/watcher/components/flot_chart';
 import 'plugins/watcher/components/chart_tooltip';
 import template from './threshold_preview_chart.html';
@@ -19,8 +19,6 @@ const app = uiModules.get('xpack/watcher');
 
 app.directive('thresholdPreviewChart', function ($injector) {
   const config = $injector.get('config');
-  const Private = $injector.get('Private');
-  const TimeBuckets = Private(TimeBucketsProvider);
 
   moment.tz.setDefault(config.get('dateFormat:tz'));
 

@@ -21,7 +21,7 @@ import moment from 'moment';
 import { formatValue } from 'plugins/ml/formatters/format_value';
 import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets } from 'ui/time_buckets';
 import loadingIndicatorWrapperTemplate from 'plugins/ml/components/loading_indicator/loading_indicator_wrapper.html';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -51,7 +51,6 @@ module.directive('mlExplorerChart', function (
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 60 };
 
-    const TimeBuckets = Private(TimeBucketsProvider);
     let lineChartXScale = null;
     let lineChartYScale = null;
     let lineChartGroup;

@@ -27,7 +27,7 @@ import {
   filterAxisLabels,
   numTicksForDateFormat
 } from 'plugins/ml/util/chart_utils';
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets } from 'ui/time_buckets';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
@@ -100,8 +100,6 @@ module.directive('mlTimeseriesChart', function (
 
     let contextXScale = d3.time.scale().range([0, vizWidth]);
     let contextYScale = d3.scale.linear().range([contextChartHeight, contextChartLineTopMargin]);
-
-    const TimeBuckets = Private(TimeBucketsProvider);
 
     let fieldFormat = undefined;
 

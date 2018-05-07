@@ -16,15 +16,14 @@ import moment from 'moment';
 
 import { TimeBucketsCalcAutoIntervalProvider } from 'plugins/ml/util/ml_calc_auto_interval';
 import { inherits } from 'plugins/ml/util/inherits';
-import { TimeBucketsCalcEsIntervalProvider } from 'ui/time_buckets/calc_es_interval';
+import { calcEsInterval } from 'ui/time_buckets/calc_es_interval';
 
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets as KibanaTimeBuckets } from 'ui/time_buckets';
 export function IntervalHelperProvider(Private, timefilter, config) {
 
   const calcAuto = Private(TimeBucketsCalcAutoIntervalProvider);
-  const calcEsInterval = Private(TimeBucketsCalcEsIntervalProvider);
 
-  inherits(TimeBuckets, Private(TimeBucketsProvider));
+  inherits(TimeBuckets, KibanaTimeBuckets);
 
   function TimeBuckets() {
     this.barTarget = config.get('histogram:barTarget');
