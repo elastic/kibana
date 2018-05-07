@@ -66,7 +66,7 @@ export class MetricVisComponent extends Component {
   }
 
   _getFormattedValue(fieldFormatter, value) {
-    if (!value && isNaN(value)) return '-';
+    if (_.isNaN(value)) return '-';
     return fieldFormatter(value);
   }
 
