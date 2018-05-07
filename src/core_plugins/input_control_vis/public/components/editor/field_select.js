@@ -11,6 +11,8 @@ export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
+    this._hasUnmounted = false;
+
     this.state = {
       isLoading: false,
       fields: [],
@@ -19,12 +21,8 @@ export class FieldSelect extends Component {
     this.filterField = _.get(props, 'filterField', () => { return true; });
   }
 
-  componentWillMount() {
-    this._isMounted = true;
-  }
-
   componentWillUnmount() {
-    this._isMounted = false;
+    this._hasUnmounted = true;
   }
 
   componentDidMount() {
@@ -52,7 +50,7 @@ export class FieldSelect extends Component {
 
     const indexPattern = await this.props.getIndexPattern(indexPatternId);
 
-    if (!this._isMounted) {
+    if (this._hasUnmounted) {
       return;
     }
 
