@@ -8,6 +8,7 @@ exports[`renders ListControl 1`] = `
 >
   <EuiComboBox
     data-test-subj="listControlSelect0"
+    isClearable={true}
     onChange={[Function]}
     options={
       Array [
