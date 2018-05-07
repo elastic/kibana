@@ -15,6 +15,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
     });
 
+    after(async () => {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
+      await PageObjects.common.navigateToApp('dashboard');
+    });
+
     it('Exported dashboard adjusts EST time to UTC', async () => {
       const timeRange = await PageObjects.header.getPrettyDuration();
       expect(timeRange).to.be('April 10th 2018, 03:00:00.000 to April 10th 2018, 04:00:00.000');
