@@ -5,7 +5,7 @@ import fetch from 'axios';
 import pkg from '../../../package.json';
 import { UpdateModal as Component } from './update_modal';
 
-const siteUrl = 'http://canvas.elastic.co';
+const siteUrl = 'https://canvas.elastic.co';
 
 export const UpdateModal = compose(
   withState('filename', 'setFilename', null),
