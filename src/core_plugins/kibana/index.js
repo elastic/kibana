@@ -25,7 +25,6 @@ const mkdirp = Promise.promisify(mkdirpNode);
 export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
-    id: 'kibana',
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),

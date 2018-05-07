@@ -9,13 +9,12 @@ import {
 } from './plugin_config';
 
 import {
-  createPackAtPath$,
-  createPacksInDirectory$,
-} from './plugin_pack';
+  createPluginAtPath$,
+  createPluginsInDirectory$,
+} from './plugin_spec';
 
 import {
   isInvalidDirectoryError,
-  isInvalidPackError,
 } from './errors';
 
 function defaultConfig(settings) {
@@ -35,7 +34,7 @@ function bufferAllResults(observable) {
 /**
  * Determine a distinct value for each result from find$
  * so they can be deduplicated
- * @param  {{error?,pack?}} result
+ * @param  {{error?,plugin?}} result
  * @return {Any}
  */
 function getDistinctKeyForFindResult(result) {
@@ -44,12 +43,12 @@ function getDistinctKeyForFindResult(result) {
     return result.error.message;
   }
 
-  // packs are distinct by their absolute and real path
-  if (result.pack) {
-    return realpathSync(result.pack.getPath());
+  // plugins are distinct by their absolute and real path
+  if (result.plugin) {
+    return realpathSync(result.plugin.getPath());
   }
 
-  // non error/pack results shouldn't exist, but if they do they are all unique
+  // non error/plugin results shouldn't exist, but if they do they are all unique
   return result;
 }
 
@@ -76,19 +75,17 @@ function groupSpecsById(specs) {
  *  @return {Object<name,Rx>}
  */
 export function findPluginSpecs(settings, config = defaultConfig(settings)) {
-  // find plugin packs in configured paths/dirs
+  // find plugins in configured paths/dirs
   const find$ = Observable.merge(
-    ...config.get('plugins.paths').map(createPackAtPath$),
-    ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
+    ...config.get('plugins.paths').map(createPluginAtPath$),
+    ...config.get('plugins.scanDirs').map(createPluginsInDirectory$)
   )
     .distinct(getDistinctKeyForFindResult)
     .share();
 
   const extendConfig$ = find$
-    // get the specs for each found plugin pack
-    .mergeMap(({ pack }) => (
-      pack ? pack.getPluginSpecs() : []
-    ))
+    // get the plugins from each result
+    .mergeMap(({ plugin }) => [].concat(plugin || []))
     // make sure that none of the plugin specs have conflicting ids, fail
     // early if conflicts detected or merge the specs back into the stream
     .toArray()
@@ -142,27 +139,17 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     .share();
 
   return {
-    // plugin packs found when searching configured paths
-    pack$: find$
-      .mergeMap(result => (
-        result.pack ? [result.pack] : []
-      )),
-
     // errors caused by invalid directories of plugin directories
     invalidDirectoryError$: find$
       .mergeMap(result => (
         isInvalidDirectoryError(result.error) ? [result.error] : []
       )),
 
-    // errors caused by directories that we expected to be plugin but were invalid
-    invalidPackError$: find$
-      .mergeMap(result => (
-        isInvalidPackError(result.error) ? [result.error] : []
-      )),
-
     otherError$: find$
       .mergeMap(result => (
-        isUnhandledError(result.error) ? [result.error] : []
+        result.error && !isInvalidDirectoryError(result.error)
+          ? [result.error]
+          : []
       )),
 
     // { spec, message } objects produced when transforming deprecated
@@ -188,12 +175,4 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     invalidVersionSpec$: extendConfig$
       .mergeMap(result => result.invalidVersionSpecs),
   };
-}
-
-function isUnhandledError(error) {
-  return (
-    error != null &&
-    !isInvalidDirectoryError(error) &&
-    !isInvalidPackError(error)
-  );
 }

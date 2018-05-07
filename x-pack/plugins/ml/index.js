@@ -21,10 +21,8 @@ import { dataVisualizerRoutes } from './server/routes/data_visualizer';
 import { calendars } from './server/routes/calendars';
 import { fieldsService } from './server/routes/fields_service';
 
-export const ml = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-    id: 'ml',
     configPrefix: 'xpack.ml',
     publicDir: resolve(__dirname, 'public'),
 

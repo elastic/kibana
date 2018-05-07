@@ -13,10 +13,8 @@ import { checkLicense } from './server/lib/check_license';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 
 
-export const searchprofiler = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    require: ['elasticsearch', 'xpack_main'],
-    id: 'searchprofiler',
     configPrefix: 'xpack.searchprofiler',
     publicDir: resolve(__dirname, 'public'),
 

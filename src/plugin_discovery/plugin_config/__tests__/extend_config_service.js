@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 
 import { Config } from '../../../server/config';
-import { PluginPack } from '../../plugin_pack';
+import { PluginSpec } from '../../plugin_spec';
 import { extendConfigService, disableConfigExtension } from '../extend_config_service';
 import * as SchemaNS from '../schema';
 import * as SettingsNS from '../settings';
@@ -11,29 +11,23 @@ describe('plugin discovery/extend config service', () => {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.restore());
 
-  const pluginSpec = new PluginPack({
-    path: '/dev/null',
-    pkg: {
-      name: 'test',
-      version: 'kibana',
+  const pluginSpec = new PluginSpec('/dev/null', {
+    id: 'test',
+    version: 'kibana'
+  }, {
+    configPrefix: 'foo.bar.baz',
+
+    config: Joi => Joi.object({
+      enabled: Joi.boolean().default(true),
+      test: Joi.string().default('bonk'),
+    }).default(),
+
+    deprecations({ rename }) {
+      return [
+        rename('oldTest', 'test'),
+      ];
     },
-    provider: ({ Plugin }) => new Plugin({
-      configPrefix: 'foo.bar.baz',
-
-      config: Joi => Joi.object({
-        enabled: Joi.boolean().default(true),
-        test: Joi.string().default('bonk'),
-      }).default(),
-
-      deprecations({ rename }) {
-        return [
-          rename('oldTest', 'test'),
-        ];
-      },
-    }),
-  })
-    .getPluginSpecs()
-    .pop();
+  });
 
   describe('extendConfigService()', () => {
     it('calls getSettings, getSchema, and Config.extendSchema() correctly', async () => {

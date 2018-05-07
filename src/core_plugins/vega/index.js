@@ -1,7 +1,4 @@
 export default kibana => new kibana.Plugin({
-  id: 'vega',
-  require: ['elasticsearch'],
-
   uiExports: {
     visTypes: ['plugins/vega/vega_type'],
     injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),

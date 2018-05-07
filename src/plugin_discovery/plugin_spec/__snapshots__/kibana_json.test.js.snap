@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseKibanaJson() returns parsed kibana.json with defaults 1`] = `
+Object {
+  "id": "foo",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": Array [],
+  "version": "kibana",
+}
+`;
+
+exports[`parseKibanaJson() throws InvalidPluginError if kibana.json is missing 1`] = `"Plugin at <PLUGINS>/lib is invalid because kibana.json file expected in <PLUGINS>/lib"`;
+
+exports[`parseKibanaJson() throws validation error if kibana.json is invalid 1`] = `"Plugin at <PLUGINS>/missing_id is invalid because kibana.json validation failure: child \\"id\\" fails because [\\"id\\" is required]"`;

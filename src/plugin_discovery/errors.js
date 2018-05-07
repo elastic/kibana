@@ -15,32 +15,14 @@ export function isInvalidDirectoryError(error) {
   return error && error[errorCodeProperty] === ERROR_INVALID_DIRECTORY;
 }
 
-
-/**
- *  Thrown when trying to create a PluginPack for a path that
- *  is not a valid plugin definition
- *  @type {String}
- */
-const ERROR_INVALID_PACK = 'ERROR_INVALID_PACK';
-export function createInvalidPackError(path, reason) {
-  const error = new Error(`PluginPack${path ? ` at "${path}"` : ''} ${reason}`);
-  error[errorCodeProperty] = ERROR_INVALID_PACK;
-  error.path = path;
-  return error;
-}
-export function isInvalidPackError(error) {
-  return error && error[errorCodeProperty] === ERROR_INVALID_PACK;
-}
-
 /**
  *  Thrown when trying to load a PluginSpec that is invalid for some reason
  *  @type {String}
  */
 const ERROR_INVALID_PLUGIN = 'ERROR_INVALID_PLUGIN';
-export function createInvalidPluginError(spec, reason) {
-  const error = new Error(`Plugin from ${spec.getId()} at ${spec.getPack().getPath()} is invalid because ${reason}`);
+export function createInvalidPluginError(id, directory, reason) {
+  const error = new Error(`Plugin${id ? ` ${id}` : ''} at ${directory} is invalid because ${reason}`);
   error[errorCodeProperty] = ERROR_INVALID_PLUGIN;
-  error.spec = spec;
   return error;
 }
 export function isInvalidPluginError(error) {

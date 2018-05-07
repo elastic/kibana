@@ -1,16 +1,16 @@
 import expect from 'expect.js';
 
-import { PluginPack } from '../../plugin_pack';
+import { PluginSpec } from '../../plugin_spec';
 import { reduceExportSpecs } from '../reduce_export_specs';
 
-const PLUGIN = new PluginPack({
-  path: __dirname,
-  pkg: {
-    name: 'foo',
-    version: 'kibana'
-  },
-  provider: ({ Plugin }) => (
-    new Plugin({
+const PLUGIN_SPECS = [
+  new PluginSpec(
+    __dirname,
+    {
+      id: 'foo',
+      version: 'kibana'
+    },
+    {
       uiExports: {
         concatNames: {
           name: 'export1'
@@ -21,9 +21,9 @@ const PLUGIN = new PluginPack({
           'export3',
         ],
       }
-    })
+    }
   )
-});
+];
 
 const REDUCERS = {
   concatNames(acc, spec, type, pluginSpec) {
@@ -43,8 +43,6 @@ const REDUCERS = {
     };
   },
 };
-
-const PLUGIN_SPECS = PLUGIN.getPluginSpecs();
 
 describe('reduceExportSpecs', () => {
   it('combines ui exports from a list of plugin definitions', () => {

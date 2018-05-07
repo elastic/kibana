@@ -15,8 +15,9 @@ describe('plugin discovery', () => {
       const { spec$ } = findPluginSpecs({
         plugins: {
           paths: [
+            resolve(PLUGIN_FIXTURES, 'bar:one'),
+            resolve(PLUGIN_FIXTURES, 'bar:two'),
             resolve(PLUGIN_FIXTURES, 'foo'),
-            resolve(PLUGIN_FIXTURES, 'bar'),
           ]
         }
       });
@@ -57,8 +58,9 @@ describe('plugin discovery', () => {
 
         plugins: {
           paths: [
+            resolve(PLUGIN_FIXTURES, 'bar:one'),
+            resolve(PLUGIN_FIXTURES, 'bar:two'),
             resolve(PLUGIN_FIXTURES, 'foo'),
-            resolve(PLUGIN_FIXTURES, 'bar')
           ]
         }
       });
@@ -77,10 +79,12 @@ describe('plugin discovery', () => {
         plugins: {
           scanDirs: [PLUGIN_FIXTURES],
           paths: [
+            resolve(PLUGIN_FIXTURES, 'bar:one'),
             resolve(PLUGIN_FIXTURES, 'foo'),
+            resolve(PLUGIN_FIXTURES, 'bar:two'),
             resolve(PLUGIN_FIXTURES, 'foo'),
-            resolve(PLUGIN_FIXTURES, 'bar'),
-            resolve(PLUGIN_FIXTURES, 'bar'),
+            resolve(PLUGIN_FIXTURES, 'bar:two'),
+            resolve(PLUGIN_FIXTURES, 'bar:one'),
           ],
         }
       });
@@ -101,6 +105,7 @@ describe('plugin discovery', () => {
             scanDirs: [],
             paths: [
               resolve(CONFLICT_FIXTURES, 'foo'),
+              resolve(CONFLICT_FIXTURES, 'also_foo'),
             ],
           }
         });

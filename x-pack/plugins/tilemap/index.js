@@ -8,11 +8,9 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { inspectSettings } from './server/lib/inspect_settings';
 import { resolve } from 'path';
 
-export const tilemap = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    id: 'tilemap',
     configPrefix: 'xpack.tilemap',
-    require: ['xpack_main', 'kbn_vislib_vis_types'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       visTypeEnhancers: [ 'plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],

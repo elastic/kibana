@@ -23,6 +23,19 @@ function canRequire(path) {
   }
 }
 
+function isDirectory(path) {
+  try {
+    const stat = statSync(path);
+    return stat.isDirectory();
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    } else {
+      return false;
+    }
+  }
+}
+
 function isSymlinkTo(link, dest) {
   try {
     const stat = lstatSync(link);
@@ -41,7 +54,7 @@ const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 // install is a link to the source, not an actual install
 const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
 const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_INSTALLED_DIR);
+const XPACK_INSTALLED = isDirectory(XPACK_INSTALLED_DIR);
 const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
 
 const pathCollector = function () {

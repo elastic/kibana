@@ -15,9 +15,7 @@ import { uiExports } from './ui_exports';
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
-export const monitoring = (kibana) => new kibana.Plugin({
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
-  id: 'monitoring',
+export default (kibana) => new kibana.Plugin({
   configPrefix: 'xpack.monitoring',
   publicDir: resolve(__dirname, 'public'),
   init(server, _options) { init(this, server); },

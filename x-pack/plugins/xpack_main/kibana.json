@@ -1,0 +1,7 @@
+{
+  "id": "xpack_main",
+  "version": "kibana",
+  "requiredPlugins": [
+    "elasticsearch"
+  ]
+}

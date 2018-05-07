@@ -10,12 +10,9 @@ import { registerLogstashPipelineRoutes } from './server/routes/api/pipeline';
 import { registerLogstashUpgradeRoutes } from './server/routes/api/upgrade';
 import { registerLogstashClusterRoutes } from './server/routes/api/cluster';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { PLUGIN } from './common/constants';
 
-export const logstash = (kibana) => new kibana.Plugin({
-  id: PLUGIN.ID,
+export default (kibana) => new kibana.Plugin({
   publicDir: resolve(__dirname, 'public'),
-  require: ['kibana', 'elasticsearch', 'xpack_main'],
   configPrefix: 'xpack.logstash',
   config(Joi) {
     return Joi.object({

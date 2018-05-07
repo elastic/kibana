@@ -1,0 +1,8 @@
+{
+  "id": "tilemap",
+  "version": "kibana",
+  "requiredPlugins": [
+    "xpack_main",
+    "kbn_vislib_vis_types"
+  ]
+}

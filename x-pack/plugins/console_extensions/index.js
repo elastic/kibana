@@ -5,10 +5,9 @@
  */
 
 import { join } from 'path';
-export function consoleExtensions(kibana) {
+
+export default function (kibana) {
   return new kibana.Plugin({
-    id: 'console_extensions',
-    require: ['kibana', 'console'],
     isEnabled(config) {
       return (
         config.get('console_extensions.enabled') &&

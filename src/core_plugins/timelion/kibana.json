@@ -1,0 +1,8 @@
+{
+  "id": "timelion",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch"
+  ]
+}

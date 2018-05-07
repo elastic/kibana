@@ -1,23 +1,17 @@
 import expect from 'expect.js';
 
-import { PluginPack } from '../../plugin_pack';
+import { PluginSpec } from '../../plugin_spec';
 import { getSchema, getStubSchema } from '../schema';
 
 describe('plugin discovery/schema', () => {
   function createPluginSpec(configProvider) {
-    return new PluginPack({
-      path: '/dev/null',
-      pkg: {
-        name: 'test',
-        version: 'kibana',
-      },
-      provider: ({ Plugin }) => new Plugin({
-        configPrefix: 'foo.bar.baz',
-        config: configProvider,
-      }),
-    })
-      .getPluginSpecs()
-      .pop();
+    return new PluginSpec('/dev/null', {
+      name: 'test',
+      version: 'kibana',
+    }, {
+      configPrefix: 'foo.bar.baz',
+      config: configProvider,
+    });
   }
 
   describe('getSchema()', () => {

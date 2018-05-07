@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loadPluginProvider() throws InvalidPluginError if plugin does not have an index.js file 1`] = `"Plugin foo at <PLUGINS>/broken is invalid because Cannot find module '<PLUGINS>/broken' from 'plugin_provider.js'"`;
+
+exports[`loadPluginProvider() throws InvalidPluginError if provider is not a function 1`] = `"Plugin foo at <PLUGINS>/exports_number is invalid because must export a function"`;
