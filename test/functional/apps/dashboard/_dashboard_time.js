@@ -8,7 +8,7 @@ const toTime = '2015-09-23 18:31:44.000';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
-  describe('dashboard time', function dashboardSaveWithTime() {
+  describe('dashboard time', () => {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -18,15 +18,15 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('dashboard without stored timed', async function () {
-      it('is saved', async function () {
+    describe('dashboard without stored timed', () => {
+      it('is saved', async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
         const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         expect(isDashboardSaved).to.eql(true);
       });
 
-      it('Does not set the time picker on open', async function () {
+      it('Does not set the time picker on open', async () => {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
