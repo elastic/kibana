@@ -35,40 +35,44 @@ export function fatalErrorHandler(err) {
 }
 
 export async function runFunctionTests() {
-  const cmd = new Command('node scripts/functional_tests');
+  try {
+    const cmd = new Command('node scripts/functional_tests');
 
-  cmd
-    .option(
-      '--bail',
-      'Stop the functional_test_runner as soon as a failure occurs'
-    )
-    .option(
-      '--kibana-install-dir <path>',
-      'Run Kibana from an existing install directory'
-    )
-    .option(
-      '--es-from <from>',
-      'Run ES from either source or snapshot [default: snapshot]'
-    )
-    .parse(process.argv);
+    cmd
+      .option(
+        '--bail',
+        'Stop the functional_test_runner as soon as a failure occurs'
+      )
+      .option(
+        '--kibana-install-dir <path>',
+        'Run Kibana from an existing install directory'
+      )
+      .option(
+        '--es-from <from>',
+        'Run ES from either source or snapshot [default: snapshot]'
+      )
+      .parse(process.argv);
 
-  await withProcRunner(async procs => {
-    const ftrConfig = await getFtrConfig();
+    await withProcRunner(log, async procs => {
+      const ftrConfig = await getFtrConfig();
 
-    const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
-    await runKibanaServer({
-      procs,
-      ftrConfig,
-      existingInstallDir: cmd.kibanaInstallDir,
+      const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
+      await runKibanaServer({
+        procs,
+        ftrConfig,
+        existingInstallDir: cmd.kibanaInstallDir,
+      });
+      await runFtr({
+        procs,
+        bail: cmd.bail,
+      });
+
+      await procs.stop('kibana');
+      await es.cleanup();
     });
-    await runFtr({
-      procs,
-      bail: cmd.bail,
-    });
-
-    await procs.stop('kibana');
-    await es.cleanup();
-  });
+  } catch (err) {
+    fatalErrorHandler(err);
+  }
 }
 
 export async function runApiTests() {
@@ -90,7 +94,7 @@ export async function runApiTests() {
     .parse(process.argv);
 
   try {
-    await withProcRunner(async procs => {
+    await withProcRunner(log, async procs => {
       const ftrConfig = await getFtrConfig();
 
       const es = await runEsWithXpack({ ftrConfig, from: cmd.esFrom });
@@ -155,7 +159,7 @@ export async function runFunctionalTestsServer() {
   const useSAML = cmd.saml;
 
   try {
-    await withProcRunner(async procs => {
+    await withProcRunner(log, async procs => {
       const ftrConfig = await getFtrConfig();
       await runEsWithXpack({ ftrConfig, useSAML, from: cmd.esFrom });
       await runKibanaServer({
@@ -165,14 +169,15 @@ export async function runFunctionalTestsServer() {
         useSAML,
       });
 
-      // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get burried
+      // wait for 5 seconds of silence before logging the
+      // success message so that it doesn't get buried
       await Rx.Observable.fromEvent(log, 'data')
+        .startWith(null)
         .switchMap(() => Rx.Observable.timer(5000))
-        .first()
+        .take(1)
         .toPromise();
 
-      log.info(SUCCESS_MESSAGE);
+      log.success(SUCCESS_MESSAGE);
       await procs.waitForAllToStop();
     });
   } catch (err) {

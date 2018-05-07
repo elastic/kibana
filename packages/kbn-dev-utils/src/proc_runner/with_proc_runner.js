@@ -5,11 +5,12 @@ import { ProcRunner } from './proc_runner';
  *  the async function finishes the ProcRunner is torn-down
  *  automatically
  *
+ *  @param  {ToolingLog} log
  *  @param  {async Function} fn
  *  @return {Promise<undefined>}
  */
-export async function withProcRunner(fn) {
-  const procs = new ProcRunner();
+export async function withProcRunner(log, fn) {
+  const procs = new ProcRunner({ log });
   try {
     await fn(procs);
   } finally {
