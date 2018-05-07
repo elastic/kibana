@@ -135,6 +135,7 @@ class GaugePanelConfig extends Component {
               Gauge Style
             </label>
             <EuiComboBox
+              isClearable={false}
               id={htmlId('gaugeStyle')}
               options={styleOptions}
               selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}

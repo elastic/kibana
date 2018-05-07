@@ -35,6 +35,7 @@ function GroupBySelect(props) {
   });
   return (
     <EuiComboBox
+      isClearable={false}
       options={modeOptions}
       selectedOptions={[selectedOption]}
       onChange={props.onChange}

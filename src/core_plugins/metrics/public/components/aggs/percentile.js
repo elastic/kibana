@@ -84,6 +84,7 @@ class Percentiles extends Component {
           <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
           <div className="vis_editor__row_item">
             <EuiComboBox
+              isClearable={false}
               id={htmlId('mode')}
               options={modeOptions}
               selectedOptions={selectedModeOption ? [selectedModeOption] : []}

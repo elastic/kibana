@@ -135,6 +135,7 @@ class MarkdownPanelConfig extends Component {
             </label>
             <div className="vis_editor__row_item">
               <EuiComboBox
+                isClearable={false}
                 id={htmlId('valign')}
                 options={alignOptions}
                 selectedOptions={selectedAlignOption ? [selectedAlignOption] : []}

@@ -96,6 +96,7 @@ export const MovingAverageAgg = props => {
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
             <EuiComboBox
+              isClearable={false}
               id={htmlId('model')}
               placeholder="Select..."
               options={modelOptions}

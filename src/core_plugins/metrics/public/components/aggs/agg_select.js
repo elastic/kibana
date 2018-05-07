@@ -126,6 +126,7 @@ function AggSelect(props) {
   return (
     <div data-test-subj="aggSelector" className="vis_editor__row_item">
       <EuiComboBox
+        isClearable={false}
         placeholder="Select aggregation"
         options={options}
         selectedOptions={selectedOptions}

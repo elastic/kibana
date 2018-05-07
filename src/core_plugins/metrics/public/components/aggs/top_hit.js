@@ -115,6 +115,7 @@ export const TopHitAgg = props => {
               Aggregate with
             </label>
             <EuiComboBox
+              isClearable={false}
               id={htmlId('agg_with')}
               placeholder="Select..."
               options={aggWithOptions}
@@ -141,6 +142,7 @@ export const TopHitAgg = props => {
               Order
             </label>
             <EuiComboBox
+              isClearable={false}
               id={htmlId('order')}
               placeholder="Select..."
               options={orderOptions}

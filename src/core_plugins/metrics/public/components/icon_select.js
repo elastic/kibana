@@ -45,6 +45,7 @@ function IconSelect(props) {
   });
   return (
     <EuiComboBox
+      isClearable={false}
       id={props.id}
       options={props.icons}
       selectedOptions={selectedIcon ? [selectedIcon] : []}
