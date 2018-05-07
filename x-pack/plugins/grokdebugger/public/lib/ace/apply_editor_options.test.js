@@ -39,8 +39,8 @@ describe('applyEditorOptions', () => {
     expect(setUseWrapMode.mock.calls[0][0]).toBe(true);
 
     expect(setScrollMargin.mock.calls).toHaveLength(1);
-    expect(setScrollMargin.mock.calls[0][0]).toEqual(EDITOR.SCROLL_MARGIN_TOP);
-    expect(setScrollMargin.mock.calls[0][1]).toEqual(EDITOR.SCROLL_MARGIN_BOTTOM);
+    expect(setScrollMargin.mock.calls[0][0]).toEqual(EDITOR.SCROLL_MARGIN_TOP_PX);
+    expect(setScrollMargin.mock.calls[0][1]).toEqual(EDITOR.SCROLL_MARGIN_BOTTOM_PX);
     expect(setScrollMargin.mock.calls[0][2]).toEqual(0);
     expect(setScrollMargin.mock.calls[0][3]).toEqual(0);
 

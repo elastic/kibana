@@ -58,8 +58,8 @@ app.directive('pipelineEdit', function ($injector) {
            * typing experience.
            */
           editor.renderer.setScrollMargin(
-            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_TOP,
-            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM,
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_TOP_PX,
+            EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM_PX,
             0,
             0
           );
