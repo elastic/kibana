@@ -16,7 +16,8 @@ describe('Validate config', function () {
   beforeEach(() => {
     config = {
       get: sinon.stub(),
-      set: sinon.stub()
+      getDefault: sinon.stub(),
+      set: sinon.stub(),
     };
     log.reset();
   });
@@ -72,6 +73,22 @@ describe('Validate config', function () {
 
     sinon.assert.neverCalledWith(config.set, 'xpack.security.encryptionKey');
     sinon.assert.calledWith(config.set, 'xpack.security.secureCookies', true);
+    sinon.assert.notCalled(log);
+  });
+
+  it('should throw error if xpack.security.rbac.application is the default when kibana.index is set', function () {
+    // other valid keys that we need
+    config.get.withArgs('server.ssl.key').returns('foo');
+    config.get.withArgs('server.ssl.certificate').returns('bar');
+    config.get.withArgs('xpack.security.encryptionKey').returns(validKey);
+
+    config.get.withArgs('kibana.index').returns('notDefaultIndex');
+    config.get.withArgs('xpack.security.rbac.application').returns('defaultApplication');
+    config.getDefault.withArgs('kibana.index').returns('defaultIndex');
+    config.getDefault.withArgs('xpack.security.rbac.application').returns('defaultApplication');
+
+    expect(() => validateConfig(config, log)).to.throwError();
+
     sinon.assert.notCalled(log);
   });
 });

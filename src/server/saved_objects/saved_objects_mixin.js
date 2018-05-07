@@ -1,5 +1,5 @@
+import { SavedObjectsClientProvider } from './client/lib';
 import { SavedObjectsClient } from './client';
-
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -62,12 +62,31 @@ export function savedObjectsMixin(kbnServer, server) {
     }
   }
 
-  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    return new SavedObjectsClient({
-      index: server.config().get('kibana.index'),
+  server.decorate('server', 'getSavedObjectsClientProvider', () => SavedObjectsClientProvider);
+
+  server.decorate('server', 'savedObjectsClientFactory', ({ callCluster, request }) => {
+    const createBaseClient = (options) => {
+      const {
+        server,
+        mappings,
+        callCluster,
+        onBeforeWrite,
+      } = options;
+
+      return new SavedObjectsClient({
+        index: server.config().get('kibana.index'),
+        mappings,
+        callCluster,
+        onBeforeWrite
+      });
+    };
+
+    return SavedObjectsClientProvider.createSavedObjectsClient(createBaseClient, {
+      server,
+      request,
       mappings: server.getKibanaIndexMappingsDsl(),
       callCluster,
-      onBeforeWrite,
+      onBeforeWrite
     });
   });
 
@@ -81,7 +100,8 @@ export function savedObjectsMixin(kbnServer, server) {
 
     const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
     const callCluster = (...args) => callWithRequest(request, ...args);
-    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
+
+    const savedObjectsClient = server.savedObjectsClientFactory({ callCluster, request });
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

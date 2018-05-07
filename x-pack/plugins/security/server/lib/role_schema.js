@@ -19,6 +19,7 @@ export const roleSchema = {
     query: Joi.string().allow('')
   }),
   run_as: Joi.array().items(Joi.string()),
+  applications: Joi.array(),
   metadata: Joi.object(),
   transient_metadata: Joi.object()
 };
