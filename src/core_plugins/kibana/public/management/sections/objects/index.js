@@ -20,7 +20,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'saved_objects',
     title: 'Saved Objects',
     description: 'Import, export, and manage your saved searches, visualizations, and dashboards.',
-    icon: '/plugins/kibana/assets/app_saved_objects.svg',
+    icon: 'savedObjectsApp',
     path: '/app/kibana#/management/kibana/objects',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
