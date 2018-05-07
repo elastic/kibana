@@ -54,15 +54,17 @@ export async function fetchBeatsStats(server, callCluster, clusterUuids, start, 
 
   const results = await callCluster('search', params);
 
-  const hitsLength = get(results, 'hits.hits.length', -1);
-  resultSet.push(results);
-  if (hitsLength === HITS_SIZE) {
-    // call recursively
-    const nextOptions = {
-      page: page + 1,
-      resultSet
-    };
-    return fetchBeatsStats(server, callCluster, clusterUuids, start, end, nextOptions);
+  const hitsLength = get(results, 'hits.hits.length', 0);
+  if (hitsLength > 0) {
+    resultSet.push(results);
+    if (hitsLength === HITS_SIZE) {
+      // call recursively
+      const nextOptions = {
+        page: page + 1,
+        resultSet
+      };
+      return fetchBeatsStats(server, callCluster, clusterUuids, start, end, nextOptions);
+    }
   }
 
   return resultSet; // contains all previously fetched results
