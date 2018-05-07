@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiCodeEditor } from '@elastic/eui';
-
+import {
+  EuiCodeEditor,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import ace from 'brace';
 import 'brace/mode/json';
 import {
   mergeAndPreserveDuplicateKeys,
@@ -24,6 +32,14 @@ export class DiffView extends PureComponent {
     }).isRequired,
   };
 
+  scrollToKey = (key, value) => {
+    const editorDom = this.aceEditor.aceEditor.refEditor;
+    const editor = ace.edit(editorDom);
+    const escapedValue = value.replace(/\^/, '\\^');
+    const range = editor.find(new RegExp(`"${key}"\\s*:\\s*"*(${escapedValue})"*`), { regex: true });
+    editor.gotoLine(range.start.row + 1, range.start.column);
+  }
+
   render() {
     const {
       templateDiff: { originalFullIndexTemplate, newFullIndexTemplate },
@@ -31,12 +47,12 @@ export class DiffView extends PureComponent {
 
     // console.log(JSON.stringify(this.props));
 
-    const mergedJson = mergeAndPreserveDuplicateKeys(
+    const { result: mergedJson, changes } = mergeAndPreserveDuplicateKeys(
       originalFullIndexTemplate,
       newFullIndexTemplate
     );
 
-    // console.log('mergedJson', mergedJson);
+    // console.log('mergedJson', mergedJson, changes);
 
     // Strip the ^ and $ characters
     const mergedJsonAsString = removePrefixes(
@@ -46,18 +62,46 @@ export class DiffView extends PureComponent {
     addDiffAddonsForAce(mergedJson);
 
     return (
-      <EuiCodeEditor
-        mode="diff_json"
-        theme="github"
-        width="100%"
-        value={mergedJsonAsString}
-        setOptions={{
-          useWorker: false,
-        }}
-        editorProps={{
-          $blockScrolling: Infinity,
-        }}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList>
+            {changes.map(({ key, original, updated }) => (
+              <Fragment key={key}>
+                <EuiDescriptionListTitle>
+                  <EuiButtonEmpty onClick={() => this.scrollToKey(key, updated)}>
+                    {key}
+                  </EuiButtonEmpty>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {original ? (
+                    <span>
+                      Changing `{original}` to `{updated}``
+                    </span>
+                  ) : (
+                    <span>Adding with `{updated}`</span>
+                  )}
+                </EuiDescriptionListDescription>
+              </Fragment>
+            ))}
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiCodeEditor
+            ref={aceEditor => (this.aceEditor = aceEditor)}
+            mode="diff_json"
+            theme="github"
+            width="100%"
+            value={mergedJsonAsString}
+            setOptions={{
+              useWorker: false,
+              readOnly: true,
+            }}
+            editorProps={{
+              $blockScrolling: Infinity,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

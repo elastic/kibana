@@ -23,7 +23,7 @@ function findInObject(key, obj) {
 }
 
 function getDiffClasses(key, val, jsonObject) {
-  // const debug = false;//key === 'sattr_name';
+  // const debug = key === 'react';
 
   let value = val;
   if (value.endsWith(',')) {

@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ADDITION_PREFIX = '$';
-export const REMOVAL_PREFIX = '^';
+export const ADDITION_PREFIX = '$$$';
+export const REMOVAL_PREFIX = '^^^';
+const escapePrefix = prefix => prefix.split('').map(i => `\\${i}`).join('');
 const removePrefixRegex = new RegExp(
-  `(\\${ADDITION_PREFIX}|\\${REMOVAL_PREFIX})`,
+  `(${escapePrefix(ADDITION_PREFIX)})|(${escapePrefix(REMOVAL_PREFIX)})`,
   'g'
 );
 
+export const isBoolean = value => JSON.parse(value) === true || JSON.parse(value) === false;
 const isObject = value => typeof value === 'object' && !Array.isArray(value);
 const isDifferent = (obj, key, value) => {
   // If the object does not contain the key, then ignore since it's not a removal or addition
@@ -46,7 +48,7 @@ const getAdditions = obj => {
 
 export const removePrefixes = str => str.replace(removePrefixRegex, '');
 
-export const mergeAndPreserveDuplicateKeys = (source, target, result = {}) => {
+export const mergeAndPreserveDuplicateKeys = (source, target, result = {}, changes = []) => {
   for (const [key, value] of Object.entries(source)) {
     // const debug = key === 'fooobar';
     // debug && console.log('mergeAndPreserveDuplicateKeys', key, value, target);
@@ -54,10 +56,17 @@ export const mergeAndPreserveDuplicateKeys = (source, target, result = {}) => {
       // debug && console.log('isDifferent');
       result[`${REMOVAL_PREFIX}${key}`] = value;
       result[`${ADDITION_PREFIX}${key}`] = target[key];
+      changes.push({
+        key,
+        original: value,
+        updated: target[key],
+      });
     } else if (isObject(value)) {
       // debug && console.log('value is object', target[key]);
       if (target.hasOwnProperty(key)) {
-        result[key] = mergeAndPreserveDuplicateKeys(value, target[key]);
+        const recurseResult = mergeAndPreserveDuplicateKeys(value, target[key]);
+        result[key] = recurseResult.result;
+        changes.push(...recurseResult.changes);
       } else {
         result[key] = value;
       }
@@ -80,6 +89,10 @@ export const mergeAndPreserveDuplicateKeys = (source, target, result = {}) => {
     } else {
       result[`${ADDITION_PREFIX}${key}`] = value;
     }
+    changes.push({
+      key,
+      updated: result[`${ADDITION_PREFIX}${key}`],
+    });
   }
-  return result;
+  return { result, changes };
 };
