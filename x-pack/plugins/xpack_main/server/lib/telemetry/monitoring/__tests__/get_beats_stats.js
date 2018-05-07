@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchBeatsStats, handleBeatsResultSet } from '../get_beats_stats';
+import { fetchBeatsStats, processResults } from '../get_beats_stats';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import beatsStatsResultSet from './fixtures/beats_stats_results';
@@ -57,40 +57,38 @@ describe('Get Beats Stats', () => {
     });
   });
 
-  describe('handleBeatsResultSet', () => {
+  describe('processResults', () => {
     it('should summarize empty results', () => {
-      const expectedEmpty = {};
+      const resultsEmpty = undefined;
+      const clusters = {};
+      const clusterHostMaps = {};
 
-      const resultsEmpty = handleBeatsResultSet([{}, {}, {}]);
-      expect(resultsEmpty).to.eql(expectedEmpty);
+      processResults(resultsEmpty, clusters, clusterHostMaps);
 
-      const resultsQuiteEmpty = handleBeatsResultSet([]);
-      expect(resultsQuiteEmpty).to.eql(expectedEmpty);
-
-      const resultsTotallyEmpty = handleBeatsResultSet();
-      expect(resultsTotallyEmpty).to.eql(expectedEmpty);
+      expect(clusters).to.eql({});
     });
 
     it('should summarize single result with some missing fields', () => {
-      const results = handleBeatsResultSet([
-        {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  cluster_uuid: 'FlV4ckTxQ0a78hmBkzzc9A',
-                  beats_stats: {
-                    metrics: { libbeat: { output: { type: 'elasticsearch' } } }, // missing events published
-                    beat: { type: 'cowbeat' }, // missing version and output
-                  },
+      const results = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                cluster_uuid: 'FlV4ckTxQ0a78hmBkzzc9A',
+                beats_stats: {
+                  metrics: { libbeat: { output: { type: 'elasticsearch' } } }, // missing events published
+                  beat: { type: 'cowbeat' }, // missing version and output
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-      ]);
+      };
+      const clusters = {};
+      const clusterHostMaps = {};
+      processResults(results, clusters, clusterHostMaps);
 
-      expect(results).to.eql({
+      expect(clusters).to.eql({
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 1,
           versions: {},
@@ -103,8 +101,16 @@ describe('Get Beats Stats', () => {
     });
 
     it('should summarize stats from hits across multiple result objects', () => {
-      const results = handleBeatsResultSet(beatsStatsResultSet); // NOTE: HITS_SIZE was 2 when capturing these results, so the set has hits in 205 result objects
-      const expected = {
+
+      const clusters = {};
+      const clusterHostMaps = {};
+
+      // beatsStatsResultSet is an array of many small query results
+      beatsStatsResultSet.forEach(results => {
+        processResults(results, clusters, clusterHostMaps);
+      });
+
+      expect(clusters).to.eql({
         W7hppdX7R229Oy3KQbZrTw: {
           count: 5,
           versions: { '7.0.0-alpha1': 5 },
@@ -130,9 +136,7 @@ describe('Get Beats Stats', () => {
           eventsPublished: 723985,
           hosts: 1,
         },
-      };
-
-      expect(results).to.eql(expected);
+      });
     });
   });
 });
