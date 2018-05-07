@@ -3,7 +3,7 @@ import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 
 import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
 import UtilsMappingSetupProvider from '../utils/mapping_setup';
-import { Notifier } from '../notify';
+import { Notifier, toastNotifications } from '../notify';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -200,7 +200,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return getRoutes();
     }
 
-    init() {
+    init(storeOriginal = true) {
       watch(this);
 
       if (!this.id) {
@@ -211,6 +211,8 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         .then(resp => {
           // temporary compatability for savedObjectsClient
 
+          this.version = resp._version;
+
           return {
             _id: resp.id,
             _type: resp.type,
@@ -219,6 +221,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           };
         })
         .then(response => updateFromElasticSearch(this, response))
+        .then(() => {
+          if (storeOriginal) {
+            this.originalBody = this.prepBody();
+          }
+        })
         .then(() => this);
     }
 
@@ -407,8 +414,48 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     }
 
     save() {
-      return savedObjectsClient.update(type, this.id, this.prepBody())
-        .then(({ id }) => setId(this, id));
+      const body = this.prepBody();
+      // What keys changed since they last pulled the index pattern
+      const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
+
+      return savedObjectsClient.update(type, this.id, body, { version: this.version })
+        .then(({ id }) => setId(this, id))
+        .catch(err => {
+          if (err.statusCode === 409) {
+            return this.init(false)
+              .then(() => {
+                // What keys changed from now and what the server returned
+                const updatedBody = this.prepBody();
+
+                // Build a list of changed keys from the server response
+                // and ensure we ignore the key if the server response
+                // is the same as the original response (since that is expected
+                // if we made a change in that key)
+                const serverChangedKeys = Object.keys(updatedBody).filter(key => {
+                  return updatedBody[key] !== body[key] && this.originalBody[key] !== updatedBody[key];
+                });
+
+                let unresolvedCollision = false;
+                for (const originalKey of originalChangedKeys) {
+                  for (const serverKey of serverChangedKeys) {
+                    if (originalKey === serverKey) {
+                      unresolvedCollision = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (unresolvedCollision) {
+                  toastNotifications.addDanger('Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.'); // eslint-disable-line max-len
+                  throw err;
+                }
+
+                // Try the save again
+                return this.save();
+              });
+          }
+          throw err;
+        });
     }
 
     refreshFields() {
