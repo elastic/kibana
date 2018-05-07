@@ -24,7 +24,7 @@ export interface URLMeaningfulParts {
  *    - auth
  *    - hostname (just the name of the host, no port or auth information)
  *    - port
- *    - pathmame (the path after the hostname, no query or hash, starts
+ *    - pathname (the path after the hostname, no query or hash, starts
  *        with a slash if there was a path)
  *    - query (always an object, even when no query on original url)
  *    - hash
@@ -34,7 +34,7 @@ export interface URLMeaningfulParts {
  *      properties on the "parsed" output. Modifying any of these might
  *      lead to the modifications being ignored (depending on which
  *      property was modified)
- *    - It's not always clear wither to use path/pathname, host/hostname,
+ *    - It's not always clear whether to use path/pathname, host/hostname,
  *      so this tries to add helpful constraints
  *
  *  @param url The string url to parse.

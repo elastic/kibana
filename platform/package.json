@@ -14,11 +14,11 @@
     "@kbn/observable": "link:../packages/kbn-observable",
     "@kbn/utils": "link:../packages/kbn-utils",
     "hapi": "^17.4.0",
-    "rxjs": "^6.0.0",
+    "rxjs": "^6.1.0",
     "type-detect": "^4.0.8"
   },
   "devDependencies": {
-    "@types/hapi": "^17.0.11",
+    "@types/hapi": "^17.0.12",
     "@types/has-ansi": "^3.0.0",
     "@types/strip-ansi": "^3.0.0",
     "has-ansi": "^3.0.0",

@@ -8,7 +8,7 @@ import { KibanaResponse, ResponseFactory, responseFactory } from './response';
 export interface RouterRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
-  handler: (req: Request, h: ResponseToolkit) => Promise<ResponseObject>;
+  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
 export class Router {
@@ -52,7 +52,7 @@ export class Router {
     this.routes.push({
       method: 'GET',
       path: route.path,
-      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -68,7 +68,7 @@ export class Router {
     this.routes.push({
       method: 'POST',
       path: route.path,
-      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -84,7 +84,7 @@ export class Router {
     this.routes.push({
       method: 'PUT',
       path: route.path,
-      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -100,7 +100,7 @@ export class Router {
     this.routes.push({
       method: 'DELETE',
       path: route.path,
-      handler: async (req, res) => await this.handle(routeSchemas, req, res, handler),
+      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -119,7 +119,7 @@ export class Router {
   >(
     routeSchemas: RouteSchemas<P, Q, B> | undefined,
     request: Request,
-    helpers: ResponseToolkit,
+    responseToolkit: ResponseToolkit,
     handler: RequestHandler<P, Q, B>
   ) {
     let kibanaRequest: KibanaRequest<
@@ -132,7 +132,7 @@ export class Router {
       kibanaRequest = KibanaRequest.from(request, routeSchemas);
     } catch (e) {
       // TODO Handle failed validation
-      return helpers.response({ error: e.message }).code(400);
+      return responseToolkit.response({ error: e.message }).code(400);
     }
 
     try {
@@ -147,15 +147,15 @@ export class Router {
           payload = kibanaResponse.payload;
         }
 
-        return helpers.response(payload).code(kibanaResponse.status);
+        return responseToolkit.response(payload).code(kibanaResponse.status);
       }
 
-      return helpers.response(kibanaResponse);
+      return responseToolkit.response(kibanaResponse);
     } catch (e) {
       // TODO Handle `KibanaResponseError`
 
       // Otherwise we default to something along the lines of
-      return helpers.response({ error: e.message }).code(500);
+      return responseToolkit.response({ error: e.message }).code(500);
     }
   }
 }

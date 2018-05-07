@@ -59,9 +59,9 @@ export class HttpServer {
             timeout: false,
           }
         },
-        handler: ({ raw: { req, res }}, h) => {
+        handler: ({ raw: { req, res }}, responseToolkit) => {
           legacyKbnServer.newPlatformProxyListener.proxy(req, res);
-          return h.abandon;
+          return responseToolkit.abandon;
         },
       });
     }
@@ -140,7 +140,7 @@ export class HttpServer {
     }
 
     const basePath = config.basePath;
-    server.ext('onRequest', (request: Request, h: ResponseToolkit) => {
+    server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
       const newURL = modifyUrl(request.url.href!, (urlParts) => {
         if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
           urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
@@ -150,15 +150,15 @@ export class HttpServer {
       });
 
       if (!newURL) {
-        return h.response('Not Found').code(404);
+        return responseToolkit.response('Not Found').code(404);
       }
 
       request.setUrl(newURL);
-      // Raw request can be forwarded to the old platform that doesn't expect base path
-      // if it has been rewritten.
+      // We should update raw request as well since it can be proxied to the old platform
+      // where base path isn't expected.
       request.raw.req.url = request.url.href;
 
-      return h.continue;
+      return responseToolkit.continue;
     });
   }
 }

@@ -22,9 +22,9 @@
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/@types/catbox/-/catbox-10.0.0.tgz#1e01e5ad83e224f110cc59f6f57c56558f7eeb61"
 
-"@types/hapi@^17.0.11":
-  version "17.0.11"
-  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.11.tgz#b76bfca0db6fbffedb48adc2b454a8e719af08a9"
+"@types/hapi@^17.0.12":
+  version "17.0.12"
+  resolved "https://registry.yarnpkg.com/@types/hapi/-/hapi-17.0.12.tgz#5751f4d8db4decb4eae6671a4efbeae671278ceb"
   dependencies:
     "@types/boom" "*"
     "@types/catbox" "*"
@@ -265,9 +265,9 @@ rxjs@5.4.3:
   dependencies:
     symbol-observable "^1.0.1"
 
-rxjs@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.0.0.tgz#d647e029b5854617f994c82fe57a4c6747b352da"
+rxjs@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.1.0.tgz#833447de4e4f6427b9cec3e5eb9f56415cd28315"
   dependencies:
     tslib "^1.9.0"
 
