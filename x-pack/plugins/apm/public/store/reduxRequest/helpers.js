@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
-import Transaction from './view';
-
-function mapStateToProps(state = {}) {
+export function withInitialData(state = {}, initialData) {
   return {
-    location: state.location
+    ...state,
+    data: state.data || initialData
   };
 }
-
-const mapDispatchToProps = {};
-export default connect(mapStateToProps, mapDispatchToProps)(Transaction);
