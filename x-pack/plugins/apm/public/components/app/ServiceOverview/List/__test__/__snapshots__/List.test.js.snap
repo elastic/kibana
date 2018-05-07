@@ -111,7 +111,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
            Oops! You should try another time range. If that's no good, there's always the 
           <a
             className="euiLink euiLink--primary"
-            href="https://www.elastic.co/guide/en/apm/get-started/6.2/index.html"
+            href="https://www.elastic.co/guide/en/apm/get-started/my-metadata-branch/index.html"
             rel="noopener noreferrer"
             target="_blank"
           >

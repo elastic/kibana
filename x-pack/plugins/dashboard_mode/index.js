@@ -38,18 +38,6 @@ export function dashboardMode(kibana) {
         hidden: true,
         description: 'view dashboards',
         main: 'plugins/dashboard_mode/dashboard_viewer',
-        uses: [
-          'visTypes',
-          'visResponseHandlers',
-          'visRequestHandlers',
-          'visEditorTypes',
-          'savedObjectTypes',
-          'embeddableFactories',
-          'spyModes',
-          'navbarExtensions',
-          'docViews',
-          'fieldFormats'
-        ],
         links: [
           {
             id: 'kibana:dashboard',

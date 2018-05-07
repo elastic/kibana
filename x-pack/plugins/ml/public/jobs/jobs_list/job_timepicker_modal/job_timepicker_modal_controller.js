@@ -95,16 +95,17 @@ module.controller('MlJobTimepickerModal', function (
         doStart();
       })
       .catch((resp) => {
-        if (resp.status === 409) {
+        if (resp.statusCode === 409) {
           doStart();
         } else {
-          if (resp.status === 500) {
+          if (resp.statusCode === 500) {
             if (doStartCalled === false) {
             // doStart hasn't been called yet, this 500 has returned before 10s,
             // so it's not due to a timeout
               msgs.error(`Could not open ${$scope.jobId}`, resp);
             }
           } else {
+            // console.log(resp);
             msgs.error(`Could not open ${$scope.jobId}`, resp);
           }
           $scope.saveLock = false;

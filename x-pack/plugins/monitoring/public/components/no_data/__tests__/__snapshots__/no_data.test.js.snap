@@ -136,7 +136,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
