@@ -1,4 +1,5 @@
-import { Observable } from 'rxjs';
+import Rx from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
@@ -35,7 +36,8 @@ async function createPackAtPath(path) {
 }
 
 export const createPackAtPath$ = (path) => (
-  Observable.defer(() => createPackAtPath(path))
-    .map(pack => ({ pack }))
-    .catch(error => [{ error }])
+  Rx.defer(() => createPackAtPath(path)).pipe(
+    map(pack => ({ pack })),
+    catchError(error => [{ error }])
+  )
 );

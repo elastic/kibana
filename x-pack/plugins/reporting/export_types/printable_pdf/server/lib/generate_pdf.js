@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs/Rx';
+import Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import moment from 'moment';
 import { pdf } from './pdf';
 import { groupBy } from 'lodash';
@@ -33,12 +34,12 @@ function generatePdfObservableFn(server) {
   const getLayout = getLayoutFactory(server);
 
   const urlScreenshotsObservable = (urls, headers, layout) => {
-    return Rx.Observable
-      .from(urls)
-      .mergeMap(url => screenshotsObservable(url, headers, layout),
+    return Rx.from(urls).pipe(
+      mergeMap(url => screenshotsObservable(url, headers, layout),
         (outer, inner) => inner,
         captureConcurrency
-      );
+      )
+    );
   };
 
 

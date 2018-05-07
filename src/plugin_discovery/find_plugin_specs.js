@@ -1,4 +1,5 @@
-import { Observable } from 'rxjs';
+import Rx from 'rxjs';
+import { distinct, toArray, mergeMap, share, map, tap, ignoreElements, concat } from 'rxjs/operators';
 import { realpathSync } from 'fs';
 
 import { transformDeprecations, Config } from '../server/config';
@@ -25,11 +26,12 @@ function defaultConfig(settings) {
 }
 
 function bufferAllResults(observable) {
-  return observable
+  return observable.pipe(
     // buffer all results into a single array
-    .toArray()
+    toArray(),
     // merge the array back into the stream when complete
-    .mergeMap(array => array);
+    mergeMap(array => array)
+  );
 }
 
 /**
@@ -77,22 +79,24 @@ function groupSpecsById(specs) {
  */
 export function findPluginSpecs(settings, config = defaultConfig(settings)) {
   // find plugin packs in configured paths/dirs
-  const find$ = Observable.merge(
+  const find$ = Rx.merge(
     ...config.get('plugins.paths').map(createPackAtPath$),
     ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
   )
-    .distinct(getDistinctKeyForFindResult)
-    .share();
+    .pipe(
+      distinct(getDistinctKeyForFindResult),
+      share()
+    );
 
-  const extendConfig$ = find$
+  const extendConfig$ = find$.pipe(
     // get the specs for each found plugin pack
-    .mergeMap(({ pack }) => (
+    mergeMap(({ pack }) => (
       pack ? pack.getPluginSpecs() : []
-    ))
+    )),
     // make sure that none of the plugin specs have conflicting ids, fail
     // early if conflicts detected or merge the specs back into the stream
-    .toArray()
-    .mergeMap(allSpecs => {
+    toArray(),
+    mergeMap(allSpecs => {
       for (const [id, specs] of groupSpecsById(allSpecs)) {
         if (specs.length > 1) {
           throw new Error(
@@ -104,8 +108,8 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
       }
 
       return allSpecs;
-    })
-    .mergeMap(async (spec) => {
+    }),
+    mergeMap(async (spec) => {
       // extend the config service with this plugin spec and
       // collect its deprecations messages if some of its
       // settings are outdated
@@ -118,10 +122,10 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         spec,
         deprecations,
       };
-    })
+    }),
     // extend the config with all plugins before determining enabled status
-    .let(bufferAllResults)
-    .map(({ spec, deprecations }) => {
+    bufferAllResults,
+    map(({ spec, deprecations }) => {
       const isRightVersion = spec.isVersionCompatible(config.get('pkg.version'));
       const enabled = isRightVersion && spec.isEnabled(config);
       return {
@@ -131,62 +135,72 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         disabledSpecs: enabled ? [] : [spec],
         invalidVersionSpecs: isRightVersion ? [] : [spec],
       };
-    })
+    }),
     // determine which plugins are disabled before actually removing things from the config
-    .let(bufferAllResults)
-    .do(result => {
+    bufferAllResults,
+    tap(result => {
       for (const spec of result.disabledSpecs) {
         disableConfigExtension(spec, config);
       }
-    })
-    .share();
+    }),
+    share()
+  );
 
   return {
     // plugin packs found when searching configured paths
-    pack$: find$
-      .mergeMap(result => (
+    pack$: find$.pipe(
+      mergeMap(result => (
         result.pack ? [result.pack] : []
-      )),
+      ))
+    ),
 
     // errors caused by invalid directories of plugin directories
-    invalidDirectoryError$: find$
-      .mergeMap(result => (
+    invalidDirectoryError$: find$.pipe(
+      mergeMap(result => (
         isInvalidDirectoryError(result.error) ? [result.error] : []
-      )),
+      ))
+    ),
 
     // errors caused by directories that we expected to be plugin but were invalid
-    invalidPackError$: find$
-      .mergeMap(result => (
+    invalidPackError$: find$.pipe(
+      mergeMap(result => (
         isInvalidPackError(result.error) ? [result.error] : []
-      )),
+      ))
+    ),
 
-    otherError$: find$
-      .mergeMap(result => (
+    otherError$: find$.pipe(
+      mergeMap(result => (
         isUnhandledError(result.error) ? [result.error] : []
-      )),
+      ))
+    ),
 
     // { spec, message } objects produced when transforming deprecated
     // settings for a plugin spec
-    deprecation$: extendConfig$
-      .mergeMap(result => result.deprecations),
+    deprecation$: extendConfig$.pipe(
+      mergeMap(result => result.deprecations)
+    ),
 
     // the config service we extended with all of the plugin specs,
     // only emitted once it is fully extended by all
-    extendedConfig$: extendConfig$
-      .ignoreElements()
-      .concat([config]),
+    extendedConfig$: extendConfig$.pipe(
+      ignoreElements(),
+      concat([config])
+    ),
 
     // all enabled PluginSpec objects
-    spec$: extendConfig$
-      .mergeMap(result => result.enabledSpecs),
+    spec$: extendConfig$.pipe(
+      mergeMap(result => result.enabledSpecs)
+    ),
 
     // all disabled PluginSpec objects
-    disabledSpec$: extendConfig$
-      .mergeMap(result => result.disabledSpecs),
+    disabledSpec$: extendConfig$.pipe(
+      mergeMap(result => result.disabledSpecs)
+    ),
 
     // all PluginSpec objects that were disabled because their version was incompatible
-    invalidVersionSpec$: extendConfig$
-      .mergeMap(result => result.invalidVersionSpecs),
+    invalidVersionSpec$: extendConfig$.pipe(
+      mergeMap(result => result.invalidVersionSpecs)
+    ),
   };
 }
 

@@ -5,9 +5,10 @@
  */
 
 import { relative } from 'path';
-import Rx from 'rxjs/Rx';
 import { Command } from 'commander';
 import { withProcRunner } from '@kbn/dev-utils';
+import Rx from 'rxjs';
+import { startWith, switchMap, take } from 'rxjs/operators';
 
 import {
   getFtrConfig,
@@ -171,10 +172,11 @@ export async function runFunctionalTestsServer() {
 
       // wait for 5 seconds of silence before logging the
       // success message so that it doesn't get buried
-      await Rx.Observable.fromEvent(log, 'data')
-        .startWith(null)
-        .switchMap(() => Rx.Observable.timer(5000))
-        .take(1)
+      await Rx.fromEvent(log, 'data').pipe(
+        startWith(null),
+        switchMap(() => Rx.timer(5000)),
+        take(1)
+      )
         .toPromise();
 
       log.success(SUCCESS_MESSAGE);

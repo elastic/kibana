@@ -1,10 +1,8 @@
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 
-import Rx from 'rxjs/Rx';
-
-const $fromEvent = Rx.Observable.fromEvent;
-const $throw = Rx.Observable.throw;
+import Rx from 'rxjs';
+import { merge, mergeMap, takeUntil } from 'rxjs/operators';
 
 /**
  *  Get the hash of a file via a file descriptor
@@ -29,9 +27,13 @@ export async function getFileHash(cache, path, stat, fd) {
     autoClose: false
   });
 
-  const promise = $fromEvent(read, 'data')
-    .merge($fromEvent(read, 'error').mergeMap($throw))
-    .takeUntil($fromEvent(read, 'end'))
+  const promise = Rx.fromEvent(read, 'data').pipe(
+    merge(
+      Rx.fromEvent(read, 'error')
+        .pipe(mergeMap(Rx.throwError))
+    ),
+    takeUntil(Rx.fromEvent(read, 'end')),
+  )
     .forEach(chunk => hash.update(chunk))
     .then(() => hash.digest('hex'))
     .catch((error) => {

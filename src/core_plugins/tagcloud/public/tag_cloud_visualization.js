@@ -1,5 +1,5 @@
 import TagCloud from './tag_cloud';
-import { Observable } from 'rxjs';
+import Rx from 'rxjs';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -30,7 +30,7 @@ export class TagCloudVisualization {
       const filter = this._bucketAgg.createFilter(event);
       this._vis.API.queryFilter.addFilters(filter);
     });
-    this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
+    this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
 
 
     this._feedbackNode = document.createElement('div');

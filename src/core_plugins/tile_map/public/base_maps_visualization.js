@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
-import { Observable } from 'rxjs/Rx';
+import Rx from 'rxjs';
+import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 
 
@@ -207,13 +208,12 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       }
 
       const maxTimeForBaseLayer = 10000;
-      const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);
-      const timer$ = Observable.timer(maxTimeForBaseLayer);
+      const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
+      const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Observable.race(interval$, timer$).first().toPromise();
+      return Rx.race(interval$, timer$).pipe(first()).toPromise();
 
     }
 
   };
 }
-

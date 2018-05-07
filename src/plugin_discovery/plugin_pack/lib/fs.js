@@ -2,7 +2,8 @@ import { stat, readdir } from 'fs';
 import { resolve, isAbsolute } from 'path';
 
 import { fromNode as fcb } from 'bluebird';
-import { Observable } from 'rxjs';
+import Rx from 'rxjs';
+import { catchError, mergeAll, filter, map, mergeMap } from 'rxjs/operators';
 
 import { createInvalidDirectoryError } from '../../errors';
 
@@ -44,20 +45,20 @@ export async function isDirectory(path) {
  *  @return {Promise<Array<string>>}
  */
 export const createChildDirectory$ = (path) => (
-  Observable
-    .defer(() => {
-      assertAbsolutePath(path);
-      return fcb(cb => readdir(path, cb));
-    })
-    .catch(error => {
+  Rx.defer(() => {
+    assertAbsolutePath(path);
+    return fcb(cb => readdir(path, cb));
+  }).pipe(
+    catchError(error => {
       throw createInvalidDirectoryError(error, path);
-    })
-    .mergeAll()
-    .filter(name => !name.startsWith('.'))
-    .map(name => resolve(path, name))
-    .mergeMap(v => (
-      Observable
-        .fromPromise(isDirectory(path))
-        .mergeMap(pass => pass ? [v] : [])
+    }),
+    mergeAll(),
+    filter(name => !name.startsWith('.')),
+    map(name => resolve(path, name)),
+    mergeMap(v => (
+      Rx.fromPromise(isDirectory(path)).pipe(
+        mergeMap(pass => pass ? [v] : [])
+      )
     ))
+  )
 );

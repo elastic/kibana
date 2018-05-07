@@ -1,4 +1,5 @@
-import Rx from 'rxjs/Rx';
+import Rx from 'rxjs';
+import { scan, takeUntil } from 'rxjs/operators';
 
 const SEP = /\r?\n/;
 
@@ -16,8 +17,8 @@ import { observeReadable } from './observe_readable';
 export function observeLines(readable) {
   const done$ = observeReadable(readable).share();
 
-  const scan$ = Rx.Observable.fromEvent(readable, 'data')
-    .scan(
+  const scan$ = Rx.fromEvent(readable, 'data').pipe(
+    scan(
       ({ buffer }, chunk) => {
         buffer += chunk;
 
@@ -31,9 +32,11 @@ export function observeLines(readable) {
         return { buffer, lines };
       },
       { buffer: '' }
-    )
+    ),
+
     // stop if done completes or errors
-    .takeUntil(done$.materialize());
+    takeUntil(done$.materialize())
+  );
 
   return Rx.Observable.merge(
     // use done$ to provide completion/errors

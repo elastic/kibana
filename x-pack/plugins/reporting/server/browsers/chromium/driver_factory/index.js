@@ -9,7 +9,8 @@ import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
 import rimraf from 'rimraf';
-import Rx from 'rxjs/Rx';
+import Rx from 'rxjs';
+import { map, share, first, tap, mergeMap, filter } from 'rxjs/operators';
 import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
@@ -29,7 +30,7 @@ export class HeadlessChromiumDriverFactory {
   type = 'chromium';
 
   create({ bridgePort, viewport }) {
-    return Rx.Observable.create(async observer => {
+    return Rx.create(async observer => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
@@ -50,42 +51,51 @@ export class HeadlessChromiumDriverFactory {
 
       safeChildProcess(chromium, observer);
 
-      const stderr$ = Rx.Observable.fromEvent(chromium.stderr, 'data').map(line => line.toString()).share();
+      const stderr$ = Rx.fromEvent(chromium.stderr, 'data').pipe(
+        map(line => line.toString()),
+        share()
+      );
 
       const [ consoleMessage$, message$ ] = stderr$.partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/));
 
-      const driver$ = message$
-        .first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0)
-        .do(() => this.logger.debug('Connecting chrome remote inspector'))
-        .mergeMap(() => cdp({ port: bridgePort, local: true }))
-        .do(() => this.logger.debug('Initializing chromium driver'))
-        .map(client => new HeadlessChromiumDriver(client, {
+      const driver$ = message$.pipe(
+        first(line => line.indexOf(`DevTools listening on ws://127.0.0.1:${bridgePort}`) >= 0),
+        tap(() => this.logger.debug('Connecting chrome remote inspector')),
+        mergeMap(() => cdp({ port: bridgePort, local: true })),
+        tap(() => this.logger.debug('Initializing chromium driver')),
+        map(client => new HeadlessChromiumDriver(client, {
           maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger
-        }));
+        }))
+      );
 
-      const processError$ = Rx.Observable.fromEvent(chromium, 'error')
-        .mergeMap(() => Rx.Observable.throw(new Error(`Unable to spawn Chromium`)));
+      const processError$ = Rx.fromEvent(chromium, 'error').pipe(
+        mergeMap(() => Rx.throwError(new Error(`Unable to spawn Chromium`))),
+      );
 
-      const processExit$ = Rx.Observable.fromEvent(chromium, 'exit')
-        .mergeMap(code => Rx.Observable.throw(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)));
+      const processExit$ = Rx.fromEvent(chromium, 'exit').pipe(
+        mergeMap(code => Rx.throwError(new Error(`Chromium exited with code: ${code}. ${exitCodeSuggestion(code)}`)))
+      );
 
-      const nssError$ = message$
-        .filter(line => line.includes('error while loading shared libraries: libnss3.so'))
-        .mergeMap(() => Rx.Observable.throw(new Error(`You must install nss for Reporting to work`)));
+      const nssError$ = message$.pipe(
+        filter(line => line.includes('error while loading shared libraries: libnss3.so')),
+        mergeMap(() => Rx.throwError(new Error(`You must install nss for Reporting to work`)))
+      );
 
-      const fontError$ = message$
-        .filter(line => line.includes('Check failed: InitDefaultFont(). Could not find the default font'))
-        .mergeMap(() => Rx.Observable.throw(new Error('You must install freetype and ttf-font for Reporting to work')));
+      const fontError$ = message$.pipe(
+        filter(line => line.includes('Check failed: InitDefaultFont(). Could not find the default font')),
+        mergeMap(() => Rx.throwError(new Error('You must install freetype and ttf-font for Reporting to work')))
+      );
 
-      const noUsableSandbox$ = message$
-        .filter(line => line.includes('No usable sandbox! Update your kernel'))
-        .mergeMap(() => Rx.Observable.throw(new Error(compactWhitespace(`
+      const noUsableSandbox$ = message$.pipe(
+        filter(line => line.includes('No usable sandbox! Update your kernel')),
+        mergeMap(() => Rx.throwError(new Error(compactWhitespace(`
           Unable to use Chromium sandbox. This can be disabled at your own risk with
           'xpack.reporting.capture.browser.chromium.disableSandbox'
-        `))));
+        `))))
+      );
 
-      const exit$ = Rx.Observable.merge(processError$, processExit$, nssError$, fontError$, noUsableSandbox$);
+      const exit$ = Rx.merge(processError$, processExit$, nssError$, fontError$, noUsableSandbox$);
 
       observer.next({
         driver$,

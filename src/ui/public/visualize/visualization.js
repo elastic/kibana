@@ -1,4 +1,6 @@
-import { Observable } from 'rxjs/Rx';
+import Rx from 'rxjs';
+import { share } from 'rxjs/operators';
+
 import './spy';
 import './visualize.less';
 import _ from 'lodash';
@@ -62,7 +64,7 @@ uiModules
 
         $scope.vis.initialized = true;
 
-        const render$ = Observable.create(observer => {
+        const render$ = Rx.create(observer => {
           $scope.$on('render', () => {
             observer.next({
               vis: $scope.vis,
@@ -70,7 +72,9 @@ uiModules
               container: getVisContainer(),
             });
           });
-        }).share();
+        }).pipe(
+          share()
+        );
 
         const success$ = render$
           .do(() => {
@@ -88,7 +92,7 @@ uiModules
 
         const requestError$ = render$.filter(({ vis }) => vis.requestError);
 
-        const renderSubscription = Observable.merge(success$, requestError$)
+        const renderSubscription = Rx.merge(success$, requestError$)
           .subscribe(() => {
             dispatchRenderComplete($el[0]);
           });
