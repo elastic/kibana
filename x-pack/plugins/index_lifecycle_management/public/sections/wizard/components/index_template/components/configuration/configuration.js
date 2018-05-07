@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -18,6 +18,8 @@ import {
   EuiCallOut,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
 import {
   STRUCTURE_NODE_ATTRS,
@@ -82,12 +84,11 @@ export class Configuration extends Component {
     const primaryNodeErrors = isPrimaryShardCountHigherThanSelectedNodeAttrsCount ? (
       <EuiCallOut
         style={{ marginTop: '1rem' }}
-        title="Proceed with caution!"
+        title="Primary shard count is too high"
         color="warning"
         iconType="help"
       >
-        The selected primary shard count is higher than the number of nodes
-        matching the selected attributes.
+        The shard count should be lower than the number of nodes that match the selected attributes.
       </EuiCallOut>
     ) : null;
 
@@ -101,7 +102,16 @@ export class Configuration extends Component {
         <EuiFlexGroup>
           <EuiFlexItem grow={!selectedNodeAttrs}>
             <ErrableFormRow
-              label="Where do you want your hot indices to live"
+              label={
+                <Fragment>
+                  <span>Where do you want your hot indices to live</span>
+                  &nbsp;
+                  <EuiIconTip
+                    content="Hot indices are indices in active writing mode."
+                    position="right"
+                  />
+                </Fragment>
+              }
               errorKey={STRUCTURE_NODE_ATTRS}
               isShowingErrors={isShowingErrors}
               errors={errors}
@@ -125,15 +135,21 @@ export class Configuration extends Component {
                     this.setState({ isShowingNodeDetailsFlyout: true })
                   }
                 >
-                  See more details about these nodes
+                  View node details
                 </EuiButtonEmpty>
               </EuiFormRow>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
         <EuiSpacer />
-        <EuiCallOut style={{ marginBottom: '1rem' }} title="Note">
-          <p>Optimize these values for throughput. (Add more)</p>
+        <EuiCallOut style={{ marginBottom: '1rem' }} title="Tip">
+          <p>
+            The best way to determine how many shards you need is to benchmark
+            using realistic data and queries on your hardware.{' '}
+            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/guide/2.x/capacity-planning.html">
+              Learn more.
+            </EuiLink>
+          </p>
         </EuiCallOut>
         <EuiSpacer />
         <EuiFlexGroup>

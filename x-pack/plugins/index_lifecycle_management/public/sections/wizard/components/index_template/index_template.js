@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { TemplateSelection } from './components/template_selection';
@@ -17,10 +14,15 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
-  EuiButton
+  EuiButton,
+  EuiTextColor,
+  EuiLink,
 } from '@elastic/eui';
 import { hasErrors } from '../../../../lib/find_errors';
-import { STRUCTURE_TEMPLATE_SELECTION, STRUCTURE_CONFIGURATION } from '../../../../store/constants';
+import {
+  STRUCTURE_TEMPLATE_SELECTION,
+  STRUCTURE_CONFIGURATION,
+} from '../../../../store/constants';
 
 export class IndexTemplate extends Component {
   static propTypes = {
@@ -32,7 +34,7 @@ export class IndexTemplate extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isShowingErrors: false
+      isShowingErrors: false,
     };
   }
 
@@ -40,14 +42,14 @@ export class IndexTemplate extends Component {
     await this.props.validate();
     const noErrors = !hasErrors(this.props.errors);
     return noErrors;
-  }
+  };
 
   submit = async () => {
     this.setState({ isShowingErrors: true });
     if (await this.validate()) {
       this.props.done();
     }
-  }
+  };
 
   render() {
     const { errors } = this.props;
@@ -57,6 +59,21 @@ export class IndexTemplate extends Component {
       <div className="euiAnimateContentLoad">
         <EuiTitle>
           <h4>Select a template</h4>
+        </EuiTitle>
+        <EuiTitle size="xs">
+          <Fragment>
+            <EuiSpacer size="xs"/>
+            <EuiTextColor color="subdued">
+              <h5>
+                A template defines the settings, mappings, and aliases to apply
+                when you create an index.
+              </h5>
+            </EuiTextColor>
+            <EuiSpacer size="xs"/>
+            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
+              Learn more
+            </EuiLink>
+          </Fragment>
         </EuiTitle>
         <EuiSpacer />
         <TemplateSelection

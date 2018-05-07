@@ -7,7 +7,7 @@
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSelect, EuiLink } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { ErrableFormRow } from '../../../../form_errors';
 import { STRUCTURE_TEMPLATE_NAME } from '../../../../../../store/constants';
 
@@ -57,18 +57,10 @@ export class TemplateSelection extends PureComponent {
       <Fragment>
         {/* {noMatchingIndicesWarning} */}
         <ErrableFormRow
-          label="Select a template"
+          label="Template name"
           errorKey={STRUCTURE_TEMPLATE_NAME}
           isShowingErrors={isShowingErrors}
           errors={errors}
-          helpText={
-            <span>
-              Learn how to{' '}
-              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html">
-                add a new index template
-              </EuiLink>.
-            </span>
-          }
         >
           <EuiSelect
             value={selectedIndexTemplateName}
