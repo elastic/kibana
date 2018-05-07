@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { map, distinct, tap } from 'rxjs/operators';
 import { findPluginSpecs } from '../../plugin_discovery';
 

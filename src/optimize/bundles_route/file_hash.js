@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { merge, mergeMap, takeUntil } from 'rxjs/operators';
 
 /**

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import path from 'path';
 import fs from 'fs';

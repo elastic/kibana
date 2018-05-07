@@ -2,7 +2,7 @@ import { stat, readdir } from 'fs';
 import { resolve, isAbsolute } from 'path';
 
 import { fromNode as fcb } from 'bluebird';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { catchError, mergeAll, filter, map, mergeMap } from 'rxjs/operators';
 
 import { createInvalidDirectoryError } from '../../errors';

@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { distinct, toArray, mergeMap, share, map, tap, ignoreElements, concat } from 'rxjs/operators';
 import { realpathSync } from 'fs';
 

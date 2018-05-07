@@ -1,5 +1,5 @@
 import TagCloud from './tag_cloud';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 

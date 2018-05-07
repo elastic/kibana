@@ -1,6 +1,6 @@
 import { createReplaceStream } from '../utils';
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 
 export const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';

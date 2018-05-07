@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 
 import './spy';

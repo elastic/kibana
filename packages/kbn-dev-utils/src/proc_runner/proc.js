@@ -1,7 +1,7 @@
 import execa from 'execa';
 import { statSync } from 'fs';
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { tap, share, take, mergeMap, map } from 'rxjs/operators';
 import { gray } from 'chalk';
 

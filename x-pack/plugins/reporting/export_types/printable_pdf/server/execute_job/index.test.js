@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { memoize } from 'lodash';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';

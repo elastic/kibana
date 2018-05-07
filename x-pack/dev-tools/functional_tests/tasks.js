@@ -7,7 +7,7 @@
 import { relative } from 'path';
 import { Command } from 'commander';
 import { withProcRunner } from '@kbn/dev-utils';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 
 import {

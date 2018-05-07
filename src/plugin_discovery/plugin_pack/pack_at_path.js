@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';

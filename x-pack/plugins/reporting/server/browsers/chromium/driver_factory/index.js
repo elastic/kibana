@@ -9,7 +9,7 @@ import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
 import rimraf from 'rimraf';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { map, share, first, tap, mergeMap, filter } from 'rxjs/operators';
 import cdp from 'chrome-remote-interface';
 import { HeadlessChromiumDriver } from '../driver';

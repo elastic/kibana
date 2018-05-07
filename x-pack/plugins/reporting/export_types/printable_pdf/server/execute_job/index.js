@@ -5,7 +5,7 @@
  */
 
 import url from 'url';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';

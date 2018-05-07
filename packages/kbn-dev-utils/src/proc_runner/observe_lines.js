@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { scan, takeUntil } from 'rxjs/operators';
 
 const SEP = /\r?\n/;

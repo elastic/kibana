@@ -6,7 +6,7 @@
 
 import $streamToObservable from 'stream-to-observable';
 import { PNG } from 'pngjs';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { mergeMap, reduce, tap, switchMap, toArray, map } from 'rxjs/operators';
 
 // if we're only given one screenshot, and it matches the output dimensions

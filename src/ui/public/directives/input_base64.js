@@ -1,6 +1,6 @@
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { map, switchMap, share } from 'rxjs/operators';
 
 const multipleUsageErrorMessage = 'Cannot use input-base-sixty-four directive on input with `multiple` attribute';

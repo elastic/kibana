@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { take, share, mapTo, delay, tap } from 'rxjs/operators';
 
 // Our process can get sent various signals, and when these occur we wish to

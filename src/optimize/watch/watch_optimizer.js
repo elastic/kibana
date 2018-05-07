@@ -1,4 +1,4 @@
-import Rx, { ReplaySubject } from 'rxjs';
+import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
 import BaseOptimizer from '../base_optimizer';
@@ -17,7 +17,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     super(opts);
     this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
-    this.status$ = new ReplaySubject(1);
+    this.status$ = new Rx.ReplaySubject(1);
   }
 
   async init() {

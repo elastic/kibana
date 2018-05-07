@@ -1,4 +1,4 @@
-import Rx, { Observable, Subject } from 'rxjs';
+import * as Rx from 'rxjs';
 import { first, mapTo, delay, map, timeout, catchError, mergeMap, finalize } from 'rxjs/operators';
 
 /**
@@ -30,7 +30,7 @@ interface WatchOptions {
 }
 
 function getWatchHandlers(
-  buildOutput$: Observable<string>,
+  buildOutput$: Rx.Observable<string>,
   {
     handlerDelay = defaultHandlerDelay,
     handlerReadinessTimeout = defaultHandlerReadinessTimeout,
@@ -73,7 +73,7 @@ export function waitUntilWatchIsReady(
   stream: NodeJS.EventEmitter,
   opts: WatchOptions = {}
 ) {
-  const buildOutput$ = new Subject<string>();
+  const buildOutput$ = new Rx.Subject<string>();
   const onDataListener = (data: Buffer) =>
     buildOutput$.next(data.toString('utf-8'));
   const onEndListener = () => buildOutput$.complete();
