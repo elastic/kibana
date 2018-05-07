@@ -4,9 +4,11 @@ import PropTypes from 'prop-types';
 import './editor_options_group.less';
 
 import {
+  EuiAccordion,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 
@@ -21,11 +23,19 @@ function EditorOptionsGroup(props) {
       grow={false}
       className="editorOptionsGroup__panel"
     >
-      <EuiTitle size="xs">
-        <h2>{props.title}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m"/>
-      { props.children }
+      <EuiAccordion
+        id={htmlIdGenerator('eog')()}
+        initialIsOpen={true}
+        extraAction={props.actions}
+        buttonContent={
+          <EuiTitle size="xs">
+            <h2>{props.title}</h2>
+          </EuiTitle>
+        }
+      >
+        <EuiSpacer size="m"/>
+        { props.children }
+      </EuiAccordion>
     </EuiPanel>
   );
 }
@@ -35,6 +45,10 @@ EditorOptionsGroup.propTypes = {
    * The title of this options group, which will be shown with the group.
    */
   title: PropTypes.string.isRequired,
+  /**
+   * Add additional elements as actions to the group.
+   */
+  actions: PropTypes.node,
   /**
    * All elements that should be within this group.
    */
