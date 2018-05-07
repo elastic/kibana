@@ -23,10 +23,6 @@ export function graph(kibana) {
         icon: 'plugins/graph/icon.png',
         description: 'Graph exploration',
         main: 'plugins/graph/app',
-        uses: [
-          'fieldFormats',
-          'savedObjectTypes',
-        ]
       },
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],

@@ -23,17 +23,18 @@ import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
+import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
 import { checkLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 
 uiRoutes
@@ -42,7 +43,8 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
-      indexPatterns: getIndexPatterns
+      indexPatterns: loadIndexPatterns,
+      initPromise: initPromise(true)
     }
   });
 
@@ -51,7 +53,6 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlExplorerController', function (
   $scope,
-  $route,
   $timeout,
   AppState,
   Private,
@@ -69,9 +70,6 @@ module.controller('MlExplorerController', function (
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const mlResultsService = Private(ResultsServiceProvider);
-  const mlJobService = Private(JobServiceProvider);
-  const mlFieldFormatService = Private(FieldFormatServiceProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
 
   let resizeTimeout = null;
@@ -84,6 +82,7 @@ module.controller('MlExplorerController', function (
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   let disableDragSelectOnMouseLeave = true;
   $scope.queryFilters = [];
+  $scope.anomalyRecords = [];
 
   const dragSelect = new DragSelect({
     selectables: document.querySelectorAll('.sl-cell'),
@@ -172,14 +171,12 @@ module.controller('MlExplorerController', function (
       jobIds, influencers, 0, earliestMs, latestMs, 500
     )
       .then((resp) => {
-      // Sort in descending time order before storing in scope.
-        $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
-        console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
-
-        // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
-        $timeout(() => {
-          $scope.$broadcast('renderTable');
-        }, 0);
+        // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
+        $scope.$evalAsync(() => {
+          // Sort in descending time order before storing in scope.
+          $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
+          console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
+        });
       });
   };
 
@@ -215,7 +212,7 @@ module.controller('MlExplorerController', function (
     $scope.appState.save();
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
-    mlFieldFormatService.populateFormats(selectedIds, $route.current.locals.indexPatterns)
+    mlFieldFormatService.populateFormats(selectedIds, getIndexPatterns())
       .finally(() => {
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
@@ -591,8 +588,8 @@ module.controller('MlExplorerController', function (
       MAX_INFLUENCER_FIELD_VALUES
     ).then((resp) => {
       // TODO - sort the influencers keys so that the partition field(s) are first.
-      $scope.influencersData = resp.influencers;
-      console.log('Explorer top influencers data set:', $scope.influencersData);
+      $scope.influencers = resp.influencers;
+      console.log('Explorer top influencers data set:', $scope.influencers);
       finish(counter);
     });
 

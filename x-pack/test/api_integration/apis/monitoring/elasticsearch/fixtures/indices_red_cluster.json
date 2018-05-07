@@ -1,0 +1,228 @@
+{
+  "clusterStatus": {
+    "status": "red",
+    "indicesCount": 19,
+    "documentCount": 4535,
+    "dataSize": 9036305,
+    "nodesCount": 1,
+    "upTime": 1403187,
+    "version": [
+      "7.0.0-alpha1"
+    ],
+    "memUsed": 280753264,
+    "memMax": 709623808,
+    "unassignedShards": 23,
+    "totalShards": 46
+  },
+  "rows": [
+    {
+      "name": "many-0010_dgnlpqtstfvi",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0024_rixhhwzyiczb",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0016_gyvtsyauoqqg",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0006_gkuqbjonkjmg",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 4.0788690476190474,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0022_dqbcjopzejlk",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0020_fqfovcnznbus",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0012_jwomwdgfpisl",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0018_ipugjcmuagih",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0008_amnscruqlsnu",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 4.0788690476190474,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "many-0014_zrukbrvuluby",
+      "doc_count": 1,
+      "data_size": 3821,
+      "index_rate": 0,
+      "search_rate": 1.9449404761904763,
+      "status": "green",
+      "unassigned_shards": 0
+    },
+    {
+      "name": "phone-home",
+      "doc_count": 1,
+      "data_size": 67798,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "yellow",
+      "unassigned_shards": 5
+    },
+    {
+      "name": "many-0015_vwmrucgzvohb",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0009_reolfgzjjtvh",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0011_xtkcmlwmxcov",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0019_slpgftmneikv",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0017_zpyxggzmytun",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0025_xmvpnfeuqxtp",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0013_smjuwdkhpduv",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0007_milycdknpycp",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0021_xjtlceanhvup",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0.000744047619047619,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0023_hkbvktonytxh",
+      "doc_count": 1,
+      "data_size": 3728,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "red",
+      "unassigned_shards": 1
+    },
+    {
+      "name": "many-0005_dnzzblxoumfe",
+      "status": "Deleted"
+    },
+    {
+      "name": "many-0004_wzgjkelqclur",
+      "status": "Deleted"
+    },
+    {
+      "name": "many-0002_emdkmgdeflno",
+      "status": "Deleted"
+    },
+    {
+      "name": "many-0003_jbwrztjwhkjt",
+      "status": "Deleted"
+    },
+    {
+      "name": "many-0001_clruksahirti",
+      "status": "Deleted"
+    }
+  ]
+}

@@ -28,7 +28,7 @@ import {
   isTimeSeriesViewDetector,
   isModelPlotEnabled,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
-import { getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import {
   createTimeSeriesJobData,
   processForecastResults,
@@ -38,13 +38,15 @@ import {
   processScheduledEventsForChart } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
-import { ResultsServiceProvider } from 'plugins/ml/services/results_service';
+import { mlResultsService } from 'plugins/ml/services/results_service';
 import template from './timeseriesexplorer.html';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
-import { ForecastServiceProvider } from 'plugins/ml/services/forecast_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
+import { mlForecastService } from 'plugins/ml/services/forecast_service';
+import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
+import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -52,8 +54,9 @@ uiRoutes
     resolve: {
       CheckLicense: checkLicense,
       privileges: checkGetJobsPrivilege,
-      indexPatterns: getIndexPatterns,
-      mlNodeCount: getMlNodeCount
+      indexPatterns: loadIndexPatterns,
+      mlNodeCount: getMlNodeCount,
+      initPromise: initPromise(true)
     }
   });
 
@@ -67,7 +70,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   timefilter,
   AppState,
-  mlTimeSeriesSearchService,
   mlAnomaliesTableService) {
 
   $scope.timeFieldName = 'timestamp';
@@ -78,10 +80,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
-  const mlResultsService = Private(ResultsServiceProvider);
-  const mlJobService = Private(JobServiceProvider);
-  const mlFieldFormatService = Private(FieldFormatServiceProvider);
-  const mlForecastService  = Private(ForecastServiceProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
 
   $scope.jobPickerSelections = [];
@@ -90,6 +88,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.loading = true;
   $scope.loadCounter = 0;
   $scope.hasResults = false;
+  $scope.anomalyRecords = [];
 
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
@@ -350,25 +349,23 @@ module.controller('MlTimeSeriesExplorerController', function (
     function finish() {
       awaitingCount--;
       if (awaitingCount === 0) {
-        processDataForFocusAnomalies(
+        // Tell the results container directives to render the focus chart.
+        // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
+        let updatedFocusChartData = processDataForFocusAnomalies(
           $scope.focusChartData,
           $scope.anomalyRecords,
           $scope.timeFieldName);
 
-        processScheduledEventsForChart(
+        updatedFocusChartData = processScheduledEventsForChart(
           $scope.focusChartData,
           $scope.scheduledEvents);
 
-        console.log('Time series explorer focus chart data set:', $scope.focusChartData);
-
-        // Tell the results container directives to render the focus chart.
-        // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
-        $timeout(() => {
-          $scope.$broadcast('renderFocusChart');
-          $scope.$broadcast('renderTable');
+        $scope.$evalAsync(() => {
+          $scope.focusChartData = updatedFocusChartData;
+          console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
-        }, 0);
+        });
       }
     }
 
@@ -524,16 +521,14 @@ module.controller('MlTimeSeriesExplorerController', function (
   };
 
   $scope.toggleShowModelBounds = function () {
-    $scope.showModelBounds = !$scope.showModelBounds;
     $timeout(() => {
-      $scope.$broadcast('renderFocusChart');
+      $scope.showModelBounds = !$scope.showModelBounds;
     }, 0);
   };
 
   $scope.toggleShowForecast = function () {
-    $scope.showForecast = !$scope.showForecast;
     $timeout(() => {
-      $scope.$broadcast('renderFocusChart');
+      $scope.showForecast = !$scope.showForecast;
     }, 0);
   };
 
@@ -655,7 +650,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     updateControlsForDetector();
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId], $route.current.locals.indexPatterns)
+    mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
       .finally(() => {
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.

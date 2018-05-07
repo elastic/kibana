@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('Overriding colors on an area chart is preserved', async () => {
+    // Flaky test https://github.com/elastic/kibana/issues/17468
+    it.skip('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();

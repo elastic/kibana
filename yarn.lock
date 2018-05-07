@@ -77,9 +77,9 @@
   version "0.0.0"
   uid ""
 
-"@elastic/eui@0.0.44", "@elastic/eui@v0.0.44":
-  version "0.0.44"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.44.tgz#b0b58eb1b10d6f8de017f548bb06c5b5f71e3d61"
+"@elastic/eui@0.0.46", "@elastic/eui@v0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.46.tgz#9e85d63bdcf402b6bf0841b83c8565793b3bc202"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
@@ -7881,7 +7881,7 @@ loader-runner@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-2.3.0.tgz#f482aea82d543e07921700d5a46ef26fdac6b8a2"
 
-loader-utils@^1.0.2, loader-utils@^1.1.0:
+loader-utils@^1.0.0, loader-utils@^1.0.2, loader-utils@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.1.0.tgz#c98aef488bcceda2ffb5e2de646d6a754429f5cd"
   dependencies:
@@ -12835,6 +12835,12 @@ uuid@^2.0.1:
 uuid@^3.0.0, uuid@^3.1.0:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.2.1.tgz#12c528bb9d58d0b9265d9a2f6f0fe8be17ff1f14"
+
+val-loader@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/val-loader/-/val-loader-1.1.0.tgz#ed91537424d62a4ded98e846ccf07367756bf506"
+  dependencies:
+    loader-utils "^1.0.0"
 
 validate-npm-package-license@^3.0.1:
   version "3.0.3"

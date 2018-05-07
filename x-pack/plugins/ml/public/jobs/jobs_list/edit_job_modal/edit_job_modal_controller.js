@@ -14,10 +14,10 @@ import numeral from '@elastic/numeral';
 
 import { calculateDatafeedFrequencyDefaultSeconds } from 'plugins/ml/../common/util/job_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
-import { CustomUrlEditorServiceProvider } from 'plugins/ml/jobs/components/custom_url_editor/custom_url_editor_service';
+import { customUrlEditorService } from 'plugins/ml/jobs/components/custom_url_editor/custom_url_editor_service';
 import { isWebUrl } from 'plugins/ml/util/string_utils';
 import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-import { JobServiceProvider } from 'plugins/ml/services/job_service';
+import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import { uiModules } from 'ui/modules';
@@ -28,11 +28,9 @@ module.controller('MlEditJobModal', function (
   $modalInstance,
   $modal,
   $window,
-  params,
-  Private) {
+  params) {
   const msgs = mlMessageBarService;
   msgs.clear();
-  const mlJobService = Private(JobServiceProvider);
   $scope.saveLock = false;
   const refreshJob = params.pscope.refreshJob;
 
@@ -152,7 +150,6 @@ module.controller('MlEditJobModal', function (
   };
 
   $scope.testCustomUrl = function (index) {
-    const customUrlEditorService = Private(CustomUrlEditorServiceProvider);
     customUrlEditorService.getTestUrl(
       $scope.job,
       $scope.job.custom_settings.custom_urls[index])
