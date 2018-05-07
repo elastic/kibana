@@ -189,7 +189,7 @@ exports[`directories should render ADMIN directory entry in "Manage" panel 1`] =
           >
             <Synopsis
               description="Manage the index patterns that help retrieve your data from Elasticsearch."
-              iconUrl="base_path//plugins/kibana/assets/app_index_pattern.svg"
+              iconType="indexPatternApp"
               title="Index Patterns"
               url="base_path/index_management_landing_page"
             />
@@ -292,7 +292,7 @@ exports[`directories should render DATA directory entry in "Explore Data" panel 
           >
             <Synopsis
               description="Display and share a collection of visualizations and saved searches."
-              iconUrl="base_path//plugins/kibana/assets/app_dashboard.svg"
+              iconType="dashboardApp"
               title="Dashboard"
               url="base_path/dashboard_landing_page"
             />
