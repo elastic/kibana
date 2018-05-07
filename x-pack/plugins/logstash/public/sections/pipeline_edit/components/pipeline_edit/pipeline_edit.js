@@ -15,6 +15,7 @@ import './pipeline_edit.less';
 import '../../../../components/tooltip';
 import { EDITOR, TOOLTIPS } from '../../../../../common/constants';
 import 'ace';
+import { PipelineMode } from '../../../../lib/pipeline_mode';
 
 const app = uiModules.get('xpack/logstash');
 
@@ -62,6 +63,9 @@ app.directive('pipelineEdit', function ($injector) {
             minLines: 25,
             maxLines: Infinity,
           });
+
+          editor.getSession().setMode(new PipelineMode());
+
           editor.$blockScrolling = Infinity;
         };
         if (this.isReadOnly) {
