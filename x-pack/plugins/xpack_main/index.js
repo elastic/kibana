@@ -67,12 +67,14 @@ export const xpackMain = (kibana) => {
     uiExports: {
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
+          name: 'Telemetry opt-in',
           description: CONFIG_TELEMETRY_DESC,
           value: false
         },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
+          name: 'Admin email',
           // TODO: change the description when email address is used for more things?
-          description: 'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.',
+          description: `Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.`,
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null
         }

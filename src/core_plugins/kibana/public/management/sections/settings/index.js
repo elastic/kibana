@@ -1,41 +1,56 @@
-import _ from 'lodash';
-import { toEditableConfig } from './lib/to_editable_config';
-import './advanced_row';
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { AdvancedSettings } from './advanced_settings';
+
+const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
+
+function updateAdvancedSettings($scope, config, query) {
+  $scope.$$postDigest(() => {
+    const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
+    if (!node) {
+      return;
+    }
+
+    render(
+      <AdvancedSettings
+        config={config}
+        query={query}
+      />,
+      node,
+    );
+  });
+}
+
+function destroyAdvancedSettings() {
+  const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+}
+
 uiRoutes
-  .when('/management/kibana/settings', {
+  .when('/management/kibana/settings/:setting?', {
     template: indexTemplate
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementAdvanced', function (config) {
+  .directive('kbnManagementAdvanced', function (config, $route) {
     return {
       restrict: 'E',
       link: function ($scope) {
-      // react to changes of the config values
-        config.watchAll(changed, $scope);
+        config.watchAll(() => {
+          updateAdvancedSettings($scope, config, $route.current.params.setting || '');
+        }, $scope);
 
-        // initial config setup
-        changed();
+        $scope.$on('$destory', () => {
+          destroyAdvancedSettings();
+        });
 
-        function changed() {
-          const all = config.getAll();
-          const editable = _(all)
-            .map((def, name) => toEditableConfig({
-              def,
-              name,
-              value: def.userValue,
-              isCustom: config.isCustom(name)
-            }))
-            .value();
-          const writable = _.reject(editable, 'readonly');
-          $scope.configs = writable;
-        }
+        $route.updateParams({ setting: null });
       }
     };
   });

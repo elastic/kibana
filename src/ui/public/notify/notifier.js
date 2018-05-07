@@ -326,12 +326,12 @@ Notifier.prototype.warning = function (msg, opts, cb) {
 
 /**
  * Display a banner message
- * @param  {String} msg
- * @param  {Function} cb
+ * @param  {String} content
+ * @param  {String} name
  */
 let bannerId;
 let bannerTimeoutId;
-Notifier.prototype.banner = function (content = '') {
+Notifier.prototype.banner = function (content = '', name = '') {
   const BANNER_PRIORITY = 100;
 
   const dismissBanner = () => {
@@ -355,6 +355,7 @@ Notifier.prototype.banner = function (content = '') {
          * The notifier relies on `markdown-it` to produce safe and correct HTML.
          */
         dangerouslySetInnerHTML={{ __html: markdownIt.render(content) }} //eslint-disable-line react/no-danger
+        data-test-subj={name ? `banner-${name}` : null}
       />
 
       <EuiButton type="primary" size="s" onClick={dismissBanner}>
