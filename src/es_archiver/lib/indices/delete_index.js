@@ -7,7 +7,15 @@ const PENDING_SNAPSHOT_STATUSES = [
   'WAITING',
 ];
 
-export async function deleteIndex(client, stats, index, retryIfSnapshottingCount = 3) {
+export async function deleteIndex(options) {
+  const {
+    client,
+    stats,
+    index,
+    log,
+    retryIfSnapshottingCount = 3
+  } = options;
+
   try {
     await client.indices.delete({ index });
     stats.deletedIndex(index);
@@ -15,8 +23,11 @@ export async function deleteIndex(client, stats, index, retryIfSnapshottingCount
 
     if (retryIfSnapshottingCount > 0 && isDeleteWhileSnapshotInProgressError(error)) {
       stats.waitingForInProgressSnapshot(index);
-      await waitForSnapshotCompletion(client, index);
-      return await deleteIndex(client, stats, index, retryIfSnapshottingCount - 1);
+      await waitForSnapshotCompletion(client, index, log);
+      return await deleteIndex({
+        ...options,
+        retryIfSnapshottingCount: retryIfSnapshottingCount - 1
+      });
     }
 
     if (get(error, 'body.error.type') !== 'index_not_found_exception') {
@@ -44,13 +55,14 @@ export function isDeleteWhileSnapshotInProgressError(error) {
  * @param  {string} index the name of the index to look for
  * @return {Promise<undefined>}
  */
-export async function waitForSnapshotCompletion(client, index) {
+export async function waitForSnapshotCompletion(client, index, log) {
   const isSnapshotPending = async (repository, snapshot) => {
     const { snapshots: [status] } = await client.snapshot.status({
       repository,
       snapshot,
     });
 
+    log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 

@@ -4,7 +4,7 @@ import { get } from 'lodash';
 
 import { deleteIndex } from './delete_index';
 
-export function createCreateIndexStream({ client, stats, skipExisting }) {
+export function createCreateIndexStream({ client, stats, skipExisting, log }) {
   const skipDocsFromIndices = new Set();
 
   async function handleDoc(stream, record) {
@@ -37,7 +37,7 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
           return;
         }
 
-        await deleteIndex(client, stats, index);
+        await deleteIndex({ client, stats, index, log });
         await attemptToCreate(attemptNumber + 1);
         return;
       }
