@@ -1,0 +1,21 @@
+<div class="confirm-modal">
+  <div class="modal-title" ng-show="(title !== undefined && title !== '' )">{{title}}</div>
+  <div class="modal-body" bind-html-unsafe="message"></div>
+  <div class="modal-footer">
+    <button
+      ng-click="ok()"
+      ng-disabled="(saveLock === true)"
+      class="kuiButton kuiButton--primary"
+      aria-label="OK">
+      {{okLabel}}
+    </button>
+    <button
+      ng-hide="hideCancel"
+      ng-click="cancel()"
+      ng-disabled="(saveLock === true)"
+      class="kuiButton kuiButton--primary"
+      aria-label="Cancel">
+      {{cancelLabel}}
+    </button>
+  </div>
+</div>

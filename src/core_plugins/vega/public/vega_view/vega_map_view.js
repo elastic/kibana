@@ -80,6 +80,7 @@ export class VegaMapView extends VegaBaseView {
     this._kibanaMap.addLayer(vegaMapLayer);
 
     this.setDebugValues(vegaMapLayer.getVegaView(), vegaMapLayer.getVegaSpec());
+    this.setView(vegaMapLayer.getVegaView());
 
     this._addDestroyHandler(() => {
       this._kibanaMap.removeLayer(vegaMapLayer);

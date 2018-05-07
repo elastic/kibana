@@ -1,0 +1,74 @@
+@textColor: #5a5a5a;
+
+.monitoringNoUserSelect() {
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rhythm_chart {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.rhythm_chart__title {
+  color: @textColor;
+  margin: 0 0 10px;
+}
+
+.rhythm_chart__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex: 1 0 auto;
+}
+
+.rhythm_chart__visualization {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  position: relative;
+  & > div {
+    min-width: 1px;
+    width: 100%;
+    height: 100%;
+  }
+
+  div {
+    .monitoringNoUserSelect();
+  }
+}
+
+.rhythm_chart__legend-item {
+  &.disabled {
+    opacity: 0.5;
+  }
+  font-size: 12px;
+  cursor: pointer;
+  color: @textColor;
+}
+
+.rhythm_chart__legend-indicator {
+  margin-right: 3px;
+}
+
+.rhythm_chart__legend-horizontal {
+  margin-top: 3px;
+}
+
+.rhythm_chart__legend-series {
+}
+.rhythm_chart__legend-label {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.rhythm_chart__legend-value {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: 3px;
+}

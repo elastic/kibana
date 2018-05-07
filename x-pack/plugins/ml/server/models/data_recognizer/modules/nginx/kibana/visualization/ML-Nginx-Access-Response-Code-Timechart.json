@@ -1,0 +1,11 @@
+{
+  "visState": "{\"title\":\"ML Nginx Access Response Code Timechart\",\"type\":\"histogram\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"scale\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"nginx.access.response_code\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}", 
+  "description": "", 
+  "title": "ML Nginx Access Response Code Timechart", 
+  "uiStateJSON": "{\n  \"vis\": {\n    \"colors\": {\n      \"200\": \"#7EB26D\",\n      \"404\": \"#614D93\"\n    }\n  }\n}", 
+  "version": 1, 
+  "savedSearchId": "ML-Filebeat-Nginx-Access", 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

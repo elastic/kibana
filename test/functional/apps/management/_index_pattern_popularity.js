@@ -25,17 +25,8 @@ export default function ({ getService, getPageObjects }) {
     describe('change popularity', function indexPatternCreation() {
       const fieldName = 'geo.coordinates';
 
-      // set the page size to All again, https://github.com/elastic/kibana/issues/5030
-      // TODO: remove this after issue #5030 is closed
-      async function fix5030() {
-        await PageObjects.settings.setPageSize(50);
-        await PageObjects.common.sleep(1000);
-      }
-
       beforeEach(async function () {
         // increase Popularity of geo.coordinates
-        await PageObjects.settings.setPageSize(50);
-        await PageObjects.common.sleep(1000);
         log.debug('Starting openControlsByName (' + fieldName + ')');
         await PageObjects.settings.openControlsByName(fieldName);
         log.debug('increasePopularity');
@@ -56,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
       it('should be reset on cancel', async function () {
         // Cancel saving the popularity change
         await PageObjects.settings.controlChangeCancel();
-        await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         // check that it is 0 (previous increase was cancelled
         const popularity = await PageObjects.settings.getPopularity();
@@ -67,7 +57,6 @@ export default function ({ getService, getPageObjects }) {
       it('can be saved', async function () {
         // Saving the popularity change
         await PageObjects.settings.controlChangeSave();
-        await fix5030();
         await PageObjects.settings.openControlsByName(fieldName);
         const popularity = await PageObjects.settings.getPopularity();
         log.debug('popularity = ' + popularity);

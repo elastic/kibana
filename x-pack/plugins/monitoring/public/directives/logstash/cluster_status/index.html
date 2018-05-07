@@ -1,0 +1,19 @@
+<div class="monitoring-summary-status" role="status">
+  <div
+    class="monitoring-summary-status__content"
+    data-test-subj="logstashSummaryStatus"
+  >
+    <div>Nodes:
+      <strong data-test-subj="node_count">{{ status.node_count }}</strong>
+    </div>
+    <div>Memory:
+      <strong data-test-subj="memory_used">{{ status.avg_memory_used|formatNumber:'byte' }} / {{ status.avg_memory|formatNumber:'byte' }}</strong>
+    </div>
+    <div>Events Received:
+      <strong data-test-subj="events_in_total">{{ status.events_in_total|formatNumber:'0.[0]a' }}</strong>
+    </div>
+    <div>Events Emitted:
+      <strong data-test-subj="events_out_total">{{ status.events_out_total|formatNumber:'0.[0]a' }}</strong>
+    </div>
+  </div>
+</div>

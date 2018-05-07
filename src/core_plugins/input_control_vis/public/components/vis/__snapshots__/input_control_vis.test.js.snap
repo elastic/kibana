@@ -7,6 +7,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -56,6 +57,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -66,6 +68,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -87,6 +90,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -108,6 +112,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -135,6 +140,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -184,6 +190,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -194,6 +201,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -215,6 +223,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -236,6 +245,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -263,6 +273,7 @@ exports[`Renders list control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -312,6 +323,7 @@ exports[`Renders list control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -322,6 +334,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -343,6 +356,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -364,6 +378,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -391,6 +406,7 @@ exports[`Renders range control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -434,6 +450,7 @@ exports[`Renders range control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -444,6 +461,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -465,6 +483,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -486,6 +505,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >

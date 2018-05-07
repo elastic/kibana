@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { getInstalledPackages } from './lib';
+import { getInstalledPackages } from '../src/dev/npm';
+import { LICENSE_OVERRIDES } from '../src/dev/license_checker';
 
 import {
   isNull,
@@ -37,14 +38,13 @@ export default function licensesCSVReport(grunt) {
     const done = this.async();
 
     try {
-      const overrides = grunt.config.get('licenses.options.overrides');
       const file = grunt.option('csv');
       const directory = grunt.option('directory');
       const release = Boolean(grunt.option('release'));
 
       const packages = await getInstalledPackages({
         directory: directory ? resolve(directory) : grunt.config.get('root'),
-        licenseOverrides: overrides,
+        licenseOverrides: LICENSE_OVERRIDES,
         dev: !release
       });
 

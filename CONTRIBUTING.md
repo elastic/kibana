@@ -176,7 +176,7 @@ Start elasticsearch from a nightly snapshot.
 yarn es snapshot
 ```
 
-Additional options are available, pass `--help` for more information.
+This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
 
@@ -195,7 +195,21 @@ Start the development server.
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
-Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+#### Running Kibana in Open-Source mode
+
+If you're looking to only work with the open-source software, supply the license type to `yarn es`:
+
+```bash
+yarn es snapshot --license oss
+```
+
+And start Kibana with only open-source code:
+
+```bash
+yarn start --oss
+```
 
 #### Unsupported URL Type
 
@@ -253,6 +267,21 @@ yarn test && yarn build --skip-os-packages
 
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+
+### Unit testing frameworks
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+
+#### Mocha (legacy)
+Mocha tests are contained in `__tests__` directories.
+
+#### Jest
+Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
+
+### Running Jest Unit Tests
+
+```bash
+node scripts/jest
+```
 
 ### Debugging Unit Tests
 

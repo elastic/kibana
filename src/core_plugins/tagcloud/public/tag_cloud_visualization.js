@@ -16,6 +16,7 @@ export class TagCloudVisualization {
 
     const cloudContainer = document.createElement('div');
     cloudContainer.classList.add('tagcloud-vis');
+    cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
     this._containerNode.appendChild(cloudContainer);
 
     this._vis = vis;
@@ -92,7 +93,12 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
-    this._bucketAgg = this._vis.aggs.find(agg => agg.type.name === 'terms');
+    const segmentAggs = this._vis.aggs.bySchemaName.segment;
+    if (segmentAggs && segmentAggs.length > 0) {
+      this._bucketAgg = segmentAggs[0];
+    } else {
+      this._bucketAgg = null;
+    }
 
     const tags = data.rows.map(row => {
       const [tag, count] = row;

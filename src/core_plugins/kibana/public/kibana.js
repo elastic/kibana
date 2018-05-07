@@ -5,6 +5,22 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
+// import the uiExports that we want to "use"
+import 'uiExports/home';
+import 'uiExports/visTypes';
+import 'uiExports/visResponseHandlers';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visEditorTypes';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/spyModes';
+import 'uiExports/fieldFormats';
+import 'uiExports/fieldFormatEditors';
+import 'uiExports/navbarExtensions';
+import 'uiExports/managementSections';
+import 'uiExports/devTools';
+import 'uiExports/docViews';
+import 'uiExports/embeddableFactories';
+
 import 'ui/autoload/all';
 import './home';
 import './discover';
