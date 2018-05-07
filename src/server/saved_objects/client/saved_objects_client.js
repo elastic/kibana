@@ -107,6 +107,7 @@ export class SavedObjectsClient {
   async create(type, attributes = {}, options = {}) {
     const {
       id,
+      extraBodyProperties = {},
       overwrite = false
     } = options;
 
@@ -122,7 +123,8 @@ export class SavedObjectsClient {
         body: {
           type,
           updated_at: time,
-          [type]: attributes
+          [type]: attributes,
+          ...extraBodyProperties
         },
       });
 
@@ -169,7 +171,8 @@ export class SavedObjectsClient {
         {
           type: object.type,
           updated_at: time,
-          [object.type]: object.attributes
+          [object.type]: object.attributes,
+          ...object.extraBodyProperties
         }
       ];
     };
@@ -272,6 +275,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
+      queryDecorator,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -299,6 +303,10 @@ export class SavedObjectsClient {
         })
       }
     };
+
+    if (esOptions.body.query && typeof queryDecorator === 'function') {
+      esOptions.body.query = queryDecorator(esOptions.body.query);
+    }
 
     const response = await this._callCluster('search', esOptions);
 
@@ -342,7 +350,7 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet(objects = []) {
+  async bulkGet(objects = [], options = {}) {
     if (objects.length === 0) {
       return { saved_objects: [] };
     }
@@ -357,8 +365,15 @@ export class SavedObjectsClient {
       }
     });
 
+    const { docs } = response;
+
+    let docsToReturn = docs;
+    if (typeof options.documentFilter === 'function') {
+      docsToReturn = docs.filter(options.documentFilter);
+    }
+
     return {
-      saved_objects: response.docs.map((doc, i) => {
+      saved_objects: docsToReturn.map((doc, i) => {
         const { id, type } = objects[i];
 
         if (!doc.found) {
@@ -370,13 +385,19 @@ export class SavedObjectsClient {
         }
 
         const time = doc._source.updated_at;
-        return {
+        const savedObject = {
           id,
           type,
           ...time && { updated_at: time },
           version: doc._version,
           attributes: doc._source[type]
         };
+
+        if (typeof options.resultDecorator === 'function') {
+          return options.resultDecorator(savedObject, doc);
+        }
+
+        return savedObject;
       })
     };
   }
@@ -388,13 +409,17 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get(type, id) {
+  async get(type, id, options = {}) {
     const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
       ignore: [404]
     });
+
+    if (typeof options.responseInterceptor === 'function') {
+      options.responseInterceptor(response);
+    }
 
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
@@ -435,7 +460,8 @@ export class SavedObjectsClient {
       body: {
         doc: {
           updated_at: time,
-          [type]: attributes
+          [type]: attributes,
+          ...options.extraBodyProperties
         }
       },
     });

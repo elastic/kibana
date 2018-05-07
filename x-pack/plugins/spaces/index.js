@@ -11,6 +11,7 @@ import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import mappings from './mappings.json';
+import { spacesSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
 
 export const spaces = (kibana) => new kibana.Plugin({
   id: 'spaces',
@@ -54,6 +55,9 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
+
+    const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
+    savedObjectsClientProvider.addClientWrapper(spacesSavedObjectsClientWrapper);
 
     initSpacesApi(server);
 
