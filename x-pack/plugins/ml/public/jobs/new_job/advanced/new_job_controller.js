@@ -216,13 +216,28 @@ module.controller('MlNewJob',
           console.log('Editing job', mlJobService.currentJob);
           $scope.ui.pageTitle = 'Editing Job ' + $scope.job.job_id;
         } else {
+          // if the job_version is undefined, assume we have transferred to this page from
+          // a new job wizard.
+          // Alternatively, we are cloning a job and so the job already has a job_version
           if (mlJobService.currentJob.job_version === undefined) {
             $scope.mode = MODE.NEW;
+
+            // if results_index_name exists, the dedicated index checkbox has been checked
+            if ($scope.job.results_index_name !== undefined) {
+              $scope.ui.useDedicatedIndex = true;
+            }
           } else {
             $scope.mode = MODE.CLONE;
             console.log('Cloning job', mlJobService.currentJob);
             $scope.ui.pageTitle = 'Clone Job from ' + $scope.job.job_id;
             $scope.job.job_id = '';
+
+            if ($scope.job.results_index_name === 'shared') {
+              delete $scope.job.results_index_name;
+            } else {
+              $scope.ui.useDedicatedIndex = true;
+              $scope.job.results_index_name = '';
+            }
           }
           setDatafeedUIText();
           setFieldDelimiterControlsFromText();
@@ -236,13 +251,6 @@ module.controller('MlNewJob',
 
           if ($scope.job.analysis_limits && $scope.job.analysis_limits.model_memory_limit) {
             $scope.ui.modelMemoryLimitText = $scope.job.analysis_limits.model_memory_limit;
-          }
-
-          if ($scope.job.results_index_name === 'shared') {
-            delete $scope.job.results_index_name;
-          } else {
-            $scope.ui.useDedicatedIndex = true;
-            $scope.job.results_index_name = '';
           }
         }
 
@@ -1153,6 +1161,7 @@ module.controller('MlNewJob',
     }
 
     $scope.aceLoaded = function (editor) {
+      editor.$blockScrolling = Infinity;
       $scope.$applyAsync();
       if (editor.container.id === 'datafeed-preview') {
         editor.setReadOnly(true);
