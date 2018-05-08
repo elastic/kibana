@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesMetricsPercentileRanksProvider } from '../../metrics/percentile_ranks';
+import { percentileRanksMetricAgg } from '../../metrics/percentile_ranks';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -8,13 +8,11 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
   let Vis;
   let indexPattern;
-  let aggTypeMetricPercentileRanks;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    aggTypeMetricPercentileRanks = Private(AggTypesMetricsPercentileRanksProvider);
   }));
 
   it('uses the custom label if it is set', function () {
@@ -29,7 +27,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
       displayName: 'bytes'
     };
 
-    const responseAggs = aggTypeMetricPercentileRanks.getResponseAggs(aggConfig);
+    const responseAggs = percentileRanksMetricAgg.getResponseAggs(aggConfig);
     const percentileRankLabelFor5kBytes = responseAggs[0].makeLabel();
     const percentileRankLabelFor10kBytes = responseAggs[1].makeLabel();
 

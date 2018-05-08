@@ -15,13 +15,13 @@ import d3 from 'd3';
 import angular from 'angular';
 import moment from 'moment';
 
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets } from 'ui/time_buckets';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlMultiMetricJobChart', function (Private) {
+module.directive('mlMultiMetricJobChart', function () {
 
   function link(scope, element) {
 
@@ -31,7 +31,6 @@ module.directive('mlMultiMetricJobChart', function (Private) {
     const svgHeight = lineChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
-    const TimeBuckets = Private(TimeBucketsProvider);
 
     let lineChartXScale = null;
     let lineChartYScale = null;

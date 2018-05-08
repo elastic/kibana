@@ -1,9 +1,10 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
-import ngMock from 'ng_mock';
-import { AggTypesBucketsGeoHashProvider } from '../../buckets/geo_hash';
+import { geoHashBucketAgg } from '../../buckets/geo_hash';
 import * as AggConfigModule from '../../../vis/agg_config';
-import { AggTypesIndexProvider } from '../..';
+import * as BucketAggTypeModule from '../../buckets/_bucket_agg_type';
+import { aggTypes } from '../..';
+AggConfigModule.AggConfig.aggTypes = aggTypes;
 
 describe('Geohash Agg', () => {
 
@@ -40,27 +41,15 @@ describe('Geohash Agg', () => {
   const AggConfigMock = (vis, aggOptions) => {
     return aggOptions;
   };
-  const PrivateMock = (provider) => {
-    switch (provider.name) {
-      case 'AggTypesBucketsBucketAggTypeProvider':
-        return BucketAggTypeMock;
-        break;
-      default:
-        return () => {};
-    }
-  };
-  const configMock = {
-    get: () => {
-      return 7;//"visualization:tileMap:maxPrecision"
-    }
-  };
 
   before(function () {
     sinon.stub(AggConfigModule, 'AggConfig', AggConfigMock);
+    sinon.stub(BucketAggTypeModule, 'BucketAggType', BucketAggTypeMock);
   });
 
   after(function () {
     AggConfigModule.AggConfig.restore();
+    BucketAggTypeModule.BucketAggType.restore();
   });
 
 
@@ -93,23 +82,12 @@ describe('Geohash Agg', () => {
     };
   }
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    AggConfigModule.AggConfig.aggTypes = Private(AggTypesIndexProvider);
-  }));
-
-  let geohashAgg;
-  beforeEach(() => {
-    geohashAgg = AggTypesBucketsGeoHashProvider(PrivateMock, configMock); // eslint-disable-line new-cap
-  });
-
-
   describe('precision parameter', () => {
 
     const PRECISION_PARAM_INDEX = 6;
     let precisionParam;
     beforeEach(() => {
-      precisionParam = geohashAgg.params[PRECISION_PARAM_INDEX];
+      precisionParam = geoHashBucketAgg.params[PRECISION_PARAM_INDEX];
     });
 
     it('should select precision parameter', () => {
@@ -169,7 +147,7 @@ describe('Geohash Agg', () => {
       beforeEach(() => {
         initVisSessionState();
         initAggParams();
-        requestAggs = geohashAgg.getRequestAggs(aggMock);
+        requestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
       });
 
       it('should create filter, geohash_grid, and geo_centroid aggregations', () => {
@@ -189,7 +167,7 @@ describe('Geohash Agg', () => {
       // there was a bug because of an "&& mapZoom" check which excluded 0 as a valid mapZoom, but it is.
       it('should create filter, geohash_grid, and geo_centroid aggregations when zoom level 0', () => {
         aggMock.vis.params.mapZoom = 0;
-        requestAggs = geohashAgg.getRequestAggs(aggMock);
+        requestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(requestAggs.length).to.equal(3);
         expect(requestAggs[0].type).to.equal('filter');
         expect(requestAggs[1].type).to.equal('geohash_grid');
@@ -206,7 +184,7 @@ describe('Geohash Agg', () => {
 
       it('should only create geohash_grid and geo_centroid aggregations when isFilteredByCollar is false', () => {
         aggMock.params.isFilteredByCollar = false;
-        const requestAggs = geohashAgg.getRequestAggs(aggMock);
+        const requestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(requestAggs.length).to.equal(2);
         expect(requestAggs[0].type).to.equal('geohash_grid');
         expect(requestAggs[1].type).to.equal('geo_centroid');
@@ -214,7 +192,7 @@ describe('Geohash Agg', () => {
 
       it('should only create filter and geohash_grid aggregations when useGeocentroid is false', () => {
         aggMock.params.useGeocentroid = false;
-        const requestAggs = geohashAgg.getRequestAggs(aggMock);
+        const requestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(requestAggs.length).to.equal(2);
         expect(requestAggs[0].type).to.equal('filter');
         expect(requestAggs[1].type).to.equal('geohash_grid');
@@ -229,7 +207,7 @@ describe('Geohash Agg', () => {
       beforeEach(() => {
         resetMap();
         initAggParams();
-        origRequestAggs = geohashAgg.getRequestAggs(aggMock);
+        origRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         origMapCollar = aggMock.vis.sessionState.mapCollar;
       });
 
@@ -239,7 +217,7 @@ describe('Geohash Agg', () => {
           bottom_right: { lat: -0.9, lon: 0.9 }
         });
 
-        const newRequestAggs = geohashAgg.getRequestAggs(aggMock);
+        const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(JSON.stringify(origRequestAggs[0].params, null, '')).to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
 
         const newMapCollar = aggMock.vis.sessionState.mapCollar;
@@ -252,7 +230,7 @@ describe('Geohash Agg', () => {
           bottom_right: { lat: 9.0, lon: -9.0 }
         });
 
-        const newRequestAggs = geohashAgg.getRequestAggs(aggMock);
+        const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(JSON.stringify(origRequestAggs[0].params, null, '')).not.to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
 
         const newMapCollar = aggMock.vis.sessionState.mapCollar;
@@ -262,7 +240,7 @@ describe('Geohash Agg', () => {
       it('should change geo_bounding_box filter aggregation and vis session state when map zoom level changes', () => {
         zoomMap(-1);
 
-        const newRequestAggs = geohashAgg.getRequestAggs(aggMock);
+        const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
         expect(JSON.stringify(origRequestAggs[0].params, null, '')).not.to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
 
         const newMapCollar = aggMock.vis.sessionState.mapCollar;

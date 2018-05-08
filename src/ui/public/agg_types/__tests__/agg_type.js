@@ -5,11 +5,10 @@ import '../../private';
 import { AggParams } from '../agg_params';
 import { VisProvider } from '../../vis';
 import { fieldFormats } from '../../registry/field_formats';
-import { AggTypesAggTypeProvider } from '../agg_type';
+import { AggType } from '../agg_type';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggType Class', function () {
-  let AggType;
   let indexPattern;
   let Vis;
 
@@ -18,7 +17,6 @@ describe('AggType Class', function () {
   beforeEach(ngMock.inject(function (Private) {
 
     Vis = Private(VisProvider);
-    AggType = Private(AggTypesAggTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 

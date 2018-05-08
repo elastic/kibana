@@ -9,7 +9,7 @@
 import _ from 'lodash';
 
 import 'plugins/kibana/visualize/styles/main.less';
-import { AggTypesIndexProvider } from 'ui/agg_types/index';
+import { aggTypes } from 'ui/agg_types/index';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
@@ -84,7 +84,6 @@ module
     };
     const appState = new AppState(stateDefaults);
 
-    const aggTypes = Private(AggTypesIndexProvider);
 
     mlMultiMetricJobService.clearChartData();
     $scope.chartData = mlMultiMetricJobService.chartData;

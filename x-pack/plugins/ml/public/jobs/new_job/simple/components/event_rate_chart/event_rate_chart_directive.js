@@ -17,13 +17,13 @@ import angular from 'angular';
 import moment from 'moment';
 import 'ui/timefilter';
 
-import { TimeBucketsProvider } from 'ui/time_buckets';
+import { TimeBuckets } from 'ui/time_buckets';
 import { numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlEventRateChart', function (Private) {
+module.directive('mlEventRateChart', function () {
 
   function link(scope, element) {
 
@@ -33,7 +33,6 @@ module.directive('mlEventRateChart', function (Private) {
     const svgHeight = barChartHeight + margin.top + margin.bottom;
     let vizWidth  = svgWidth  - margin.left - margin.right;
     const chartLimits = { max: 0, min: 0 };
-    const TimeBuckets = Private(TimeBucketsProvider);
 
     let barChartXScale = null;
     let swimlaneXScale = null;

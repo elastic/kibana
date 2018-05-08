@@ -2,20 +2,18 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesBucketsCreateFilterRangeProvider } from '../../../buckets/create_filter/range';
+import { createFilterRange } from '../../../buckets/create_filter/range';
 
 describe('AggConfig Filters', function () {
 
   describe('range', function () {
     let indexPattern;
     let Vis;
-    let createFilter;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       Vis = Private(VisProvider);
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      createFilter = Private(AggTypesBucketsCreateFilterRangeProvider);
     }));
 
     it('should return a range filter for range agg', function () {
@@ -36,7 +34,7 @@ describe('AggConfig Filters', function () {
       });
 
       const aggConfig = vis.aggs.byTypeName.range[0];
-      const filter = createFilter(aggConfig, { gte: 1024, lt: 2048.0 });
+      const filter = createFilterRange(aggConfig, { gte: 1024, lt: 2048.0 });
       expect(filter).to.have.property('range');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);

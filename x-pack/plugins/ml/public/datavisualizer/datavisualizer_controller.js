@@ -22,7 +22,7 @@ import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
 import { luceneStringToDsl } from 'ui/courier/data_source/build_query/lucene_string_to_dsl.js';
-import { DecorateQueryProvider } from 'ui/courier/data_source/_decorate_query';
+import { decorateQuery } from 'ui/courier/data_source/_decorate_query';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
@@ -113,7 +113,6 @@ module
       }
     }
 
-    const decorateQuery = Private(DecorateQueryProvider);
     $scope.searchQuery = buildSearchQuery();
 
     $scope.samplerShardSize = $scope.appState.samplerShardSize ?
