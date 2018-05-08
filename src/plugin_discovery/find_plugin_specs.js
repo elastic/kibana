@@ -141,6 +141,7 @@ export function findPluginSpecs(settings, configToMutate) {
         const isRightVersion = spec.isVersionCompatible(config.get('pkg.version'));
         const enabled = isRightVersion && spec.isEnabled(config);
         return {
+          config,
           spec,
           deprecations,
           enabledSpecs: enabled ? [spec] : [],
@@ -196,8 +197,7 @@ export function findPluginSpecs(settings, configToMutate) {
     // the config service we extended with all of the plugin specs,
     // only emitted once it is fully extended by all
     extendedConfig$: extendConfig$
-      .ignoreElements()
-      .mergeMap(config$),
+      .mergeMap(result => result.config),
 
     // all enabled PluginSpec objects
     spec$: extendConfig$
