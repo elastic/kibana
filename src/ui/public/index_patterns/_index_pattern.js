@@ -149,6 +149,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     return id;
   }
 
+  function setVersion(indexPattern, version) {
+    indexPattern.version = version;
+    return version;
+  }
+
   function watch(indexPattern) {
     if (configWatchers.has(indexPattern)) {
       return;
@@ -211,7 +216,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         .then(resp => {
           // temporary compatability for savedObjectsClient
 
-          this.version = resp._version;
+          setVersion(this, resp._version);
 
           return {
             _id: resp.id,
@@ -390,7 +395,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         const body = this.prepBody();
 
         return savedObjectsClient.create(type, body, { id: this.id })
-          .then(response => setId(this, response.id))
+          .then(response => {
+            setVersion(this, response.version);
+            setId(this, response.id);
+          })
           .catch(err => {
             if (err.statusCode !== 409) {
               return Promise.resolve(false);
@@ -406,7 +414,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                   }
                 })
                 .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-                .then(response => setId(this, response.id)),
+                .then(response => {
+                  setVersion(this, response.version);
+                  setId(this, response.id);
+                }),
               _.constant(false) // if the user doesn't overwrite, resolve with false
               );
           });
@@ -421,7 +432,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return savedObjectsClient.update(type, this.id, body, { version: this.version })
         .then(({ id, version }) => {
           setId(this, id);
-          this.version = version;
+          setVersion(this, version);
         })
         .catch(err => {
           if (err.statusCode === 409) {
