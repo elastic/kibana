@@ -115,6 +115,7 @@ module.directive('mlTimeseriesChart', function (
       drawContextChartSelection();
     });
 
+    scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
     scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
 
