@@ -205,7 +205,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return getRoutes();
     }
 
-    init(storeOriginal = true) {
+    init() {
       watch(this);
 
       if (!this.id) {
@@ -225,11 +225,16 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
             found: resp._version ? true : false
           };
         })
+        // Do this before we attempt to update from ES
+        // since that call can potentially perform a save
+        .then(response => {
+          this.originalBody = this.prepBody();
+          return response;
+        })
         .then(response => updateFromElasticSearch(this, response))
+        // Do it after to ensure we have the most up to date information
         .then(() => {
-          if (storeOriginal) {
-            this.originalBody = this.prepBody();
-          }
+          this.originalBody = this.prepBody();
         })
         .then(() => this);
     }
@@ -428,7 +433,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       const body = this.prepBody();
       // What keys changed since they last pulled the index pattern
       const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
-
       return savedObjectsClient.update(type, this.id, body, { version: this.version })
         .then(({ id, version }) => {
           setId(this, id);
@@ -436,10 +440,11 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         })
         .catch(err => {
           if (err.statusCode === 409) {
-            return this.init(false)
+            const samePattern = new IndexPattern(this.id);
+            return samePattern.init()
               .then(() => {
                 // What keys changed from now and what the server returned
-                const updatedBody = this.prepBody();
+                const updatedBody = samePattern.prepBody();
 
                 // Build a list of changed keys from the server response
                 // and ensure we ignore the key if the server response
@@ -463,6 +468,16 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                   toastNotifications.addDanger('Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.'); // eslint-disable-line max-len
                   throw err;
                 }
+
+                // Set the updated response on this object
+                serverChangedKeys.forEach(key => {
+                  this[key] = samePattern[key];
+                });
+
+                setVersion(this, samePattern.version);
+
+                // Clear cache
+                patternCache.clear(this.id);
 
                 // Try the save again
                 return this.save();
