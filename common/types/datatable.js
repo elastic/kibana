@@ -37,7 +37,6 @@ export const datatable = () => ({
         as: 'table',
         value: {
           datatable,
-          font: undefined,
           paginate: true,
           perPage: 10,
         },
