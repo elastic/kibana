@@ -33,7 +33,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
 
       const charts = this.handler.data.getVisData();
       this._validatePieData(charts);
-      this.ABBREVIATIONS = ['', 'k', 'Mil', 'Bn', 'Tn'];
+      this.ABBREVIATIONS = ['', 'k', 'M', 'G', 'T', 'P'];
       this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
     }
 
@@ -331,20 +331,16 @@ export function VislibVisualizationsPieChartProvider(Private) {
     readableNumber(number) {
       let tier = Math.log10(Math.abs(number)) / 3 | 0;
       if(tier === 0) return number;
-      if(tier > 4) tier = 4;
+      if(tier >= this.ABBREVIATIONS.length) tier = this.ABBREVIATIONS.length - 1;
       const postfix = this.ABBREVIATIONS[tier];
-      const scale = Math.pow(10, tier * 3);
+      const scale = 10 ** (tier * 3);
       const scaled = number / scale;
-      let formatted = String(scaled.toFixed(1));
-      if (/\.0$/.test(formatted)) {
-        formatted = formatted.substr(0, formatted.length - 2);
-      }
-      return formatted + postfix;
+      const formatted = Number(scaled.toFixed(1));
+      return `${formatted}${postfix}`;
     }
 
     addDonutDescriptor(svg, width, height) {
-      const self = this;
-      const metricLabel = self.events.handler.data.data
+      const metricLabel = this.events.handler.data.data
         .raw.columns.find(function (element) {
           return element.categoryName === 'metric';
         }).label;
@@ -352,16 +348,13 @@ export function VislibVisualizationsPieChartProvider(Private) {
         .style('text-anchor', 'middle')
         .attr('font-size', function (chartData) {
           const dividend = Math.min(width, height);
-          let length = 0;
-          if(chartData.raw) {
-            length = chartData.raw.columns.length;
-          }
+          const length = chartData.raw ? chartData.raw.columns.length : 0;
           const divisor = Math.max(length, 4);
           return (dividend / divisor) + 'px';
         })
         .attr('dy', '.35em')
-        .text(function (chartData) {
-          return self.readableNumber(chartData.slices.sumOfChildren);
+        .text((chartData) => {
+          return this.readableNumber(chartData.slices.sumOfChildren);
         });
       let tooltip;
       const mouseMove = function () {
