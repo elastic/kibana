@@ -12,7 +12,7 @@ test('it removes the space url context from the base path when the space is not 
 
 test('it removes the space url context from the base path when the space is the root', () => {
   const basePath = `/s/my-space`;
-  expect(stripSpaceUrlContext(basePath)).toEqual('/');
+  expect(stripSpaceUrlContext(basePath)).toEqual('');
 });
 
 test(`it doesn't change base paths without a space url context`, () => {
@@ -21,7 +21,11 @@ test(`it doesn't change base paths without a space url context`, () => {
 });
 
 test('it accepts no parameters', () => {
-  expect(stripSpaceUrlContext()).toEqual('/');
+  expect(stripSpaceUrlContext()).toEqual('');
+});
+
+test('it remove the trailing slash', () => {
+  expect(stripSpaceUrlContext('/')).toEqual('');
 });
 
 test('it identifies the space url context', () => {

@@ -32,9 +32,13 @@ export function stripSpaceUrlContext(basePath = '/') {
     } else {
       basePathWithoutSpace = basePath.substring(0, indexOfSpaceContext);
     }
-
-    return basePathWithoutSpace;
+  } else {
+    basePathWithoutSpace = basePath;
   }
 
-  return basePath;
+  if (basePathWithoutSpace.endsWith('/')) {
+    return basePathWithoutSpace.substr(0, -1);
+  }
+
+  return basePathWithoutSpace;
 }
