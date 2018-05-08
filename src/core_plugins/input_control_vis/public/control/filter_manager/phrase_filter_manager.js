@@ -58,7 +58,7 @@ export class PhraseFilterManager extends FilterManager {
    * Extract filtering value from kibana filters
    *
    * @param {object} kbnFilter
-   * @return {array of strings} array of values pulled from filter
+   * @return {Array.<string>} array of values pulled from filter
    */
   _getValueFromFilter(kbnFilter) {
     // bool filter - multiple phrase filters
