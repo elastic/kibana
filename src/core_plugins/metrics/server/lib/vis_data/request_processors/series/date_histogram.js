@@ -30,7 +30,6 @@ export default function dateHistogram(req, panel, series) {
     const { timeField, interval } = getIntervalAndTimefield(panel, series);
     const { bucketSize, intervalString } = getBucketSize(req, interval);
     const { from, to }  = offsetTime(req, series.offset_time, panel);
-    const { timezone } = req.payload.timerange;
 
     const offset = getBucketOffset(from.valueOf(), bucketSize * 1000);
     const offsetString = `${Math.floor(offset / 1000)}s`;
@@ -45,7 +44,6 @@ export default function dateHistogram(req, panel, series) {
         field: timeField,
         interval: intervalString,
         min_doc_count: 0,
-        time_zone: timezone,
         offset: offsetString,
         extended_bounds: {
           min: boundsMin.valueOf(),

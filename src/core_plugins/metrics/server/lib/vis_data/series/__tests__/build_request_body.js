@@ -132,7 +132,6 @@ describe('buildRequestBody(req)', () => {
                 field: '@timestamp',
                 interval: '10s',
                 min_doc_count: 0,
-                time_zone: 'UTC',
                 offset: '-5s',
                 extended_bounds: {
                   min: 1485463055881,

@@ -24,12 +24,16 @@ import getTimerange from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 import { isMetric } from '../../../../../common/metric_types';
 import { hasSiblingAggs } from '../../helpers/has_sibling_aggs';
+import { getBucketOffset } from '../../helpers/get_bucket_offset';
 
 export default function dateHistogram(req, panel) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel);
     const { bucketSize, intervalString } = getBucketSize(req, interval);
     const { from, to }  = getTimerange(req);
+    const offset = getBucketOffset(from.valueOf(), bucketSize * 1000);
+    const offsetString = `${Math.floor(offset / 1000)}s`;
+
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
       if (isMetric(panel.type) && panel.timerange_mode === 'all') {
@@ -42,6 +46,7 @@ export default function dateHistogram(req, panel) {
           field: timeField,
           interval: intervalString,
           min_doc_count: 0,
+          offset: offsetString,
           extended_bounds: {
             min: boundsMin.valueOf(),
             max: to.valueOf()
@@ -53,7 +58,8 @@ export default function dateHistogram(req, panel) {
         from: from.toISOString(),
         timeField,
         intervalString,
-        bucketSize
+        bucketSize,
+        offset: offsetString
       });
     });
     return next(doc);

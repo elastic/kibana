@@ -69,7 +69,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: '@timestamp',
                 interval: '10s',
                 min_doc_count: 0,
-                time_zone: 'UTC',
                 offset: '-10s',
                 extended_bounds: {
                   min: 1483228800000,
@@ -111,7 +110,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: '@timestamp',
                 interval: '10s',
                 min_doc_count: 0,
-                time_zone: 'UTC',
                 offset: '-10s',
                 extended_bounds: {
                   min: 1483225200000,
@@ -156,7 +154,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: 'timestamp',
                 interval: '20s',
                 min_doc_count: 0,
-                time_zone: 'UTC',
                 offset: '-20s',
                 extended_bounds: {
                   min: 1483228800000,
