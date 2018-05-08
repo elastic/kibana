@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiIcon,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 
 export const NUM_LONG_LINKS = 5;
@@ -130,12 +131,17 @@ export class RecentlyAccessed extends Component {
           style={style}
           grow={false}
         >
-          <EuiLink
-            className="recentlyAccessedLongLink"
-            href={recentlyAccessedItem.link}
+          <EuiToolTip
+            position="bottom"
+            content={recentlyAccessedItem.label}
           >
-            {recentlyAccessedItem.label}
-          </EuiLink>
+            <EuiLink
+              className="recentlyAccessedLongLink"
+              href={recentlyAccessedItem.link}
+            >
+              {recentlyAccessedItem.label}
+            </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       </React.Fragment>
     );
@@ -178,7 +184,7 @@ export class RecentlyAccessed extends Component {
 
         <EuiSpacer size="s"/>
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" wrap>
           <EuiFlexItem grow={false} className="recentlyAccessedFlexItem">
             <EuiFlexGroup>
               {this.renderRecentlyAccessed()}
