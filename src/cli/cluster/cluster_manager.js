@@ -75,7 +75,7 @@ export default class ClusterManager {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
       const extraPaths = [
-        ...config.get('plugins.paths'),
+        ...pluginPaths,
         ...scanDirs,
       ];
 
