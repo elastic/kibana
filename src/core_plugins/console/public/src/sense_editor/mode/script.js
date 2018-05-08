@@ -1,15 +1,14 @@
-let acequire = require('acequire');
-require('ace');
-require('ace/mode-json');
+import ace from 'ace';
 
-var oop = acequire("ace/lib/oop");
-var TextMode = acequire("ace/mode/text").Mode;
-var MatchingBraceOutdent = acequire("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
-var CstyleBehaviour = acequire("ace/mode/behaviour/cstyle").CstyleBehaviour;
-var CStyleFoldMode = acequire("ace/mode/folding/cstyle").FoldMode;
-acequire("ace/tokenizer")
+const oop = ace.acequire('ace/lib/oop');
+const TextMode = ace.acequire('ace/mode/text').Mode;
+const MatchingBraceOutdent = ace.acequire('ace/mode/matching_brace_outdent').MatchingBraceOutdent;
+const CstyleBehaviour = ace.acequire('ace/mode/behaviour/cstyle').CstyleBehaviour;
+const CStyleFoldMode = ace.acequire('ace/mode/folding/cstyle').FoldMode;
+const WorkerClient = ace.acequire('ace/worker/worker_client').WorkerClient;
+ace.acequire('ace/tokenizer');
 
-var ScriptHighlightRules = require("./script_highlight_rules").ScriptHighlightRules;
+const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
 
 export function ScriptMode() {
   this.$outdent = new MatchingBraceOutdent();
@@ -24,8 +23,8 @@ oop.inherits(ScriptMode, TextMode);
   this.HighlightRules = ScriptHighlightRules;
 
   this.getNextLineIndent = function (state, line, tab) {
-    var indent = this.$getIndent(line);
-    var match = line.match(/^.*[\{\[]\s*$/);
+    let indent = this.$getIndent(line);
+    const match = line.match(/^.*[\{\[]\s*$/);
     if (match) {
       indent += tab;
     }
@@ -41,21 +40,22 @@ oop.inherits(ScriptMode, TextMode);
     this.$outdent.autoOutdent(doc, row);
   };
 
-  // this.createWorker = function (session) {
-  //   var worker = new WorkerClient(["ace", "sense_editor"], "sense_editor/mode/worker", "SenseWorker");
-  //   worker.attachToDocument(session.getDocument());
+  this.createWorker = function (session) {
+    console.log('SCRIPT');
+    const worker = new WorkerClient(['ace', 'sense_editor'], 'sense_editor/mode/worker', 'SenseWorker', 'sense_editor/mode/worker');
+    worker.attachToDocument(session.getDocument());
 
 
-  //   worker.on("error", function (e) {
-  //     session.setAnnotations([e.data]);
-  //   });
+    worker.on('error', function (e) {
+      session.setAnnotations([e.data]);
+    });
 
-  //   worker.on("ok", function (anno) {
-  //     session.setAnnotations(anno.data);
-  //   });
+    worker.on('ok', function (anno) {
+      session.setAnnotations(anno.data);
+    });
 
-  //   return worker;
-  // };
+    return worker;
+  };
 
 
 }).call(ScriptMode.prototype);

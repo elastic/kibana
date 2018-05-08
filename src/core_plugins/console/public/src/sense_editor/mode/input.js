@@ -1,19 +1,17 @@
-let acequire = require('acequire');
-require('ace');
-require('ace/mode-json');
+import ace from 'ace';
 
-var oop = acequire("ace/lib/oop");
-var TextMode = acequire("ace/mode/text").Mode;
-var ScriptMode = require("./script").ScriptMode;
-var MatchingBraceOutdent = acequire("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
-var CstyleBehaviour = acequire("ace/mode/behaviour/cstyle").CstyleBehaviour;
-var CStyleFoldMode = acequire("ace/mode/folding/cstyle").FoldMode;
-var WorkerClient = acequire("ace/worker/worker_client").WorkerClient;
-var AceTokenizer = acequire("ace/tokenizer").Tokenizer;
+const oop = ace.acequire('ace/lib/oop');
+const TextMode = ace.acequire('ace/mode/text').Mode;
+const ScriptMode = require('./script').ScriptMode;
+const MatchingBraceOutdent = ace.acequire('ace/mode/matching_brace_outdent').MatchingBraceOutdent;
+const CstyleBehaviour = ace.acequire('ace/mode/behaviour/cstyle').CstyleBehaviour;
+const CStyleFoldMode = ace.acequire('ace/mode/folding/cstyle').FoldMode;
+const WorkerClient = ace.acequire('ace/worker/worker_client').WorkerClient;
+const AceTokenizer = ace.acequire('ace/tokenizer').Tokenizer;
 
-var HighlightRules = require("./input_highlight_rules").InputHighlightRules;
-
-acequire("ace/config").setModuleUrl("sense_editor/mode/worker", require("file-loader!./worker.js"));
+const HighlightRules = require('./input_highlight_rules').InputHighlightRules;
+ace.acequire('ace/config').setModuleUrl('sense_editor/mode/worker', require('file-loader!./worker.js'));
+//
 
 export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());
@@ -21,7 +19,7 @@ export function Mode() {
   this.$behaviour = new CstyleBehaviour();
   this.foldingRules = new CStyleFoldMode();
   this.createModeDelegates({
-    "script-": ScriptMode
+    'script-': ScriptMode
   });
 }
 oop.inherits(Mode, TextMode);
@@ -33,10 +31,10 @@ oop.inherits(Mode, TextMode);
   };
 
   this.getNextLineIndent = function (state, line, tab) {
-    var indent = this.$getIndent(line);
+    let indent = this.$getIndent(line);
 
-    if (state !== "string_literal") {
-      var match = line.match(/^.*[\{\(\[]\s*$/);
+    if (state !== 'string_literal') {
+      const match = line.match(/^.*[\{\(\[]\s*$/);
       if (match) {
         indent += tab;
       }
@@ -52,17 +50,23 @@ oop.inherits(Mode, TextMode);
   this.autoOutdent = function (state, doc, row) {
     this.$outdent.autoOutdent(doc, row);
   };
-
   this.createWorker = function (session) {
-    var worker = new WorkerClient(["ace", "sense_editor"], "sense_editor/mode/worker", "SenseWorker");
+    console.log('WORKER');
+    const worker = new WorkerClient(['ace', 'sense_editor'], 'sense_editor/mode/worker', 'SenseWorker', 'sense_editor/mode/worker');
+    console.log(worker);
     worker.attachToDocument(session.getDocument());
 
-
-    worker.on("error", function (e) {
+    worker.on('lint', function (results) {
+      console.log('OL');
+      session.setAnnotations(results.data);
+    });
+    worker.on('error', function (e) {
+      console.log('OL');
       session.setAnnotations([e.data]);
     });
 
-    worker.on("ok", function (anno) {
+    worker.on('ok', function (anno) {
+      console.log('OL');
       session.setAnnotations(anno.data);
     });
 

@@ -1,15 +1,15 @@
 /* eslint import/no-unresolved: 0 */
 /* global define */
 (function (window) {
-  "use strict";
 
-  if (typeof window.window !== "undefined" && window.document) {
+
+  if (typeof window.window !== 'undefined' && window.document) {
     return;
   }
 
   window.console = function () {
-    var msgs = Array.prototype.slice.call(arguments, 0);
-    window.postMessage({ type: "log", data: msgs });
+    const msgs = Array.prototype.slice.call(arguments, 0);
+    window.postMessage({ type: 'log', data: msgs });
   };
   window.console.error =
     window.console.warn =
@@ -20,22 +20,22 @@
   window.ace = window;
 
   window.onerror = function (message, file, line, col, err) {
-    console.error("Worker " + err.stack);
+    console.error('Worker ' + err.stack);
   };
 
   window.normalizeModule = function (parentId, moduleName) {
-    if (moduleName.indexOf("!") !== -1) {
-      var chunks = moduleName.split("!");
-      return window.normalizeModule(parentId, chunks[0]) + "!" + window.normalizeModule(parentId, chunks[1]);
+    if (moduleName.indexOf('!') !== -1) {
+      const chunks = moduleName.split('!');
+      return window.normalizeModule(parentId, chunks[0]) + '!' + window.normalizeModule(parentId, chunks[1]);
     }
-    if (moduleName.charAt(0) == ".") {
-      var base = parentId.split("/").slice(0, -1).join("/");
-      moduleName = (base ? base + "/" : "") + moduleName;
+    if (moduleName.charAt(0) == '.') {
+      const base = parentId.split('/').slice(0, -1).join('/');
+      moduleName = (base ? base + '/' : '') + moduleName;
 
-      var previous;
-      while (moduleName.indexOf(".") !== -1 && previous != moduleName) {
+      let previous;
+      while (moduleName.indexOf('.') !== -1 && previous != moduleName) {
         previous = moduleName;
-        moduleName = moduleName.replace(/^\.\//, "").replace(/\/\.\//, "/").replace(/[^\/]+\/\.\.\//, "");
+        moduleName = moduleName.replace(/^\.\//, '').replace(/\/\.\//, '/').replace(/[^\/]+\/\.\.\//, '');
       }
     }
 
@@ -44,15 +44,15 @@
 
   window.require = function (parentId, id) {
     if (!id) {
-      id = parentId
+      id = parentId;
       parentId = null;
     }
     if (!id.charAt)
-      throw new Error("worker.js require() accepts only (parentId, id) as arguments");
+    {throw new Error('worker.js require() accepts only (parentId, id) as arguments');}
 
     id = window.normalizeModule(parentId, id);
 
-    var module = window.require.modules[id];
+    const module = window.require.modules[id];
     if (module) {
       if (!module.initialized) {
         module.initialized = true;
@@ -61,11 +61,11 @@
       return module.exports;
     }
 
-    var chunks = id.split("/");
+    const chunks = id.split('/');
     if (!window.require.tlns)
-      return console.log("unable to load " + id);
+    {return console.log('unable to load ' + id);}
     chunks[0] = window.require.tlns[chunks[0]] || chunks[0];
-    var path = chunks.join("/") + ".js";
+    const path = chunks.join('/') + '.js';
 
     window.require.id = id;
     window.importScripts(path);
@@ -77,60 +77,60 @@
   window.define = function (id, deps, factory) {
     if (arguments.length == 2) {
       factory = deps;
-      if (typeof id != "string") {
+      if (typeof id !== 'string') {
         deps = id;
         id = window.require.id;
       }
     } else if (arguments.length == 1) {
       factory = id;
-      deps = []
+      deps = [];
       id = window.require.id;
     }
 
     if (!deps.length)
-      deps = ['require', 'exports', 'module']
+    {deps = ['require', 'exports', 'module'];}
 
-    if (id.indexOf("text!") === 0)
-      return;
+    if (id.indexOf('text!') === 0)
+    {return;}
 
-    var req = function (childId) {
+    const req = function (childId) {
       return window.require(id, childId);
     };
 
     window.require.modules[id] = {
       exports: {},
       factory: function () {
-        var module = this;
-        var returnExports = factory.apply(this, deps.map(function (dep) {
+        const module = this;
+        const returnExports = factory.apply(this, deps.map(function (dep) {
           switch (dep) {
             case 'require':
-              return req
+              return req;
             case 'exports':
-              return module.exports
+              return module.exports;
             case 'module':
-              return module
+              return module;
             default:
-              return req(dep)
+              return req(dep);
           }
         }));
         if (returnExports)
-          module.exports = returnExports;
+        {module.exports = returnExports;}
         return module;
       }
     };
   };
-  window.define.amd = {}
+  window.define.amd = {};
 
   window.initBaseUrls = function initBaseUrls(topLevelNamespaces) {
     require.tlns = topLevelNamespaces;
-  }
+  };
 
   window.initSender = function initSender() {
 
-    var EventEmitter = window.require("ace/lib/event_emitter").EventEmitter;
-    var oop = window.require("ace/lib/oop");
+    const EventEmitter = window.require('ace/lib/event_emitter').EventEmitter;
+    const oop = window.require('ace/lib/oop');
 
-    var Sender = function () {
+    const Sender = function () {
     };
 
     (function () {
@@ -139,7 +139,7 @@
 
       this.callback = function (data, callbackId) {
         window.postMessage({
-          type: "call",
+          type: 'call',
           id: callbackId,
           data: data
         });
@@ -147,7 +147,7 @@
 
       this.emit = function (name, data) {
         window.postMessage({
-          type: "event",
+          type: 'event',
           name: name,
           data: data
         });
@@ -156,24 +156,24 @@
     }).call(Sender.prototype);
 
     return new Sender();
-  }
+  };
 
   window.main = null;
   window.sender = null;
 
   window.onmessage = function (e) {
-    var msg = e.data;
+    const msg = e.data;
     if (msg.command) {
       if (window.main[msg.command])
-        window.main[msg.command].apply(window.main, msg.args);
+      {window.main[msg.command].apply(window.main, msg.args);}
       else
-        throw new Error("Unknown command:" + msg.command);
+      {throw new Error('Unknown command:' + msg.command);}
     }
     else if (msg.init) {
       window.initBaseUrls(msg.tlns);
-      require("ace/lib/es5-shim");
+      require('ace/lib/es5-shim');
       window.sender = window.initSender();
-      var clazz = require(msg.module)[msg.classname];
+      const clazz = require(msg.module)[msg.classname];
       /*jshint -W055 */
       window.main = new clazz(window.sender);
     }
@@ -181,10 +181,10 @@
       window.sender._emit(msg.event, msg.data);
     }
   };
-})(this);// https://github.com/kriskowal/es5-shim
+}(this));// https://github.com/kriskowal/es5-shim
 
 define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, exports) {
-  "use strict";
+
 
   exports.inherits = function (ctor, superCtor) {
     ctor.super_ = superCtor;
@@ -199,7 +199,7 @@ define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, expo
   };
 
   exports.mixin = function (obj, mixin) {
-    for (var key in mixin) {
+    for (const key in mixin) {
       obj[key] = mixin[key];
     }
     return obj;
@@ -211,22 +211,22 @@ define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, expo
 
 });
 define('ace/worker/mirror', ['require', 'exports', 'module', 'ace/document', 'ace/lib/lang'], function (require, exports) {
-  "use strict";
 
-  var Document = require("../document").Document;
-  var lang = require("../lib/lang");
 
-  var Mirror = exports.Mirror = function (sender) {
+  const Document = require('../document').Document;
+  const lang = require('../lib/lang');
+
+  const Mirror = exports.Mirror = function (sender) {
     this.sender = sender;
-    var doc = this.doc = new Document("");
+    const doc = this.doc = new Document('');
 
-    var deferredUpdate = this.deferredUpdate = lang.delayedCall(this.onUpdate.bind(this));
+    const deferredUpdate = this.deferredUpdate = lang.delayedCall(this.onUpdate.bind(this));
 
-    var _self = this;
-    sender.on("change", function (e) {
+    const _self = this;
+    sender.on('change', function (e) {
       doc.applyDeltas(e.data);
       if (_self.$timeout)
-        return deferredUpdate.schedule(_self.$timeout);
+      {return deferredUpdate.schedule(_self.$timeout);}
       _self.onUpdate();
     });
   };
@@ -261,17 +261,17 @@ define('ace/worker/mirror', ['require', 'exports', 'module', 'ace/document', 'ac
 
 define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter',
   'ace/range', 'ace/anchor'], function (require, exports) {
-  "use strict";
 
-  var oop = require("./lib/oop");
-  var EventEmitter = require("./lib/event_emitter").EventEmitter;
-  var Range = require("./range").Range;
-  var Anchor = require("./anchor").Anchor;
 
-  var Document = function (text) {
+  const oop = require('./lib/oop');
+  const EventEmitter = require('./lib/event_emitter').EventEmitter;
+  const Range = require('./range').Range;
+  const Anchor = require('./anchor').Anchor;
+
+  const Document = function (text) {
     this.$lines = [];
     if (text.length == 0) {
-      this.$lines = [""];
+      this.$lines = [''];
     } else if (Array.isArray(text)) {
       this._insertLines(0, text);
     } else {
@@ -283,7 +283,7 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
 
     oop.implement(this, EventEmitter);
     this.setValue = function (text) {
-      var len = this.getLength();
+      const len = this.getLength();
       this.remove(new Range(0, 0, len, this.getLine(len - 1).length));
       this.insert({ row: 0, column: 0 }, text);
     };
@@ -293,36 +293,38 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
     this.createAnchor = function (row, column) {
       return new Anchor(this, row, column);
     };
-    if ("aaa".split(/a/).length == 0)
+    if ('aaa'.split(/a/).length == 0) {
       this.$split = function (text) {
-        return text.replace(/\r\n|\r/g, "\n").split("\n");
-      }
-    else
-      this.$split = function (text) {
-        return text.split(/\r\n|\r|\n/);
+        return text.replace(/\r\n|\r/g, '\n').split('\n');
       };
+    }
+
+    else
+    {this.$split = function (text) {
+      return text.split(/\r\n|\r|\n/);
+    };}
 
 
     this.$detectNewLine = function (text) {
-      var match = text.match(/^.*?(\r\n|\r|\n)/m);
-      this.$autoNewLine = match ? match[1] : "\n";
+      const match = text.match(/^.*?(\r\n|\r|\n)/m);
+      this.$autoNewLine = match ? match[1] : '\n';
     };
     this.getNewLineCharacter = function () {
       switch (this.$newLineMode) {
-        case "windows":
-          return "\r\n";
-        case "unix":
-          return "\n";
+        case 'windows':
+          return '\r\n';
+        case 'unix':
+          return '\n';
         default:
           return this.$autoNewLine;
       }
     };
 
-    this.$autoNewLine = "\n";
-    this.$newLineMode = "auto";
+    this.$autoNewLine = '\n';
+    this.$newLineMode = 'auto';
     this.setNewLineMode = function (newLineMode) {
       if (this.$newLineMode === newLineMode)
-        return;
+      {return;}
 
       this.$newLineMode = newLineMode;
     };
@@ -330,10 +332,10 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
       return this.$newLineMode;
     };
     this.isNewLine = function (text) {
-      return (text == "\r\n" || text == "\r" || text == "\n");
+      return (text == '\r\n' || text == '\r' || text == '\n');
     };
     this.getLine = function (row) {
-      return this.$lines[row] || "";
+      return this.$lines[row] || '';
     };
     this.getLines = function (firstRow, lastRow) {
       return this.$lines.slice(firstRow, lastRow + 1);
@@ -349,135 +351,135 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
         return this.getLine(range.start.row)
           .substring(range.start.column, range.end.column);
       }
-      var lines = this.getLines(range.start.row, range.end.row);
-      lines[0] = (lines[0] || "").substring(range.start.column);
-      var l = lines.length - 1;
+      const lines = this.getLines(range.start.row, range.end.row);
+      lines[0] = (lines[0] || '').substring(range.start.column);
+      const l = lines.length - 1;
       if (range.end.row - range.start.row == l)
-        lines[l] = lines[l].substring(0, range.end.column);
+      {lines[l] = lines[l].substring(0, range.end.column);}
       return lines.join(this.getNewLineCharacter());
     };
 
     this.$clipPosition = function (position) {
-      var length = this.getLength();
+      const length = this.getLength();
       if (position.row >= length) {
         position.row = Math.max(0, length - 1);
         position.column = this.getLine(length - 1).length;
       } else if (position.row < 0)
-        position.row = 0;
+      {position.row = 0;}
       return position;
     };
     this.insert = function (position, text) {
       if (!text || text.length === 0)
-        return position;
+      {return position;}
 
       position = this.$clipPosition(position);
       if (this.getLength() <= 1)
-        this.$detectNewLine(text);
+      {this.$detectNewLine(text);}
 
-      var lines = this.$split(text);
-      var firstLine = lines.splice(0, 1)[0];
-      var lastLine = lines.length == 0 ? null : lines.splice(lines.length - 1, 1)[0];
+      const lines = this.$split(text);
+      const firstLine = lines.splice(0, 1)[0];
+      const lastLine = lines.length == 0 ? null : lines.splice(lines.length - 1, 1)[0];
 
       position = this.insertInLine(position, firstLine);
       if (lastLine !== null) {
         position = this.insertNewLine(position); // terminate first line
         position = this._insertLines(position.row, lines);
-        position = this.insertInLine(position, lastLine || "");
+        position = this.insertInLine(position, lastLine || '');
       }
       return position;
     };
     this.insertLines = function (row, lines) {
       if (row >= this.getLength())
-        return this.insert({ row: row, column: 0 }, "\n" + lines.join("\n"));
+      {return this.insert({ row: row, column: 0 }, '\n' + lines.join('\n'));}
       return this._insertLines(Math.max(row, 0), lines);
     };
     this._insertLines = function (row, lines) {
       if (lines.length == 0)
-        return { row: row, column: 0 };
-      var end;
+      {return { row: row, column: 0 };}
+      let end;
       if (lines.length > 0xFFFF) {
         end = this._insertLines(row, lines.slice(0xFFFF));
         lines = lines.slice(0, 0xFFFF);
       }
 
-      var args = [row, 0];
+      const args = [row, 0];
       args.push.apply(args, lines);
       this.$lines.splice.apply(this.$lines, args);
 
-      var range = new Range(row, 0, row + lines.length, 0);
-      var delta = {
-        action: "insertLines",
+      const range = new Range(row, 0, row + lines.length, 0);
+      const delta = {
+        action: 'insertLines',
         range: range,
         lines: lines
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
       return end || range.end;
     };
     this.insertNewLine = function (position) {
       position = this.$clipPosition(position);
-      var line = this.$lines[position.row] || "";
+      const line = this.$lines[position.row] || '';
 
       this.$lines[position.row] = line.substring(0, position.column);
       this.$lines.splice(position.row + 1, 0, line.substring(position.column, line.length));
 
-      var end = {
+      const end = {
         row: position.row + 1,
         column: 0
       };
 
-      var delta = {
-        action: "insertText",
+      const delta = {
+        action: 'insertText',
         range: Range.fromPoints(position, end),
         text: this.getNewLineCharacter()
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
 
       return end;
     };
     this.insertInLine = function (position, text) {
       if (text.length == 0)
-        return position;
+      {return position;}
 
-      var line = this.$lines[position.row] || "";
+      const line = this.$lines[position.row] || '';
 
       this.$lines[position.row] = line.substring(0, position.column) + text
         + line.substring(position.column);
 
-      var end = {
+      const end = {
         row: position.row,
         column: position.column + text.length
       };
 
-      var delta = {
-        action: "insertText",
+      const delta = {
+        action: 'insertText',
         range: Range.fromPoints(position, end),
         text: text
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
 
       return end;
     };
     this.remove = function (range) {
       if (!range instanceof Range)
-        range = Range.fromPoints(range.start, range.end);
+      {range = Range.fromPoints(range.start, range.end);}
       range.start = this.$clipPosition(range.start);
       range.end = this.$clipPosition(range.end);
 
       if (range.isEmpty())
-        return range.start;
+      {return range.start;}
 
-      var firstRow = range.start.row;
-      var lastRow = range.end.row;
+      const firstRow = range.start.row;
+      const lastRow = range.end.row;
 
       if (range.isMultiLine()) {
-        var firstFullRow = range.start.column == 0 ? firstRow : firstRow + 1;
-        var lastFullRow = lastRow - 1;
+        const firstFullRow = range.start.column == 0 ? firstRow : firstRow + 1;
+        const lastFullRow = lastRow - 1;
 
         if (range.end.column > 0)
-          this.removeInLine(lastRow, 0, range.end.column);
+        {this.removeInLine(lastRow, 0, range.end.column);}
 
         if (lastFullRow >= firstFullRow)
-          this._removeLines(firstFullRow, lastFullRow);
+        {this._removeLines(firstFullRow, lastFullRow);}
 
         if (firstFullRow != firstRow) {
           this.removeInLine(firstRow, range.start.column, this.getLine(firstRow).length);
@@ -491,67 +493,67 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
     };
     this.removeInLine = function (row, startColumn, endColumn) {
       if (startColumn == endColumn)
-        return;
+      {return;}
 
-      var range = new Range(row, startColumn, row, endColumn);
-      var line = this.getLine(row);
-      var removed = line.substring(startColumn, endColumn);
-      var newLine = line.substring(0, startColumn) + line.substring(endColumn, line.length);
+      const range = new Range(row, startColumn, row, endColumn);
+      const line = this.getLine(row);
+      const removed = line.substring(startColumn, endColumn);
+      const newLine = line.substring(0, startColumn) + line.substring(endColumn, line.length);
       this.$lines.splice(row, 1, newLine);
 
-      var delta = {
-        action: "removeText",
+      const delta = {
+        action: 'removeText',
         range: range,
         text: removed
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
       return range.start;
     };
     this.removeLines = function (firstRow, lastRow) {
       if (firstRow < 0 || lastRow >= this.getLength())
-        return this.remove(new Range(firstRow, 0, lastRow + 1, 0));
+      {return this.remove(new Range(firstRow, 0, lastRow + 1, 0));}
       return this._removeLines(firstRow, lastRow);
     };
 
     this._removeLines = function (firstRow, lastRow) {
-      var range = new Range(firstRow, 0, lastRow + 1, 0);
-      var removed = this.$lines.splice(firstRow, lastRow - firstRow + 1);
+      const range = new Range(firstRow, 0, lastRow + 1, 0);
+      const removed = this.$lines.splice(firstRow, lastRow - firstRow + 1);
 
-      var delta = {
-        action: "removeLines",
+      const delta = {
+        action: 'removeLines',
         range: range,
         nl: this.getNewLineCharacter(),
         lines: removed
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
       return removed;
     };
     this.removeNewLine = function (row) {
-      var firstLine = this.getLine(row);
-      var secondLine = this.getLine(row + 1);
+      const firstLine = this.getLine(row);
+      const secondLine = this.getLine(row + 1);
 
-      var range = new Range(row, firstLine.length, row + 1, 0);
-      var line = firstLine + secondLine;
+      const range = new Range(row, firstLine.length, row + 1, 0);
+      const line = firstLine + secondLine;
 
       this.$lines.splice(row, 2, line);
 
-      var delta = {
-        action: "removeText",
+      const delta = {
+        action: 'removeText',
         range: range,
         text: this.getNewLineCharacter()
       };
-      this._emit("change", { data: delta });
+      this._emit('change', { data: delta });
     };
     this.replace = function (range, text) {
       if (!range instanceof Range)
-        range = Range.fromPoints(range.start, range.end);
+      {range = Range.fromPoints(range.start, range.end);}
       if (text.length == 0 && range.isEmpty())
-        return range.start;
+      {return range.start;}
       if (text == this.getTextRange(range))
-        return range.end;
+      {return range.end;}
 
       this.remove(range);
-      var end;
+      let end;
       if (text) {
         end = this.insert(range.start, text);
       }
@@ -562,53 +564,53 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
       return end;
     };
     this.applyDeltas = function (deltas) {
-      for (var i = 0; i < deltas.length; i++) {
-        var delta = deltas[i];
-        var range = Range.fromPoints(delta.range.start, delta.range.end);
+      for (let i = 0; i < deltas.length; i++) {
+        const delta = deltas[i];
+        const range = Range.fromPoints(delta.range.start, delta.range.end);
 
-        if (delta.action == "insertLines")
-          this.insertLines(range.start.row, delta.lines);
-        else if (delta.action == "insertText")
-          this.insert(range.start, delta.text);
-        else if (delta.action == "removeLines")
-          this._removeLines(range.start.row, range.end.row - 1);
-        else if (delta.action == "removeText")
-          this.remove(range);
+        if (delta.action == 'insertLines')
+        {this.insertLines(range.start.row, delta.lines);}
+        else if (delta.action == 'insertText')
+        {this.insert(range.start, delta.text);}
+        else if (delta.action == 'removeLines')
+        {this._removeLines(range.start.row, range.end.row - 1);}
+        else if (delta.action == 'removeText')
+        {this.remove(range);}
       }
     };
     this.revertDeltas = function (deltas) {
-      for (var i = deltas.length - 1; i >= 0; i--) {
-        var delta = deltas[i];
+      for (let i = deltas.length - 1; i >= 0; i--) {
+        const delta = deltas[i];
 
-        var range = Range.fromPoints(delta.range.start, delta.range.end);
+        const range = Range.fromPoints(delta.range.start, delta.range.end);
 
-        if (delta.action == "insertLines")
-          this._removeLines(range.start.row, range.end.row - 1);
-        else if (delta.action == "insertText")
-          this.remove(range);
-        else if (delta.action == "removeLines")
-          this._insertLines(range.start.row, delta.lines);
-        else if (delta.action == "removeText")
-          this.insert(range.start, delta.text);
+        if (delta.action == 'insertLines')
+        {this._removeLines(range.start.row, range.end.row - 1);}
+        else if (delta.action == 'insertText')
+        {this.remove(range);}
+        else if (delta.action == 'removeLines')
+        {this._insertLines(range.start.row, delta.lines);}
+        else if (delta.action == 'removeText')
+        {this.insert(range.start, delta.text);}
       }
     };
     this.indexToPosition = function (index, startRow) {
-      var lines = this.$lines || this.getAllLines();
-      var newlineLength = this.getNewLineCharacter().length;
+      const lines = this.$lines || this.getAllLines();
+      const newlineLength = this.getNewLineCharacter().length;
       for (var i = startRow || 0, l = lines.length; i < l; i++) {
         index -= lines[i].length + newlineLength;
         if (index < 0)
-          return { row: i, column: index + lines[i].length + newlineLength };
+        {return { row: i, column: index + lines[i].length + newlineLength };}
       }
       return { row: l - 1, column: lines[l - 1].length };
     };
     this.positionToIndex = function (pos, startRow) {
-      var lines = this.$lines || this.getAllLines();
-      var newlineLength = this.getNewLineCharacter().length;
-      var index = 0;
-      var row = Math.min(pos.row, lines.length);
-      for (var i = startRow || 0; i < row; ++i)
-        index += lines[i].length + newlineLength;
+      const lines = this.$lines || this.getAllLines();
+      const newlineLength = this.getNewLineCharacter().length;
+      let index = 0;
+      const row = Math.min(pos.row, lines.length);
+      for (let i = startRow || 0; i < row; ++i)
+      {index += lines[i].length + newlineLength;}
 
       return index + pos.column;
     };
@@ -619,13 +621,13 @@ define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/
 });
 
 define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (require, exports) {
-  "use strict";
 
-  var EventEmitter = {};
-  var stopPropagation = function () {
+
+  const EventEmitter = {};
+  const stopPropagation = function () {
     this.propagationStopped = true;
   };
-  var preventDefault = function () {
+  const preventDefault = function () {
     this.defaultPrevented = true;
   };
 
@@ -634,44 +636,44 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
       this._eventRegistry || (this._eventRegistry = {});
       this._defaultHandlers || (this._defaultHandlers = {});
 
-      var listeners = this._eventRegistry[eventName] || [];
-      var defaultHandler = this._defaultHandlers[eventName];
+      let listeners = this._eventRegistry[eventName] || [];
+      const defaultHandler = this._defaultHandlers[eventName];
       if (!listeners.length && !defaultHandler)
-        return;
+      {return;}
 
-      if (typeof e != "object" || !e)
-        e = {};
+      if (typeof e !== 'object' || !e)
+      {e = {};}
 
       if (!e.type)
-        e.type = eventName;
+      {e.type = eventName;}
       if (!e.stopPropagation)
-        e.stopPropagation = stopPropagation;
+      {e.stopPropagation = stopPropagation;}
       if (!e.preventDefault)
-        e.preventDefault = preventDefault;
+      {e.preventDefault = preventDefault;}
 
       listeners = listeners.slice();
-      for (var i = 0; i < listeners.length; i++) {
+      for (let i = 0; i < listeners.length; i++) {
         listeners[i](e, this);
         if (e.propagationStopped)
-          break;
+        {break;}
       }
 
       if (defaultHandler && !e.defaultPrevented)
-        return defaultHandler(e, this);
+      {return defaultHandler(e, this);}
     };
 
 
   EventEmitter._signal = function (eventName, e) {
-    var listeners = (this._eventRegistry || {})[eventName];
+    let listeners = (this._eventRegistry || {})[eventName];
     if (!listeners)
-      return;
+    {return;}
     listeners = listeners.slice();
-    for (var i = 0; i < listeners.length; i++)
-      listeners[i](e, this);
+    for (let i = 0; i < listeners.length; i++)
+    {listeners[i](e, this);}
   };
 
   EventEmitter.once = function (eventName, callback) {
-    var _self = this;
+    const _self = this;
     callback && this.addEventListener(eventName, function newCallback() {
       _self.removeEventListener(eventName, newCallback);
       callback.apply(null, arguments);
@@ -680,35 +682,35 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
 
 
   EventEmitter.setDefaultHandler = function (eventName, callback) {
-    var handlers = this._defaultHandlers
+    let handlers = this._defaultHandlers;
     if (!handlers)
-      handlers = this._defaultHandlers = { _disabled_: {} };
+    {handlers = this._defaultHandlers = { _disabled_: {} };}
 
     if (handlers[eventName]) {
-      var old = handlers[eventName];
-      var disabled = handlers._disabled_[eventName];
+      const old = handlers[eventName];
+      let disabled = handlers._disabled_[eventName];
       if (!disabled)
-        handlers._disabled_[eventName] = disabled = [];
+      {handlers._disabled_[eventName] = disabled = [];}
       disabled.push(old);
-      var i = disabled.indexOf(callback);
+      const i = disabled.indexOf(callback);
       if (i != -1)
-        disabled.splice(i, 1);
+      {disabled.splice(i, 1);}
     }
     handlers[eventName] = callback;
   };
   EventEmitter.removeDefaultHandler = function (eventName, callback) {
-    var handlers = this._defaultHandlers
+    const handlers = this._defaultHandlers;
     if (!handlers)
-      return;
-    var disabled = handlers._disabled_[eventName];
+    {return;}
+    const disabled = handlers._disabled_[eventName];
 
     if (handlers[eventName] == callback) {
       if (disabled)
-        this.setDefaultHandler(eventName, disabled.pop());
+      {this.setDefaultHandler(eventName, disabled.pop());}
     } else if (disabled) {
-      var i = disabled.indexOf(callback);
+      const i = disabled.indexOf(callback);
       if (i != -1)
-        disabled.splice(i, 1);
+      {disabled.splice(i, 1);}
     }
   };
 
@@ -716,12 +718,12 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
     EventEmitter.addEventListener = function (eventName, callback, capturing) {
       this._eventRegistry = this._eventRegistry || {};
 
-      var listeners = this._eventRegistry[eventName];
+      let listeners = this._eventRegistry[eventName];
       if (!listeners)
-        listeners = this._eventRegistry[eventName] = [];
+      {listeners = this._eventRegistry[eventName] = [];}
 
       if (listeners.indexOf(callback) == -1)
-        listeners[capturing ? "unshift" : "push"](callback);
+      {listeners[capturing ? 'unshift' : 'push'](callback);}
       return callback;
     };
 
@@ -730,13 +732,13 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
       EventEmitter.removeEventListener = function (eventName, callback) {
         this._eventRegistry = this._eventRegistry || {};
 
-        var listeners = this._eventRegistry[eventName];
+        const listeners = this._eventRegistry[eventName];
         if (!listeners)
-          return;
+        {return;}
 
-        var index = listeners.indexOf(callback);
+        const index = listeners.indexOf(callback);
         if (index !== -1)
-          listeners.splice(index, 1);
+        {listeners.splice(index, 1);}
       };
 
   EventEmitter.removeAllListeners = function (eventName) {
@@ -748,12 +750,12 @@ define('ace/lib/event_emitter', ['require', 'exports', 'module' ], function (req
 });
 
 define('ace/range', ['require', 'exports', 'module' ], function (require, exports) {
-  "use strict";
 
-  var comparePoints = function (p1, p2) {
+
+  const comparePoints = function (p1, p2) {
     return p1.row - p2.row || p1.column - p2.column;
   };
-  var Range = function (startRow, startColumn, endRow, endColumn) {
+  const Range = function (startRow, startColumn, endRow, endColumn) {
     this.start = {
       row: startRow,
       column: startColumn
@@ -773,15 +775,15 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
         this.end.column === range.end.column;
     };
     this.toString = function () {
-      return ("Range: [" + this.start.row + "/" + this.start.column +
-        "] -> [" + this.end.row + "/" + this.end.column + "]");
+      return ('Range: [' + this.start.row + '/' + this.start.column +
+        '] -> [' + this.end.row + '/' + this.end.column + ']');
     };
 
     this.contains = function (row, column) {
       return this.compare(row, column) == 0;
     };
     this.compareRange = function (range) {
-      var cmp,
+      let cmp,
         end = range.end,
         start = range.start;
 
@@ -815,7 +817,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       return this.comparePoint(range.start) == 0 && this.comparePoint(range.end) == 0;
     };
     this.intersects = function (range) {
-      var cmp = this.compareRange(range);
+      const cmp = this.compareRange(range);
       return (cmp == -1 || cmp == 0 || cmp == 1);
     };
     this.isEnd = function (row, column) {
@@ -825,7 +827,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       return this.start.row == row && this.start.column == column;
     };
     this.setStart = function (row, column) {
-      if (typeof row == "object") {
+      if (typeof row === 'object') {
         this.start.column = row.column;
         this.start.row = row.row;
       } else {
@@ -834,7 +836,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       }
     };
     this.setEnd = function (row, column) {
-      if (typeof row == "object") {
+      if (typeof row === 'object') {
         this.end.column = row.column;
         this.end.row = row.row;
       } else {
@@ -880,16 +882,16 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       }
 
       if (row < this.start.row)
-        return -1;
+      {return -1;}
 
       if (row > this.end.row)
-        return 1;
+      {return 1;}
 
       if (this.start.row === row)
-        return column >= this.start.column ? 0 : -1;
+      {return column >= this.start.column ? 0 : -1;}
 
       if (this.end.row === row)
-        return column <= this.end.column ? 0 : 1;
+      {return column <= this.end.column ? 0 : 1;}
 
       return 0;
     };
@@ -917,28 +919,28 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       }
     };
     this.clipRows = function (firstRow, lastRow) {
-      var start, end;
+      let start, end;
       if (this.end.row > lastRow)
-        end = { row: lastRow + 1, column: 0 };
+      {end = { row: lastRow + 1, column: 0 };}
       else if (this.end.row < firstRow)
-        end = { row: firstRow, column: 0 };
+      {end = { row: firstRow, column: 0 };}
 
       if (this.start.row > lastRow)
-        start = { row: lastRow + 1, column: 0 };
+      {start = { row: lastRow + 1, column: 0 };}
       else if (this.start.row < firstRow)
-        start = { row: firstRow, column: 0 };
+      {start = { row: firstRow, column: 0 };}
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
     this.extend = function (row, column) {
-      var cmp = this.compare(row, column);
-      var start, end;
+      const cmp = this.compare(row, column);
+      let start, end;
       if (cmp == 0)
-        return this;
+      {return this;}
       else if (cmp == -1)
-        start = { row: row, column: column };
+      {start = { row: row, column: column };}
       else
-        end = { row: row, column: column };
+      {end = { row: row, column: column };}
 
       return Range.fromPoints(start || this.start, end || this.end);
     };
@@ -953,14 +955,15 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
       return Range.fromPoints(this.start, this.end);
     };
     this.collapseRows = function () {
-      if (this.end.column == 0)
-        return new Range(this.start.row, 0, Math.max(this.start.row, this.end.row - 1), 0)
-      else
-        return new Range(this.start.row, 0, this.end.row, 0)
+      if (this.end.column == 0) {
+        return new Range(this.start.row, 0, Math.max(this.start.row, this.end.row - 1), 0);
+      } else {
+        return new Range(this.start.row, 0, this.end.row, 0);
+      }
     };
     this.toScreenRange = function (session) {
-      var screenPosStart = session.documentToScreenPosition(this.start);
-      var screenPosEnd = session.documentToScreenPosition(this.end);
+      const screenPosStart = session.documentToScreenPosition(this.start);
+      const screenPosEnd = session.documentToScreenPosition(this.end);
 
       return new Range(
         screenPosStart.row, screenPosStart.column,
@@ -989,19 +992,19 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
 });
 
 define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports) {
-  "use strict";
 
-  var oop = require("./lib/oop");
-  var EventEmitter = require("./lib/event_emitter").EventEmitter;
 
-  var Anchor = exports.Anchor = function (doc, row, column) {
+  const oop = require('./lib/oop');
+  const EventEmitter = require('./lib/event_emitter').EventEmitter;
+
+  const Anchor = exports.Anchor = function (doc, row, column) {
     this.$onChange = this.onChange.bind(this);
     this.attach(doc);
 
-    if (typeof column == "undefined")
-      this.setPosition(row.row, row.column);
+    if (typeof column === 'undefined')
+    {this.setPosition(row.row, row.column);}
     else
-      this.setPosition(row, column);
+    {this.setPosition(row, column);}
   };
 
   (function () {
@@ -1015,24 +1018,24 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
     };
     this.$insertRight = false;
     this.onChange = function (e) {
-      var delta = e.data;
-      var range = delta.range;
+      const delta = e.data;
+      const range = delta.range;
 
       if (range.start.row == range.end.row && range.start.row != this.row)
-        return;
+      {return;}
 
       if (range.start.row > this.row)
-        return;
+      {return;}
 
       if (range.start.row == this.row && range.start.column > this.column)
-        return;
+      {return;}
 
-      var row = this.row;
-      var column = this.column;
-      var start = range.start;
-      var end = range.end;
+      let row = this.row;
+      let column = this.column;
+      const start = range.start;
+      const end = range.end;
 
-      if (delta.action === "insertText") {
+      if (delta.action === 'insertText') {
         if (start.row === row && start.column <= column) {
           if (start.column === column && this.$insertRight) {
           } else if (start.row === end.row) {
@@ -1044,29 +1047,29 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
         } else if (start.row !== end.row && start.row < row) {
           row += end.row - start.row;
         }
-      } else if (delta.action === "insertLines") {
+      } else if (delta.action === 'insertLines') {
         if (start.row <= row) {
           row += end.row - start.row;
         }
-      } else if (delta.action === "removeText") {
+      } else if (delta.action === 'removeText') {
         if (start.row === row && start.column < column) {
           if (end.column >= column)
-            column = start.column;
+          {column = start.column;}
           else
-            column = Math.max(0, column - (end.column - start.column));
+          {column = Math.max(0, column - (end.column - start.column));}
 
         } else if (start.row !== end.row && start.row < row) {
           if (end.row === row)
-            column = Math.max(0, column - end.column) + start.column;
+          {column = Math.max(0, column - end.column) + start.column;}
           row -= (end.row - start.row);
         } else if (end.row === row) {
           row -= end.row - start.row;
           column = Math.max(0, column - end.column) + start.column;
         }
-      } else if (delta.action == "removeLines") {
+      } else if (delta.action == 'removeLines') {
         if (start.row <= row) {
           if (end.row <= row)
-            row -= end.row - start.row;
+          {row -= end.row - start.row;}
           else {
             row = start.row;
             column = 0;
@@ -1077,7 +1080,7 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
       this.setPosition(row, column, true);
     };
     this.setPosition = function (row, column, noClip) {
-      var pos;
+      let pos;
       if (noClip) {
         pos = {
           row: row,
@@ -1088,29 +1091,29 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
       }
 
       if (this.row == pos.row && this.column == pos.column)
-        return;
+      {return;}
 
-      var old = {
+      const old = {
         row: this.row,
         column: this.column
       };
 
       this.row = pos.row;
       this.column = pos.column;
-      this._emit("change", {
+      this._emit('change', {
         old: old,
         value: pos
       });
     };
     this.detach = function () {
-      this.document.removeEventListener("change", this.$onChange);
+      this.document.removeEventListener('change', this.$onChange);
     };
     this.attach = function (doc) {
       this.document = doc || this.document;
-      this.document.on("change", this.$onChange);
+      this.document.on('change', this.$onChange);
     };
     this.$clipPositionToDocument = function (row, column) {
-      var pos = {};
+      const pos = {};
 
       if (row >= this.document.getLength()) {
         pos.row = Math.max(0, this.document.getLength() - 1);
@@ -1126,7 +1129,7 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
       }
 
       if (column < 0)
-        pos.column = 0;
+      {pos.column = 0;}
 
       return pos;
     };
@@ -1136,26 +1139,26 @@ define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/ev
 });
 
 define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exports) {
-  "use strict";
+
 
   exports.stringReverse = function (string) {
-    return string.split("").reverse().join("");
+    return string.split('').reverse().join('');
   };
 
   exports.stringRepeat = function (string, count) {
-    var result = '';
+    let result = '';
     while (count > 0) {
       if (count & 1)
-        result += string;
+      {result += string;}
 
       if (count >>= 1)
-        string += string;
+      {string += string;}
     }
     return result;
   };
 
-  var trimBeginRegexp = /^\s\s*/;
-  var trimEndRegexp = /\s\s*$/;
+  const trimBeginRegexp = /^\s\s*/;
+  const trimEndRegexp = /\s\s*$/;
 
   exports.stringTrimLeft = function (string) {
     return string.replace(trimBeginRegexp, '');
@@ -1166,34 +1169,34 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
   };
 
   exports.copyObject = function (obj) {
-    var copy = {};
-    for (var key in obj) {
+    const copy = {};
+    for (const key in obj) {
       copy[key] = obj[key];
     }
     return copy;
   };
 
   exports.copyArray = function (array) {
-    var copy = [];
-    for (var i = 0, l = array.length; i < l; i++) {
-      if (array[i] && typeof array[i] == "object")
-        copy[i] = this.copyObject(array[i]);
+    const copy = [];
+    for (let i = 0, l = array.length; i < l; i++) {
+      if (array[i] && typeof array[i] === 'object')
+      {copy[i] = this.copyObject(array[i]);}
       else
-        copy[i] = array[i];
+      {copy[i] = array[i];}
     }
     return copy;
   };
 
   exports.deepCopy = function (obj) {
-    if (typeof obj !== "object" || !obj)
-      return obj;
-    var cons = obj.constructor;
+    if (typeof obj !== 'object' || !obj)
+    {return obj;}
+    const cons = obj.constructor;
     if (cons === RegExp)
-      return obj;
+    {return obj;}
 
-    var copy = cons();
-    for (var key in obj) {
-      if (typeof obj[key] === "object") {
+    const copy = cons();
+    for (const key in obj) {
+      if (typeof obj[key] === 'object') {
         copy[key] = exports.deepCopy(obj[key]);
       } else {
         copy[key] = obj[key];
@@ -1203,8 +1206,8 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
   };
 
   exports.arrayToMap = function (arr) {
-    var map = {};
-    for (var i = 0; i < arr.length; i++) {
+    const map = {};
+    for (let i = 0; i < arr.length; i++) {
       map[arr[i]] = 1;
     }
     return map;
@@ -1212,14 +1215,14 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
   };
 
   exports.createMap = function (props) {
-    var map = Object.create(null);
-    for (var i in props) {
+    const map = Object.create(null);
+    for (const i in props) {
       map[i] = props[i];
     }
     return map;
   };
   exports.arrayRemove = function (array, value) {
-    for (var i = 0; i <= array.length; i++) {
+    for (let i = 0; i <= array.length; i++) {
       if (value === array[i]) {
         array.splice(i, 1);
       }
@@ -1231,11 +1234,11 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
   };
 
   exports.escapeHTML = function (str) {
-    return str.replace(/&/g, "&#38;").replace(/"/g, "&#34;").replace(/'/g, "&#39;").replace(/</g, "&#60;");
+    return str.replace(/&/g, '&#38;').replace(/"/g, '&#34;').replace(/'/g, '&#39;').replace(/</g, '&#60;');
   };
 
   exports.getMatchOffsets = function (string, regExp) {
-    var matches = [];
+    const matches = [];
 
     string.replace(regExp, function (str) {
       matches.push({
@@ -1248,8 +1251,8 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
   };
   exports.deferredCall = function (fcn) {
 
-    var timer = null;
-    var callback = function () {
+    let timer = null;
+    const callback = function () {
       timer = null;
       fcn();
     };
@@ -1283,15 +1286,15 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
 
 
   exports.delayedCall = function (fcn, defaultTimeout) {
-    var timer = null;
-    var callback = function () {
+    let timer = null;
+    const callback = function () {
       timer = null;
       fcn();
     };
 
-    var _self = function (timeout) {
+    const _self = function (timeout) {
       if (timer == null)
-        timer = setTimeout(callback, timeout || defaultTimeout);
+      {timer = setTimeout(callback, timeout || defaultTimeout);}
     };
 
     _self.delay = function (timeout) {
@@ -1319,10 +1322,10 @@ define('ace/lib/lang', ['require', 'exports', 'module' ], function (require, exp
 });
 
 
-define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], function () {
-  "use strict";
+define('sense_editor/mode/worker_parser', ['require', 'exports', 'module' ], function () {
 
-  var at,     // The index of the current character
+
+  let at,     // The index of the current character
     ch,     // The current character
     annos, // annotations
     escapee = {
@@ -1360,7 +1363,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     next = function (c) {
 
       if (c && c !== ch) {
-        error("Expected '" + c + "' instead of '" + ch + "'");
+        error('Expected \'' + c + '\' instead of \'' + ch + '\'');
       }
 
       ch = text.charAt(at);
@@ -1369,10 +1372,10 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     },
 
     nextUpTo = function (upTo, errorMessage) {
-      var currentAt = at,
+      let currentAt = at,
         i = text.indexOf(upTo, currentAt);
       if (i < 0) {
-        error(errorMessage || "Expected '" + upTo + "'");
+        error(errorMessage || 'Expected \'' + upTo + '\'');
       }
       reset(i + upTo.length);
       return text.substring(currentAt, i);
@@ -1384,7 +1387,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     number = function () {
 
-      var number,
+      let number,
         string = '';
 
       if (ch === '-') {
@@ -1415,7 +1418,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
       }
       number = +string;
       if (isNaN(number)) {
-        error("Bad number");
+        error('Bad number');
       } else {
         return number;
       }
@@ -1423,7 +1426,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     string = function () {
 
-      var hex,
+      let hex,
         i,
         string = '',
         uffff;
@@ -1433,7 +1436,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           // literal
           next('"');
           next('"');
-          return nextUpTo('"""', "failed to find closing '\"\"\"'");
+          return nextUpTo('"""', 'failed to find closing \'"""\'');
         } else {
           while (next()) {
             if (ch === '"') {
@@ -1462,7 +1465,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           }
         }
       }
-      error("Bad string");
+      error('Bad string');
     },
 
     white = function () {
@@ -1474,7 +1477,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     strictWhite = function () {
 
-      while (ch && ( ch == ' ' || ch == '\t')) {
+      while (ch && (ch == ' ' || ch == '\t')) {
         next();
       }
     },
@@ -1506,23 +1509,23 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           next('l');
           return null;
       }
-      error("Unexpected '" + ch + "'");
+      error('Unexpected \'' + ch + '\'');
     },
 
-  // parses and returns the method
+    // parses and returns the method
     method = function () {
       switch (ch) {
         case 'G':
           next('G');
           next('E');
           next('T');
-          return "GET";
+          return 'GET';
         case 'H':
           next('H');
           next('E');
           next('A');
           next('D');
-          return "HEAD";
+          return 'HEAD';
         case 'D':
           next('D');
           next('E');
@@ -1530,25 +1533,25 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           next('E');
           next('T');
           next('E');
-          return "DELETE";
+          return 'DELETE';
         case 'P':
           next('P');
           switch (ch) {
             case 'U':
               next('U');
               next('T');
-              return "PUT";
+              return 'PUT';
             case 'O':
               next('O');
               next('S');
               next('T');
-              return "POST";
+              return 'POST';
             default:
-              error("Unexpected '" + ch + "'");
+              error('Unexpected \'' + ch + '\'');
           }
           break;
         default:
-          error("Expected one of GET/POST/PUT/DELETE/HEAD");
+          error('Expected one of GET/POST/PUT/DELETE/HEAD');
       }
 
     },
@@ -1557,7 +1560,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
     array = function () {
 
-      var array = [];
+      const array = [];
 
       if (ch === '[') {
         next('[');
@@ -1577,12 +1580,12 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           white();
         }
       }
-      error("Bad array");
+      error('Bad array');
     },
 
     object = function () {
 
-      var key,
+      let key,
         object = {};
 
       if (ch === '{') {
@@ -1609,7 +1612,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           white();
         }
       }
-      error("Bad object");
+      error('Bad object');
     };
 
   value = function () {
@@ -1629,15 +1632,15 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     }
   };
 
-  var url = function () {
+  let url = function () {
 
-      var url = '';
+      let url = '';
       while (ch && ch != '\n') {
         url += ch;
         next();
       }
       if (url == '')
-        error('Missing url');
+      {error('Missing url');}
       return url;
     },
 
@@ -1691,10 +1694,10 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
           white();
         }
         catch (e) {
-          annotate("error", e.message);
+          annotate('error', e.message);
           // snap
-          var substring = text.substr(at);
-          var nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE/m);
+          const substring = text.substr(at);
+          const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE/m);
           if (nextMatch < 1) return;
           reset(at + nextMatch);
         }
@@ -1703,7 +1706,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 
 
   return function (source, reviver) {
-    var result;
+    let result;
 
     text = source;
     at = 0;
@@ -1712,14 +1715,14 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     multi_request();
     white();
     if (ch) {
-      annotate("error", "Syntax error");
+      annotate('error', 'Syntax error');
     }
 
-    result = { "annotations": annos };
+    result = { 'annotations': annos };
 
 
     return typeof reviver === 'function' ? (function walk(holder, key) {
-      var k, v, value = holder[key];
+      let k, v, value = holder[key];
       if (value && typeof value === 'object') {
         for (k in value) {
           if (Object.hasOwnProperty.call(value, k)) {
@@ -1733,21 +1736,22 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         }
       }
       return reviver.call(holder, key, value);
-    })({ '': result }, '') : result;
+    }({ '': result }, '')) : result;
   };
 });
 
 
-define("sense_editor/mode/worker", ['require', 'exports', 'module', 'ace/lib/oop', 'ace/worker/mirror',
+define('sense_editor/mode/worker', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/worker/mirror',
   'sense_editor/mode/worker_parser'], function (require, exports) {
-  "use strict";
 
 
-  var oop = require("ace/lib/oop");
-  var Mirror = require("ace/worker/mirror").Mirror;
-  var parse = require("sense_editor/mode/worker_parser");
 
-  var SenseWorker = exports.SenseWorker = function (sender) {
+  const oop = require('ace/lib/oop');
+  const Mirror = require('ace/worker/mirror').Mirror;
+  const parse = require('sense_editor/mode/worker_parser');
+
+  const SenseWorker = exports.SenseWorker = function (sender) {
+    console.log('SENSE');
     Mirror.call(this, sender);
     this.setTimeout(200);
   };
@@ -1755,49 +1759,50 @@ define("sense_editor/mode/worker", ['require', 'exports', 'module', 'ace/lib/oop
   oop.inherits(SenseWorker, Mirror);
 
   (function () {
-
+    this.id = 'senseWorker';
     this.onUpdate = function () {
-      var value = this.doc.getValue();
-      var pos, result;
+      console.log('called');
+      const value = this.doc.getValue();
+      let pos, result;
       try {
         result = parse(value);
       } catch (e) {
         pos = this.charToDocumentPosition(e.at - 1);
-        this.sender.emit("error", {
+        this.sender.emit('error', {
           row: pos.row,
           column: pos.column,
           text: e.message,
-          type: "error"
+          type: 'error'
         });
         return;
       }
-      for (var i = 0; i < result.annotations.length; i++) {
+      for (let i = 0; i < result.annotations.length; i++) {
         pos = this.charToDocumentPosition(result.annotations[i].at - 1);
         result.annotations[i].row = pos.row;
         result.annotations[i].column = pos.column;
 
       }
-      this.sender.emit("ok", result.annotations);
+      this.sender.emit('ok', result.annotations);
     };
 
     this.charToDocumentPosition = function (charPos) {
-      var i = 0;
-      var len = this.doc.getLength();
-      var nl = this.doc.getNewLineCharacter().length;
+      let i = 0;
+      const len = this.doc.getLength();
+      const nl = this.doc.getNewLineCharacter().length;
 
       if (!len) {
         return { row: 0, column: 0 };
       }
 
-      var lineStart = 0, line;
+      let lineStart = 0, line;
       while (i < len) {
         line = this.doc.getLine(i);
-        var lineLength = line.length + nl;
+        const lineLength = line.length + nl;
         if (lineStart + lineLength > charPos)
-          return {
-            row: i,
-            column: charPos - lineStart
-          };
+        {return {
+          row: i,
+          column: charPos - lineStart
+        };}
 
         lineStart += lineLength;
         i += 1;
