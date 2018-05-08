@@ -26,6 +26,7 @@ export function parse(command, options, kbnPackage) {
     timeout: options.timeout || 0,
     quiet: options.quiet || false,
     silent: options.silent || false,
+    batch: options.batch || false,
     config: options.config || '',
     plugin: command,
     version: kbnPackage.version,

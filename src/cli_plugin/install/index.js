@@ -28,6 +28,7 @@ export default function pluginInstall(program) {
     .command('install <plugin/url>')
     .option('-q, --quiet', 'disable all process messaging except errors')
     .option('-s, --silent', 'disable all process messaging')
+    .option('-b, --batch', 'enable batch mode explicitly, automatic confirmation of security permission')
     .option(
       '-c, --config <path>',
       'path to the config file',

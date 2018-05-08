@@ -21,6 +21,11 @@ Continue with installation? [y/N]`;
 
     const answer = await new Promise(resolve => {
       rl.question(question, resolve);
+
+      if (settings.batch) {
+        rl.write('y');
+        rl.write(null, { name: 'enter' });
+      }
     });
 
     rl.close();
