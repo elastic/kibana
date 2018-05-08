@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedEntries = ['200', '404', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.equal(expectedEntries);
+        expect(legendEntries).to.eql(expectedEntries);
       });
     });
 
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }) {
           '503 - win xp', '404 - osx', '404 - win 7', '404 - win 8', '404 - win xp'
         ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.equal(expectedEntries);
+        expect(legendEntries).to.eql(expectedEntries);
       });
     });
   });
