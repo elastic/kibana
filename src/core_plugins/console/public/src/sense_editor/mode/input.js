@@ -51,22 +51,13 @@ oop.inherits(Mode, TextMode);
     this.$outdent.autoOutdent(doc, row);
   };
   this.createWorker = function (session) {
-    console.log('WORKER');
     const worker = new WorkerClient(['ace', 'sense_editor'], require('./worker.js'), 'SenseWorker', 'sense_editor/mode/worker');
-    console.log(worker);
     worker.attachToDocument(session.getDocument());
-
-    worker.on('lint', function (results) {
-      console.log('OL');
-      session.setAnnotations(results.data);
-    });
     worker.on('error', function (e) {
-      console.log('OL');
       session.setAnnotations([e.data]);
     });
 
     worker.on('ok', function (anno) {
-      console.log('OL');
       session.setAnnotations(anno.data);
     });
 

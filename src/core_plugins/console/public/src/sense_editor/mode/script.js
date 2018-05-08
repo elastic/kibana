@@ -41,7 +41,6 @@ oop.inherits(ScriptMode, TextMode);
   };
 
   this.createWorker = function (session) {
-    console.log('SCRIPT');
     const worker = new WorkerClient(['ace', 'sense_editor'], 'sense_editor/mode/worker', 'SenseWorker', 'sense_editor/mode/worker');
     worker.attachToDocument(session.getDocument());
 
