@@ -14,18 +14,8 @@
           }
         },
         {
-          "exists": {
-            "field": "context.service.name"
-          }
-        },
-        {
-          "exists": {
-            "field": "context.service.agent.name"
-          }
-        },
-        {
-          "exists": {
-            "field": "context.service.agent.version"
+          "term": {
+            "processor.event": "transaction"
           }
         }
       ]
@@ -33,15 +23,15 @@
   },
   "jobs": [
     {
-      "id": "transaction_duration",
-      "file": "transaction_duration.json"
+      "id": "high_mean_response_time",
+      "file": "high_mean_response_time.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-transaction_duration",
-      "file": "datafeed_transaction_duration.json",
-      "job_id": "transaction_duration"
+      "id": "datafeed-high_mean_response_time",
+      "file": "datafeed_high_mean_response_time.json",
+      "job_id": "high_mean_response_time"
     }
   ]
 }
