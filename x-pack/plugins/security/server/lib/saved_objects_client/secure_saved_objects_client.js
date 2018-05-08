@@ -8,6 +8,7 @@
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
 import Boom from 'boom';
+import { uniq } from 'lodash';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 
@@ -37,9 +38,8 @@ export class SecureSavedObjectsClient {
   }
 
   async bulkCreate(objects, options = {}) {
-    for (const object of objects) {
-      await this._performAuthorizationCheck(object.type, 'create');
-    }
+    const types = uniq(objects.map(o => o.type));
+    await this._performAuthorizationCheck(types, 'create');
 
     return await this._client.bulkCreate(objects, options);
   }
@@ -76,22 +76,23 @@ export class SecureSavedObjectsClient {
     return await this._client.update(type, id, attributes, options);
   }
 
-  async _performAuthorizationCheck(type, action) {
+  async _performAuthorizationCheck(typeOrTypes, action) {
+    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const version = `version:${this._kibanaVersion}`;
-    const kibanaAction = `action:saved-objects/${type}/${action}`;
+    const kibanaActions = types.map(type => `action:saved-objects/${type}/${action}`);
 
     const privilegeCheck = await this._callCluster(this._request, 'shield.hasPrivileges', {
       body: {
         applications: [{
           application: this._application,
           resources: [DEFAULT_RESOURCE],
-          privileges: [version, kibanaAction]
+          privileges: [version, ...kibanaActions]
         }]
       }
     });
 
     if (!privilegeCheck.has_all_requested) {
-      throw Boom.forbidden(`User ${privilegeCheck.username} is not authorized to ${action} objects of type ${type}`);
+      throw Boom.forbidden(`User ${privilegeCheck.username} is not authorized to ${action} objects of types ${types.join(',')}`);
     }
   }
 }
