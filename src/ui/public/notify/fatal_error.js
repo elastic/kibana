@@ -49,7 +49,7 @@ export const fatalErrorInternals = {
       callEach(fatalCallbacks);
       firstFatal = false;
       window.addEventListener('hashchange', function () {
-        window.location.reload();
+        //window.location.reload();
       });
     }
 

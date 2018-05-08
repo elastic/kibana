@@ -10,6 +10,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
   const retry = getService('retry');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard state', function describeIndexTests() {
@@ -115,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeSpyPanel();
 
       await PageObjects.dashboard.clickEdit();
-      await PageObjects.dashboard.clickEditVisualization();
+      await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();

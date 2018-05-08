@@ -49,7 +49,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       <PanelMinimizeIcon onMinimize={onMinimizePanel} /> :
       <PanelMaximizeIcon onMaximize={onMaximizePanel} />;
   } else {
-    actions = <PanelOptionsMenuContainer panelId={panelId} />;
+    actions = <PanelOptionsMenuContainer panelId={panelId} embeddable={ownProps.embeddable} />;
   }
 
   return {
@@ -68,4 +68,5 @@ export const PanelHeaderContainer = connect(
 
 PanelHeaderContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
+  embeddable: PropTypes.object,
 };
