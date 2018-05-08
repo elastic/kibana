@@ -27,7 +27,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     } = {}) {
       log.debug('load kibana index with visualizations and log data');
       await Promise.all([
-        esArchiver.load(kibanaIndex),
+        esArchiver.load(kibanaIndex, { skipExisting: true }),
         esArchiver.loadIfNeeded(dataIndex)
       ]);
 
