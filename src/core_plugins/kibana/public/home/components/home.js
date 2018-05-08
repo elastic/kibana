@@ -30,7 +30,7 @@ export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed 
           <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
             <Synopsis
               description={directory.description}
-              iconUrl={addBasePath(directory.icon)}
+              iconType={directory.icon}
               title={directory.title}
               url={addBasePath(directory.path)}
             />
@@ -57,7 +57,6 @@ export function Home({ addBasePath, directories, apmUiEnabled, recentlyAccessed 
       {recentlyAccessedPanel}
 
       <AddData
-        addBasePath={addBasePath}
         apmUiEnabled={apmUiEnabled}
       />
 

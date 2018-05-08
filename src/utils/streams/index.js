@@ -1,3 +1,4 @@
+export { concatStreamProviders } from './concat_stream_providers';
 export { createIntersperseStream } from './intersperse_stream';
 export { createSplitStream } from './split_stream';
 export { createListStream } from './list_stream';

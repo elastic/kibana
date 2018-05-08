@@ -1,0 +1,87 @@
+{
+  "_xpack/ml/anomaly_detectors/{job_id}/results/buckets": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/results/buckets",
+      "_xpack/ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}"
+    ],
+    "data_autocomplete_rules": {
+      "desc": [true, false],
+      "exclude_interim": [true, false],
+      "expand": [true, false],
+      "anomaly_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/results/overall_buckets": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/results/overall_buckets",
+      "_xpack/ml/anomaly_detectors/_all/results/overall_buckets"
+    ],
+    "data_autocomplete_rules": {
+      "allow_no_jobs": [true, false],
+      "bucket_span": "",
+      "end": "",
+      "exclude_interim": [true, false],
+      "overall_score": 0,
+      "start": "",
+      "top_n": 0
+    }
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/results/categories": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/results/categories",
+      "_xpack/ml/anomaly_detectors/{job_id}/results/categories/{category_id}"
+    ],
+    "data_autocomplete_rules": {
+      "page": {
+        "from": 0,
+        "size": 100
+      }
+    }
+  },
+  "_xpack/ml/anomaly_detectors/{job_id}/results/influencers": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/results/influencers"
+    ],
+    "data_autocomplete_rules": {
+      "desc": [true, false],
+      "exclude_interim": [true, false],
+      "influencer_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  },  
+  "_xpack/ml/anomaly_detectors/{job_id}/results/records": {
+    "methods": ["GET"],
+    "patterns": [
+      "_xpack/ml/anomaly_detectors/{job_id}/results/records"
+    ],
+    "data_autocomplete_rules": {
+      "desc": [true, false],
+      "exclude_interim": [true, false],
+      "record_score": 0,
+      "end": "",
+      "page": {
+        "from": 0,
+        "size": 100
+      },
+      "sort": "",
+      "start": ""
+    }
+  }
+}

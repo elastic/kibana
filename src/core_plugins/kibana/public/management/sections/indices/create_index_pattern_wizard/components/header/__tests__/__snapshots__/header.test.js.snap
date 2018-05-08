@@ -5,7 +5,9 @@ exports[`Header should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiTitle>
+  <EuiTitle
+    size="m"
+  >
     <h1>
       Create index pattern
     </h1>
@@ -13,6 +15,7 @@ exports[`Header should render normally 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -22,7 +25,9 @@ exports[`Header should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           <EuiTextColor
             color="subdued"
@@ -54,7 +59,9 @@ exports[`Header should render without including system indices 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiTitle>
+  <EuiTitle
+    size="m"
+  >
     <h1>
       Create index pattern
     </h1>
@@ -62,6 +69,7 @@ exports[`Header should render without including system indices 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -71,7 +79,9 @@ exports[`Header should render without including system indices 1`] = `
       component="div"
       grow={false}
     >
-      <EuiText>
+      <EuiText
+        grow={true}
+      >
         <p>
           <EuiTextColor
             color="subdued"

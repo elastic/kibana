@@ -1,0 +1,10 @@
+/.gradle
+/build
+/target
+/test/functional/screenshots
+/test/functional/apps/reporting/reports/session
+/plugins/reporting/.chromium/
+/plugins/reporting/.phantom/
+/.aws-config.json
+/.env
+/.kibana-plugin-helpers.dev.*

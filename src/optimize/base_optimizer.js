@@ -154,6 +154,30 @@ export default class BaseOptimizer {
 
         new webpack.NoEmitOnErrorsPlugin(),
 
+        // replace imports for `uiExports/*` modules with a synthetic module
+        // created by create_ui_exports_module.js
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+          // the map of uiExport types to module ids
+          const extensions = this.uiBundles.getAppExtensions();
+
+          // everything following the first / in the request is
+          // treated as a type of appExtension
+          const type = resource.request.slice(resource.request.indexOf('/') + 1);
+
+          resource.request = [
+            // the "val-loader" is used to execute create_ui_exports_module
+            // and use its return value as the source for the module in the
+            // bundle. This allows us to bypass writing to the file system
+            require.resolve('val-loader'),
+            '!',
+            require.resolve('./create_ui_exports_module'),
+            '?',
+            // this JSON is parsed by create_ui_exports_module and determines
+            // what require() calls it will execute within the bundle
+            JSON.stringify({ type, modules: extensions[type] || [] })
+          ].join('');
+        }),
+
         ...this.uiBundles.getWebpackPluginProviders()
           .map(provider => provider(webpack)),
       ],
@@ -189,8 +213,17 @@ export default class BaseOptimizer {
             loader: 'file-loader'
           },
           {
-            test: /\.js$/,
-            exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+            resource: [
+              {
+                test: /\.js$/,
+                exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+              },
+              {
+                test: /\.js$/,
+                include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
+                exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+              }
+            ],
             use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',

@@ -102,6 +102,40 @@ describe('VegaParser._parseSchema', () => {
   it('vega-lite old', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
 });
 
+describe('VegaParser._parseTooltips', () => {
+  function test(tooltips, position, padding, centerOnMark) {
+    return () => {
+      const vp = new VegaParser(tooltips !== undefined ? { config: { kibana: { tooltips } } } : {});
+      vp._config = vp._parseConfig();
+      if (position === undefined) {
+        // error
+        expect(() => vp._parseTooltips()).to.throwError();
+      } else if (position === false) {
+        expect(vp._parseTooltips()).to.eql(false);
+      } else {
+        expect(vp._parseTooltips()).to.eql({ position, padding, centerOnMark });
+      }
+    };
+  }
+
+  it('undefined', test(undefined, 'top', 16, 50));
+  it('{}', test({}, 'top', 16, 50));
+  it('left', test({ position: 'left' }, 'left', 16, 50));
+  it('padding', test({ position: 'bottom', padding: 60 }, 'bottom', 60, 50));
+  it('padding2', test({ padding: 70 }, 'top', 70, 50));
+  it('centerOnMark', test({}, 'top', 16, 50));
+  it('centerOnMark=10', test({ centerOnMark: 10 }, 'top', 16, 10));
+  it('centerOnMark=true', test({ centerOnMark: true }, 'top', 16, Number.MAX_VALUE));
+  it('centerOnMark=false', test({ centerOnMark: false }, 'top', 16, -1));
+
+  it('false', test(false, false));
+
+  it('err1', test(true, undefined));
+  it('err2', test({ position: 'foo' }, undefined));
+  it('err3', test({ padding: 'foo' }, undefined));
+  it('err4', test({ centerOnMark: {} }, undefined));
+});
+
 describe('VegaParser._parseMapConfig', () => {
   function test(config, expected, warnCount) {
     return () => {

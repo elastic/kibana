@@ -1,0 +1,182 @@
+{
+  "field_not_aggregatable": {
+    "status": "ERROR",
+    "text": "Detector field \"{{fieldName}}\" is not an aggregatable field.",
+    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+  },
+  "fields_not_aggregatable": {
+    "status": "ERROR",
+    "text": "One of the detector fields is not an aggregatable field.",
+    "url": "https://www.elastic.co/guide/en/x-pack/{{version}}/ml-configuring-aggregation.html"
+  },
+  "cardinality_by_field": {
+    "status": "WARNING",
+    "text": "Cardinality of by_field \"{{fieldName}}\" is above 1000 and might result in high memory usage.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
+  },
+  "cardinality_over_field_low": {
+    "status": "WARNING",
+    "text": "Cardinality of over_field \"{{fieldName}}\" is below 10 and might be less suitable for population analysis.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
+  },
+  "cardinality_over_field_high": {
+    "status": "WARNING",
+    "text": "Cardinality of over_field \"{{fieldName}}\" is above 1000000 and might result in high memory usage.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
+  },
+  "cardinality_partition_field": {
+    "status": "WARNING",
+    "text": "Cardinality of partition_field \"{{fieldName}}\" is above 1000 and might result in high memory usage.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality"
+  },
+  "cardinality_model_plot_high": {
+    "status": "WARNING",
+    "text": "The estimated cardinality of {{modelPlotCardinality}} of fields relevant to creating model plots might result in resource intensive jobs."
+  },
+  "categorization_filters_valid": {
+    "status": "SUCCESS",
+    "text": "Categorization filters"
+  },
+  "categorization_filters_invalid": {
+    "status": "ERROR",
+    "text": "The categorization filters are invalid."
+  },
+  "bucket_span_empty": {
+    "status": "ERROR",
+    "text": "The bucket span field must be specified."
+  },
+  "bucket_span_estimation_mismatch": {
+    "status": "INFO",
+    "text": "Current bucket span is \"{{currentBucketSpan}}\", but bucket span estimation returned \"{{estimateBucketSpan}}\".",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
+  },
+  "bucket_span_high": {
+    "status": "INFO",
+    "text": "Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span"
+  },
+  "bucket_span_valid": {
+    "status": "SUCCESS",
+    "text": "Bucket span format"
+  },
+  "bucket_span_invalid": {
+    "status": "ERROR",
+    "text": "The specified bucket span is not a valid time interval format e.g. 10m, 1h. It also needs to be higher than zero."
+  },
+  "detectors_duplicates": {
+    "status": "ERROR",
+    "text": "Duplicate detectors were found. Detectors having the same combined configuration for 'function', 'field_name', 'by_field_name', 'over_field_name' and 'partition_field_name' are not allowed within the same job."
+  },
+  "detectors_empty": {
+    "status": "ERROR",
+    "text": "No detectors were found. At least one detector must be specified."
+  },
+  "detectors_function_empty": {
+    "status": "ERROR",
+    "text": "One of the detector functions is empty."
+  },
+  "detectors_function_not_empty": {
+    "status": "SUCCESS",
+    "text": "Detector functions format"
+  },
+  "index_fields_invalid": {
+    "status": "ERROR",
+    "text": "Could not load fields from index."
+  },
+  "index_fields_valid": {
+    "status": "SUCCESS",
+    "text": "Index fields"
+  },
+  "influencer_high": {
+    "status": "WARNING",
+    "text": "The job configuration includes more than 3 influencers. Consider using fewer influencers or creating multiple jobs.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
+  },
+  "influencer_low": {
+    "status": "WARNING",
+    "text": "No influencers have been configured. Picking an influencer is strongly recommended.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
+  },
+  "influencer_low_suggestion": {
+    "status": "WARNING",
+    "text": "No influencers have been configured. Consider using {{influencerSuggestion}} as an influencer.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
+  },
+  "influencer_low_suggestions": {
+    "status": "WARNING",
+    "text": "No influencers have been configured. Consider using one or more of {{influencerSuggestion}}.",
+    "url": "https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers"
+  },
+  "job_id_empty": {
+    "status": "ERROR",
+    "text": "The job name field must not be empty."
+  },
+  "job_id_invalid": {
+    "status": "ERROR",
+    "text": "The job name is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character."
+  },
+  "job_id_valid": {
+    "status": "SUCCESS",
+    "text": "Job id"
+  },
+  "job_group_id_invalid": {
+    "status": "ERROR",
+    "text": "One of the job group names is invalid. They can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character."
+  },
+  "job_group_id_valid": {
+    "status": "SUCCESS",
+    "text": "Job group ids"
+  },
+  "skipped_extended_tests": {
+    "status": "WARNING",
+    "text": "Skipped some checks because the basic requirements of the job configuration were not met."
+  },
+  "success_cardinality": {
+    "status": "SUCCESS",
+    "text": "Cardinality"
+  },
+  "success_bucket_span": {
+    "status": "SUCCESS",
+    "text": "Bucket span"
+  },
+  "success_influencers": {
+    "status": "SUCCESS",
+    "text": "Influencers"
+  },
+  "estimated_mml_greater_than_max_mml": {
+    "status": "WARNING",
+    "text": "The estimated model memory limit is greater than the max model memory limit configured for this cluster."
+  },
+  "mml_greater_than_max_mml": {
+    "status": "ERROR",
+    "text": "The model memory limit is greater than the max model memory limit configured for this cluster."
+  },
+  "mml_value_invalid": {
+    "status": "ERROR",
+    "text": "{{mml}} is not a valid value for model memory limit. The value should be specified in bytes e.g. 10MB"
+  },
+  "estimated_mml_greater_than_mml": {
+    "status": "INFO",
+    "text": "The estimated model memory limit is greater than the model memory limit you have configured."
+  },
+  "success_mml": {
+    "status": "SUCCESS",
+    "text": "Model memory limit"
+  },
+  "success_time_range": {
+    "status": "SUCCESS",
+    "text": "Time range"
+  },
+  "time_field_invalid": {
+    "status": "ERROR",
+    "text": "'{{timeField}}' cannot be used as the time-field because it's not a valid field of type 'date'."
+  },
+  "time_range_short": {
+    "status": "WARNING",
+    "text": "The selected or available time range might be too short. The recommended minimum time range should be at least {{minTimeSpanReadable}} and {{bucketSpanCompareFactor}} times the bucket span."
+  },
+  "time_range_before_epoch": {
+    "status": "WARNING",
+    "text": "The selected or available time range contains data with timestamps before the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs."
+  }
+}

@@ -1,0 +1,85 @@
+[role="xpack"]
+[[secure-reporting]]
+=== Reporting and Security
+
+Reporting operates by creating and updating documents in {es} in response to
+user actions in {kib}.
+
+To use {reporting} with {security} enabled, you need to
+<<using-kibana-with-security,set up {kib} to work with {security}>>.
+If you are automatically generating reports with
+{xpack-ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
+to trust the {kib} server's certificate. For more information, see
+<<securing-reporting>>.
+
+[[reporting-app-users]]
+To enable users to generate reports, assign them the built in `reporting_user`
+and `kibana_user` roles:
+
+* If you're using the `native` realm, you can assign roles through
+**Management / Users** UI in Kibana or with the `user` API. For example,
+the following request creates a `reporter` user that has the
+`reporting_user` and `kibana_user` roles:
++
+[source, sh]
+---------------------------------------------------------------
+POST /_xpack/security/user/reporter
+{
+  "password" : "x-pack-test-password",
+  "roles" : ["kibana_user", "reporting_user"],
+  "full_name" : "Reporting User"
+}
+---------------------------------------------------------------
+
+* If you are using an LDAP or Active Directory realm, you can either assign
+roles on a per user basis, or assign roles to groups of users. By default, role
+mappings are configured in
+{xpack-ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
+For example, the following snippet assigns the user named Bill Murray the
+`kibana_user` and `reporting_user` roles:
++
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana_user:
+  - "cn=Bill Murray,dc=example,dc=com"
+reporting_user:
+  - "cn=Bill Murray,dc=example,dc=com"
+--------------------------------------------------------------------------------
+
+[role="xpack"]
+[[securing-reporting]]
+=== Securing the Reporting Endpoints
+
+In a production environment, you should restrict access to
+the {reporting} endpoints to authorized users. This requires that you:
+
+. Enable {security} on your {es} cluster. For more information,
+see {xpack-ref}/security-getting-started.html[Getting Started with Security].
+. Configure an SSL certificate for Kibana. For more information, see
+<<using-kibana-with-security>>.
+. Configure {watcher} to trust the Kibana server's certificate by adding it to
+the {watcher} truststore on each node:
+.. Import the {kib} server certificate into the {watcher} truststore using
+Java Keytool:
++
+[source,shell]
+---------------------------------------------------------
+keytool -importcert -keystore watcher-truststore.jks -file server.crt
+---------------------------------------------------------
++
+NOTE: If the truststore doesn't already exist, it is created.
+
+.. Make sure the `xpack.http.ssl.truststore.path` setting in
+`elasticsearch.yml` specifies the location of the {watcher}
+truststore.
+. Add one or more users who have the permissions
+necessary to use {kib} and {reporting}. For more information, see
+<<secure-reporting>>.
+
+Once you've enabled SSL for {kib}, all requests to the {reporting} endpoints
+must include valid credentials. For example, see the following page which
+includes a watch that submits requests as the built-in `elastic` user:
+<<automating-report-generation>>.
+
+For more information about configuring watches, see
+{xpack-ref}/how-watcher-works.html[How Watcher Works].

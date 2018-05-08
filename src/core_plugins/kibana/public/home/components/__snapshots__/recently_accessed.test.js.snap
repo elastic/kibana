@@ -6,7 +6,9 @@ exports[`render 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiText>
+  <EuiText
+    grow={true}
+  >
     <p>
       <EuiTextColor
         color="subdued"
@@ -21,6 +23,7 @@ exports[`render 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="spaceBetween"
     responsive={true}
@@ -34,6 +37,7 @@ exports[`render 1`] = `
       <EuiFlexGroup
         alignItems="stretch"
         component="div"
+        direction="row"
         gutterSize="l"
         justifyContent="flexStart"
         responsive={true}
@@ -70,7 +74,9 @@ exports[`render 1`] = `
             component="div"
             grow={false}
           >
-            <EuiText>
+            <EuiText
+              grow={true}
+            >
               <EuiIcon
                 color="subdued"
                 size="m"

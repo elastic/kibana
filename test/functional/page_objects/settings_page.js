@@ -38,42 +38,42 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
-      return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('value');
+    }
+
+    async getAdvancedSettingCheckbox(propertyName) {
+      log.debug('in getAdvancedSettingCheckbox');
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('checked');
     }
 
     async clearAdvancedSettings(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-clearButton`);
+      await testSubjects.click(`advancedSetting-resetField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`option[label="${propertyValue}"]`).click();
+        .findByCssSelector(`[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async setAdvancedSettingsInput(propertyName, propertyValue, inputSelector) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const input = await testSubjects.find(inputSelector);
+    async setAdvancedSettingsInput(propertyName, propertyValue) {
+      const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();
       await input.type(propertyValue);
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAdvancedSettingCheckbox(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const checkbox = await testSubjects.find(`advancedSetting-${propertyName}-checkbox`);
+      const checkbox = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await checkbox.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -189,12 +189,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    getPageSize() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('div.euiPopover button.euiButtonEmpty span.euiButtonEmpty__content span')
-        .getVisibleText();
-    }
-
     async getFieldNames() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern indexedFieldName');
       return await mapAsync(fieldNameCells, async cell => {
@@ -228,18 +222,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         .click();
     }
 
-    async goToPage(pageNum) {
-      const pageButtons = await remote.setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.euiPagination button.euiPaginationButton')
-        .getVisibleText();
-
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`.euiPagination button.euiPaginationButton:nth-child(${pageButtons.indexOf(pageNum + '') + 2})`)
-        .click();
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async filterField(name) {
       const input = await testSubjects.find('indexPatternFieldFilter');
       await input.clearValue();
@@ -247,6 +229,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async openControlsByName(name) {
+      await this.filterField(name);
       const tableFields = await remote.setFindTimeout(defaultFindTimeout)
         .findAllByCssSelector('table.euiTable tbody tr.euiTableRow td.euiTableRowCell:first-child')
         .getVisibleText();
@@ -276,29 +259,6 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async controlChangeSave() {
       await testSubjects.click('fieldSaveButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async setPageSize(size) {
-      try {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector('div.euiPopover button.euiButtonEmpty')
-          .click();
-
-        const sizeButtons = await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector('div.euiPopover .euiContextMenuPanel button.euiContextMenuItem')
-          .getVisibleText();
-
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findAllByCssSelector(`div.euiPopover .euiContextMenuPanel
-          button.euiContextMenuItem:nth-child(${sizeButtons.indexOf(size + ' rows') + 1})`)
-          .click();
-      } catch(e) {
-        await remote.setFindTimeout(defaultFindTimeout)
-          .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-          .click();
-      } finally {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {

@@ -1,0 +1,78 @@
+{
+  "_xpack/rollup/job/{job_id}": {
+    "patterns": [
+      "_xpack/rollup/job/{job_id}"
+    ],
+    "methods": [
+      "GET"
+    ]
+  },
+  "PUT _xpack/rollup/job/{job_id}": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_xpack/rollup/job/{job_id}"
+    ],
+    "data_autocomplete_rules": {
+      "index_pattern": "",
+      "rollup_index": "",
+      "cron": "",
+      "page_size": 100,
+      "groups": {},
+      "metrics": {}
+    }
+  },
+  "DELETE _xpack/rollup/job/{job_id}": {
+    "patterns": [
+      "_xpack/rollup/job/{job_id}"
+    ],
+    "methods": [
+      "DELETE"
+    ],
+    "data_autocomplete_rules": {
+      "index_pattern": "",
+      "rollup_index": "",
+      "cron": "",
+      "page_size": 100,
+      "groups": {},
+      "metrics": {}
+    }
+  },
+  "_xpack/rollup/job/{job_id}/_start": {
+    "patterns": [
+      "_xpack/rollup/job/{job_id}/_start"
+    ],
+    "methods": [
+      "POST"
+    ]
+  },
+  "_xpack/rollup/job/{job_id}/_stop": {
+    "patterns": [
+      "_xpack/rollup/job/{job_id}/_stop"
+    ],
+    "methods": [
+      "POST"
+    ]
+  },
+  "_xpack/rollup/data/{index_name}": {
+    "patterns": [
+      "_xpack/rollup/data/{index_name}"
+    ],
+    "methods": [
+      "GET"
+    ]
+  },
+  "{index_name}/_rollup_search": {
+    "patterns": [
+      "{index_name}/_rollup_search"
+    ],
+    "methods": [
+      "GET"
+    ],
+    "data_autocomplete_rules": {
+      "query": {},
+      "aggregations": {}
+    }
+  }
+}

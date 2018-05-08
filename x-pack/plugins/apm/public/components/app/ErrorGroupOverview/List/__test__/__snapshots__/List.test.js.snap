@@ -1,0 +1,751 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorGroupOverview -> List should render empty state 1`] = `
+.c0 {
+  text-align: center;
+  font-size: 16px;
+}
+
+.c1 {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.c2 {
+  font-size: 12px;
+  color: #999999;
+}
+
+<div
+  className="kuiControlledTable"
+>
+  <div
+    className="kuiToolBar"
+  >
+    <div
+      className="kuiToolBarSearch"
+      onClick={[Function]}
+    >
+      <div
+        className="kuiToolBarSearchBox"
+      >
+        <div
+          className="kuiToolBarSearchBox__icon kuiIcon fa-search"
+        />
+        <input
+          aria-label="Filter"
+          className="kuiToolBarSearchBox__input"
+          onChange={[Function]}
+          placeholder="Search..."
+          type="text"
+        />
+      </div>
+    </div>
+    <div
+      className="kuiToolBarSection"
+    >
+      <div
+        className="kuiPager"
+      >
+        <div
+          className="kuiPagerText"
+        >
+          0
+          –
+          0
+           of 
+          0
+        </div>
+        <div
+          className="kuiButtonGroup kuiButtonGroup--united"
+          role="group"
+        >
+          <button
+            aria-label="Show previous page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerPreviousButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-left"
+              />
+            </span>
+          </button>
+          <button
+            aria-label="Show next page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerNextButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-right"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="kuiPanel kuiPanel--centered kuiPanel--withToolBar"
+  >
+    <div
+      className="kuiTableInfo c0"
+    >
+      No errors in the selected time range.
+      <div
+        className="c1"
+      >
+        <span>
+           Oops! You should try another time range. If that's no good, there's always the 
+          <a
+            className="euiLink euiLink--primary"
+            href="https://www.elastic.co/guide/en/apm/get-started/my-metadata-branch/index.html"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            documentation.
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="kuiToolBarFooter"
+  >
+    <div
+      className="kuiToolBarFooterSection"
+    >
+      <div
+        className="c2"
+      />
+    </div>
+    <div
+      className="kuiToolBarSection"
+    >
+      <div
+        className="kuiPager"
+      >
+        <div
+          className="kuiPagerText"
+        >
+          0
+          –
+          0
+           of 
+          0
+        </div>
+        <div
+          className="kuiButtonGroup kuiButtonGroup--united"
+          role="group"
+        >
+          <button
+            aria-label="Show previous page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerPreviousButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-left"
+              />
+            </span>
+          </button>
+          <button
+            aria-label="Show next page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerNextButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-right"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ErrorGroupOverview -> List should render with data 1`] = `
+.c8 {
+  font-size: 12px;
+  color: #999999;
+}
+
+.c0 {
+  max-width: none;
+}
+
+.c0.kuiTableHeaderCell--alignRight > button > span {
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+}
+
+.c1 {
+  max-width: none;
+  width: 100px;
+}
+
+.c2 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+.c3 {
+  max-width: 512px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c4 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c5 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+.c6 {
+  max-width: none;
+  width: 100px;
+}
+
+.c7 {
+  max-width: none;
+}
+
+<div
+  className="kuiControlledTable"
+>
+  <div
+    className="kuiToolBar"
+  >
+    <div
+      className="kuiToolBarSearch"
+      onClick={[Function]}
+    >
+      <div
+        className="kuiToolBarSearchBox"
+      >
+        <div
+          className="kuiToolBarSearchBox__icon kuiIcon fa-search"
+        />
+        <input
+          aria-label="Filter"
+          className="kuiToolBarSearchBox__input"
+          onChange={[Function]}
+          placeholder="Search..."
+          type="text"
+        />
+      </div>
+    </div>
+    <div
+      className="kuiToolBarSection"
+    >
+      <div
+        className="kuiPager"
+      >
+        <div
+          className="kuiPagerText"
+        >
+          0
+          –
+          4
+           of 
+          4
+        </div>
+        <div
+          className="kuiButtonGroup kuiButtonGroup--united"
+          role="group"
+        >
+          <button
+            aria-label="Show previous page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerPreviousButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-left"
+              />
+            </span>
+          </button>
+          <button
+            aria-label="Show next page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerNextButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-right"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table
+    className="kuiTable"
+  >
+    <thead>
+      <tr>
+        <th
+          className="kuiTableHeaderCell c0"
+          scope="col"
+        >
+          <div
+            className="kuiTableHeaderCell__liner"
+          >
+            Group ID
+          </div>
+        </th>
+        <th
+          className="kuiTableHeaderCell c0"
+          scope="col"
+        >
+          <div
+            className="kuiTableHeaderCell__liner"
+          >
+            Error message and culprit
+          </div>
+        </th>
+        <th
+          className="kuiTableHeaderCell kuiTableHeaderCell--alignRight c0"
+          scope="col"
+        >
+          <div
+            className="kuiTableHeaderCell__liner"
+          />
+        </th>
+        <th
+          className="kuiTableHeaderCell kuiTableHeaderCell--alignRight c0"
+          scope="col"
+        >
+          <button
+            aria-label="Sort Occurrences ascending"
+            className="kuiTableHeaderCellButton"
+            onClick={[Function]}
+          >
+            <span
+              className="kuiTableHeaderCell__liner"
+            >
+              Occurrences
+              <span
+                aria-hidden="true"
+                className="kuiTableSortIcon kuiIcon fa-long-arrow-down"
+              />
+            </span>
+          </button>
+        </th>
+        <th
+          className="kuiTableHeaderCell kuiTableHeaderCell--alignRight c0"
+          scope="col"
+        >
+          <button
+            aria-label="Sort Latest occurrence ascending"
+            className="kuiTableHeaderCellButton kuiTableHeaderCellButton-isSorted"
+            onClick={[Function]}
+          >
+            <span
+              className="kuiTableHeaderCell__liner"
+            >
+              Latest occurrence
+              <span
+                aria-hidden="true"
+                className="kuiTableSortIcon kuiIcon fa-long-arrow-down"
+              />
+            </span>
+          </button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        className="kuiTableRow"
+      >
+        <td
+          className="kuiTableRowCell c1"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              className="euiLink euiLink--primary c2"
+              href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
+              onClick={[Function]}
+            >
+              a0ce2
+            </a>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c3"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              aria-describedby="overlay1"
+              className="euiLink euiLink--primary c4"
+              href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
+              onClick={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              About to blow up!
+            </a>
+            <div
+              aria-describedby="overlay2"
+              className="c5"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              elasticapm.contrib.django.client.capture
+            </div>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c6 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          />
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            75
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            1515578797
+          </div>
+        </td>
+      </tr>
+      <tr
+        className="kuiTableRow"
+      >
+        <td
+          className="kuiTableRowCell c1"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              className="euiLink euiLink--primary c2"
+              href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
+              onClick={[Function]}
+            >
+              f3ac9
+            </a>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c3"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              aria-describedby="overlay3"
+              className="euiLink euiLink--primary c4"
+              href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
+              onClick={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              AssertionError: 
+            </a>
+            <div
+              aria-describedby="overlay4"
+              className="c5"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              opbeans.views.oopsie
+            </div>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c6 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          />
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            75
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            1515578797
+          </div>
+        </td>
+      </tr>
+      <tr
+        className="kuiTableRow"
+      >
+        <td
+          className="kuiTableRowCell c1"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              className="euiLink euiLink--primary c2"
+              href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
+              onClick={[Function]}
+            >
+              e9086
+            </a>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c3"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              aria-describedby="overlay5"
+              className="euiLink euiLink--primary c4"
+              href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
+              onClick={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              AssertionError: Bad luck!
+            </a>
+            <div
+              aria-describedby="overlay6"
+              className="c5"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              opbeans.tasks.update_stats
+            </div>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c6 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          />
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            24
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            1515578796
+          </div>
+        </td>
+      </tr>
+      <tr
+        className="kuiTableRow"
+      >
+        <td
+          className="kuiTableRowCell c1"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              className="euiLink euiLink--primary c2"
+              href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
+              onClick={[Function]}
+            >
+              8673d
+            </a>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c3"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            <a
+              aria-describedby="overlay7"
+              className="euiLink euiLink--primary c4"
+              href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
+              onClick={[Function]}
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              Customer with ID 8517 not found
+            </a>
+            <div
+              aria-describedby="overlay8"
+              className="c5"
+              onMouseOut={[Function]}
+              onMouseOver={[Function]}
+            >
+              opbeans.views.customer
+            </div>
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c6 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          />
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            15
+          </div>
+        </td>
+        <td
+          className="kuiTableRowCell c7 kuiTableRowCell--alignRight"
+        >
+          <div
+            className="kuiTableRowCell__liner"
+          >
+            1515578773
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    className="kuiToolBarFooter"
+  >
+    <div
+      className="kuiToolBarFooterSection"
+    >
+      <div
+        className="c8"
+      />
+    </div>
+    <div
+      className="kuiToolBarSection"
+    >
+      <div
+        className="kuiPager"
+      >
+        <div
+          className="kuiPagerText"
+        >
+          0
+          –
+          4
+           of 
+          4
+        </div>
+        <div
+          className="kuiButtonGroup kuiButtonGroup--united"
+          role="group"
+        >
+          <button
+            aria-label="Show previous page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerPreviousButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-left"
+              />
+            </span>
+          </button>
+          <button
+            aria-label="Show next page"
+            className="kuiButton kuiButton--basic kuiButton--iconText"
+            data-test-subj="pagerNextButton"
+            disabled={true}
+            onClick={[Function]}
+          >
+            <span
+              className="kuiButton__inner"
+            >
+              <span
+                aria-hidden="true"
+                className="kuiButton__icon kuiIcon fa-chevron-right"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

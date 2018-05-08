@@ -67,6 +67,7 @@ export class VegaParser {
     this.hideWarnings = !!this._config.hideWarnings;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
+    this.tooltips = this._parseTooltips();
 
     this._setDefaultColors();
     this._parseControlPlacement(this._config);
@@ -209,6 +210,37 @@ export class VegaParser {
       }
     }
     return result || {};
+  }
+
+  _parseTooltips() {
+    if (this._config.tooltips === false) {
+      return false;
+    }
+
+    const result = this._config.tooltips || {};
+
+    if (result.position === undefined) {
+      result.position = 'top';
+    } else if (['top', 'right', 'bottom', 'left'].indexOf(result.position) === -1) {
+      throw new Error('Unexpected value for the result.position configuration');
+    }
+
+    if (result.padding === undefined) {
+      result.padding = 16;
+    } else if (typeof result.padding !== 'number') {
+      throw new Error('config.kibana.result.padding is expected to be a number');
+    }
+
+    if (result.centerOnMark === undefined) {
+      // if mark's width & height is less than this value, center on it
+      result.centerOnMark = 50;
+    } else if (typeof result.centerOnMark === 'boolean') {
+      result.centerOnMark = result.centerOnMark ? Number.MAX_VALUE : -1;
+    } else if (typeof result.centerOnMark !== 'number') {
+      throw new Error('config.kibana.result.centerOnMark is expected to be true, false, or a number');
+    }
+
+    return result;
   }
 
   /**

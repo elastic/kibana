@@ -38,7 +38,7 @@ describe('directories', () => {
       id: 'dashboard',
       title: 'Dashboard',
       description: 'Display and share a collection of visualizations and saved searches.',
-      icon: '/plugins/kibana/assets/app_dashboard.svg',
+      icon: 'dashboardApp',
       path: 'dashboard_landing_page',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA
@@ -58,7 +58,7 @@ describe('directories', () => {
       id: 'index_patterns',
       title: 'Index Patterns',
       description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
-      icon: '/plugins/kibana/assets/app_index_pattern.svg',
+      icon: 'indexPatternApp',
       path: 'index_management_landing_page',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN
@@ -78,7 +78,7 @@ describe('directories', () => {
       id: 'management',
       title: 'Management',
       description: 'Your center console for managing the Elastic Stack.',
-      icon: '/plugins/kibana/assets/app_management.svg',
+      icon: 'managementApp',
       path: 'management_landing_page',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN
