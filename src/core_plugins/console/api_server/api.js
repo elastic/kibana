@@ -12,7 +12,6 @@ class Api {
   addEndpointDescription(endpoint, description = {}) {
     let copiedDescription = {};
     if (this.endpoints[endpoint]) {
-      console.warn(`Extending endpoint definition: ${endpoint}`);
       copiedDescription = { ...this.endpoints[endpoint] };
     }
     let urlParamsDef;
