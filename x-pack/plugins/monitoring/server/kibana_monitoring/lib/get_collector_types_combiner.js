@@ -28,7 +28,7 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
     // kibana usage and stats
     let statsResult;
     const [ statsHeader, statsPayload ] = findItem(KIBANA_STATS_TYPE);
-    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE);
+    const [ reportingHeader, reportingPayload ] = findItem(KIBANA_REPORTING_TYPE); // TODO: move this to reporting
 
     // sourceKibana uses "host" from the kibana stats payload
     const host = get(statsPayload, 'host');
@@ -49,7 +49,7 @@ export function getCollectorTypesCombiner(kbnServer, config, _sourceKibana = sou
         set(statsResult, '[1].usage', kibanaUsage);
       }
       if (reportingUsage) {
-        set(statsResult, '[1].usage.xpack.reporting', reportingUsage);
+        set(statsResult, '[1].usage.xpack.reporting', reportingUsage); // TODO: move this to reporting
       }
     }
 

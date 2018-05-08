@@ -21,35 +21,25 @@ import { initKibanaMonitoring } from './server/kibana_monitoring';
  * @param server {Object} HapiJS server instance
  */
 export const init = (monitoringPlugin, server) => {
+  monitoringPlugin.status.yellow('Initializing');
   const xpackMainPlugin = server.plugins.xpack_main;
 
   xpackMainPlugin.status.once('green', async () => {
     const config = server.config();
     const uiEnabled = config.get('xpack.monitoring.ui.enabled');
-    const features = [];
-    const onceMonitoringGreen = callbackFn => monitoringPlugin.status.once('green', () => callbackFn()); // avoid race condition in things that require ES client
 
     if (uiEnabled) {
-      // Instantiate the dedicated ES client
-      features.push(instantiateClient(server));
-
-      // route handlers depend on xpackInfo (exposed as server.plugins.monitoring.info)
-      onceMonitoringGreen(async () => {
-        await initMonitoringXpackInfo(server);
-      });
-
-      // Require only routes needed for ui app
-      features.push(requireUIRoutes(server));
+      await instantiateClient(server); // Instantiate the dedicated ES client
+      await initMonitoringXpackInfo(server); // Route handlers depend on this for xpackInfo
+      await requireUIRoutes(server);
     }
 
-    // Send Kibana usage / server ops to the monitoring bulk api
     if (config.get('xpack.monitoring.kibana.collection.enabled')) {
-      onceMonitoringGreen(() => {
-        features.push(initKibanaMonitoring(monitoringPlugin.kbnServer, server));
-      });
+      const collector = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate an object for collecting/sending metrics and usage stats
+      server.expose('typeCollector', collector); // expose the collector object on the server. other plugins will call typeCollector.registerType(typeDefinition) to define their own collection
     }
 
-    Promise.all(features);
+    monitoringPlugin.status.green('Ready');
   });
 
   server.injectUiAppVars('monitoring', (server) => {

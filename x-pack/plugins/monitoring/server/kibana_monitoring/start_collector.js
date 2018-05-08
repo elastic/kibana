@@ -38,10 +38,10 @@ export function startCollector(kbnServer, server, client, _sendBulkPayload = sen
   });
   const callCluster = callClusterFactory(server).getCallClusterInternal();
 
-  collector.register(getUsageCollector(server, callCluster));
-  collector.register(getOpsStatsCollector(server));
-  collector.register(getSettingsCollector(server));
-  collector.register(getReportingCollector(server, callCluster));
+  collector.registerType(getUsageCollector(server, callCluster));
+  collector.registerType(getOpsStatsCollector(server));
+  collector.registerType(getSettingsCollector(server));
+  collector.registerType(getReportingCollector(server, callCluster)); // TODO: move this to Reporting init
 
   // Startup Kibana cleanly or reconnect to Elasticsearch
   server.plugins.elasticsearch.status.on('green', () => {
@@ -53,4 +53,6 @@ export function startCollector(kbnServer, server, client, _sendBulkPayload = sen
   server.plugins.elasticsearch.status.on('red', () => {
     collector.cleanup();
   });
+
+  return collector;
 }
