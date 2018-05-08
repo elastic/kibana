@@ -1,0 +1,8 @@
+{
+  "id": "license_management",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch"
+  ]
+}

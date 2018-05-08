@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugin discovery/plugin spec PluginSpec #getPublicDir() options.publicDir is an absolute path throws because of invalid setting 1`] = `"Plugin foo at / is invalid because Plugin(options) validation failure: child \\"publicDir\\" fails because [\\"publicDir\\" must be a boolean]"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is defined throws if not passed a config service 1`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is defined throws if not passed a config service 2`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is defined throws if not passed a config service 3`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is not defined returns false when config.get([...configPrefix, "enabled"]) returns false 1`] = `
+Array [
+  Array [
+    Array [
+      "g",
+      "h",
+      "i",
+      "enabled",
+    ],
+  ],
+]
+`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is not defined returns true when config.get([...configPrefix, "enabled"]) returns true 1`] = `
+Array [
+  Array [
+    Array [
+      "d",
+      "e",
+      "f",
+      "enabled",
+    ],
+  ],
+]
+`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is not defined throws if not passed a config service 1`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is not defined throws if not passed a config service 2`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isEnabled() options.isEnabled is not defined throws if not passed a config service 3`] = `"PluginSpec#isEnabled() must be called with a config service"`;
+
+exports[`plugin discovery/plugin spec PluginSpec #isVersionCompatible() passes this.getExpectedKibanaVersion() and arg to isVersionCompatible(), returns its result 1`] = `
+Array [
+  Array [
+    "1.2.3",
+    "baz",
+  ],
+]
+`;
+
+exports[`plugin discovery/plugin spec PluginSpec validation throws if options include an id 1`] = `"Plugin foo at / is invalid because Plugin(options) validation failure: \\"id\\" is not allowed"`;
+
+exports[`plugin discovery/plugin spec PluginSpec validation throws if options include requires 1`] = `"Plugin foo at / is invalid because Plugin(options) validation failure: \\"requires\\" is not allowed"`;

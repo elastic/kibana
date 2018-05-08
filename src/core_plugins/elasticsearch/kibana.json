@@ -1,0 +1,7 @@
+{
+  "id": "elasticsearch",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana"
+  ]
+}

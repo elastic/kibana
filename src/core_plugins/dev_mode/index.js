@@ -1,7 +1,5 @@
 export default (kibana) => {
   return new kibana.Plugin({
-    id: 'dev_mode',
-
     isEnabled(config) {
       return (
         config.get('env.dev') &&

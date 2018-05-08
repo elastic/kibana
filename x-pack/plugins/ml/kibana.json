@@ -1,0 +1,9 @@
+{
+  "id": "ml",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch",
+    "xpack_main"
+  ]
+}

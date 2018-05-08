@@ -10,12 +10,9 @@ import Boom from 'boom';
 import { initServer } from './server';
 import mappings from './mappings.json';
 
-export function graph(kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
-    id: 'graph',
     configPrefix: 'xpack.graph',
-    publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         title: 'Graph',

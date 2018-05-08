@@ -1,0 +1,8 @@
+{
+  "id": "searchprofiler",
+  "version": "kibana",
+  "requiredPlugins": [
+    "elasticsearch",
+    "xpack_main"
+  ]
+}

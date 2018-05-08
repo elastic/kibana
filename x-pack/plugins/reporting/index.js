@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { main as mainRoutes } from './server/routes/main';
@@ -24,12 +23,9 @@ const kbToBase64Length = (kb) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
 
-export const reporting = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    id: 'reporting',
     configPrefix: 'xpack.reporting',
-    publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
       navbarExtensions: [

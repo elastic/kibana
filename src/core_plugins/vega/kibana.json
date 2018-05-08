@@ -1,0 +1,7 @@
+{
+  "id": "vega",
+  "version": "kibana",
+  "requiredPlugins": [
+    "elasticsearch"
+  ]
+}

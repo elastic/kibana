@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import dedent from 'dedent';
 import {
   XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
@@ -42,12 +41,9 @@ function isTelemetryEnabled(config) {
   return enabled;
 }
 
-export const xpackMain = (kibana) => {
+export default (kibana) => {
   return new kibana.Plugin({
-    id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
-    publicDir: resolve(__dirname, 'public'),
-    require: ['elasticsearch'],
 
     config(Joi) {
       return Joi.object({

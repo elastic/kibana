@@ -1,0 +1,9 @@
+{
+  "id": "security",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch",
+    "xpack_main"
+  ]
+}

@@ -5,9 +5,7 @@ import { Plugin } from './lib';
 
 export async function scanMixin(kbnServer, server, config) {
   const {
-    pack$,
     invalidDirectoryError$,
-    invalidPackError$,
     otherError$,
     deprecation$,
     invalidVersionSpec$,
@@ -16,25 +14,11 @@ export async function scanMixin(kbnServer, server, config) {
   } = findPluginSpecs(kbnServer.settings, config);
 
   const logging$ = Observable.merge(
-    pack$.do(definition => {
-      server.log(['plugin', 'debug'], {
-        tmpl: 'Found plugin at <%= path %>',
-        path: definition.getPath()
-      });
-    }),
-
     invalidDirectoryError$.do(error => {
       server.log(['plugin', 'warning'], {
         tmpl: '<%= err.code %>: Unable to scan directory for plugins "<%= dir %>"',
         err: error,
         dir: error.path
-      });
-    }),
-
-    invalidPackError$.do(error => {
-      server.log(['plugin', 'warning'], {
-        tmpl: 'Skipping non-plugin directory at <%= path %>',
-        path: error.path
       });
     }),
 
@@ -61,6 +45,12 @@ export async function scanMixin(kbnServer, server, config) {
   );
 
   const enabledSpecs$ = spec$
+    .do((spec) => {
+      server.log(['plugin', 'debug'], {
+        tmpl: 'Found plugin at <%= path %>',
+        path: spec.getPath()
+      });
+    })
     .toArray()
     .do(specs => {
       kbnServer.pluginSpecs = specs;

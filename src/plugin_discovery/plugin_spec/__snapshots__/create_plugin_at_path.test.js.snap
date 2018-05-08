@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results ./relative path 1`] = `[TypeError: path must be absolute]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results default export is an number 1`] = `[Error: Plugin foo at <PLUGINS>/exports_number is invalid because must export a function]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results default export is an object 1`] = `[Error: Plugin foo at <PLUGINS>/exports_object is invalid because must export a function]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results default export is an string 1`] = `[Error: Plugin foo at <PLUGINS>/exports_string is invalid because must export a function]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results directory with an invalid kibana.json 1`] = `[Error: Plugin at <PLUGINS>/broken is invalid because unable to load kibana.json file: Unexpected token } in JSON at position 10]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results directory with code that fails when required 1`] = `[Error: Plugin foo at <PLUGINS>/broken_code is invalid because Cannot find module 'does-not-exist' from 'index.js']`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results directory without a kibana.json 1`] = `[Error: Plugin at <PLUGINS>/lib is invalid because kibana.json file expected in <PLUGINS>/lib]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results non-existent path 1`] = `[Error: Plugin at <PLUGINS>/baz is invalid because must be a directory]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results path to a file 1`] = `[Error: Plugin at <PLUGINS>/index.js is invalid because must be a directory]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results relative path 1`] = `[TypeError: path must be absolute]`;
+
+exports[`plugin discovery/plugin_pack createPluginAtPath$() errors emitted as { error } results undefined path 1`] = `[TypeError: path must be a string]`;

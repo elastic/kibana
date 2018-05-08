@@ -1,0 +1,10 @@
+{
+  "id": "index_management",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch",
+    "xpack_main",
+    "watcher"
+  ]
+}

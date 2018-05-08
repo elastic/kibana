@@ -1,0 +1,9 @@
+{
+  "id": "dashboard_mode",
+  "version": "kibana",
+  "requiredPlugins": [
+    "kibana",
+    "elasticsearch",
+    "xpack_main"
+  ]
+}
