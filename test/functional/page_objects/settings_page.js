@@ -483,60 +483,42 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`importFile(${path})`);
 
       log.debug(`Clicking importObjects`);
-      await (await testSubjects.find('importObjects')).click();
+      await testSubjects.click('importObjects');
       log.debug(`Setting the path on the file input`);
-      await retry.try(async () => {
-        await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('.euiFilePicker__input').type(path);
-      });
+      await find.setValue('.euiFilePicker__input', path);
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
-        await (await testSubjects.find('importSavedObjectsOverwriteToggle')).click();
+        await testSubjects.click('importSavedObjectsOverwriteToggle');
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }
-      const importBtn = await this.getImportButton();
-      log.debug(`got the import button`, await importBtn.isDisplayed());
-      await importBtn.click();
+      await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
     }
 
-    async getImportButton() {
-      log.debug(`getImportButton()`);
-      return retry.try(async () => {
-        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsImportBtn"]`);
-      });
-    }
-
     async clickImportDone() {
-      const doneBtn = await retry.try(async () => {
-        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsDoneBtn"]`);
-      });
-      await doneBtn.click();
+      await testSubjects.click('importSavedObjectsDoneBtn');
     }
 
     async clickConfirmConflicts() {
-      const confirmBtn = await retry.try(async () => {
-        return await remote.setFindTimeout(defaultFindTimeout).findByCssSelector(`*[data-test-subj="importSavedObjectsConfirmBtn"]`);
-      });
-      await confirmBtn.click();
+      await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
     async setImportIndexFieldOption(child) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`)
-        .click();
+      await find
+        .clickByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`);
     }
 
     async clickChangeIndexConfirmButton() {
-      await (await testSubjects.find('changeIndexConfirmButton')).click();
+      await testSubjects.click('changeIndexConfirmButton');
     }
 
     async clickVisualizationsTab() {
-      await (await testSubjects.find('objectsTab-visualizations')).click();
+      await testSubjects.click('objectsTab-visualizations');
     }
 
     async clickSearchesTab() {
-      await (await testSubjects.find('objectsTab-searches')).click();
+      await testSubjects.click('objectsTab-searches');
     }
 
     async getVisualizationRows() {
@@ -545,19 +527,16 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async waitUntilSavedObjectsTableIsNotLoading() {
       return retry.try(async () => {
-        try {
-          await remote.setFindTimeout(100).findByCssSelector(`*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading`);
-        } catch (err) {
-          // Was not found, we're good
-          return;
+        const exists = await find.existsByDisplayedByCssSelector('*[data-test-subj="savedObjectsTable"] .euiBasicTable-loading');
+        if (exists) {
+          throw new Error('Waiting');
         }
-        throw new Error('Waiting');
+        return true;
       });
     }
 
     async getSavedObjectsInTable() {
-      const table = await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`*[data-test-subj="savedObjectsTable"]`);
+      const table = await testSubjects.find('savedObjectsTable');
       const cells = await table.findAll('css selector', 'td:nth-child(3)');
 
       const objects = [];
