@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
+import { aggTypes } from '../agg_types/index';
 
-
-function AggConfig(vis, opts) {
+export function AggConfig(vis, opts) {
   const self = this;
 
   self.id = String(opts.id || AggConfig.nextId(vis.aggs));
@@ -29,6 +29,7 @@ function AggConfig(vis, opts) {
   self.setParams(opts.params || {});
 }
 
+AggConfig.aggTypes = aggTypes;
 /**
  * Ensure that all of the objects in the list have ids, the objects
  * and list are modified by reference.
@@ -337,5 +338,3 @@ AggConfig.prototype.fieldIsTimeField = function () {
   const timeFieldName = this.vis.indexPattern.timeFieldName;
   return timeFieldName && this.fieldName() === timeFieldName;
 };
-
-export { AggConfig };
