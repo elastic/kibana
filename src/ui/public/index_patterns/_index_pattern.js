@@ -419,7 +419,10 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
 
       return savedObjectsClient.update(type, this.id, body, { version: this.version })
-        .then(({ id }) => setId(this, id))
+        .then(({ id, version }) => {
+          setId(this, id);
+          this.version = version;
+        })
         .catch(err => {
           if (err.statusCode === 409) {
             return this.init(false)
