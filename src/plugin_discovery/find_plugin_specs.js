@@ -196,7 +196,9 @@ export function findPluginSpecs(settings, configToMutate) {
     // the config service we extended with all of the plugin specs,
     // only emitted once it is fully extended by all
     extendedConfig$: extendConfig$
-      .mergeMap(result => result.config),
+      .mergeMap(result => result.config)
+      .filter(Boolean)
+      .last(),
 
     // all enabled PluginSpec objects
     spec$: extendConfig$
