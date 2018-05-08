@@ -1,23 +1,17 @@
 import 'isomorphic-fetch';
 import { flatten, memoize } from 'lodash';
-import chrome from '../../chrome';
 import { escapeQuotes } from './escape_kuery';
+import { kfetch } from '../../kfetch';
 
-const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const type = 'value';
 
-const requestSuggestions = memoize(async (query, field) => {
-  const response = await fetch(`${baseUrl}/${field.indexPatternTitle}`, {
+const requestSuggestions = memoize((query, field) => {
+  return kfetch({
+    pathname: `/api/kibana/suggestions/values/${field.indexPatternTitle}`,
     method: 'POST',
     body: JSON.stringify({ query, field: field.name }),
-    headers: new Headers({
-      'Content-Type': 'application/json',
-      'kbn-xsrf': true
-    }),
   });
-  return response.json();
 }, resolver);
-
 
 export function getSuggestionsProvider({ config, indexPatterns }) {
   const allFields = flatten(
@@ -30,14 +24,24 @@ export function getSuggestionsProvider({ config, indexPatterns }) {
   );
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
 
-  return function getValueSuggestions({ start, end, prefix, suffix, fieldName }) {
+  return function getValueSuggestions({
+    start,
+    end,
+    prefix,
+    suffix,
+    fieldName,
+  }) {
     const fields = allFields.filter(field => field.name === fieldName);
     const query = `${prefix}${suffix}`;
 
     const suggestionsByField = fields.map(field => {
       if (field.type === 'boolean') {
         return wrapAsSuggestions(start, end, query, ['true', 'false']);
-      } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
+      } else if (
+        !shouldSuggestValues ||
+        !field.aggregatable ||
+        field.type !== 'string'
+      ) {
         return [];
       }
 
@@ -47,8 +51,9 @@ export function getSuggestionsProvider({ config, indexPatterns }) {
       });
     });
 
-    return Promise.all(suggestionsByField)
-      .then(suggestions => flatten(suggestions));
+    return Promise.all(suggestionsByField).then(suggestions =>
+      flatten(suggestions)
+    );
   };
 }
 
