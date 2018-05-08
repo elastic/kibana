@@ -130,7 +130,6 @@ export function findPluginSpecs(settings, configToMutate) {
         });
 
         return {
-          config,
           spec,
           deprecations,
         };
