@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'watcher',
     title: 'Watcher',
     description: 'Detect changes in your data by creating, managing, and monitoring alerts.',
-    icon: '/plugins/watcher/assets/app_watches.svg',
+    icon: 'watchesApp',
     path: '/app/kibana#/management/elasticsearch/watcher/watches',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

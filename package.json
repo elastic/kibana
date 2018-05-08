@@ -77,7 +77,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/eui": "v0.0.44",
+    "@elastic/eui": "v0.0.46",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
@@ -204,6 +204,7 @@
     "ui-select": "0.19.6",
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
+    "val-loader": "^1.1.0",
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "^3.3.1",
     "vega-lite": "^2.4.0",

@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TransactionOverview should not call loadTransactionList without any props 1`] = `
+<div>
+  <styled.h1>
+    MyServiceName
+  </styled.h1>
+  <Connect(TabNavigation) />
+  <OverviewChartsRequest
+    render={[Function]}
+    urlParams={
+      Object {
+        "serviceName": "MyServiceName",
+        "transactionType": "request",
+      }
+    }
+  />
+  <styled.h2>
+    Request
+  </styled.h2>
+  <ServiceDetailsAndTransactionList
+    render={[Function]}
+    urlParams={
+      Object {
+        "serviceName": "MyServiceName",
+        "transactionType": "request",
+      }
+    }
+  />
+</div>
+`;
