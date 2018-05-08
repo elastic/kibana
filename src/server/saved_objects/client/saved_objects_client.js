@@ -169,10 +169,10 @@ export class SavedObjectsClient {
           }
         },
         {
+          ...object.extraBodyProperties,
           type: object.type,
           updated_at: time,
           [object.type]: object.attributes,
-          ...object.extraBodyProperties
         }
       ];
     };
