@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import {
   Control,
-  noValuesDisableMsg
+  noValuesDisableMsg,
+  noIndexPatternMsg,
 } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
@@ -30,6 +31,11 @@ class RangeControl extends Control {
 
   async fetch() {
     const indexPattern = this.filterManager.getIndexPattern();
+    if (!indexPattern) {
+      this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
+      return;
+    }
+
     const fieldName = this.filterManager.fieldName;
 
     const aggs = minMaxAgg(indexPattern.fields.byName[fieldName]);
@@ -60,7 +66,12 @@ class RangeControl extends Control {
 }
 
 export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
-  const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  let indexPattern;
+  try {
+    indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  } catch (err) {
+    // ignore not found error and return control so it can be displayed in disabled state.
+  }
   const unsetValue = { min: 0, max: 1 };
   return new RangeControl(
     controlParams,
