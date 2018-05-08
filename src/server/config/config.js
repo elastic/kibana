@@ -9,8 +9,9 @@ const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
 export class Config {
-  static withDefaultSchema(settings = {}) {
-    return new Config(createDefaultSchema(), settings);
+  static async withDefaultSchema(settings = {}) {
+    const defaultSchema = await createDefaultSchema();
+    return new Config(defaultSchema, settings);
   }
 
   constructor(initialSchema, initialSettings) {

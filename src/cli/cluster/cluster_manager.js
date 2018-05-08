@@ -4,11 +4,20 @@ import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import Log from '../log';
 import Worker from './worker';
 import BasePathProxy from './base_path_proxy';
+import { Config } from '../../server/config/config';
+import { transformDeprecations } from '../../server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  constructor(opts = {}, settings = {}) {
+  static async create(opts = {}, settings = {}) {
+    const transformedSettings = transformDeprecations(settings);
+    const config = await Config.withDefaultSchema(transformedSettings);
+
+    return new ClusterManager(opts, config);
+  }
+
+  constructor(opts, config) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;
 
@@ -19,7 +28,7 @@ export default class ClusterManager {
     ];
 
     if (opts.basePath) {
-      this.basePathProxy = new BasePathProxy(this, settings);
+      this.basePathProxy = new BasePathProxy(this, config);
 
       optimizerArgv.push(
         `--server.basePath=${this.basePathProxy.basePath}`,
@@ -63,14 +72,16 @@ export default class ClusterManager {
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
     if (opts.watch) {
+      const pluginPaths = config.get('plugins.paths');
+      const scanDirs = config.get('plugins.scanDirs');
       const extraPaths = [
-        ...settings.plugins.paths,
-        ...settings.plugins.scanDirs,
+        ...config.get('plugins.paths'),
+        ...scanDirs,
       ];
 
-      const extraIgnores = settings.plugins.scanDirs
+      const extraIgnores = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
-        .concat(settings.plugins.paths)
+        .concat(pluginPaths)
         .reduce((acc, path) => acc.concat(
           resolve(path, 'test'),
           resolve(path, 'build'),
