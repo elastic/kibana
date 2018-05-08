@@ -25,7 +25,7 @@ function EditorOptionsGroup(props) {
     >
       <EuiAccordion
         id={htmlIdGenerator('eog')()}
-        initialIsOpen={true}
+        initialIsOpen={!props.initialIsCollapsed}
         extraAction={props.actions}
         buttonContent={
           <EuiTitle size="xs">
@@ -49,6 +49,10 @@ EditorOptionsGroup.propTypes = {
    * Add additional elements as actions to the group.
    */
   actions: PropTypes.node,
+  /**
+  * Whether the panel should be collapsed by default.
+  */
+  initialIsCollapsed: PropTypes.bool,
   /**
    * All elements that should be within this group.
    */

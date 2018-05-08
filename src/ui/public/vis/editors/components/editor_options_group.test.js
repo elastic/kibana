@@ -36,4 +36,17 @@ describe('<EditorOptionsGroup/>', () => {
     );
     expect(group).toMatchSnapshot();
   });
+
+  it('renders as expected with initial collapsed', () => {
+    const group = render(
+      <EditorOptionsGroup
+        title="Some options"
+        initialIsCollapsed={true}
+      >
+        <span>Children</span>
+        <span>within the editor group</span>
+      </EditorOptionsGroup>
+    );
+    expect(group).toMatchSnapshot();
+  });
 });
