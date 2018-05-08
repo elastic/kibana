@@ -1,7 +1,7 @@
 export const boolean = () => ({
   name: 'boolean',
   from: {
-    null: () => 0,
+    null: () => false,
     number: n => Boolean(n),
     string: s => Boolean(s),
   },
