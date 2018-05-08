@@ -15,20 +15,27 @@
     }
 
     .markdown-vis-options {
-      .flex-parent();
-      flex: 1 1 auto;
+      .euiPanel {
 
-      textarea {
+        .flex-parent();
         flex: 1 1 auto;
-        resize: none;
+
+        .euiFlexGroup {
+          flex-grow: 0;
+        }
+
+        textarea {
+          flex: 1 1 auto;
+          resize: none;
+        }
+
+        .markdown-vis--editor {
+          flex: 1 1 100%;
+        }
       }
 
     }
 
   }
 
-}
-
-.markdown-vis--editor {
-  flex: 1 1 100%;
 }

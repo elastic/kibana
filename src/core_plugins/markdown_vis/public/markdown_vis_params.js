@@ -5,17 +5,11 @@ import React, { Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
   EuiRange,
-  EuiSpacer,
   EuiSwitch,
-  EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
+
+import { EditorOptionsGroup } from 'ui/vis/editors/components';
 
 export class MarkdownOptionsTab extends Component {
 
@@ -34,26 +28,9 @@ export class MarkdownOptionsTab extends Component {
   render() {
     const params = this.props.scope.vis.params;
 
-    const markdownLabel = (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          Content
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink className="markdown-vis--help" href="https://www.markdownguide.org/cheat-sheet" target="_blank">
-            <EuiIcon type="help" /> Syntax help
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-
     return (
       <EuiForm>
-
-        <EuiPanel className="markdown-vis-options">
-          <EuiTitle className="markdown-vis--title"><h1>Markdown</h1></EuiTitle>
-          <EuiSpacer />
-
+        <EditorOptionsGroup title="">
           <EuiFormRow
             id="fontSize"
             label={`Font Size (${params.fontSize}pt)`}
@@ -77,21 +54,7 @@ export class MarkdownOptionsTab extends Component {
               data-test-subj="markdownEditorOpenLinksInNewTab"
             />
           </EuiFormRow>
-
-          <EuiFormRow
-            id="markdown"
-            label={markdownLabel}
-            fullWidth={true}
-            className="markdown-vis--editor"
-          >
-            <EuiTextArea
-              value={params.markdown}
-              fullWidth={true}
-              onChange={this.handleUpdate('markdown')}
-              data-test-subj="markdownEditorMarkdown"
-            />
-          </EuiFormRow>
-        </EuiPanel>
+        </EditorOptionsGroup>
       </EuiForm>
     );
   }

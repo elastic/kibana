@@ -5,6 +5,8 @@ import './editor_options_group.less';
 
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -18,26 +20,49 @@ import {
  * to produce an aligned look and feel.
  */
 function EditorOptionsGroup(props) {
-  return (
-    <EuiPanel
-      grow={false}
-      className="editorOptionsGroup__panel"
-    >
-      <EuiAccordion
-        id={htmlIdGenerator('eog')()}
-        initialIsOpen={!props.initialIsCollapsed}
-        extraAction={props.actions}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h2>{props.title}</h2>
-          </EuiTitle>
-        }
+  if (props.collapsible) {
+    return (
+      <EuiPanel
+        grow={false}
+        className="editorOptionsGroup__panel"
       >
+        <EuiAccordion
+          id={htmlIdGenerator('eog')()}
+          initialIsOpen={!props.initialIsCollapsed}
+          extraAction={props.actions}
+          buttonContent={
+            <EuiTitle size="xs">
+              <h2>{props.title}</h2>
+            </EuiTitle>
+          }
+        >
+          <EuiSpacer size="m"/>
+          { props.children }
+        </EuiAccordion>
+      </EuiPanel>
+    );
+  } else {
+    return (
+      <EuiPanel
+        grow={props.grow}
+        className="editorOptionsGroup__panel"
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>{props.title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {props.actions}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiSpacer size="m"/>
         { props.children }
-      </EuiAccordion>
-    </EuiPanel>
-  );
+      </EuiPanel>
+    );
+  }
 }
 
 EditorOptionsGroup.propTypes = {
@@ -53,6 +78,14 @@ EditorOptionsGroup.propTypes = {
   * Whether the panel should be collapsed by default.
   */
   initialIsCollapsed: PropTypes.bool,
+  /**
+   * Whether the panel should be collapsible.
+   */
+  collapsible: PropTypes.bool,
+  /**
+   * Whether the panel should grow.
+   */
+  grow: PropTypes.bool,
   /**
    * All elements that should be within this group.
    */
