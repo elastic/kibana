@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       // a fresh index.
       loadTestFile(require.resolve('./_embeddable_rendering'));
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
+      loadTestFile(require.resolve('./_time_zones'));
       loadTestFile(require.resolve('./_dashboard_options'));
       loadTestFile(require.resolve('./_data_shared_attributes'));
       loadTestFile(require.resolve('./_embed_mode'));
