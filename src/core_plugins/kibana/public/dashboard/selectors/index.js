@@ -131,7 +131,6 @@ export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
 
 /**
  * @param dashboard {DashboardState}
- * @return {string} timeRange.from
  * @return {{ from: {string}, to: {string}, mode: {string} }}
  */
 export const getTimeRange = dashboard => dashboard.view.timeRange;
