@@ -1161,7 +1161,6 @@ module.controller('MlNewJob',
     }
 
     $scope.aceLoaded = function (editor) {
-      editor.$blockScrolling = Infinity;
       $scope.$applyAsync();
       if (editor.container.id === 'datafeed-preview') {
         editor.setReadOnly(true);
