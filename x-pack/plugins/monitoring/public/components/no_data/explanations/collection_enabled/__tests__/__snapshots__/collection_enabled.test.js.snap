@@ -115,13 +115,14 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
     responsive={true}
     wrap={false}
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--responsive"
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
         component="div"

@@ -15,8 +15,8 @@ export function applyEditorOptions(editor, minLines, maxLines) {
     * typing experience.
     */
   editor.renderer.setScrollMargin(
-    EDITOR.SCROLL_MARGIN_TOP,
-    EDITOR.SCROLL_MARGIN_BOTTOM,
+    EDITOR.SCROLL_MARGIN_TOP_PX,
+    EDITOR.SCROLL_MARGIN_BOTTOM_PX,
     0,
     0
   );

@@ -11,7 +11,7 @@
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
-import { VisAggConfigsProvider } from './agg_configs';
+import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { UtilsBrushEventProvider } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
@@ -23,7 +23,6 @@ import { SavedObjectsClientProvider } from '../saved_objects';
 
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);

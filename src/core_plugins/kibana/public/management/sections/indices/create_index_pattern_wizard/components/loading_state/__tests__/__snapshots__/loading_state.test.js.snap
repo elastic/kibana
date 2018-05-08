@@ -9,6 +9,7 @@ exports[`LoadingState should render normally 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="center"
     responsive={true}
@@ -41,6 +42,7 @@ exports[`LoadingState should render normally 1`] = `
       <EuiFlexGroup
         alignItems="center"
         component="div"
+        direction="row"
         gutterSize="s"
         justifyContent="center"
         responsive={true}
