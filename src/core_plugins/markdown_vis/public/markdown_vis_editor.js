@@ -36,17 +36,18 @@ export class MarkdownEditorTab extends Component {
     );
 
     return (
-      <EuiForm className="markdown-vis-options">
+      <EuiForm>
         <EditorOptionsGroup
           title="Markdown"
           actions={markdownLabel}
           collapsible={false}
           grow={true}
+          className="markdown-vis-editor"
         >
           <EuiFormRow
             id="markdown"
             fullWidth={true}
-            className="markdown-vis--editor"
+            className="markdown-vis-editor-row"
           >
             <EuiTextArea
               value={params.markdown}

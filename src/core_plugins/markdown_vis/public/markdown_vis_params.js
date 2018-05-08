@@ -30,7 +30,7 @@ export class MarkdownOptionsTab extends Component {
 
     return (
       <EuiForm>
-        <EditorOptionsGroup title="">
+        <EditorOptionsGroup title="General">
           <EuiFormRow
             id="fontSize"
             label={`Font Size (${params.fontSize}pt)`}

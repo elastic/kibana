@@ -20,48 +20,58 @@ import {
  * to produce an aligned look and feel.
  */
 function EditorOptionsGroup(props) {
-  if (props.collapsible) {
-    return (
-      <EuiPanel
-        grow={false}
-        className="editorOptionsGroup__panel"
+  const collapsibleOptionGroup = (
+    <EuiPanel
+      grow={false}
+      className={`editorOptionsGroup__panel ${props.className}`}
+    >
+      <EuiAccordion
+        id={htmlIdGenerator('eog')()}
+        initialIsOpen={!props.initialIsCollapsed}
+        extraAction={props.actions}
+        buttonContent={
+          <EuiTitle size="xs">
+            <h2>{props.title}</h2>
+          </EuiTitle>
+        }
       >
-        <EuiAccordion
-          id={htmlIdGenerator('eog')()}
-          initialIsOpen={!props.initialIsCollapsed}
-          extraAction={props.actions}
-          buttonContent={
-            <EuiTitle size="xs">
-              <h2>{props.title}</h2>
-            </EuiTitle>
-          }
-        >
-          <EuiSpacer size="m"/>
-          { props.children }
-        </EuiAccordion>
-      </EuiPanel>
-    );
-  } else {
-    return (
-      <EuiPanel
-        grow={props.grow}
-        className="editorOptionsGroup__panel"
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>{props.title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {props.actions}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
         <EuiSpacer size="m"/>
         { props.children }
-      </EuiPanel>
-    );
+      </EuiAccordion>
+    </EuiPanel>
+  );
+
+  const simpleOptionGroup = (
+    <EuiPanel
+      grow={props.grow}
+      className={`editorOptionsGroup__panel ${props.className}`}
+    >
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>{props.title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {props.actions}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m"/>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          { props.children }
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  if (props.collapsible) {
+    return collapsibleOptionGroup;
+  } else {
+    return simpleOptionGroup;
   }
 }
 
@@ -75,6 +85,10 @@ EditorOptionsGroup.propTypes = {
    */
   actions: PropTypes.node,
   /**
+   * classNames to append to panel.
+   */
+  className: PropTypes.string,
+  /**
   * Whether the panel should be collapsed by default.
   */
   initialIsCollapsed: PropTypes.bool,
@@ -86,10 +100,13 @@ EditorOptionsGroup.propTypes = {
    * Whether the panel should grow.
    */
   grow: PropTypes.bool,
+
   /**
    * All elements that should be within this group.
    */
   children: PropTypes.node.isRequired,
 };
+
+EditorOptionsGroup.defaultProps = { grow: false, collapsible: true };
 
 export { EditorOptionsGroup };
