@@ -30,7 +30,6 @@ export function indexMissingSuite() {
 
         expect(resp[indexName].mappings).to.have.property('doc');
         expect(resp[indexName].mappings.doc.properties).to.have.keys(
-          'index-pattern',
           'visualization',
           'search',
           'dashboard'
