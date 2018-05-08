@@ -32,6 +32,7 @@ class FlotChart extends Component {
             axis.max !== this.props.yaxes[i].max ||
             axis.min !== this.props.yaxes[i].min ||
             axis.axisFormatter !== this.props.yaxes[i].axisFormatter ||
+            axis.mode !== this.props.yaxes[i].mode ||
             axis.axisFormatterTemplate !== this.props.yaxes[i].axisFormatterTemplate
           );
         }

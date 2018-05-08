@@ -5,9 +5,13 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { EDITOR } from '../../../../../common/constants';
 import template from './pattern_input.html';
 import './pattern_input.less';
-import { GrokMode } from '../../../../lib/ace';
+import {
+  applyEditorOptions,
+  GrokMode
+} from '../../../../lib/ace';
 
 const app = uiModules.get('xpack/grokdebugger');
 
@@ -27,14 +31,7 @@ app.directive('patternInput', function () {
         });
         $scope.aceLoaded = (editor) => {
           this.editor = editor;
-          editor.getSession().setUseWrapMode(true);
-          editor.setOptions({
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            minLines: 3,
-            maxLines: 10
-          });
-          editor.$blockScrolling = Infinity;
+          applyEditorOptions(editor, EDITOR.PATTERN_MIN_LINES, EDITOR.PATTERN_MAX_LINES);
           editor.getSession().setMode(new GrokMode());
         };
       }

@@ -492,7 +492,7 @@ class JobService {
       }
 
       function deleteFailed(resp, txt) {
-        if (resp.status === 500) {
+        if (resp.statusCode === 500) {
           status.errorMessage = txt;
         }
         reject({ success: false });
@@ -905,7 +905,7 @@ class JobService {
         })
         .catch((err) => {
           console.log('jobService error stopping datafeed:', err);
-          if (err.status === 500) {
+          if (err.statusCode === 500) {
             msgs.error('Could not stop datafeed for ' + jobId);
             msgs.error('Request may have timed out and may still be running in the background.');
           } else {

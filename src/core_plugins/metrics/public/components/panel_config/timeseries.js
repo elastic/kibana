@@ -38,6 +38,10 @@ class TimeseriesPanelConfig extends Component {
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
     ];
+    const scaleOptions = [
+      { label: 'Normal', value: 'normal' },
+      { label: 'Log', value: 'log' }
+    ];
     const legendPositionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' },
@@ -96,6 +100,17 @@ class TimeseriesPanelConfig extends Component {
                 options={positionOptions}
                 value={model.axis_position}
                 onChange={handleSelectChange('axis_position')}
+              />
+            </div>
+            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Scale</label>
+            <div className="vis_editor__row_item">
+              <Select
+                inputProps={{ id: htmlId('axisScale') }}
+                autosize={false}
+                clearable={false}
+                options={scaleOptions}
+                value={model.axis_scale}
+                onChange={handleSelectChange('axis_scale')}
               />
             </div>
           </div>

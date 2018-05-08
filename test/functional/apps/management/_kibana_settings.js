@@ -28,18 +28,11 @@ export default function ({ getService, getPageObjects }) {
       expect(advancedSetting).to.be('America/Phoenix');
     });
 
-    it('should coerce an empty setting of type JSON into an empty object', async function () {
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsInput('query:queryString:options', '', 'unsavedValueJsonTextArea');
-      const advancedSetting = await PageObjects.settings.getAdvancedSettings('query:queryString:options');
-      expect(advancedSetting).to.be.eql('{}');
-    });
-
     describe('state:storeInSessionStorage', () => {
       it ('defaults to false', async () => {
         await PageObjects.settings.clickKibanaSettings();
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be('false');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        expect(storeInSessionStorage).to.be(false);
       });
 
       it('when false, dashboard state is unhashed', async function () {
@@ -61,8 +54,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettings('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be('true');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        expect(storeInSessionStorage).to.be(true);
       });
 
       it('when true, dashboard state is hashed', async function () {
@@ -84,21 +77,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-      });
-    });
-
-    describe('notifications:banner', () => {
-      it('Should convert notification banner markdown into HTML', async function () {
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.setAdvancedSettingsInput('notifications:banner', '# Welcome to Kibana', 'unsavedValueMarkdownTextArea');
-        const bannerValue = await PageObjects.settings.getAdvancedSettings('notifications:banner');
-        expect(bannerValue).to.equal('Welcome to Kibana');
-      });
-
-      after('navigate to settings page and clear notifications:banner', async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.clearAdvancedSettings('notifications:banner');
       });
     });
 

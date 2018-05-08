@@ -118,11 +118,7 @@ module
       jobLabel: '',
       jobGroups: [],
       jobs: [],
-      kibanaObjects: {
-        dashboard: [],
-        search: [],
-        visualization: []
-      },
+      kibanaObjects: {},
       start: 0,
       end: 0,
       query,
@@ -137,9 +133,7 @@ module
       $scope.overallState = SAVE_STATE.NOT_SAVED;
       $scope.formConfig.jobs = [];
       $scope.formConfig.filters = [];
-      $scope.formConfig.kibanaObjects.dashboard = [];
-      $scope.formConfig.kibanaObjects.search = [];
-      $scope.formConfig.kibanaObjects.visualization = [];
+      $scope.formConfig.kibanaObjects = {};
 
       loadJobConfigs();
     };
@@ -188,14 +182,14 @@ module
           // populate the kibana saved objects
           if (resp.kibana) {
             _.each(resp.kibana, (obj, key) => {
-              obj.forEach((o) => {
-                $scope.formConfig.kibanaObjects[key].push({
+              $scope.formConfig.kibanaObjects[key] = obj.map((o) => {
+                return {
                   id: o.id,
                   title: o.title,
                   saveState: SAVE_STATE.NOT_SAVED,
                   config: o.config,
                   exists: false
-                });
+                };
               });
             });
             // check to see if any of the saved objects already exist.
@@ -472,6 +466,8 @@ module
         } else {
           $scope.overallState = SAVE_STATE.PARTIAL_FAILURE;
         }
+      } else {
+        $scope.overallState = SAVE_STATE.SAVED;
       }
 
       $scope.resultsUrl = createResultsUrl(

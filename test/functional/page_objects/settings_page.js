@@ -38,42 +38,42 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
-      return await testSubjects.getVisibleText(`advancedSetting-${propertyName}-currentValue`);
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('value');
+    }
+
+    async getAdvancedSettingCheckbox(propertyName) {
+      log.debug('in getAdvancedSettingCheckbox');
+      const setting =  await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      return await setting.getProperty('checked');
     }
 
     async clearAdvancedSettings(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-clearButton`);
+      await testSubjects.click(`advancedSetting-resetField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setAdvancedSettingsSelect(propertyName, propertyValue) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.sleep(1000);
       await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`option[label="${propertyValue}"]`).click();
+        .findByCssSelector(`[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`).click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async setAdvancedSettingsInput(propertyName, propertyValue, inputSelector) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const input = await testSubjects.find(inputSelector);
+    async setAdvancedSettingsInput(propertyName, propertyValue) {
+      const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();
       await input.type(propertyValue);
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAdvancedSettingCheckbox(propertyName) {
-      await testSubjects.click(`advancedSetting-${propertyName}-editButton`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const checkbox = await testSubjects.find(`advancedSetting-${propertyName}-checkbox`);
+      const checkbox = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await checkbox.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click(`advancedSetting-${propertyName}-saveButton`);
+      await testSubjects.click(`advancedSetting-saveEditField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

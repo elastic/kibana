@@ -84,7 +84,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.44",
+    "@elastic/eui": "0.0.46",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/datemath": "link:../packages/kbn-datemath",
