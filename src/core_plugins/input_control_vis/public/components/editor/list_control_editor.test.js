@@ -2,36 +2,13 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
+import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
   ListControlEditor,
 } from './list_control_editor';
 
-const getIndexPatterns = () => {
-  return Promise.resolve([
-    {
-      id: 'indexPattern1',
-      attributes: {
-        title: 'indexPattern1'
-      }
-    },
-    {
-      id: 'indexPattern2',
-      attributes: {
-        title: 'indexPattern2'
-      }
-    }
-  ]);
-};
-const getIndexPattern = () => {
-  return Promise.resolve({
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true }
-    ]
-  });
-};
 const controlParams = {
   id: '1',
   indexPattern: 'indexPattern1',
@@ -58,8 +35,8 @@ beforeEach(() => {
 
 test('renders ListControlEditor', () => {
   const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -78,8 +55,8 @@ test('parentCandidates', () => {
     { value: '2', text: 'fieldB' }
   ];
   const component = shallow(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -94,8 +71,8 @@ test('parentCandidates', () => {
 
 test('handleCheckboxOptionChange - multiselect', () => {
   const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
@@ -126,8 +103,8 @@ test('handleCheckboxOptionChange - multiselect', () => {
 
 test('handleNumberOptionChange - size', () => {
   const component = mount(<ListControlEditor
-    getIndexPatterns={getIndexPatterns}
-    getIndexPattern={getIndexPattern}
+    getIndexPatterns={getIndexPatternsMock}
+    getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
