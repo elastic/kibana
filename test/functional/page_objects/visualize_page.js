@@ -42,6 +42,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
     }
 
+    async clickAddBucket() {
+      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    }
+
     async clickMetric() {
       await find.clickByPartialLinkText('Metric');
     }
@@ -375,12 +379,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async toggleOpenEditor(index) {
+    async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
       const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
-      if (toggleOpen === 'false') {
+      if (toggleOpen !== toState) {
         log.debug(`toggle ${index} click()`);
         await toggle.click();
       }
@@ -878,6 +882,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
+    }
+
+    async getLegendEntries() {
+      const legendEntries = await find.allByCssSelector('.legend-value-title', defaultFindTimeout * 2);
+      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
     async clickLegendOption(name) {

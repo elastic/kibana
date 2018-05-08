@@ -9,7 +9,7 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(function () {
+    beforeEach(function () {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
         .then(function () {
@@ -116,6 +116,55 @@ export default function ({ getService, getPageObjects }) {
             log.debug(data.split('\n'));
             expect(data.trim().split('\n')).to.eql(expectedChartData);
           });
+      });
+    });
+
+    describe('vertical bar with split series', function () {
+      it('should show correct series', async function () {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = ['200', '404', '503'];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.equal(expectedEntries);
+      });
+    });
+
+    describe('vertical bar with multiple splits', function () {
+      it('should show correct series', async function () {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('response.raw');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.visualize.toggleOpenEditor(3, 'false');
+        await PageObjects.visualize.clickAddBucket();
+        await PageObjects.visualize.clickBucket('Split Series');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('machine.os');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = [
+          '200 - win 8', '200 - win xp', '200 - ios', '200 - osx', '200 - win 7',
+          '404 - ios', '503 - ios', '503 - osx', '503 - win 7', '503 - win 8',
+          '503 - win xp', '404 - osx', '404 - win 7', '404 - win 8', '404 - win xp'
+        ];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.equal(expectedEntries);
       });
     });
   });
