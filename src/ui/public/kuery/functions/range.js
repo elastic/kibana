@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getRangeScript } from 'ui/filter_manager/lib/range';
+import { getRangeScript } from '../../filter_manager/lib/range';
 import { getFields } from './utils/get_fields';
 
 export function buildNodeParams(fieldName, params) {

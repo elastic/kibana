@@ -1,11 +1,10 @@
 import { groupBy, has } from 'lodash';
-import { DecorateQueryProvider } from '../_decorate_query';
+import { decorateQuery } from '../_decorate_query';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 
-export function BuildESQueryProvider(Private, config) {
-  const decorateQuery = Private(DecorateQueryProvider);
+export function BuildESQueryProvider(config) {
 
   /**
    *

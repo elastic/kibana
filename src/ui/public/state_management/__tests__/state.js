@@ -2,19 +2,19 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
-import 'ui/private';
-import { Notifier, fatalErrorInternals } from 'ui/notify';
-import { StateProvider } from 'ui/state_management/state';
+import '../../private';
+import { Notifier, fatalErrorInternals } from '../../notify';
+import { StateProvider } from '../state';
 import {
   unhashQueryString,
-} from 'ui/state_management/state_hashing';
+} from '../state_hashing';
 import {
   createStateHash,
   isStateHash,
-} from 'ui/state_management/state_storage';
-import { HashedItemStore } from 'ui/state_management/state_storage/hashed_item_store';
+} from '../state_storage';
+import { HashedItemStore } from '../state_storage/hashed_item_store';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import { EventsProvider } from 'ui/events';
+import { EventsProvider } from '../../events';
 
 describe('State Management', () => {
   describe('Enabled', () => {

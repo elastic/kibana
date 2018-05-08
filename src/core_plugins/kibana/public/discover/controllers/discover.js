@@ -21,7 +21,7 @@ import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { DocTitleProvider } from 'ui/doc_title';
 import PluginsKibanaDiscoverHitSortFnProvider from '../_hit_sort_fn';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
@@ -138,7 +138,7 @@ function discoverController(
   });
 
   $scope.getDocLink = getDocLink;
-  $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+  $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
 

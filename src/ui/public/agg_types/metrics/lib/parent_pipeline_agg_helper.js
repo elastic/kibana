@@ -1,9 +1,10 @@
-import metricAggTemplate from 'ui/agg_types/controls/sub_agg.html';
+import metricAggTemplate from '../../controls/sub_agg.html';
 import _ from 'lodash';
-import { AggConfig } from 'ui/vis/agg_config';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggConfig } from '../../../vis/agg_config';
+import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWritter } from './parent_pipeline_agg_writter';
+import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 
 const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
@@ -38,6 +39,7 @@ const parentPipelineAggHelper = {
           metricAgg.id = termsAgg.id + '-metric';
           return metricAgg;
         },
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
         write: _.noop
       },
       {

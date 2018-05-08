@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules
   .get('kibana')

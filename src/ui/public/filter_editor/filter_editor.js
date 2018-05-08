@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { callAfterBindingsWorkaround } from 'ui/compat';
+import { uiModules } from '../modules';
+import { callAfterBindingsWorkaround } from '../compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
 import '../directives/documentation_href';

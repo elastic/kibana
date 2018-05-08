@@ -1,0 +1,12 @@
+<div class="anomalies-table">
+  <div class="no-results-item" ng-if="table.rows.length === 0">
+    <h4 class="euiTitle euiTitle--small">No matching results found</h4>
+  </div>
+
+  <ml-paginated-table ng-hide="table.rows.length === 0"
+    columns="table.columns"
+    rows="table.rows"
+    per-page="table.perPage">
+  </ml-paginated-table>
+
+</div>

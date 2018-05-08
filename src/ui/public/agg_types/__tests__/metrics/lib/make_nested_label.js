@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { makeNestedLabel } from 'ui/agg_types/metrics/lib/make_nested_label';
+import { makeNestedLabel } from '../../../metrics/lib/make_nested_label';
 
 describe('metric agg make_nested_label', function () {
 

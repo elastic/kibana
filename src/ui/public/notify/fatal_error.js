@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import $ from 'jquery';
-import { metadata } from 'ui/metadata';
+import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
 import fatalSplashScreen from './partials/fatal_splash_screen.html';
 import { callEach } from '../utils/function';

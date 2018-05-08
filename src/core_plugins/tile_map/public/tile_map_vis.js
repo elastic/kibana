@@ -5,15 +5,14 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
-
+import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
 
-  const geoJsonConverter = Private(AggResponseGeoJsonProvider);
   const VisFactory = Private(VisFactoryProvider);
   const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
 
@@ -26,6 +25,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visConfig: {
       canDesaturate: !!supports.cssFilters,
       defaults: {
+        colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
         addTooltip: true,
@@ -36,12 +36,12 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         wms: config.get('visualization:tileMap:WMSdefaults')
       }
     },
-    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
-    responseConverter: geoJsonConverter,
-    responseHandler: 'basic',
+    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
+    responseHandler: makeGeoJsonResponseHandler(),
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
+        colorSchemas: Object.keys(truncatedColorMaps),
         legendPositions: [{
           value: 'bottomleft',
           text: 'bottom left',

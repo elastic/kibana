@@ -10,8 +10,7 @@ describe('plugins/elasticsearch', function () {
         serverConfig = {
           url: 'https://localhost:9200',
           ssl: {
-            verificationMode: 'full',
-            keystore: {}
+            verificationMode: 'full'
           }
         };
       });
@@ -70,7 +69,7 @@ describe('plugins/elasticsearch', function () {
         expect(config.ssl.ca).to.contain('test ca certificate\n');
       });
 
-      it(`sets cert and key when certificate and key paths are specified`, function () {
+      it(`by default sets cert and key when certificate and key paths are specified`, function () {
         serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
         serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
 
@@ -79,7 +78,7 @@ describe('plugins/elasticsearch', function () {
         expect(config.ssl.key).to.be('test key\n');
       });
 
-      it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
+      it(`by default sets passphrase when certificate, key and keyPassphrase are specified`, function () {
         serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
         serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
         serverConfig.ssl.keyPassphrase = 'secret';
@@ -88,23 +87,22 @@ describe('plugins/elasticsearch', function () {
         expect(config.ssl.passphrase).to.be('secret');
       });
 
-      it(`sets pfx when a PKCS#12 certificate bundle is specified`, function () {
-        serverConfig.ssl.keystore.path = __dirname + '/fixtures/cert.pfx';
-        serverConfig.ssl.keystore.password = 'secret';
+      it(`doesn't set cert and key when ignoreCertAndKey is true`, function () {
+        serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
+        serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
 
-        const config = parseConfig(serverConfig);
-        expect(Buffer.isBuffer(config.ssl.pfx)).to.be(true);
-        expect(config.ssl.pfx.toString('utf-8')).to.be('test pfx\n');
-        expect(config.ssl.passphrase).to.be('secret');
+        const config = parseConfig(serverConfig, { ignoreCertAndKey: true });
+        expect(config.ssl.cert).to.be(undefined);
+        expect(config.ssl.key).to.be(undefined);
       });
 
-      it('throws an error when both pfx and certificate are specified', function () {
+      it(`by default sets passphrase when ignoreCertAndKey is true`, function () {
         serverConfig.ssl.certificate = __dirname + '/fixtures/cert.crt';
-        serverConfig.ssl.keystore.path = __dirname + '/fixtures/cert.pfx';
+        serverConfig.ssl.key = __dirname + '/fixtures/cert.key';
+        serverConfig.ssl.keyPassphrase = 'secret';
 
-        expect(() => parseConfig(serverConfig)).to.throwError(
-          `Invalid Configuration: please specify either "elasticsearch.ssl.keystore.path" or "elasticsearch.ssl.certificate", not both.`
-        );
+        const config = parseConfig(serverConfig, { ignoreCertAndKey: true });
+        expect(config.ssl.passphrase).to.be(undefined);
       });
     });
   });

@@ -28,7 +28,7 @@ export async function linkProjectExecutables(
 
         // existing logic from lerna -- ensure that the bin we are going to
         // point to exists or ignore it
-        if (!await isFile(srcPath)) {
+        if (!(await isFile(srcPath))) {
           continue;
         }
 

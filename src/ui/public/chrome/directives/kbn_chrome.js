@@ -1,22 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import { remove } from 'lodash';
 
 import './kbn_chrome.less';
-import { uiModules } from 'ui/modules';
-import { isSystemApiRequest } from 'ui/system_api';
+import { uiModules } from '../../modules';
 import {
   getUnhashableStatesProvider,
   unhashUrl,
-} from 'ui/state_management/state_hashing';
+} from '../../state_management/state_hashing';
 import {
   notify,
   GlobalToastList,
   toastNotifications,
   GlobalBannerList,
   banners,
-} from 'ui/notify';
+} from '../../notify';
 import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -67,13 +65,6 @@ export function kbnChromeProvider(chrome, internals) {
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
           $rootScope.$on('$routeUpdate', onRouteChange);
           updateSubUrls(); // initialize sub urls
-
-          const allPendingHttpRequests = () => $http.pendingRequests;
-          const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);
-          $scope.$watchCollection(allPendingHttpRequests, removeSystemApiRequests);
-
-          // and some local values
-          chrome.httpActive = $http.pendingRequests;
 
           // Notifications
           $scope.notifList = notify._notifs;

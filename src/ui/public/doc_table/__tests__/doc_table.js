@@ -2,8 +2,8 @@ import angular from 'angular';
 import expect from 'expect.js';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import 'ui/private';
-import 'ui/doc_table';
+import '../../private';
+import '..';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 
 // Load the kibana app dependencies.

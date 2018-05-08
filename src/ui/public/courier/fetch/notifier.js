@@ -1,4 +1,4 @@
-import { Notifier } from 'ui/notify';
+import { Notifier } from '../../notify';
 
 export const location = 'Courier fetch';
 

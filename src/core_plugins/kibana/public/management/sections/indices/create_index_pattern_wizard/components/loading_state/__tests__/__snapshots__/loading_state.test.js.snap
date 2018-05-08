@@ -9,6 +9,7 @@ exports[`LoadingState should render normally 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="center"
     responsive={true}
@@ -18,7 +19,9 @@ exports[`LoadingState should render normally 1`] = `
       component="div"
       grow={false}
     >
-      <EuiTitle>
+      <EuiTitle
+        size="m"
+      >
         <EuiTextColor
           color="subdued"
         >
@@ -39,6 +42,7 @@ exports[`LoadingState should render normally 1`] = `
       <EuiFlexGroup
         alignItems="center"
         component="div"
+        direction="row"
         gutterSize="s"
         justifyContent="center"
         responsive={true}
@@ -58,6 +62,7 @@ exports[`LoadingState should render normally 1`] = `
         >
           <EuiText
             color="subdued"
+            grow={true}
             size="s"
           >
             Reticulating splines...

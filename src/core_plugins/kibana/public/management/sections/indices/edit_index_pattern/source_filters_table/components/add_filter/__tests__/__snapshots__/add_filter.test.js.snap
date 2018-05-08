@@ -4,6 +4,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}
@@ -43,6 +44,7 @@ exports[`AddFilter should render normally 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
   component="div"
+  direction="row"
   gutterSize="l"
   justifyContent="flexStart"
   responsive={true}

@@ -14,23 +14,28 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class DashboardPage {
-    async initTests() {
+    async initTests({
+      kibanaIndex = 'dashboard/legacy',
+      dataIndex = 'logstash_functional',
+      defaultIndex = 'logstash-*',
+    } = {}) {
       log.debug('load kibana index with visualizations and log data');
       await Promise.all([
-        esArchiver.load('dashboard'),
-        esArchiver.loadIfNeeded('logstash_functional')
+        esArchiver.load(kibanaIndex),
+        esArchiver.loadIfNeeded(dataIndex)
       ]);
 
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
+        'defaultIndex': defaultIndex
       });
-
+      await this.selectDefaultIndex(defaultIndex);
       await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
@@ -39,6 +44,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const url = await remote.getCurrentUrl();
       await remote.get(url, false);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async selectDefaultIndex(indexName) {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickLinkText(indexName);
+      await PageObjects.settings.clickDefaultIndexButton();
     }
 
     async clickEditVisualization() {
@@ -198,20 +210,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('createDashboardPromptButton');
     }
 
-    async clickListItemCheckbox() {
-      await testSubjects.click('dashboardListItemCheckbox');
+    async checkDashboardListingSelectAllCheckbox() {
+      const element = await testSubjects.find('checkboxSelectAll');
+      const isSelected = await element.isSelected();
+      if (!isSelected) {
+        log.debug(`checking checkbox "checkboxSelectAll"`);
+        await testSubjects.click('checkboxSelectAll');
+      }
     }
 
     async clickDeleteSelectedDashboards() {
       await testSubjects.click('deleteSelectedDashboards');
-    }
-
-    async clickAddVisualization() {
-      await testSubjects.click('dashboardAddPanelButton');
-    }
-
-    async clickAddNewVisualizationLink() {
-      await testSubjects.click('addNewSavedObjectLink');
     }
 
     async clickOptions() {
@@ -229,6 +238,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (!isOpen) {
         return await testSubjects.click('dashboardOptionsButton');
       }
+    }
+
+    // avoids any 'Object with id x not found' errors when switching tests.
+    async clearSavedObjectsFromAppLinks() {
+      await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.gotoLandingPage();
+      await PageObjects.header.clickDashboard();
+      await this.gotoDashboardLandingPage();
     }
 
     async isDarkThemeOn() {
@@ -261,46 +278,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async clickVizNameLink(vizName) {
-      await find.clickByPartialLinkText(vizName);
-    }
-
-    async closeAddVizualizationPanel() {
-      log.debug('closeAddVizualizationPanel');
-      await find.clickByCssSelector('i.fa fa-chevron-up');
-    }
-
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
       await this.clickEdit();
-    }
-
-    async filterEmbeddableNames(name) {
-      await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async clickSavedSearchTab() {
-      await testSubjects.click('addSavedSearchTab');
-    }
-
-    async addSavedSearch(searchName) {
-      await this.clickAddVisualization();
-      await this.clickSavedSearchTab();
-      await this.filterEmbeddableNames(searchName);
-
-      await find.clickByPartialLinkText(searchName);
-      await testSubjects.exists('addSavedSearchToDashboardSuccess');
-      await this.clickAddVisualization();
-    }
-
-    async addVisualization(vizName) {
-      await this.clickAddVisualization();
-      log.debug('filter visualization (' + vizName + ')');
-      await this.filterEmbeddableNames(vizName);
-      await this.clickVizNameLink(vizName);
-      // this second click of 'Add' collapses the Add Visualization pane
-      await this.clickAddVisualization();
     }
 
     async renameDashboard(dashName) {
@@ -366,6 +346,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
+        await PageObjects.common.pressEnterKey();
       });
     }
 
@@ -385,13 +366,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
         await searchFilter.type(dashName.replace('-', ' '));
+        await PageObjects.common.pressEnterKey();
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
+      const dashboardTitles = await find.allByCssSelector('.dashboardLink');
       return dashboardTitles.length;
     }
 
@@ -431,8 +413,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return Promise.all(getTitlePromises);
     }
 
-    async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
+    async getPanelHeading(title) {
+      return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
     }
 
     async getPanelDimensions() {
@@ -451,7 +433,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await find.allByCssSelector('.react-grid-item');
+      const panels = await testSubjects.findAll('dashboardPanel');
       return panels.length;
     }
 
@@ -471,6 +453,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return this.getTestVisualizations().map(visualization => visualization.name);
     }
 
+    getTestVisualizationDescriptions() {
+      return this.getTestVisualizations().map(visualization => visualization.description);
+    }
+
     async showPanelEditControlsDropdownMenu() {
       log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
@@ -485,6 +471,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getDashboardPanels() {
+      return await testSubjects.findAll('dashboardPanel');
+    }
+
     async clickDashboardPanelEditLink() {
       await this.showPanelEditControlsDropdownMenu();
       await testSubjects.click('dashboardPanelEditLink');
@@ -496,14 +486,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async addVisualizations(visualizations) {
-      for (const vizName of visualizations) {
-        await this.addVisualization(vizName);
-      }
+      await dashboardAddPanel.addVisualizations(visualizations);
     }
 
     async setTimepickerInDataRange() {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async setTimepickerIn63DataRange() {
+      const fromTime = '2018-01-01 00:00:00.000';
+      const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
     }
 
@@ -538,34 +532,82 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }
 
-    async getPieSliceCount() {
+    async getPieSliceCount(timeout) {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
         return slices.length;
       });
     }
 
-    async filterOnPieSlice() {
-      log.debug('Filtering on a pie slice');
-      await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-        log.debug('Slices found:' + slices.length);
-        return slices[0].click();
-      });
+    async filterOnPieSlice(sliceValue) {
+      log.debug(`Filtering on a pie slice with optional value ${sliceValue}`);
+      if (sliceValue) {
+        await testSubjects.click(`pieSlice-${sliceValue}`);
+      } else {
+        await retry.try(async () => {
+          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+          log.debug('Slices found:' + slices.length);
+          return slices[0].click();
+        });
+      }
     }
 
-    async toggleExpandPanel(panel) {
-      log.debug('toggleExpandPanel');
-      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+    async arePanelMainMenuOptionsOpen(parent) {
+      log.debug('arePanelMainMenuOptionsOpen');
+      // Sub menu used arbitrarily - any option on the main menu panel would do.
+      return parent ?
+        await testSubjects.descendantExists('dashboardPanelOptionsSubMenuLink', parent) :
+        await testSubjects.exists('dashboardPanelOptionsSubMenuLink');
+    }
+
+    async openPanelOptions(parent) {
+      log.debug('openPanelOptions');
+      const panelOpen = await this.arePanelMainMenuOptionsOpen(parent);
+      if (!panelOpen) {
+        await retry.try(async () => {
+          await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+          const toggleMenuItem = parent ?
+            await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', parent) :
+            await testSubjects.find('dashboardPanelToggleMenuIcon');
+          await toggleMenuItem.click();
+          const panelOpen = await this.arePanelMainMenuOptionsOpen(parent);
+          if (!panelOpen) { throw new Error('Panel menu still not open'); }
+        });
+      }
+    }
+
+    async toggleExpandPanel(parent) {
+      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        const toggleMenuItem = panel ?
-          await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
-          testSubjects.find('dashboardPanelToggleMenuIcon');
-        await toggleMenuItem.click();
+        await this.openPanelOptions(parent);
       }
       await testSubjects.click('dashboardPanelExpandIcon');
+    }
+
+    /**
+     *
+     * @param customTitle
+     * @param originalTitle - optional to specify which panel to change the title on.
+     * @return {Promise<void>}
+     */
+    async setCustomPanelTitle(customTitle, originalTitle) {
+      log.debug(`setCustomPanelTitle(${customTitle}, ${originalTitle})`);
+      let panelOptions = null;
+      if (originalTitle) {
+        panelOptions = await this.getPanelHeading(originalTitle);
+      }
+      await this.openPanelOptions(panelOptions);
+      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
+      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+    }
+
+    async resetCustomPanelTitle(panel) {
+      log.debug('resetCustomPanelTitle');
+      await this.openPanelOptions(panel);
+      await testSubjects.click('dashboardPanelOptionsSubMenuLink');
+      await testSubjects.click('resetCustomDashboardPanelTitle');
     }
 
     async getSharedItemsCount() {
@@ -593,6 +635,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
           throw new Error('Still waiting on more visualizations to finish rendering');
         }
       });
+    }
+
+    async getSharedContainerData() {
+      log.debug('getSharedContainerData');
+      const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
+      return {
+        title: await sharedContainer.getAttribute('data-title'),
+        description: await sharedContainer.getAttribute('data-description')
+      };
     }
 
     async getPanelSharedItemData() {

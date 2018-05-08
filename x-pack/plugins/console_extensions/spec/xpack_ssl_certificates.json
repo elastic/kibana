@@ -1,0 +1,10 @@
+{
+  "_xpack/ssl/certificates": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack/ssl/certificates"
+    ]
+  }
+}

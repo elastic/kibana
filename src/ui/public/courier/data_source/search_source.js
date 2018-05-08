@@ -53,7 +53,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 
-import 'ui/promises';
+import '../../promises';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
@@ -536,7 +536,7 @@ export function SearchSourceProvider(Promise, PromiseEmitter, Private, config) {
             return this._filterPredicates.every(predicate => predicate(filter, state));
           });
 
-          state.filters = [...state.filters || [], ...filters];
+          state.filters = [...(state.filters || []), ...filters];
           return;
         case 'index':
         case 'type':

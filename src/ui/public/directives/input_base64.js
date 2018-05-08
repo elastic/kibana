@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { Observable } from 'rxjs/Rx';
 const module = uiModules.get('kibana');
 

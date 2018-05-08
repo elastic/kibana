@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
+import { extractBuckets } from './_extract_buckets';
 
 export function createRawData(vis, resp) {
 

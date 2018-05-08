@@ -1,5 +1,7 @@
+import Promise from 'bluebird';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import $ from 'jquery';
 import { VegaVisualizationProvider } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
@@ -11,6 +13,8 @@ import vegaliteImage512 from './vegalite_image_512.png';
 
 import vegaGraph from '!!raw-loader!./vega_graph.hjson';
 import vegaImage512 from './vega_image_512.png';
+
+import vegaTooltipGraph from '!!raw-loader!./vega_tooltip_test.hjson';
 
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
@@ -87,6 +91,52 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, { data: true });
         const mismatchedPixels = await compareImage(vegaImage512);
         expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
+      } finally {
+        vegaVis.destroy();
+      }
+
+    });
+
+    it('should show vegatooltip on mouseover over a vega graph', async () => {
+
+      let vegaVis;
+      try {
+
+        vegaVis = new VegaVisualization(domNode, vis);
+        const vegaParser = new VegaParser(vegaTooltipGraph, new SearchCache());
+        await vegaParser.parseAsync();
+        await vegaVis.render(vegaParser, { data: true });
+
+
+        const $el = $(domNode);
+        const offset = $el.offset();
+
+        const event = new MouseEvent('mousemove', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+          clientX: offset.left + 10,
+          clientY: offset.top + 10,
+        });
+
+        $el.find('canvas')[0].dispatchEvent(event);
+
+        await Promise.delay(10);
+
+        let tooltip = document.getElementById('vega-kibana-tooltip');
+        expect(tooltip).to.be.ok();
+        expect(tooltip.innerHTML).to.be(
+          '<h2>This is a long title</h2>' +
+          '<table><tbody>' +
+          '<tr><td class="key">fieldA:</td><td class="value">value of fld1</td></tr>' +
+          '<tr><td class="key">fld2:</td><td class="value">42</td></tr>' +
+          '</tbody></table>');
+
+        vegaVis.destroy();
+
+        tooltip = document.getElementById('vega-kibana-tooltip');
+        expect(tooltip).to.not.be.ok();
 
       } finally {
         vegaVis.destroy();

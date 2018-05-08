@@ -45,6 +45,7 @@ fi
 export PATH="$nodeDir/bin:$PATH"
 hash -r
 
+
 ###
 ### downloading yarn
 ###

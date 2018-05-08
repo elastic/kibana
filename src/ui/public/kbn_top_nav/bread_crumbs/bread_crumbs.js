@@ -1,6 +1,6 @@
 import breadCrumbsTemplate from './bread_crumbs.html';
-import { uiModules } from 'ui/modules';
-import uiRouter from 'ui/routes';
+import { uiModules } from '../../modules';
+import uiRouter from '../../routes';
 
 const module = uiModules.get('kibana');
 

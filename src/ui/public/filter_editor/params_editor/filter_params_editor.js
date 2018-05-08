@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../../modules';
 import template from './filter_params_editor.html';
 import './filter_params_phrase_editor';
 import './filter_params_phrases_editor';

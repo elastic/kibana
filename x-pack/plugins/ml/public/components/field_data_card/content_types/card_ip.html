@@ -1,0 +1,17 @@
+<div ng-if="card.existsInDocs === true" class="card-contents">
+  <div class="stats euiText">
+    <div class="stat"><i class="fa fa-files-o" aria-hidden="true"></i>
+      {{ card.stats.count }} <ng-pluralize count="card.stats.count" when="{'1':'document', 'other':'documents'}">documents</ng-pluralize>
+      ({{ 100 * card.stats.count / card.stats.sampleCount | number:1 }}%)
+    </div>
+    <div class="stat"><i class="fa fa-cubes" aria-hidden="true"></i> {{ card.stats.cardinality }} distinct
+      <ng-pluralize count="card.stats.cardinality" when="{'1':'value', 'other':'values'}">values</ng-pluralize>
+    </div>
+
+  </div>
+
+  <div class="stats euiText">
+    <div class="stat">top values</div>
+    <ml-top-values></ml-top-values>
+  </div>
+</div>

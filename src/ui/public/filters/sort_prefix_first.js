@@ -1,4 +1,4 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { sortPrefixFirst } from '../utils/sort_prefix_first';
 
 uiModules

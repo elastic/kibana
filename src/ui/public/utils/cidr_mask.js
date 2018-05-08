@@ -1,4 +1,4 @@
-import Ipv4Address from 'ui/utils/ipv4_address';
+import Ipv4Address from './ipv4_address';
 const NUM_BITS = 32;
 
 function throwError(mask) {

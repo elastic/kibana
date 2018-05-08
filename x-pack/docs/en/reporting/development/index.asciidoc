@@ -1,0 +1,36 @@
+[role="xpack"]
+[[reporting-integration]]
+== Reporting Integration
+Intergrating a Kibana application with {reporting} requires a minimum amount of code, and the goal is to not have to
+modify the Reporting code as we add additional applications. Instead, applications abide by a contract that Reporting
+uses to determine the information that is required to export CSVs and PDFs.
+
+[IMPORTANT]
+==============================================
+These pages document internal APIs and are not guaranteed to be supported across future versions of Kibana.
+However, these docs will be kept up-to-date to reflect the current implementation of Reporting integration in Kibana.
+==============================================
+
+[float]
+[[reporting-nav-bar-extensions]]
+=== Nav Bar Extensions
+X-Pack uses the `NavBarExtensionsRegistryProvider` to register a navigation bar item for the
+Dashboard/Discover/Visualize applications. These all use the `export-config` AngularJS directive to display the
+Reporting options. Each of the different exportTypes require the AngularJS controller that the contains the
+`export-config` directive to implement certain methods/properties that are used when creating the {reporting} job.
+
+If you wish to add Reporting integration via the navigation bar that emulates the way these options are chosen for
+Dashboards, Visualize and Discover, you can reuse the `export-config` directive for the time being. Otherwise, you can
+provide a custom UI that generates the URL that is used to generate the {reporting} job.
+
+This integration will likely be changing in the near future as we move away from AngularJS towards React.
+
+[float]
+=== Generate Job URL
+To generate a new {reporting} job, different export types require different `jobParams` that are Rison encoded into a URL
+that abide by the following convention: `/api/reporting/generate?jobParams=${rison.encode(jobParams)}`. If you use the
+aforementioned <<reporting-nav-bar-extensions, nav bar extensions>> then this detail will be abstracted away, but if you
+provide a custom UI for generating the report, you will have to generate the URL and create a POST request to the URL.
+
+include::csv-integration.asciidoc[]
+include::pdf-integration.asciidoc[]

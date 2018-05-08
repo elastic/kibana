@@ -4,7 +4,7 @@
  * @description Allows apps to configure state management
  */
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 
 uiModules.get('kibana/state_management')
   .provider('stateManagementConfig', class StateManagementConfigProvider {

@@ -1,0 +1,11 @@
+{
+  "visState": "{\"title\":\"ML Apache2 Access Top URLs Table\",\"type\":\"table\",\"params\":{\"perPage\":100,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"apache2.access.url\",\"size\":1000,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}", 
+  "description": "", 
+  "title": "ML Apache2 Access Top URLs Table", 
+  "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}", 
+  "version": 1, 
+  "savedSearchId": "ML-Filebeat-Apache2-Access", 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

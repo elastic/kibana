@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify';
+import { uiModules } from '../../modules';
+import { Notifier } from '../../notify';
 import { UrlOverflowServiceProvider } from '../../error_url_overflow';
 
 import { directivesProvider } from '../directives';
@@ -39,6 +39,7 @@ export function initAngularApi(chrome, internals) {
 
         $locationProvider.hashPrefix('');
       })
+      .run(internals.capture$httpLoadingCount)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {
           return $location.path().split('/')[1];

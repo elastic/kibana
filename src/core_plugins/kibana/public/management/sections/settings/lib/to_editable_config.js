@@ -1,6 +1,6 @@
 import { getValType } from './get_val_type';
-import { getEditorType } from './get_editor_type';
 import { getAriaName } from './get_aria_name';
+import { DEFAULT_CATEGORY } from './default_category';
 
 /**
  * @param {object} advanced setting definition object
@@ -14,25 +14,17 @@ export function toEditableConfig({ def, name, value, isCustom }) {
   }
   const conf = {
     name,
+    displayName: def.name || name,
     ariaName: getAriaName(name),
     value,
+    category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
     readonly: !!def.readonly,
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    options: def.options
+    options: def.options,
   };
-
-  const editor = getEditorType(conf);
-  conf.json = editor === 'json';
-  conf.select = editor === 'select';
-  conf.bool = editor === 'boolean';
-  conf.array = editor === 'array';
-  conf.markdown = editor === 'markdown';
-  conf.image = editor === 'image';
-  conf.normal = editor === 'normal';
-  conf.tooComplex = !editor;
 
   return conf;
 }

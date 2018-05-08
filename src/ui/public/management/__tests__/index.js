@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 
-import { management } from 'ui/management';
-import { ManagementSection } from 'ui/management/section';
+import { management } from '..';
+import { ManagementSection } from '../section';
 
 describe('Management', () => {
   it('provides ManagementSection', () => {

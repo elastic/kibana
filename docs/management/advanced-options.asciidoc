@@ -8,7 +8,7 @@ for displayed decimal values.
 To set advanced options:
 
 . Go to *Settings > Advanced*.
-. Click the *Edit* button for the option you want to modify.
+. Scroll or use the search bar to find the option you want to modify.
 . Enter a new value for the option.
 . Click the *Save* button.
 
@@ -47,7 +47,7 @@ increase request processing time.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
-`visualize:enableLabs`:: Enables experimental visualizations. Default is `true`. If this is turned off, users will not be able to create visualizations that are considered experimental. They will also not be able to add or view these visualizations on a dashboard. 
+`visualize:enableLabs`:: Enables experimental visualizations. Default is `true`. If this is turned off, users will not be able to create visualizations that are considered experimental. They will also not be able to add or view these visualizations on a dashboard.
 `visualization:tileMap:maxPrecision`:: The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high,
 12 is the maximum. {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Explanation of cell dimensions].
 `visualization:tileMap:WMSdefaults`:: Default properties for the WMS map server support in the coordinate map.
@@ -62,8 +62,6 @@ values are shown.
 `shortDots:enable`:: Set this property to `true` to shorten long field names in visualizations. For example, instead of `foo.bar.baz`, show `f.b.baz`.
 `truncate:maxHeight`:: This property specifies the maximum height that a cell occupies in a table. A value of 0 disables
 truncation.
-`indexPattern:fieldMapping:lookBack`:: The value of this property sets the number of recent matching patterns to query the
-field mapping for index patterns with names that contain timestamps.
 `indexPattern:placeholder`:: The default placeholder value used when adding a new index pattern to Kibana.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "_default_".

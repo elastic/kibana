@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 import { keysToSnakeCaseShallow, keysToCamelCaseShallow } from '../../../utils/case_conversion';

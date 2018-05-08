@@ -151,10 +151,9 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const args = extractConfigFiles(esArgs, this._installPath).reduce(
-      (acc, cur) => acc.concat(['-E', cur]),
-      []
-    );
+    const args = extractConfigFiles(esArgs, installPath, {
+      log: this._log,
+    }).reduce((acc, cur) => acc.concat(['-E', cur]), []);
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
 
@@ -176,7 +175,7 @@ exports.Cluster = class Cluster {
       this._process.once('exit', code => {
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat them as errors
         if (code > 0 && !(code === 143 || code === 130)) {
-          reject(createCliError(`ES exitted with code ${code}`));
+          reject(createCliError(`ES exited with code ${code}`));
         } else {
           resolve();
         }

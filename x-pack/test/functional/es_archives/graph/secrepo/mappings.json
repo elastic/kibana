@@ -1,0 +1,155 @@
+{
+  "type": "index",
+  "value": {
+    "index": "secrepo",
+    "settings": {
+      "index": {
+        "number_of_shards": "5",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "logs": {
+        "dynamic_templates": [
+          {
+            "strings": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "@version": {
+            "type": "keyword"
+          },
+          "build": {
+            "type": "keyword"
+          },
+          "bytes": {
+            "type": "integer"
+          },
+          "device": {
+            "type": "keyword"
+          },
+          "http_method": {
+            "type": "keyword"
+          },
+          "http_version": {
+            "type": "keyword"
+          },
+          "major": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "text"
+          },
+          "minor": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "keyword"
+          },
+          "os": {
+            "type": "keyword"
+          },
+          "os_major": {
+            "type": "keyword"
+          },
+          "os_minor": {
+            "type": "keyword"
+          },
+          "os_name": {
+            "type": "keyword"
+          },
+          "params": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            },
+            "fielddata": true
+          },
+          "patch": {
+            "type": "keyword"
+          },
+          "referer": {
+            "type": "keyword"
+          },
+          "response_code": {
+            "type": "integer"
+          },
+          "src": {
+            "type": "ip"
+          },
+          "url": {
+            "type": "keyword",
+            "fields": {
+              "parts": {
+                "type": "text",
+                "fielddata": true
+              }
+            }
+          }
+        }
+      },
+      "_default_": {
+        "dynamic_templates": [
+          {
+            "strings": {
+              "match": "*",
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "keyword"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "bytes": {
+            "type": "integer"
+          },
+          "major": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "text"
+          },
+          "minor": {
+            "type": "integer"
+          },
+          "params": {
+            "type": "text",
+            "fields": {
+              "raw": {
+                "type": "keyword"
+              }
+            },
+            "fielddata": true
+          },
+          "response_code": {
+            "type": "integer"
+          },
+          "src": {
+            "type": "ip"
+          },
+          "url": {
+            "type": "keyword",
+            "fields": {
+              "parts": {
+                "type": "text",
+                "fielddata": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

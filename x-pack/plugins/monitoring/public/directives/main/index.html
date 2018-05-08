@@ -1,0 +1,177 @@
+<div class="app-container">
+  <kbn-top-nav name="{{ monitoringMain.name }}-nav">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <!-- NOTE: The KBN breadCrumbs directive does not work for Monitoring usecase.
+      Breadcrumbs can't be automatically derived because the directive doesn't
+      automatically know to show the Clusters breadcrumb. We recreate the
+      structure and styles manually -->
+      <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
+        <div ng-repeat="crumb in monitoringMain.breadcrumbs" class="kuiLocalBreadcrumb">
+          <a
+            ng-if="crumb.url"
+            kbn-href="{{ crumb.url }}"
+            class="kuiLocalBreadcrumb__link"
+            data-test-subj="{{ crumb.testSubj }}"
+          >
+            {{ crumb.label }}
+          </a>
+
+          <span ng-if="!crumb.url">
+            {{ crumb.label }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div data-transclude-slot="bottomRow">
+        <div ng-if="monitoringMain.inElasticsearch" class="kuiLocalTabs" role="navigation">
+          <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}">Overview</a>
+          <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch/nodes" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('nodes')}">Nodes</a>
+          <a ng-if="!monitoringMain.instance" kbn-href="#/elasticsearch/indices" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('indices')}">Indices</a>
+          <a ng-if="!monitoringMain.instance && monitoringMain.isMlSupported()" kbn-href="#/elasticsearch/ml_jobs" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ml')}">Jobs</a>
+          <a
+            ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
+            kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+          >
+            <span ng-if="monitoringMain.tabIconClass" class="fa {{ monitoringMain.tabIconClass }}" title="{{ monitoringMain.tabIconLabel }}"></span>
+            Overview
+          </a>
+          <a
+            ng-if="monitoringMain.instance && (monitoringMain.name === 'nodes' || monitoringMain.name === 'indices')"
+            kbn-href="#/elasticsearch/{{ monitoringMain.name }}/{{ monitoringMain.resolver }}/advanced"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'advanced'}"
+          >
+            Advanced
+          </a>
+            <!-- ML Instance (for use later) -->
+          <a
+            ng-if="monitoringMain.instance && monitoringMain.name !== 'nodes' && monitoringMain.name !== 'indices'"
+            class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+        </div>
+
+        <div ng-if="monitoringMain.inKibana" class="kuiLocalTabs" role="navigation">
+          <a ng-if="!monitoringMain.instance" kbn-href="#/kibana" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}">Overview</a>
+          <a ng-if="!monitoringMain.instance" kbn-href="#/kibana/instances" class="kuiLocalTab" ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('kibanas')}">Instances</a>
+          <a ng-if="monitoringMain.instance" class="kuiLocalTab">{{ monitoringMain.instance }}</a>
+        </div>
+
+        <div ng-if="monitoringMain.inBeats" class="kuiLocalTabs" role="navigation">
+          <a
+            ng-if="!monitoringMain.instance"
+            kbn-href="#/beats"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected':
+            monitoringMain.isActiveTab('overview')}"
+          >
+            Overview
+          </a>
+          <a
+            ng-if="!monitoringMain.instance"
+            kbn-href="#/beats/beats"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('beats')}"
+          >
+            Instances
+          </a>
+          <a
+            ng-if="monitoringMain.instance"
+            kbn-href="#/beats/beat/{{ monitoringMain.resolver }}"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+          >
+            Overview
+          </a>
+        </div>
+
+        <div ng-if="monitoringMain.inLogstash" class="kuiLocalTabs" role="navigation">
+          <a
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
+            kbn-href="#/logstash"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('overview')}"
+          >
+            Overview
+          </a>
+          <a
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
+            kbn-href="#/logstash/nodes"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('nodes')}"
+          >
+            Nodes
+          </a>
+          <a
+            ng-if="!monitoringMain.instance && !monitoringMain.pipelineId"
+            kbn-href="#/logstash/pipelines"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
+          >
+            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
+            Pipelines
+          </a>
+          <a
+            ng-if="monitoringMain.instance"
+            kbn-href="#/logstash/node/{{ monitoringMain.resolver }}"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'overview'}"
+          >
+            Overview
+          </a>
+          <a
+            ng-if="monitoringMain.instance"
+            kbn-href="#/logstash/node/{{ monitoringMain.resolver }}/pipelines"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"
+          >
+            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
+            Pipelines
+          </a>
+          <a
+            ng-if="monitoringMain.instance"
+            kbn-href="#/logstash/node/{{ monitoringMain.resolver }}/advanced"
+            class="kuiLocalTab"
+            ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'advanced'}"
+          >
+            Advanced
+          </a>
+          <div
+            ng-if="monitoringMain.pipelineVersions"
+            class="kuiFlexGroup kuiFlexGroup--gutterMedium"
+          >
+            <h1 class="kuiTitle kuiFlexItem">{{ monitoringMain.pipelineId }}</h1>
+            <select
+              ng-model="monitoringMain.pipelineHash"
+              class="kuiSelect kuiFlexItem"
+              ng-change="monitoringMain.onChangePipelineHash()"
+            >
+              <option
+                ng-repeat="version in monitoringMain.pipelineVersions"
+                ng-value="version.hash"
+              >
+                Version active {{ version.relativeLastSeen }} and first seen {{ version.relativeFirstSeen }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div ng-if="monitoringMain.inOverview" class="kuiLocalTabs" role="navigation">
+          <a class="kuiLocalTab" data-test-subj="clusterName">{{ cluster.cluster_name }}</a>
+        </div>
+
+        <div ng-if="monitoringMain.inAlerts" class="kuiLocalTabs" role="navigation">
+          <a class="kuiLocalTab" data-test-subj="clusterAlertsListingPage">Cluster Alerts</a>
+        </div>
+
+        <div ng-if="monitoringMain.inListing" class="kuiLocalTabs" role="navigation">
+         <a class="kuiLocalTab">Clusters</a>
+       </div>
+      </div>
+    </div>
+  </kbn-top-nav>
+  <div ng-transclude></div>
+</div>

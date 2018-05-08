@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import 'ui/directives/validate_date_math';
+import '../validate_date_math';
 
 
 describe('Validate date math directive', function () {

@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { AggResponseIndexProvider } from 'ui/agg_response/index';
-import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
+import { AggResponseIndexProvider } from '../../agg_response';
+import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
 const TabifyResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);

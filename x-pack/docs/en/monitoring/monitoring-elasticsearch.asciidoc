@@ -1,0 +1,4 @@
+[[monitoring-cluster]]
+== Monitoring Elasticsearch
+
+See <<monitoring-production>> and {ref}/es-monitoring.html[Monitoring {es}].

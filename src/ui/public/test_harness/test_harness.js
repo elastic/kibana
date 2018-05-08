@@ -1,10 +1,10 @@
 // chrome expects to be loaded first, let it get its way
-import chrome from 'ui/chrome';
+import chrome from '../chrome';
 
 import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
-import { Notifier } from 'ui/notify';
-import { metadata } from 'ui/metadata';
+import { Notifier } from '../notify';
+import { metadata } from '../metadata';
 import { UiSettingsClient } from '../../ui_settings/public/ui_settings_client';
 
 import './test_harness.less';
@@ -67,5 +67,8 @@ afterEach(function () {
 
 // Kick off mocha, called at the end of test entry files
 export function bootstrap() {
+  // load the hacks since we aren't actually bootstrapping the
+  // chrome, which is where the hacks would normally be loaded
+  require('uiExports/hacks');
   chrome.setupAngular();
 }

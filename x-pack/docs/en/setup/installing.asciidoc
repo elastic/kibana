@@ -1,0 +1,8 @@
+[role="xpack"]
+[[installing-xpack-kb]]
+== Installing X-Pack in Kibana
+++++
+<titleabbrev>Installing {xpack}</titleabbrev>
+++++
+
+By default, when you install {kib}, {xpack} is installed. See <<install>>.

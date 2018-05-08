@@ -1,0 +1,22 @@
+{
+  "_xpack": {
+    "url_params": {
+      "categories": [
+        "build",
+        "license",
+        "features"
+      ],
+      "human": [
+        "true",
+        "false"
+      ]
+      
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_xpack"
+    ]
+  }
+}

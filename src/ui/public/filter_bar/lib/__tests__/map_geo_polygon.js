@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { FilterBarLibMapGeoPolygonProvider } from 'ui/filter_bar/lib/map_geo_polygon';
+import { FilterBarLibMapGeoPolygonProvider } from '../map_geo_polygon';
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoPolygon()', function () {

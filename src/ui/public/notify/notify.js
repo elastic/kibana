@@ -1,11 +1,11 @@
-import { uiModules } from 'ui/modules';
+import { uiModules } from '../modules';
 import { fatalError } from './fatal_error';
 import { Notifier } from './notifier';
-import { metadata } from 'ui/metadata';
+import { metadata } from '../metadata';
 import template from './partials/toaster.html';
 import './notify.less';
-import 'ui/filters/markdown';
-import 'ui/directives/truncated';
+import '../filters/markdown';
+import '../directives/truncated';
 
 const module = uiModules.get('kibana/notify');
 
@@ -62,7 +62,7 @@ function applyConfig(config) {
   const banner = config.get('notifications:banner');
 
   if (typeof banner === 'string' && banner.trim()) {
-    notify.banner(banner);
+    notify.banner(banner, 'notifications:banner');
   }
 }
 

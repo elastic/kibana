@@ -10,20 +10,19 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
-import { PersistedState } from 'ui/persisted_state';
-import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { VisTypesRegistryProvider } from '../registry/vis_types';
+import { AggConfigs } from './agg_configs';
+import { PersistedState } from '../persisted_state';
+import { UtilsBrushEventProvider } from '../utils/brush_event';
+import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
+import { FilterBarClickHandlerProvider } from '../filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
 import { queryManagerFactory } from '../query_manager';
-import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SearchSourceProvider } from '../courier/data_source/search_source';
+import { SavedObjectsClientProvider } from '../saved_objects';
 
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
