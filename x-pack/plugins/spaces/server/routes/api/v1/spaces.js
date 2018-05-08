@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { omit } from 'lodash';
+import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { spaceSchema } from '../../../lib/space_schema';
 import { wrapError } from '../../../lib/errors';
-import { getSpaceUrlContext } from '../../../../common/spaces_url_parser';
+import { createDuplicateContextQuery } from '../../../lib/check_duplicate_context';
 
 export function initSpacesApi(server) {
   const routePreCheckLicenseFn = routePreCheckLicense(server);
@@ -18,6 +20,30 @@ export function initSpacesApi(server) {
       id: savedObject.id,
       ...savedObject.attributes
     };
+  }
+
+  const callWithInternalUser = getClient(server).callWithInternalUser;
+
+  const config = server.config();
+
+  async function checkForDuplicateContext(space) {
+    const query = createDuplicateContextQuery(config.get('kibana.index'), space);
+
+    const { hits } = await callWithInternalUser('search', query);
+
+    const { total, hits: conflicts } = hits;
+
+    let error;
+
+    if (total > 0) {
+      const firstConflictName = conflicts[0]._source.space.name;
+
+      error = Boom.badRequest(
+        `Another Space (${firstConflictName}) already uses this URL Context. Please choose a different URL Context.`
+      );
+    }
+
+    return { error };
   }
 
   server.route({
@@ -47,42 +73,7 @@ export function initSpacesApi(server) {
 
   server.route({
     method: 'GET',
-    path: '/api/spaces/v1/spaces/_active',
-    async handler(request, reply) {
-      const basePath = request.getBasePath();
-
-      const spaceContext = getSpaceUrlContext(basePath);
-
-      if (!spaceContext) {
-        return reply();
-      }
-
-      try {
-        const client = request.getSavedObjectsClient();
-
-        const {
-          saved_objects: spaces = []
-        } = await client.find({
-          type: 'space',
-          search: `"${spaceContext}"`,
-          search_fields: ['urlContext'],
-        });
-
-        if (spaces.length === 0) {
-          return reply();
-        }
-
-        return reply(convertSavedObjectToSpace(spaces[0]));
-
-      } catch (e) {
-        return reply(wrapError(e));
-      }
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/spaces/v1/spaces/{id}',
+    path: '/api/spaces/v1/space/{id}',
     async handler(request, reply) {
       const spaceId = request.params.id;
 
@@ -103,7 +94,38 @@ export function initSpacesApi(server) {
 
   server.route({
     method: 'POST',
-    path: '/api/spaces/v1/spaces/{id}',
+    path: '/api/spaces/v1/space',
+    async handler(request, reply) {
+      const client = request.getSavedObjectsClient();
+
+      const {
+        overwrite = false
+      } = request.query;
+
+      const space = omit(request.payload, ['id']);
+
+      const { error } = await checkForDuplicateContext(space);
+
+      if (error) {
+        return reply(wrapError(error));
+      }
+
+      const id = request.params.id;
+
+      let result;
+      try {
+        result = await client.create('space', { ...space }, { id, overwrite });
+      } catch(e) {
+        return reply(wrapError(e));
+      }
+
+      return reply(convertSavedObjectToSpace(result));
+    }
+  });
+
+  server.route({
+    method: 'PUT',
+    path: '/api/spaces/v1/space/{id}',
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
 
@@ -113,6 +135,12 @@ export function initSpacesApi(server) {
 
       const space = omit(request.payload, ['id']);
       const id = request.params.id;
+
+      const { error } = await checkForDuplicateContext({ ...space, id });
+
+      if (error) {
+        return reply(wrapError(error));
+      }
 
       let result;
       try {
@@ -133,7 +161,7 @@ export function initSpacesApi(server) {
 
   server.route({
     method: 'DELETE',
-    path: '/api/spaces/v1/spaces/{id}',
+    path: '/api/spaces/v1/space/{id}',
     async handler(request, reply) {
       const client = request.getSavedObjectsClient();
 

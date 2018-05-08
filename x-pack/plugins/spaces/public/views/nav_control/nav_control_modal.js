@@ -13,7 +13,6 @@ import {
   EuiModalBody,
   EuiOverlayMask,
   EuiAvatar,
-  EuiLoadingSpinner
 } from '@elastic/eui';
 import { SpaceCards } from '../components/space_cards';
 
@@ -21,15 +20,10 @@ export class NavControlModal extends Component {
     state = {
       isOpen: false,
       loading: false,
-      spaces: [],
-      activeSpace: null
+      spaces: []
     };
 
-    componentDidMount() {
-      this.loadSpaces();
-    }
-
-    loadSpaces() {
+    async loadSpaces() {
       const {
         spacesManager
       } = this.props;
@@ -38,15 +32,10 @@ export class NavControlModal extends Component {
         loading: true
       });
 
-      Promise.all([
-        spacesManager.getSpaces(),
-        spacesManager.getActiveSpace()
-      ]).then(([spaces, activeSpace]) => {
-        this.setState({
-          spaces,
-          activeSpace,
-          loading: false
-        });
+      const spaces = await spacesManager.getSpaces();
+      this.setState({
+        spaces,
+        loading: false
       });
     }
 
@@ -74,21 +63,23 @@ export class NavControlModal extends Component {
 
     getActiveSpaceButton = () => {
       const {
-        loading,
         activeSpace
-      } = this.state;
+      } = this.props;
 
-      if (loading) {
-        return this.getButton(
-          <EuiLoadingSpinner size={'m'} className={'spaceNavGraphic'}/>,
-          ''
-        );
+      if (!activeSpace) {
+        return null;
       }
+      console.log(activeSpace);
 
-      if (activeSpace && activeSpace.hasOwnProperty('name')) {
+      if (activeSpace.valid) {
         return this.getButton(
-          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={activeSpace.name} />,
-          activeSpace.name
+          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={activeSpace.space.name} />,
+          activeSpace.space.name
+        );
+      } else if (activeSpace.error) {
+        return this.getButton(
+          <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
+          'error'
         );
       }
 
@@ -125,5 +116,6 @@ export class NavControlModal extends Component {
 }
 
 NavControlModal.propTypes = {
+  activeSpace: PropTypes.object,
   spacesManager: PropTypes.object.isRequired
 };

@@ -37,13 +37,11 @@ export class ManageSpacePage extends React.Component {
 
     const {
       space,
-      httpAgent,
-      chrome
+      spacesManager
     } = this.props;
 
     if (space) {
-      httpAgent
-        .get(chrome.addBasePath(`/api/spaces/v1/spaces/${space}`))
+      spacesManager.getSpace(space)
         .then(result => {
           if (result.data) {
             this.setState({
@@ -210,8 +208,6 @@ export class ManageSpacePage extends React.Component {
       urlContext
     } = this.state.space;
 
-    const { httpAgent, chrome } = this.props;
-
     const params = {
       name,
       id,
@@ -219,13 +215,17 @@ export class ManageSpacePage extends React.Component {
       urlContext
     };
 
-    const overwrite = this.editingExistingSpace();
-
     if (name && description) {
-      httpAgent
-        .post(chrome.addBasePath(`/api/spaces/v1/spaces/${encodeURIComponent(id)}?overwrite=${overwrite}`), params)
+      let action;
+      if (this.editingExistingSpace()) {
+        action = this.props.spacesManager.updateSpace(params);
+      } else {
+        action = this.props.spacesManager.createSpace(params);
+      }
+
+      action
         .then(result => {
-          toastNotifications.addSuccess(`Saved '${result.data.id}'`);
+          toastNotifications.addSuccess(`Saved '${result.data.name}'`);
           window.location.hash = `#/management/spaces/list`;
         })
         .catch(error => {
@@ -327,6 +327,7 @@ export class ManageSpacePage extends React.Component {
 
 ManageSpacePage.propTypes = {
   space: PropTypes.string,
+  spacesManager: PropTypes.object,
   httpAgent: PropTypes.func.isRequired,
   chrome: PropTypes.object,
   breadcrumbs: PropTypes.array.isRequired,

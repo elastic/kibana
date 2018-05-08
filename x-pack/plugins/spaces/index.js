@@ -10,6 +10,8 @@ import { checkLicense } from './server/lib/check_license';
 import { initSpacesApi } from './server/routes/api/v1/spaces';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
+import { getActiveSpace } from './server/lib/get_active_space';
+import { wrapError } from './server/lib/errors';
 import mappings from './mappings.json';
 
 export const spaces = (kibana) => new kibana.Plugin({
@@ -39,8 +41,23 @@ export const spaces = (kibana) => new kibana.Plugin({
     home: ['plugins/spaces/register_feature'],
     injectDefaultVars: function () {
       return {
-        spaces: []
+        spaces: [],
+        activeSpace: null
       };
+    },
+    replaceInjectedVars: async function (vars, request) {
+      try {
+        vars.activeSpace = {
+          valid: true,
+          space: await getActiveSpace(request.getSavedObjectsClient(), request.getBasePath())
+        };
+      } catch(e) {
+        vars.activeSpace = {
+          valid: false,
+          error: wrapError(e).output.payload
+        };
+      }
+      return vars;
     }
   },
 
@@ -55,10 +72,6 @@ export const spaces = (kibana) => new kibana.Plugin({
 
     const config = server.config();
     validateConfig(config, message => server.log(['spaces', 'warning'], message));
-
-    if (!config.get('xpack.spaces.enabled')) {
-      return;
-    }
 
     initSpacesApi(server);
 

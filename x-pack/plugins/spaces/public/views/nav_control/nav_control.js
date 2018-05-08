@@ -23,12 +23,12 @@ chromeNavControlsRegistry.register(constant({
 
 const module = uiModules.get('spaces', ['kibana']);
 
-module.controller('spacesNavController', ($scope, $http, chrome) => {
+module.controller('spacesNavController', ($scope, $http, chrome, activeSpace) => {
   const domNode = document.getElementById(`spacesNavReactRoot`);
 
   const spacesManager = new SpacesManager($http, chrome);
 
-  render(<NavControlModal spacesManager={spacesManager} />, domNode);
+  render(<NavControlModal spacesManager={spacesManager} activeSpace={activeSpace} />, domNode);
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {
