@@ -10,7 +10,7 @@ const WorkerClient = ace.acequire('ace/worker/worker_client').WorkerClient;
 const AceTokenizer = ace.acequire('ace/tokenizer').Tokenizer;
 
 const HighlightRules = require('./input_highlight_rules').InputHighlightRules;
-ace.acequire('ace/config').setModuleUrl('sense_editor/mode/worker', require('file-loader!./worker.js'));
+//ace.acequire('ace/config').setModuleUrl('sense_editor/mode/worker', require('./worker.js'));
 //
 
 export function Mode() {
@@ -52,7 +52,7 @@ oop.inherits(Mode, TextMode);
   };
   this.createWorker = function (session) {
     console.log('WORKER');
-    const worker = new WorkerClient(['ace', 'sense_editor'], 'sense_editor/mode/worker', 'SenseWorker', 'sense_editor/mode/worker');
+    const worker = new WorkerClient(['ace', 'sense_editor'], require('./worker.js'), 'SenseWorker', 'sense_editor/mode/worker');
     console.log(worker);
     worker.attachToDocument(session.getDocument());
 
