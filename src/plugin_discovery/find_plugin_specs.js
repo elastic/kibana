@@ -83,7 +83,7 @@ export function findPluginSpecs(settings, configToMutate) {
     }
 
     return await defaultConfig(settings);
-  });
+  }).shareReplay();
 
   // find plugin packs in configured paths/dirs
   const packageJson$ = config$.mergeMap(config => {
@@ -130,7 +130,6 @@ export function findPluginSpecs(settings, configToMutate) {
         });
 
         return {
-          config,
           spec,
           deprecations,
         };
@@ -141,6 +140,7 @@ export function findPluginSpecs(settings, configToMutate) {
         const isRightVersion = spec.isVersionCompatible(config.get('pkg.version'));
         const enabled = isRightVersion && spec.isEnabled(config);
         return {
+          config,
           spec,
           deprecations,
           enabledSpecs: enabled ? [spec] : [],
@@ -196,8 +196,9 @@ export function findPluginSpecs(settings, configToMutate) {
     // the config service we extended with all of the plugin specs,
     // only emitted once it is fully extended by all
     extendedConfig$: extendConfig$
-      .ignoreElements()
-      .mergeMap(config$),
+      .mergeMap(result => result.config)
+      .filter(Boolean)
+      .last(),
 
     // all enabled PluginSpec objects
     spec$: extendConfig$

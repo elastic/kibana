@@ -15,14 +15,18 @@ function createPack(packageJson) {
 
 export const createPack$ = (packageJson$) => (
   packageJson$
-    .mergeMap(({ error, packageJson }) => {
+    .map(({ error, packageJson }) => {
       if (error) {
-        return [{ error }];
+        return { error };
       }
 
-      return [{
+      if (!packageJson) {
+        throw new Error('packageJson is required to create the pack');
+      }
+
+      return {
         pack: createPack(packageJson)
-      }];
+      };
     })
     // createPack can throw errors, and we want them to be represented
     // like the errors we consume from createPackageJsonAtPath/Directory

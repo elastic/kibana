@@ -1,60 +1,102 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Select from 'react-select';
 
 import {
   EuiFormRow,
+  EuiComboBox,
 } from '@elastic/eui';
 
 export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
-    // not storing activeIndexPatternId in react state
-    // 1) does not effect rendering
-    // 2) requires synchronous modification to avoid race condition
-    this.activeIndexPatternId = props.indexPatternId;
+    this._hasUnmounted = false;
 
     this.state = {
-      fields: []
+      isLoading: false,
+      fields: [],
+      indexPatternId: props.indexPatternId,
     };
     this.filterField = _.get(props, 'filterField', () => { return true; });
-    this.loadFields(props.indexPatternId);
+  }
+
+  componentWillUnmount() {
+    this._hasUnmounted = true;
+  }
+
+  componentDidMount() {
+    this.loadFields(this.state.indexPatternId);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
-      this.activeIndexPatternId = nextProps.indexPatternId;
-      this.setState({ fields: [] });
       this.loadFields(nextProps.indexPatternId);
     }
   }
 
-  async loadFields(indexPatternId) {
+  loadFields = (indexPatternId) => {
+    this.setState({
+      isLoading: true,
+      fields: [],
+      indexPatternId
+    }, this.debouncedLoad.bind(null, indexPatternId));
+  }
+
+  debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
     const indexPattern = await this.props.getIndexPattern(indexPatternId);
 
-    // props.indexPatternId may be updated before getIndexPattern returns
-    // ignore response when fetched index pattern does not match active index pattern
-    if (indexPattern.id !== this.activeIndexPatternId) {
+    if (this._hasUnmounted) {
       return;
     }
 
-    const fields = indexPattern.fields
+    // props.indexPatternId may be updated before getIndexPattern returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (indexPattern.id !== this.state.indexPatternId) {
+      return;
+    }
+
+    const fieldsByTypeMap = new Map();
+    const fields = [];
+    indexPattern.fields
       .filter(this.filterField)
-      .sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
-      })
-      .map(function (field) {
-        return { label: field.name, value: field.name };
+      .forEach(field => {
+        if (fieldsByTypeMap.has(field.type)) {
+          const fieldsList = fieldsByTypeMap.get(field.type);
+          fieldsList.push(field.name);
+          fieldsByTypeMap.set(field.type, fieldsList);
+        } else {
+          fieldsByTypeMap.set(field.type, [field.name]);
+        }
       });
-    this.setState({ fields: fields });
+
+    fieldsByTypeMap.forEach((fieldsList, fieldType) => {
+      fields.push({
+        label: fieldType,
+        options: fieldsList.sort().map(fieldName => {
+          return { value: fieldName, label: fieldName };
+        })
+      });
+    });
+
+    fields.sort((a, b) => {
+      if (a.label < b.label) return -1;
+      if (a.label > b.label) return 1;
+      return 0;
+    });
+
+    this.setState({
+      isLoading: false,
+      fields: fields
+    });
+  }, 300);
+
+  onChange = (selectedOptions) => {
+    this.props.onChange(_.get(selectedOptions, '0.value'));
   }
 
   render() {
@@ -63,19 +105,25 @@ export class FieldSelect extends Component {
     }
 
     const selectId = `fieldSelect-${this.props.controlIndex}`;
+
+    const selectedOptions = [];
+    if (this.props.fieldName) {
+      selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
+    }
+
     return (
       <EuiFormRow
         id={selectId}
         label="Field"
       >
-        <Select
-          className="field-react-select"
+        <EuiComboBox
           placeholder="Select field..."
-          value={this.props.value}
+          singleSelection={true}
+          isLoading={this.state.isLoading}
           options={this.state.fields}
-          onChange={this.props.onChange}
-          resetValue={''}
-          inputProps={{ id: selectId }}
+          selectedOptions={selectedOptions}
+          onChange={this.onChange}
+          data-test-subj={selectId}
         />
       </EuiFormRow>
     );
@@ -86,7 +134,7 @@ FieldSelect.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
+  fieldName: PropTypes.string,
   filterField: PropTypes.func,
   controlIndex: PropTypes.number.isRequired,
 };
