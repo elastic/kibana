@@ -7,11 +7,10 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
-  EuiSpacer,
   EuiSwitch,
-  EuiPanel,
-  EuiTitle,
 } from '@elastic/eui';
+
+import { EditorOptionsGroup } from 'ui/vis/editors/components';
 
 export class PieOptionsTab extends Component {
 
@@ -34,10 +33,7 @@ export class PieOptionsTab extends Component {
     return (
       <EuiForm>
 
-        <EuiPanel grow={false}>
-          <EuiTitle size="s"><span>Pie settings</span></EuiTitle>
-
-          <EuiSpacer />
+        <EditorOptionsGroup title="Pie settings">
 
           <EuiFormRow
             id="isDonut"
@@ -56,7 +52,7 @@ export class PieOptionsTab extends Component {
             <EuiSwitch
               label="Show tooltip per slice"
               checked={params.addTooltip}
-              onChange={this.handleUpdate('addTootip', 'checked')}
+              onChange={this.handleUpdate('addTooltip', 'checked')}
               data-test-subj="pieEditorShowTooltip"
             />
           </EuiFormRow>
@@ -73,13 +69,9 @@ export class PieOptionsTab extends Component {
             />
           </EuiFormRow>
 
-        </EuiPanel>
+        </EditorOptionsGroup>
 
-        <EuiPanel grow={false}>
-
-          <EuiTitle size="s"><span>Label settings</span></EuiTitle>
-
-          <EuiSpacer />
+        <EditorOptionsGroup title="Label settings">
 
           <EuiFormRow
             id="showLabels"
@@ -128,7 +120,7 @@ export class PieOptionsTab extends Component {
             />
           </EuiFormRow>
 
-        </EuiPanel>
+        </EditorOptionsGroup>
       </EuiForm>
     );
   }
