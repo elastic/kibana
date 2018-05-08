@@ -3,6 +3,7 @@ import { uiModules } from '../modules';
 import { getFieldOptions } from './lib/filter_editor_utils';
 import template from './filter_field_select.html';
 import '../directives/ui_select_focus_on';
+import '../directives/scroll_bottom';
 import '../filters/sort_prefix_first';
 
 const module = uiModules.get('kibana');
@@ -23,6 +24,10 @@ module.directive('filterFieldSelect', function () {
       $scope.getFieldIndexPattern = (field) => {
         return field.indexPattern.title;
       };
+
+      $scope.increaseLimit = () => $scope.limit += 50;
+      $scope.resetLimit = () => $scope.limit = 50;
+      $scope.resetLimit();
     }
   };
 });
