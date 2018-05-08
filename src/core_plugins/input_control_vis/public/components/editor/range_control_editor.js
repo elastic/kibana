@@ -25,14 +25,15 @@ export function RangeControlEditor(props) {
     <div>
 
       <IndexPatternSelect
-        value={props.controlParams.indexPattern}
+        indexPatternId={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
         getIndexPatterns={props.getIndexPatterns}
+        getIndexPattern={props.getIndexPattern}
         controlIndex={props.controlIndex}
       />
 
       <FieldSelect
-        value={props.controlParams.fieldName}
+        fieldName={props.controlParams.fieldName}
         indexPatternId={props.controlParams.indexPattern}
         filterField={filterField}
         onChange={props.handleFieldNameChange}
