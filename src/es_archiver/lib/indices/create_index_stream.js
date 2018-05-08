@@ -25,7 +25,9 @@ export function createCreateIndexStream({ client, stats, skipExisting }) {
         });
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        const errorType = get(err, 'body.error.type');
+        const isExistingIndexOrAlias = (errorType === 'resource_already_exists_exception' || errorType === 'invalid_index_name_exception');
+        if (!isExistingIndexOrAlias || attemptNumber >= 3) {
           throw err;
         }
 
