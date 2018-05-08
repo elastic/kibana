@@ -50,22 +50,13 @@ export class SpacesSavedObjectsClient {
 
     if (this._isTypeSpaceAware(options.type)) {
       const spaceId = await this._getSpaceId();
-
-      spaceOptions.queryDecorator = (query) => {
-        const { bool = {} } = query;
-
-        if (!Array.isArray(bool.filter)) {
-          bool.filter = [];
-        }
-
-        bool.filter.push({
+      if (spaceId) {
+        spaceOptions.extraFilters = [{
           term: {
             spaceId
           }
-        });
-
-        return query;
-      };
+        }];
+      }
     }
 
     return await this._client.find({ ...options, ...spaceOptions });
@@ -76,6 +67,7 @@ export class SpacesSavedObjectsClient {
     const thisSpaceId = await this._getSpaceId();
 
     return await this._client.bulkGet(objects, {
+      extraSourceProperties: ['spaceId'],
       documentFilter: (doc) => {
         if (!doc.found) return true;
 
@@ -86,13 +78,6 @@ export class SpacesSavedObjectsClient {
         }
 
         return true;
-      },
-      resultDecorator(savedObject, doc) {
-        savedObject.attributes = {
-          ...savedObject.attributes,
-          spaceId: doc._source.spaceId
-        };
-        return savedObject;
       }
     });
   }
@@ -105,26 +90,21 @@ export class SpacesSavedObjectsClient {
       thisSpaceId = await this._getSpaceId();
     }
 
-    return await this._client.get(type, id, {
-      responseInterceptor: (response) => {
-        if (!this._isTypeSpaceAware(type)) {
-          return response;
-        }
-
-        if (response.found && response.status !== 404) {
-          const { spaceId } = response._source;
-          if (spaceId !== thisSpaceId) {
-            response.found = false;
-            response._source = {};
-          }
-        }
-
-        return response;
-      }
+    const response = await this._client.get(type, id, {
+      extraSourceProperties: ['spaceId']
     });
+
+    const { spaceId: objectSpaceId } = response.attributes;
+
+    if (objectSpaceId !== thisSpaceId) {
+      throw this._client.errors.createGenericNotFoundError();
+    }
+
+    return response;
   }
 
   async update(type, id, attributes, options = {}) {
+    attributes.spaceId = await this._getSpaceId();
     return await this._client.update(type, id, attributes, options);
   }
 

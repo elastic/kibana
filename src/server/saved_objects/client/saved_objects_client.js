@@ -121,10 +121,10 @@ export class SavedObjectsClient {
         index: this._index,
         refresh: 'wait_for',
         body: {
+          ...extraBodyProperties,
           type,
           updated_at: time,
           [type]: attributes,
-          ...extraBodyProperties
         },
       });
 
@@ -275,7 +275,7 @@ export class SavedObjectsClient {
       sortField,
       sortOrder,
       fields,
-      queryDecorator,
+      extraFilters,
     } = options;
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -284,6 +284,10 @@ export class SavedObjectsClient {
 
     if (fields && !Array.isArray(fields)) {
       throw new TypeError('options.searchFields must be an array');
+    }
+
+    if (extraFilters && !Array.isArray(extraFilters)) {
+      throw new TypeError('options.extraFilters must be an array');
     }
 
     const esOptions = {
@@ -299,14 +303,11 @@ export class SavedObjectsClient {
           searchFields,
           type,
           sortField,
-          sortOrder
+          sortOrder,
+          extraFilters
         })
       }
     };
-
-    if (esOptions.body.query && typeof queryDecorator === 'function') {
-      esOptions.body.query = queryDecorator(esOptions.body.query);
-    }
 
     const response = await this._callCluster('search', esOptions);
 
@@ -372,6 +373,8 @@ export class SavedObjectsClient {
       docsToReturn = docs.filter(options.documentFilter);
     }
 
+    const { extraSourceProperties = [] } = options;
+
     return {
       saved_objects: docsToReturn.map((doc, i) => {
         const { id, type } = objects[i];
@@ -390,12 +393,14 @@ export class SavedObjectsClient {
           type,
           ...time && { updated_at: time },
           version: doc._version,
-          attributes: doc._source[type]
-        };
+          attributes: {
+            ...extraSourceProperties
+              .map(s => doc._source[s])
+              .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
 
-        if (typeof options.resultDecorator === 'function') {
-          return options.resultDecorator(savedObject, doc);
-        }
+            ...doc._source[type],
+          }
+        };
 
         return savedObject;
       })
@@ -417,16 +422,14 @@ export class SavedObjectsClient {
       ignore: [404]
     });
 
-    if (typeof options.responseInterceptor === 'function') {
-      options.responseInterceptor(response);
-    }
-
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
       // see "404s from missing index" above
       throw errors.createGenericNotFoundError();
     }
+
+    const { extraSourceProperties = [] } = options;
 
     const { updated_at: updatedAt } = response._source;
 
@@ -435,7 +438,13 @@ export class SavedObjectsClient {
       type,
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
-      attributes: response._source[type]
+      attributes: {
+        ...extraSourceProperties
+          .map(s => response._source[s])
+          .reduce((acc, prop) => ({ ...acc, ...prop }), {}),
+
+        ...response._source[type],
+      }
     };
   }
 
@@ -459,9 +468,9 @@ export class SavedObjectsClient {
       ignore: [404],
       body: {
         doc: {
+          ...options.extraBodyProperties,
           updated_at: time,
           [type]: attributes,
-          ...options.extraBodyProperties
         }
       },
     });
