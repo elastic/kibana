@@ -76,6 +76,15 @@ exports[`parentCandidates 1`] = `
       value={10}
     />
   </EuiFormRow>
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowRight"
+    onClick={[Function]}
+    type="button"
+  >
+    Advanced
+  </EuiButtonEmpty>
 </div>
 `;
 
@@ -124,5 +133,14 @@ exports[`renders ListControlEditor 1`] = `
       value={10}
     />
   </EuiFormRow>
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowRight"
+    onClick={[Function]}
+    type="button"
+  >
+    Advanced
+  </EuiButtonEmpty>
 </div>
 `;

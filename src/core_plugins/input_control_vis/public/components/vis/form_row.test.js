@@ -41,3 +41,22 @@ test('renders disabled control with tooltip', () => {
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
+
+test('renders warning with tooltip', () => {
+  const warningControl = {
+    id: 'mock-warning-control',
+    isEnabled: () => { return true; },
+    warning: 'I am showing a warning for testing purposes'
+  };
+  const component = shallow(
+    <FormRow
+      label="test control"
+      id="controlId"
+      control={warningControl}
+      controlIndex={0}
+    >
+      <div>My Control</div>
+    </FormRow>
+  );
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
