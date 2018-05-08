@@ -32,13 +32,7 @@ const termsAgg = (field, size, direction) => {
   };
 };
 
-const listControlDelimiter = '$$kbn_delimiter$$';
-
 class ListControl extends Control {
-
-  getMultiSelectDelimiter() {
-    return this.filterManager.delimiter;
-  }
 
   async fetch() {
     let ancestorFilters;
@@ -99,7 +93,7 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
 
   return new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
+    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter),
     kbnApi,
     useTimeFilter
   );
