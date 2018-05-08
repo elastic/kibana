@@ -196,7 +196,11 @@ module.controller('MlExplorerController', function (
         recreateJobs = true;
       }
 
-      const influencers = mlJobService.getJob(id).analysis_config.influencers || [];
+      const job = mlJobService.getJob(id);
+      let influencers = [];
+      if (job !== undefined) {
+        influencers = job.analysis_config.influencers || [];
+      }
       hasInfluencers = hasInfluencers || influencers.length > 0;
     });
 
