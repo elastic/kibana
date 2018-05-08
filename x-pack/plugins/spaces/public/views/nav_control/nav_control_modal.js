@@ -15,6 +15,7 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 import { SpaceCards } from '../components/space_cards';
+import { Notifier } from 'ui/notify';
 
 export class NavControlModal extends Component {
     state = {
@@ -22,6 +23,8 @@ export class NavControlModal extends Component {
       loading: false,
       spaces: []
     };
+
+    notifier = new Notifier(`Spaces`);
 
     async loadSpaces() {
       const {
@@ -37,6 +40,19 @@ export class NavControlModal extends Component {
         spaces,
         loading: false
       });
+    }
+
+    componentDidMount() {
+      const {
+        activeSpace
+      } = this.props;
+
+      if (activeSpace && !activeSpace.valid) {
+        const { error = {} } = activeSpace;
+        if (error.message) {
+          this.notifier.error(error.message);
+        }
+      }
     }
 
     render() {
@@ -69,9 +85,8 @@ export class NavControlModal extends Component {
       if (!activeSpace) {
         return null;
       }
-      console.log(activeSpace);
 
-      if (activeSpace.valid) {
+      if (activeSpace.valid && activeSpace.space) {
         return this.getButton(
           <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={activeSpace.space.name} />,
           activeSpace.space.name

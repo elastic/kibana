@@ -31,7 +31,9 @@ export async function getActiveSpace(savedObjectsClient, basePath) {
   }
 
   if (spaces.length === 0) {
-    throw Boom.notFound();
+    throw Boom.notFound(
+      `The Space you requested could not be found. Please select a different Space to continue.`
+    );
   }
 
   if (spaces.length > 1) {
