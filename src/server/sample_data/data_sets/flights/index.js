@@ -8,7 +8,7 @@ export function flightsSpecProvider() {
     previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    dataPath: './sample_data/flights.json',
+    dataPath: './src/server/sample_data/data_sets/flights/flights.json.gz',
     fields: {
       timestamp: {
         type: 'date'

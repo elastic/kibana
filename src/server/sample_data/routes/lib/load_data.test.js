@@ -5,7 +5,7 @@ test('load data', done => {
   const bulkLoadMock = (docs) => {
     myDocsCount += docs.length;
   };
-  loadData('./sample_data/flights.json.gz', bulkLoadMock, async (err, count) => {
+  loadData('./src/server/sample_data/data_sets/flights/flights.json.gz', bulkLoadMock, async (err, count) => {
     expect(myDocsCount).toBe(13059);
     expect(count).toBe(13059);
     done();

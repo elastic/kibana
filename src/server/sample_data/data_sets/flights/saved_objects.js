@@ -1,4 +1,5 @@
 /* eslint max-len: 0 */
+/* eslint quotes: 0 */
 
 export const savedObjects = [
   {
