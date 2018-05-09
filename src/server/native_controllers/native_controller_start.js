@@ -2,17 +2,14 @@ require('../../babel-register');
 const program = require('commander');
 
 program
-  .arguments('<nativeControllerPath> [config...]')
+  .arguments('<nativeControllerPath>')
+  .option('--configJSON <value>', 'config in JSON format')
   .action(startNativeController);
 program.parse(process.argv);
 
-function startNativeController(nativeControllerPathArg, configArgs) {
+function startNativeController(nativeControllerPathArg, options) {
   const nativeControllerPath = nativeControllerPathArg;
-  const configMap = configArgs.reduce((map, arg) => {
-    const [ , name, value] = /^(.+)=(.+)/.exec(arg);
-    map.set(name, value);
-    return map;
-  }, new Map());
+  const configMap = new Map(Object.entries(options.configJSON ? JSON.parse(options.configJSON) : {}));
 
   const receivedMessage = (message) => {
     switch (message) {

@@ -54,7 +54,13 @@ test(`loads native controller on start message`, () => {
 });
 
 test(`passed config to the nativeController`, () => {
-  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js', 'foo.bar=baz'];
+  process.argv = [
+    'node',
+    'native_controller_start.js',
+    './native_controller_impl.js',
+    '--configJSON',
+    '{"foo.bar":"baz"}'
+  ];
 
   require('./native_controller_start');
   process.emit('message', 'start');

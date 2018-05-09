@@ -34,13 +34,24 @@ const getExecArgv = () => {
   return execArgv;
 };
 
+const getConfigParams = (nativeControllerConfig, config) => {
+  if (nativeControllerConfig.length === 0) {
+    return [];
+  }
+
+  const configJSON = JSON.stringify(nativeControllerConfig.reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: config.get(key)
+    };
+  }, {}));
+
+  return ['--configJSON', configJSON];
+};
+
 export async function spawnNativeController(settings, nativeControllerPath, nativeControllerConfig = []) {
-
   const config = await defaultConfig(settings);
-
-  const configParams = nativeControllerConfig.reduce((acc, key) => {
-    return [...acc, `${key}=${config.get(key)}`];
-  }, []);
+  const configParams = getConfigParams(nativeControllerConfig, config);
 
   return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath, ...configParams], {
     execArgv: getExecArgv()
