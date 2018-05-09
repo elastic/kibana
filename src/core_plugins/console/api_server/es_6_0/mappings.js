@@ -150,13 +150,13 @@ export default function (api) {
 
           // objects
           properties: {
-            __scope_link: 'put_mapping.{type}.properties'
+            __scope_link: 'indices.put_mapping.{type}.properties' // DOES THIS WORK?
           },
 
           // multi_field
           fields: {
             '*': {
-              __scope_link: 'put_mapping.type.properties.field'
+              __scope_link: 'indices.put_mapping.type.properties.field'
             }
           },
           copy_to: { __one_of: ['{field}', ['{field}']] },

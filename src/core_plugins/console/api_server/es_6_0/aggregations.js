@@ -379,16 +379,16 @@ const rules = {
       size: 10,
       sort: {
         __template: [],
-        __scope_link: '_search.sort',
+        __scope_link: 'search.sort',
       },
       highlight: {},
       explain: { __one_of: [true, false] },
       _source: {
         __template: '',
-        __scope_link: '_search._source',
+        __scope_link: 'search._source',
       },
       script_fields: {
-        __scope_link: '_search.script_fields',
+        __scope_link: 'search.script_fields',
       },
       docvalue_fields: ['{field}'],
       version: { __one_of: [true, false] },

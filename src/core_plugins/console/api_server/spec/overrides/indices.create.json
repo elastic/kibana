@@ -2,10 +2,10 @@
   "indices.create": {
     "data_autocomplete_rules": {
       "mappings": {
-        "__scope_link": "_put_mapping"
+        "__scope_link": "put_mapping"
       },
       "settings": {
-        "__scope_link": "_settings_autocomplete"
+        "__scope_link": "put_settings"
       },
       "aliases": {
         "__template": {

@@ -1,5 +1,5 @@
 {
-  "indices.put_mapping": {
+  "put_mapping": {
     "url_params": {
       "include_type_name": "",
       "timeout": "",
