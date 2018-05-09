@@ -1,2 +1,4 @@
 require('../src/babel-register');
-require('../packages/kbn-test').startServersCli('test/functional/config.js');
+require('../packages/kbn-test').startServersCli(
+  require.resolve('../test/functional/config.js'),
+);
