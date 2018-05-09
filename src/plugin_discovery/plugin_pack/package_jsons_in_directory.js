@@ -1,7 +1,7 @@
 import { isInvalidDirectoryError } from '../errors';
 
 import { createChildDirectory$ } from './lib';
-import { createPackAtPath$ } from './pack_at_path';
+import { createPackageJsonAtPath$ } from './package_json_at_path';
 
 /**
  *  Finds the plugins within a directory. Results are
@@ -16,9 +16,9 @@ import { createPackAtPath$ } from './pack_at_path';
  *  @param  {String} path
  *  @return {Array<{pack}|{error}>}
  */
-export const createPacksInDirectory$ = (path) => (
+export const createPackageJsonsInDirectory$ = (path) => (
   createChildDirectory$(path)
-    .mergeMap(createPackAtPath$)
+    .mergeMap(createPackageJsonAtPath$)
     .catch(error => {
       // this error is produced by createChildDirectory$() when the path
       // is invalid, we return them as an error result similar to how

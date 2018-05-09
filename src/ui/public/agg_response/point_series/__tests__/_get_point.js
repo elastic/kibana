@@ -69,7 +69,7 @@ describe('getPoint', function () {
 
       expect(point)
         .to.have.property('x', 1)
-        .and.have.property('series', 2)
+        .and.have.property('series', '2')
         .and.have.property('y', 3)
         .and.have.property('aggConfigResult', row[2]);
     });
@@ -80,7 +80,7 @@ describe('getPoint', function () {
 
       expect(point)
         .to.have.property('x', 1)
-        .and.have.property('series', true)
+        .and.have.property('series', 'true')
         .and.have.property('y', 3)
         .and.have.property('aggConfigResult', row[2]);
     });

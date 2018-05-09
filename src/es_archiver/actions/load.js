@@ -48,7 +48,7 @@ export async function loadAction({ name, skipExisting, client, dataDir, log }) {
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting }),
+    createCreateIndexStream({ client, stats, skipExisting, log }),
     createIndexDocRecordsStream(client, stats),
   ]);
 
