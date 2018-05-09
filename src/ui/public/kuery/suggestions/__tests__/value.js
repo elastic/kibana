@@ -87,16 +87,17 @@ describe('Kuery value suggestions', function () {
       const suffix = '';
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
 
-      expect(fetchMock.calls(fetchUrlMatcher, 'POST')).to.eql([
-        [
-          '/api/kibana/suggestions/values/logstash-*',
-          {
-            method: 'POST',
-            body: '{"query":"","field":"machine.os.raw"}',
-            headers: {}
-          },
-        ],
-      ]);
+      const lastCall = fetchMock.lastCall(fetchUrlMatcher, 'POST');
+      expect(lastCall[0]).to.eql('/api/kibana/suggestions/values/logstash-*');
+      expect(lastCall[1]).to.eql({
+        method: 'POST',
+        body: '{"query":"","field":"machine.os.raw"}',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-version': '1.2.3',
+        },
+      });
       expect(suggestions.map(({ text }) => text)).to.eql(['"foo" ', '"bar" ']);
     });
 
