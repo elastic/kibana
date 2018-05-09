@@ -49,10 +49,10 @@ app.directive('pipelineEdit', function ($injector) {
         $scope.aceLoaded = editor => {
           this.editor = editor;
           /*
--           * This sets the space between the editor's borders and the
--           * edges of the top/bottom lines to make for a less-crowded
--           * typing experience.
--           */
+           * This sets the space between the editor's borders and the
+           * edges of the top/bottom lines to make for a less-crowded
+           * typing experience.
+           */
           editor.renderer.setScrollMargin(
             EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_TOP_PX,
             EDITOR.PIPELINE_EDITOR_SCROLL_MARGIN_BOTTOM_PX,
