@@ -1,0 +1,12 @@
+{
+  "name": "wrong_schema",
+  "version": "kibana",
+  "kibana": {
+    "nativeControllers": [
+      {
+        "notThePluginId": "wrong_schema",
+        "wrongPath": "native_controller.js"
+      }
+    ]
+  }
+}

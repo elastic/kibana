@@ -8,6 +8,7 @@ jest.mock('./spawn_native_controller');
 jest.mock('../../utils/child_process/safe_child_process');
 
 const FIXTURES = path.resolve(__dirname, '__fixtures__');
+const VALID_FIXTURES = path.resolve(FIXTURES, 'valid');
 
 let mockSpawnedProcess;
 beforeEach(() => {
@@ -21,7 +22,7 @@ describe('#prepare', () => {
     const settings = {
       plugins: {
         paths: [
-          path.resolve(FIXTURES, 'correct')
+          path.resolve(VALID_FIXTURES, 'correct')
         ]
       }
     };
@@ -34,7 +35,7 @@ describe('#prepare', () => {
     expect(spawnNativeController).toHaveBeenCalledTimes(1);
     expect(spawnNativeController).toHaveBeenCalledWith(
       settings,
-      path.resolve(FIXTURES, 'correct', 'native_controller.js'),
+      path.resolve(VALID_FIXTURES, 'correct', 'native_controller.js'),
       [ 'path.data' ]
     );
     expect(kbnServer.nativeControllers).toHaveProperty('correct');
@@ -46,7 +47,7 @@ describe('#prepare', () => {
       settings: {
         plugins: {
           paths: [
-            path.resolve(FIXTURES, 'not_defined_in_package_json')
+            path.resolve(VALID_FIXTURES, 'none')
           ]
         }
       }
@@ -61,7 +62,7 @@ describe('#prepare', () => {
     const settings = {
       plugins: {
         scanDirs: [
-          FIXTURES
+          VALID_FIXTURES
         ]
       }
     };
@@ -75,11 +76,26 @@ describe('#prepare', () => {
     expect(spawnNativeController).toHaveBeenCalledTimes(1);
     expect(spawnNativeController).toHaveBeenCalledWith(
       settings,
-      path.resolve(FIXTURES, 'correct', 'native_controller.js'),
+      path.resolve(VALID_FIXTURES, 'correct', 'native_controller.js'),
       [ 'path.data' ]
     );
     expect(kbnServer.nativeControllers).toHaveProperty('correct');
     expect(kbnServer.nativeControllers.correct).toBeInstanceOf(NativeController);
+  });
+
+  test(`validates nativeControllers schema`, () => {
+    const settings = {
+      plugins: {
+        paths: [
+          path.resolve(FIXTURES, 'wrong_schema')
+        ]
+      }
+    };
+    const kbnServer = {
+      settings
+    };
+
+    return expect(NativeControllers.prepare(kbnServer)).rejects.toThrow();
   });
 
   test(`calls safeChildProcess with the nativeController.process`, async () => {
@@ -87,7 +103,7 @@ describe('#prepare', () => {
       settings: {
         plugins: {
           paths: [
-            path.resolve(FIXTURES, 'correct')
+            path.resolve(VALID_FIXTURES, 'correct')
           ]
         }
       }
@@ -103,7 +119,7 @@ describe('#prepare', () => {
       settings: {
         plugins: {
           paths: [
-            path.resolve(FIXTURES, 'correct')
+            path.resolve(VALID_FIXTURES, 'correct')
           ]
         }
       }
@@ -130,7 +146,7 @@ describe('#prepare', () => {
       settings: {
         plugins: {
           paths: [
-            path.resolve(FIXTURES, 'correct')
+            path.resolve(VALID_FIXTURES, 'correct')
           ]
         }
       }
@@ -157,7 +173,7 @@ describe('#prepare', () => {
       settings: {
         plugins: {
           paths: [
-            path.resolve(FIXTURES, 'correct')
+            path.resolve(VALID_FIXTURES, 'correct')
           ]
         }
       }

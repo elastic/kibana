@@ -1,10 +1,17 @@
 import path from 'path';
 import { get } from 'lodash';
 import { Observable } from 'rxjs';
+import Joi from 'joi';
 import { spawnNativeController } from './spawn_native_controller';
 import { findPluginSpecs } from '../../plugin_discovery';
 import { safeChildProcess } from '../../utils/child_process';
 import { NativeController } from './native_controller';
+
+const specSchema = Joi.object().keys({
+  pluginId: Joi.string().required(),
+  path: Joi.string().required(),
+  config: Joi.array().items(Joi.string())
+});
 
 const getNativeControllers = async (settings) => {
   const {
@@ -14,8 +21,14 @@ const getNativeControllers = async (settings) => {
   const spec$ = packageJson$
     .mergeMap(packageJson => {
       const nativeControllerSpecs = get(packageJson.contents, 'kibana.nativeControllers');
+
       if (nativeControllerSpecs) {
         return nativeControllerSpecs.map(spec => {
+          const result = Joi.validate(spec, specSchema);
+          if (result.error) {
+            throw result.error;
+          }
+
           return {
             pluginId: spec.pluginId,
             path: path.resolve(packageJson.directoryPath, spec.path),
