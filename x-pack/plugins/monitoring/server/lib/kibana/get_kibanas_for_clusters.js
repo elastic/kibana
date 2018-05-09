@@ -7,7 +7,7 @@
 import Promise from 'bluebird';
 import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
-import { createQuery } from '../create_query';
+import { createQuery } from '../create_query.js';
 import { KibanaClusterMetric } from '../metrics';
 
 /*
@@ -32,6 +32,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
 
   return Promise.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
+    const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
       size: 0,
@@ -42,7 +43,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
           start,
           end,
           clusterUuid,
-          metric: KibanaClusterMetric.getMetricFields()
+          metric
         }),
         aggs: {
           kibana_uuids: {
