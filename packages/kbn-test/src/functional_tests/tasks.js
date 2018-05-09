@@ -57,7 +57,7 @@ export async function startServers(configPath, { log }) {
 }
 
 async function silence(milliseconds, { log }) {
-  return await Rx.Observable.fromEvent(log, 'data')
+  await Rx.Observable.fromEvent(log, 'data')
     .startWith(null)
     .switchMap(() => Rx.Observable.timer(milliseconds))
     .take(1)
