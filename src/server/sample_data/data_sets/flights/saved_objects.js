@@ -4,7 +4,7 @@ export const savedObjects = [
   {
     "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Controls",
@@ -20,7 +20,7 @@ export const savedObjects = [
   {
     "id": "c8fc3d30-4c87-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Count and Average Ticket Price",
@@ -36,7 +36,7 @@ export const savedObjects = [
   {
     "id": "571aaf70-4c88-11e8-b3d7-01146121b73d",
     "type": "search",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Log",
@@ -66,7 +66,7 @@ export const savedObjects = [
   {
     "id": "8f4d0c00-4c86-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Airline Carrier",
@@ -82,7 +82,7 @@ export const savedObjects = [
   {
     "id": "f8290060-4c88-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Delay Type",
@@ -98,7 +98,7 @@ export const savedObjects = [
   {
     "id": "bcb63b50-4c89-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Delays & Cancellations",
@@ -114,7 +114,7 @@ export const savedObjects = [
   {
     "id": "9886b410-4c8b-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Delay Buckets",
@@ -130,7 +130,7 @@ export const savedObjects = [
   {
     "id": "76e3c090-4c8c-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Delays",
@@ -146,7 +146,7 @@ export const savedObjects = [
   {
     "id": "707665a0-4c8c-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Cancellations",
@@ -162,7 +162,7 @@ export const savedObjects = [
   {
     "id": "79e8ff60-4c8e-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Destination Airport",
@@ -178,7 +178,7 @@ export const savedObjects = [
   {
     "id": "293b5a30-4c8f-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Destination Weather",
@@ -194,8 +194,8 @@ export const savedObjects = [
   {
     "id": "129be430-4c93-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-09T14:17:36.161Z",
-    "version": 3,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Markdown Instructions",
       "visState": "{\"title\":\"[Flights] Markdown Instructions\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"openLinksInNewTab\":true,\"markdown\":\"### Elastic Flights Sample Data\\nThis dashboard contains mock flight data. Use the input controls or click into a visualization to filter the entire dashboard, or simply search with the query bar . Click `Edit` to move around, resize or edit any visualizations. For more information about Kibana, be sure to check out our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).\"},\"aggs\":[]}",
@@ -210,7 +210,7 @@ export const savedObjects = [
   {
     "id": "334084f0-52fd-11e8-a160-89cc2ad9e8e2",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Origin Country Ticket Prices",
@@ -226,8 +226,8 @@ export const savedObjects = [
   {
     "id": "f8283bf0-52fd-11e8-a160-89cc2ad9e8e2",
     "type": "visualization",
-    "updated_at": "2018-05-09T14:21:43.865Z",
-    "version": 2,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Total Flight Delays",
       "visState": "{\"title\":\"[Flights] Total Flight Delays\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Blues\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":75},{\"from\":75,\"to\":150},{\"from\":150,\"to\":225},{\"from\":225,\"to\":300}],\"invertColors\":true,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"\",\"fontSize\":60,\"labelColor\":true}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Delays\"}}]}",
@@ -242,8 +242,8 @@ export const savedObjects = [
   {
     "id": "08884800-52fe-11e8-a160-89cc2ad9e8e2",
     "type": "visualization",
-    "updated_at": "2018-05-09T14:22:25.197Z",
-    "version": 2,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Total Flight Cancellations",
       "visState": "{\"title\":\"[Flights] Total Flight Cancellations\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Blues\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":75},{\"from\":75,\"to\":150},{\"from\":150,\"to\":225},{\"from\":225,\"to\":300}],\"invertColors\":true,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"\",\"fontSize\":60,\"labelColor\":true}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Cancellations\"}}]}",
@@ -258,7 +258,7 @@ export const savedObjects = [
   {
     "id": "e6944e50-52fe-11e8-a160-89cc2ad9e8e2",
     "type": "visualization",
-    "updated_at": "2018-05-08T21:45:47.390Z",
+    "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Origin Country vs. Destination Country",
@@ -274,8 +274,8 @@ export const savedObjects = [
   {
     "id": "01c413e0-5395-11e8-99bf-1ba7b1bdaa61",
     "type": "visualization",
-    "updated_at": "2018-05-09T14:35:54.436Z",
-    "version": 2,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Total Flights",
       "visState": "{\"title\":\"[Flights] Total Flights\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Flights\"}}]}",
@@ -290,8 +290,8 @@ export const savedObjects = [
   {
     "id": "2edf78b0-5395-11e8-99bf-1ba7b1bdaa61",
     "type": "visualization",
-    "updated_at": "2018-05-09T14:36:23.556Z",
-    "version": 2,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Average Ticket Price",
       "visState": "{\"title\":\"[Flights] Average Ticket Price\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"AvgTicketPrice\",\"customLabel\":\"Avg. Ticket Price\"}}]}",
@@ -304,10 +304,26 @@ export const savedObjects = [
     }
   },
   {
+    "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b",
+    "type": "visualization",
+    "updated_at": "2018-05-09T15:55:51.195Z",
+    "version": 3,
+    "attributes": {
+      "title": "[Flights] Airport Connections (Hover Over Airport)",
+      "visState": "{\"aggs\":[],\"params\":{\"spec\":\"{\\n  $schema: https://vega.github.io/schema/vega/v3.0.json\\n  config: {\\n    kibana: {type: \\\"map\\\", latitude: 25, longitude: -70, zoom: 3}\\n  }\\n  data: [\\n    {\\n      name: table\\n      url: {\\n        index: kibana_sample_data_flights\\n        %context%: true\\n        // Uncomment to enable time filtering\\n        // %timefield%: timestamp\\n        body: {\\n          size: 0\\n          aggs: {\\n            origins: {\\n              terms: {field: \\\"OriginAirportID\\\", size: 10000}\\n              aggs: {\\n                originLocation: {\\n                  top_hits: {\\n                    size: 1\\n                    _source: {\\n                      includes: [\\\"OriginLocation\\\", \\\"Origin\\\"]\\n                    }\\n                  }\\n                }\\n                distinations: {\\n                  terms: {field: \\\"DestAirportID\\\", size: 10000}\\n                  aggs: {\\n                    destLocation: {\\n                      top_hits: {\\n                        size: 1\\n                        _source: {\\n                          includes: [\\\"DestLocation\\\"]\\n                        }\\n                      }\\n                    }\\n                  }\\n                }\\n              }\\n            }\\n          }\\n        }\\n      }\\n      format: {property: \\\"aggregations.origins.buckets\\\"}\\n      transform: [\\n        {\\n          type: geopoint\\n          projection: projection\\n          fields: [\\n            originLocation.hits.hits[0]._source.OriginLocation.lon\\n            originLocation.hits.hits[0]._source.OriginLocation.lat\\n          ]\\n        }\\n      ]\\n    }\\n    {\\n      name: selectedDatum\\n      on: [\\n        {trigger: \\\"!selected\\\", remove: true}\\n        {trigger: \\\"selected\\\", insert: \\\"selected\\\"}\\n      ]\\n    }\\n  ]\\n  signals: [\\n    {\\n      name: selected\\n      value: null\\n      on: [\\n        {events: \\\"@airport:mouseover\\\", update: \\\"datum\\\"}\\n        {events: \\\"@airport:mouseout\\\", update: \\\"null\\\"}\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      name: airportSize\\n      type: linear\\n      domain: {data: \\\"table\\\", field: \\\"doc_count\\\"}\\n      range: [\\n        {signal: \\\"zoom*zoom*0.2+1\\\"}\\n        {signal: \\\"zoom*zoom*10+1\\\"}\\n      ]\\n    }\\n  ]\\n  marks: [\\n    {\\n      type: group\\n      from: {\\n        facet: {\\n          name: facetedDatum\\n          data: selectedDatum\\n          field: distinations.buckets\\n        }\\n      }\\n      data: [\\n        {\\n          name: facetDatumElems\\n          source: facetedDatum\\n          transform: [\\n            {\\n              type: geopoint\\n              projection: projection\\n              fields: [\\n                destLocation.hits.hits[0]._source.DestLocation.lon\\n                destLocation.hits.hits[0]._source.DestLocation.lat\\n              ]\\n            }\\n            {type: \\\"formula\\\", expr: \\\"{x:parent.x, y:parent.y}\\\", as: \\\"source\\\"}\\n            {type: \\\"formula\\\", expr: \\\"{x:datum.x, y:datum.y}\\\", as: \\\"target\\\"}\\n            {type: \\\"linkpath\\\", shape: \\\"diagonal\\\"}\\n          ]\\n        }\\n      ]\\n      scales: [\\n        {\\n          name: lineThickness\\n          type: linear\\n          domain: {data: \\\"facetDatumElems\\\", field: \\\"doc_count\\\"}\\n          range: [1, 8]\\n        }\\n        {\\n          name: lineOpacity\\n          type: linear\\n          domain: {data: \\\"facetDatumElems\\\", field: \\\"doc_count\\\"}\\n          range: [0.2, 0.8]\\n        }\\n      ]\\n      marks: [\\n        {\\n          from: {data: \\\"facetDatumElems\\\"}\\n          type: path\\n          interactive: false\\n          encode: {\\n            update: {\\n              path: {field: \\\"path\\\"}\\n              stroke: {value: \\\"black\\\"}\\n              strokeWidth: {scale: \\\"lineThickness\\\", field: \\\"doc_count\\\"}\\n              strokeOpacity: {scale: \\\"lineOpacity\\\", field: \\\"doc_count\\\"}\\n            }\\n          }\\n        }\\n      ]\\n    }\\n    {\\n      name: airport\\n      type: symbol\\n      from: {data: \\\"table\\\"}\\n      encode: {\\n        update: {\\n          size: {scale: \\\"airportSize\\\", field: \\\"doc_count\\\"}\\n          xc: {signal: \\\"datum.x\\\"}\\n          yc: {signal: \\\"datum.y\\\"}\\n          tooltip: {\\n            signal: \\\"{title: datum.originLocation.hits.hits[0]._source.Origin + ' (' + datum.key + ')', connnections: length(datum.distinations.buckets), flights: datum.doc_count}\\\"\\n          }\\n        }\\n      }\\n    }\\n  ]\\n}\"},\"title\":\"[Flights] Airport Connections (Hover Over Airport)\",\"type\":\"vega\"}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{}"
+      }
+    }
+  },
+  {
     "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
     "type": "index-pattern",
-    "updated_at": "2018-05-09T14:36:49.531Z",
-    "version": 2,
+    "updated_at": "2018-05-09T15:49:03.736Z",
+    "version": 1,
     "attributes": {
       "title": "kibana_sample_data_flights",
       "timeFieldName": "timestamp",
@@ -318,13 +334,13 @@ export const savedObjects = [
   {
     "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
     "type": "dashboard",
-    "updated_at": "2018-05-09T14:41:46.210Z",
-    "version": 7,
+    "updated_at": "2018-05-09T15:59:04.578Z",
+    "version": 4,
     "attributes": {
       "title": "[Flights] Global Flight Dashboard",
       "hits": 0,
       "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
-      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"aeb212e0-4c84-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"id\":\"c8fc3d30-4c87-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":75,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"id\":\"571aaf70-4c88-11e8-b3d7-01146121b73d\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"id\":\"8f4d0c00-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"id\":\"f8290060-4c88-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"bcb63b50-4c89-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"9886b410-4c8b-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"76e3c090-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"707665a0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":60,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"id\":\"79e8ff60-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":13,\"i\":\"21\"},\"embeddableConfig\":{},\"id\":\"293b5a30-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"id\":\"129be430-4c93-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":60,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"334084f0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"f8283bf0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"08884800-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":13,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"id\":\"e6944e50-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"id\":\"01c413e0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"id\":\"2edf78b0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"aeb212e0-4c84-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"id\":\"c8fc3d30-4c87-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"id\":\"571aaf70-4c88-11e8-b3d7-01146121b73d\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"id\":\"8f4d0c00-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"id\":\"f8290060-4c88-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"bcb63b50-4c89-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"9886b410-4c8b-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"76e3c090-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"707665a0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"id\":\"79e8ff60-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":8,\"i\":\"21\"},\"embeddableConfig\":{},\"id\":\"293b5a30-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"id\":\"129be430-4c93-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":70,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"334084f0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"f8283bf0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"08884800-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":15,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"id\":\"e6944e50-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"id\":\"01c413e0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"id\":\"2edf78b0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"31\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":15,\"i\":\"31\"},\"embeddableConfig\":{},\"id\":\"ed78a660-53a0-11e8-acbd-0be0ad9d822b\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
       "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
