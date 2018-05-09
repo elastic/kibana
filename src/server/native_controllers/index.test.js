@@ -117,6 +117,7 @@ describe('#prepare', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(processExitSpy).toHaveBeenCalledTimes(1);
+    expect(processExitSpy).toHaveBeenCalledWith(1);
 
     consoleErrorSpy.mockReset();
     consoleErrorSpy.mockRestore();

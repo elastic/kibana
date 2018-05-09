@@ -42,7 +42,7 @@ const getNativeControllers = async (settings) => {
         }
 
         console.error(`${nativeController.pluginId}'s native controller exited with code ${code}`);
-        process.exit();
+        process.exit(1);
       });
     })
     .toArray()
