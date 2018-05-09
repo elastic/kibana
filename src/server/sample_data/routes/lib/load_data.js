@@ -1,5 +1,6 @@
 import readline from 'readline';
 import fs from 'fs';
+import zlib from 'zlib';
 
 const BULK_LOAD_SIZE = 500;
 
@@ -7,11 +8,13 @@ export function loadData(path, bulkLoad, callback) {
   let count = 0;
   let docs = [];
   let isPaused = false;
+
+  const readStream = fs.createReadStream(path, {
+    // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
+    highWaterMark: 1024 * 4
+  });
   const lineStream = readline.createInterface({
-    input: fs.createReadStream(path, {
-      // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
-      highWaterMark: 1024 * 4
-    })
+    input: readStream.pipe(zlib.Unzip()) // eslint-disable-line new-cap
   });
 
   const onClose = async () => {
