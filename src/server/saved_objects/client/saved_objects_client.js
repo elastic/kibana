@@ -343,6 +343,7 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {object} options
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -368,15 +369,10 @@ export class SavedObjectsClient {
 
     const { docs } = response;
 
-    let docsToReturn = docs;
-    if (typeof options.documentFilter === 'function') {
-      docsToReturn = docs.filter(options.documentFilter);
-    }
-
     const { extraSourceProperties = [] } = options;
 
     return {
-      saved_objects: docsToReturn.map((doc, i) => {
+      saved_objects: docs.map((doc, i) => {
         const { id, type } = objects[i];
 
         if (!doc.found) {

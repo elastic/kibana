@@ -66,20 +66,20 @@ export class SpacesSavedObjectsClient {
     // ES 'mget' does not support queries, so we have to filter results after the fact.
     const thisSpaceId = await this._getSpaceId();
 
-    return await this._client.bulkGet(objects, {
-      extraSourceProperties: ['spaceId'],
-      documentFilter: (doc) => {
-        if (!doc.found) return true;
-
-        const { type, spaceId } = doc._source;
-
-        if (this._isTypeSpaceAware(type)) {
-          return spaceId === thisSpaceId;
-        }
-
-        return true;
-      }
+    const result = await this._client.bulkGet(objects, {
+      extraSourceProperties: ['spaceId', 'type']
     });
+
+    result.saved_objects = result.saved_objects.filter(savedObject => {
+      const { type, spaceId } = savedObject.attributes;
+
+      if (this._isTypeSpaceAware(type)) {
+        return spaceId === thisSpaceId;
+      }
+      return true;
+    });
+
+    return result;
   }
 
   async get(type, id) {
