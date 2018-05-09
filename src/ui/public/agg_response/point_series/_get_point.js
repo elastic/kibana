@@ -25,8 +25,9 @@ export function PointSeriesGetPointProvider() {
     }
 
     if (series) {
-      point.aggConfig = series.agg;
-      point.series = series.agg.fieldFormatter()(unwrap(row[series.i]));
+      const seriesArray = series.length ? series : [ series ];
+      point.aggConfig = seriesArray[0].agg;
+      point.series = seriesArray.map(s => s.agg.fieldFormatter()(unwrap(row[s.i]))).join(' - ');
     } else if (y) {
       // If the data is not split up with a series aspect, then
       // each point's "series" becomes the y-agg that produced it
