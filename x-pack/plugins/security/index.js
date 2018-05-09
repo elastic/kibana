@@ -22,6 +22,7 @@ import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objec
 import { registerPrivilegesWithCluster } from './server/lib/privileges/privilege_action_registry';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
+import { createRequestHasPrivileges } from './server/lib/authorization/has_privileges';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -108,8 +109,11 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     if (config.get('xpack.security.rbac.enabled')) {
+      const requestHasPrivileges = createRequestHasPrivileges(server);
       const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
-      savedObjectsClientProvider.addClientOptionBuilder((options) => secureSavedObjectsClientOptionsBuilder(server, options));
+      savedObjectsClientProvider.addClientOptionBuilder(options =>
+        secureSavedObjectsClientOptionsBuilder(server, requestHasPrivileges, options)
+      );
       savedObjectsClientProvider.addClientWrapper(secureSavedObjectsClientWrapper);
     }
 

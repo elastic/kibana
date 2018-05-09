@@ -9,26 +9,19 @@
 
 import Boom from 'boom';
 import { uniq } from 'lodash';
-import { getClient } from '../../../../../server/lib/get_client_shield';
-import { DEFAULT_RESOURCE } from '../../../common/constants';
 
 export class SecureSavedObjectsClient {
   constructor(options) {
     const {
-      server,
       request,
+      requestHasPrivileges,
       baseClient,
-      application,
-      kibanaVersion,
     } = options;
 
     this.errors = baseClient.errors;
 
     this._client = baseClient;
-    this._application = application;
-    this._kibanaVersion = kibanaVersion;
-    this._callCluster = getClient(server).callWithRequest;
-    this._request = request;
+    this._hasPrivileges = requestHasPrivileges(request);
   }
 
   async create(type, attributes = {}, options = {}) {
@@ -78,21 +71,12 @@ export class SecureSavedObjectsClient {
 
   async _performAuthorizationCheck(typeOrTypes, action) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const version = `version:${this._kibanaVersion}`;
-    const kibanaActions = types.map(type => `action:saved-objects/${type}/${action}`);
+    const actions = types.map(type => `action:saved-objects/${type}/${action}`);
 
-    const privilegeCheck = await this._callCluster(this._request, 'shield.hasPrivileges', {
-      body: {
-        applications: [{
-          application: this._application,
-          resources: [DEFAULT_RESOURCE],
-          privileges: [version, ...kibanaActions]
-        }]
-      }
-    });
+    const result = await this._hasPrivileges(actions);
 
-    if (!privilegeCheck.has_all_requested) {
-      throw Boom.forbidden(`User ${privilegeCheck.username} is not authorized to ${action} objects of types ${types.join(',')}`);
+    if (!result.success) {
+      throw Boom.forbidden(result.message);
     }
   }
 }
