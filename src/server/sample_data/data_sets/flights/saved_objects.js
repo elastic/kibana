@@ -4,11 +4,11 @@ export const savedObjects = [
   {
     "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Controls",
-      "visState": "{\"title\":\"[Flights] Controls\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1525098134264\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"OriginCityName\",\"parent\":\"\",\"label\":\"Origin City\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}},{\"id\":\"1525099277699\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"DestCityName\",\"parent\":\"1525098134264\",\"label\":\"Destination City\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}},{\"id\":\"1525099307278\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"AvgTicketPrice\",\"parent\":\"\",\"label\":\"Average Ticket Price\",\"type\":\"range\",\"options\":{\"decimalPlaces\":0,\"step\":10}}],\"updateFiltersOnChange\":false,\"useTimeFilter\":false,\"pinFilters\":false},\"aggs\":[]}",
+      "visState": "{\"title\":\"[Flights] Controls\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1525098134264\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"OriginCityName\",\"parent\":\"\",\"label\":\"Origin City\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}},{\"id\":\"1525099277699\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"DestCityName\",\"parent\":\"1525098134264\",\"label\":\"Destination City\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}},{\"id\":\"1525099307278\",\"indexPattern\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"fieldName\":\"AvgTicketPrice\",\"parent\":\"\",\"label\":\"Average Ticket Price\",\"type\":\"range\",\"options\":{\"decimalPlaces\":0,\"step\":10}}],\"updateFiltersOnChange\":false,\"useTimeFilter\":true,\"pinFilters\":false},\"aggs\":[]}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
@@ -18,25 +18,9 @@ export const savedObjects = [
     }
   },
   {
-    "id": "6bea0e70-4c86-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Origin Country vs. Hour of Departure",
-      "visState": "{\"title\":\"[Flights] Origin Country vs. Hour of Departure\",\"type\":\"heatmap\",\"params\":{\"type\":\"heatmap\",\"addTooltip\":true,\"addLegend\":true,\"enableHover\":false,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":5,\"colorSchema\":\"Blues\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"overwriteColor\":false,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"OriginCountry\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Origin Country\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"hour_of_day\",\"size\":24,\"order\":\"asc\",\"orderBy\":\"_term\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Hour Of Day\"}}]}",
-      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 4\":\"rgb(247,251,255)\",\"4 - 7\":\"rgb(208,225,242)\",\"7 - 10\":\"rgb(148,196,223)\",\"10 - 13\":\"rgb(74,152,201)\",\"13 - 16\":\"rgb(23,100,171)\"}}}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
     "id": "c8fc3d30-4c87-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Count and Average Ticket Price",
@@ -52,7 +36,7 @@ export const savedObjects = [
   {
     "id": "571aaf70-4c88-11e8-b3d7-01146121b73d",
     "type": "search",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Log",
@@ -82,7 +66,7 @@ export const savedObjects = [
   {
     "id": "8f4d0c00-4c86-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Airline Carrier",
@@ -98,8 +82,8 @@ export const savedObjects = [
   {
     "id": "f8290060-4c88-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:10:09.269Z",
-    "version": 3,
+    "updated_at": "2018-05-08T21:45:47.390Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Delay Type",
       "visState": "{\"title\":\"[Flights] Delay Type\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"cardinal\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"FlightDelayType\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
@@ -114,8 +98,8 @@ export const savedObjects = [
   {
     "id": "bcb63b50-4c89-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:13:24.823Z",
-    "version": 2,
+    "updated_at": "2018-05-08T21:45:47.390Z",
+    "version": 1,
     "attributes": {
       "title": "[Flights] Delays & Cancellations",
       "visState": "{\"title\":\"[Flights] Delays & Cancellations\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(0,156,224,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"filter_ratio\",\"numerator\":\"FlightDelay:true\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"percent\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Percent Delays\"}],\"time_field\":\"timestamp\",\"index_pattern\":\"kibana_sample_data_flights\",\"interval\":\">=1h\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"annotations\":[{\"fields\":\"FlightDelay,Cancelled,Carrier\",\"template\":\"{{Carrier}}: Flight Delayed and Cancelled!\",\"index_pattern\":\"kibana_sample_data_flights\",\"query_string\":\"FlightDelay:true AND Cancelled:true\",\"id\":\"53b7dff0-4c89-11e8-a66a-6989ad5a0a39\",\"color\":\"rgba(0,98,177,1)\",\"time_field\":\"timestamp\",\"icon\":\"fa-exclamation-triangle\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1}],\"legend_position\":\"bottom\"},\"aggs\":[]}",
@@ -130,7 +114,7 @@ export const savedObjects = [
   {
     "id": "9886b410-4c8b-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Delay Buckets",
@@ -144,41 +128,9 @@ export const savedObjects = [
     }
   },
   {
-    "id": "d95eef10-4c8c-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Total Flight Cancellations",
-      "visState": "{\"title\":\"[Flights] Total Flight Cancellations\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Reds\",\"metricColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":1000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":true,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Cancellations\"}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"Cancelled\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"Cancelled\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
-    "id": "9ce9f1b0-4c8c-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Total Flight Delays",
-      "visState": "{\"title\":\"[Flights] Total Flight Delays\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":1000}],\"labels\":{\"show\":true},\"invertColors\":true,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":true,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Delays\"}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelay\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelay\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
     "id": "76e3c090-4c8c-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Delays",
@@ -194,7 +146,7 @@ export const savedObjects = [
   {
     "id": "707665a0-4c8c-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Flight Cancellations",
@@ -208,57 +160,9 @@ export const savedObjects = [
     }
   },
   {
-    "id": "171d78e0-4c8c-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Destination Country vs. Hour of Arrival",
-      "visState": "{\"title\":\"[Flights] Destination Country vs. Hour of Arrival\",\"type\":\"heatmap\",\"params\":{\"type\":\"heatmap\",\"addTooltip\":true,\"addLegend\":true,\"enableHover\":false,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":5,\"colorSchema\":\"Blues\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"overwriteColor\":false,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"DestCountry\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Origin Country\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"hour_of_day\",\"size\":24,\"order\":\"asc\",\"orderBy\":\"_term\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Hour Of Day\"}}]}",
-      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 3\":\"rgb(247,251,255)\",\"3 - 6\":\"rgb(208,225,242)\",\"6 - 9\":\"rgb(148,196,223)\",\"9 - 12\":\"rgb(74,152,201)\",\"12 - 14\":\"rgb(23,100,171)\"}}}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
-    "id": "eb7938d0-4c8d-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Origin Airport",
-      "visState": "{\"title\":\"[Flights] Origin Airport\",\"type\":\"tile_map\",\"params\":{\"colorSchema\":\"Yellow to Red\",\"mapType\":\"Scaled Circle Markers\",\"isDesaturated\":true,\"addTooltip\":true,\"heatClusterSize\":1.5,\"legendPosition\":\"bottomright\",\"mapZoom\":2,\"mapCenter\":[0,0],\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"baseLayersAreLoaded\":{},\"tmsLayers\":[{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}],\"selectedTmsLayer\":{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"geohash_grid\",\"schema\":\"segment\",\"params\":{\"field\":\"OriginLocation\",\"autoPrecision\":true,\"isFilteredByCollar\":true,\"useGeocentroid\":true,\"precision\":2}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
-    "id": "1dd7a960-4c8e-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Origin Country",
-      "visState": "{\"title\":\"[Flights] Origin Country\",\"type\":\"region_map\",\"params\":{\"legendPosition\":\"bottomright\",\"addTooltip\":true,\"colorSchema\":\"Blues\",\"selectedLayer\":{\"attribution\":\"<p><a href=\\\"http://www.naturalearthdata.com/about/terms-of-use\\\">Made with NaturalEarth</a> | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"name\":\"World Countries\",\"weight\":1,\"format\":{\"type\":\"geojson\"},\"url\":\"https://vector.maps.elastic.co/blob/5659313586569216?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"fields\":[{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},{\"name\":\"name\",\"description\":\"Country name\"},{\"name\":\"iso3\",\"description\":\"Three letter abbreviation\"}],\"created_at\":\"2017-04-26T17:12:15.978370\",\"tags\":[],\"id\":5659313586569216,\"layerId\":\"elastic_maps_service.World Countries\"},\"selectedJoinField\":{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},\"isDisplayWarning\":false,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"baseLayersAreLoaded\":{},\"tmsLayers\":[{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}],\"selectedTmsLayer\":{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}},\"mapZoom\":2,\"mapCenter\":[0,0],\"outlineWeight\":1,\"showAllShapes\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"OriginCountry\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
     "id": "79e8ff60-4c8e-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Destination Airport",
@@ -272,41 +176,9 @@ export const savedObjects = [
     }
   },
   {
-    "id": "910856f0-4c8e-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Destination Country",
-      "visState": "{\"title\":\"[Flights] Destination Country\",\"type\":\"region_map\",\"params\":{\"legendPosition\":\"bottomright\",\"addTooltip\":true,\"colorSchema\":\"Blues\",\"selectedLayer\":{\"attribution\":\"<p><a href=\\\"http://www.naturalearthdata.com/about/terms-of-use\\\">Made with NaturalEarth</a> | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"name\":\"World Countries\",\"weight\":1,\"format\":{\"type\":\"geojson\"},\"url\":\"https://vector.maps.elastic.co/blob/5659313586569216?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"fields\":[{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},{\"name\":\"name\",\"description\":\"Country name\"},{\"name\":\"iso3\",\"description\":\"Three letter abbreviation\"}],\"created_at\":\"2017-04-26T17:12:15.978370\",\"tags\":[],\"id\":5659313586569216,\"layerId\":\"elastic_maps_service.World Countries\"},\"selectedJoinField\":{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},\"isDisplayWarning\":false,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"baseLayersAreLoaded\":{},\"tmsLayers\":[{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}],\"selectedTmsLayer\":{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}},\"mapZoom\":2,\"mapCenter\":[0,0],\"outlineWeight\":1,\"showAllShapes\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"DestCountry\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"language\":\"lucene\",\"query\":\"\"}}"
-      }
-    }
-  },
-  {
-    "id": "1ce53da0-4c8f-11e8-b3d7-01146121b73d",
-    "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
-    "attributes": {
-      "title": "[Flights] Origin Weather",
-      "visState": "{\"title\":\"[Flights] Origin Weather\",\"type\":\"tagcloud\",\"params\":{\"scale\":\"linear\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":72,\"showLabel\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"OriginWeather\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
-      "uiStateJSON": "{}",
-      "description": "",
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
-      }
-    }
-  },
-  {
     "id": "293b5a30-4c8f-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:13.297Z",
+    "updated_at": "2018-05-08T21:45:47.390Z",
     "version": 1,
     "attributes": {
       "title": "[Flights] Destination Weather",
@@ -322,11 +194,11 @@ export const savedObjects = [
   {
     "id": "129be430-4c93-11e8-b3d7-01146121b73d",
     "type": "visualization",
-    "updated_at": "2018-05-02T17:00:50.107Z",
-    "version": 2,
+    "updated_at": "2018-05-09T14:17:36.161Z",
+    "version": 3,
     "attributes": {
       "title": "[Flights] Markdown Instructions",
-      "visState": "{\"title\":\"[Flights] Markdown Instructions\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"openLinksInNewTab\":false,\"markdown\":\"### Elastic Flights Sample Data\\nThis dashboard contains mock flight data. Use the input controls or click into a visualization to filter the entire dashboard. Click `Edit` to move around, resize or edit any visualizations.\"},\"aggs\":[]}",
+      "visState": "{\"title\":\"[Flights] Markdown Instructions\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"openLinksInNewTab\":true,\"markdown\":\"### Elastic Flights Sample Data\\nThis dashboard contains mock flight data. Use the input controls or click into a visualization to filter the entire dashboard, or simply search with the query bar . Click `Edit` to move around, resize or edit any visualizations. For more information about Kibana, be sure to check out our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).\"},\"aggs\":[]}",
       "uiStateJSON": "{}",
       "description": "",
       "version": 1,
@@ -336,27 +208,123 @@ export const savedObjects = [
     }
   },
   {
+    "id": "334084f0-52fd-11e8-a160-89cc2ad9e8e2",
+    "type": "visualization",
+    "updated_at": "2018-05-08T21:45:47.390Z",
+    "version": 1,
+    "attributes": {
+      "title": "[Flights] Origin Country Ticket Prices",
+      "visState": "{\"title\":\"[Flights] Origin Country Ticket Prices\",\"type\":\"region_map\",\"params\":{\"legendPosition\":\"bottomright\",\"addTooltip\":true,\"colorSchema\":\"Blues\",\"selectedLayer\":{\"attribution\":\"<p><a href=\\\"http://www.naturalearthdata.com/about/terms-of-use\\\">Made with NaturalEarth</a> | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"name\":\"World Countries\",\"weight\":1,\"format\":{\"type\":\"geojson\"},\"url\":\"https://vector.maps.elastic.co/blob/5659313586569216?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"fields\":[{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},{\"name\":\"name\",\"description\":\"Country name\"},{\"name\":\"iso3\",\"description\":\"Three letter abbreviation\"}],\"created_at\":\"2017-04-26T17:12:15.978370\",\"tags\":[],\"id\":5659313586569216,\"layerId\":\"elastic_maps_service.World Countries\"},\"selectedJoinField\":{\"name\":\"iso2\",\"description\":\"Two letter abbreviation\"},\"isDisplayWarning\":false,\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"baseLayersAreLoaded\":{},\"tmsLayers\":[{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}],\"selectedTmsLayer\":{\"id\":\"road_map\",\"url\":\"https://tiles.maps.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.0.0-alpha1&license=686f9ec6-d775-44f0-b334-38caf85da617\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"http://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors | <a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\",\"subdomains\":[]}},\"mapZoom\":2,\"mapCenter\":[0,0],\"outlineWeight\":1,\"showAllShapes\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"AvgTicketPrice\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"OriginCountry\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+      }
+    }
+  },
+  {
+    "id": "f8283bf0-52fd-11e8-a160-89cc2ad9e8e2",
+    "type": "visualization",
+    "updated_at": "2018-05-09T14:21:43.865Z",
+    "version": 2,
+    "attributes": {
+      "title": "[Flights] Total Flight Delays",
+      "visState": "{\"title\":\"[Flights] Total Flight Delays\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Blues\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":75},{\"from\":75,\"to\":150},{\"from\":150,\"to\":225},{\"from\":225,\"to\":300}],\"invertColors\":true,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"\",\"fontSize\":60,\"labelColor\":true}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Delays\"}}]}",
+      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 75\":\"rgb(8,48,107)\",\"75 - 150\":\"rgb(55,135,192)\",\"150 - 225\":\"rgb(171,208,230)\",\"225 - 300\":\"rgb(247,251,255)\"}}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelay\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelay\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+      }
+    }
+  },
+  {
+    "id": "08884800-52fe-11e8-a160-89cc2ad9e8e2",
+    "type": "visualization",
+    "updated_at": "2018-05-09T14:22:25.197Z",
+    "version": 2,
+    "attributes": {
+      "title": "[Flights] Total Flight Cancellations",
+      "visState": "{\"title\":\"[Flights] Total Flight Cancellations\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Blues\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":75},{\"from\":75,\"to\":150},{\"from\":150,\"to\":225},{\"from\":225,\"to\":300}],\"invertColors\":true,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"#eee\",\"bgColor\":false,\"subText\":\"\",\"fontSize\":60,\"labelColor\":true}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Cancellations\"}}]}",
+      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 75\":\"rgb(8,48,107)\",\"75 - 150\":\"rgb(55,135,192)\",\"150 - 225\":\"rgb(171,208,230)\",\"225 - 300\":\"rgb(247,251,255)\"}}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"Cancelled\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"Cancelled\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+      }
+    }
+  },
+  {
+    "id": "e6944e50-52fe-11e8-a160-89cc2ad9e8e2",
+    "type": "visualization",
+    "updated_at": "2018-05-08T21:45:47.390Z",
+    "version": 1,
+    "attributes": {
+      "title": "[Flights] Origin Country vs. Destination Country",
+      "visState": "{\"title\":\"[Flights] Origin Country vs. Destination Country\",\"type\":\"heatmap\",\"params\":{\"type\":\"heatmap\",\"addTooltip\":true,\"addLegend\":true,\"enableHover\":false,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":5,\"colorSchema\":\"Blues\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"overwriteColor\":false,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"OriginCountry\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Origin Country\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"DestCountry\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Country\"}}]}",
+      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 22\":\"rgb(247,251,255)\",\"22 - 44\":\"rgb(208,225,242)\",\"44 - 66\":\"rgb(148,196,223)\",\"66 - 88\":\"rgb(74,152,201)\",\"88 - 110\":\"rgb(23,100,171)\"}}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+      }
+    }
+  },
+  {
+    "id": "01c413e0-5395-11e8-99bf-1ba7b1bdaa61",
+    "type": "visualization",
+    "updated_at": "2018-05-09T14:35:54.436Z",
+    "version": 2,
+    "attributes": {
+      "title": "[Flights] Total Flights",
+      "visState": "{\"title\":\"[Flights] Total Flights\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Total Flights\"}}]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      }
+    }
+  },
+  {
+    "id": "2edf78b0-5395-11e8-99bf-1ba7b1bdaa61",
+    "type": "visualization",
+    "updated_at": "2018-05-09T14:36:23.556Z",
+    "version": 2,
+    "attributes": {
+      "title": "[Flights] Average Ticket Price",
+      "visState": "{\"title\":\"[Flights] Average Ticket Price\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"AvgTicketPrice\",\"customLabel\":\"Avg. Ticket Price\"}}]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      }
+    }
+  },
+  {
     "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
     "type": "index-pattern",
-    "updated_at": "2018-05-02T17:00:13.297Z",
-    "version": 1,
+    "updated_at": "2018-05-09T14:36:49.531Z",
+    "version": 2,
     "attributes": {
       "title": "kibana_sample_data_flights",
       "timeFieldName": "timestamp",
       "fields": "[{\"name\":\"AvgTicketPrice\",\"type\":\"number\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"Cancelled\",\"type\":\"boolean\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"Carrier\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"Dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestAirportID\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestCityName\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestCountry\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestLocation\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestRegion\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DestWeather\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DistanceKilometers\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"DistanceMiles\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightDelay\",\"type\":\"boolean\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightDelayMin\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightDelayType\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightNum\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightTimeHour\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"FlightTimeMin\",\"type\":\"number\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"Origin\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginAirportID\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginCityName\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginCountry\",\"type\":\"string\",\"count\":1,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginLocation\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginRegion\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"OriginWeather\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"dayOfWeek\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['timestamp'].date.hourOfDay\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
-      "fieldFormatMap": "{\"hour_of_day\":{\"id\":\"number\",\"params\":{\"pattern\":\"00\"}},\"AvgTicketPrice\":{\"id\":\"number\",\"params\":{\"pattern\":\"0,0.[00]\"}}}"
+      "fieldFormatMap": "{\"hour_of_day\":{\"id\":\"number\",\"params\":{\"pattern\":\"00\"}},\"AvgTicketPrice\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.[00]\"}}}"
     }
   },
   {
     "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
     "type": "dashboard",
-    "updated_at": "2018-05-02T17:16:53.791Z",
-    "version": 4,
+    "updated_at": "2018-05-09T14:41:46.210Z",
+    "version": 7,
     "attributes": {
       "title": "[Flights] Global Flight Dashboard",
       "hits": 0,
-      "description": "A sample data dashboard filled with mock flight data",
-      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":33,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"aeb212e0-4c84-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":0,\"y\":51,\"w\":24,\"h\":15,\"i\":\"2\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 4\":\"rgb(247,252,245)\",\"12 - 16\":\"rgb(35,139,69)\",\"4 - 8\":\"rgb(199,233,192)\",\"8 - 12\":\"rgb(116,196,118)\"},\"legendOpen\":false}},\"id\":\"6bea0e70-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":18,\"y\":7,\"w\":30,\"h\":15,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"id\":\"c8fc3d30-4c87-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":108,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"id\":\"571aaf70-4c88-11e8-b3d7-01146121b73d\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":18,\"h\":15,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"id\":\"8f4d0c00-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":36,\"w\":24,\"h\":15,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"id\":\"f8290060-4c88-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":22,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"bcb63b50-4c89-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":36,\"w\":24,\"h\":15,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"9886b410-4c8b-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"11\",\"gridData\":{\"x\":0,\"y\":29,\"w\":10,\"h\":7,\"i\":\"11\"},\"embeddableConfig\":{},\"id\":\"d95eef10-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"12\",\"gridData\":{\"x\":0,\"y\":22,\"w\":10,\"h\":7,\"i\":\"12\"},\"embeddableConfig\":{},\"id\":\"9ce9f1b0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":22,\"w\":14,\"h\":7,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"76e3c090-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":29,\"w\":14,\"h\":7,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"707665a0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"15\",\"gridData\":{\"x\":24,\"y\":51,\"w\":24,\"h\":15,\"i\":\"15\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 3\":\"rgb(247,251,255)\",\"12 - 14\":\"rgb(23,100,171)\",\"3 - 6\":\"rgb(208,225,242)\",\"6 - 9\":\"rgb(148,196,223)\",\"9 - 12\":\"rgb(74,152,201)\"},\"legendOpen\":false}},\"id\":\"171d78e0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"16\",\"gridData\":{\"x\":0,\"y\":78,\"w\":24,\"h\":15,\"i\":\"16\"},\"embeddableConfig\":{\"mapZoom\":1,\"mapCenter\":[25.841309569824062,14.289501174353065]},\"id\":\"eb7938d0-4c8d-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"17\",\"gridData\":{\"x\":0,\"y\":93,\"w\":24,\"h\":15,\"i\":\"17\"},\"embeddableConfig\":{\"mapCenter\":[42.75908134865102,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"1dd7a960-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":78,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapZoom\":1,\"mapCenter\":[27.421687059550266,15.371002131141724]},\"id\":\"79e8ff60-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"19\",\"gridData\":{\"x\":24,\"y\":93,\"w\":24,\"h\":15,\"i\":\"19\"},\"embeddableConfig\":{\"mapCenter\":[42.75908134865102,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"910856f0-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"20\",\"gridData\":{\"x\":0,\"y\":66,\"w\":24,\"h\":12,\"i\":\"20\"},\"embeddableConfig\":{},\"id\":\"1ce53da0-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":24,\"y\":66,\"w\":24,\"h\":12,\"i\":\"21\"},\"embeddableConfig\":{},\"id\":\"293b5a30-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":33,\"y\":0,\"w\":15,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"id\":\"129be430-4c93-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
+      "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"aeb212e0-4c84-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"id\":\"c8fc3d30-4c87-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":75,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"id\":\"571aaf70-4c88-11e8-b3d7-01146121b73d\",\"type\":\"search\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"id\":\"8f4d0c00-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"id\":\"f8290060-4c88-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"bcb63b50-4c89-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"9886b410-4c8b-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"76e3c090-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"707665a0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":60,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"id\":\"79e8ff60-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":13,\"i\":\"21\"},\"embeddableConfig\":{},\"id\":\"293b5a30-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"id\":\"129be430-4c93-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":60,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"334084f0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"f8283bf0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"08884800-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":13,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"id\":\"e6944e50-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"id\":\"01c413e0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"id\":\"2edf78b0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"7.0.0-alpha1\"}]",
       "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
