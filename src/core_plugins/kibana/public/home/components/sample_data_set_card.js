@@ -61,6 +61,7 @@ export class SampleDataSetCard extends React.Component {
               isLoading={this.state.isProcessingRequest}
               onClick={this.startRequest}
               color="danger"
+              data-test-subj={`removeSampleDataSet${this.props.id}`}
             >
               {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
             </EuiButtonEmpty>
@@ -68,6 +69,7 @@ export class SampleDataSetCard extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiButton
               href={this.props.launchUrl}
+              data-test-subj={`launchSampleDataSet${this.props.id}`}
             >
               Launch
             </EuiButton>
@@ -82,6 +84,7 @@ export class SampleDataSetCard extends React.Component {
           <EuiButton
             isLoading={this.state.isProcessingRequest}
             onClick={this.startRequest}
+            data-test-subj={`addSampleDataSet${this.props.id}`}
           >
             {this.state.isProcessingRequest ? 'Adding' : 'Add'}
           </EuiButton>
@@ -98,6 +101,7 @@ export class SampleDataSetCard extends React.Component {
         description={this.props.description}
         betaBadgeLabel={this.props.isInstalled ? 'INSTALLED' : null}
         footer={this.renderBtn()}
+        data-test-subj={`sampleDataSetCard${this.props.id}`}
       />
     );
   }
