@@ -76,12 +76,11 @@ async function runSingleConfig(configPath, { bail, log }) {
 
     // Note: When solving how to incorporate functional_test_runner
     // clean this up
-    const logLevel = log.getLevel();
     await runFtr({
       procs,
       configPath,
       bail,
-      logLevel,
+      log,
       cwd: process.cwd(),
     });
 
