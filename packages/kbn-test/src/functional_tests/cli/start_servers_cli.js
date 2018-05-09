@@ -51,6 +51,13 @@ function displayHelp() {
 
     --config      Option to pass in a config
     --help        Display this menu and exit
+
+    Log level options:
+
+    --verbose
+    --debug
+    --quiet       Log errors
+    --silent
     `)
   );
 }

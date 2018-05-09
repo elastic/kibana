@@ -44,6 +44,7 @@ export async function runTests(configPaths, { bail, log }) {
 /**
  * Start only servers using single config
  * @param {string}  configPath   Path to a config file
+ * @param {Log}     log          Optional logger
  */
 export async function startServers(configPath, { log }) {
   if (!configPath) {
@@ -60,20 +61,25 @@ export async function startServers(configPath, { log }) {
       const es = await runElasticsearch({ config, log });
       await runKibanaServer({ procs, config, log });
 
-      // wait for 5 seconds of silence before logging the success message
-      // so that it doesn't get buried
-      await Rx.Observable.fromEvent(log, 'data')
-        .switchMap(() => Rx.Observable.timer(5000))
-        .first()
-        .toPromise();
-
+      // wait for 5 seconds of silence before logging the
+      // success message so that it doesn't get buried
+      await silence(5000, { log });
       log.info(SUCCESS_MESSAGE);
+
       await procs.waitForAllToStop();
       await es.cleanup();
     });
   } catch (err) {
     fatalErrorHandler(err);
   }
+}
+
+async function silence(milliseconds, { log }) {
+  return await Rx.Observable.fromEvent(log, 'data')
+    .startWith(null)
+    .switchMap(() => Rx.Observable.timer(milliseconds))
+    .take(1)
+    .toPromise();
 }
 
 /*
