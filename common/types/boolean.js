@@ -8,5 +8,14 @@ export const boolean = () => ({
   to: {
     string: n => String(n),
     number: n => Number(n),
+    render: input => {
+      return {
+        type: 'render',
+        as: 'markdown',
+        value: {
+          content: input,
+        },
+      };
+    },
   },
 });

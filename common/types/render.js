@@ -1,11 +1,10 @@
 export const render = () => ({
   name: 'render',
   from: {
-    null: () => ({
+    '*': v => ({
       type: 'render',
       as: 'debug',
-      value: null,
+      value: v,
     }),
   },
-  to: {},
 });

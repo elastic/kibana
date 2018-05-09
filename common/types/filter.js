@@ -11,11 +11,4 @@ export const filter = () => ({
       };
     },
   },
-  to: {
-    render: value => ({
-      type: 'render',
-      as: 'debug',
-      value,
-    }),
-  },
 });

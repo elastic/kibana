@@ -9,11 +9,4 @@ export const style = () => ({
       };
     },
   },
-  to: {
-    render: value => ({
-      type: 'render',
-      as: 'debug',
-      value,
-    }),
-  },
 });
