@@ -8,8 +8,6 @@ import { runTests } from '../../';
  * Only cares about --config option. Other options
  * are passed directly to functional_test_runner, such as
  * --bail, --verbose, etc.
- * In the future, this method will accept --tests-only,
- * --servers-only.
  * @param {string[]} defaultConfigPaths  Array of paths to configs to use
  *                                       if no config option is passed
  */
