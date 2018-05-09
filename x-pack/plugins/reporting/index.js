@@ -47,15 +47,17 @@ export const reporting = (kibana) => {
       },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-          description: `Custom image to use in the PDF's footer`,
+          name: 'PDF footer image',
           value: null,
+          description: `Custom image to use in the PDF's footer`,
           type: 'image',
           options: {
             maxSize: {
               length: kbToBase64Length(200),
               description: '200 kB',
             }
-          }
+          },
+          category: ['reporting'],
         }
       }
     },

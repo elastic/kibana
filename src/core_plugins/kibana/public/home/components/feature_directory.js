@@ -82,7 +82,7 @@ export class FeatureDirectory extends React.Component {
           <EuiFlexItem key={directory.id}>
             <Synopsis
               description={directory.description}
-              iconUrl={this.props.addBasePath(directory.icon)}
+              iconType={directory.icon}
               title={directory.title}
               url={this.props.addBasePath(directory.path)}
               wrapInPanel

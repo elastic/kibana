@@ -7,6 +7,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -24,31 +25,24 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>
@@ -56,6 +50,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -66,6 +61,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -87,6 +83,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -108,6 +105,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -135,6 +133,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -152,31 +151,24 @@ exports[`Clear btns enabled when there are values 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>
@@ -184,6 +176,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -194,6 +187,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -215,6 +209,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -236,6 +231,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -263,6 +259,7 @@ exports[`Renders list control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -280,31 +277,24 @@ exports[`Renders list control 1`] = `
       }
     >
       <ListControl
-        control={
-          Object {
-            "getMultiSelectDelimiter": [Function],
-            "id": "mock-list-control",
-            "isEnabled": [Function],
-            "label": "list control",
-            "options": Object {
-              "multiselect": true,
-              "type": "terms",
-            },
-            "selectOptions": Array [
-              Object {
-                "label": "choice1",
-                "value": "choice1",
-              },
-              Object {
-                "label": "choice2",
-                "value": "choice2",
-              },
-            ],
-            "type": "list",
-            "value": "",
-          }
-        }
         controlIndex={0}
+        disableMsg={null}
+        id="mock-list-control"
+        label="list control"
+        multiselect={true}
+        options={
+          Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ]
+        }
+        selectedOptions={Array []}
         stageFilter={[Function]}
       />
     </EuiFlexItem>
@@ -312,6 +302,7 @@ exports[`Renders list control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -322,6 +313,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -343,6 +335,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -364,6 +357,7 @@ exports[`Renders list control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -391,6 +385,7 @@ exports[`Renders range control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -434,6 +429,7 @@ exports[`Renders range control 1`] = `
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
@@ -444,6 +440,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -465,6 +462,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >
@@ -486,6 +484,7 @@ exports[`Renders range control 1`] = `
       grow={false}
     >
       <EuiFormRow
+        describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
       >

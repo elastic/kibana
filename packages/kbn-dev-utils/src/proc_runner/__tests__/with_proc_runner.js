@@ -1,3 +1,4 @@
+import { createToolingLog } from '../../tooling_log';
 import { withProcRunner } from '../with_proc_runner';
 
 describe('proc runner', () => {
@@ -14,7 +15,7 @@ describe('proc runner', () => {
   }
 
   it('passes procs to a function', async () => {
-    await withProcRunner(async procs => {
+    await withProcRunner(createToolingLog(), async procs => {
       await runProc({ procs });
       await procs.stop('proc');
     });
