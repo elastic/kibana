@@ -208,6 +208,46 @@ exports[`apmUiEnabled 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="center"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <span
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Fresh Elastic stack installation?
+        </span>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Try some sample data sets
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </EuiPanel>
 `;
 
@@ -385,6 +425,46 @@ exports[`render 1`] = `
           type="button"
         >
           Set up index patterns
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="center"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText
+        grow={true}
+      >
+        <span
+          style={
+            Object {
+              "height": 38,
+            }
+          }
+        >
+          Fresh Elastic stack installation?
+        </span>
+        <EuiLink
+          color="primary"
+          href="#/home/tutorial_directory/sampleData"
+          style={
+            Object {
+              "marginLeft": 8,
+            }
+          }
+          type="button"
+        >
+          Try some sample data sets
         </EuiLink>
       </EuiText>
     </EuiFlexItem>

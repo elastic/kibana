@@ -62,7 +62,7 @@ export class SampleDataSetCard extends React.Component {
               onClick={this.startRequest}
               color="danger"
             >
-              {this.state.isProcessingRequest ? 'Uninstalling' : 'Uninstall'}
+              {this.state.isProcessingRequest ? 'Removing' : 'Remove'}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -83,7 +83,7 @@ export class SampleDataSetCard extends React.Component {
             isLoading={this.state.isProcessingRequest}
             onClick={this.startRequest}
           >
-            {this.state.isProcessingRequest ? 'Installing' : 'Install'}
+            {this.state.isProcessingRequest ? 'Adding' : 'Add'}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -96,6 +96,7 @@ export class SampleDataSetCard extends React.Component {
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}
+        betaBadgeLabel={this.props.isInstalled ? 'INSTALLED' : null}
         footer={this.renderBtn()}
       />
     );
