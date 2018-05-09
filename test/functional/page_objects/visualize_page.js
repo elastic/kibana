@@ -150,7 +150,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setMarkdownTxt(markdownTxt) {
-      const input = await testSubjects.find('markdownTextarea');
+      const input = await testSubjects.find('markdownEditorMarkdown');
       await input.clearValue();
       await input.type(markdownTxt);
     }
