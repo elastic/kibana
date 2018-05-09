@@ -1,6 +1,5 @@
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { getFieldByName } from '../../index_patterns/static_utils';
 
 export function buildNodeParams(fieldName, points) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
@@ -17,7 +16,7 @@ export function buildNodeParams(fieldName, points) {
 export function toElasticsearchQuery(node, indexPattern) {
   const [ fieldNameArg, ...points ] = node.arguments;
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = getFieldByName(indexPattern.fields, fieldName);
+  const field = indexPattern.fields.find(field => field.name === fieldName);
   const queryParams = {
     points: points.map(ast.toElasticsearchQuery)
   };

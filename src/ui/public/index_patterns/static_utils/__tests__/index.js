@@ -1,26 +1,7 @@
 import expect from 'expect.js';
-import { getFieldByName, isFilterable } from '../index';
+import { isFilterable } from '../index';
 
 describe('static utils', () => {
-  describe('getFieldByName', () => {
-    it('should return the correct field', () => {
-      expect(
-        getFieldByName(
-          [
-            { name: 'a' },
-            { name: 'b' },
-            { name: 'c' },
-            { name: 'd' },
-            { name: 'e' },
-            { name: 'f' },
-            { name: 'g' },
-          ],
-          'c'
-        )
-      ).to.eql({ name: 'c' });
-    });
-  });
-
   describe('isFilterable', () => {
     it('should be filterable', () => {
       ['string', 'number', 'date', 'ip', 'boolean'].forEach(type => {

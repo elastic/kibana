@@ -1,13 +1,10 @@
 import * as literal from '../../node_types/literal';
 import * as wildcard from '../../node_types/wildcard';
-import { getFieldByName } from '../../../index_patterns/static_utils';
-
-
 
 export function getFields(node, indexPattern) {
   if (node.type === 'literal') {
     const fieldName = literal.toElasticsearchQuery(node);
-    const field = getFieldByName(indexPattern.fields, fieldName);
+    const field = indexPattern.fields.find(field => field.name === fieldName);
     if (!field) {
       return [];
     }
