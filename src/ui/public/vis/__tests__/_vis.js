@@ -19,10 +19,13 @@
 
 import _ from 'lodash';
 import ngMock from 'ng_mock';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
+import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
+import * as Inspector from '../../inspector/inspector';
 
 describe('Vis Class', function () {
   let indexPattern;
@@ -104,6 +107,150 @@ describe('Vis Class', function () {
       const vis = new Vis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
     });
+  });
+
+  describe('inspector', () => {
+
+    // Wrap the given vis type definition in a state, that can be passed to vis
+    const state = (type) => ({
+      type: {
+        visConfig: { defaults: {} },
+        ...type,
+      }
+    });
+
+    describe('hasInspector()', () => {
+      it('should forward to inspectors hasInspector', () => {
+        const vis = new Vis(indexPattern, state({
+          inspectorAdapters: {
+            data: true,
+            requests: true,
+          }
+        }));
+        sinon.spy(Inspector, 'hasInspector');
+        vis.hasInspector();
+        expect(Inspector.hasInspector.calledOnce).to.be(true);
+        const adapters = Inspector.hasInspector.lastCall.args[0];
+        expect(adapters.data).to.be.a(DataAdapter);
+        expect(adapters.requests).to.be.a(RequestAdapter);
+      });
+
+      it('should return hasInspectors result', () => {
+        const vis = new Vis(indexPattern, state({}));
+        const stub = sinon.stub(Inspector, 'hasInspector');
+        stub.returns(true);
+        expect(vis.hasInspector()).to.be(true);
+        stub.returns(false);
+        expect(vis.hasInspector()).to.be(false);
+      });
+
+      afterEach(() => {
+        Inspector.hasInspector.restore();
+      });
+    });
+
+    describe('openInspector()', () => {
+      it('should call openInspector with all attached inspectors', () => {
+        const Foodapter = class {};
+        const vis = new Vis(indexPattern, state({
+          inspectorAdapters: {
+            data: true,
+            custom: {
+              foo: Foodapter
+            }
+          }
+        }));
+        sinon.spy(Inspector, 'openInspector');
+        vis.openInspector();
+        expect(Inspector.openInspector.calledOnce).to.be(true);
+        const adapters = Inspector.openInspector.lastCall.args[0];
+        expect(adapters).to.be(vis.API.inspectorAdapters);
+      });
+
+      it('should pass the vis title to the openInspector call', () => {
+        const vis = new Vis(indexPattern, { ...state(), title: 'beautifulVis' });
+        sinon.spy(Inspector, 'openInspector');
+        vis.openInspector();
+        expect(Inspector.openInspector.calledOnce).to.be(true);
+        const params = Inspector.openInspector.lastCall.args[1];
+        expect(params.title).to.be('beautifulVis');
+      });
+
+      afterEach(() => {
+        Inspector.openInspector.restore();
+      });
+    });
+
+    describe('inspectorAdapters', () => {
+
+      it('should register none for none requestHandler', () => {
+        const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
+        expect(vis.API.inspectorAdapters).to.eql({});
+      });
+
+      it('should attach data and request handler for courier', () => {
+        const vis = new Vis(indexPattern, state({ requestHandler: 'courier' }));
+        expect(vis.API.inspectorAdapters.data).to.be.a(DataAdapter);
+        expect(vis.API.inspectorAdapters.requests).to.be.a(RequestAdapter);
+      });
+
+      it('should allow enabling data adapter manually', () => {
+        const vis = new Vis(indexPattern, state({
+          requestHandler: 'none',
+          inspectorAdapters: {
+            data: true,
+          }
+        }));
+        expect(vis.API.inspectorAdapters.data).to.be.a(DataAdapter);
+      });
+
+      it('should allow enabling requests adapter manually', () => {
+        const vis = new Vis(indexPattern, state({
+          requestHandler: 'none',
+          inspectorAdapters: {
+            requests: true,
+          }
+        }));
+        expect(vis.API.inspectorAdapters.requests).to.be.a(RequestAdapter);
+      });
+
+      it('should allow adding custom inspector adapters via the custom key', () => {
+        const Foodapter =  class {};
+        const Bardapter = class {};
+        const vis = new Vis(indexPattern, state({
+          requestHandler: 'none',
+          inspectorAdapters: {
+            custom: {
+              foo: Foodapter,
+              bar: Bardapter,
+            }
+          }
+        }));
+        expect(vis.API.inspectorAdapters.foo).to.be.a(Foodapter);
+        expect(vis.API.inspectorAdapters.bar).to.be.a(Bardapter);
+      });
+
+      it('should not share adapter instances between vis instances', () => {
+        const Foodapter = class {};
+        const visState = state({
+          inspectorAdapters: {
+            data: true,
+            custom: {
+              foo: Foodapter
+            }
+          }
+        });
+        const vis1 = new Vis(indexPattern, visState);
+        const vis2 = new Vis(indexPattern, visState);
+        expect(vis1.API.inspectorAdapters.foo).to.be.a(Foodapter);
+        expect(vis2.API.inspectorAdapters.foo).to.be.a(Foodapter);
+        expect(vis1.API.inspectorAdapters.foo).not.to.be(vis2.API.inspectorAdapters.foo);
+        expect(vis1.API.inspectorAdapters.data).to.be.a(DataAdapter);
+        expect(vis2.API.inspectorAdapters.data).to.be.a(DataAdapter);
+        expect(vis1.API.inspectorAdapters.data).not.to.be(vis2.API.inspectorAdapters.data);
+      });
+    });
+
   });
 
 });

@@ -18,6 +18,8 @@
  */
 
 import $ from 'jquery';
+import { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
 import { SpyModesRegistryProvider } from '../registry/spy_modes';
 import { uiModules } from '../modules';
 import spyTemplate from './spy.html';
@@ -155,6 +157,17 @@ uiModules
         });
 
         /**
+         * Renders the currently active spy via its React component to the DOM.
+         * This method must only be called if the current spy is a react spy.
+         */
+        function renderReactSpy() {
+          render(
+            React.createElement(currentSpy.component, { vis: $scope.vis }),
+            currentSpy.$container[0]
+          );
+        }
+
+        /**
          * Watch for changes of the currentMode. Whenever it changes, we render
          * the new mode into the template. Therefore we remove the previously rendered
          * mode (if existing) and compile and bind the template of the new mode.
@@ -168,10 +181,18 @@ uiModules
           const newMode = spyModes.byName[mode];
 
           if (currentSpy) {
-            // If we already have a spy loaded, remove that HTML element and
-            // destroy the previous Angular scope.
+            // In case we already had a spy loaded, we clean it up first.
+            if (currentSpy.$scope) {
+              // In case of an Angular spy, destroy the scope
+              currentSpy.$scope.$destroy();
+            } else {
+              // In case of a react spy, unregister the vis $scope watch
+              // and unmount the React component.
+              currentSpy.visWatch();
+              unmountComponentAtNode(currentSpy.$container[0]);
+            }
+            // Remove the actual container element.
             currentSpy.$container.remove();
-            currentSpy.$scope.$destroy();
             currentSpy = null;
           }
 
@@ -182,19 +203,35 @@ uiModules
             return;
           }
 
-          const contentScope = $scope.$new();
           const contentContainer = $('<div class="visualize-spy-content">');
-          contentContainer.append($compile(newMode.template)(contentScope));
 
-          $container.append(contentContainer);
+          if (newMode.component) {
+            // Render via react
+            // In case $scope.vis updates, we need to rerender the component
+            const visWatch = $scope.$watch('vis', renderReactSpy);
+            currentSpy = {
+              component: newMode.component,
+              visWatch: visWatch,
+              $container: contentContainer,
+              mode: mode,
+            };
+            $container.append(contentContainer);
+            renderReactSpy();
+          } else {
+            // Render via Angular
+            const contentScope = $scope.$new();
+            contentContainer.append($compile(newMode.template)(contentScope));
 
-          currentSpy = {
-            $scope: contentScope,
-            $container: contentContainer,
-            mode: mode,
-          };
+            currentSpy = {
+              $scope: contentScope,
+              $container: contentContainer,
+              mode: mode,
+            };
 
-          newMode.link && newMode.link(currentSpy.$scope, currentSpy.$element);
+            $container.append(contentContainer);
+            newMode.link && newMode.link(currentSpy.$scope, currentSpy.$element);
+          }
+
         });
       }
     };

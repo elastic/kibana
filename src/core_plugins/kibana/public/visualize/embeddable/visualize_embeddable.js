@@ -19,7 +19,6 @@
 
 import { PersistedState } from 'ui/persisted_state';
 import { Embeddable } from 'ui/embeddable';
-import chrome from 'ui/chrome';
 import _ from 'lodash';
 
 export class VisualizeEmbeddable extends Embeddable  {
@@ -146,7 +145,6 @@ export class VisualizeEmbeddable extends Embeddable  {
       cssClass: `panel-content panel-content--fullWidth`,
       // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
       // we deem that situation to be more public facing and want to hide more detailed information.
-      showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
       dataAttrs: {
         'shared-item': '',
         title: this.panelTitle,

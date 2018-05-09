@@ -40,6 +40,7 @@ import 'uiExports/managementSections';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
+import 'uiExports/inspectorViews';
 
 import 'ui/autoload/all';
 import './home';

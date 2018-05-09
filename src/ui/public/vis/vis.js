@@ -40,6 +40,9 @@ import { queryManagerFactory } from '../query_manager';
 import { SearchSourceProvider } from '../courier/data_source/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 
+import { openInspector, hasInspector } from '../inspector';
+import { RequestAdapter, DataAdapter } from '../inspector/adapters';
+
 export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -88,8 +91,58 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
             throw new Error('Unable to inherit search source, visualize saved object does not have search source.');
           }
           return new SearchSource().inherits(parentSearchSource);
-        }
+        },
+        inspectorAdapters: this._getActiveInspectorAdapters(),
       };
+    }
+
+    /**
+     * Open the inspector for this visualization.
+     * @return {InspectorSession} the handler for the session of this inspector.
+     */
+    openInspector() {
+      return openInspector(this.API.inspectorAdapters, {
+        title: this.title
+      });
+    }
+
+    hasInspector() {
+      return hasInspector(this.API.inspectorAdapters);
+    }
+
+    /**
+     * Returns an object of all inspectors for this vis object.
+     * This must only be called after this.type has properly be initialized,
+     * since we need to read out data from the the vis type to check which
+     * inspectors are available.
+     */
+    _getActiveInspectorAdapters() {
+      const adapters = {};
+
+      // Add the requests inspector adapters if the vis type explicitly requested it via
+      // inspectorAdapters.requests: true in its definition or if it's using the courier
+      // request handler, since that will automatically log its requests.
+      if (this.type.inspectorAdapters && this.type.inspectorAdapters.requests
+          || this.type.requestHandler === 'courier') {
+        adapters.requests = new RequestAdapter();
+      }
+
+      // Add the data inspector adapter if the vis type requested it or if the
+      // vis is using courier, since we know that courier supports logging
+      // its data.
+      if (this.type.inspectorAdapters && this.type.inspectorAdapters.data
+          || this.type.requestHandler === 'courier') {
+        adapters.data = new DataAdapter();
+      }
+
+      // Add all inspectors, that are explicitly registered with this vis type
+      if (this.type.inspectorAdapters && this.type.inspectorAdapters.custom) {
+        Object.entries(this.type.inspectorAdapters.custom).forEach(([key, Adapter]) => {
+          adapters[key] = new Adapter();
+        });
+      }
+
+      return adapters;
     }
 
     isEditorMode() {
