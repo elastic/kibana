@@ -60,7 +60,6 @@ app.directive('pipelineEdit', function ($injector) {
             0
           );
           editor.setReadOnly(this.isReadOnly);
-          editor.getSession().setMode('brace/mode/ruby');
           editor.setOptions({
             minLines: 25,
             maxLines: Infinity,
