@@ -18,7 +18,6 @@ import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { migrateKibanaIndex } from './migrations';
 
 const rootDir = fromRoot('.');
 
@@ -112,7 +111,6 @@ export default class KbnServer {
     } = this;
 
     await this.ready();
-    await migrateKibanaIndex(this);
     await fromNode(cb => server.start(cb));
 
     if (isWorker) {

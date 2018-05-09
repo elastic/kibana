@@ -1,6 +1,5 @@
 import { SavedObjectsClient } from './client';
 import { Mapping, Document } from '@kbn/migrations';
-import { optsFromKbnServer } from '../migrations';
 import { once } from 'lodash';
 import {
   createBulkGetRoute,
@@ -33,7 +32,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createUpdateRoute(prereqs));
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    const opts = optsFromKbnServer(kbnServer, callCluster);
+    const opts = server.plugins.kibanamigrations.migrationOptions({ callCluster });
 
     return new SavedObjectsClient({
       callCluster,
