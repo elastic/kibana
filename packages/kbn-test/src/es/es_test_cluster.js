@@ -6,17 +6,14 @@ import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
 import { KIBANA_ROOT } from '../';
-import { createToolingLog } from '@kbn/dev-utils';
 import elasticsearch from 'elasticsearch';
-
-const defaultLog = createToolingLog('debug');
 
 export function createEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
     license = 'oss',
-    log = defaultLog,
+    log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     // Use source when running on CI
     from = esTestConfig.getBuildFrom(),
