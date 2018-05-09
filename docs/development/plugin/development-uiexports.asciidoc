@@ -10,7 +10,6 @@ An aggregate list of available UiExport types:
 | visTypes | Modules that register providers with the `ui/registry/vis_types` registry.
 | fieldFormats | Modules that register providers with the `ui/registry/field_formats` registry.
 | inspectorViews | Modules that register custom inspector views via the `viewRegistry` in `ui/inspector`.
-| spyModes | Modules that register providers with the `ui/registry/spy_modes` registry.
 | chromeNavControls | Modules that register providers with the `ui/registry/chrome_nav_controls` registry.
 | navbarExtensions | Modules that register providers with the `ui/registry/navbar_extensions` registry.
 | docViews | Modules that register providers with the `ui/registry/doc_views` registry.

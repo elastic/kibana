@@ -18,7 +18,6 @@
  */
 
 import { Observable } from 'rxjs/Rx';
-import './spy';
 import './visualize.less';
 import _ from 'lodash';
 import { uiModules } from '../modules';
@@ -35,7 +34,6 @@ uiModules
     return {
       restrict: 'E',
       scope: {
-        showSpyPanel: '=?',
         vis: '=',
         visData: '=',
         uiState: '=?',

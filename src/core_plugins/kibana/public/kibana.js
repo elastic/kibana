@@ -31,7 +31,6 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
-import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';

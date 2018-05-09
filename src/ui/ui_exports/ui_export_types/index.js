@@ -41,7 +41,6 @@ export {
   fieldFormats,
   fieldFormatEditors,
   inspectorViews,
-  spyModes,
   chromeNavControls,
   navbarExtensions,
   dashboardPanelActions,

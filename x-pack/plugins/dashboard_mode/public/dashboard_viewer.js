@@ -20,7 +20,6 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableFactories';
-import 'uiExports/spyModes';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
