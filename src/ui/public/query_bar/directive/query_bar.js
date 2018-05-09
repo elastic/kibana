@@ -7,6 +7,7 @@ import { getSuggestionsProvider } from '../../kuery';
 import './suggestion.less';
 import '../../directives/match_pairs';
 import './query_popover';
+import { getFromLegacyIndexPattern } from '../../index_patterns/static_utils';
 
 const module = uiModules.get('kibana');
 
@@ -114,12 +115,10 @@ module.directive('queryBar', function () {
 
       $scope.$watch('queryBar.indexPatterns', () => {
         this.getIndexPatterns().then(indexPatterns => {
+
           this.getKuerySuggestions = getSuggestionsProvider({
             config,
-            indexPatterns: indexPatterns.map(indexPattern => ({
-              fields: indexPattern.fields.raw,
-              title: indexPattern.title,
-            })),
+            indexPatterns: getFromLegacyIndexPattern(indexPatterns)
           });
           this.updateSuggestions();
         });
