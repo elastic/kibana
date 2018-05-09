@@ -1,36 +1,38 @@
 import { resolve } from 'path';
-import { get } from 'lodash';
 import { format } from 'url';
-import elasticsearch from 'elasticsearch';
+import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
 import { rmrfSync } from './rmrf_sync';
+import { KIBANA_ROOT } from '../';
+import elasticsearch from 'elasticsearch';
 
-export function createTestCluster(options = {}) {
+export function createEsTestCluster(options = {}) {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
     license = 'oss',
     log,
-    basePath = resolve(__dirname, '../../../.es'),
+    basePath = resolve(KIBANA_ROOT, '.es'),
+    // Use source when running on CI
+    from = esTestConfig.getBuildFrom(),
   } = options;
 
-  const randomHash = Math.random().toString(36).substring(2);
+  const randomHash = Math.random()
+    .toString(36)
+    .substring(2);
   const clusterName = `test-${randomHash}`;
   const config = {
     version: esTestConfig.getVersion(),
     installPath: resolve(basePath, clusterName),
-    sourcePath: resolve(__dirname, '../../../../elasticsearch'),
+    sourcePath: resolve(KIBANA_ROOT, '../elasticsearch'),
     password,
     license,
     basePath,
   };
 
   const cluster = new Cluster(log);
-
-  // Use source when running on CI
-  const from = options.from || esTestConfig.getBuildFrom();
 
   return new class EsTestCluster {
     getStartTimeout() {
@@ -51,18 +53,20 @@ export function createTestCluster(options = {}) {
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
           `discovery.zen.ping.unicast.hosts=localhost:${port}`,
-          ...esArgs
+          ...esArgs,
         ],
       });
     }
 
     async stop() {
       await cluster.stop();
+      log.info('[es] stopped');
     }
 
     async cleanup() {
       await this.stop();
       rmrfSync(config.installPath);
+      log.info('[es] cleanup complete');
     }
 
     /**
@@ -84,7 +88,7 @@ export function createTestCluster(options = {}) {
 
       return format(parts);
     }
-  };
+  }();
 }
 
 /**
