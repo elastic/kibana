@@ -402,7 +402,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         return savedObjectsClient.create(type, body, { id: this.id })
           .then(response => {
             setVersion(this, response.version);
-            setId(this, response.id);
+            return setId(this, response.id);
           })
           .catch(err => {
             if (err.statusCode !== 409) {
@@ -421,7 +421,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                 .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
                 .then(response => {
                   setVersion(this, response.version);
-                  setId(this, response.id);
+                  return setId(this, response.id);
                 }),
               _.constant(false) // if the user doesn't overwrite, resolve with false
               );
