@@ -151,7 +151,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async setQuery(query) {
       log.debug(`setQuery(${query})`);
-      return await testSubjects.setValue('queryInput', query);
+      // Extra caution used because of flaky test here: https://github.com/elastic/kibana/issues/16978 doesn't seem
+      // to be actually setting the query in the query input based off
+      await retry.try(async () => {
+        await testSubjects.setValue('queryInput', query);
+        const newQuery = this.getQuery();
+        if (newQuery !== query) {
+          throw new Error('Failed to set query input');
+        }
+      });
     }
 
     async clickFilterButton() {
