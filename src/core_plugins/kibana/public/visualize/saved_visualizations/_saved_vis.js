@@ -78,17 +78,6 @@ uiModules
           self.searchSource.size(0);
 
           return self.vis ? self._updateVis() : self._createVis();
-        })
-        .then(function () {
-          self.searchSource.onRequestStart((searchSource, searchRequest) => {
-            return self.vis.onSearchRequestStart(searchSource, searchRequest);
-          });
-
-          self.searchSource.aggs(function () {
-            return self.vis.getAggConfig().toDsl();
-          });
-
-          return self;
         });
     };
 
