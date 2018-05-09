@@ -10,13 +10,13 @@ import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
 import { initKibanaMonitoring } from './server/kibana_monitoring';
 
 /**
- * Initialize the Kibana Monitoring plugin by starting up asynchronous server
- * tasks, based on user-defined configuration
- * - webserver route handling
- * - monitoring cluster health checker
- * - instantiation of an elasticsearch-js client exposed as a server plugin object
- * - start kibana ops monitoring loop
- * - start monitoring cluster x-pack license and features check loop
+ * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
+ * - [1] instantiation of an elasticsearch-js client exposed as a server plugin object
+ * - [2] start monitoring cluster x-pack license and features check
+ * - [3] webserver route handling
+ * - [4] start the internal monitoring collectors
+ * - [5] expose the monitoring collector object for other plugins to register with
+ * - [6] set monitoring plugin status to green
  * @param monitoringPlugin {Object} Monitoring UI plugin
  * @param server {Object} HapiJS server instance
  */
