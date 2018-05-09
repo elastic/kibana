@@ -27,17 +27,8 @@ in another terminal session by running this command from this directory:
  * @param {Log}      log           Optional logger
  */
 export async function runTests(configPaths, { bail, log }) {
-  if (!configPaths || configPaths.length === 0) {
-    log.error(`runTests requires configPaths to contain at least one item`);
-    process.exit(1);
-  }
-
   for (const configPath of configPaths) {
-    try {
-      await runSingleConfig(resolve(process.cwd(), configPath), { bail, log });
-    } catch (err) {
-      fatalErrorHandler(err, { log });
-    }
+    await runSingleConfig(resolve(process.cwd(), configPath), { bail, log });
   }
 }
 
@@ -47,31 +38,22 @@ export async function runTests(configPaths, { bail, log }) {
  * @param {Log}     log          Optional logger
  */
 export async function startServers(configPath, { log }) {
-  if (!configPath) {
-    log.error(`startServers requires configPath`);
-    process.exit(1);
-  }
-
   configPath = resolve(process.cwd(), configPath);
 
-  try {
-    await withProcRunner(log, async procs => {
-      const config = await readConfigFile(log, configPath);
+  await withProcRunner(log, async procs => {
+    const config = await readConfigFile(log, configPath);
 
-      const es = await runElasticsearch({ config, log });
-      await runKibanaServer({ procs, config, log });
+    const es = await runElasticsearch({ config, log });
+    await runKibanaServer({ procs, config, log });
 
-      // wait for 5 seconds of silence before logging the
-      // success message so that it doesn't get buried
-      await silence(5000, { log });
-      log.info(SUCCESS_MESSAGE);
+    // wait for 5 seconds of silence before logging the
+    // success message so that it doesn't get buried
+    await silence(5000, { log });
+    log.info(SUCCESS_MESSAGE);
 
-      await procs.waitForAllToStop();
-      await es.cleanup();
-    });
-  } catch (err) {
-    fatalErrorHandler(err);
-  }
+    await procs.waitForAllToStop();
+    await es.cleanup();
+  });
 }
 
 async function silence(milliseconds, { log }) {
@@ -106,10 +88,4 @@ async function runSingleConfig(configPath, { bail, log }) {
     await procs.stop('kibana');
     await es.cleanup();
   });
-}
-
-function fatalErrorHandler(err, { log }) {
-  log.error('FATAL ERROR');
-  log.error(err);
-  process.exit(1);
 }

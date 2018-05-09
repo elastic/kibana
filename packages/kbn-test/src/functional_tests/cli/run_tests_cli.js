@@ -13,15 +13,28 @@ import { runTests } from '../../';
  * @param {string[]} defaultConfigPaths  Array of paths to configs to use
  *                                       if no config option is passed
  */
-export function runTestsCli(defaultConfigPaths) {
-  const { configs, help, bail, log } = processArgv(defaultConfigPaths);
+export async function runTestsCli(defaultConfigPaths) {
+  const { configs, help, bail, log } = processArgs(defaultConfigPaths);
 
   if (help) return displayHelp();
 
-  runTests(configs, { bail, log });
+  if (!configs || configs.length === 0) {
+    log.error(
+      `Run Tests requires at least one path to a config. Leave blank to use defaults.`
+    );
+    process.exit(9);
+  }
+
+  try {
+    await runTests(configs, { bail, log });
+  } catch (err) {
+    log.error('FATAL ERROR');
+    log.error(err);
+    process.exit(1);
+  }
 }
 
-function processArgv(defaultConfigPaths) {
+function processArgs(defaultConfigPaths) {
   // If no args are passed, use {}
   const options = getopts(process.argv.slice(2)) || {};
 

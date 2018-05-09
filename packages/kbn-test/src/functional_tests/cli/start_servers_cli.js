@@ -8,12 +8,25 @@ import { startServers } from '../../';
  * Start servers
  * @param {string} configPath path to config
  */
-export function startServersCli(defaultConfigPath) {
+export async function startServersCli(defaultConfigPath) {
   const { config, log, help } = processArgv(defaultConfigPath);
 
   if (help) return displayHelp();
 
-  startServers(config, { log });
+  if (!config) {
+    log.error(
+      `Start Servers requires one path to a config. Leave blank to use default.`
+    );
+    process.exit(1);
+  }
+
+  try {
+    await startServers(config, { log });
+  } catch (err) {
+    log.error('FATAL ERROR');
+    log.error(err);
+    process.exit(1);
+  }
 }
 
 function processArgv(defaultConfigPath) {
@@ -25,7 +38,7 @@ function processArgv(defaultConfigPath) {
         `Starting servers requires a single config path. Multiple were passed.`
       )
     );
-    process.exit(1);
+    process.exit(9);
   }
 
   const config =
