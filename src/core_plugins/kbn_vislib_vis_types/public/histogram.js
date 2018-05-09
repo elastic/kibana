@@ -151,7 +151,7 @@ export default function PointSeriesVisType(Private) {
           name: 'group',
           title: 'Split Series',
           min: 0,
-          max: 1,
+          max: 3,
           aggFilter: ['!geohash_grid', '!filter']
         },
         {

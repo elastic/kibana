@@ -4,17 +4,18 @@ exports[`renders RangeControlEditor 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="numberField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="numberField"
   />
   <EuiFormRow
     describedByIds={Array []}

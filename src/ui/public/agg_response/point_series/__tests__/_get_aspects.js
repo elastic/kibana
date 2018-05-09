@@ -123,14 +123,6 @@ describe('getAspects', function () {
     }).to.throwError(TypeError);
   });
 
-  it('throws an error if there are multiple series aspects', function () {
-    init(2, 1, 1);
-
-    expect(function () {
-      getAspects(vis, table);
-    }).to.throwError(TypeError);
-  });
-
   it('creates a fake x aspect if the column does not exist', function () {
     init(0, 0, 1);
 
