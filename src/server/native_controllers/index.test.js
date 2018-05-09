@@ -291,4 +291,19 @@ describe('#killOrStart', () => {
 
     await NativeControllers.killOrStart(kbnServer);
   });
+
+  test(`throws error when nativeController isn't for a known plugin`, () => {
+    const kbnServer = {
+      nativeControllers: [],
+      pluginSpecs: [{
+        getId: () => 'foo'
+      }],
+      disabledPluginSpecs: [],
+      nativeControllers: {
+        'bar': {}
+      }
+    };
+
+    return expect(NativeControllers.killOrStart(kbnServer)).rejects.toThrow();
+  });
 });

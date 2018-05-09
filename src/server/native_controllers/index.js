@@ -75,27 +75,28 @@ export async function prepare(kbnServer) {
 }
 
 export async function killOrStart(kbnServer) {
-  const started$ = Observable.from(kbnServer.pluginSpecs)
-    .mergeMap(spec => {
-      const nativeController = kbnServer.nativeControllers[spec.getId()];
-      if (!nativeController) {
+  const nativeControllers = Object.entries(kbnServer.nativeControllers)
+    .map(([pluginId, nativeController]) => ({
+      pluginId,
+      nativeController
+    }));
+
+  const enabledSpecIds = kbnServer.pluginSpecs.map(spec => spec.getId());
+  const disabledSpecIds = kbnServer.disabledPluginSpecs.map(spec => spec.getId());
+
+  return await Observable
+    .from(nativeControllers)
+    .mergeMap(({ pluginId, nativeController }) => {
+      if (enabledSpecIds.includes(pluginId)) {
+        return nativeController.start();
+      }
+
+      if (disabledSpecIds.includes(pluginId)) {
+        nativeController.kill();
         return Observable.empty();
       }
 
-      return nativeController.start();
-    });
-
-
-  const killed$ = Observable.from(kbnServer.disabledPluginSpecs)
-    .do(spec => {
-      const nativeController = kbnServer.nativeControllers[spec.getId()];
-      if (!nativeController) {
-        return;
-      }
-
-      nativeController.kill();
-    });
-
-  // await completion of start$, kill$
-  await Observable.merge(started$, killed$).toPromise();
+      throw new Error(`Found nativeController for unknown plugin ${pluginId}`);
+    })
+    .toPromise();
 }
