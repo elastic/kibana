@@ -74,7 +74,6 @@ module.controller('MlExplorerController', function (
   let resizeTimeout = null;
 
   const $mlExplorer = $('.ml-explorer');
-  const MAX_INFLUENCER_FIELD_NAMES = 10;
   const MAX_INFLUENCER_FIELD_VALUES = 10;
   const VIEW_BY_JOB_LABEL = 'job ID';
 
@@ -165,20 +164,6 @@ module.controller('MlExplorerController', function (
       return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan.asSeconds() };
     });
   }
-
-  $scope.loadAnomaliesTable = function (jobIds, influencers, earliestMs, latestMs) {
-    mlResultsService.getRecordsForInfluencer(
-      jobIds, influencers, 0, earliestMs, latestMs, 500
-    )
-      .then((resp) => {
-        // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
-        $scope.$evalAsync(() => {
-          // Sort in descending time order before storing in scope.
-          $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
-          console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
-        });
-      });
-  };
 
   $scope.setSelectedJobs = function (selectedIds) {
     let previousSelected = 0;
@@ -367,7 +352,7 @@ module.controller('MlExplorerController', function (
 
       $scope.cellData = cellData;
       const args = [jobIds, influencers, timerange.earliestMs, timerange.latestMs];
-      $scope.loadAnomaliesTable(...args);
+      loadAnomalies(...args);
       $scope.loadAnomaliesForCharts(...args);
     }
   };
@@ -424,7 +409,7 @@ module.controller('MlExplorerController', function (
 
   $scope.loadAnomaliesForCharts = function (jobIds, influencers, earliestMs, latestMs) {
     // Load the top anomalies (by record_score) which will be displayed in the charts.
-    // TODO - combine this with loadAnomaliesTable() if the table is being retained.
+    // TODO - combine this with loadAnomalies().
     mlResultsService.getRecordsForInfluencer(
       jobIds, influencers, 0, earliestMs, latestMs, 500
     ).then((resp) => {
@@ -438,6 +423,70 @@ module.controller('MlExplorerController', function (
       }
     });
   };
+
+  function loadAnomalies(jobIds, influencers, earliestMs, latestMs) {
+    // Loads the anomalies for the table, plus the scores for
+    // the Top Influencers List for the influencers in the anomaly records.
+
+    if (influencers.length === 0) {
+      getTopInfluencers(jobIds, earliestMs, latestMs);
+    }
+
+    mlResultsService.getRecordsForInfluencer(
+      jobIds, influencers, 0, earliestMs, latestMs, 500
+    )
+      .then((resp) => {
+        if (influencers.length > 0) {
+          // Filter the Top Influencers list to show just the influencers from
+          // the records in the selected time range.
+          const recordInfluencersByName = {};
+          resp.records.forEach((record) => {
+            const influencersByName = record.influencers || [];
+            influencersByName.forEach((influencer) => {
+              const fieldName = influencer.influencer_field_name;
+              const fieldValues = influencer.influencer_field_values;
+              if (recordInfluencersByName[fieldName] === undefined) {
+                recordInfluencersByName[fieldName] = [];
+              }
+              recordInfluencersByName[fieldName].push(...fieldValues);
+            });
+          });
+
+          const uniqValuesByName = {};
+          Object.keys(recordInfluencersByName).forEach((fieldName) => {
+            const fieldValues = recordInfluencersByName[fieldName];
+            uniqValuesByName[fieldName] = _.uniq(fieldValues);
+          });
+
+          const filterInfluencers = [];
+          Object.keys(uniqValuesByName).forEach((fieldName) => {
+            // Find record influencers with the same field name as the clicked on cell(s).
+            const matchingFieldName = influencers.filter((influencer) => {
+              return influencer.fieldName === fieldName;
+            });
+
+            if (matchingFieldName.length > 0) {
+              // Filter for the value(s) of the clicked on cell(s).
+              filterInfluencers.push(...influencers);
+            } else {
+              // For other field names, add values from all records.
+              uniqValuesByName[fieldName].forEach((fieldValue) => {
+                filterInfluencers.push({ fieldName, fieldValue });
+              });
+            }
+          });
+
+          getTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
+        }
+
+        // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
+        $scope.$evalAsync(() => {
+          // Sort in descending time order before storing in scope.
+          $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
+          console.log('Explorer anomalies table data set:', $scope.anomalyRecords);
+        });
+      });
+  }
 
   function loadViewBySwimlaneOptions() {
     // Obtain the list of 'View by' fields per job.
@@ -600,14 +649,14 @@ module.controller('MlExplorerController', function (
 
   }
 
-  function getTopInfluencers(selectedJobIds, earliestMs, latestMs) {
+  function getTopInfluencers(selectedJobIds, earliestMs, latestMs, influencers = []) {
     if ($scope.noInfluencersConfigured !== true) {
       mlResultsService.getTopInfluencers(
         selectedJobIds,
         earliestMs,
         latestMs,
-        MAX_INFLUENCER_FIELD_NAMES,
-        MAX_INFLUENCER_FIELD_VALUES
+        MAX_INFLUENCER_FIELD_VALUES,
+        influencers
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         $scope.influencers = resp.influencers;
@@ -689,7 +738,6 @@ module.controller('MlExplorerController', function (
         selectedJobIds,
         earliestMs,
         latestMs,
-        MAX_INFLUENCER_FIELD_NAMES,
         swimlaneLimit
       ).then((resp) => {
         const topFieldValues = [];
@@ -725,8 +773,7 @@ module.controller('MlExplorerController', function (
     const earliestMs = bounds.min.valueOf();
     const latestMs = bounds.max.valueOf();
     mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords, earliestMs, latestMs);
-    getTopInfluencers(jobIds, earliestMs, latestMs);
-    $scope.loadAnomaliesTable(jobIds, [], earliestMs, latestMs);
+    loadAnomalies(jobIds, [], earliestMs, latestMs);
   }
 
   function calculateSwimlaneBucketInterval() {
