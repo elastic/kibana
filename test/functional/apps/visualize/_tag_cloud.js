@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }) {
           '18,253,611,008', '679'
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openInspector()
           .then(function () {
             return PageObjects.visualize.setSpyPanelPageSize('All');
           })

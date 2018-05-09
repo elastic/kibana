@@ -133,6 +133,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   }, {
     key: 'inspector',
     description: 'Open Inspector for visualization',
+    testId: 'openInspectorButton',
     disableButton() {
       return !vis.hasInspector();
     },

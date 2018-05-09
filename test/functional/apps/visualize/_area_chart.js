@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-22 21:00', '29'
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openInspector()
           .then(function setPageSize() {
             return PageObjects.visualize.setSpyPanelPageSize('All');
           })

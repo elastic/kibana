@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }) {
           '160,000', '44', '200,000', '40', '240,000', '46', '280,000', '39', '320,000', '40', '360,000', '47'
         ];
 
-        return PageObjects.visualize.toggleSpyPanel()
+        return PageObjects.visualize.openInspector()
           .then(function () {
             return PageObjects.visualize.setSpyPanelPageSize('All');
           })

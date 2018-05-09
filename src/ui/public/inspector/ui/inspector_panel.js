@@ -86,6 +86,7 @@ class InspectorPanel extends Component {
     return (
       <EuiFlyout
         onClose={onClose}
+        data-test-subj="inspectorPanel"
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup
@@ -115,6 +116,7 @@ class InspectorPanel extends Component {
           <EuiButtonEmpty
             iconType="cross"
             onClick={this.props.onClose}
+            data-test-subj="inspectorPanel-close"
           >
             Close
           </EuiButtonEmpty>

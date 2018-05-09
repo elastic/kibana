@@ -126,10 +126,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
+      await PageObjects.visualize.openInspector();
       const tileMapData = await PageObjects.visualize.getDataTableData();
       await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
+      await PageObjects.visualize.closeInspector();
 
       await PageObjects.dashboard.clickEdit();
       await dashboardPanelActions.clickEdit();
@@ -144,10 +144,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
 
       await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.openSpyPanel();
+      await PageObjects.visualize.openInspector();
       const changedTileMapData = await PageObjects.visualize.getDataTableData();
       await testSubjects.moveMouseTo('dashboardPanel');
-      await PageObjects.visualize.closeSpyPanel();
+      await PageObjects.visualize.closeInspector();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 

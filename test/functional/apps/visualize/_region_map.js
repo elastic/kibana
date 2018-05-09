@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show results after clicking play (join on states)', async function () {
         const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
-        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getDataTableData();
         expect(data.trim().split('\n').join(',')).to.eql(expectedData);
       });
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.sleep(2000);//need some time for the data to load
 
-        await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.openInspector();
         const actualData = await PageObjects.visualize.getDataTableData();
         const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
         expect(actualData.trim().split('\n').join(',')).to.eql(expectedData);

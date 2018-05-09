@@ -93,6 +93,7 @@ class DataTableFormat extends Component {
     };
     return (
       <EuiInMemoryTable
+        data-test-subj="inspectorDataTable"
         columns={columns}
         items={rows}
         sorting={true}

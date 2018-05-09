@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }) {
                 return hit._id === 'AU_x3_g4GFA8no6QjkYX' && hit._index === 'logstash-2015.09.22';
               });
               log.info(JSON.stringify(spyPanelDoc));
-              await PageObjects.visualize.closeSpyPanel();
+              await PageObjects.visualize.closeInspector();
 
               throw e;
             }

@@ -321,26 +321,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await find.existsByCssSelector('.collapsible-sidebar');
     }
 
-    async openSpyPanel() {
-      log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyContentContainer');
+    async openInspector() {
+      log.debug('Open Inspector');
+      const isOpen = await testSubjects.exists('inspectorPanel');
       if (!isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          await testSubjects.find('spyContentContainer');
+          await testSubjects.click('openInspectorButton');
+          await testSubjects.find('inspectorPanel');
         });
       }
     }
 
-    async closeSpyPanel() {
-      log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyContentContainer');
+    async closeInspector() {
+      log.debug('Close Inspector');
+      let isOpen = await testSubjects.exists('inspectorPanel');
       if (isOpen) {
         await retry.try(async () => {
-          await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyContentContainer');
+          await testSubjects.click('inspectorPanel-close');
+          isOpen = await testSubjects.exists('inspectorPanel');
           if (isOpen) {
-            throw new Error('Failed to close spy panel');
+            throw new Error('Failed to close inspector');
           }
         });
       }
@@ -803,17 +803,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getDataTableData() {
-      const dataTable = await testSubjects.find('paginated-table-body');
-      return await dataTable.getVisibleText();
+      const inspectorTable = await testSubjects.find('inspectorTable');
+      const tableBody = await inspectorTable.findByTagName('tbody');
+      return await tableBody.getVisibleText();
     }
 
-    async getDataTableHeaders(parent) {
-      const dataTableHeader = await retry.try(
-        async () => (
-          parent ?
-            testSubjects.findDescendant('paginated-table-header', parent) :
-            testSubjects.find('paginated-table-header')
-        ));
+    async getDataTableHeaders() {
+      const dataTableHeader = await retry.try(async () => {
+        const inspectorTable = await testSubjects.find('inspectorTable');
+        return await inspectorTable.findByTagName('thead');
+      });
       return await dataTableHeader.getVisibleText();
     }
 
@@ -848,14 +847,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
-      await this.openSpyPanel();
+      await this.openInspector();
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
 
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
-      await this.openSpyPanel();
+      await this.openInspector();
       await testSubjects.click('spyModeSelect-response');
       return await testSubjects.getVisibleText('visualizationEsResponseBody');
     }

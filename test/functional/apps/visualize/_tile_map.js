@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
       }
 
       describe('Only request data around extent of map option', async () => {
-        before(async () => await PageObjects.visualize.openSpyPanel());
+        before(async () => await PageObjects.visualize.openInspector());
 
         it('when checked adds filters to aggregation', async () => {
           const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
           await PageObjects.header.waitUntilLoadingHasFinished();
@@ -173,12 +173,12 @@ export default function ({ getService, getPageObjects }) {
           //level 0
           await PageObjects.visualize.clickMapZoomOut();
 
-          await PageObjects.visualize.openSpyPanel();
+          await PageObjects.visualize.openInspector();
           await PageObjects.visualize.setSpyPanelPageSize('All');
           await PageObjects.visualize.selectTableInSpyPaneSelect();
           const actualTableData = await PageObjects.visualize.getDataTableData();
           compareTableData(expectedTableData, actualTableData.trim().split('\n'));
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
         });
 
         it('should not be able to zoom out beyond 0', async function () {
@@ -203,11 +203,11 @@ export default function ({ getService, getPageObjects }) {
           ];
 
           await PageObjects.visualize.clickMapFitDataBounds();
-          await PageObjects.visualize.openSpyPanel();
+          await PageObjects.visualize.openInspector();
           await PageObjects.visualize.selectTableInSpyPaneSelect();
           const data = await PageObjects.visualize.getDataTableData();
           await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
         });
 
         it('Newly saved visualization retains map bounds', async () => {
@@ -218,7 +218,7 @@ export default function ({ getService, getPageObjects }) {
 
           const mapBounds = await PageObjects.visualize.getMapBounds();
 
-          await PageObjects.visualize.closeSpyPanel();
+          await PageObjects.visualize.closeInspector();
           await PageObjects.visualize.saveVisualization(vizName1);
 
           const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
