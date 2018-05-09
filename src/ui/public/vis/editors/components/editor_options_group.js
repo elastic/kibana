@@ -1,3 +1,4 @@
+import className from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -20,10 +21,12 @@ import {
  * to produce an aligned look and feel.
  */
 function EditorOptionsGroup(props) {
+  const panelClass = className('editorOptionsGroup__panel', props.className);
+
   const collapsibleOptionGroup = (
     <EuiPanel
       grow={false}
-      className={`editorOptionsGroup__panel ${props.className}`}
+      className={panelClass}
     >
       <EuiAccordion
         id={htmlIdGenerator('eog')()}
@@ -44,7 +47,7 @@ function EditorOptionsGroup(props) {
   const simpleOptionGroup = (
     <EuiPanel
       grow={props.grow}
-      className={`editorOptionsGroup__panel ${props.className}`}
+      className={panelClass}
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
@@ -58,8 +61,6 @@ function EditorOptionsGroup(props) {
               {props.actions}
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          <EuiSpacer size="m"/>
         </EuiFlexItem>
         <EuiFlexItem>
           { props.children }
@@ -97,7 +98,7 @@ EditorOptionsGroup.propTypes = {
    */
   collapsible: PropTypes.bool,
   /**
-   * Whether the panel should grow.
+   * Whether the panel should grow. Only applies when collapsible is set to false.
    */
   grow: PropTypes.bool,
 

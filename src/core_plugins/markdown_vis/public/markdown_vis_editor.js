@@ -30,7 +30,7 @@ export class MarkdownEditorTab extends Component {
     const params = this.props.scope.vis.params;
 
     const markdownLabel = (
-      <EuiLink className="markdown-vis--help" href="https://www.markdownguide.org/cheat-sheet" target="_blank">
+      <EuiLink href="https://www.markdownguide.org/cheat-sheet" target="_blank">
         <EuiIcon type="help" /> Syntax help
       </EuiLink>
     );
@@ -54,6 +54,7 @@ export class MarkdownEditorTab extends Component {
               fullWidth={true}
               onChange={this.handleUpdate('markdown')}
               data-test-subj="markdownEditorMarkdown"
+              className="markdown-vis-editor-textarea"
             />
           </EuiFormRow>
         </EditorOptionsGroup>
