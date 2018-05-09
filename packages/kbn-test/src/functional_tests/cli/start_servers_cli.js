@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import dedent from 'dedent';
 import getopts from 'getopts';
+import { createToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 import { startServers } from '../../';
 
 /**
@@ -8,11 +9,11 @@ import { startServers } from '../../';
  * @param {string} configPath path to config
  */
 export function startServersCli(defaultConfigPath) {
-  const { config, help } = processArgv(defaultConfigPath);
+  const { config, log, help } = processArgv(defaultConfigPath);
 
   if (help) return displayHelp();
 
-  startServers(config);
+  startServers(config, { log });
 }
 
 function processArgv(defaultConfigPath) {
@@ -30,8 +31,12 @@ function processArgv(defaultConfigPath) {
   const config =
     typeof options.config === 'string' ? options.config : defaultConfigPath;
 
+  const log = createToolingLog(pickLevelFromFlags(options));
+  log.pipe(process.stdout);
+
   return {
     config,
+    log,
     help: options.help,
     rest: options._,
   };
