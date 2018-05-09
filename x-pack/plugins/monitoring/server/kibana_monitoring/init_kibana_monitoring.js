@@ -11,6 +11,7 @@ import { startCollector } from './start_collector';
 /**
  * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param server {Object} HapiJS server instance
+ * @return {Object} TypeCollector instance to be exposed at a higher level, for other plugins to register their own type collectors
  */
 export function initKibanaMonitoring(kbnServer, server) {
   const mainXpackInfo = server.plugins.xpack_main.info;
@@ -22,7 +23,6 @@ export function initKibanaMonitoring(kbnServer, server) {
     const client = server.plugins.elasticsearch.getCluster('admin').createClient({
       plugins: [monitoringBulk]
     });
-
     collector = startCollector(kbnServer, server, client);
   } else {
     server.log(

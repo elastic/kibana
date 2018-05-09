@@ -109,7 +109,7 @@ export class TypeCollector {
 
     if (payload.length > 0) {
       try {
-        const combinedData = this._combineTypes(payload);
+        const combinedData = this._combineTypes(payload); // use the collector types combiner
         this._log.debug(`Uploading bulk Kibana monitoring payload`);
         this._onPayload(flatten(combinedData));
       } catch(err) {
