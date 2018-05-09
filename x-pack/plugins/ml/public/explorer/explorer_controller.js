@@ -461,11 +461,11 @@ module.controller('MlExplorerController', function (
           const filterInfluencers = [];
           Object.keys(uniqValuesByName).forEach((fieldName) => {
             // Find record influencers with the same field name as the clicked on cell(s).
-            const matchingFieldName = influencers.filter((influencer) => {
+            const matchingFieldName = influencers.find((influencer) => {
               return influencer.fieldName === fieldName;
             });
 
-            if (matchingFieldName.length > 0) {
+            if (matchingFieldName !== undefined) {
               // Filter for the value(s) of the clicked on cell(s).
               filterInfluencers.push(...influencers);
             } else {
@@ -479,7 +479,7 @@ module.controller('MlExplorerController', function (
           getTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
 
-        // Need to use $timeout to ensure the update happens after the child scope is updated with the new data.
+        // Use $evalAsync to ensure the update happens after the child scope is updated with the new data.
         $scope.$evalAsync(() => {
           // Sort in descending time order before storing in scope.
           $scope.anomalyRecords = _.chain(resp.records).sortBy(record => record[$scope.timeFieldName]).reverse().value();
