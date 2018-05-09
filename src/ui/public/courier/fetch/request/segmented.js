@@ -88,7 +88,7 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
         const indexCount = Math.max(1, Math.floor(this._queue.length / remainingSegments));
 
         const indices = this._active = this._queue.splice(0, indexCount);
-        params.index = _.pluck(indices, 'index');
+        params.index = indices.map(({ index }) => index).join(',');
 
         if (_.isNumber(this._desiredSize)) {
           params.body.size = this._pickSizeForIndices(indices);
