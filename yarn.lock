@@ -3432,7 +3432,7 @@ debug@0.7.4:
   version "0.7.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-0.7.4.tgz#06e1ea8082c2cb14e39806e22e2f6f757f92af39"
 
-debug@2, debug@2.6.9, debug@2.X, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
+debug@2, debug@2.6.9, debug@2.X, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.0, debug@^2.6.3, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   dependencies:
@@ -3545,6 +3545,10 @@ deep-equal@^1.0.0, deep-equal@^1.0.1:
 deep-extend@~0.4.0:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.4.2.tgz#48b699c27e334bf89f10892be432f6e4c7d34a7f"
+
+deep-is@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.2.tgz#9ced65ea0bc0b09f42a6d79c1b1903f9d913cc18"
 
 deep-is@~0.1.3:
   version "0.1.3"
@@ -4856,7 +4860,7 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fibers@~2.0.0:
+fibers@^2.0.0, fibers@~2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/fibers/-/fibers-2.0.2.tgz#36db63ea61c543174e2264675fea8c2783371366"
 
@@ -6893,6 +6897,12 @@ is-word-character@^1.0.0:
 is-wsl@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-wsl/-/is-wsl-1.1.0.tgz#1f16e4aa22b04d1336b66188a66af3c600c3a66d"
+
+is2@0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/is2/-/is2-0.0.9.tgz#119556d1d1651a41ba105af803267c80b299f629"
+  dependencies:
+    deep-is "0.1.2"
 
 isarray@0.0.1:
   version "0.0.1"
@@ -10245,13 +10255,13 @@ process@~0.5.1:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/process/-/process-0.5.2.tgz#1638d8a8e34c2f440a91db95ab9aeb677fc185cf"
 
+progress@1.1.8, progress@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
+
 progress@2.0.0, progress@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.0.tgz#8a1be366bf8fc23db2bd23f10c6fe920b4389d1f"
-
-progress@^1.1.8:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/progress/-/progress-1.1.8.tgz#e260c78f6161cdd9b0e56cc3e0a85de17c7a57be"
 
 promise@^6.0.1:
   version "6.1.0"
@@ -10387,6 +10397,10 @@ punycode@2.x.x, punycode@^2.1.0:
 punycode@^1.2.4, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
+
+q@0.9.7:
+  version "0.9.7"
+  resolved "https://registry.yarnpkg.com/q/-/q-0.9.7.tgz#4de2e6cb3b29088c9e4cbc03bf9d42fb96ce2f75"
 
 q@^1.0.1, q@^1.1.2, q@~1.5.0:
   version "1.5.1"
@@ -11605,6 +11619,24 @@ selenium-standalone@^6.13.0:
     which "^1.2.12"
     yauzl "^2.5.0"
 
+selenium-standalone@~6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/selenium-standalone/-/selenium-standalone-6.6.0.tgz#00973b979732a54fa2662afd8be3fb06cb6004f1"
+  dependencies:
+    async "^2.1.4"
+    commander "^2.9.0"
+    cross-spawn "^5.1.0"
+    debug "^2.6.3"
+    lodash "^4.17.4"
+    minimist "^1.2.0"
+    mkdirp "^0.5.1"
+    progress "1.1.8"
+    request "2.79.0"
+    tar-stream "1.5.2"
+    urijs "^1.18.4"
+    which "^1.2.12"
+    yauzl "^2.5.0"
+
 semver-diff@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/semver-diff/-/semver-diff-2.1.0.tgz#4bbb8437c8d37e4b0cf1a68fd726ec6d645d6d36"
@@ -12582,6 +12614,14 @@ tar@^2.2.1:
     block-stream "*"
     fstream "^1.0.2"
     inherits "2"
+
+tcp-port-used@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/tcp-port-used/-/tcp-port-used-0.1.2.tgz#9450e8768c83b416fd4d1a6a9449eeccbf496c29"
+  dependencies:
+    debug "0.7.4"
+    is2 "0.0.9"
+    q "0.9.7"
 
 term-size@^1.2.0:
   version "1.2.0"
@@ -13795,6 +13835,15 @@ wdio-webpack-dev-server-service@^1.2.0:
     express "^4.15.2"
     webpack "^2.3.1 || ^3.4.1"
     webpack-dev-middleware "^1.11.0"
+
+wdio@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/wdio/-/wdio-2.0.2.tgz#218bfd98cdac37c0f24dcf25276cb132efba6de7"
+  dependencies:
+    fibers "^2.0.0"
+    selenium-standalone "~6.6.0"
+    tcp-port-used "^0.1.2"
+    webdriverio "^4.12.0"
 
 webcola@3.3.6:
   version "3.3.6"

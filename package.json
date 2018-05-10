@@ -210,8 +210,8 @@
     "validate-npm-package-name": "2.2.2",
     "vega-lib": "^3.3.1",
     "vega-lite": "^2.4.0",
-    "vega-tooltip": "^0.9.14",
     "vega-schema-url-parser": "1.0.0",
+    "vega-tooltip": "^0.9.14",
     "vision": "4.1.0",
     "wdio-chromedriver-service": "^0.1.2",
     "wdio-iedriver-service": "^0.1.0",
@@ -313,6 +313,7 @@
     "ts-jest": "^22.4.3",
     "typescript": "^2.8.1",
     "vinyl-fs": "^3.0.2",
+    "wdio": "^2.0.2",
     "xml2js": "0.4.19",
     "xmlbuilder": "9.0.4"
   },

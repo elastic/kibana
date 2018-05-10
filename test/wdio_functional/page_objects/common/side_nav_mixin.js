@@ -1,8 +1,16 @@
 import { PageRegion } from './base_page';
+import { testSubjectifySelector } from '../../helpers/helpers';
+import ConsolePage from '../console/console_page';
 
 export default class SideNav extends PageRegion {
 
-  discoverLinkSelector = '[data-test-subj="appLink"] ';
+  constructor(driver) {
+    super(driver, testSubjectifySelector('globalNav', 'css'));
+
+    this.baseLinkSelector = testSubjectifySelector('appLink', 'xpath');
+    this.consoleLinkSelector = this.baseLinkSelector + '[@aria-label="Dev Tools"' ;
+  }
+
   navigateToApp(app) {
     switch (app) {
       case 'Discover':
@@ -14,7 +22,8 @@ export default class SideNav extends PageRegion {
       case 'Timelion':
         break;
       case 'Dev Tools':
-        break;
+        this.driver.click(this.consoleLinkSelector);
+        return new ConsolePage(this.driver);
       case 'Management':
         break;
       default:
