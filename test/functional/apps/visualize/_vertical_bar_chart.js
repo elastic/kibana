@@ -186,6 +186,16 @@ export default function ({ getService, getPageObjects }) {
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
+
+      it('should show correct series when disabling first agg', async function () {
+        await PageObjects.visualize.toggleDisabledAgg(3);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
     });
   });
 }
