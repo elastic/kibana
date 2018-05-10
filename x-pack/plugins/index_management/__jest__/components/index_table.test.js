@@ -32,6 +32,7 @@ jest.mock('react-ace', () => {
     }
   };
 });
+jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 
 setHttpClient(axios.create());
 let server = null;
