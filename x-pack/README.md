@@ -72,7 +72,7 @@ node scripts/functional_tests
 
 #### Running UI tests
 
-The functional UI tests can be run separately like so:
+To run _only_ the functional UI tests:
 
 ```sh
 node scripts/functional_tests --config test/functional/config
@@ -86,7 +86,7 @@ API integration tests are run with a unique setup usually without UI assets buil
 
 API integration tests are intended to test _only programmatic API exposed by Kibana_. There is no need to run browser and simulate user actions, which significantly reduces execution time. In addition, the configuration for API integration tests typically sets `optimize.enabled=false` for Kibana because UI assets are usually not needed for these tests.
 
-The API integration tests can be run separately like so:
+To run _only_ the API integration tests:
 
 ```sh
 node scripts/functional_tests --config test/api_integration/config
@@ -94,7 +94,7 @@ node scripts/functional_tests --config test/api_integration/config
 
 #### Running SAML API integration tests
 
-We also have SAML API integration tests which set up Elasticsearch and Kibana with SAML support. Run API integration tests separately with SAML support like so:
+We also have SAML API integration tests which set up Elasticsearch and Kibana with SAML support. Run _only_ API integration tests with SAML enabled like so:
 
 ```sh
 node scripts/functional_tests --config test/saml_api_integration/config
@@ -111,10 +111,10 @@ node scripts/functional_tests_server
 After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
 
 ```sh
-# make sure you are in the x-pack-kibana project
+# make sure you are in the x-pack project
 cd x-pack
 
-# invoke the functional_test_runner from kibana project. try sending --help to learn more
+# invoke the functional_test_runner from Kibana project. try sending --help to learn more
 node ../scripts/functional_test_runner
 ```
 
