@@ -1,4 +1,5 @@
 import { includes } from 'lodash';
+import { resolveWithMissingImage } from '../../lib/resolve_dataurl';
 import { elasticLogo } from './elastic_logo';
 
 export const image = () => ({
@@ -35,7 +36,7 @@ export const image = () => ({
     return {
       type: 'image',
       mode,
-      dataurl: args.dataurl,
+      dataurl: resolveWithMissingImage(args.dataurl, elasticLogo),
     };
   },
 });

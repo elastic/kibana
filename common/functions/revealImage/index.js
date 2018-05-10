@@ -1,3 +1,4 @@
+import { resolveWithMissingImage } from '../../lib/resolve_dataurl';
 import { elasticOutline } from './elastic_outline';
 
 export const revealImage = () => ({
@@ -10,13 +11,14 @@ export const revealImage = () => ({
   },
   args: {
     image: {
-      types: ['string'],
+      types: ['string', 'null'],
       help: 'The image to reveal',
       default: elasticOutline,
     },
     emptyImage: {
       types: ['string', 'null'],
       help: 'An optional background image to reveal over',
+      default: null,
     },
     origin: {
       types: ['string'],
@@ -33,6 +35,8 @@ export const revealImage = () => ({
       value: {
         percent,
         ...args,
+        image: resolveWithMissingImage(args.image, elasticOutline),
+        emptyImage: resolveWithMissingImage(args.emptyImage),
       },
     };
   },

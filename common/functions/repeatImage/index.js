@@ -1,3 +1,4 @@
+import { resolveWithMissingImage } from '../../lib/resolve_dataurl';
 import { elasticOutline } from './elastic_outline';
 
 export const repeatImage = () => ({
@@ -10,7 +11,7 @@ export const repeatImage = () => ({
   },
   args: {
     image: {
-      types: ['string'],
+      types: ['string', 'null'],
       help: 'The image to repeat. Usually a dataURL or an asset',
       default: elasticOutline,
     },
@@ -28,6 +29,7 @@ export const repeatImage = () => ({
     emptyImage: {
       types: ['string', 'null'],
       help: 'Fill the difference between the input and the `max=` parameter with this image',
+      default: null,
     },
   },
   fn: (count, args) => {
@@ -37,6 +39,8 @@ export const repeatImage = () => ({
       value: {
         count,
         ...args,
+        image: resolveWithMissingImage(args.image, elasticOutline),
+        emptyImage: resolveWithMissingImage(args.emptyImage),
       },
     };
   },

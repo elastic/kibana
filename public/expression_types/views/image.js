@@ -1,6 +1,5 @@
-import { get } from 'lodash';
 import { elasticLogo } from '../../../common/functions/image/elastic_logo';
-import { isValid } from '../../../common/lib/dataurl';
+import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
 
 export const image = () => ({
   name: 'image',
@@ -13,11 +12,7 @@ export const image = () => ({
       displayName: 'Upload Image',
       argType: 'imageUpload',
       resolve({ args }) {
-        const wrap = val => ({ dataurl: val });
-        const dataurl = get(args, 'dataurl.0', null);
-
-        if (dataurl && isValid(dataurl)) return wrap(dataurl);
-        return wrap(elasticLogo);
+        return { dataurl: resolveFromArgs(args, elasticLogo) };
       },
     },
     {

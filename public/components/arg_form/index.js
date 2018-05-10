@@ -9,11 +9,14 @@ export const ArgForm = compose(
     return label || argTypeInstance.displayName || argTypeInstance.name;
   }),
   withState('expand', 'setExpand', ({ argTypeInstance }) => argTypeInstance.expanded),
+  withState('resolvedArgValue', 'setResolvedArgValue'),
   withState('renderError', 'setRenderError', false),
   lifecycle({
-    componentWillUpdate(prevProps) {
-      if (prevProps.templateProps.argValue !== this.props.templateProps.argValue)
+    componentDidUpdate(prevProps) {
+      if (prevProps.templateProps.argValue !== this.props.templateProps.argValue) {
         this.props.setRenderError(false);
+        this.props.setResolvedArgValue();
+      }
     },
   }),
   connect(state => ({ workpad: getWorkpadInfo(state) }))
@@ -21,5 +24,9 @@ export const ArgForm = compose(
 
 ArgForm.propTypes = {
   label: PropTypes.string,
-  argTypeInstance: PropTypes.object.isRequired,
+  argTypeInstance: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+    expanded: PropTypes.bool,
+  }).isRequired,
 };

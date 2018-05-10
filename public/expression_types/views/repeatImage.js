@@ -1,6 +1,5 @@
-import { get } from 'lodash';
-import { elasticLogo } from '../../../common/functions/image/elastic_logo';
-import { isValid } from '../../../common/lib/dataurl';
+import { elasticOutline } from '../../../common/functions/repeatImage/elastic_outline';
+import { resolveFromArgs } from '../../../common/lib/resolve_dataurl';
 
 export const repeatImage = () => ({
   name: 'repeatImage',
@@ -16,11 +15,7 @@ export const repeatImage = () => ({
 
       // TODO: This code is repeated in both image.js and this file. Shouldn't this be handled in the imageUpload argType?
       resolve({ args }) {
-        const wrap = val => ({ dataurl: val });
-        const dataurl = get(args, 'dataurl.0', null);
-
-        if (dataurl && isValid(dataurl)) return wrap(dataurl);
-        return wrap(elasticLogo);
+        return { dataurl: resolveFromArgs(args, elasticOutline) };
       },
     },
     {
@@ -31,11 +26,7 @@ export const repeatImage = () => ({
 
       // TODO: This code is repeated in both image.js and this file. Shouldn't this be handled in the imageUpload argType?
       resolve({ args }) {
-        const wrap = val => ({ dataurl: val });
-        const dataurl = get(args, 'dataurl.0', null);
-
-        if (dataurl && isValid(dataurl)) return wrap(dataurl);
-        return wrap(elasticLogo);
+        return { dataurl: resolveFromArgs(args, elasticOutline) };
       },
     },
     {

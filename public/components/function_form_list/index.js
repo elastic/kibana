@@ -1,27 +1,32 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { modelRegistry, viewRegistry } from '../../expression_types';
+import { interpretAst } from '../../lib/interpreter';
 import { toExpression } from '../../../common/lib/ast';
 import { FunctionFormList as Component } from './function_form_list';
 
-function getExpression(chain) {
+function normalizeContext(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;
-
-  return toExpression({
+  return {
     type: 'expression',
     chain,
-  });
+  };
+}
+
+function getExpression(ast) {
+  return ast != null && ast.type === 'expression' ? toExpression(ast) : ast;
 }
 
 const functionFormItems = withProps(props => {
   const selectedElement = props.element;
   const FunctionFormChain = get(selectedElement, 'ast.chain', []);
+  const getArgTypeDef = fn => modelRegistry.get(fn) || viewRegistry.get(fn);
 
   // map argTypes from AST, attaching nextArgType if one exists
   const FunctionFormListItems = FunctionFormChain.reduce(
     (acc, argType, i) => {
-      const argTypeDef = modelRegistry.get(argType.function) || viewRegistry.get(argType.function);
-      const prevContext = acc.context;
+      const argTypeDef = getArgTypeDef(argType.function);
+      const prevContext = normalizeContext(acc.context);
       const nextArg = FunctionFormChain[i + 1] || null;
 
       // filter out argTypes that shouldn't be in the sidebar
@@ -31,9 +36,10 @@ const functionFormItems = withProps(props => {
           args: argType.arguments,
           argType: argType.function,
           argTypeDef: argTypeDef,
-          nextArgType: nextArg && nextArg.function,
+          argResolver: argAst => interpretAst(argAst, prevContext),
           contextExpression: getExpression(prevContext),
           expressionIndex: i, // preserve the index in the AST
+          nextArgType: nextArg && nextArg.function,
         };
 
         acc.mapped.push(component);

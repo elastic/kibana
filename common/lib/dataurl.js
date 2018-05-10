@@ -1,26 +1,35 @@
 import { fromByteArray } from 'base64-js';
 import mime from 'mime/lite';
 
+const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
+
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
 export function parse(str, withData = false) {
   if (typeof str !== 'string') return;
 
-  const reg = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?;base64,/;
-  const matches = str.match(reg);
+  const matches = str.match(dataurlRegex);
+
   if (!matches) return;
 
+  const [, mimetype, charset, , encoding] = matches;
+
+  // all types except for svg need to be base64 encoded
+  const imageTypeIndex = imageTypes.indexOf(matches[1]);
+  if (imageTypeIndex > 0 && encoding !== 'base64') return;
+
   return {
-    mimetype: matches[1],
-    charset: matches[2] && matches[2].split('=')[1],
+    mimetype,
+    encoding,
+    charset: charset && charset.split('=')[1],
     data: !withData ? null : str.split(',')[1],
-    isImage: imageTypes.indexOf(matches[1]) >= 0,
-    extension: mime.getExtension(matches[1]),
+    isImage: imageTypeIndex >= 0,
+    extension: mime.getExtension(mimetype),
   };
 }
 
 export function isValid(str) {
-  return parse(str) != null;
+  return dataurlRegex.test(str);
 }
 
 export function encode(data, type = 'text/plain') {
