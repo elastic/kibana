@@ -313,8 +313,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('timepickerGoButton');
     }
 
-    async getSpyToggleExists() {
-      return await testSubjects.exists('spyToggleButton');
+    async isInspectorButtonEnabled() {
+      const button = await testSubjects.find('openInspectorButton');
+      const ariaDisabled = await button.getAttribute('aria-disabled');
+      return ariaDisabled !== 'true';
     }
 
     async getSideEditorExists() {

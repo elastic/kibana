@@ -91,8 +91,8 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('should display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
         expect(spyToggleExists).to.be(true);
       });
 
