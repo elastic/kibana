@@ -5,7 +5,7 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
-export default () => Joi.object({
+export default async () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     branch: Joi.string().default(Joi.ref('$branch')),

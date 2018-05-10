@@ -6,7 +6,7 @@ const NoConnections = require('elasticsearch').errors.NoConnections;
 
 import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
-import { esTestConfig } from '../../../../test_utils/es';
+import { esTestConfig } from '@kbn/test';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();

@@ -186,7 +186,7 @@ export default function (program) {
       if (CAN_CLUSTER && opts.dev && !isWorker) {
         // stop processing the action and handoff to cluster manager
         const ClusterManager = require(CLUSTER_MANAGER_PATH);
-        new ClusterManager(opts, settings);
+        await ClusterManager.create(opts, settings);
         return;
       }
 
@@ -218,10 +218,10 @@ export default function (program) {
         process.exit(exitCode);
       }
 
-      process.on('SIGHUP', function reloadConfig() {
+      process.on('SIGHUP', async function reloadConfig() {
         const settings = getCurrentSettings();
         kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-        kbnServer.applyLoggingConfiguration(settings);
+        await kbnServer.applyLoggingConfiguration(settings);
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
       });
 

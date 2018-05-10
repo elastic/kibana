@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
         unassignedShards: '5',
         documentCount: '25,927',
         dataSize: '101.6 MB',
-        health: 'Status: yellow',
+        health: 'Health: yellow',
       });
     });
   });

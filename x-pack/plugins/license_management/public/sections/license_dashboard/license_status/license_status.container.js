@@ -10,9 +10,10 @@ import { getLicense, getExpirationDateFormatted, isExpired } from '../../../stor
 
 const mapStateToProps = (state) => {
   const { isActive, type } = getLicense(state);
+  const typeTitleCase = type.charAt(0).toUpperCase() + type.substr(1).toLowerCase();
   return {
     status: isActive ? 'Active' : 'Inactive',
-    type,
+    type: typeTitleCase,
     isExpired: isExpired(state),
     expiryDate: getExpirationDateFormatted(state)
   };
