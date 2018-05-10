@@ -99,18 +99,18 @@ export class ControlEditor extends Component {
     return (
       <div>
         <EuiButtonIcon
-          aria-label="Move control down"
-          color="primary"
-          onClick={this.moveDownControl}
-          iconType="sortUp"
-          data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
-        />
-        <EuiButtonIcon
           aria-label="Move control up"
           color="primary"
           onClick={this.moveUpControl}
-          iconType="sortDown"
+          iconType="sortUp"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
+        />
+        <EuiButtonIcon
+          aria-label="Move control down"
+          color="primary"
+          onClick={this.moveDownControl}
+          iconType="sortDown"
+          data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
           aria-label="Remove control"

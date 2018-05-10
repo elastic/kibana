@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
-import { ElasticsearchMetric } from '../metrics';
+import { KibanaClusterMetric } from '../metrics';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -32,7 +32,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
 
   return Promise.map(clusters, cluster => {
     const clusterUuid = cluster.cluster_uuid;
-    const metric = ElasticsearchMetric.getMetricFields();
+    const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
       size: 0,
