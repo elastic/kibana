@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await queryBar.getQuery();
+        const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
         await dashboardExpect.pieSliceCount(5);
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await queryBar.getQuery();
+        const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
         await dashboardExpect.pieSliceCount(5);

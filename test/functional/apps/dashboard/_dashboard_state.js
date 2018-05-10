@@ -148,14 +148,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
 
-        const currentQuery = await queryBar.getQuery();
+        const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
-        const newQuery = await queryBar.getQuery();
+        const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
       });
 
