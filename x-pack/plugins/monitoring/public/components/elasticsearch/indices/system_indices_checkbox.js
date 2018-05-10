@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { TABLE_ACTION_RESET_PAGING } from '../../../../common/constants';
 
-export class ShowSytemIndicesCheckbox extends React.Component {
+export class SytemIndicesCheckbox extends React.Component {
   constructor(props) {
     super(props);
     this.state = { showSystemIndices: props.showSystemIndices };
