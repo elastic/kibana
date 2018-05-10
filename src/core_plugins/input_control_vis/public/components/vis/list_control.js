@@ -64,6 +64,7 @@ export class ListControl extends Component {
       <EuiComboBox
         placeholder="Select..."
         options={options}
+        isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}
         onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
         selectedOptions={this.props.selectedOptions}

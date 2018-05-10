@@ -7,8 +7,10 @@ exports[`renders ListControl 1`] = `
   label="list control"
 >
   <EuiComboBox
+    async={false}
     data-test-subj="listControlSelect0"
     isClearable={true}
+    isLoading={false}
     onChange={[Function]}
     options={
       Array [

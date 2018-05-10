@@ -66,6 +66,18 @@ exports[`parentCandidates 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    id="dynamicOptions-0"
+  >
+    <EuiSwitch
+      data-test-subj="listControlDynamicOptionsSwitch"
+      label="Dynamic Options"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
     id="size-0"
     label="Size"
   >
@@ -109,6 +121,18 @@ exports[`renders ListControlEditor 1`] = `
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label="Multiselect"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="dynamicOptions-0"
+  >
+    <EuiSwitch
+      data-test-subj="listControlDynamicOptionsSwitch"
+      label="Dynamic Options"
       onChange={[Function]}
     />
   </EuiFormRow>

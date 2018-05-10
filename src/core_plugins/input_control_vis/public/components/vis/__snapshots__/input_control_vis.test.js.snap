@@ -27,6 +27,8 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        dynamicOptions={false}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
@@ -153,6 +155,8 @@ exports[`Clear btns enabled when there are values 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        dynamicOptions={false}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
@@ -279,6 +283,8 @@ exports[`Renders list control 1`] = `
       <ListControl
         controlIndex={0}
         disableMsg={null}
+        dynamicOptions={false}
+        fetchOptions={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
