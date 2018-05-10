@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const remote = getService('remote');
+  const queryBar = getService('queryBar');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
   const dashboardName = 'Dashboard View Edit Test';
@@ -80,8 +81,8 @@ export default function ({ getService, getPageObjects }) {
 
         it('when the query is edited and applied', async function () {
           const originalQuery = await PageObjects.dashboard.getQuery();
-          await PageObjects.dashboard.setQuery(`${originalQuery} and extra stuff`);
-          await PageObjects.dashboard.clickFilterButton();
+          await queryBar.setQuery(`${originalQuery} and extra stuff`);
+          await queryBar.submitQuery();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -233,7 +234,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await PageObjects.dashboard.getQuery();
-        await PageObjects.dashboard.setQuery(`${originalQuery} extra stuff`);
+        await queryBar.setQuery(`${originalQuery} extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 

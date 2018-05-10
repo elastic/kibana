@@ -139,35 +139,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getQueryInputElement() {
-      return await testSubjects.find('queryInput');
-    }
-
-    async getQuery() {
-      log.debug(`getQuery`);
-      const queryInputElement = await this.getQueryInputElement();
-      return await queryInputElement.getProperty('value');
-    }
-
-    async setQuery(query) {
-      log.debug(`setQuery(${query})`);
-      // Extra caution used because of flaky test here: https://github.com/elastic/kibana/issues/16978 doesn't seem
-      // to be actually setting the query in the query input based off
-      await retry.try(async () => {
-        await testSubjects.setValue('queryInput', query);
-        const newQuery = this.getQuery();
-        if (newQuery !== query) {
-          throw new Error('Failed to set query input');
-        }
-      });
-    }
-
-    async clickFilterButton() {
-      log.debug('Clicking filter button');
-      await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async clickClone() {
       log.debug('Clicking clone');
       await testSubjects.click('dashboardClone');

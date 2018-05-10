@@ -1,6 +1,7 @@
 
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
@@ -25,8 +26,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInDataRange();
 
       if (query) {
-        await PageObjects.dashboard.setQuery(query);
-        await PageObjects.dashboard.clickFilterButton();
+        await queryBar.setQuery(query);
+        await queryBar.submitQuery();
       }
 
       if (fields) {
