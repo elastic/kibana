@@ -10,22 +10,27 @@ import React from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIcon,
   EuiPanel,
-  EuiSpacer,
+  EuiFlexGrid,
+  //EuiSpacer,
   EuiButtonEmpty
 } from '@elastic/eui';
 
 const StatementStatsList = ({ stats }) => (
   stats.map(({ value, isHighlighted }, index) => (
-    <EuiFlexItem
-      grow={false}
-      key={index}
-    >
-      <StatOverview
-        value={value}
-        isHighlighted={isHighlighted}
-      />
-    </EuiFlexItem>
+    <div>
+      <EuiFlexItem
+        grow={false}
+        key={index}
+        className="statement__stat"
+      >
+        <StatOverview
+          value={value}
+          isHighlighted={isHighlighted}
+        />
+      </EuiFlexItem>
+    </div>
   ))
 );
 
@@ -40,7 +45,7 @@ const getStatStyle = isHighlighted => (
 );
 
 const StatOverview = ({ value, isHighlighted }) => (
-  <span style={getStatStyle(isHighlighted)} >{value}</span>
+  <div style={getStatStyle(isHighlighted)} >{value}</div>
 );
 
 export const PluginStatement = ({ statement, stats, vertexSelected }) => (
@@ -50,45 +55,51 @@ export const PluginStatement = ({ statement, stats, vertexSelected }) => (
         className="statement__content"
         paddingSize="s"
       >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          gutterSize="s"
-        >
-          <EuiFlexItem
-            grow={false}
-            style={{ padding: "0px", margin: "0px" }}
-          >
-            <EuiButtonEmpty
-              color="text"
-              flush="left"
-              onClick={vertexSelected}
-              size="xs"
-            >
-              <strong>{statement.name}</strong>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {
-            statement.hasExplicitId &&
-            <EuiFlexItem
-              grow={false}
-              style={{ paddingTop: "1px" }}
-            >
-              <span>
-                <em>{statement.id}</em>
-              </span>
+        <div>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiIcon className="statement__dot" type="dot" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="text"
+                    flush="left"
+                    onClick={vertexSelected}
+                    size="xs"
+                    className="statement__name"
+                  >
+                    <span className="statement__name">
+                      {statement.name}
+                    </span>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {
+                    statement.hasExplicitId &&
+                    <span className="statement__explicitId">
+                      {statement.id}
+                    </span>
+                  }
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          }
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        {
-          stats &&
-          stats.length > 0 &&
-          <EuiFlexGroup>
-            <StatementStatsList
-              stats={stats}
-            />
+            <EuiFlexItem grow={false}>
+              {
+                stats &&
+                stats.length > 0 &&
+                <EuiFlexGrid>
+                  <StatementStatsList
+                    stats={stats}
+                  />
+                </EuiFlexGrid>
+              }
+            </EuiFlexItem>
           </EuiFlexGroup>
-        }
+        </div>
       </EuiPanel>
     </div>
   </li>

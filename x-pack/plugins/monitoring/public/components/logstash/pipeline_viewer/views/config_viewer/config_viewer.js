@@ -7,7 +7,6 @@
 
 
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import { DetailDrawer } from '../detail_drawer';
 
@@ -66,11 +65,9 @@ export class ConfigViewer extends React.Component {
 
     return (
       <div>
-        <EuiPanel className="configViewer">
-          {
-            getStatementListFromPipeline(pipeline, this.onShowVertexDetails).map(section => renderSection(section))
-          }
-        </EuiPanel>
+        {
+          getStatementListFromPipeline(pipeline, this.onShowVertexDetails).map(section => renderSection(section))
+        }
         { this.renderDetailDrawer() }
       </div>
     );

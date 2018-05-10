@@ -10,7 +10,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  // EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -20,7 +20,7 @@ import {
 const StatementSection = ({ headerText, icon, children }) => (
   <EuiPanel
     paddingSize="s"
-    hasShadow
+    className="statementSection"
   >
     <EuiFlexGroup style={{ marginBottom: "2px" }}>
       <EuiFlexItem grow={false}>
@@ -32,7 +32,6 @@ const StatementSection = ({ headerText, icon, children }) => (
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiHorizontalRule margin="none" />
     <ul>
       {
         children
