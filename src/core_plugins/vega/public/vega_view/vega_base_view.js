@@ -66,6 +66,10 @@ export class VegaBaseView {
           this._$messages.remove();
           this._$messages = null;
         }
+        if (this._view) {
+          this._view.finalize();
+        }
+        this._view = null;
       });
 
       this._vegaViewConfig = this.createViewConfig();
@@ -143,16 +147,25 @@ export class VegaBaseView {
   }
 
   setView(view) {
+    if (this._view === view) return;
+
+    if (this._view) {
+      this._view.finalize();
+    }
+
     this._view = view;
 
-    if (view && this._parser.tooltips) {
-      // position and padding can be specified with
-      // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
-      const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
+    if (view) {
+      if (this._parser.tooltips) {
+        // position and padding can be specified with
+        // {config:{kibana:{tooltips: {position: 'top', padding: 15 } }}}
+        const tthandler = new TooltipHandler(this._$container[0], view, this._parser.tooltips);
 
-      // Vega bug workaround - need to destroy tooltip by hand
-      this._addDestroyHandler(() => tthandler.hideTooltip());
+        // Vega bug workaround - need to destroy tooltip by hand
+        this._addDestroyHandler(() => tthandler.hideTooltip());
+      }
 
+      return view.runAsync(); // Allows callers to await rendering
     }
   }
 
