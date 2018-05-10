@@ -90,9 +90,10 @@ export default async () => Joi.object({
       ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
-    systemCallFilters: Joi.object({
-      enabled: Joi.boolean().default(await getSystemCallFiltersEnabledDefault())
-    }).default()
+  }).default(),
+
+  systemCallFilters: Joi.object({
+    enabled: Joi.boolean().default(await getSystemCallFiltersEnabledDefault())
   }).default(),
 
   logging: Joi.object().keys({

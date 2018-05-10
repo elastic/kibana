@@ -9,7 +9,7 @@ async function defaultConfig(settings) {
 
 export async function activate(kbnServer) {
   const config = await defaultConfig(kbnServer.settings);
-  if (config.get('server.systemCallFilters.enabled') === false) {
+  if (config.get('systemCallFilters.enabled') === false) {
     return;
   }
 
