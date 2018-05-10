@@ -80,20 +80,23 @@ function displayHelp() {
     dedent(`
     Start Functional Test Servers
 
-    Usage:  node scripts/functional_tests_server [options]
+    Usage:
+      node scripts/functional_tests_server [options]
+      node scripts/functional_tests_server --help
+      node scripts/functional_tests_server [--config <file>]
 
-    --config      Option to pass in a config
-    --kibana-install-dir
-                  Run Kibana from an existing install directory
-                  Default: run from source
-    --help        Display this menu and exit
+    Options:
+      --help                         Display this menu and exit.
+      --config=<file>                Option to pass in a config.
+      --bail                         Stop the test run at the first failure.
+      --kibana-install-dir           Run Kibana from an existing install directory
+                                     Default: run from source
 
     Log level options:
-
-    --verbose
-    --debug
-    --quiet       Log errors
-    --silent
+      --verbose                      Log everything.
+      --debug                        Run in debug mode.
+      --quiet                        Only log errors.
+      --silent                       Log nothing.
     `)
   );
 }

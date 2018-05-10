@@ -81,23 +81,23 @@ function displayHelp() {
     dedent(`
     Run Functional Tests
 
-    Usage:  node scripts/functional_tests [options]
+    Usage:
+      node scripts/functional_tests [options]
+      node scripts/functional_tests --help
+      node scripts/functional_tests [--config <file1> [--config <file2> ...]]
 
-    --config      Option to pass in a config
-                  Can pass in multiple configs with
-                  --config file1 --config file2 --config file3
-    --kibana-install-dir
-                  Run Kibana from an existing install directory
-                  Default: run from source
-    --bail        Stop the test run at the first failure
-    --help        Display this menu and exit
+    Options:
+      --help                         Display this menu and exit.
+      --config=<file>                Option to pass in a config. Can pass in multiple configs.
+      --bail                         Stop the test run at the first failure.
+      --kibana-install-dir           Run Kibana from an existing install directory
+                                     Default: run from source
 
     Log level options:
-
-    --verbose
-    --debug
-    --quiet       Log errors
-    --silent
+      --verbose                      Log everything.
+      --debug                        Run in debug mode.
+      --quiet                        Only log errors.
+      --silent                       Log nothing.
     `)
   );
 }
