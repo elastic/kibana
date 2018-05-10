@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const sinon = require('sinon');
 const migrationsPlugin = require('./index');
-const { mockCluster } = require('../../../packages/kbn-migrations/src/test');
+const { testCluster } = require('../../../packages/kbn-migrations/src/test');
 
 describe('kibana_migrations plugin', () => {
   describe('init', () => {
@@ -38,35 +38,30 @@ describe('kibana_migrations plugin', () => {
           seed: () => ({ id: 'b', type: 'field2', attributes: 'Bobby' }),
         }],
       }];
-      const adminCluster = mockCluster({}, {});
-      await testMigrationPlugin({ adminCluster, pluginSpecs });
+      const { callCluster } = await testCluster();
+      await testMigrationPlugin({ callCluster, pluginSpecs });
 
-      expect(adminCluster.state()).toMatchSnapshot();
+      expect(callCluster.state()).toMatchSnapshot();
     });
 
     test('waits for the index to migrate', async () => {
       let timedOut = false;
-      const data = {
-        '.kibana': {
-          'migration:migration-state': {
-            _source: {
-              migration: {
-                status: 'migrating',
-                plugins: [],
-              },
-            },
-          },
+      const existingDocs = [{
+        id: 'migration-state',
+        type: 'migration',
+        attributes: {
+          status: 'migrating',
+          plugins: [],
         },
-      };
-      const adminCluster = mockCluster(data, {});
-      const kbnServer = mockKbnServer({ adminCluster });
+      }];
+      const { callCluster } = await testCluster({ existingDocs, index: '.kibana' });
+      const kbnServer = mockKbnServer({ callCluster });
       const plugin = migrationsPlugin(mockKibana(kbnServer));
       const promise = plugin.init(kbnServer.server);
 
       setTimeout(() => {
         expect(plugin.status.value).toEqual('yellow');
-        _.set(data, ['.kibana', 'migration:migration-state', '_source', 'migration', 'status'], 'migrated');
-        timedOut = true;
+        setStatus(callCluster, 'migrated').then(() => timedOut = true);
       }, 20);
 
       await promise;
@@ -75,23 +70,19 @@ describe('kibana_migrations plugin', () => {
     });
 
     test('respects the force option', async () => {
-      const data = {
-        '.kibana': {
-          'migration:migration-state': {
-            _source: {
-              migration: {
-                status: 'migrating',
-                plugins: [],
-              },
-            },
-          },
+      const existingDocs = [{
+        id: 'migration-state',
+        type: 'migration',
+        attributes: {
+          status: 'migrating',
+          plugins: [],
         },
-      };
-      const adminCluster = mockCluster(data, {});
-      const { plugin } = await testMigrationPlugin({ adminCluster, force: true });
+      }];
+      const { callCluster } = await testCluster({ existingDocs, index: '.kibana' });
+      const { plugin } = await testMigrationPlugin({ callCluster, force: true });
 
       expect(plugin.status.value).toEqual('green');
-      expect(adminCluster.state()).toMatchSnapshot();
+      expect(callCluster.state()).toMatchSnapshot();
     });
   });
 
@@ -104,10 +95,10 @@ describe('kibana_migrations plugin', () => {
     });
 
     test('exposes callWithInternalUser if no callCluster is specified', async () => {
-      const adminCluster = () => {};
-      const { kbnServer } = await testMigrationPlugin({ adminCluster });
+      const callCluster = () => {};
+      const { kbnServer } = await testMigrationPlugin({ callCluster });
       const opts = kbnServer.server.exposed.migrationOptions();
-      expect(opts.callCluster).toEqual(adminCluster);
+      expect(opts.callCluster).toEqual(callCluster);
     });
 
     test('exposes configured index', async () => {
@@ -146,8 +137,8 @@ describe('kibana_migrations plugin', () => {
         mappings: undefined,
         migrations: undefined,
       }];
-      const adminCluster = mockCluster({}, {});
-      const { kbnServer } = await testMigrationPlugin({ pluginSpecs, adminCluster });
+      const { callCluster } = await testCluster();
+      const { kbnServer } = await testMigrationPlugin({ pluginSpecs, callCluster });
       const opts = kbnServer.server.exposed.migrationOptions();
       expect(opts.plugins).toEqual(pluginSpecs);
     });
@@ -192,10 +183,10 @@ function mockKbnServer(config = {}) {
   };
 }
 
-function mockServer({ adminCluster, index } = {}) {
+function mockServer({ callCluster, index } = {}) {
   const clusterMap = {
     admin: {
-      callWithInternalUser: adminCluster || sinon.spy()
+      callWithInternalUser: callCluster || sinon.spy()
     },
   };
   const configMap = {
@@ -224,4 +215,21 @@ function mockServer({ adminCluster, index } = {}) {
   };
 
   return server;
+}
+
+function setStatus(callCluster, status) {
+  return callCluster('update', {
+    id: 'migration:migration-state',
+    type: 'doc',
+    index: '.kibana',
+    body: {
+      doc: {
+        type: 'migration',
+        migration: {
+          status,
+          plugins: [],
+        },
+      },
+    },
+  });
 }

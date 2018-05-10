@@ -1,5 +1,5 @@
 const MigrationContext = require('./migration_context');
-const { mockCluster } = require('../test');
+const { testCluster } = require('../test');
 
 describe('migrationContext', () => {
   test('ensures that migrations are not undefined', async () => {
@@ -22,7 +22,7 @@ describe('migrationContext', () => {
 
   test('creates a logger that logs info', async () => {
     const logs = [];
-    const opts = buildOpts({});
+    const opts = await buildOpts({});
     opts.log = (...args) => logs.push(args);
     const actual = await MigrationContext.fetch(opts);
     actual.log.info('Wat up?');
@@ -36,7 +36,7 @@ describe('migrationContext', () => {
 
   test('creates a logger that logs debug', async () => {
     const logs = [];
-    const opts = buildOpts({});
+    const opts = await buildOpts({});
     opts.log = (...args) => logs.push(args);
     const actual = await MigrationContext.fetch(opts);
     actual.log.debug('I need coffee');
@@ -55,14 +55,10 @@ describe('migrationContext', () => {
       { id: 'mana', migrations: [{ id: 'mushboom' }, { id: 'rabbite' }] }
     ];
     const migrationState = {
-      _source: {
-        migration: {
-          plugins: [
-            { id: 'x-pack', migrationIds: ['foo'] },
-            { id: 'mana', migrationIds: ['mushboom'] },
-          ],
-        },
-      },
+      plugins: [
+        { id: 'x-pack', migrationIds: ['foo'] },
+        { id: 'mana', migrationIds: ['mushboom'] },
+      ],
     };
     const { migrationPlan } = await testMigrationContext({ plugins: rawPlugins, migrationState });
 
@@ -80,11 +76,7 @@ describe('migrationContext', () => {
       { id: 'x-pack', migrations: [{ id: 'foo' }, { id: 'bar' }, { id: 'baz' }] },
     ];
     const migrationState = {
-      _source: {
-        migration: {
-          plugins: [{ id: 'x-pack', migrationIds: ['foo', 'baz', 'bar'] }],
-        },
-      },
+      plugins: [{ id: 'x-pack', migrationIds: ['foo', 'baz', 'bar'] }],
     };
     return expect(testMigrationContext({ plugins, migrationState }))
       .rejects.toThrowError(/Expected migration "baz", but found "bar"/);
@@ -99,25 +91,25 @@ describe('migrationContext', () => {
       .rejects.toThrowError(/has migration "foo" defined more than once/);
   });
 
-  function buildOpts(opts, elasticVersion = '9.8.7') {
-    const index = 'test-index';
-    const data = {
-      [index]: {
-        'migration:migration-state': opts.migrationState,
-      },
-    };
+  async function buildOpts(opts, elasticVersion = '9.8.7') {
+    const existingDocs = !opts.migrationState ? undefined : [{
+      id: 'migration-state',
+      type: 'migration',
+      attributes: opts.migrationState,
+    }];
+    const { index, callCluster } = await testCluster({ existingDocs });
     return {
       index,
       elasticVersion,
       log: () => {},
-      callCluster: mockCluster(data, {}),
+      callCluster,
       plugins: opts.plugins || [],
       ...opts,
     };
   }
 
   async function testMigrationContext(testOpts, version) {
-    const opts = buildOpts(testOpts, version);
+    const opts = await buildOpts(testOpts, version);
     return MigrationContext.fetch(opts);
   }
 });

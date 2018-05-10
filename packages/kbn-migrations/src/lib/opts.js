@@ -33,7 +33,7 @@ const migrationStateSchema = Joi.object({
     migrationIds: Joi.array().required().items(Joi.string()),
     migrationsChecksum: Joi.string().required(),
   })),
-});
+}).unknown();
 
 module.exports = {
   migrationSchema,

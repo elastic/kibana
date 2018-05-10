@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { migrate, fetchStatus } = require('./migration');
-const { mockCluster, testPlugins } = require('./test');
+const { testCluster, testPlugins } = require('./test');
 const { MigrationStatus } = require('./lib');
 
 const opts = {
@@ -245,43 +245,3 @@ describe('Migration.migrate', () => {
       .rejects.toThrow(/"force" must be a boolean/);
   });
 });
-
-async function testCluster({ plugins, existingDocs } = {}) {
-  const index = '.sample-index';
-  const callCluster = existingDocs ? clusterWithDocs(index, existingDocs) : mockCluster({});
-
-  if (plugins) {
-    await migrate({ ...opts, index, plugins, callCluster });
-  }
-
-  return { index, callCluster };
-}
-
-// Convenience function which, given an index name and a set of documents,
-// returns the data and meta required to represent those docs in mockCluster.
-function clusterWithDocs(index, docs) {
-  const data = {
-    [index]: docs.reduce((acc, { id, type, attributes }) => _.set(acc, `${type}:${id}`, {
-      _source: {
-        type,
-        [type]: attributes,
-      },
-    }), {}),
-  };
-
-  const deriveMappings = (attributes) => ({
-    properties: _.mapValues(attributes, (v) => typeof v === 'number' ? 'integer' : 'text')
-  });
-
-  const meta = {
-    mappings: {
-      [index]: {
-        doc: {
-          properties: docs.reduce((acc, { type, attributes }) => _.set(acc, type, deriveMappings(attributes)), {}),
-        },
-      },
-    },
-  };
-
-  return mockCluster(data, meta);
-}
