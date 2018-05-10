@@ -111,10 +111,10 @@ node scripts/functional_tests_server
 After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
 
 ```sh
-# make sure you are in the x-pack project
+# Make sure you are in the x-pack directory
 cd x-pack
 
-# invoke the functional_test_runner from Kibana project. try sending --help to learn more
+# Invoke the functional_test_runner from Kibana. Try sending --help to learn more
 node ../scripts/functional_test_runner
 ```
 
