@@ -5,7 +5,7 @@
  */
 
 import { callClusterFactory } from '../../../xpack_main';
-import { CollectorSet } from './lib/collector_set';
+import { CollectorSet } from './classes/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
 import { getKibanaUsageCollector } from './collectors/get_kibana_usage_collector';

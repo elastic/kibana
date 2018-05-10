@@ -7,6 +7,7 @@
 import { flatten, isEmpty } from 'lodash';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../common/constants';
 import Promise from 'bluebird';
+import { UsageCollector } from './usage_collector';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
@@ -52,13 +53,10 @@ export class CollectorSet {
   }
 
   /*
-   * @param {String} type.type
-   * @param {Function} type.init (optional)
-   * @param {Function} type.fetch
-   * @param {Function} type.cleanup (optional)
+   * @param {Collector} collector object
    */
-  register(type) {
-    this._collectors.push(type);
+  register(collector) {
+    this._collectors.push(collector);
   }
 
   /*
@@ -137,6 +135,19 @@ export class CollectorSet {
           this._log.warn(`Unable to fetch data from ${collectorType} collector`);
         });
     });
+  }
+
+  async bulkFetchUsage() {
+    const usageCollectors = this._collectors.filter(c => c instanceof UsageCollector);
+    const bulk = await this._bulkFetch(usageCollectors);
+
+    // summarize each type of stat
+    return bulk.reduce((accumulatedStats, currentStat) => {
+      return {
+        ...accumulatedStats,
+        [currentStat.type]: currentStat.result,
+      };
+    }, {});
   }
 
   cleanup() {

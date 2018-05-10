@@ -6,6 +6,7 @@
 
 import { get, snakeCase } from 'lodash';
 import { KIBANA_USAGE_TYPE } from '../../../common/constants';
+import { UsageCollector } from '../classes/usage_collector';
 
 const TYPES = [
   'dashboard',
@@ -20,7 +21,7 @@ const TYPES = [
  * Fetches saved object client counts by querying the saved object index
  */
 export function getKibanaUsageCollector(server, callCluster) {
-  return {
+  return new UsageCollector({
     type: KIBANA_USAGE_TYPE,
     async fetch() {
       const index = server.config().get('kibana.index');
@@ -62,5 +63,5 @@ export function getKibanaUsageCollector(server, callCluster) {
         }), {})
       };
     }
-  };
+  });
 }
