@@ -259,9 +259,16 @@ function getScheduledEventsByBucket(
 
 // Obtains the top influencers, by maximum influencer score, for the specified index, time range and job ID(s).
 // Pass an empty array or ['*'] to search over all job IDs.
+// An optional array of influencers may be supplied, with each object in the array having 'fieldName'
+// and 'fieldValue' properties, to limit data to the supplied list of influencers.
 // Returned response contains an influencers property, with a key for each of the influencer field names,
 // whose value is an array of objects containing influencerFieldValue, maxAnomalyScore and sumAnomalyScore keys.
-function getTopInfluencers(jobIds, earliestMs, latestMs, maxFieldNames, maxFieldValues) {
+function getTopInfluencers(
+  jobIds,
+  earliestMs,
+  latestMs,
+  maxFieldValues = 10,
+  influencers = []) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -292,6 +299,25 @@ function getTopInfluencers(jobIds, earliestMs, latestMs, maxFieldNames, maxField
         query_string: {
           analyze_wildcard: false,
           query: jobIdFilterStr
+        }
+      });
+    }
+
+    // Add a should query to filter for each of the specified influencers.
+    if (influencers.length > 0) {
+      boolCriteria.push({
+        bool: {
+          should: influencers.map((influencer) => {
+            return {
+              bool: {
+                must: [
+                  { term: { influencer_field_name: influencer.fieldName } },
+                  { term: { influencer_field_value: influencer.fieldValue } }
+                ]
+              }
+            };
+          }),
+          minimum_should_match: 1,
         }
       });
     }
@@ -335,7 +361,7 @@ function getTopInfluencers(jobIds, earliestMs, latestMs, maxFieldNames, maxField
               influencerFieldValues: {
                 terms: {
                   field: 'influencer_field_value',
-                  size: maxFieldValues !== undefined ? maxFieldValues : 10,
+                  size: maxFieldValues,
                   order: {
                     maxAnomalyScore: 'desc'
                   }
