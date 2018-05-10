@@ -3,6 +3,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 export class NativeController {
 
   killed = false;
+  _started = false;
 
   constructor(pluginId, process) {
     this.pluginId = pluginId;
@@ -14,14 +15,14 @@ export class NativeController {
       .filter(message => message === 'ready')
       .first()
       .subscribe(this._ready$);
-
-    this._started$ = Observable
-      .fromEvent(process, 'message')
-      .filter(message => message === 'started')
-      .first();
   }
 
   async start() {
+    if (this._started) {
+      throw new Error(`Already started, can't start again`);
+    }
+    this._started = true;
+
     return this._ready$
       .mergeMap(() => {
         if (this.process.killed) {
@@ -29,13 +30,20 @@ export class NativeController {
         }
 
         this.process.send('start');
-        return this._started$;
+        return Observable
+          .fromEvent(process, 'message')
+          .filter(message => message === 'started')
+          .first();
       })
       .toPromise();
   }
 
   kill() {
+    if (this.killed) {
+      throw new Error(`Already killed, can't kill again`);
+    }
     this.killed = true;
+
     this.process.kill('SIGKILL');
   }
 }
