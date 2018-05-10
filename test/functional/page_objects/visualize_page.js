@@ -208,6 +208,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await remote.pressKeys('\uE004');
     }
 
+    async filterComboBoxOptions(comboBoxSelector, value) {
+      const comboBox = await testSubjects.find(comboBoxSelector);
+      const input = await comboBox.findByTagName('input');
+      await input.clearValue();
+      await input.type(value);
+      await this.closeComboBoxOptionsList(comboBox);
+    }
+
     async getComboBoxOptions(comboBoxSelector) {
       await testSubjects.click(comboBoxSelector);
       const menu = await retry.try(

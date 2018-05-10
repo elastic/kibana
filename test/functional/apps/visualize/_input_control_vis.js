@@ -164,6 +164,35 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
+      describe('dynamic options', () => {
+        before(async () => {
+          await PageObjects.common.navigateToUrl('visualize', 'new');
+          await PageObjects.visualize.clickInputControlVis();
+          await PageObjects.visualize.clickVisEditorTab('controls');
+
+          await PageObjects.visualize.addInputControl();
+          await PageObjects.visualize.setComboBox('indexPatternSelect-0', 'logstash');
+          await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
+          await PageObjects.visualize.setComboBox('fieldSelect-0', 'geo.src');
+
+          await PageObjects.visualize.checkCheckbox('listControlDynamicOptionsSwitch');
+
+          await PageObjects.visualize.clickGo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+
+        it('should update options list when filtered', async () => {
+          const initialOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
+          expect(initialOptions.trim().split('\n').join()).to.equal('BR,CN,ID,IN,US');
+
+          await PageObjects.visualize.filterComboBoxOptions('listControlSelect0', 'R');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          const updatedOptions = await PageObjects.visualize.getComboBoxOptions('listControlSelect0');
+          expect(updatedOptions.trim().split('\n').join()).to.equal('RE,RO,RS,RU,RW');
+        });
+      });
+
       describe('nested controls', () => {
 
         before(async () => {
