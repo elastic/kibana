@@ -28,3 +28,16 @@ users can have full control over their custom filters.
 
 *Impact:* You must ensure that any saved searches with a `query_string` filter aren't relying implicitly on 
 `query:queryString:options`.
+
+[float]
+=== Advanced setting query:queryString:options no longer applies `default_field: *` by default.
+*Details:* Elasticsearch removed the ability to create indices with an _all field in 6.0. As a result, a user could end
+up with a mix of indices with and without _all fields if they upgraded from an older version of ES. This could lead to
+inconsistent highlighting in Discover. To work around this issue we added `default_field: *` to query:queryString:options
+to force consistent querying across indices with and without _all. In 7.0 the _all field will be gone from all indices
+so we no longer need this workaround.
+
+*Impact:* Since we'll no longer send the `default_field` parameter in Kibana's query_string query, Elasticsearch
+will use the index setting instead. The default for the index setting is also `*`, so most users should not be impacted.
+If some of your indices have a non-default `default_field` setting, you may want to update it or re-add the parameter
+to Kibana's advanced setting.
