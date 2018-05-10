@@ -3,28 +3,57 @@
 exports[`Migration.migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
-    ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
-                "id": "hoi",
-                "mappings": "{\\"stuff\\":{\\"type\\":\\"integer\\"}}",
-                "mappingsChecksum": "a2b8b8ab8c524ee1bd50dd9d4ec481a67e034491",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+                "id": "p1",
+                "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
+                "migrationIds": Array [
+                  "p1m1",
+                ],
+                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
+              },
+              Object {
+                "id": "p2",
+                "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
-            "previousIndex": ".mufasa-9.8.7-original",
+            "previousIndex": ".sample-index-3.2.1-original",
             "status": "migrated",
           },
           "type": "migration",
         },
         "_version": 1,
       },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
     },
-    ".mufasa-9.8.7-original": Object {
+    ".sample-index-3.2.1-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -39,16 +68,16 @@ Object {
   },
   "meta": Object {
     "aliases": Object {
-      ".mufasa": Object {
-        ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
           "aliases": Object {
-            ".mufasa": Object {},
+            ".sample-index": Object {},
           },
         },
       },
     },
     "mappings": Object {
-      ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -90,8 +119,19 @@ Object {
                 },
               },
             },
-            "stuff": Object {
-              "type": "integer",
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
             },
             "type": Object {
               "type": "keyword",
@@ -102,7 +142,7 @@ Object {
           },
         },
       },
-      ".mufasa-9.8.7-original": Object {
+      ".sample-index-3.2.1-original": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -144,262 +184,16 @@ Object {
                 },
               },
             },
-            "stuff": Object {
-              "type": "integer",
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {
-      ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
-        "index": Object {
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
-        },
-      },
-      ".mufasa-9.8.7-original": Object {
-        "index": Object {
-          "blocks.read_only": false,
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
-        },
-      },
-    },
-  },
-}
-`;
-
-exports[`Migration.migrate data and mappings for disabled plugins is retained 1`] = `
-Object {
-  "data": Object {
-    "disabled-scenario-1": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "quotes",
-                "mappings": "{\\"quote\\":{\\"properties\\":{\\"text\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "f2deb89810821e0e854a94b144159f896b992341",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-              Object {
-                "id": "tweets",
-                "mappings": "{\\"tweet\\":{\\"properties\\":{\\"chars\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "dfc3c70042e0bfcb9d5d586d48b88f5ab0e4a29b",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-            ],
-            "previousIndex": undefined,
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 43,
-      },
-      "quote:q1": Object {
-        "_source": Object {
-          "quote": Object {
-            "text": "It's a dangerous business going out your front door.",
-          },
-          "type": "quote",
-        },
-      },
-      "tweet:t1": Object {
-        "_source": Object {
-          "tweet": Object {
-            "chars": "The past is not what it was.",
-          },
-          "type": "tweet",
-        },
-      },
-    },
-    "disabled-scenario-9.8.7-b7c6da6bcfa6ce52478d06df60aaac893dcbf31f": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "tweets",
-                "mappings": "{\\"tweet\\":{\\"properties\\":{\\"chars\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "dfc3c70042e0bfcb9d5d586d48b88f5ab0e4a29b",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-              Object {
-                "id": "quotes",
-                "mappings": "{\\"quote\\":{\\"properties\\":{\\"text\\":{\\"type\\":\\"text\\"},\\"author\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "32bda98830c7014796e40c32edcc9338b7564453",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-            ],
-            "previousIndex": "disabled-scenario-1",
-            "status": "migrated",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-      "quote:q1": Object {
-        "_source": Object {
-          "quote": Object {
-            "text": "It's a dangerous business going out your front door.",
-          },
-          "type": "quote",
-          "updated_at": undefined,
-        },
-      },
-      "tweet:t1": Object {
-        "_source": Object {
-          "tweet": Object {
-            "chars": "The past is not what it was.",
-          },
-          "type": "tweet",
-          "updated_at": undefined,
-        },
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {
-      "disabled-scenario": Object {
-        "disabled-scenario-9.8.7-b7c6da6bcfa6ce52478d06df60aaac893dcbf31f": Object {
-          "aliases": Object {
-            "disabled-scenario": Object {},
-          },
-        },
-      },
-    },
-    "mappings": Object {
-      "disabled-scenario-1": Object {
-        "doc": Object {
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
+            "p1": Object {
               "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "quote": Object {
-              "properties": Object {
-                "text": Object {
+                "name": Object {
                   "type": "text",
                 },
               },
             },
-            "tweet": Object {
+            "p2": Object {
               "properties": Object {
-                "chars": Object {
-                  "type": "text",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-      "disabled-scenario-9.8.7-b7c6da6bcfa6ce52478d06df60aaac893dcbf31f": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "quote": Object {
-              "properties": Object {
-                "author": Object {
-                  "type": "keyword",
-                },
-                "text": Object {
-                  "type": "text",
-                },
-              },
-            },
-            "tweet": Object {
-              "properties": Object {
-                "chars": Object {
+                "thing": Object {
                   "type": "text",
                 },
               },
@@ -415,15 +209,17 @@ Object {
       },
     },
     "settings": Object {
-      "disabled-scenario-1": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "index": Object {
-          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
         },
       },
-      "disabled-scenario-9.8.7-b7c6da6bcfa6ce52478d06df60aaac893dcbf31f": Object {
+      ".sample-index-3.2.1-original": Object {
         "index": Object {
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
         },
       },
     },
@@ -442,520 +238,90 @@ Object {
 }
 `;
 
-exports[`Migration.migrate existing docs are migrated 1`] = `
-Object {
-  "data": Object {
-    "gentleman-9.8.7-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
-      "baz:fred": Object {
-        "_source": Object {
-          "baz": Object {
-            "bar": "bing",
-          },
-          "type": "baz",
-          "updated_at": undefined,
-        },
-      },
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "hoi",
-                "mappings": "{\\"baz\\":{\\"properties\\":{\\"bar\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "9d395eb475bfad4d2a8bc2524ab260bb13c932ed",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-            ],
-            "previousIndex": "gentleman-9.8.7-original",
-            "status": "migrated",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-    "gentleman-9.8.7-original": Object {
-      "baz:fred": Object {
-        "_source": Object {
-          "baz": Object {
-            "bar": "bing",
-          },
-          "type": "baz",
-        },
-      },
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {
-      "gentleman": Object {
-        "gentleman-9.8.7-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
-          "aliases": Object {
-            "gentleman": Object {},
-          },
-        },
-      },
-    },
-    "mappings": Object {
-      "gentleman-9.8.7-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "baz": Object {
-              "properties": Object {
-                "bar": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-      "gentleman-9.8.7-original": Object {
-        "doc": Object {
-          "properties": Object {
-            "baz": Object {
-              "properties": Object {
-                "bar": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {
-      "gentleman-9.8.7-66b870191326b7ea306bc06a7992b5380f97cc83": Object {
-        "index": Object {
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
-        },
-      },
-      "gentleman-9.8.7-original": Object {
-        "index": Object {
-          "blocks.read_only": false,
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
-        },
-      },
-    },
-  },
-}
-`;
-
-exports[`Migration.migrate existing docs are transformed 1`] = `
-Object {
-  "data": Object {
-    "groovystuff-9.8.7-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "users",
-                "mappings": "{\\"user\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"keyword\\"},\\"country\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "c46727b1349b57b903e4f6debda29d1f377d98b7",
-                "migrationIds": Array [
-                  "ensure_country",
-                ],
-                "migrationsChecksum": "17605a0182fa119f6acd7739cc1f967f4725a9e7",
-              },
-              Object {
-                "id": "preferences",
-                "mappings": "{\\"preference\\":{\\"properties\\":{\\"resultSize\\":{\\"type\\":\\"integer\\"},\\"color\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "03df4121c2e775ab551beb90c3f3a196e2b61bda",
-                "migrationIds": Array [
-                  "default_pref",
-                ],
-                "migrationsChecksum": "67d77399db16823739150691b6102b31d5c77d8e",
-              },
-            ],
-            "previousIndex": "groovystuff-9.8.7-original",
-            "status": "migrated",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-      "preference:default_pref": Object {
-        "_source": Object {
-          "preference": Object {
-            "color": "steelblue",
-            "resultSize": 10,
-          },
-          "type": "preference",
-          "updated_at": undefined,
-        },
-      },
-      "preference:p1": Object {
-        "_source": Object {
-          "preference": Object {
-            "color": "blue",
-            "resultSize": 1,
-          },
-          "type": "preference",
-          "updated_at": undefined,
-        },
-      },
-      "user:u1": Object {
-        "_source": Object {
-          "type": "user",
-          "updated_at": undefined,
-          "user": Object {
-            "country": "N/A",
-            "name": "jimmy fallon",
-          },
-        },
-      },
-      "user:u2": Object {
-        "_source": Object {
-          "type": "user",
-          "updated_at": undefined,
-          "user": Object {
-            "country": "N/A",
-            "name": "bono",
-          },
-        },
-      },
-    },
-    "groovystuff-9.8.7-original": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-      "preference:p1": Object {
-        "_source": Object {
-          "preference": Object {
-            "color": "blue",
-            "resultSize": 1,
-          },
-          "type": "preference",
-        },
-      },
-      "user:u1": Object {
-        "_source": Object {
-          "type": "user",
-          "user": Object {
-            "name": "jimmy fallon",
-          },
-        },
-      },
-      "user:u2": Object {
-        "_source": Object {
-          "type": "user",
-          "user": Object {
-            "name": "bono",
-          },
-        },
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {
-      "groovystuff": Object {
-        "groovystuff-9.8.7-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
-          "aliases": Object {
-            "groovystuff": Object {},
-          },
-        },
-      },
-    },
-    "mappings": Object {
-      "groovystuff-9.8.7-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "preference": Object {
-              "properties": Object {
-                "color": Object {
-                  "type": "keyword",
-                },
-                "resultSize": Object {
-                  "type": "integer",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-            "user": Object {
-              "properties": Object {
-                "country": Object {
-                  "type": "keyword",
-                },
-                "name": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-          },
-        },
-      },
-      "groovystuff-9.8.7-original": Object {
-        "doc": Object {
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "preference": Object {
-              "properties": Object {
-                "color": Object {
-                  "type": "keyword",
-                },
-                "resultSize": Object {
-                  "type": "integer",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-            "user": Object {
-              "name": Object {
-                "type": "keyword",
-              },
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {
-      "groovystuff-9.8.7-5a56b3c37620cf3bc8b3d2c5432a3571feb2980f": Object {
-        "index": Object {
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
-        },
-      },
-      "groovystuff-9.8.7-original": Object {
-        "index": Object {
-          "blocks.read_only": false,
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
-        },
-      },
-    },
-  },
-}
-`;
-
 exports[`Migration.migrate existing indices are converted to aliases and migrated 1`] = `
 Object {
   "data": Object {
-    ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+    ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
-                "id": "hoi",
-                "mappings": "{\\"stuff\\":{\\"type\\":\\"integer\\"}}",
-                "mappingsChecksum": "a2b8b8ab8c524ee1bd50dd9d4ec481a67e034491",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+                "id": "p1",
+                "mappings": "{\\"p1\\":{\\"properties\\":{\\"fullName\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "a0bdf0a0f73308c651498cd933546db273c94c35",
+                "migrationIds": Array [
+                  "p1m1",
+                  "p1m2",
+                  "p1m3",
+                ],
+                "migrationsChecksum": "8f79508f405b3e1a3488b5f384b4009f71cbc4d5",
+              },
+              Object {
+                "id": "p3",
+                "mappings": "{\\"p3\\":{\\"properties\\":{\\"shtuff\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "43d3b076d88915a50a3d21d1a5cb5ef6ae03095d",
+                "migrationIds": Array [
+                  "p3m1",
+                  "p3m2",
+                ],
+                "migrationsChecksum": "6b3d741eee260792b4a44566671be3cff587ff02",
               },
             ],
-            "previousIndex": ".mufasa-9.8.7-original",
+            "previousIndex": ".sample-index-3.2.1-original",
             "status": "migrated",
           },
           "type": "migration",
         },
         "_version": 1,
       },
+      "p1:newseedsofcontemplation": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "Thomas Merton",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p3:for-old-plugin-1": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "OLD SHTUFF",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
+      "p3:p3doc": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "SHTUFF HAPPENS",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
       "shut_the_front_door:2": Object {
         "_source": Object {
           "shut_the_front_door": Object {
-            "name": 35,
+            "meaning": 42,
           },
           "type": "shut_the_front_door",
           "updated_at": undefined,
         },
       },
     },
-    ".mufasa-9.8.7-original": Object {
+    ".sample-index-3.2.1-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -966,10 +332,18 @@ Object {
         },
         "_version": 1,
       },
+      "p3:for-old-plugin-1": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "Old Shtuff",
+          },
+          "type": "p3",
+        },
+      },
       "shut_the_front_door:2": Object {
         "_source": Object {
           "shut_the_front_door": Object {
-            "name": 35,
+            "meaning": 42,
           },
           "type": "shut_the_front_door",
         },
@@ -978,16 +352,16 @@ Object {
   },
   "meta": Object {
     "aliases": Object {
-      ".mufasa": Object {
-        ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
           "aliases": Object {
-            ".mufasa": Object {},
+            ".sample-index": Object {},
           },
         },
       },
     },
     "mappings": Object {
-      ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1029,15 +403,24 @@ Object {
                 },
               },
             },
-            "shut_the_front_door": Object {
+            "p1": Object {
               "properties": Object {
-                "name": Object {
-                  "type": "integer",
+                "fullName": Object {
+                  "type": "text",
                 },
               },
             },
-            "stuff": Object {
-              "type": "integer",
+            "p3": Object {
+              "properties": Object {
+                "shtuff": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "meaning": "integer",
+              },
             },
             "type": Object {
               "type": "keyword",
@@ -1048,7 +431,7 @@ Object {
           },
         },
       },
-      ".mufasa-9.8.7-original": Object {
+      ".sample-index-3.2.1-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
@@ -1089,11 +472,14 @@ Object {
                 },
               },
             },
+            "p3": Object {
+              "properties": Object {
+                "shtuff": "text",
+              },
+            },
             "shut_the_front_door": Object {
               "properties": Object {
-                "name": Object {
-                  "type": "integer",
-                },
+                "meaning": "integer",
               },
             },
             "type": Object {
@@ -1107,13 +493,13 @@ Object {
       },
     },
     "settings": Object {
-      ".mufasa-9.8.7-ef20323548702925730f8572e22a0ed21619cc9c": Object {
+      ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
         },
       },
-      ".mufasa-9.8.7-original": Object {
+      ".sample-index-3.2.1-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
@@ -1128,100 +514,161 @@ Object {
 exports[`Migration.migrate existing previously migrated index only runs new migrations 1`] = `
 Object {
   "data": Object {
-    "aquatica-9.8.7-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
-      "fish:f1": Object {
-        "_source": Object {
-          "fish": Object {
-            "species": "catfish",
-          },
-          "type": "fish",
-          "updated_at": undefined,
-        },
-      },
-      "fish:f2": Object {
-        "_source": Object {
-          "fish": Object {
-            "species": "carp",
-          },
-          "type": "fish",
-          "updated_at": undefined,
-        },
-      },
+    ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
-                "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"species\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "c44cbb34e9a49a64141523438f72c8dc2fb9f773",
+                "id": "p2",
+                "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
                 "migrationIds": Array [
-                  "something_or_other",
-                  "convert_kind_to_species",
+                  "p2m1",
                 ],
-                "migrationsChecksum": "a54ec64d9b3feaf81ea3095662211f1c27fb1f17",
+                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
+              },
+              Object {
+                "id": "p1",
+                "mappings": "{\\"p1\\":{\\"properties\\":{\\"fullName\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "a0bdf0a0f73308c651498cd933546db273c94c35",
+                "migrationIds": Array [
+                  "p1m1",
+                  "p1m2",
+                  "p1m3",
+                ],
+                "migrationsChecksum": "8f79508f405b3e1a3488b5f384b4009f71cbc4d5",
+              },
+              Object {
+                "id": "p3",
+                "mappings": "{\\"p3\\":{\\"properties\\":{\\"shtuff\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "43d3b076d88915a50a3d21d1a5cb5ef6ae03095d",
+                "migrationIds": Array [
+                  "p3m1",
+                  "p3m2",
+                ],
+                "migrationsChecksum": "6b3d741eee260792b4a44566671be3cff587ff02",
               },
             ],
-            "previousIndex": "aquatica-9.8.7-original",
+            "previousIndex": ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f",
             "status": "migrated",
           },
           "type": "migration",
         },
         "_version": 1,
       },
+      "p1:newseedsofcontemplation": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "Thomas Merton",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "fullName": "This Was Updated",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+      "p3:p3doc": Object {
+        "_source": Object {
+          "p3": Object {
+            "shtuff": "SHTUFF HAPPENS",
+          },
+          "type": "p3",
+          "updated_at": undefined,
+        },
+      },
     },
-    "aquatica-9.8.7-original": Object {
-      "fish:f1": Object {
-        "_source": Object {
-          "fish": Object {
-            "kind": "catfish",
-          },
-          "type": "fish",
-        },
-      },
-      "fish:f2": Object {
-        "_source": Object {
-          "fish": Object {
-            "kind": "carp",
-          },
-          "type": "fish",
-        },
-      },
+    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
-                "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "id": "p1",
+                "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
                 "migrationIds": Array [
-                  "something_or_other",
+                  "p1m1",
                 ],
-                "migrationsChecksum": "46e8aedaf5f7df5d406a3db25e2abc78c612ef13",
+                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
+              },
+              Object {
+                "id": "p2",
+                "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
-            "previousIndex": undefined,
+            "previousIndex": ".sample-index-3.2.1-original",
             "status": "migrating",
           },
           "type": "migration",
         },
-        "_version": 43,
+        "_version": 2,
+      },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "This Was Updated",
+          },
+          "type": "p1",
+        },
+        "_version": 1,
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
+    },
+    ".sample-index-3.2.1-original": Object {
+      "migration:migration-state": Object {
+        "_source": Object {
+          "migration": Object {
+            "plugins": Array [],
+            "status": "migrating",
+          },
+          "type": "migration",
+        },
+        "_version": 1,
       },
     },
   },
   "meta": Object {
     "aliases": Object {
-      "aquatica": Object {
-        "aquatica-9.8.7-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
           "aliases": Object {
-            "aquatica": Object {},
+            ".sample-index": Object {},
           },
         },
       },
     },
     "mappings": Object {
-      "aquatica-9.8.7-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+      ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1229,13 +676,6 @@ Object {
               "dynamic": true,
               "properties": Object {
                 "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "fish": Object {
-              "properties": Object {
-                "species": Object {
                   "type": "keyword",
                 },
               },
@@ -1267,6 +707,27 @@ Object {
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "fullName": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p3": Object {
+              "properties": Object {
+                "shtuff": Object {
+                  "type": "text",
                 },
               },
             },
@@ -1279,20 +740,14 @@ Object {
           },
         },
       },
-      "aquatica-9.8.7-original": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "doc": Object {
+          "dynamic": "strict",
           "properties": Object {
             "config": Object {
               "dynamic": true,
               "properties": Object {
                 "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "fish": Object {
-              "properties": Object {
-                "kind": Object {
                   "type": "keyword",
                 },
               },
@@ -1324,6 +779,85 @@ Object {
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+            "updated_at": Object {
+              "type": "date",
+            },
+          },
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "doc": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "config": Object {
+              "dynamic": true,
+              "properties": Object {
+                "buildNum": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "migration": Object {
+              "properties": Object {
+                "plugins": Object {
+                  "properties": Object {
+                    "id": Object {
+                      "type": "keyword",
+                    },
+                    "mappings": Object {
+                      "type": "text",
+                    },
+                    "mappingsChecksum": Object {
+                      "type": "keyword",
+                    },
+                    "migrationIds": Object {
+                      "type": "keyword",
+                    },
+                    "migrationsChecksum": Object {
+                      "type": "keyword",
+                    },
+                  },
+                  "type": "nested",
+                },
+                "previousIndex": Object {
+                  "type": "keyword",
+                },
+                "status": Object {
+                  "type": "keyword",
+                },
+              },
+            },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
                 },
               },
             },
@@ -1338,67 +872,27 @@ Object {
       },
     },
     "settings": Object {
-      "aquatica-9.8.7-7611c4e7b73014a1ebc37c1d530aac57ad005df6": Object {
+      ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
         "index": Object {
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
         },
       },
-      "aquatica-9.8.7-original": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "index": Object {
           "blocks.read_only": false,
-          "number_of_replicas": undefined,
-          "number_of_shards": undefined,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
+        },
+      },
+      ".sample-index-3.2.1-original": Object {
+        "index": Object {
+          "blocks.read_only": false,
+          "number_of_replicas": "1",
+          "number_of_shards": "5",
         },
       },
     },
-  },
-}
-`;
-
-exports[`Migration.migrate migrations are skipped if migration status is migrating 1`] = `
-Object {
-  "data": Object {
-    "skippy": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
-                "migrationIds": Array [],
-                "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
-              },
-            ],
-            "previousIndex": undefined,
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 42,
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {},
-    "mappings": Object {
-      "skippy": Object {
-        "doc": Object {
-          "properties": Object {
-            "fish": Object {
-              "properties": Object {
-                "kind": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {},
   },
 }
 `;
@@ -1406,39 +900,57 @@ Object {
 exports[`Migration.migrate migrations will run, if forced even if index is in migrating state 1`] = `
 Object {
   "data": Object {
-    "skippy-9.8.7-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
-      "fish:bass": Object {
-        "_source": Object {
-          "fish": Object {
-            "kind": "freshwater",
-          },
-          "type": "fish",
-          "updated_at": undefined,
-        },
-      },
+    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
-                "id": "fishes",
-                "mappings": "{\\"fish\\":{\\"properties\\":{\\"kind\\":{\\"type\\":\\"keyword\\"}}}}",
-                "mappingsChecksum": "1e805de2c794baa87241ced0f980e23901996057",
+                "id": "p1",
+                "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
                 "migrationIds": Array [
-                  "makeafish",
+                  "p1m1",
                 ],
-                "migrationsChecksum": "4820cce3d2954e10c2fe5cf4d1b19df403b51e43",
+                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
+              },
+              Object {
+                "id": "p2",
+                "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
+                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
+                "migrationIds": Array [
+                  "p2m1",
+                ],
+                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
-            "previousIndex": "skippy-9.8.7-original",
+            "previousIndex": ".sample-index-3.2.1-original",
             "status": "migrated",
           },
           "type": "migration",
         },
         "_version": 1,
       },
+      "p1:sample": Object {
+        "_source": Object {
+          "p1": Object {
+            "name": "P1 Name!",
+          },
+          "type": "p1",
+          "updated_at": undefined,
+        },
+      },
+      "p2:p2doc": Object {
+        "_source": Object {
+          "p2": Object {
+            "thing": "P2 Thingamabob",
+          },
+          "type": "p2",
+          "updated_at": undefined,
+        },
+      },
     },
-    "skippy-9.8.7-original": Object {
+    ".sample-index-3.2.1-original": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
@@ -1447,22 +959,22 @@ Object {
           },
           "type": "migration",
         },
-        "_version": 43,
+        "_version": 1,
       },
     },
   },
   "meta": Object {
     "aliases": Object {
-      "skippy": Object {
-        "skippy-9.8.7-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+      ".sample-index": Object {
+        ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
           "aliases": Object {
-            "skippy": Object {},
+            ".sample-index": Object {},
           },
         },
       },
     },
     "mappings": Object {
-      "skippy-9.8.7-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -1470,13 +982,6 @@ Object {
               "dynamic": true,
               "properties": Object {
                 "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "fish": Object {
-              "properties": Object {
-                "kind": Object {
                   "type": "keyword",
                 },
               },
@@ -1511,6 +1016,20 @@ Object {
                 },
               },
             },
+            "p1": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "text",
+                },
+              },
+            },
+            "p2": Object {
+              "properties": Object {
+                "thing": Object {
+                  "type": "text",
+                },
+              },
+            },
             "type": Object {
               "type": "keyword",
             },
@@ -1520,20 +1039,13 @@ Object {
           },
         },
       },
-      "skippy-9.8.7-original": Object {
+      ".sample-index-3.2.1-original": Object {
         "doc": Object {
           "properties": Object {
             "config": Object {
               "dynamic": true,
               "properties": Object {
                 "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "fish": Object {
-              "properties": Object {
-                "kind": Object {
                   "type": "keyword",
                 },
               },
@@ -1579,418 +1091,17 @@ Object {
       },
     },
     "settings": Object {
-      "skippy-9.8.7-e5a3a5d45fee54a1e06c91cd86ab07e8c5f3a9cc": Object {
+      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
         },
       },
-      "skippy-9.8.7-original": Object {
+      ".sample-index-3.2.1-original": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
-        },
-      },
-    },
-  },
-}
-`;
-
-exports[`Migration.migrate new index gets seeded 1`] = `
-Object {
-  "data": Object {
-    ".mufasa-9.8.7-df9934795ce1f24822920ad398d915201a10ffe3": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "hoi",
-                "mappings": "{\\"music\\":{\\"properties\\":{\\"jazz\\":{\\"type\\":\\"blob\\"}}}}",
-                "mappingsChecksum": "4dbf5c4db0d4d02d6b9c1c4506f13f81034db580",
-                "migrationIds": Array [
-                  "jazzhands",
-                ],
-                "migrationsChecksum": "6c349fa63409939239bfeb893123ebd6dc5ef474",
-              },
-            ],
-            "previousIndex": ".mufasa-9.8.7-original",
-            "status": "migrated",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-      "music:jazzmeup": Object {
-        "_source": Object {
-          "music": Object {
-            "jazz": Object {
-              "louis": "Armstrong",
-            },
-          },
-          "type": "music",
-          "updated_at": undefined,
-        },
-      },
-    },
-    ".mufasa-9.8.7-original": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {
-      ".mufasa": Object {
-        ".mufasa-9.8.7-df9934795ce1f24822920ad398d915201a10ffe3": Object {
-          "aliases": Object {
-            ".mufasa": Object {},
-          },
-        },
-      },
-    },
-    "mappings": Object {
-      ".mufasa-9.8.7-df9934795ce1f24822920ad398d915201a10ffe3": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "music": Object {
-              "properties": Object {
-                "jazz": Object {
-                  "type": "blob",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-      ".mufasa-9.8.7-original": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "music": Object {
-              "properties": Object {
-                "jazz": Object {
-                  "type": "blob",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {
-      ".mufasa-9.8.7-df9934795ce1f24822920ad398d915201a10ffe3": Object {
-        "index": Object {
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
-        },
-      },
-      ".mufasa-9.8.7-original": Object {
-        "index": Object {
-          "blocks.read_only": false,
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
-        },
-      },
-    },
-  },
-}
-`;
-
-exports[`Migration.migrate seeds are transformed 1`] = `
-Object {
-  "data": Object {
-    ".music-9.8.7-24807dac952a960402f3e039b380068bc1cf6897": Object {
-      "artists:jazzmeup": Object {
-        "_source": Object {
-          "artists": Object {
-            "john": "coltrane",
-            "louis": "Armstrong",
-          },
-          "type": "artists",
-          "updated_at": undefined,
-        },
-      },
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [
-              Object {
-                "id": "hoi",
-                "mappings": "{\\"artists\\":{\\"properties\\":{\\"louis\\":{\\"type\\":\\"text\\"},\\"john\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "ba944b2559de28ce942aab467b9609481427257c",
-                "migrationIds": Array [
-                  "never_happens",
-                  "add_jazzmeup",
-                  "enter_coltrane",
-                ],
-                "migrationsChecksum": "46c6402e887c1d479266848e5c409e4e9f814c8b",
-              },
-            ],
-            "previousIndex": ".music-9.8.7-original",
-            "status": "migrated",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-    ".music-9.8.7-original": Object {
-      "migration:migration-state": Object {
-        "_source": Object {
-          "migration": Object {
-            "plugins": Array [],
-            "status": "migrating",
-          },
-          "type": "migration",
-        },
-        "_version": 1,
-      },
-    },
-  },
-  "meta": Object {
-    "aliases": Object {
-      ".music": Object {
-        ".music-9.8.7-24807dac952a960402f3e039b380068bc1cf6897": Object {
-          "aliases": Object {
-            ".music": Object {},
-          },
-        },
-      },
-    },
-    "mappings": Object {
-      ".music-9.8.7-24807dac952a960402f3e039b380068bc1cf6897": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "artists": Object {
-              "properties": Object {
-                "john": Object {
-                  "type": "text",
-                },
-                "louis": Object {
-                  "type": "text",
-                },
-              },
-            },
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-      ".music-9.8.7-original": Object {
-        "doc": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "artists": Object {
-              "properties": Object {
-                "john": Object {
-                  "type": "text",
-                },
-                "louis": Object {
-                  "type": "text",
-                },
-              },
-            },
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "migration": Object {
-              "properties": Object {
-                "plugins": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "type": "keyword",
-                    },
-                    "mappings": Object {
-                      "type": "text",
-                    },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
-                    "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
-                      "type": "keyword",
-                    },
-                  },
-                  "type": "nested",
-                },
-                "previousIndex": Object {
-                  "type": "keyword",
-                },
-                "status": Object {
-                  "type": "keyword",
-                },
-              },
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
-            },
-          },
-        },
-      },
-    },
-    "settings": Object {
-      ".music-9.8.7-24807dac952a960402f3e039b380068bc1cf6897": Object {
-        "index": Object {
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
-        },
-      },
-      ".music-9.8.7-original": Object {
-        "index": Object {
-          "blocks.read_only": false,
-          "number_of_replicas": "1",
-          "number_of_shards": "5",
         },
       },
     },
