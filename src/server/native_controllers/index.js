@@ -13,10 +13,10 @@ const specSchema = Joi.object().keys({
   config: Joi.array().items(Joi.string())
 });
 
-const getNativeControllers = async (settings) => {
+const getNativeControllers = async (kbnServer) => {
   const {
     packageJson$,
-  } = findPluginSpecs(settings);
+  } = findPluginSpecs(kbnServer.settings);
 
   const spec$ = packageJson$
     .mergeMap(packageJson => {
@@ -42,7 +42,7 @@ const getNativeControllers = async (settings) => {
 
   const nativeController$ = spec$
     .mergeMap(async spec => {
-      const process = await spawnNativeController(settings, spec.path, spec.config);
+      const process = await spawnNativeController(kbnServer.settings, spec.path, spec.config);
       return new NativeController(spec.pluginId, process);
     });
 
@@ -54,7 +54,14 @@ const getNativeControllers = async (settings) => {
           return;
         }
 
-        console.error(`${nativeController.pluginId}'s native controller exited with code ${code}`);
+        const message = `${nativeController.pluginId}'s native controller exited with code ${code}`;
+
+        // this can happen before we have the logging configured, so we log to both
+        // console.error and server.log to ensure something is output somewhere.
+        console.error(message);
+        if (kbnServer.server) {
+          kbnServer.server.log(['error', 'native-controllers'], message);
+        }
         process.exit(1);
       });
     })
@@ -63,7 +70,8 @@ const getNativeControllers = async (settings) => {
 };
 
 export async function prepare(kbnServer) {
-  const nativeControllers = await getNativeControllers(kbnServer.settings);
+  debugger; //eslint-disable-line
+  const nativeControllers = await getNativeControllers(kbnServer);
   kbnServer.nativeControllers = nativeControllers.reduce((acc, nativeController) => {
     if (acc[nativeController.pluginId]) {
       throw new Error(`Multiple native controllers defined for ${nativeController.pluginId}, which is unsupported`);
