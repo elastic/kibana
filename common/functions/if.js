@@ -18,7 +18,7 @@ export const ifFn = () => ({
     },
   },
   fn: (context, args) => {
-    const then = args.then || context;
+    const then = typeof args.then !== 'undefined' ? args.then : context;
     if (args._) return then;
     if (typeof args.else !== 'undefined') return args.else;
     return context;

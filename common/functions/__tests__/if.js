@@ -31,6 +31,24 @@ describe('if', () => {
       it('without else', () =>
         expect(fn('some context', { _: false, then: 'foo' })).to.be('some context'));
     });
+
+    describe('falsy values', () => {
+      describe('for then', () => {
+        it('with null', () => expect(fn('some context', { _: true, then: null })).to.be(null));
+
+        it('with false', () => expect(fn('some context', { _: true, then: false })).to.be(false));
+
+        it('with 0', () => expect(fn('some context', { _: true, then: 0 })).to.be(0));
+      });
+
+      describe('for else', () => {
+        it('with null', () => expect(fn('some context', { _: false, else: null })).to.be(null));
+
+        it('with false', () => expect(fn('some context', { _: false, else: false })).to.be(false));
+
+        it('with 0', () => expect(fn('some context', { _: false, else: 0 })).to.be(0));
+      });
+    });
   });
 
   // TODO: Passing through context
