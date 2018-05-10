@@ -1,8 +1,8 @@
 import { createAction } from 'redux-actions';
-import { get, pick, cloneDeep } from 'lodash';
+import { get, pick, cloneDeep, without } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
-import { getPages, getElementById } from '../selectors/workpad';
+import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
@@ -135,33 +135,42 @@ export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, ele
 });
 
 export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatch, getState }) => {
-  const pages = getPages(getState());
+  const workpadPages = getPages(getState());
+  const currentPageIndex = getSelectedPageIndex(getState());
 
-  const elements = [];
-  pages.forEach(page => {
-    page.elements.forEach(element => {
-      elements.push(element);
-    });
-  });
+  const currentPage = workpadPages[currentPageIndex];
+  const otherPages = without(workpadPages, currentPage);
 
   dispatch(args.inFlightActive());
 
-  const renderablePromises = elements.map(element => {
-    const ast = element.ast || safeElementFromExpression(element.expression);
-    const argumentPath = [element.id, 'expressionRenderable'];
-
-    return runInterpreter(ast, null, { castToRender: true })
-      .then(renderable => ({ path: argumentPath, value: renderable }))
-      .catch(err => {
-        notify.error(err);
-        return { path: argumentPath, value: err };
+  function fetchElementsOnPages(pages) {
+    const elements = [];
+    pages.forEach(page => {
+      page.elements.forEach(element => {
+        elements.push(element);
       });
-  });
+    });
 
-  Promise.all(renderablePromises).then(renderables => {
-    dispatch(args.inFlightComplete());
-    dispatch(args.setValues(renderables));
-  });
+    const renderablePromises = elements.map(element => {
+      const ast = element.ast || safeElementFromExpression(element.expression);
+      const argumentPath = [element.id, 'expressionRenderable'];
+
+      return runInterpreter(ast, null, { castToRender: true })
+        .then(renderable => ({ path: argumentPath, value: renderable }))
+        .catch(err => {
+          notify.error(err);
+          return { path: argumentPath, value: err };
+        });
+    });
+
+    return Promise.all(renderablePromises).then(renderables => {
+      dispatch(args.setValues(renderables));
+    });
+  }
+
+  fetchElementsOnPages([currentPage])
+    .then(() => fetchElementsOnPages(otherPages))
+    .then(() => dispatch(args.inFlightComplete()));
 });
 
 export const duplicateElement = createThunk(
