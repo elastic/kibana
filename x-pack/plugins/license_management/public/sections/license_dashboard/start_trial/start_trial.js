@@ -49,13 +49,13 @@ export class StartTrial extends React.PureComponent {
           <div>
             <EuiText>
               <p>
-                This trial is for the full set of Elastic{' '}
+                This trial is for the full set of{' '}
                 <EuiLink
                   href="https://www.elastic.co/subscriptions/xpack"
                   target="_blank"
                 >
                   Platinum features
-                </EuiLink>. You&apos;ll get immediate access to:
+                </EuiLink> of the Elastic Stack. You&apos;ll get immediate access to:
               </p>
               <ul>
                 <li>Machine learning</li>
