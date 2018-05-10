@@ -31,7 +31,7 @@ export class NativeController {
 
         this.process.send('start');
         return Observable
-          .fromEvent(process, 'message')
+          .fromEvent(this.process, 'message')
           .filter(message => message === 'started')
           .first();
       })
