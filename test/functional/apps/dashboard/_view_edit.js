@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when the query is edited and applied', async function () {
-          const originalQuery = await PageObjects.dashboard.getQuery();
+          const originalQuery = await queryBar.getQuery();
           await queryBar.setQuery(`${originalQuery} and extra stuff`);
           await queryBar.submitQuery();
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const query = await PageObjects.dashboard.getQuery();
+          const query = await queryBar.getQuery();
           expect(query).to.equal(originalQuery);
         });
 
@@ -233,7 +233,7 @@ export default function ({ getService, getPageObjects }) {
       it('when the query is edited but not applied', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
-        const originalQuery = await PageObjects.dashboard.getQuery();
+        const originalQuery = await queryBar.getQuery();
         await queryBar.setQuery(`${originalQuery} extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isOpen).to.be(false);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-        const query = await PageObjects.dashboard.getQuery();
+        const query = await queryBar.getQuery();
         expect(query).to.equal(originalQuery);
       });
     });

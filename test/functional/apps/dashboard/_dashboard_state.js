@@ -9,6 +9,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -147,14 +148,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
 
-        const currentQuery = await PageObjects.dashboard.getQuery();
+        const currentQuery = await queryBar.getQuery();
         expect(currentQuery).to.equal('');
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
         await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
+        const newQuery = await queryBar.getQuery();
         expect(newQuery).to.equal('hi');
       });
 
