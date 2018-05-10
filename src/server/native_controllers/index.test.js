@@ -83,7 +83,7 @@ describe('#prepare', () => {
     expect(kbnServer.nativeControllers.correct).toBeInstanceOf(NativeController);
   });
 
-  test(`validates nativeControllers schema`, () => {
+  test(`validates incorrect nativeControllers schema`, () => {
     const settings = {
       plugins: {
         paths: [
@@ -95,7 +95,22 @@ describe('#prepare', () => {
       settings
     };
 
-    return expect(NativeControllers.prepare(kbnServer)).rejects.toThrow();
+    return expect(NativeControllers.prepare(kbnServer)).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test(`validates no nativeControllers schema`, () => {
+    const settings = {
+      plugins: {
+        paths: [
+          path.resolve(FIXTURES, 'no_schema')
+        ]
+      }
+    };
+    const kbnServer = {
+      settings
+    };
+
+    return expect(NativeControllers.prepare(kbnServer)).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test(`calls safeChildProcess with the nativeController.process`, async () => {

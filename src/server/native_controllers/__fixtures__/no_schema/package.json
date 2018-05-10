@@ -1,0 +1,7 @@
+{
+  "name": "wrong_schema",
+  "version": "kibana",
+  "kibana": {
+    "nativeControllers": [null]
+  }
+}
