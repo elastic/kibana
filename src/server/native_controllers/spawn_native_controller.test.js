@@ -17,20 +17,10 @@ afterEach(() => {
 test(`forks native_controller_start.js with path as argument`, async () => {
   const nativeControllerPath = '/foo/bar';
 
-  await spawnNativeController({}, nativeControllerPath);
+  await spawnNativeController(nativeControllerPath);
 
   expect(fork).toHaveBeenCalledTimes(1);
   expect(fork).toHaveBeenCalledWith(require.resolve('./native_controller_start.js'), [nativeControllerPath], expect.anything());
-});
-
-test(`forks native_controller_start.js with settings in command argument`, async () => {
-  const nativeControllerPath = '/foo/bar';
-
-  await spawnNativeController({ path: { data: '/tmp' } }, nativeControllerPath, ['path.data']);
-
-  expect(fork).toHaveBeenCalledTimes(1);
-  const expectedArgs = [nativeControllerPath, '--configJSON', '{"path.data":"/tmp"}'];
-  expect(fork).toHaveBeenCalledWith(require.resolve('./native_controller_start.js'), expectedArgs, expect.anything());
 });
 
 [

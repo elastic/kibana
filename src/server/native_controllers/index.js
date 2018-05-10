@@ -5,7 +5,8 @@ import Joi from 'joi';
 import { spawnNativeController } from './spawn_native_controller';
 import { findPluginSpecs } from '../../plugin_discovery';
 import { safeChildProcess } from '../../utils/child_process';
-import { NativeController } from './native_controller';
+import { createNativeController } from './native_controller';
+import { getNativeControllerConfig } from './native_controller_config';
 
 const specSchema = Joi.object().keys({
   pluginId: Joi.string().required(),
@@ -22,48 +23,55 @@ const getNativeControllers = async (kbnServer) => {
     .mergeMap(packageJson => {
       const nativeControllerSpecs = get(packageJson.contents, 'kibana.nativeControllers');
 
-      if (nativeControllerSpecs) {
-        return nativeControllerSpecs.map(spec => {
-          const result = Joi.validate(spec, specSchema);
-          if (result.error) {
-            throw result.error;
-          }
-
-          return {
-            pluginId: spec.pluginId,
-            path: path.resolve(packageJson.directoryPath, spec.path),
-            config: spec.config
-          };
-        });
+      if (!nativeControllerSpecs) {
+        return Observable.empty();
       }
 
-      return Observable.empty();
+      return nativeControllerSpecs.map(spec => {
+        const result = Joi.validate(spec, specSchema);
+        if (result.error) {
+          throw result.error;
+        }
+
+        return {
+          pluginId: spec.pluginId,
+          path: path.resolve(packageJson.directoryPath, spec.path),
+          config: spec.config
+        };
+      });
     });
 
-  const nativeController$ = spec$
+  const nativeControllerAndConfig$ = spec$
     .mergeMap(async spec => {
-      const process = await spawnNativeController(kbnServer.settings, spec.path, spec.config);
-      return new NativeController(spec.pluginId, process);
+      const nativeControllerProcess = spawnNativeController(spec.path);
+      return {
+        nativeController: createNativeController(spec.pluginId, nativeControllerProcess),
+        specConfig: spec.config,
+      };
     });
 
-  return await nativeController$
-    .do(nativeController => {
+  return await nativeControllerAndConfig$
+    .do(({ nativeController }) => {
       const childProcessStatus = safeChildProcess(nativeController.process);
       nativeController.process.on('exit', (code) => {
         if (childProcessStatus.terminating || nativeController.killed) {
           return;
         }
 
-        const message = `${nativeController.pluginId}'s native controller exited with code ${code}`;
-
         // this can happen before we have the logging configured, so we log to both
         // console.error and server.log to ensure something is output somewhere.
+        const message = `${nativeController.pluginId}'s native controller exited with code ${code}`;
         console.error(message);
         if (kbnServer.server) {
           kbnServer.server.log(['error', 'native-controllers'], message);
         }
         process.exit(1);
       });
+    })
+    .mergeMap(async ({ nativeController, specConfig }) => {
+      const config = await getNativeControllerConfig(kbnServer.settings, specConfig);
+      await nativeController.configure(config);
+      return nativeController;
     })
     .toArray()
     .toPromise();

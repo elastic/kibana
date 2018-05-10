@@ -1,12 +1,4 @@
 import { fork } from 'child_process';
-import { transformDeprecations, Config } from '../config';
-
-async function defaultConfig(settings) {
-  return await Config.withDefaultSchema(
-    transformDeprecations(settings)
-  );
-}
-
 
 let debugPortOffset = 100;
 
@@ -34,26 +26,8 @@ const getExecArgv = () => {
   return execArgv;
 };
 
-const getConfigParams = (nativeControllerConfig, config) => {
-  if (nativeControllerConfig.length === 0) {
-    return [];
-  }
-
-  const configJSON = JSON.stringify(nativeControllerConfig.reduce((acc, key) => {
-    return {
-      ...acc,
-      [key]: config.get(key)
-    };
-  }, {}));
-
-  return ['--configJSON', configJSON];
-};
-
-export async function spawnNativeController(settings, nativeControllerPath, nativeControllerConfig = []) {
-  const config = await defaultConfig(settings);
-  const configParams = getConfigParams(nativeControllerConfig, config);
-
-  return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath, ...configParams], {
+export function spawnNativeController(nativeControllerPath) {
+  return fork(require.resolve('./native_controller_start.js'), [nativeControllerPath], {
     execArgv: getExecArgv()
   });
 }

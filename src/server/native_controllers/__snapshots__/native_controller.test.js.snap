@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#configure throws error if you try to configure twice 1`] = `"Already configured, can't configure again"`;
+
+exports[`#kill throws error if kill called twice 1`] = `"Already killed, can't kill again"`;
+
+exports[`#start throws Error when start has already been called 1`] = `"Already started, can't start again"`;
+
+exports[`#start throws Error when the proc has been killed before start is called 1`] = `"Can't start killed process"`;

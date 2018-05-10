@@ -43,27 +43,52 @@ test(`doesn't load native controller immediately`, () => {
   expect(nativeController).toHaveBeenCalledTimes(0);
 });
 
+test(`throws error when receives start without call to configure`, () => {
+  process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
+
+  require('./native_controller_start');
+
+  expect(() => {
+    process.emit('message', { type: 'start' });
+  }).toThrowErrorMatchingSnapshot();
+
+  expect(nativeController).toHaveBeenCalledTimes(0);
+});
+
+test(`throws error if configure called twice`, () => {
+  process.argv = [
+    'node',
+    'native_controller_start.js',
+    './native_controller_impl.js',
+  ];
+
+  require('./native_controller_start');
+  process.emit('message', { type: 'configure' });
+  expect(() => {
+    process.emit('message', { type: 'configure', payload: {} });
+  }).toThrowErrorMatchingSnapshot();
+});
 
 test(`loads native controller on start message`, () => {
   process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
-  process.emit('message', 'start');
+  process.emit('message', { type: 'configure', payload: {} });
+  process.emit('message', { type: 'start' });
 
   expect(nativeController).toHaveBeenCalledTimes(1);
 });
 
-test(`passed config to the nativeController`, () => {
+test(`passes config to the nativeController`, () => {
   process.argv = [
     'node',
     'native_controller_start.js',
     './native_controller_impl.js',
-    '--configJSON',
-    '{"foo.bar":"baz"}'
   ];
 
   require('./native_controller_start');
-  process.emit('message', 'start');
+  process.emit('message', { type: 'configure', payload: { 'foo.bar': 'baz' } });
+  process.emit('message', { type: 'start' });
 
   expect(nativeController).toHaveBeenCalledTimes(1);
   const call = nativeController.mock.calls[0];
@@ -74,8 +99,9 @@ test(`removes listener when start message received`, () => {
   process.argv = ['node', 'native_controller_start.js', './native_controller_impl.js'];
 
   require('./native_controller_start');
-  process.emit('message', 'start');
-  process.emit('message', 'start');
+  process.emit('message', { type: 'configure', payload: {} });
+  process.emit('message', { type: 'start' });
+  process.emit('message', { type: 'start' });
 
   expect(nativeController).toHaveBeenCalledTimes(1);
 });

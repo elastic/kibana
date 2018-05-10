@@ -1,8 +1,9 @@
 import { Observable, ReplaySubject } from 'rxjs';
 
-export class NativeController {
+class NativeController {
 
   killed = false;
+  _configured = false;
   _started = false;
 
   constructor(pluginId, process) {
@@ -17,24 +18,39 @@ export class NativeController {
       .subscribe(this._ready$);
   }
 
+  async configure(config) {
+    if (this._configured) {
+      throw new Error(`Already configured, can't configure again`);
+    }
+    this._configured = true;
+
+    const configured$ = this._ready$
+      .mergeMap(() => {
+        this.process.send({ type: 'configure', payload: config });
+        return Observable
+          .fromEvent(this.process, 'message')
+          .filter(message => message === 'configured')
+          .first();
+      });
+
+    await configured$.toPromise();
+  }
+
   async start() {
     if (this._started) {
       throw new Error(`Already started, can't start again`);
     }
     this._started = true;
 
-    return this._ready$
-      .mergeMap(() => {
-        if (this.process.killed) {
-          throw new Error(`Can't start killed process`);
-        }
+    if (this.process.killed) {
+      throw new Error(`Can't start killed process`);
+    }
 
-        this.process.send('start');
-        return Observable
-          .fromEvent(this.process, 'message')
-          .filter(message => message === 'started')
-          .first();
-      })
+    this.process.send({ type: 'start' });
+    return Observable
+      .fromEvent(this.process, 'message')
+      .filter(message => message === 'started')
+      .first()
       .toPromise();
   }
 
@@ -46,4 +62,8 @@ export class NativeController {
 
     this.process.kill('SIGKILL');
   }
+}
+
+export function createNativeController(pluginId, process) {
+  return new NativeController(pluginId, process);
 }

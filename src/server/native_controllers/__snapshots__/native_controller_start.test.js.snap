@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`throws error if configure called twice 1`] = `"Can only configure once"`;
+
+exports[`throws error when receives start without call to configure 1`] = `"configure must be called before start"`;

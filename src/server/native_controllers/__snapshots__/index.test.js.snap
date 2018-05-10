@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#prepare rejects if configure rejects 1`] = `"test error"`;
+
 exports[`#prepare validates incorrect nativeControllers schema 1`] = `"child \\"pluginId\\" fails because [\\"pluginId\\" is required]"`;
 
 exports[`#prepare validates no nativeControllers schema 1`] = `"\\"value\\" must be an object"`;
