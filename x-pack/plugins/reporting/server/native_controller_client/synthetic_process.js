@@ -6,24 +6,15 @@
 
 
 
-import { Readable } from 'stream';
-
-class SyntheticStream extends Readable {
-  constructor(options) {
-    super(options);
-  }
-
-  _read() {
-  }
-}
+import { PassThrough } from 'stream';
 
 export class SyntheticProcess {
 
   _callbacks = {};
 
   killed = false;
-  stdout = new SyntheticStream();
-  stderr = new SyntheticStream();
+  stdout = new PassThrough();
+  stderr = new PassThrough();
 
   constructor(channel) {
     this._channel = channel;
@@ -31,11 +22,11 @@ export class SyntheticProcess {
     this._channel.onMessage(({ type, payload }) => {
       switch (type) {
         case 'stdout': {
-          this.stdout.push(payload);
+          this.stdout.write(payload);
           break;
         }
         case 'stderr': {
-          this.stderr.push(payload);
+          this.stderr.write(payload);
           break;
         }
         default: {
