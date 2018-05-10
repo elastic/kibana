@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
-import { metrics, serializeMetric } from '../metrics';
+import { metrics } from '../metrics';
 import { createQuery } from '../create_query.js';
 import { formatTimestampToDuration } from '../../../common';
 import {
@@ -196,7 +196,7 @@ function handleSeries(metric, min, max, bucketSizeInSeconds, response) {
   return {
     bucket_size: formatBucketSize(bucketSizeInSeconds),
     timeRange: { min, max },
-    metric: serializeMetric(metric),
+    metric: metric.serialize(),
     data
   };
 }
