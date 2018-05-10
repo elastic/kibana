@@ -162,7 +162,7 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--',
-        '--server.maxPayloadBytes=1648576',
+        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 
