@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickEdit();
 
       // Opening legend colors has been flaky.
-      retry.try(async () => {
+      await retry.try(async () => {
         await PageObjects.visualize.clickLegendOption('Count');
         await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
       });
