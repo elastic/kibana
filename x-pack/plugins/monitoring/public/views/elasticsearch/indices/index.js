@@ -35,7 +35,7 @@ uiRoutes.when('/elasticsearch/indices', {
       super({
         title: 'Elasticsearch - Indices',
         storageKey: 'elasticsearch.indices',
-        apiFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
+        apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',
         defaultData: {},
         $scope,

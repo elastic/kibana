@@ -40,23 +40,27 @@ export class MonitoringViewBaseController {
   /**
    * Create a view controller
    * @param {String} title - Title of the page
-   * @param {String} api - Back-end API endpoint to poll for getting the page data using POST and time range data in the body.
-   *                       Whenever possible, use this method for data polling rather than supply the getPageData param.
-   * @param {Function} apiFn - Function that returns a string for the back-end API endpoint, in case the string has
-   *                           dynamic query parameters (e.g. show_system_indices)
-   * rather than supply the getPageData param.
-   * @param {Function} getPageData - (Optional) Function to fetch page data, if simply passing the API string isn't workable.
+   * @param {String} api - Back-end API endpoint to poll for getting the page
+   *    data using POST and time range data in the body. Whenever possible, use
+   *    this method for data polling rather than supply the getPageData param.
+   * @param {Function} apiUrlFn - Function that returns a string for the back-end
+   *    API endpoint, in case the string has dynamic query parameters (e.g.
+   *    show_system_indices) rather than supply the getPageData param.
+   * @param {Function} getPageData - (Optional) Function to fetch page data, if
+   *    simply passing the API string isn't workable.
    * @param {Object} defaultData - Initial model data to populate
-   * @param {String} reactNodeId - DOM element ID of the element for mounting the view's main React component
+   * @param {String} reactNodeId - DOM element ID of the element for mounting
+   *    the view's main React component
    * @param {Service} $injector - Angular dependency injection service
    * @param {Service} $scope - Angular view data binding service
    * @param {Boolean} options.enableTimeFilter - Whether to show the time filter
-   * @param {Boolean} options.enableAutoRefresh - Whether to show the auto refresh control
+   * @param {Boolean} options.enableAutoRefresh - Whether to show the auto
+   *    refresh control
    */
   constructor({
     title = '',
     api = '',
-    apiFn,
+    apiUrlFn,
     getPageData: _getPageData = getPageData,
     defaultData,
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
@@ -92,7 +96,7 @@ export class MonitoringViewBaseController {
     }
 
     this.updateData = () => {
-      const _api = apiFn ? apiFn() : api;
+      const _api = apiUrlFn ? apiUrlFn() : api;
       return _getPageData($injector, _api)
         .then(pageData => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
