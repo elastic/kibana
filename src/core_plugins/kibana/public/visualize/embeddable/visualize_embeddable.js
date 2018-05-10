@@ -93,7 +93,13 @@ export class VisualizeEmbeddable extends Embeddable  {
     }
   }
 
-  render(domNode) {
+  /**
+   *
+   * @param {Element} domNode
+   * @param {ContainerState} containerState
+   */
+  render(domNode, containerState) {
+    this.onContainerStateChanged(containerState);
     this.domNode = domNode;
     this.handler = this.loader.embedVisualizationWithSavedObject(
       domNode,

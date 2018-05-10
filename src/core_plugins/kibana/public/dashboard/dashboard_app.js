@@ -139,7 +139,7 @@ app.directive('dashboardApp', function ($injector) {
         courier.fetch(...args);
       };
       $scope.timefilter = timefilter;
-      dashboardStateManager.handleTimeChange($scope.timefilter);
+      dashboardStateManager.handleTimeChange($scope.timefilter.time);
 
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -220,7 +220,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
       $scope.$listen(timefilter, 'fetch', () => {
-        dashboardStateManager.handleTimeChange($scope.timefilter);
+        dashboardStateManager.handleTimeChange($scope.timefilter.time);
         // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
         // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
         $scope.refresh();
