@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { statSync, lstatSync, realpathSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
+import moment from 'moment';
 
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
@@ -249,10 +250,15 @@ function shouldStartRepl(opts) {
 }
 
 function logFatal(message, server) {
-  if (server) {
-    server.log(['fatal'], message);
+  let useUTC =  true;
+  try {
+    if (server) {
+      server.log(['fatal'], message);
+      useUTC = server.config().get('logging.useUTC');
+    }
+  } finally {
+    // It's possible for the Hapi logger to not be setup
+    const timestamp = moment().toISOString(!useUTC);
+    console.log(timestamp, 'FATAL', message);
   }
-
-  // It's possible for the Hapi logger to not be setup
-  console.error('FATAL', message);
 }
