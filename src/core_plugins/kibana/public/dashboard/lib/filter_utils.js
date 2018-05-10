@@ -54,12 +54,18 @@ export class FilterUtils {
   }
 
   /**
-   * Converts the time to a string, if it isn't already.
+   * Converts the time to a utc formatted string. If the time is not valid (e.g. it might be in a relative format like
+   * 'now-15m', then it just returns what it was passed).
    * @param time {string|Moment}
-   * @returns {string}
+   * @returns {string} the time represented in utc format, or if the time range was not able to be parsed into a moment
+   * object, it returns the same object it was given.
    */
-  static convertTimeToString(time) {
-    return typeof time === 'string' ? time : moment(time).toString();
+  static convertTimeToUTCString(time) {
+    if (moment(time).isValid()) {
+      return moment(time).utc();
+    }  else {
+      return time;
+    }
   }
 
   /**
@@ -71,7 +77,7 @@ export class FilterUtils {
    * @returns {boolean}
    */
   static areTimesEqual(timeA, timeB) {
-    return this.convertTimeToString(timeA) === this.convertTimeToString(timeB);
+    return this.convertTimeToUTCString(timeA) === this.convertTimeToUTCString(timeB);
   }
 
   /**
