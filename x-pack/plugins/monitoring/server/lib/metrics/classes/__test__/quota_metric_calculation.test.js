@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QuotaMetric } from '..';
+import { QuotaMetric } from '../';
 
 describe('Quota Metric Calculation', () => {
   it('When bucket is invalid, returns undefined', () => {
