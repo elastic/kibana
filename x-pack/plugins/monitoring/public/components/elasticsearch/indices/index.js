@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ShowSytemIndicesCheckbox } from './show_system_indices_checkbox';
+export { ElasticsearchIndices } from './indices';
