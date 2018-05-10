@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    // Flaky test https://github.com/elastic/kibana/issues/17468
-    it.skip('Overriding colors on an area chart is preserved', async () => {
+    it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
@@ -35,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickEdit();
 
       // Opening legend colors has been flaky.
-      retry.try(async () => {
+      await retry.try(async () => {
         await PageObjects.visualize.clickLegendOption('Count');
         await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
       });
