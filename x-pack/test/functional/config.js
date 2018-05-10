@@ -7,7 +7,6 @@
 /* eslint-disable kibana-custom/no-default-export */
 
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import { format as formatUrl } from 'url';
 
 import {
@@ -54,9 +53,9 @@ import {
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
 
-  const kibanaCommonConfig = await readConfigFile(resolveKibanaPath('test/common/config.js'));
-  const kibanaFunctionalConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
 
   const servers = {
     elasticsearch: {
