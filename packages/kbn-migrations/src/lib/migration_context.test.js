@@ -91,6 +91,12 @@ describe('migrationContext', () => {
       .rejects.toThrowError(/has migration "foo" defined more than once/);
   });
 
+  test('lower-cases index name', async () => {
+    const { initialIndex, destIndex } = await testMigrationContext({}, '1.2.3-BIG');
+    expect(initialIndex).toEqual('.sample-index-1.2.3-big-original');
+    expect(destIndex).toEqual('.sample-index-1.2.3-big-989db2448f309bfdd99b513f37c84b8f5794d2b5');
+  });
+
   async function buildOpts(opts, elasticVersion = '9.8.7') {
     const existingDocs = !opts.migrationState ? undefined : [{
       id: 'migration-state',

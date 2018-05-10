@@ -14,7 +14,7 @@ module.exports = {
 
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
-  const initialIndex = `${index}-${elasticVersion}-original`;
+  const initialIndex = `${index}-${elasticVersion}-original`.toLowerCase();
   const [currentIndex, { migrationState, migrationStateVersion }, currentMappings] = await Promise.all([
     Persistence.getCurrentIndex(callCluster, index),
     MigrationState.fetch(callCluster, index),
@@ -34,7 +34,7 @@ async function fetch(opts) {
     force,
     initialIndex,
     plugins: sanitizedPlugins,
-    destIndex: `${index}-${elasticVersion}-${sha}`,
+    destIndex: `${index}-${elasticVersion}-${sha}`.toLowerCase(),
     log: log ? migrationLogger(log) : _.noop,
   };
 }

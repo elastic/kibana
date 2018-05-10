@@ -111,6 +111,9 @@ function mockElasticSearchCommands(data, meta) {
     if (indexExists({ index })) {
       return reject(400, `Index ${index} exists!`);
     }
+    if ((/[A-Z]/.test(index))) {
+      return reject(400, `Index ${index} cannot have uppercase characters!`);
+    }
     data[index] = {};
     meta.mappings[index] = _.cloneDeep(mappings);
     if (settings) {
