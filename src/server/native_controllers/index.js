@@ -70,7 +70,6 @@ const getNativeControllers = async (kbnServer) => {
 };
 
 export async function prepare(kbnServer) {
-  debugger; //eslint-disable-line
   const nativeControllers = await getNativeControllers(kbnServer);
   kbnServer.nativeControllers = nativeControllers.reduce((acc, nativeController) => {
     if (acc[nativeController.pluginId]) {
