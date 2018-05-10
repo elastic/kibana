@@ -1,0 +1,13 @@
+[[vis-inspector]]
+== Inspector
+
+Using the Inspector you can gain insights into several aspects of your visualizations.
+
+To open the Inspector use the Inspector button while in the editor or the Inspector
+option from the Dashboard panel menu.
+
+The Inspector offer multiple views to inspect different aspects of your visualization,
+like viewing the data that is drawn in a visualization or viewing the requests
+that were made to gather that data.
+
+Which views are available depends on the inspected visualization.
