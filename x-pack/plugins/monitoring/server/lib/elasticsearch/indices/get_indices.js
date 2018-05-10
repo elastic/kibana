@@ -57,7 +57,7 @@ export function handleResponse(resp, min, max, shardStats) {
         statusSort = 3;
       }
     } else {
-      status = 'Deleted/Closed';
+      status = 'Deleted / Closed';
       statusSort = 0;
     }
 

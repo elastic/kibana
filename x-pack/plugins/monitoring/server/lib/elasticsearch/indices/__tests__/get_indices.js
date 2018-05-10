@@ -31,7 +31,7 @@ describe('Get Elasticsearch Indices', () => {
         data_size: undefined,
         index_rate: null,
         search_rate: null,
-        status: 'Deleted/Closed',
+        status: 'Deleted / Closed',
         status_sort: 0,
         unassigned_shards: undefined
       }
@@ -101,7 +101,7 @@ describe('Get Elasticsearch Indices', () => {
         data_size: 3199059,
         index_rate: 0,
         search_rate: 0,
-        status: 'Deleted/Closed',
+        status: 'Deleted / Closed',
         status_sort: 0,
         unassigned_shards: undefined
       },
@@ -111,7 +111,7 @@ describe('Get Elasticsearch Indices', () => {
         data_size: 239591867,
         index_rate: 13.30026455026455,
         search_rate: 28.902116402116405,
-        status: 'Deleted/Closed',
+        status: 'Deleted / Closed',
         status_sort: 0,
         unassigned_shards: undefined
       }
