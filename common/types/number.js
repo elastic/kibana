@@ -6,13 +6,11 @@ export const number = () => ({
   },
   to: {
     string: n => String(n),
-    render: input => {
+    render: value => {
       return {
         type: 'render',
-        as: 'markdown',
-        value: {
-          content: String(input),
-        },
+        as: 'text',
+        value: `${value}`,
       };
     },
     datatable: value => {

@@ -11,6 +11,7 @@ import { pie } from './pie';
 import { plot } from './plot';
 import { table } from './table';
 import { timeFilter } from './time_filter';
+import { text } from './text';
 
 export const renderFunctions = [
   advancedFilter,
@@ -26,4 +27,5 @@ export const renderFunctions = [
   plot,
   table,
   timeFilter,
+  text,
 ];
