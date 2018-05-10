@@ -49,22 +49,22 @@ export class StartTrial extends React.PureComponent {
           <div>
             <EuiText>
               <p>
-                This trial is for the full set of Elastic{' '}
+                This trial is for the full set of{' '}
                 <EuiLink
                   href="https://www.elastic.co/subscriptions/xpack"
                   target="_blank"
                 >
-                  platinum features
-                </EuiLink>. You&apos;ll get immediate access to:
+                  Platinum features
+                </EuiLink> of the Elastic Stack. You&apos;ll get immediate access to:
               </p>
               <ul>
                 <li>Machine learning</li>
                 <li>Alerting</li>
-                <li>Graph</li>
+                <li>Graph capabilities</li>
                 <li>JDBC connectivity for SQL</li>
               </ul>
               <p>
-                Security features, such authentication (native, AD/LDAP, SAML,
+                Security features, such as authentication (native, AD/LDAP, SAML,
                 PKI), role-based access control, and auditing, require
                 configuration. See the{' '}
                 <EuiLink
@@ -98,12 +98,12 @@ export class StartTrial extends React.PureComponent {
     }
     const description = (
       <span>
-        Experience what Security, Machine Learning, and all our other{' '}
+        Experience what security, machine learning, and all our other{' '}
         <EuiLink
           href="https://www.elastic.co/subscriptions/xpack"
           target="_blank"
         >
-          platinum features
+          Platinum features
         </EuiLink>{' '}
         have to offer.
       </span>
