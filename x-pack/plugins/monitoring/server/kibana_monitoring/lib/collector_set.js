@@ -67,7 +67,7 @@ export class CollectorSet {
    */
   start() {
     const initialCollectors = [];
-    this._log.info(`Starting all Kibana monitoring collectors`);
+    this._log.info(`Starting all stats collectors`);
 
     this._collectors.forEach(collector => {
       if (collector.init) {
@@ -110,14 +110,14 @@ export class CollectorSet {
     if (payload.length > 0) {
       try {
         const combinedData = this._combineTypes(payload); // use the collector types combiner
-        this._log.debug(`Uploading bulk Kibana monitoring payload`);
+        this._log.debug(`Uploading bulk stats payload to the local cluster`);
         this._onPayload(flatten(combinedData));
       } catch(err) {
         this._log.warn(err);
-        this._log.warn(`Unable to bulk upload the Kibana monitoring payload`);
+        this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
       }
     } else {
-      this._log.debug(`Skipping bulk uploading of empty Kibana monitoring payload`);
+      this._log.debug(`Skipping bulk uploading of an empty stats payload`);
     }
   }
 
@@ -140,7 +140,7 @@ export class CollectorSet {
   }
 
   cleanup() {
-    this._log.info(`Stopping all Kibana monitoring collectors`);
+    this._log.info(`Stopping all stats collectors`);
 
     // stop fetching
     clearInterval(this._timer);
