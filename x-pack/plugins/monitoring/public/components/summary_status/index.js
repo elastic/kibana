@@ -21,8 +21,9 @@ const wrapChild = ({ label, value, dataTestSubj }, index) => (
 
 const DefaultIconComponent = ({ status }) => (
   <Fragment>
-    Status:{' '}
-    <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
+    Status: {(
+      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
+    )}
   </Fragment>
 );
 
