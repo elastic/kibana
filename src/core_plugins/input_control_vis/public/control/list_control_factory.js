@@ -7,7 +7,12 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 
-const termsAgg = (field, size, direction) => {
+function getEscapedQuery(query = '') {
+  // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
+  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
+}
+
+const termsAgg = (field, size, direction, query) => {
   if (size < 1) {
     size = 1;
   }
@@ -26,6 +31,11 @@ const termsAgg = (field, size, direction) => {
   } else {
     terms.field = field.name;
   }
+
+  if (query) {
+    terms.include = `${getEscapedQuery(query)}.*`;
+  }
+
   return {
     'termsAgg': {
       'terms': terms
@@ -35,7 +45,7 @@ const termsAgg = (field, size, direction) => {
 
 class ListControl extends Control {
 
-  async fetch() {
+  fetch = async (query) => {
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -67,7 +77,8 @@ class ListControl extends Control {
     const aggs = termsAgg(
       indexPattern.fields.byName[fieldName],
       _.get(this.options, 'size', 5),
-      'desc');
+      'desc',
+      query);
     const searchSource = createSearchSource(
       this.kbnApi,
       initialSearchSourceState,
@@ -76,14 +87,20 @@ class ListControl extends Control {
       this.useTimeFilter,
       ancestorFilters);
 
+    this.lastQuery = query;
     const resp = await searchSource.fetch();
+    if (query && this.lastQuery !== query) {
+      // search results returned out of order - ignore results from old query
+      return;
+    }
+
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
       return { label: this.format(bucket.key), value: bucket.key.toString() };
     }).sort((a, b) => {
       return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
     });
 
-    if(selectOptions.length === 0) {
+    if(selectOptions.length === 0 && !query) {
       this.disable(noValuesDisableMsg(fieldName, indexPattern.title));
       return;
     }

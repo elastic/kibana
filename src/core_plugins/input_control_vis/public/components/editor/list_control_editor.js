@@ -15,18 +15,6 @@ function filterField(field) {
 }
 
 export function ListControlEditor(props) {
-  const multiselectId = `multiselect-${props.controlIndex}`;
-  const sizeId = `size-${props.controlIndex}`;
-  const handleMultiselectChange = (evt) => {
-    props.handleCheckboxOptionChange(props.controlIndex, 'multiselect', evt);
-  };
-  const handleSizeChange = (evt) => {
-    props.handleNumberOptionChange(props.controlIndex, 'size', evt);
-  };
-  const handleParentChange = (evt) => {
-    props.handleParentChange(props.controlIndex, evt);
-  };
-
   let parentSelect;
   if (props.parentCandidates && props.parentCandidates.length > 0) {
     const options = [
@@ -42,7 +30,9 @@ export function ListControlEditor(props) {
         <EuiSelect
           options={options}
           value={props.controlParams.parent}
-          onChange={handleParentChange}
+          onChange={(evt) => {
+            props.handleParentChange(props.controlIndex, evt);
+          }}
         />
       </EuiFormRow>
     );
@@ -71,24 +61,41 @@ export function ListControlEditor(props) {
       { parentSelect }
 
       <EuiFormRow
-        id={multiselectId}
+        id={`multiselect-${props.controlIndex}`}
       >
         <EuiSwitch
           label="Multiselect"
           checked={props.controlParams.options.multiselect}
-          onChange={handleMultiselectChange}
+          onChange={(evt) => {
+            props.handleCheckboxOptionChange(props.controlIndex, 'multiselect', evt);
+          }}
           data-test-subj="listControlMultiselectInput"
         />
       </EuiFormRow>
 
       <EuiFormRow
-        id={sizeId}
+        id={`dynamicOptions-${props.controlIndex}`}
+      >
+        <EuiSwitch
+          label="Dynamic Options"
+          checked={props.controlParams.options.dynamicOptions}
+          onChange={(evt) => {
+            props.handleCheckboxOptionChange(props.controlIndex, 'dynamicOptions', evt);
+          }}
+          data-test-subj="listControlDynamicOptionsSwitch"
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        id={`size-${props.controlIndex}`}
         label="Size"
       >
         <EuiFieldNumber
           min={1}
           value={props.controlParams.options.size}
-          onChange={handleSizeChange}
+          onChange={(evt) => {
+            props.handleNumberOptionChange(props.controlIndex, 'size', evt);
+          }}
           data-test-subj="listControlSizeInput"
         />
       </EuiFormRow>
