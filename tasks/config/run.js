@@ -20,9 +20,6 @@
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { resolve } from 'path';
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
 const PKG_VERSION = require('../../package.json').version;
 
 module.exports = function (grunt) {
@@ -57,14 +54,6 @@ module.exports = function (grunt) {
       ]
     };
   }
-
-  const apiTestServerFlags = [
-    '--optimize.enabled=false',
-    '--elasticsearch.url=' + esTestConfig.getUrl(),
-    '--elasticsearch.healthCheck.delay=' + HOUR,
-    '--server.port=' + kbnTestConfig.getPort(),
-    '--server.xsrf.disableProtection=true',
-  ];
 
   const funcTestServerFlags = [
     '--server.maxPayloadBytes=1648576', //default is 1048576
@@ -116,25 +105,6 @@ module.exports = function (grunt) {
         require.resolve('../../scripts/mocha')
       ]
     },
-
-    // used by the test:api task
-    //    runs the kibana server prepared for the api_integration tests
-    apiTestServer: createKbnServerTask({
-      flags: [
-        ...apiTestServerFlags
-      ]
-    }),
-
-    // used by the test:api:server task
-    //    runs the kibana server in --dev mode, prepared for developing api_integration tests
-    //    and watching for changes so the server will restart when necessary
-    devApiTestServer: createKbnServerTask({
-      flags: [
-        '--dev',
-        '--no-base-path',
-        ...apiTestServerFlags,
-      ]
-    }),
 
     // used by test:ui task
     //    runs the kibana server prepared for the functional tests
@@ -224,6 +194,14 @@ module.exports = function (grunt) {
         'scripts/notice',
         '--validate'
       ]
-    }
+    },
+
+    api_integration_tests: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config ../../test/api_integration/jenkins_config.js',
+      ],
+    },
   };
 };

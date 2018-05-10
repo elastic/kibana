@@ -64,7 +64,7 @@ module.exports = function (grunt) {
     'test:jest_integration',
     'test:projects',
     'test:browser',
-    'test:api'
+    'run:api_integration_tests'
   ]);
 
   grunt.registerTask('test:dev', [
@@ -96,23 +96,6 @@ module.exports = function (grunt) {
     'run:testEsServer',
     'run:devFuncTestServer:keepalive'
   ]);
-
-  grunt.registerTask('test:api', [
-    'run:testEsServer',
-    'run:apiTestServer',
-    'functional_test_runner:apiIntegration',
-    'stop:testEsServer',
-    'stop:apiTestServer'
-  ]);
-
-  grunt.registerTask('test:api:server', [
-    'run:testEsServer',
-    'run:devApiTestServer:keepalive'
-  ]);
-
-  grunt.registerTask('test:api:runner', () => {
-    grunt.fail.fatal('test:api:runner has moved, use: `node scripts/functional_test_runner --config test/api_integration/config.js`');
-  });
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
