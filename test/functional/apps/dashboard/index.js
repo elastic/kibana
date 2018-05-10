@@ -47,19 +47,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_snapshots'));
       loadTestFile(require.resolve('./_panel_controls'));
       loadTestFile(require.resolve('./_view_edit'));
-
       loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-      loadTestFile(require.resolve('./_dashboard_state'));
-
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));
       loadTestFile(require.resolve('./_dashboard_listing'));
