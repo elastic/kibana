@@ -103,7 +103,13 @@ export class SearchEmbeddable extends Embeddable {
     };
   }
 
-  render(domNode) {
+  /**
+   *
+   * @param {Element} domNode
+   * @param {ContainerState} containerState
+   */
+  render(domNode, containerState) {
+    this.onContainerStateChanged(containerState);
     this.domNode = domNode;
     this.initializeSearchScope();
     this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
