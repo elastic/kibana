@@ -11,9 +11,9 @@ const DEFAULTS_SETTINGS = {
     xsrf: {
       disableProtection: true
     },
-    systemCallFilters: {
-      enabled: false
-    }
+  },
+  systemCallFilters: {
+    enabled: false
   },
   logging: {
     quiet: true

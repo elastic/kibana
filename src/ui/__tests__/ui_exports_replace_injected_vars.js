@@ -35,9 +35,9 @@ describe('UiExports', function () {
       kbnServer = new KbnServer({
         server: {
           port: 0, // pick a random open port
-          systemCallFilters: {
-            enabled: false,
-          }
+        },
+        systemCallFilters: {
+          enabled: false,
         },
         logging: { silent: true }, // no logs
         optimize: { enabled: false },
