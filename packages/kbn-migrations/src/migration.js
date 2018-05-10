@@ -45,6 +45,7 @@ async function fetchStatus(opts) {
  * @returns {MigrationResult}
  */
 async function migrate(opts) {
+  Joi.assert(opts, migrateOptsSchema);
   const { result, elapsedMs } = await measureElapsedTime(() => runMigrationIfOutOfDate(opts));
   return {
     ...result,
@@ -55,23 +56,27 @@ async function migrate(opts) {
 async function measureElapsedTime(fn) {
   const startTime = Date.now();
   const result = await fn();
-  return {
-    result,
-    elapsedMs: Date.now() - startTime,
-  };
+  return { result, elapsedMs: Date.now() - startTime };
 }
 
 async function runMigrationIfOutOfDate(opts) {
-  Joi.assert(opts, migrateOptsSchema);
   const context = await MigrationContext.fetch(opts);
   const status = await MigrationState.status(context.plugins, context.migrationState);
 
   try {
-    if (status === MigrationStatus.outOfDate || (status === MigrationStatus.migrating && context.force)) {
-      return runMigration(context);
-    } else {
+    if (status === MigrationStatus.migrated || (status === MigrationStatus.migrating && !context.force)) {
       return skipMigration(context, status);
     }
+
+    // This can happen if you attempt to migrate the current index to some future
+    // version, the migration fails, and you revert your Kibana to the same version
+    // as the existing index. In this case, the existing index state is 'migrating'
+    // and it is read-only.
+    if (context.nextMigrationState.previousIndex === context.destIndex) {
+      return resetIndex(context);
+    }
+
+    return runMigration(context);
   } catch (err) {
     context.log.error(err);
     throw err;
@@ -80,54 +85,28 @@ async function runMigrationIfOutOfDate(opts) {
 
 function skipMigration({ index, log }, status) {
   log.info(() => `Skipping migration of "${index}", beacause its status is: ${status}`);
-  return {
-    index,
-    status,
-    destIndex: index,
-    skippedMigration: true,
-  };
+  return { index, status, destIndex: index, skippedMigration: true };
 }
 
 async function runMigration(context) {
-  const {
-    index,
-    callCluster,
-    log,
-    nextMigrationState,
-    migrationPlan,
-    scrollSize,
-    destIndex,
-  } = context;
-  const result = {
-    index,
-    destIndex,
-    status: MigrationStatus.migrated,
-  };
+  const { log, index, destIndex, migrationPlan, callCluster, scrollSize, nextMigrationState } = context;
 
   log.info(() => `Preparing to migrate "${index}"`);
   log.debug(() => `Migrations being applied: ${migrationPlan.migrations.map(({ id }) => id).join(', ')}`);
 
+  log.info(() => `Ensuring index ${index} exists`);
   await ensureIndexExists(context);
 
-  // This can happen if you attempt to migrate the current index to some future
-  // version, the migration fails, and you revert your Kibana to the same version
-  // as the existing index. In this case, the existing index state is 'migrating'
-  // and it is read-only.
-  if (nextMigrationState.previousIndex === destIndex) {
-    log.info(() => `Re-activating "${index}" to use "${destIndex}"`);
-    await resetIndex(context);
-    return result;
-  }
-
   log.info(() => `Marking index ${index} as migrating`);
-  await Persistence.setReadonly(callCluster, index, false);
   await setMigrationStatus(context, MigrationStatus.migrating);
 
+  log.info(() => `Ensuring alias ${index} exists`);
   await ensureIsAliased(context);
 
   log.info(() => `Setting index ${index} to read-only`);
   await Persistence.setReadonly(callCluster, index, true);
 
+  log.info(() => `Setting up destination index`);
   await createDestIndex(context);
 
   log.info(() => `Seeding ${destIndex}`);
@@ -142,10 +121,11 @@ async function runMigration(context) {
   log.info(() => `Pointing alias ${index} to ${destIndex}`);
   await Persistence.setAlias(callCluster, index, destIndex);
 
-  return result;
+  return migrationResult(context);
 }
 
 async function setMigrationStatus({ callCluster, index, migrationStateVersion, migrationState }, status) {
+  await Persistence.setReadonly(callCluster, index, false);
   await MigrationState.save(callCluster, index, migrationStateVersion, {
     ...migrationState,
     status,
@@ -193,7 +173,12 @@ async function createDestIndex({ callCluster, force, destIndex, index, migration
 }
 
 async function resetIndex(context) {
-  const { callCluster, index } = context;
-  await Persistence.setReadonly(callCluster, index, false);
+  const { log, index, destIndex } = context;
+  log.info(() => `Re-activating "${index}" to use "${destIndex}"`);
   await setMigrationStatus(context, MigrationStatus.migrated);
+  return migrationResult(context);
+}
+
+function migrationResult({ index, destIndex }) {
+  return { index, destIndex, status: MigrationStatus.migrated };
 }
