@@ -31,8 +31,8 @@ export default class WatchOptimizer extends BaseOptimizer {
 
     await this.initCompiler();
 
-    this.compiler.plugin('watch-run', this.compilerRunStartHandler);
-    this.compiler.plugin('done', this.compilerDoneHandler);
+    this.compiler.hooks.watchRun.tap(this.compilerWatchRunTap);
+    this.compiler.hooks.done.tap(this.compilerDoneTap);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -79,12 +79,34 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerRunStartHandler = (watchingCompiler, cb) => {
-    this.status$.next({
-      type: STATUS.RUNNING
-    });
+  compilerWatchRunTap = {
+    name: 'kibana-compilerWatchRunTap',
+    fn: () => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
+    }
+  }
 
-    cb();
+  compilerDoneTap = {
+    name: 'kibana-compilerDoneTap',
+    fn: (stats) => {
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (stats.hasErrors() || stats.hasWarnings()) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    }
   }
 
   compilerWatchErrorHandler = (error) => {
@@ -92,24 +114,6 @@ export default class WatchOptimizer extends BaseOptimizer {
       this.status$.next({
         type: STATUS.FATAL,
         error
-      });
-    }
-  }
-
-  compilerDoneHandler = (stats) => {
-    this.initialBuildComplete = true;
-    const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-    if (stats.hasErrors() || stats.hasWarnings()) {
-      this.status$.next({
-        type: STATUS.FAILURE,
-        seconds,
-        error: this.failedStatsToError(stats)
-      });
-    } else {
-      this.status$.next({
-        type: STATUS.SUCCESS,
-        seconds,
       });
     }
   }

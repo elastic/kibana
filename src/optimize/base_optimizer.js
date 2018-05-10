@@ -51,14 +51,17 @@ export default class BaseOptimizer {
     const compilerConfig = this.getConfig();
     this.compiler = webpack(compilerConfig);
 
-    this.compiler.plugin('done', stats => {
-      if (!this.profile) return;
+    this.compiler.hooks.done.tap({
+      name: 'kibana-writeStatsJson',
+      fn: stats => {
+        if (!this.profile) return;
 
-      const path = this.uiBundles.resolvePath('stats.json');
-      const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function (err) {
-        if (err) throw err;
-      });
+        const path = this.uiBundles.resolvePath('stats.json');
+        const content = JSON.stringify(stats.toJson());
+        writeFile(path, content, function (err) {
+          if (err) throw err;
+        });
+      }
     });
 
     return this.compiler;
