@@ -26,6 +26,8 @@ export function getRoutes() {
   };
 }
 
+const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+
 export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
@@ -429,7 +431,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       });
     }
 
-    save() {
+    save(saveAttempts = 0) {
       const body = this.prepBody();
       // What keys changed since they last pulled the index pattern
       const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
@@ -439,7 +441,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           setVersion(this, version);
         })
         .catch(err => {
-          if (err.statusCode === 409) {
+          if (err.statusCode === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
             const samePattern = new IndexPattern(this.id);
             return samePattern.init()
               .then(() => {
@@ -480,7 +482,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                 patternCache.clear(this.id);
 
                 // Try the save again
-                return this.save();
+                return this.save(saveAttempts);
               });
           }
           throw err;
