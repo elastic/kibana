@@ -49,4 +49,31 @@ describe('<EditorOptionsGroup/>', () => {
     );
     expect(group).toMatchSnapshot();
   });
+
+  it('renders as expected with collapsible false', () => {
+    const group = render(
+      <EditorOptionsGroup
+        title="Some options"
+        collapsible={false}
+      >
+        <span>Children</span>
+        <span>within the editor group</span>
+      </EditorOptionsGroup>
+    );
+    expect(group).toMatchSnapshot();
+  });
+
+  it('renders as expected with collapsible false and grow true', () => {
+    const group = render(
+      <EditorOptionsGroup
+        title="Some options"
+        collapsible={false}
+        grow={true}
+      >
+        <span>Children</span>
+        <span>within the editor group</span>
+      </EditorOptionsGroup>
+    );
+    expect(group).toMatchSnapshot();
+  });
 });
