@@ -1,7 +1,7 @@
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
@@ -66,35 +66,29 @@ export default class BaseOptimizer {
 
   getConfig() {
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
-      return ExtractTextPlugin.extract({
-        fallback: {
-          loader: 'style-loader'
+      return [
+        MiniCssExtractPlugin.loader,
+        ...postProcessors,
+        {
+          loader: 'css-loader',
+          options: {
+            // importLoaders needs to know the number of loaders that follow this one,
+            // so we add 1 (for the postcss-loader) to the length of the preProcessors
+            // array that we merge into this array
+            importLoaders: 1 + preProcessors.length,
+          },
         },
-        use: [
-          ...postProcessors,
-          {
-            loader: 'css-loader',
-            options: {
-              // importLoaders needs to know the number of loaders that follow this one,
-              // so we add 1 (for the postcss-loader) to the length of the preProcessors
-              // array that we merge into this array
-              importLoaders: 1 + preProcessors.length,
+        {
+          loader: 'postcss-loader',
+          options: {
+            config: {
+              path: POSTCSS_CONFIG_PATH,
             },
           },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: POSTCSS_CONFIG_PATH,
-              },
-            },
-          },
-          ...preProcessors,
-        ],
-      });
+        },
+        ...preProcessors,
+      ];
     }
-
-    const nodeModulesPath = fromRoot('node_modules');
 
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
@@ -119,6 +113,8 @@ export default class BaseOptimizer {
     }
 
     const commonConfig = {
+      mode: 'none',
+
       node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.uiBundles.toWebpackEntries(),
@@ -134,22 +130,32 @@ export default class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendors: {
+              name: 'vendors',
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              minSize: 0,
+              minChunks: 1,
+              maxInitialRequests: Infinity,
+              maxAsyncRequests: Infinity,
+            },
+            commons: {
+              name: 'commons',
+              priority: -20,
+              minChunks: 2,
+              reuseExistingChunk: true,
+            }
+          }
+        }
+      },
+
       plugins: [
-        new ExtractTextPlugin('[name].style.css', {
-          allChunks: true
-        }),
-
-        new webpack.optimize.CommonsChunkPlugin({
-          name: 'commons',
-          filename: 'commons.bundle.js',
-          minChunks: 2,
-        }),
-
-        new webpack.optimize.CommonsChunkPlugin({
-          name: 'vendors',
-          filename: 'vendors.bundle.js',
-          // only combine node_modules from Kibana
-          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
+        new MiniCssExtractPlugin({
+          filename: '[name].style.css',
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
