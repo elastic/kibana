@@ -225,7 +225,7 @@ function mockElasticSearchCommands(data, meta) {
   }
 
   function getMapping({ index }) {
-    const mappings = _.cloneDeep(meta.mappings[tryUnAlias(index)]);
+    const mappings = _.cloneDeep(meta.mappings[unAlias(index)]);
     if (mappings) {
       return {
         [index]: {

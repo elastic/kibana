@@ -19,7 +19,7 @@ export default function (kibana) {
       return server.plugins.elasticsearch.waitUntilReady()
         .then(() => this.status.yellow('Migrating the Kibana index...'))
         .then(() => migrateKibanaIndex(this.kbnServer))
-        .then(() => this.status.green());
+        .then(() => this.status.green('Ready'));
     }
   });
 }

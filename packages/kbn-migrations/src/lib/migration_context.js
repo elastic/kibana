@@ -15,12 +15,13 @@ module.exports = {
 async function fetch(opts) {
   const { callCluster, log, index, plugins, elasticVersion, force } = opts;
   const initialIndex = `${index}-${elasticVersion}-original`;
-  const [currentIndex, { migrationState, migrationStateVersion }] = await Promise.all([
+  const [currentIndex, { migrationState, migrationStateVersion }, currentMappings] = await Promise.all([
     Persistence.getCurrentIndex(callCluster, index),
     MigrationState.fetch(callCluster, index),
+    Persistence.getMapping(callCluster, index),
   ]);
   const sanitizedPlugins = Plugin.validate(plugins, migrationState);
-  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState);
+  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState, currentMappings);
   const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex || initialIndex, migrationState);
   const sha = objectHash(nextMigrationState.plugins);
   return {

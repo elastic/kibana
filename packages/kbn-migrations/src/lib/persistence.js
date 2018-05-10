@@ -17,6 +17,7 @@ module.exports = {
   setReadonly,
   fetchOrNull,
   getCurrentIndex,
+  getMapping,
 };
 
 // Runs all transform migrations on docs in the sourceIndex and persists the resulting docs to destIndex
@@ -86,7 +87,7 @@ async function cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings)
 
 // Moves sourceIndex to destIndex, and create an alias named sourceIndex that points to destIndex.
 async function convertIndexToAlias(callCluster, sourceIndex, destIndex) {
-  const mappings = await callCluster('indices.getMapping', { index: sourceIndex });
+  const mappings = await getMapping(callCluster, sourceIndex);
   await cloneIndexSettings(callCluster, sourceIndex, destIndex, mappings[sourceIndex].mappings);
   await reindex(callCluster, sourceIndex, destIndex);
   await callCluster('indices.updateAliases', {
@@ -152,6 +153,10 @@ async function getCurrentIndex(callCluster, index) {
   if (currentAlias) {
     return Object.keys(currentAlias)[0];
   }
+}
+
+function getMapping(callCluster, index) {
+  return fetchOrNull(callCluster('indices.getMapping', { index, ignoreUnavailable: true }));
 }
 
 async function removeIndicesFromAlias(callCluster, alias) {

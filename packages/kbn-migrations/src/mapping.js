@@ -6,9 +6,7 @@ module.exports = {
 };
 
 /**
- * Computes the current mappings for the specified index. These mappings may not have been
- * applied yet, if the index is unmigrated. This function returns mappings for enabled
- * and disabled pugins unless the includeDisabledPlugins option is set to false
+ * Computes the index mappings defined by the specified set of plugins.
  *
  * @returns {Promise<Mappings>}
  */

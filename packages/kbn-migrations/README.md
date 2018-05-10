@@ -308,7 +308,11 @@ It should now be possible to start the previous version of Kibana.
     - Those migrations have been applied to an index
     - The plugin is upgraded to a later version, which defines migrations 'a', 'c', 'b'
     - In this case, the plugin's migrations have been reordered
-
+- Mappings are never removed
+  - This is because we need to support old indices which might have mappings that are no longer associated with a plugin
+  - We could put in logic to clean up mappings at the end of a migration:
+    - During migration, track what mappings are required by existing docs
+    - After migration, remove any mappings that are not defined by active plugins and that are not required by existing docs
 
 
 ## Kibana-index specific notes

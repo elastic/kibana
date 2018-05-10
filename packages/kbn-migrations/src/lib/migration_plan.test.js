@@ -33,7 +33,7 @@ describe('MigrationPlan.build', () => {
       });
   });
 
-  test('retains mappings from disabled plugins', () => {
+  test('retains mappings from previous index', () => {
     const plugins = [{
       id: 'hello',
       migrations: [],
@@ -47,8 +47,17 @@ describe('MigrationPlan.build', () => {
       },
     }];
     const state = MigrationState.build(plugins);
+    const currentMappings = {
+      someIndexName: {
+        mappings: {
+          doc: {
+            properties: plugins[1].mappings,
+          },
+        },
+      },
+    };
 
-    expect(MigrationPlan.build([plugins[0]], state).mappings)
+    expect(MigrationPlan.build([plugins[0]], state, currentMappings).mappings)
       .toEqual({
         doc: {
           dynamic: 'strict',
@@ -77,7 +86,7 @@ describe('MigrationPlan.build', () => {
     }];
     const state = MigrationState.build(plugins);
 
-    expect(() => MigrationPlan.build([plugins[0]], state))
+    expect(() => MigrationPlan.build(plugins, state))
       .toThrow(/Plugin \"(hello|cartoons)\" is attempting to redefine mapping \"stuff\"/);
   });
 

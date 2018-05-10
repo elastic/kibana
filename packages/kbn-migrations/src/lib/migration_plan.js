@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const MigrationState = require('./migration_state');
-const Plugin = require('./plugin');
 
 module.exports = {
   build,
@@ -8,12 +7,12 @@ module.exports = {
 };
 
 // Given the current set of enabled plugins, and the previous
-// or default migration state, this returns the mappings and
-// migrations which need to be applied. It's important to move
-// disbled plugin mappings over so that their docs remain valid.
-function build(plugins, migrationState) {
+// or default migration state, and the current index's mappings,
+// this returns the mappings and migrations which need to be applied.
+// It's important to move existing mappings over so their docs remain valid.
+function build(plugins, migrationState, currentMappings) {
   return {
-    mappings: buildMappings([...plugins, ...disabledPluginMappings(plugins, migrationState)]),
+    mappings: updateMappings(currentMappings, buildMappings([...plugins])),
     migrations: unappliedMigrations(plugins, migrationState),
   };
 }
@@ -46,10 +45,17 @@ function buildMappings(plugins) {
   };
 }
 
-function disabledPluginMappings(plugins, migrationState) {
-  const mappingsById = _.indexBy(migrationState.plugins, 'id');
-  return Plugin.disabledIds(plugins, migrationState)
-    .map(id => ({ id, mappings: JSON.parse(mappingsById[id].mappings) }));
+function updateMappings(currentMappings, newMappings) {
+  const currentProperties = _.get(currentMappings, [_(currentMappings).keys().first(), 'mappings', 'doc', 'properties'], {});
+  return {
+    doc: {
+      ...newMappings.doc,
+      properties: {
+        ...currentProperties,
+        ...newMappings.doc.properties,
+      },
+    },
+  };
 }
 
 // Shallow merge of the specified objects into one object, if any property

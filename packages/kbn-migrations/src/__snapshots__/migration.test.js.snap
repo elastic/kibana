@@ -945,6 +945,15 @@ Object {
         },
         "_version": 1,
       },
+      "shut_the_front_door:2": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "name": 35,
+          },
+          "type": "shut_the_front_door",
+          "updated_at": undefined,
+        },
+      },
     },
     ".mufasa-9.8.7-original": Object {
       "migration:migration-state": Object {
@@ -956,6 +965,14 @@ Object {
           "type": "migration",
         },
         "_version": 1,
+      },
+      "shut_the_front_door:2": Object {
+        "_source": Object {
+          "shut_the_front_door": Object {
+            "name": 35,
+          },
+          "type": "shut_the_front_door",
+        },
       },
     },
   },
@@ -1009,6 +1026,13 @@ Object {
                 },
                 "status": Object {
                   "type": "keyword",
+                },
+              },
+            },
+            "shut_the_front_door": Object {
+              "properties": Object {
+                "name": Object {
+                  "type": "integer",
                 },
               },
             },

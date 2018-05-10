@@ -69,11 +69,11 @@ function trimForExport({ plugins }) {
   };
 }
 
-// Migration state includes a plugin's mappings. This is so that we can keep a plugin's data
-// around even if the plugin is disabled / removed.
+// Migration state includes a plugin's mappings. This is so that we can can make determinations
+// about what documents require what plugins even if those plugins are disabled.
 function build(plugins, previousIndex, previousState = empty) {
-  const isDisabled = Plugin.disabledIds(plugins, previousState).reduce((acc, k) => _.set(acc, k, true), {});
-  const disabledPlugins = previousState.plugins.filter(({ id }) => isDisabled[id]);
+  const disabledIds = new Set(Plugin.disabledIds(plugins, previousState));
+  const disabledPlugins = previousState.plugins.filter(({ id }) => disabledIds.has(id));
   const enabledPlugins = plugins.map((plugin) => {
     const { id, mappings, migrations } = plugin;
     return {

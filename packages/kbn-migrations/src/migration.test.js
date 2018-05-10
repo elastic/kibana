@@ -137,7 +137,18 @@ describe('Migration.migrate', () => {
         stuff: { type: 'integer' },
       },
     }];
-    const existingData = { [index]: {} };
+    const existingData = {
+      [index]: {
+        'shut_the_front_door:2': {
+          _source: {
+            type: 'shut_the_front_door',
+            shut_the_front_door: {
+              name: 35,
+            },
+          },
+        },
+      },
+    };
     const existingMeta = assocMappings({}, index, {
       shut_the_front_door: {
         properties: {
