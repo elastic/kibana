@@ -89,7 +89,7 @@ API integration tests are intended to test _only programmatic API exposed by Kib
 The API integration tests can be run separately like so:
 
 ```sh
-node scripts/functional_tests --config test/api_integration/config
+node ../scripts/functional_test_runner.js --config test/api_integration/config
 ```
 
 #### Running SAML API integration tests
