@@ -28,7 +28,9 @@ import { startServers } from '../../';
  * @param {string} configPath path to config
  */
 export async function startServersCli(defaultConfigPath) {
-  const { config, log, help, installDir } = processArgv(defaultConfigPath);
+  const { config, log, help, installDir, esFrom } = processArgv(
+    defaultConfigPath
+  );
 
   if (help) return displayHelp();
 
@@ -40,7 +42,7 @@ export async function startServersCli(defaultConfigPath) {
   }
 
   try {
-    await startServers(config, { log, installDir });
+    await startServers(config, { log, installDir, esFrom });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -66,10 +68,14 @@ function processArgv(defaultConfigPath) {
   const log = createToolingLog(pickLevelFromFlags(options));
   log.pipe(process.stdout);
 
+  // Default is 'snapshot', so unless it is 'source', use 'snapshot'.
+  const esFrom = options['es-from'] === 'source' ? 'source' : 'snapshot';
+
   return {
     config,
     log,
     installDir: options.kibanaInstallDir,
+    esFrom,
     help: options.help,
     rest: options._,
   };
@@ -88,7 +94,9 @@ function displayHelp() {
     Options:
       --help                         Display this menu and exit.
       --config=<file>                Option to pass in a config.
-      --bail                         Stop the test run at the first failure.
+      --es-from=<snapshot|source>    Either build Elasticsearch from source
+                                     or run from snapshot
+                                     default: snapshot
       --kibana-install-dir           Run Kibana from an existing install directory
                                      Default: run from source
 

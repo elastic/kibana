@@ -200,7 +200,9 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         'scripts/functional_tests',
-        '--config ../../test/api_integration/jenkins_config.js',
+        '--config', 'test/api_integration/config.js',
+        '--es-from', 'source',
+        '--debug',
       ],
     },
   };

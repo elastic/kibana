@@ -31,7 +31,7 @@ import { runTests } from '../../';
  *                                       if no config option is passed
  */
 export async function runTestsCli(defaultConfigPaths) {
-  const { configs, help, bail, log, installDir } = processArgs(
+  const { configs, help, bail, log, installDir, esFrom } = processArgs(
     defaultConfigPaths
   );
 
@@ -45,7 +45,7 @@ export async function runTestsCli(defaultConfigPaths) {
   }
 
   try {
-    await runTests(configs, { bail, log, installDir });
+    await runTests(configs, { bail, log, installDir, esFrom });
   } catch (err) {
     log.error('FATAL ERROR');
     log.error(err);
@@ -66,9 +66,13 @@ function processArgs(defaultConfigPaths) {
   const log = createToolingLog(pickLevelFromFlags(options));
   log.pipe(process.stdout);
 
+  // Default is 'snapshot', so unless option passed is 'source', use 'snapshot'.
+  const esFrom = options['es-from'] === 'source' ? 'source' : 'snapshot';
+
   return {
     configs,
     log,
+    esFrom,
     help: options.help,
     bail: options.bail,
     installDir: options['kibana-install-dir'],
@@ -89,6 +93,9 @@ function displayHelp() {
     Options:
       --help                         Display this menu and exit.
       --config=<file>                Option to pass in a config. Can pass in multiple configs.
+      --es-from=<snapshot|source>    Either build Elasticsearch from source
+                                     or run from snapshot
+                                     default: snapshot
       --bail                         Stop the test run at the first failure.
       --kibana-install-dir           Run Kibana from an existing install directory
                                      Default: run from source

@@ -29,13 +29,12 @@ import elasticsearch from 'elasticsearch';
 
 export function createEsTestCluster(options = {}) {
   const {
-    port = esTestConfig.getPort(),
-    password = 'changeme',
-    license = 'oss',
-    log,
-    basePath = resolve(KIBANA_ROOT, '.es'),
-    // Use source when running on CI
-    from = esTestConfig.getBuildFrom(),
+    port = options.port || esTestConfig.getPort(),
+    password = options.password || 'changeme',
+    license = options.license || 'oss',
+    log = options.log,
+    basePath = options.basePath || resolve(KIBANA_ROOT, '.es'),
+    esFrom = options.esFrom || esTestConfig.getBuildFrom(),
   } = options;
 
   const randomHash = Math.random()
@@ -58,12 +57,12 @@ export function createEsTestCluster(options = {}) {
       const second = 1000;
       const minute = second * 60;
 
-      return from === 'snapshot' ? minute : minute * 6;
+      return esFrom === 'snapshot' ? minute : minute * 6;
     }
 
     async start(esArgs = []) {
       const { installPath } =
-        from === 'source'
+        esFrom === 'source'
           ? await cluster.installSource(config)
           : await cluster.installSnapshot(config);
 
