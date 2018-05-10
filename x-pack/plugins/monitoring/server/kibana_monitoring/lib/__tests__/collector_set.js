@@ -7,7 +7,7 @@
 import { identity, noop } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { TypeCollector } from '../type_collector';
+import { CollectorSet } from '../collector_set';
 
 const DEBUG_LOG = [ 'debug', 'monitoring-ui', 'kibana-monitoring' ];
 const INFO_LOG = [ 'info', 'monitoring-ui', 'kibana-monitoring' ];
@@ -15,8 +15,8 @@ const INFO_LOG = [ 'info', 'monitoring-ui', 'kibana-monitoring' ];
 const COLLECTOR_INTERVAL = 10000;
 const CHECK_DELAY = 100; // can be lower than COLLECTOR_INTERVAL because the collectors use fetchAfterInit
 
-describe('TypeCollector', () => {
-  describe('registers a collector and runs lifecycle events', () => {
+describe('CollectorSet', () => {
+  describe('registers a collector set and runs lifecycle events', () => {
     let log;
     let init;
     let cleanup;
@@ -29,14 +29,14 @@ describe('TypeCollector', () => {
     });
 
     it('for skipping bulk upload because payload is empty', (done) => {
-      const collector = new TypeCollector({
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes: identity,
         onPayload: identity
       });
 
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -44,11 +44,11 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
+      collectors.start();
 
       // allow interval to tick a few times
       setTimeout(() => {
-        collector.cleanup();
+        collectors.cleanup();
 
         expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Initializing type_collector_test collector')).to.be(true);
@@ -71,7 +71,7 @@ describe('TypeCollector', () => {
       });
       const onPayload = sinon.spy();
 
-      const collector = new TypeCollector({
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes,
@@ -79,7 +79,7 @@ describe('TypeCollector', () => {
       });
 
       fetch = () => ({ testFetch: true });
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -87,11 +87,11 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
+      collectors.start();
 
       // allow interval to tick a few times
       setTimeout(() => {
-        collector.cleanup();
+        collectors.cleanup();
 
         expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Initializing type_collector_test collector')).to.be(true);
@@ -115,14 +115,14 @@ describe('TypeCollector', () => {
     });
 
     it('logs info-level status of stopping and restarting', (done) => {
-      const collector = new TypeCollector({
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes: identity,
         onPayload: identity
       });
 
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -130,17 +130,17 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
+      collectors.start();
       expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
 
-      collector.cleanup();
+      collectors.cleanup();
       expect(log.calledWith(INFO_LOG, 'Stopping all Kibana monitoring collectors')).to.be(true);
 
-      collector.start();
+      collectors.start();
       expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
 
       // exit
-      collector.cleanup();
+      collectors.cleanup();
       done();
     });
   });

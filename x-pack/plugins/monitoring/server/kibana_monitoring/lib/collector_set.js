@@ -15,7 +15,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * function. Each type that gets registered defines how to fetch its own data
  * and combine it into a unified payload for bulk upload.
  */
-export class TypeCollector {
+export class CollectorSet {
 
   /*
    * @param options.interval {Number} in milliseconds

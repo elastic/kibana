@@ -5,7 +5,7 @@
  */
 
 import { callClusterFactory } from '../../../xpack_main';
-import { TypeCollector } from './lib/type_collector';
+import { CollectorSet } from './lib/collector_set';
 import { getOpsStatsCollector } from './collectors/get_ops_stats_collector';
 import { getSettingsCollector } from './collectors/get_settings_collector';
 import { getUsageCollector } from './collectors/get_usage_collector';
@@ -22,11 +22,11 @@ import { getCollectorTypesCombiner } from './lib/get_collector_types_combiner';
  * @param server {Object} HapiJS server instance
  * @param client {Object} Dedicated ES Client with monitoringBulk plugin
  */
-export function startCollector(kbnServer, server, client, _sendBulkPayload = sendBulkPayload) {
+export function startCollectors(kbnServer, server, client, _sendBulkPayload = sendBulkPayload) {
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
 
-  const collector = new TypeCollector({
+  const collectorSet = new CollectorSet({
     interval,
     logger(...message) {
       server.log(...message);
@@ -38,21 +38,21 @@ export function startCollector(kbnServer, server, client, _sendBulkPayload = sen
   });
   const callCluster = callClusterFactory(server).getCallClusterInternal();
 
-  collector.register(getUsageCollector(server, callCluster));
-  collector.register(getOpsStatsCollector(server));
-  collector.register(getSettingsCollector(server));
-  collector.register(getReportingCollector(server, callCluster)); // TODO: move this to Reporting init
+  collectorSet.register(getUsageCollector(server, callCluster));
+  collectorSet.register(getOpsStatsCollector(server));
+  collectorSet.register(getSettingsCollector(server));
+  collectorSet.register(getReportingCollector(server, callCluster)); // TODO: move this to Reporting init
 
   // Startup Kibana cleanly or reconnect to Elasticsearch
   server.plugins.elasticsearch.status.on('green', () => {
-    collector.start();
+    collectorSet.start();
   });
 
   // If connection to elasticsearch is lost
   // NOTE it is possible for the plugin status to go from red to red and trigger cleanup twice
   server.plugins.elasticsearch.status.on('red', () => {
-    collector.cleanup();
+    collectorSet.cleanup();
   });
 
-  return collector;
+  return collectorSet;
 }

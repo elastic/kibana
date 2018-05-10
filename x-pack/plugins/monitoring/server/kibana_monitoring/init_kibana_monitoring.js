@@ -6,7 +6,7 @@
 
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, } from '../../common/constants';
 import { monitoringBulk } from './lib/monitoring_bulk';
-import { startCollector } from './start_collector';
+import { startCollectors } from './start_collectors';
 
 /**
  * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
@@ -17,13 +17,13 @@ export function initKibanaMonitoring(kbnServer, server) {
   const mainXpackInfo = server.plugins.xpack_main.info;
   const mainMonitoring = mainXpackInfo.feature('monitoring');
 
-  let collector;
+  let collectorSet;
 
   if (mainXpackInfo && mainMonitoring.isAvailable() && mainMonitoring.isEnabled()) {
     const client = server.plugins.elasticsearch.getCluster('admin').createClient({
       plugins: [monitoringBulk]
     });
-    collector = startCollector(kbnServer, server, client);
+    collectorSet = startCollectors(kbnServer, server, client);
   } else {
     server.log(
       ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
@@ -31,5 +31,5 @@ export function initKibanaMonitoring(kbnServer, server) {
     );
   }
 
-  return collector;
+  return collectorSet;
 }
