@@ -150,6 +150,11 @@ describe('Vis Class', function () {
     });
 
     describe('openInspector()', () => {
+
+      beforeEach(() => {
+        sinon.stub(Inspector, 'openInspector');
+      });
+
       it('should call openInspector with all attached inspectors', () => {
         const Foodapter = class {};
         const vis = new Vis(indexPattern, state({
@@ -160,7 +165,6 @@ describe('Vis Class', function () {
             }
           }
         }));
-        sinon.spy(Inspector, 'openInspector');
         vis.openInspector();
         expect(Inspector.openInspector.calledOnce).to.be(true);
         const adapters = Inspector.openInspector.lastCall.args[0];
@@ -169,7 +173,6 @@ describe('Vis Class', function () {
 
       it('should pass the vis title to the openInspector call', () => {
         const vis = new Vis(indexPattern, { ...state(), title: 'beautifulVis' });
-        sinon.spy(Inspector, 'openInspector');
         vis.openInspector();
         expect(Inspector.openInspector.calledOnce).to.be(true);
         const params = Inspector.openInspector.lastCall.args[1];
