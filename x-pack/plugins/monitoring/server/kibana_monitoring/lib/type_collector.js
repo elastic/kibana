@@ -11,7 +11,7 @@ import Promise from 'bluebird';
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
 /*
- * A collector object has types registered into it with the registerType(type)
+ * A collector object has types registered into it with the register(type)
  * function. Each type that gets registered defines how to fetch its own data
  * and combine it into a unified payload for bulk upload.
  */
@@ -57,7 +57,7 @@ export class TypeCollector {
    * @param {Function} type.fetch
    * @param {Function} type.cleanup (optional)
    */
-  registerType(type) {
+  register(type) {
     this._collectors.push(type);
   }
 

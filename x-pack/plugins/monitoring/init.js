@@ -36,7 +36,7 @@ export const init = (monitoringPlugin, server) => {
 
     if (config.get('xpack.monitoring.kibana.collection.enabled')) {
       const collector = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate an object for collecting/sending metrics and usage stats
-      server.expose('typeCollector', collector); // expose the collector object on the server. other plugins will call typeCollector.registerType(typeDefinition) to define their own collection
+      server.expose('typeCollector', collector); // expose the collector object on the server. other plugins will call typeCollector.register(typeDefinition) to define their own collection
     }
 
     monitoringPlugin.status.green('Ready');

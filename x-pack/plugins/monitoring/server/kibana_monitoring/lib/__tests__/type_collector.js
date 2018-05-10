@@ -36,7 +36,7 @@ describe('TypeCollector', () => {
         onPayload: identity
       });
 
-      collector.registerType({
+      collector.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -79,7 +79,7 @@ describe('TypeCollector', () => {
       });
 
       fetch = () => ({ testFetch: true });
-      collector.registerType({
+      collector.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -122,7 +122,7 @@ describe('TypeCollector', () => {
         onPayload: identity
       });
 
-      collector.registerType({
+      collector.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
