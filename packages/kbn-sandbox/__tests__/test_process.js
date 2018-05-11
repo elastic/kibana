@@ -1,5 +1,5 @@
 const assert = require('assert');
-const sandbox = require('./index.js');
+const sandbox = require('../index.js');
 const { exec } = require('child_process');
 
 function tryExec() {
