@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import './styles/main.less';
-
-// import angular from 'angular';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
