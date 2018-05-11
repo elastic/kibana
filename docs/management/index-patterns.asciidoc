@@ -73,12 +73,12 @@ To reload the index fields list:
 [float]
 [[delete-pattern]]
 == Deleting an Index Pattern
-Deleting an Index Pattern removes the index-pattern Saved Object from the kibana index.
-You will be unable to recover field formatters, scripted fields, source filters, and field popularity data
-associated with the Index Pattern once an Index Pattern has been deleted.
-Deleting an Index Pattern will break all Visualizations, Saved Searches, and any other Saved Objects that
-references the deleted Index Pattern.
-Deleting an Index Pattern does not remove any indices or data documents from Elasticsearch.
+Deleting an index pattern removes the pattern from the list of Saved Objects in Kibana.
+You will not be able to recover field formatters, scripted fields, source filters, and field popularity data
+associated with the index pattern.
+
+Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the pattern.
+Deleting a pattern does not remove any indices or data documents from Elasticsearch.
 
 To delete an index pattern:
 
