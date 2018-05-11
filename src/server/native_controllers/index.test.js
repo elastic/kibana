@@ -317,19 +317,22 @@ describe('#killOrStart', () => {
     triggerStarted();
   });
 
-  test(`doesn't throw error when enabled plugin doesn't have a nativeController`, async () => {
-    const kbnServer = {
-      nativeControllers: [],
-      pluginSpecs: [
-        {
-          getId: () => 'foo',
-        },
-      ],
-      disabledPluginSpecs: [],
-    };
+  [[], ['foo'], ['foo', 'bar']].forEach(enabledPlugins => {
+    test(`doesn't throw error when ${enabledPlugins.length} enabled plugin(s) don't have a nativeController`, async () => {
+      const kbnServer = {
+        nativeControllers: [],
+        pluginSpecs: enabledPlugins.map(id =>
+          ({
+            getId: () => id,
+          })
+        ),
+        disabledPluginSpecs: [],
+      };
 
-    await NativeControllers.killOrStart(kbnServer);
+      await NativeControllers.killOrStart(kbnServer);
+    });
   });
+
 
   test('kills disabled plugin', async () => {
     const mockNativeController = {
