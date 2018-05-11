@@ -26,6 +26,7 @@ export class RevertToBasic extends React.PureComponent {
       needsAcknowledgement,
       messages: [firstLine, ...messages] = [],
       startBasicLicense,
+      cancelStartBasicLicense,
       licenseType
     } = this.props;
     if (!needsAcknowledgement) {
@@ -35,7 +36,7 @@ export class RevertToBasic extends React.PureComponent {
       <EuiOverlayMask>
         <EuiConfirmModal
           title="Confirm Revert to Basic License"
-          onCancel={this.cancel}
+          onCancel={cancelStartBasicLicense}
           onConfirm={() => startBasicLicense(licenseType, HTMLMarqueeElement)}
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
@@ -63,13 +64,13 @@ export class RevertToBasic extends React.PureComponent {
     }
     const description = (
       <span>
-        You’ll revert to our free features and lose access to Security, Machine
-        Learning and other{' '}
+        You’ll revert to our free features and lose access to security, machine
+        learning and other{' '}
         <EuiLink
           href="https://www.elastic.co/subscriptions/xpack"
           target="_blank"
         >
-          platinum features
+          Platinum features
         </EuiLink>.
       </span>
     );
@@ -78,11 +79,11 @@ export class RevertToBasic extends React.PureComponent {
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
-          title="Revert to basic license"
+          title="Revert to Basic license"
           description={description}
           footer={
             <EuiButton onClick={() => startBasicLicense(licenseType)}>
-              Revert to basic
+              Revert to Basic
             </EuiButton>
           }
         />

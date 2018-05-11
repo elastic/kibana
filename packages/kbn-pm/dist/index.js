@@ -11130,17 +11130,56 @@ Object.defineProperty(exports, "__esModule", {
 let parallelizeBatches = exports.parallelizeBatches = (() => {
     var _ref = _asyncToGenerator(function* (batches, fn) {
         for (const batch of batches) {
-            const running = batch.map(function (obj) {
-                return fn(obj);
-            });
             // We need to make sure the entire batch has completed before we can move on
             // to the next batch
-            yield Promise.all(running);
+            yield parallelize(batch, fn);
         }
     });
 
     return function parallelizeBatches(_x, _x2) {
         return _ref.apply(this, arguments);
+    };
+})();
+
+let parallelize = exports.parallelize = (() => {
+    var _ref2 = _asyncToGenerator(function* (items, fn, concurrency = 4) {
+        if (items.length === 0) {
+            return;
+        }
+        return new Promise(function (resolve, reject) {
+            let scheduleItem = (() => {
+                var _ref3 = _asyncToGenerator(function* (item) {
+                    activePromises++;
+                    try {
+                        yield fn(item);
+                        activePromises--;
+                        if (values.length > 0) {
+                            // We have more work to do, so we schedule the next promise
+                            scheduleItem(values.shift());
+                        } else if (activePromises === 0) {
+                            // We have no more values left, and all items have completed, so we've
+                            // completed all the work.
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                return function scheduleItem(_x5) {
+                    return _ref3.apply(this, arguments);
+                };
+            })();
+
+            let activePromises = 0;
+            const values = items.slice(0);
+
+            values.splice(0, concurrency).map(scheduleItem);
+        });
+    });
+
+    return function parallelize(_x3, _x4) {
+        return _ref2.apply(this, arguments);
     };
 })();
 

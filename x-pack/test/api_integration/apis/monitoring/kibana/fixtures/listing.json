@@ -1,0 +1,44 @@
+{
+  "clusterStatus": {
+    "uuids": [
+      "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
+    ],
+    "status": "green",
+    "requests_total": 174,
+    "concurrent_connections": 174,
+    "response_time_max": 2203,
+    "memory_size": 230227968,
+    "memory_limit": 1501560832,
+    "count": 1
+  },
+  "kibanas": [
+    {
+      "process": {
+        "memory": {
+          "resident_set_size_in_bytes": 230227968
+        }
+      },
+      "os": {
+        "load": {
+          "1m": 3.19091796875
+        }
+      },
+      "response_times": {
+        "average": 171.05714285714285,
+        "max": 2203
+      },
+      "requests": {
+        "total": 174
+      },
+      "concurrent_connections": 174,
+      "kibana": {
+        "transport_address": "tsullivan.local:5601",
+        "name": "tsullivan.local",
+        "host": "tsullivan.local",
+        "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
+        "status": "green"
+      },
+      "availability": false
+    }
+  ]
+}

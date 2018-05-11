@@ -144,7 +144,7 @@ export default class KbnServer {
     return await this.server.inject(opts);
   }
 
-  applyLoggingConfiguration(config) {
+  async applyLoggingConfiguration(config) {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),

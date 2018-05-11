@@ -9,7 +9,23 @@ export const CreateArchivesSourcesTask = {
       await copyAll(
         build.resolvePath('.'),
         build.resolvePathForPlatform(platform, '.'),
-        { dot: true },
+        {
+          select: [
+            '**/*',
+            '!node_modules/**',
+          ],
+          dot: true,
+        },
+      );
+
+      const currentTime = new Date();
+      await copyAll(
+        build.resolvePath('node_modules'),
+        build.resolvePathForPlatform(platform, 'node_modules'),
+        {
+          dot: true,
+          time: currentTime
+        },
       );
       log.debug('Generic build source copied into', platform.getName(), 'specific build directory');
 

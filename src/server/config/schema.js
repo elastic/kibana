@@ -5,7 +5,7 @@ import os from 'os';
 import { fromRoot } from '../../utils';
 import { getData } from '../path';
 
-export default () => Joi.object({
+export default async () => Joi.object({
   pkg: Joi.object({
     version: Joi.string().default(Joi.ref('$version')),
     branch: Joi.string().default(Joi.ref('$branch')),
@@ -177,8 +177,7 @@ export default () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      // then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
-      then: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest'),
+      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
       otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest')
     }),
     includeElasticMapsService: Joi.boolean().default(true)

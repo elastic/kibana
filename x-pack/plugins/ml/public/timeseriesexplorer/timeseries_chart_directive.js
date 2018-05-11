@@ -31,7 +31,7 @@ import { TimeBuckets } from 'ui/time_buckets';
 import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
 import { findNearestChartPointToTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { mlEscape } from 'plugins/ml/util/string_utils';
-import { FieldFormatServiceProvider } from 'plugins/ml/services/field_format_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -46,7 +46,6 @@ module.directive('mlTimeseriesChart', function (
 
   function link(scope, element) {
 
-    const mlFieldFormatService = Private(FieldFormatServiceProvider);
     // Key dimensions for the viz and constituent charts.
     let svgWidth = angular.element('.results-container').width();
     const focusZoomPanelHeight = 25;
@@ -113,9 +112,9 @@ module.directive('mlTimeseriesChart', function (
       drawContextChartSelection();
     });
 
-    scope.$on('renderFocusChart', () => {
-      renderFocusChart();
-    });
+    scope.$watchCollection('focusForecastData', renderFocusChart);
+    scope.$watchCollection('focusChartData', renderFocusChart);
+    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));

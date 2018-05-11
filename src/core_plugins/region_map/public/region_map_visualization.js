@@ -126,6 +126,14 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       }
 
       this._choroplethLayer.on('select', (event) => {
+
+
+        if (!this._isAggReady()) {
+          //even though we have maps data available and have added the choropleth layer to the map
+          //the aggregation may not be available yet
+          return;
+        }
+
         const agg = this._vis.aggs.bySchemaName.segment[0];
         const filter = agg.createFilter(event);
         this._vis.API.queryFilter.addFilters(filter);
@@ -145,10 +153,14 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
     }
 
+    _isAggReady() {
+      return this._vis.getAggConfig().bySchemaName.segment && this._vis.getAggConfig().bySchemaName.segment[0];
+    }
+
 
     _setTooltipFormatter() {
       const metricsAgg = _.first(this._vis.getAggConfig().bySchemaName.metric);
-      if (this._vis.getAggConfig().bySchemaName.segment && this._vis.getAggConfig().bySchemaName.segment[0]) {
+      if (this._isAggReady()) {
         const fieldName = this._vis.getAggConfig().bySchemaName.segment[0].makeLabel();
         this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricsAgg, fieldName);
       } else {

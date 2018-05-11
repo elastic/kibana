@@ -41,8 +41,9 @@ export class Embeddable {
 
   /**
    * @param {Element} domNode - the dom node to mount the rendered embeddable on
+   * @param {ContainerState} containerState
    */
-  render(/*domNode*/) {}
+  render(/*domNode, containerState*/) {}
 
   destroy() {}
 }

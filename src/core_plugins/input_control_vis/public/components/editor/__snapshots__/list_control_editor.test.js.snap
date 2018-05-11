@@ -4,19 +4,21 @@ exports[`parentCandidates 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="keywordField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="keywordField"
   />
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     helpText="Options are based on the value of parent control. Disabled if parent is not set."
@@ -47,6 +49,7 @@ exports[`parentCandidates 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="multiselect-0"
@@ -59,6 +62,7 @@ exports[`parentCandidates 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="size-0"
@@ -80,19 +84,21 @@ exports[`renders ListControlEditor 1`] = `
 <div>
   <IndexPatternSelect
     controlIndex={0}
+    getIndexPattern={[Function]}
     getIndexPatterns={[Function]}
+    indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="indexPattern1"
   />
   <FieldSelect
     controlIndex={0}
+    fieldName="keywordField"
     filterField={[Function]}
     getIndexPattern={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
-    value="keywordField"
   />
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="multiselect-0"
@@ -105,6 +111,7 @@ exports[`renders ListControlEditor 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     id="size-0"
