@@ -6,5 +6,5 @@
 
 export const INDEX_NAMES = {
   AGENTS: '.management-beats-agents',
-  ADMIN: '.managemnt-beats-admin'
+  ADMIN: '.management-beats-admin'
 };
