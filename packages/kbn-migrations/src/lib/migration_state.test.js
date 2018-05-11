@@ -56,7 +56,7 @@ describe('MigrationState.status', () => {
       id: 'hello-world',
       migrations: [{ id: 'migration1' }, { id: 'migration2' }],
       mappings: { stuff: 'whatnot' },
-    }])
+    }]);
     const state = buildMinimalMigrationState(plugins);
     plugins[0].migrations.push({ id: 'dang diggity' });
 
