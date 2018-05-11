@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
+export const INDEX_NAMES = {
+  AGENTS: '.management-beats-agents',
+  ADMIN: '.managemnt-beats-admin'
+};

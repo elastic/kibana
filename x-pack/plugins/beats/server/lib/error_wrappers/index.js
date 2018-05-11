@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
+export { wrapCustomError } from './wrap_custom_error';
+export { wrapEsError } from './wrap_es_error';
+export { wrapUnknownError } from './wrap_unknown_error';
