@@ -47,9 +47,10 @@ data sets.
 <<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
 * *Other*
 [horizontal]
-<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
+<<controls,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
+<<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance.
 <<vega-graph,Vega graph>>:: Support for user-defined graphs, external data sources, images, and user-defined interactivity.
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
@@ -138,6 +139,8 @@ https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
 include::visualize/xychart.asciidoc[]
+
+include::visualize/controls.asciidoc[]
 
 include::visualize/datatable.asciidoc[]
 
