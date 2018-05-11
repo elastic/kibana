@@ -274,16 +274,16 @@ export class SavedObjectsClient {
       fields,
     } = options;
 
+    if (!type) {
+      throw new Error('options.type is required');
+    }
+
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
     }
 
     if (fields && !Array.isArray(fields)) {
       throw new TypeError('options.searchFields must be an array');
-    }
-
-    if (!type) {
-      throw new Error('options.type is required');
     }
 
     const esOptions = {

@@ -343,9 +343,20 @@ describe('SavedObjectsClient', () => {
       callAdminCluster.returns(searchResults);
     });
 
+    it('requires type', async () => {
+      try {
+        await savedObjectsClient.find({ });
+        throw new Error('expected find() to reject');
+      } catch (error) {
+        sinon.assert.notCalled(callAdminCluster);
+        sinon.assert.notCalled(onBeforeWrite);
+        expect(error.message).toMatch('options.type is required');
+      }
+    });
+
     it('requires searchFields be an array if defined', async () => {
       try {
-        await savedObjectsClient.find({ searchFields: 'string' });
+        await savedObjectsClient.find({ type: 'foo', searchFields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -356,7 +367,7 @@ describe('SavedObjectsClient', () => {
 
     it('requires fields be an array if defined', async () => {
       try {
-        await savedObjectsClient.find({ fields: 'string' });
+        await savedObjectsClient.find({ type: 'foo', fields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
         sinon.assert.notCalled(callAdminCluster);
@@ -381,7 +392,7 @@ describe('SavedObjectsClient', () => {
 
     it('merges output of getSearchDsl into es request body', async () => {
       getSearchDsl.returns({ query: 1, aggregations: 2 });
-      await savedObjectsClient.find();
+      await savedObjectsClient.find({ type: 'foo' });
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
@@ -395,7 +406,7 @@ describe('SavedObjectsClient', () => {
     it('formats Elasticsearch response', async () => {
       const count = searchResults.hits.hits.length;
 
-      const response = await savedObjectsClient.find();
+      const response = await savedObjectsClient.find({ type: 'foo' });
 
       expect(response.total).toBe(count);
       expect(response.saved_objects).toHaveLength(count);
@@ -412,7 +423,7 @@ describe('SavedObjectsClient', () => {
     });
 
     it('accepts per_page/page', async () => {
-      await savedObjectsClient.find({ perPage: 10, page: 6 });
+      await savedObjectsClient.find({ type: 'foo', perPage: 10, page: 6 });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
@@ -424,12 +435,12 @@ describe('SavedObjectsClient', () => {
     });
 
     it('can filter by fields', async () => {
-      await savedObjectsClient.find({ fields: ['title'] });
+      await savedObjectsClient.find({ type: 'foo', fields: ['title'] });
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
         _source: [
-          '*.title', 'type', 'title'
+          'foo.title', 'type', 'title'
         ]
       }));
 
