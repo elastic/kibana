@@ -15,10 +15,15 @@ const optsSchema = Joi.object().unknown().keys({
 });
 
 /**
- * Given a migration state (migrationState) and a set of documents (docs),
- * transforms those documents to be the same version as the index. If such a
- * transform is impossible, this will fail.
+ * Transforms documents to be the same version as the index. If such a
+ * transform is impossible, this will throw an exception.
  * @param {ImportDocsOpts} opts
+ * @prop {function} callCluster - The ElasticSearch connection
+ * @prop {string} index - The index for which the documents are being transformed
+ * @prop {Plugin[]} plugins - The plugins whose migrations will be used to transform the docs
+ * @prop {Document[]} docs - The array of documents being transformed
+ * @prop {MigrationState} migrationState - The migration state that was exported with the docs
+ * @returns {Promise<Document[]>} - The transformed documents
  */
 async function transform(opts) {
   Joi.assert(opts, optsSchema);

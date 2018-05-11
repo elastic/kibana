@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { MigrationStatus, Migration } from '@kbn/migrations';
+import { MigrationStatus, MigrationState, Migration } from '@kbn/migrations';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -43,7 +43,7 @@ async function waitForMigration(opts, pollInterval) {
   let status = MigrationStatus.migrating;
   while (status !== MigrationStatus.migrated) {
     await new Promise(resolve => setTimeout(resolve, pollInterval));
-    status = await Migration.fetchStatus(opts);
+    status = await MigrationState.fetchStatus(opts);
   }
 }
 

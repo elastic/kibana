@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { migrate, fetchStatus } = require('./migration');
+const { migrate, computeStatus } = require('./migration');
 const { testCluster, testPlugins } = require('./test');
 const { MigrationStatus } = require('./lib');
 
@@ -11,25 +11,25 @@ const opts = {
   plugins: [],
 };
 
-describe('Migration.fetchStatus', () => {
+describe('Migration.computeStatus', () => {
   test('is migrated, if the stored migration state matches the plugin state', async () => {
     const plugins = testPlugins.v1;
     const { index, callCluster } = await testCluster({ plugins });
-    const actual = await fetchStatus({ callCluster, index, plugins });
+    const actual = await computeStatus({ callCluster, index, plugins });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
   test('is not migrated, if there is no stored migration state', async () => {
     const plugins = testPlugins.v1;
     const { index, callCluster } = await testCluster();
-    const actual = await fetchStatus({ callCluster, plugins, index });
+    const actual = await computeStatus({ callCluster, plugins, index });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('is migrated, if there is no stored state and no plugins with migrations', async () => {
     const plugins = [];
     const { index, callCluster } = await testCluster();
-    const actual = await fetchStatus({ callCluster, plugins, index });
+    const actual = await computeStatus({ callCluster, plugins, index });
     expect(actual).toEqual(MigrationStatus.migrated);
   });
 
@@ -37,37 +37,37 @@ describe('Migration.fetchStatus', () => {
     const pluginV1 = testPlugins.v1[0];
     const { index, callCluster } = await testCluster({ plugins: [pluginV1] });
     const pluginV2 = { ...pluginV1, mappings: { whatever: { type: 'keyword' } } };
-    const actual = await fetchStatus({ callCluster, index, plugins: [pluginV2] });
+    const actual = await computeStatus({ callCluster, index, plugins: [pluginV2] });
     expect(actual).toEqual(MigrationStatus.outOfDate);
   });
 
   test('index is required', () => {
-    expect(fetchStatus({ ...opts, index: undefined }))
+    expect(computeStatus({ ...opts, index: undefined }))
       .rejects.toThrow(/"index" is required/);
   });
 
   test('callCluster is required', () => {
-    expect(fetchStatus({ ...opts, callCluster: undefined }))
+    expect(computeStatus({ ...opts, callCluster: undefined }))
       .rejects.toThrow(/"callCluster" is required/);
   });
 
   test('plugins are required', () => {
-    expect(fetchStatus({ ...opts, plugins: undefined }))
+    expect(computeStatus({ ...opts, plugins: undefined }))
       .rejects.toThrow(/"plugins" is required/);
   });
 
   test('callCluster must be an object', () => {
-    expect(fetchStatus({ ...opts, callCluster: 'hello' }))
+    expect(computeStatus({ ...opts, callCluster: 'hello' }))
       .rejects.toThrow(/"callCluster" must be a Function/);
   });
 
   test('index must be a string', () => {
-    expect(fetchStatus({ ...opts, index: 23 }))
+    expect(computeStatus({ ...opts, index: 23 }))
       .rejects.toThrow(/"index" must be a string/);
   });
 
   test('plugins must be an array', () => {
-    expect(fetchStatus({ ...opts, plugins: 'notright' }))
+    expect(computeStatus({ ...opts, plugins: 'notright' }))
       .rejects.toThrow(/"plugins" must be an array/);
   });
 });

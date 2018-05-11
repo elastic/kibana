@@ -8,9 +8,11 @@ module.exports = {
 /**
  * Computes the index mappings defined by the specified set of plugins.
  *
- * @returns {Promise<Mappings>}
+ * @param {FromPluginOpts}
+ * @prop {Plugin[]} plugins - The array of migration plugins from which mappings will be extracted
+ * @returns {Mappings}
  */
-function fromPlugins(plugins) {
+function fromPlugins({ plugins }) {
   Joi.assert(plugins, Opts.pluginArraySchema);
   return MigrationPlan.buildMappings(Plugin.sanitize(plugins));
 }

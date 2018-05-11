@@ -3,11 +3,11 @@ const Joi = require('joi');
 const { MigrationState, MigrationStatus, Persistence, MigrationContext, Opts } = require('./lib');
 
 module.exports = {
-  fetchStatus,
+  computeStatus,
   migrate,
 };
 
-const fetchStatusOptsSchema = Joi.object().unknown().keys({
+const computeStatusOptsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
   plugins: Opts.pluginArraySchema.required(),
@@ -27,13 +27,17 @@ const migrateOptsSchema = Joi.object().unknown().keys({
 */
 
 /**
- * Checks whether or not the specified index is in need of migrations.
+ * Checks whether or not the specified index is in need of migrations. This is more comprehensive
+ * than MigrationState.fetchStatus, in that this takes into account the current migrations.
  *
  * @param {MigrationOpts} opts
- * @returns {Promise<MigrationStatus>}
+ * @prop {function} callCluster - The ElasticSearch connection
+ * @prop {string} index - The index whose migration status is being computed
+ * @prop {Plugin[]} plugins - The plugins whose migrations will be used to transform the docs
+ * @returns {Promise<MigrationStatus>} - The migration status (migrating | migrated | outOfDate)
  */
-async function fetchStatus(opts) {
-  Joi.assert(opts, fetchStatusOptsSchema);
+async function computeStatus(opts) {
+  Joi.assert(opts, computeStatusOptsSchema);
   const { plugins, migrationState } = await MigrationContext.fetch(opts);
   return MigrationState.status(plugins, migrationState);
 }
@@ -42,7 +46,13 @@ async function fetchStatus(opts) {
  * Performs a migration of the specified index using the migrations defined by
  * the specified plugins.
  * @param {MigrationOpts} opts
- * @returns {MigrationResult}
+ * @prop {function} callCluster - The ElasticSearch connection
+ * @prop {string} index - The index whose migration status is being computed
+ * @prop {Plugin[]} plugins - The plugins whose migrations will be used to transform the docs
+ * @prop {function} log - A function which writes to the application log
+ * @prop {string} elasticVersion - The current version of the ELK stack
+ * @prop {bool} [force] - If true, migrations will run even if the index has the 'migrating' status
+ * @returns {Promise<MigrationResult>} - The migration result { status, index, destIndex, elapsedMs, skippedMigration }
  */
 async function migrate(opts) {
   Joi.assert(opts, migrateOptsSchema);
