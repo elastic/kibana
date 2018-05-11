@@ -39,7 +39,7 @@ export class PanelOptionsMenu extends React.Component {
     const { isExpanded } = this.props;
     const mainPanelMenuItems = [
       {
-        name: 'Edit visualization',
+        name: 'Edit panel contents',
         'data-test-subj': 'dashboardPanelEditLink',
         icon: <EuiIcon
           type="pencil"
