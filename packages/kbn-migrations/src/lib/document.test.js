@@ -1,9 +1,6 @@
 const _ = require('lodash');
 const { seededDocs, buildTransformFunction, toObjectClient, toRaw } = require('./document');
 
-// Test if id is not specified by seed, it will be generated
-// Test that seeds blow up, maybe, if type isn't specified, etc?
-
 describe('buildTransformFunction', () => {
   test('accepts a raw document (e.g. straight from the index)', () => {
     const migrations = [{

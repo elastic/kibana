@@ -6,9 +6,7 @@ module.exports = {
   buildMappings,
 };
 
-// Given the current set of enabled plugins, and the previous
-// or default migration state, and the current index's mappings,
-// this returns the mappings and migrations which need to be applied.
+// Computes the mappings and migrations which need to be applied.
 // It's important to move existing mappings over so their docs remain valid.
 function build(plugins, migrationState, currentMappings) {
   return {
