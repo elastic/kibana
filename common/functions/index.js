@@ -1,4 +1,6 @@
 import { alterColumn } from './alterColumn';
+import { all } from './all';
+import { any } from './any';
 import { asFn } from './as';
 import { axisConfig } from './axisConfig';
 import { compare } from './compare';
@@ -7,18 +9,24 @@ import { context } from './context';
 import { columns } from './columns';
 import { date } from './date';
 import { dropdownControl } from './dropdownControl';
+import { eq } from './eq';
 import { exactly } from './exactly';
 import { filterrows } from './filterrows';
 import { font } from './font';
 import { formatdate } from './formatdate';
 import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
+import { gt } from './gt';
+import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
+import { lt } from './lt';
+import { lte } from './lte';
 import { mapColumn } from './mapColumn';
 import { markdown } from './markdown';
 import { math } from './math';
+import { neq } from './neq';
 import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
@@ -41,35 +49,43 @@ import { switchFn } from './switch';
 import { caseFn } from './case';
 
 export const commonFunctions = [
+  all,
   alterColumn,
+  any,
   asFn,
   axisConfig,
-  containerStyle,
-  compare,
   columns,
+  compare,
+  containerStyle,
   context,
   date,
   dropdownControl,
+  eq,
   exactly,
   filterrows,
   font,
   formatdate,
   formatnumber,
   getCell,
+  gt,
+  gte,
   head,
   ifFn,
   image,
+  lt,
+  lte,
   mapColumn,
   markdown,
   math,
+  neq,
   palette,
-  plot,
   pie,
+  plot,
   ply,
   render,
   repeatImage,
-  revealImage,
   replace,
+  revealImage,
   rounddate,
   rowCount,
   seriesStyle,
