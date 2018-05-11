@@ -105,6 +105,10 @@ export class DataRecognizer {
   }
 
   async searchForFields(moduleConfig, indexPattern) {
+    if (moduleConfig.query === undefined) {
+      return false;
+    }
+
     const index = indexPattern;
     const size = 0;
     const body = {
@@ -158,21 +162,23 @@ export class DataRecognizer {
     }));
 
     // load all of the kibana saved objects
-    const kKeys = Object.keys(manifestJSON.kibana);
-    await Promise.all(kKeys.map(async (key) => {
-      kibana[key] = [];
-      await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
-        const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
-        // use the file name for the id
-        const kId = obj.file.replace('.json', '');
-        const config = JSON.parse(kConfig);
-        kibana[key].push({
-          id: kId,
-          title: config.title,
-          config
-        });
+    if (manifestJSON.kibana !== undefined) {
+      const kKeys = Object.keys(manifestJSON.kibana);
+      await Promise.all(kKeys.map(async (key) => {
+        kibana[key] = [];
+        await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
+          const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
+          // use the file name for the id
+          const kId = obj.file.replace('.json', '');
+          const config = JSON.parse(kConfig);
+          kibana[key].push({
+            id: kId,
+            title: config.title,
+            config
+          });
+        }));
       }));
-    }));
+    }
 
     return {
       jobs,

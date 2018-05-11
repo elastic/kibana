@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  KuiPopover,
-  KuiContextMenu,
-  KuiKeyboardAccessible,
-} from '@kbn/ui-framework/components';
 
 import { PanelOptionsMenuForm } from './panel_options_menu_form';
+
+import {
+  EuiContextMenu,
+  EuiPopover,
+  EuiIcon,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 export class PanelOptionsMenu extends React.Component {
   state = {
@@ -39,9 +41,8 @@ export class PanelOptionsMenu extends React.Component {
       {
         name: 'Edit visualization',
         'data-test-subj': 'dashboardPanelEditLink',
-        icon: <span
-          aria-hidden="true"
-          className="kuiButton__icon kuiIcon fa-edit"
+        icon: <EuiIcon
+          type="pencil"
         />,
         onClick: this.onEditPanel,
         disabled: !this.props.editUrl,
@@ -49,18 +50,16 @@ export class PanelOptionsMenu extends React.Component {
       {
         name: 'Customize panel',
         'data-test-subj': 'dashboardPanelOptionsSubMenuLink',
-        icon: <span
-          aria-hidden="true"
-          className="kuiButton__icon kuiIcon fa-edit"
+        icon: <EuiIcon
+          type="pencil"
         />,
         panel: 'panelSubOptionsMenu',
       },
       {
         name: isExpanded ? 'Minimize' : 'Full screen',
         'data-test-subj': 'dashboardPanelExpandIcon',
-        icon: <span
-          aria-hidden="true"
-          className={`kuiButton__icon kuiIcon ${isExpanded ? 'fa-compress' : 'fa-expand'}`}
+        icon: <EuiIcon
+          type={isExpanded ? 'expand' : 'expand'}
         />,
         onClick: this.onToggleExpandPanel,
       }
@@ -69,9 +68,8 @@ export class PanelOptionsMenu extends React.Component {
       mainPanelMenuItems.push({
         name: 'Delete from dashboard',
         'data-test-subj': 'dashboardPanelRemoveIcon',
-        icon: <span
-          aria-hidden="true"
-          className="kuiButton__icon kuiIcon fa-trash"
+        icon: <EuiIcon
+          type="trash"
         />,
         onClick: this.onDeletePanel,
       });
@@ -106,31 +104,30 @@ export class PanelOptionsMenu extends React.Component {
 
   render() {
     const button = (
-      <KuiKeyboardAccessible>
-        <span
-          aria-label="Panel options"
-          className="kuiButton__icon kuiIcon panel-dropdown fa fa-gear"
-          data-test-subj="dashboardPanelToggleMenuIcon"
-          onClick={this.toggleMenu}
-        />
-      </KuiKeyboardAccessible>
+      <EuiButtonIcon
+        iconType="gear"
+        aria-label="Panel options"
+        data-test-subj="dashboardPanelToggleMenuIcon"
+        onClick={this.toggleMenu}
+      />
     );
 
     return (
-      <KuiPopover
+      <EuiPopover
+        id="panelContextMenu"
         className="dashboardPanelPopOver"
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
-        anchorPosition="right"
+        anchorPosition="downRight"
         withTitle
       >
-        <KuiContextMenu
+        <EuiContextMenu
           initialPanelId="mainMenu"
           panels={this.renderPanels()}
         />
-      </KuiPopover>
+      </EuiPopover>
     );
   }
 }

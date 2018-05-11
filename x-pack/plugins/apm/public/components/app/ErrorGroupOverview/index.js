@@ -7,22 +7,16 @@
 import { connect } from 'react-redux';
 import ErrorGroupOverview from './view';
 import { getUrlParams } from '../../../store/urlParams';
-import {
-  getErrorGroupList,
-  loadErrorGroupList
-} from '../../../store/errorGroupList';
+import { getLicense } from '../../../store/reduxRequest/license';
 
 function mapStateToProps(state = {}) {
   return {
     urlParams: getUrlParams(state),
-    errorGroupList: getErrorGroupList(state),
     location: state.location,
-    license: state.license
+    license: getLicense(state)
   };
 }
 
-const mapDispatchToProps = {
-  loadErrorGroupList
-};
+const mapDispatchToProps = {};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ErrorGroupOverview);

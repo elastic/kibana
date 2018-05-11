@@ -9,6 +9,7 @@ exports[`EmptyState should render normally 1`] = `
   <EuiFlexGroup
     alignItems="center"
     component="div"
+    direction="row"
     gutterSize="l"
     justifyContent="center"
     responsive={true}
@@ -64,6 +65,7 @@ exports[`EmptyState should render normally 1`] = `
       <EuiFlexGroup
         alignItems="center"
         component="div"
+        direction="row"
         gutterSize="l"
         justifyContent="center"
         responsive={true}

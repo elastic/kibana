@@ -5,4 +5,8 @@
  */
 
 require('@kbn/plugin-helpers').babelRegister();
-require('../dev-tools/functional_tests').runFunctionTests();
+require('@kbn/test').runTestsCli([
+  require.resolve('../test/functional/config.js'),
+  require.resolve('../test/api_integration/config.js'),
+  require.resolve('../test/saml_api_integration/config.js'),
+]);

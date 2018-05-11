@@ -23,7 +23,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._makeKibanaMap();
 
-      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+      this.vis.sessionState.mapBounds = this._kibanaMap.getBounds();
 
       let previousPrecision = this._kibanaMap.getGeohashPrecision();
       let precisionChange = false;
@@ -31,14 +31,20 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
         precisionChange = (previousPrecision !== this._kibanaMap.getGeohashPrecision());
         previousPrecision = this._kibanaMap.getGeohashPrecision();
         const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
         const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
-        if (geohashAgg && isAutoPrecision) {
+        if (isAutoPrecision) {
           geohashAgg.params.precision = previousPrecision;
         }
       });
       this._kibanaMap.on('zoomend', () => {
-        const agg = this._getGeoHashAgg();
-        const isAutoPrecision = typeof agg.params.autoPrecision === 'boolean' ? agg.params.autoPrecision : true;
+        const geohashAgg = this._getGeoHashAgg();
+        if (!geohashAgg) {
+          return;
+        }
+        const isAutoPrecision = typeof geohashAgg.params.autoPrecision === 'boolean' ? geohashAgg.params.autoPrecision : true;
         if (!isAutoPrecision) {
           return;
         }

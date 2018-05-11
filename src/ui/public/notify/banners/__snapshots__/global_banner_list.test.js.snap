@@ -8,7 +8,7 @@ exports[`GlobalBannerList props banners is rendered 1`] = `
   style="border:none"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
     style="flex-direction:column"
   >
     <div

@@ -48,22 +48,6 @@ export default function (kibana) {
         listed: false,
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
-        uses: [
-          'home',
-          'visTypes',
-          'visResponseHandlers',
-          'visRequestHandlers',
-          'visEditorTypes',
-          'savedObjectTypes',
-          'spyModes',
-          'fieldFormats',
-          'fieldFormatEditors',
-          'navbarExtensions',
-          'managementSections',
-          'devTools',
-          'docViews',
-          'embeddableFactories',
-        ],
       },
 
       links: [
