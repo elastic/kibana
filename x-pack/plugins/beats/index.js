@@ -5,6 +5,7 @@
  */
 
 import { installIndexTemplate } from './server/lib/index_template';
+import { registerApiRoutes } from './server/routes/api';
 import { PLUGIN } from './common/constants';
 
 export function beats(kibana)  {
@@ -13,6 +14,7 @@ export function beats(kibana)  {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     init: async function (server) {
       await installIndexTemplate(server);
+      registerApiRoutes(server);
     }
   });
 }
