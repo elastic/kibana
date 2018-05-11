@@ -1,5 +1,30 @@
 import _ from 'lodash';
 
+const matchOptions = {
+  cutoff_frequency: 0.001,
+  query: '',
+  operator: {
+    __one_of: ['and', 'or']
+  },
+  zero_terms_query: {
+    __one_of: ['none', 'all']
+  },
+  max_expansions: 10,
+  analyzer: '',
+  boost: 1.0,
+  lenient: {
+    __one_of: [ 'true', 'false' ]
+  },
+  fuzzy_transpositions: {
+    __one_of: [ 'true', 'false' ]
+  },
+  auto_generate_synonyms_phrase_query: {
+    __one_of: [ 'true', 'false' ]
+  },
+  fuzziness: 1.0,
+  prefix_length: 1,
+  minimum_should_match: 1
+};
 const innerHits = {
   docvalue_fields: [
     'FIELD'
@@ -103,18 +128,10 @@ export default function (api) {
         'FIELD': 'TEXT'
       },
       '{field}': {
-        'query': '',
-        'operator': {
-          __one_of: ['and', 'or']
-        },
         'type': {
           __one_of: ['phrase', 'phrase_prefix', 'boolean']
         },
-        'max_expansions': 10,
-        'analyzer': '',
-        'fuzziness': 1.0,
-        'prefix_length': 1,
-        'minimum_should_match': 1
+        ...matchOptions
       }
     },
     match_phrase: {
@@ -144,7 +161,7 @@ export default function (api) {
         'query': '',
         'fields': []
       },
-      query: '',
+      ...matchOptions,
       fields: ['{field}'],
       use_dis_max: {
         __template: true,
