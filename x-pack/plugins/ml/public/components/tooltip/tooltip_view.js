@@ -12,15 +12,15 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
-const Tooltip = ({ position = 'top', text, transclude }) => (
-  <EuiToolTip position={position} content={text}>
-    <span ref={transclude} />
-  </EuiToolTip>
-);
+export function Tooltip({ position = 'top', text, transclude }) {
+  return (
+    <EuiToolTip position={position} content={text}>
+      <span ref={transclude} />
+    </EuiToolTip>
+  );
+}
 Tooltip.propTypes = {
   position: PropTypes.string,
   text: PropTypes.string,
   transclude: PropTypes.func
 };
-
-export { Tooltip };
