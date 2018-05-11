@@ -7,7 +7,6 @@
 /* eslint-disable kibana-custom/no-default-export */
 
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 
 import {
   SecurityPageProvider,
@@ -55,8 +54,8 @@ export default async function ({ readConfigFile }) {
 
   // read the Kibana config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
 
   return {
     // list paths to the files that contain your plugins tests

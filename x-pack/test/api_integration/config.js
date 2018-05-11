@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import { SupertestWithoutAuthProvider } from './services';
 
 export default async function ({ readConfigFile }) {
 
   // Read the Kibana API integration tests config file so that we can utilize its services.
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaFunctionalConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../../../test/functional/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
