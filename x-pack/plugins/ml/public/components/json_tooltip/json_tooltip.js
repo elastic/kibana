@@ -36,7 +36,8 @@ module.service('mlJsonTooltipService', function () {
 module.directive('mlInfoIcon', function () {
   return {
     scope: {
-      id: '@mlInfoIcon'
+      id: '@mlInfoIcon',
+      position: '@'
     },
     restrict: 'AE',
     replace: true,

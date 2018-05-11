@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { Tooltip } from './tooltip_view_legacy';
+import { Tooltip } from './tooltip_view';
 
 module.directive('mlTooltip', function ($compile) {
   const link = function (scope, element) {
@@ -21,6 +21,7 @@ module.directive('mlTooltip', function ($compile) {
     element.html('');
 
     const props = {
+      position: scope.position,
       text: scope.text,
       transclude: (el) => {
         const transcludeScope = scope.$new();

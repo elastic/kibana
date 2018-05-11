@@ -12,12 +12,13 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 
-const Tooltip = ({ text, transclude }) => (
-  <EuiToolTip position="top" content={text}>
+const Tooltip = ({ position = 'top', text, transclude }) => (
+  <EuiToolTip position={position} content={text}>
     <span ref={transclude} />
   </EuiToolTip>
 );
 Tooltip.propTypes = {
+  position: PropTypes.string,
   text: PropTypes.string,
   transclude: PropTypes.func
 };
