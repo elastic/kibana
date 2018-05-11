@@ -1,5 +1,34 @@
 import _ from 'lodash';
 
+const innerHits = {
+  docvalue_fields: [
+    'FIELD'
+  ],
+  from: {},
+  size: {},
+  sort: {},
+  name: {},
+  highlight: {},
+  '_source': {
+    __one_of: [ 'true', 'false' ]
+  },
+  'explain': {
+    __one_of: [ 'true', 'false' ]
+  },
+  script_fields: {
+    __template: {
+      'FIELD': {
+        script: {}
+      }
+    },
+    '{field}': {
+      script: {}
+    }
+  },
+  version: {
+    __one_of: [ 'true', 'false' ]
+  }
+};
 const SPAN_QUERIES = {
   // TODO add one_of for objects
   span_first: {
@@ -208,6 +237,7 @@ export default function (api) {
         type: 'TYPE',
         query: {}
       },
+      inner_hits: { ...innerHits },
       'type': '{type}',
       'score_mode': {
         __one_of: ['none', 'max', 'sum', 'avg']
@@ -537,6 +567,7 @@ export default function (api) {
         path: 'path_to_nested_doc',
         query: {}
       },
+      inner_hits: { ...innerHits },
       path: '',
       query: {},
       score_mode: {
