@@ -27,6 +27,8 @@ async function persistTokens(callWithRequest, tokens) {
   return await callWithRequest('bulk', params);
 }
 
+// TODO: remove license commented out code
+// TODO: write API functional tests
 export function registerCreateEnrollmentTokensRoute(server) {
   // const licensePreRouting = licensePreRoutingFactory(server);
 
