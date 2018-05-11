@@ -33,11 +33,15 @@ describe('kfetch', () => {
     });
 
     it('should not prepend with basepath when disabled', async () => {
-      await kfetch({
-        pathname: 'my/path',
-        query: { a: 'b' },
-        prependBasePath: false,
-      });
+      await kfetch(
+        {
+          pathname: 'my/path',
+          query: { a: 'b' },
+        },
+        {
+          prependBasePath: false,
+        }
+      );
 
       expect(fetchMock.lastUrl(matcherName)).toBe('my/path?a=b');
     });
@@ -83,12 +87,11 @@ describe('kfetch', () => {
     it('should throw custom error containing response object', () => {
       return kfetch({
         pathname: 'my/path',
-        query: { a: 'b' },
-        prependBasePath: false,
+        query: { a: 'b' }
       }).catch(e => {
         expect(e.message).toBe('Not Found');
         expect(e.res.status).toBe(404);
-        expect(e.res.url).toBe('my/path?a=b');
+        expect(e.res.url).toBe('myBase/my/path?a=b');
       });
     });
   });

@@ -12,26 +12,32 @@ class FetchError extends Error {
   }
 }
 
-export async function kfetch(options) {
-  const { prependBasePath, pathname, query, ...requestOptions } = merge(
+export async function kfetch(fetchOptions, kibanaOptions) {
+  // fetch specific options with defaults
+  const { pathname, query, ...combinedFetchOptions } = merge(
     {
       method: 'GET',
-      prependBasePath: true,
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
         'kbn-version': metadata.version,
       },
     },
-    options
+    fetchOptions
   );
 
+  // kibana specific options with defaults
+  const combinedKibanaOptions = {
+    prependBasePath: true,
+    ...kibanaOptions,
+  };
+
   const fullUrl = url.format({
-    pathname: prependBasePath ? chrome.addBasePath(pathname) : pathname,
+    pathname: combinedKibanaOptions.prependBasePath ? chrome.addBasePath(pathname) : pathname,
     query,
   });
 
-  const res = await fetch(fullUrl, requestOptions);
+  const res = await fetch(fullUrl, combinedFetchOptions);
 
   if (!res.ok) {
     throw new FetchError(res);

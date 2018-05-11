@@ -13,19 +13,22 @@ function removeEmpty(query) {
   return omit(query, val => val == null);
 }
 
-async function callApi(options) {
-  const { camelcase, compact, ...requestOptions } = {
+async function callApi(fetchOptions, kibanaOptions) {
+  const combinedKibanaOptions = {
     compact: true, // remove empty query args
     camelcase: true,
-    ...options
+    ...kibanaOptions
   };
 
-  const res = await kfetch({
-    ...requestOptions,
-    query: compact ? removeEmpty(options.query) : options.query
-  });
+  const combinedFetchOptions = {
+    ...fetchOptions,
+    query: combinedKibanaOptions.compact
+      ? removeEmpty(fetchOptions.query)
+      : fetchOptions.query
+  };
 
-  return camelcase ? camelizeKeys(res) : res;
+  const res = await kfetch(combinedFetchOptions, combinedKibanaOptions);
+  return combinedKibanaOptions.camelcase ? camelizeKeys(res) : res;
 }
 
 export async function loadLicense() {
