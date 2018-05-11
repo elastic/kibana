@@ -39,6 +39,7 @@ import { getIndexTemplates } from '.';
 
 export const getPolicies = state => state.policies.policies;
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
+export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
 export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;
 
 export const getSaveAsNewPolicy = state =>

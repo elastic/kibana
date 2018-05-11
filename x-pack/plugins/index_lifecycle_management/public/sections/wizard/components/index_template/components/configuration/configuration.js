@@ -16,7 +16,6 @@ import {
   EuiFieldNumber,
   EuiHorizontalRule,
   EuiCallOut,
-  EuiFormRow,
   EuiButtonEmpty,
   EuiIconTip,
   EuiLink,
@@ -99,54 +98,45 @@ export class Configuration extends Component {
           <h4>Configure options</h4>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={!selectedNodeAttrs}>
-            <ErrableFormRow
-              label={
-                <Fragment>
-                  <span>Where do you want your hot indices to live</span>
-                  &nbsp;
-                  <EuiIconTip
-                    content="Hot indices are indices in active writing mode."
-                    position="right"
-                  />
-                </Fragment>
-              }
-              errorKey={STRUCTURE_NODE_ATTRS}
-              isShowingErrors={isShowingErrors}
-              errors={errors}
-            >
-              <EuiSelect
-                value={selectedNodeAttrs}
-                onChange={async e => {
-                  await setSelectedNodeAttrs(e.target.value);
-                  validate();
-                }}
-                options={nodeOptions}
+        <ErrableFormRow
+          label={
+            <Fragment>
+              <span>Where do you want your hot indices to live</span>
+              &nbsp;
+              <EuiIconTip
+                content="Hot indices are indices in active writing mode."
+                position="right"
               />
-            </ErrableFormRow>
-          </EuiFlexItem>
-          {selectedNodeAttrs ? (
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButtonEmpty
-                  flush="left"
-                  onClick={() =>
-                    this.setState({ isShowingNodeDetailsFlyout: true })
-                  }
-                >
-                  View node details
-                </EuiButtonEmpty>
-              </EuiFormRow>
-            </EuiFlexItem>
+            </Fragment>
+          }
+          errorKey={STRUCTURE_NODE_ATTRS}
+          isShowingErrors={isShowingErrors}
+          errors={errors}
+          helpText={selectedNodeAttrs ? (
+            <EuiButtonEmpty
+              flush="left"
+              onClick={() =>
+                this.setState({ isShowingNodeDetailsFlyout: true })
+              }
+            >
+              View node details
+            </EuiButtonEmpty>
           ) : null}
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiCallOut style={{ marginBottom: '1rem' }} title="Tip">
+        >
+          <EuiSelect
+            value={selectedNodeAttrs}
+            onChange={async e => {
+              await setSelectedNodeAttrs(e.target.value);
+              validate();
+            }}
+            options={nodeOptions}
+          />
+        </ErrableFormRow>
+        <EuiCallOut title="Tip">
           <p>
             The best way to determine how many shards you need is to benchmark
             using realistic data and queries on your hardware.{' '}
-            <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/guide/2.x/capacity-planning.html">
+            <EuiLink href="https://www.elastic.co/webinars/using-rally-to-get-your-elasticsearch-cluster-size-right">
               Learn more.
             </EuiLink>
           </p>

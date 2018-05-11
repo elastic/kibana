@@ -22,7 +22,7 @@ import {
   mergeAndPreserveDuplicateKeys,
   removePrefixes,
 } from '../../../../lib/diff_tools';
-import { addDiffAddonsForAce } from '../../../../lib/diff_ace_addons';
+import { addDiffAddonsForAce, setCurrentJsonObject } from '../../../../lib/diff_ace_addons';
 
 export class DiffView extends PureComponent {
   static propTypes = {
@@ -35,8 +35,11 @@ export class DiffView extends PureComponent {
   scrollToKey = (key, value) => {
     const editorDom = this.aceEditor.aceEditor.refEditor;
     const editor = ace.edit(editorDom);
-    const escapedValue = value.replace(/\^/, '\\^');
+    const escapedValue = value.replace(/\^/g, '\\^');
     const range = editor.find(new RegExp(`"${key}"\\s*:\\s*"*(${escapedValue})"*`), { regex: true });
+    if (!range) {
+      return;
+    }
     editor.gotoLine(range.start.row + 1, range.start.column);
   }
 
@@ -52,14 +55,17 @@ export class DiffView extends PureComponent {
       newFullIndexTemplate
     );
 
-    // console.log('mergedJson', mergedJson, changes);
+    console.log('mergedJson', mergedJson, changes);
 
     // Strip the ^ and $ characters
     const mergedJsonAsString = removePrefixes(
       JSON.stringify(mergedJson, null, 2)
     );
 
-    addDiffAddonsForAce(mergedJson);
+    // console.log('mergedJsonAsString', mergedJsonAsString);
+
+    setCurrentJsonObject(mergedJson);
+    addDiffAddonsForAce();
 
     return (
       <EuiFlexGroup>
@@ -75,10 +81,10 @@ export class DiffView extends PureComponent {
                 <EuiDescriptionListDescription>
                   {original ? (
                     <span>
-                      Changing `{original}` to `{updated}``
+                      Changing `{JSON.stringify(original)}` to `{JSON.stringify(updated)}``
                     </span>
                   ) : (
-                    <span>Adding with `{updated}`</span>
+                    <span>Adding with `{JSON.stringify(updated)}`</span>
                   )}
                 </EuiDescriptionListDescription>
               </Fragment>

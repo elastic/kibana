@@ -29,6 +29,8 @@ export const PHASE_ROLLOVER_AFTER_UNITS = 'selectedAfterUnits';
 export const PHASE_FORCE_MERGE_SEGMENTS = 'selectedForceMergeSegments';
 export const PHASE_FORCE_MERGE_ENABLED = 'forceMergeEnabled';
 
+export const PHASE_SHRINK_ENABLED = 'shrinkEnabled';
+
 export const PHASE_NODE_ATTRS = 'selectedNodeAttrs';
 export const PHASE_PRIMARY_SHARD_COUNT = 'selectedPrimaryShardCount';
 export const PHASE_REPLICA_COUNT = 'selectedReplicaCount';
@@ -52,6 +54,8 @@ export const STRUCTURE_PRIMARY_NODES = 'primary_nodes';
 export const STRUCTURE_REPLICAS = 'replicas';
 
 export const STRUCTURE_POLICY_CONFIGURATION = 'policyConfiguration';
+
+export const STRUCTURE_REVIEW = 'review';
 export const STRUCTURE_POLICY_NAME = 'policyName';
 export const STRUCTURE_INDEX_NAME = 'indexName';
 export const STRUCTURE_ALIAS_NAME = 'aliasName';
@@ -59,7 +63,9 @@ export const STRUCTURE_ALIAS_NAME = 'aliasName';
 export const ERROR_STRUCTURE = {
   [STRUCTURE_INDEX_TEMPLATE]: {
     [STRUCTURE_TEMPLATE_SELECTION]: {
-      [STRUCTURE_TEMPLATE_NAME]: []
+      [STRUCTURE_TEMPLATE_NAME]: [],
+      [STRUCTURE_INDEX_NAME]: [],
+      [STRUCTURE_ALIAS_NAME]: []
     },
     [STRUCTURE_CONFIGURATION]: {
       [STRUCTURE_NODE_ATTRS]: [],
@@ -68,9 +74,6 @@ export const ERROR_STRUCTURE = {
     }
   },
   [STRUCTURE_POLICY_CONFIGURATION]: {
-    [STRUCTURE_POLICY_NAME]: [],
-    [STRUCTURE_INDEX_NAME]: [],
-    [STRUCTURE_ALIAS_NAME]: [],
     [PHASE_HOT]: {
       [PHASE_ROLLOVER_ALIAS]: [],
       [PHASE_ROLLOVER_MAX_AGE]: [],
@@ -100,5 +103,8 @@ export const ERROR_STRUCTURE = {
       [PHASE_ROLLOVER_AFTER]: [],
       [PHASE_ROLLOVER_AFTER_UNITS]: [],
     },
+  },
+  [STRUCTURE_REVIEW]: {
+    [STRUCTURE_POLICY_NAME]: [],
   }
 };

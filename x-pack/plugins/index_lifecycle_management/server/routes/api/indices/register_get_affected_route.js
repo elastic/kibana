@@ -38,7 +38,7 @@ async function getAffectedIndices(
       template.settings &&
       template.settings.index &&
       template.settings.index.lifecycle &&
-      template.settings.index.lifecycle.name === policyName
+      (policyName && template.settings.index.lifecycle.name === policyName)
     ) {
       accum.push(...template.index_patterns);
     }
@@ -63,6 +63,32 @@ async function getAffectedIndices(
 export function registerGetAffectedRoute(server) {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
+
+  server.route({
+    path:
+      '/api/index_lifecycle_management/indices/affected/{indexTemplateName}',
+    method: 'GET',
+    handler: async (request, reply) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+
+      try {
+        const response = await getAffectedIndices(
+          callWithRequest,
+          request.params.indexTemplateName,
+        );
+        reply(response);
+      } catch (err) {
+        if (isEsError(err)) {
+          return reply(wrapEsError(err));
+        }
+
+        reply(wrapUnknownError(err));
+      }
+    },
+    config: {
+      pre: [licensePreRouting]
+    }
+  });
 
   server.route({
     path:

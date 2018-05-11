@@ -86,8 +86,7 @@ export class DeletePhase extends PureComponent {
               <EuiTextColor color="subdued">
                 <EuiText>
                   <p>
-                    This phase is optional. Delete your indices after a
-                    configured amount of time.
+                    This phase is optional. Your data is no longer useful. Define how long you want to retain it.
                   </p>
                 </EuiText>
               </EuiTextColor>

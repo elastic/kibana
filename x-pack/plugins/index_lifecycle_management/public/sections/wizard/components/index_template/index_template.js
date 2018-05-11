@@ -6,6 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
+import { toastNotifications } from 'ui/notify';
 
 import { TemplateSelection } from './components/template_selection';
 import { Configuration } from './components/configuration';
@@ -48,6 +49,8 @@ export class IndexTemplate extends Component {
     this.setState({ isShowingErrors: true });
     if (await this.validate()) {
       this.props.done();
+    } else {
+      toastNotifications.addDanger('Please fix errors on the page.');
     }
   };
 
@@ -65,7 +68,7 @@ export class IndexTemplate extends Component {
             <EuiSpacer size="xs"/>
             <EuiTextColor color="subdued">
               <h5>
-                A template defines the settings, mappings, and aliases to apply
+                An index template defines the settings, mappings, and aliases to apply
                 when you create an index.
               </h5>
             </EuiTextColor>

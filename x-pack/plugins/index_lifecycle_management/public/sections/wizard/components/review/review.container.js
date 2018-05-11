@@ -19,10 +19,14 @@ import {
   getSelectedOriginalPolicyName,
   getAliasName,
   getBootstrapEnabled,
+  getIndexName,
 } from '../../../../store/selectors';
 import {
   setSelectedPolicyName,
   setSaveAsNewPolicy,
+  setAliasName,
+  setIndexName,
+  setBootstrapEnabled,
 } from '../../../../store/actions';
 
 export const Review = connect(
@@ -33,13 +37,19 @@ export const Review = connect(
     lifecycle: getLifecycle(state),
     bootstrapEnabled: getBootstrapEnabled(state),
     aliasName: getAliasName(state),
-    selectedIndexTemplateName: getSelectedIndexTemplateName(state),
     selectedPolicyName: getSelectedPolicyName(state),
     saveAsNewPolicy: getSaveAsNewPolicy(state),
     originalPolicyName: getSelectedOriginalPolicyName(state),
+
+    /* start might go away */
+    indexName: getIndexName(state),
+    /* end might go away */
   }),
   {
     setSelectedPolicyName,
     setSaveAsNewPolicy,
+    setBootstrapEnabled,
+    setIndexName,
+    setAliasName,
   }
 )(PresentationComponent);

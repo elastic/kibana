@@ -20,6 +20,7 @@ async function formatTemplates(templates, callWithRequest) {
     const formattedTemplate = {
       index_lifecycle_name: settings.index && settings.index.lifecycle ? settings.index.lifecycle.name : undefined,
       index_patterns,
+      allocation_rules: settings.index && settings.index.routing ? settings.index.routing : undefined,
       name: templateName,
     };
 

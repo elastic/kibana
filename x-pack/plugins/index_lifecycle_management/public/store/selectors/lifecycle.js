@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import {
   PHASE_HOT,
   PHASE_WARM,
@@ -18,7 +15,6 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   STRUCTURE_INDEX_TEMPLATE,
   STRUCTURE_CONFIGURATION,
-  STRUCTURE_NODE_ATTRS,
   STRUCTURE_PRIMARY_NODES,
   STRUCTURE_REPLICAS,
   STRUCTURE_TEMPLATE_SELECTION,
@@ -28,7 +24,10 @@ import {
   STRUCTURE_INDEX_NAME,
   STRUCTURE_ALIAS_NAME,
   ERROR_STRUCTURE,
-  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS
+  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
+  PHASE_PRIMARY_SHARD_COUNT,
+  PHASE_SHRINK_ENABLED,
+  STRUCTURE_REVIEW
 } from '../constants';
 import {
   getPhase,
@@ -37,7 +36,6 @@ import {
   getSelectedPolicyName,
   getSelectedIndexTemplateName,
   isNumber,
-  getSelectedNodeAttrs,
   getSelectedPrimaryShardCount,
   getSelectedReplicaCount,
   getSaveAsNewPolicy,
@@ -69,12 +67,19 @@ export const validatePhase = (type, phase) => {
   }
 
   for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS) {
-    if (phase.hasOwnProperty(numberedAttribute) && !phase[numberedAttribute] === '') {
+    if (phase.hasOwnProperty(numberedAttribute) && phase[numberedAttribute] !== '') {
+      // If shrink is disabled, there is no need to validate this
+      if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && !phase[PHASE_SHRINK_ENABLED]) {
+        continue;
+      }
       if (!isNumber(phase[numberedAttribute])) {
-        errors[numberedAttribute].push('A number is required.');
+        errors[numberedAttribute] = ['A number is required.'];
       }
       else if (phase[numberedAttribute] < 0) {
-        errors[numberedAttribute].push('Only positive numbers allowed.');
+        errors[numberedAttribute] = ['Only positive numbers allowed.'];
+      }
+      else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
+        errors[numberedAttribute] = ['Only positive numbers above 0 are allowed.'];
       }
     }
   }
@@ -89,13 +94,15 @@ export const validateLifecycle = state => {
   if (!getSelectedIndexTemplateName(state)) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][
       STRUCTURE_TEMPLATE_NAME
-    ].push('An index template is required.');
+    ].push('An index template is required');
   }
 
-  if (!getSelectedNodeAttrs(state)) {
-    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
-      STRUCTURE_NODE_ATTRS
-    ].push('A node must be selected.');
+  if (getBootstrapEnabled(state) && !getIndexName(state)) {
+    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_INDEX_NAME].push('An index name is required.');
+  }
+
+  if (getBootstrapEnabled(state) && !getAliasName(state)) {
+    errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_TEMPLATE_SELECTION][STRUCTURE_ALIAS_NAME].push('An alias name is required.');
   }
 
   if (!isNumber(getSelectedPrimaryShardCount(state))) {
@@ -103,10 +110,10 @@ export const validateLifecycle = state => {
       STRUCTURE_PRIMARY_NODES
     ].push('A value is required.');
   }
-  else if (getSelectedPrimaryShardCount(state) < 0) {
+  else if (getSelectedPrimaryShardCount(state) < 1) {
     errors[STRUCTURE_INDEX_TEMPLATE][STRUCTURE_CONFIGURATION][
       STRUCTURE_PRIMARY_NODES
-    ].push('Only positive numbers allowed.');
+    ].push('Only positive numbers above 0 are allowed.');
   }
 
   if (!isNumber(getSelectedReplicaCount(state))) {
@@ -121,11 +128,11 @@ export const validateLifecycle = state => {
   }
 
   if (!getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_CONFIGURATION][STRUCTURE_POLICY_NAME].push('A policy name is required.');
+    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('A policy name is required.');
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_CONFIGURATION][STRUCTURE_POLICY_NAME].push('The policy name must be different.');
+    errors[STRUCTURE_REVIEW][STRUCTURE_POLICY_NAME].push('The policy name must be different.');
   }
 
   // if (getSaveAsNewPolicy(state)) {
@@ -134,14 +141,6 @@ export const validateLifecycle = state => {
   //     errors[STRUCTURE_POLICY_CONFIGURATION][STRUCTURE_POLICY_NAME].push('That policy name is already used.');
   //   }
   // }
-
-  if (getBootstrapEnabled(state) && !getIndexName(state)) {
-    errors[STRUCTURE_POLICY_CONFIGURATION][STRUCTURE_INDEX_NAME].push('An index name is required.');
-  }
-
-  if (getBootstrapEnabled(state) && !getAliasName(state)) {
-    errors[STRUCTURE_POLICY_CONFIGURATION][STRUCTURE_ALIAS_NAME].push('An alias name is required.');
-  }
 
   errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_HOT] = {
     ...errors[STRUCTURE_POLICY_CONFIGURATION][PHASE_HOT],

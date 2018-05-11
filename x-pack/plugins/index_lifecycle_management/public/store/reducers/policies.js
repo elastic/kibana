@@ -36,7 +36,8 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MAX_DOC_SIZE
+  PHASE_ROLLOVER_MAX_DOC_SIZE,
+  PHASE_SHRINK_ENABLED
 } from '../constants';
 
 export const defaultWarmPhase = {
@@ -48,6 +49,7 @@ export const defaultWarmPhase = {
   [PHASE_ROLLOVER_AFTER]: '',
   [PHASE_ROLLOVER_AFTER_UNITS]: 's',
   [PHASE_NODE_ATTRS]: '',
+  [PHASE_SHRINK_ENABLED]: true,
   [PHASE_PRIMARY_SHARD_COUNT]: '',
   [PHASE_REPLICA_COUNT]: ''
 };
@@ -95,6 +97,7 @@ const defaultPolicy = {
 const defaultState = {
   isLoading: false,
   originalPolicyName: undefined,
+  selectedPolicySet: false,
   selectedPolicy: defaultPolicy,
   policies: []
 };
@@ -113,12 +116,14 @@ export const policies = handleActions(
         return {
           ...state,
           selectedPolicy: defaultPolicy,
+          selectedPolicySet: true,
         };
       }
 
       return {
         ...state,
         originalPolicyName: selectedPolicy.name,
+        selectedPolicySet: true,
         selectedPolicy: {
           ...defaultPolicy,
           ...policyFromES(selectedPolicy)

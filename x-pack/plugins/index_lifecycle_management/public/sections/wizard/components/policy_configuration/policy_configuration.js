@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiButton,
-  EuiFormRow,
-  EuiSwitch,
-  EuiFieldText,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
@@ -27,13 +24,10 @@ import {
   PHASE_COLD,
   PHASE_DELETE,
   PHASE_WARM,
-  STRUCTURE_POLICY_NAME,
-  STRUCTURE_INDEX_NAME,
-  STRUCTURE_ALIAS_NAME,
 } from '../../../../store/constants';
 import { hasErrors } from '../../../../lib/find_errors';
-import { ErrableFormRow } from '../../form_errors';
 import { NodeAttrsDetails } from '../node_attrs_details';
+import { PolicySelection } from '../policy_selection/policy_selection.container';
 
 export class PolicyConfiguration extends Component {
   static propTypes = {
@@ -76,6 +70,8 @@ export class PolicyConfiguration extends Component {
     this.setState({ isShowingErrors: true });
     if (await this.validate()) {
       this.props.done();
+    } else {
+      toastNotifications.addDanger('Please fix errors on the page.');
     }
   };
 
@@ -85,62 +81,55 @@ export class PolicyConfiguration extends Component {
 
   render() {
     const {
-      setSelectedPolicyName,
-      setSaveAsNewPolicy,
-      setBootstrapEnabled,
-      setIndexName,
-      setAliasName,
-      validate,
       back,
 
-      affectedIndexTemplates,
-      selectedIndexTemplateName,
       selectedPolicyName,
-      saveAsNewPolicy,
+      isSelectedPolicySet,
       errors,
-      bootstrapEnabled,
-      indexName,
-      aliasName,
-      originalPolicyName,
     } = this.props;
 
     const { isShowingErrors } = this.state;
 
-    const singleTemplate = (
-      <span>
-        This policy is only attached to the selected template{' '}
-        <strong>{selectedIndexTemplateName}</strong>.
-      </span>
-    );
+    if (!isSelectedPolicySet) {
+      return (
+        <PolicySelection/>
+      );
+    }
 
-    const multiTemplate = (
-      <span>
-        This policy is attached to{' '}
-        <strong>{affectedIndexTemplates.length - 1} other template(s)</strong>{' '}
-        besides <strong>{selectedIndexTemplateName}</strong>.
-      </span>
-    );
+    // const singleTemplate = (
+    //   <span>
+    //     This policy is only attached to the selected template{' '}
+    //     <strong>{selectedIndexTemplateName}</strong>.
+    //   </span>
+    // );
 
-    const warningMessage =
-      affectedIndexTemplates.length === 1 &&
-      affectedIndexTemplates[0] === selectedIndexTemplateName
-        ? singleTemplate
-        : multiTemplate;
+    // const multiTemplate = (
+    //   <span>
+    //     This policy is attached to{' '}
+    //     <strong>{affectedIndexTemplates.length - 1} other template(s)</strong>{' '}
+    //     besides <strong>{selectedIndexTemplateName}</strong>.
+    //   </span>
+    // );
+
+    // const warningMessage =
+    //   affectedIndexTemplates.length === 1 &&
+    //   affectedIndexTemplates[0] === selectedIndexTemplateName
+    //     ? singleTemplate
+    //     : multiTemplate;
 
     return (
       <div className="euiAnimateContentLoad">
+        <PolicySelection/>
+        <EuiHorizontalRule className="ilmHrule" />
         <EuiTitle>
-          <h4>Edit policy: {selectedPolicyName}</h4>
+          <h4>
+            {!selectedPolicyName ? 'Edit new policy' : `Edit policy ${selectedPolicyName}`}
+          </h4>
         </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          size="s"
-          title={
-            <span>
-              <strong>Only the hot phase is required.</strong>
-            </span>
-          }
-        />
+        <EuiSpacer size="xs" />
+        <EuiTitle size="xs">
+          <h5>Configure the phases of your data and when to transition between them.  Only the hot phase is required.</h5>
+        </EuiTitle>
         <EuiHorizontalRule className="ilmHrule" />
         <HotPhase
           validate={this.validate}
@@ -169,7 +158,7 @@ export class PolicyConfiguration extends Component {
         />
         <EuiHorizontalRule className="ilmHrule" />
 
-        <EuiCallOut size="s" color="warning" title={warningMessage} />
+        {/* <EuiCallOut size="s" color="warning" title={warningMessage} />
         <EuiSpacer />
 
         <Fragment>
@@ -248,9 +237,9 @@ export class PolicyConfiguration extends Component {
               </ErrableFormRow>
             </Fragment>
           ) : null}
-        </Fragment>
+        </Fragment> */}
 
-        <EuiSpacer />
+        {/* <EuiSpacer /> */}
 
         <EuiButtonEmpty
           iconSide="left"

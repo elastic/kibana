@@ -11,6 +11,8 @@ export const setHttpClient = (client) => {
 };
 const apiPrefix = chrome.addBasePath('/api/index_lifecycle_management');
 
+console.log('apiPrefix', apiPrefix);
+
 export async function loadNodes() {
   const response = await httpClient.get(`${apiPrefix}/nodes/list`);
   return response.data;
@@ -47,6 +49,9 @@ export async function bootstrap(indexName, aliasName) {
 }
 
 export async function getAffectedIndices(indexTemplateName, policyName) {
-  const response = await httpClient.get(`${apiPrefix}/indices/affected/${indexTemplateName}/${policyName}`);
+  const path = policyName
+    ? `${apiPrefix}/indices/affected/${indexTemplateName}/${encodeURIComponent(policyName)}`
+    : `${apiPrefix}/indices/affected/${indexTemplateName}`;
+  const response = await httpClient.get(path);
   return response.data;
 }

@@ -6,12 +6,13 @@
 
 import { connect } from 'react-redux';
 import { NodeAttrsDetails as PresentationComponent } from './node_attrs_details';
-import { getNodeDetails } from '../../../../store/selectors';
+import { getNodeDetails, getExistingAllocationRules } from '../../../../store/selectors';
 import { fetchNodeDetails } from '../../../../store/actions';
 
 export const NodeAttrsDetails = connect(
   (state, ownProps) => ({
     details: getNodeDetails(state, ownProps.selectedNodeAttrs),
+    allocationRules: getExistingAllocationRules(state),
   }),
   { fetchNodeDetails }
 )(PresentationComponent);

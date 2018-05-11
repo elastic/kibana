@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
@@ -21,7 +18,8 @@ import {
   EuiAccordion,
   EuiFieldNumber,
   EuiSelect,
-  EuiSwitch
+  EuiSwitch,
+  EuiLink
 } from '@elastic/eui';
 import {
   PHASE_ROLLOVER_ALIAS,
@@ -93,7 +91,7 @@ export class HotPhase extends PureComponent {
               </EuiTitle>
               <EuiTextColor color="subdued">
                 <EuiText>
-                  <p>This phase is required. Rollover data by time and size.</p>
+                  <p>This phase is required. Your index is being queried and in active writing mode.</p>
                 </EuiText>
               </EuiTextColor>
               {isShowingErrors ? (
@@ -111,7 +109,7 @@ export class HotPhase extends PureComponent {
       >
         <div style={{ padding: '16px 16px 16px 40px', marginLeft: '-16px' }}>
           <EuiTitle size="s">
-            <p>Rollover configuration</p>
+            <p>Rollover condition</p>
           </EuiTitle>
           <EuiSpacer />
           <EuiSwitch
@@ -122,31 +120,25 @@ export class HotPhase extends PureComponent {
             }}
             label="Enable rollover"
           />
+          <EuiSpacer size="xs"/>
+          <EuiTitle size="xs">
+            <p>
+              <EuiTextColor color="subdued">
+                Rollover the index when it gets too big or too old. The alias will switch to the new index.
+              </EuiTextColor>
+              &nbsp;
+              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html">
+                Learn more.
+              </EuiLink>
+            </p>
+          </EuiTitle>
           {phaseData[PHASE_ROLLOVER_ENABLED] ? (
             <Fragment>
               <EuiSpacer size="m" />
-              {/* <EuiFlexGroup>
-                <EuiFlexItem>
-                  <ErrableFormRow
-                    label="Rollover alias"
-                    errorKey={PHASE_ROLLOVER_ALIAS}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors}
-                  >
-                    <EuiFieldText
-                      value={phaseData[PHASE_ROLLOVER_ALIAS]}
-                      onChange={e => {
-                        showErrorsFor(PHASE_ROLLOVER_ALIAS);
-                        setPhaseData(PHASE_ROLLOVER_ALIAS, e.target.value);
-                      }}
-                    />
-                  </ErrableFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup> */}
               <EuiFlexGroup>
                 <EuiFlexItem style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    label="Maximum size stored"
+                    label="Maximum index size stored"
                     errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
                     isShowingErrors={isShowingErrors}
                     errors={errors}

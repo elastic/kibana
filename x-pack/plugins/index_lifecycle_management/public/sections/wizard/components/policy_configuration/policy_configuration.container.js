@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { connect } from 'react-redux';
 import { PolicyConfiguration as PresentationComponent } from './policy_configuration';
 import {
@@ -17,7 +14,8 @@ import {
   getIndexName,
   getAliasName,
   getSaveAsNewPolicy,
-  getSelectedOriginalPolicyName
+  getSelectedOriginalPolicyName,
+  getIsSelectedPolicySet
 } from '../../../../store/selectors';
 import {
   setBootstrapEnabled,
@@ -29,6 +27,7 @@ import {
 
 export const PolicyConfiguration = connect(
   state => ({
+    isSelectedPolicySet: getIsSelectedPolicySet(state),
     selectedPolicyName: getSelectedPolicyName(state),
     selectedIndexTemplateName: getSelectedIndexTemplateName(state),
     affectedIndexTemplates: getAffectedIndexTemplates(state),

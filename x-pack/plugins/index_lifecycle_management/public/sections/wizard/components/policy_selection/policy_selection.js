@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -19,16 +16,14 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiText,
-  EuiHorizontalRule,
-  EuiButtonEmpty
 } from '@elastic/eui';
 
 export class PolicySelection extends Component {
   static propTypes = {
     fetchPolicies: PropTypes.func.isRequired,
     setSelectedPolicy: PropTypes.func.isRequired,
-    done: PropTypes.func.isRequired,
-    back: PropTypes.func.isRequired,
+    // done: PropTypes.func.isRequired,
+    // back: PropTypes.func.isRequired,
 
     existingPolicyName: PropTypes.string.isRequired,
     policies: PropTypes.array.isRequired
@@ -40,23 +35,23 @@ export class PolicySelection extends Component {
 
   selectPolicy(policy) {
     this.props.setSelectedPolicy(policy);
-    this.props.done();
+    // this.props.done();
   }
 
   render() {
-    const { policies, existingPolicyName, back } = this.props;
+    const { policies, existingPolicyName } = this.props;
 
     return (
       <div className="euiAnimateContentLoad">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={true}>
             <EuiTitle>
-              <h4>Select a policy to start from</h4>
+              <h4>Select a policy</h4>
             </EuiTitle>
             <EuiText>
               <p>
-                You can edit existing policies and save them under a new name
-                later
+                An index lifecycle policy is a blueprint for transitioning your data over time.
+                You can create a new policy or edit an existing policy and save it with a new name.
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -90,15 +85,15 @@ export class PolicySelection extends Component {
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
-        <EuiHorizontalRule className="ilmHrule" />
+        {/* <EuiHorizontalRule className="ilmHrule" /> */}
 
-        <EuiButtonEmpty
+        {/* <EuiButtonEmpty
           iconSide="left"
           iconType="sortLeft"
           onClick={back}
         >
           Back
-        </EuiButtonEmpty>
+        </EuiButtonEmpty> */}
       </div>
     );
   }

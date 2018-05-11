@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import { IndexTemplate } from './components/index_template';
-import { PolicySelection } from './components/policy_selection';
+// import { PolicySelection } from './components/policy_selection';
 import { PolicyConfiguration } from './components/policy_configuration';
 import { Review } from './components/review';
 import {
@@ -23,6 +23,7 @@ import { bootstrap } from '../../api';
 import {
   STRUCTURE_INDEX_TEMPLATE,
   STRUCTURE_POLICY_CONFIGURATION,
+  STRUCTURE_REVIEW,
 } from '../../store/constants';
 // import { DiffView } from './components/review/diff_view';
 // import diff from './diff.json';
@@ -99,27 +100,29 @@ export class Wizard extends Component {
             done={() => this.onSelectedStepChanged(2)}
           />
         );
+      // case 2:
+      //   return (
+      //     <PolicySelection
+      //       done={() => this.onSelectedStepChanged(3)}
+      //       back={() => this.onSelectedStepChanged(1)}
+      //     />
+      //   );
       case 2:
         return (
-          <PolicySelection
+          <PolicyConfiguration
+            validate={this.validate}
+            errors={errors[STRUCTURE_POLICY_CONFIGURATION]}
             done={() => this.onSelectedStepChanged(3)}
             back={() => this.onSelectedStepChanged(1)}
           />
         );
       case 3:
         return (
-          <PolicyConfiguration
-            validate={this.validate}
-            errors={errors[STRUCTURE_POLICY_CONFIGURATION]}
-            done={() => this.onSelectedStepChanged(4)}
-            back={() => this.onSelectedStepChanged(2)}
-          />
-        );
-      case 4:
-        return (
           <Review
+            validate={this.validate}
             done={this.addLifecycle}
-            back={() => this.onSelectedStepChanged(3)}
+            errors={errors[STRUCTURE_REVIEW]}
+            back={() => this.onSelectedStepChanged(2)}
           />
         );
     }
@@ -133,26 +136,26 @@ export class Wizard extends Component {
         isComplete: this.state.selectedStep > 1,
         onClick: () => this.onSelectedStepChanged(1),
       },
+      // {
+      //   title: 'Select or create policy',
+      //   isSelected: this.state.selectedStep === 2,
+      //   isComplete: this.state.selectedStep > 2,
+      //   disabled: this.state.selectedStep < 2,
+      //   onClick: () => this.onSelectedStepChanged(2),
+      // },
       {
-        title: 'Select or create policy',
+        title: 'Configure policy',
         isSelected: this.state.selectedStep === 2,
         isComplete: this.state.selectedStep > 2,
         disabled: this.state.selectedStep < 2,
         onClick: () => this.onSelectedStepChanged(2),
       },
       {
-        title: 'Configure policy',
+        title: 'Review and save',
         isSelected: this.state.selectedStep === 3,
         isComplete: this.state.selectedStep > 3,
         disabled: this.state.selectedStep < 3,
         onClick: () => this.onSelectedStepChanged(3),
-      },
-      {
-        title: 'Review and save',
-        isSelected: this.state.selectedStep === 4,
-        isComplete: this.state.selectedStep > 4,
-        disabled: this.state.selectedStep < 4,
-        onClick: () => this.onSelectedStepChanged(4),
       },
     ];
 
@@ -171,7 +174,7 @@ export class Wizard extends Component {
         <EuiStepsHorizontal steps={steps} />
         <EuiSpacer size="m" />
         {/* <DiffView
-          templateDiff={templateDiff}
+          templateDiff={diff}
         /> */}
         {this.renderContent()}
       </EuiPage>

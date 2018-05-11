@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -21,6 +21,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import {
   PHASE_ENABLED,
@@ -33,6 +34,7 @@ import {
   PHASE_REPLICA_COUNT,
   PHASE_ROLLOVER_AFTER,
   PHASE_ROLLOVER_AFTER_UNITS,
+  PHASE_SHRINK_ENABLED,
 } from '../../../../../../store/constants';
 import { ErrableFormRow } from '../../../../form_errors';
 
@@ -134,8 +136,8 @@ export class WarmPhase extends Component {
               <EuiTextColor color="subdued">
                 <EuiText>
                   <p>
-                    This phase is optional. Re-allocate indices, redefine number
-                    of active shards, replicas, and compress even further.
+                    This phase is optional. Your index is frequently queried,
+                    but is read-only. Use this phase to optimize for search.
                   </p>
                 </EuiText>
               </EuiTextColor>
@@ -171,7 +173,7 @@ export class WarmPhase extends Component {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiSwitch
-                  label="Apply on rollover?"
+                  label="Move to warm phase on rollover"
                   checked={this.state.applyOnRollover}
                   onChange={async e => {
                     await this.setState({ applyOnRollover: e.target.checked });
@@ -222,37 +224,34 @@ export class WarmPhase extends Component {
 
           <EuiSpacer />
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={!phaseData[PHASE_NODE_ATTRS]}>
-              <ErrableFormRow
-                label="Where would you like to allocate these indices?"
-                errorKey={PHASE_NODE_ATTRS}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiSelect
-                  value={phaseData[PHASE_NODE_ATTRS]}
-                  options={nodeOptions}
-                  onChange={async e => {
-                    await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            {phaseData[PHASE_NODE_ATTRS] ? (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiButtonEmpty
-                    flush="left"
-                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-                  >
-                    See more details about these nodes
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <ErrableFormRow
+            label="Where would you like to allocate these indices?"
+            errorKey={PHASE_NODE_ATTRS}
+            isShowingErrors={isShowingErrors}
+            errors={errors}
+            helpText={
+              phaseData[PHASE_NODE_ATTRS] ? (
+                <EuiButtonEmpty
+                  flush="left"
+                  onClick={() =>
+                    showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])
+                  }
+                >
+                  View node details
+                </EuiButtonEmpty>
+              ) : null
+            }
+          >
+            <EuiSelect
+              value={phaseData[PHASE_NODE_ATTRS]}
+              options={nodeOptions}
+              onChange={async e => {
+                await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+                validate();
+              }}
+            />
+          </ErrableFormRow>
+
           <EuiFlexGroup>
             <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
               <ErrableFormRow
@@ -282,7 +281,7 @@ export class WarmPhase extends Component {
                     validate();
                   }}
                 >
-                  Set to same as hot phase
+                  Use number in hot phase
                 </EuiButtonEmpty>
               </EuiFormRow>
             </EuiFlexItem>
@@ -293,56 +292,89 @@ export class WarmPhase extends Component {
           <EuiTitle size="s">
             <p>Shrink</p>
           </EuiTitle>
+          <EuiTitle size="xs">
+            <EuiTextColor color="subdued">
+              Shrink the index into a new index with fewer primary shards.{' '}
+              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-shrink-index.html#indices-shrink-index">
+                Learn more.
+              </EuiLink>
+            </EuiTextColor>
+          </EuiTitle>
 
           <EuiSpacer />
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <ErrableFormRow
-                label="Number of active shards"
-                errorKey={PHASE_REPLICA_COUNT}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiFieldNumber
-                  value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
-                  onChange={async e => {
-                    await setPhaseData(
-                      PHASE_PRIMARY_SHARD_COUNT,
-                      e.target.value
-                    );
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace>
-                <EuiButtonEmpty
-                  flush="left"
-                  onClick={async () => {
-                    await setPhaseData(
-                      PHASE_PRIMARY_SHARD_COUNT,
-                      hotPhasePrimaryShardCount
-                    );
-                    validate();
-                  }}
-                >
-                  Set to same as hot phase
-                </EuiButtonEmpty>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiSwitch
+            checked={phaseData[PHASE_SHRINK_ENABLED]}
+            onChange={async e => {
+              await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
+              validate();
+            }}
+            label="Enable shrink"
+          />
 
-          <EuiSpacer />
+          <EuiSpacer size="m" />
+
+          {phaseData[PHASE_SHRINK_ENABLED] ? (
+            <Fragment>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <ErrableFormRow
+                    label="Number of primary shards"
+                    errorKey={PHASE_PRIMARY_SHARD_COUNT}
+                    isShowingErrors={isShowingErrors}
+                    errors={errors}
+                  >
+                    <EuiFieldNumber
+                      value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
+                      onChange={async e => {
+                        await setPhaseData(
+                          PHASE_PRIMARY_SHARD_COUNT,
+                          e.target.value
+                        );
+                        validate();
+                      }}
+                    />
+                  </ErrableFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow hasEmptyLabelSpace>
+                    <EuiButtonEmpty
+                      flush="left"
+                      onClick={async () => {
+                        await setPhaseData(
+                          PHASE_PRIMARY_SHARD_COUNT,
+                          hotPhasePrimaryShardCount
+                        );
+                        validate();
+                      }}
+                    >
+                      Use number in hot phase
+                    </EuiButtonEmpty>
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
 
           <EuiTitle size="s">
             <p>Force merge</p>
           </EuiTitle>
+          <EuiTitle size="xs">
+            <EuiTextColor color="subdued">
+              Reduce the number of segments in your shard by and merging smaller
+              files and clearing deleted ones.{' '}
+              <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html">
+                Learn More
+              </EuiLink>
+            </EuiTextColor>
+          </EuiTitle>
 
           <EuiSpacer size="m" />
+
           <EuiSwitch
-            label="Should we force merge your data?"
+            label="Force merge data"
             checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
             onChange={async e => {
               await setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
@@ -352,20 +384,25 @@ export class WarmPhase extends Component {
 
           <EuiSpacer />
 
-          <ErrableFormRow
-            label="How many segments should we compress down to?"
-            errorKey={PHASE_FORCE_MERGE_SEGMENTS}
-            isShowingErrors={isShowingErrors}
-            errors={errors}
-          >
-            <EuiFieldNumber
-              value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
-              onChange={async e => {
-                await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
-                validate();
-              }}
-            />
-          </ErrableFormRow>
+          {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
+            <ErrableFormRow
+              label="Number of segments"
+              errorKey={PHASE_FORCE_MERGE_SEGMENTS}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+            >
+              <EuiFieldNumber
+                value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
+                onChange={async e => {
+                  await setPhaseData(
+                    PHASE_FORCE_MERGE_SEGMENTS,
+                    e.target.value
+                  );
+                  validate();
+                }}
+              />
+            </ErrableFormRow>
+          ) : null}
         </div>
       </EuiAccordion>
     );

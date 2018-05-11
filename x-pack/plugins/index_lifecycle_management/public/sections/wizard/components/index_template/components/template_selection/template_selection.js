@@ -7,9 +7,13 @@
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiSwitch, EuiFieldText } from '@elastic/eui';
 import { ErrableFormRow } from '../../../../form_errors';
-import { STRUCTURE_TEMPLATE_NAME } from '../../../../../../store/constants';
+import {
+  STRUCTURE_TEMPLATE_NAME,
+  STRUCTURE_INDEX_NAME,
+  STRUCTURE_ALIAS_NAME,
+} from '../../../../../../store/constants';
 
 export class TemplateSelection extends PureComponent {
   static propTypes = {
@@ -31,31 +35,22 @@ export class TemplateSelection extends PureComponent {
     const {
       setSelectedIndexTemplate,
       validate,
+      setBootstrapEnabled,
+      setIndexName,
+      setAliasName,
 
+      bootstrapEnabled,
       templateOptions,
+      selectedIndexTemplateIndices,
+      indexName,
+      aliasName,
       selectedIndexTemplateName,
       errors,
       isShowingErrors,
     } = this.props;
 
-    // const noMatchingIndicesWarning =
-    //   affectedIndices.length > 0 ? (
-    //     <EuiCallOut
-    //       style={{ marginBottom: '1rem' }}
-    //       title="Warning"
-    //       color="warning"
-    //       iconType="help"
-    //     >
-    //       <p>
-    //         The selected index template `{selectedIndexTemplateName}` matches
-    //         existing indices which will not be affected by these changes.
-    //       </p>
-    //     </EuiCallOut>
-    //   ) : null;
-
     return (
       <Fragment>
-        {/* {noMatchingIndicesWarning} */}
         <ErrableFormRow
           label="Template name"
           errorKey={STRUCTURE_TEMPLATE_NAME}
@@ -71,6 +66,50 @@ export class TemplateSelection extends PureComponent {
             options={templateOptions}
           />
         </ErrableFormRow>
+        {selectedIndexTemplateName && selectedIndexTemplateIndices.length === 0 ? (
+          <Fragment>
+            <EuiFormRow label="Bootstrap options" style={{ maxWidth: '100%' }}>
+              <EuiSwitch
+                style={{ maxWidth: '100%' }}
+                checked={bootstrapEnabled}
+                onChange={e => setBootstrapEnabled(e.target.checked)}
+                label={<span>Create an index and alias for this template</span>}
+              />
+            </EuiFormRow>
+            {bootstrapEnabled ? (
+              <Fragment>
+                <ErrableFormRow
+                  label="Name your index"
+                  errorKey={STRUCTURE_INDEX_NAME}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldText
+                    value={indexName}
+                    onChange={async e => {
+                      await setIndexName(e.target.value);
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+                <ErrableFormRow
+                  label="Name your alias"
+                  errorKey={STRUCTURE_ALIAS_NAME}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldText
+                    value={aliasName}
+                    onChange={async e => {
+                      await setAliasName(e.target.value);
+                      validate();
+                    }}
+                  />
+                </ErrableFormRow>
+              </Fragment>
+            ) : null}
+          </Fragment>
+        ) : null}
       </Fragment>
     );
   }

@@ -112,7 +112,23 @@ export const getAffectedIndexPatterns = state => {
   return indexPatterns;
 };
 
-// const hasJSONChanged = (json1, json2) => JSON.stringify(json1) !== JSON.stringify(json2);
+export const getSelectedIndexTemplateIndices = state => {
+  const selectedIndexTemplate = getSelectedIndexTemplate(state);
+  if (selectedIndexTemplate) {
+    return selectedIndexTemplate.indices;
+  }
+  return undefined;
+};
+
+export const getExistingAllocationRules = state => {
+  const selectedIndexTemplate = getSelectedIndexTemplate(state);
+  if (selectedIndexTemplate) {
+    return selectedIndexTemplate.allocation_rules;
+  }
+  return undefined;
+};
+
+const hasJSONChanged = (json1, json2) => JSON.stringify(json1) !== JSON.stringify(json2);
 export const getTemplateDiff = state => {
   const originalFullIndexTemplate = getFullSelectedIndexTemplate(state) || { settings: {} };
   const newFullIndexTemplate = merge(cloneDeep(originalFullIndexTemplate), {
@@ -137,7 +153,7 @@ export const getTemplateDiff = state => {
   return {
     originalFullIndexTemplate,
     newFullIndexTemplate,
-    hasChanged: true//hasJSONChanged(originalFullIndexTemplate, newFullIndexTemplate),
+    hasChanged: hasJSONChanged(originalFullIndexTemplate, newFullIndexTemplate),
   };
 };
 

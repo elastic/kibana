@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
@@ -107,8 +104,8 @@ export class ColdPhase extends PureComponent {
               <EuiTextColor color="subdued">
                 <EuiText>
                   <p>
-                    This phase is optional. Re-allocate your indices again and
-                    modify the number of replicas.
+                    This phase is optional. Your read-only index is queried less frequently.
+                    Use this phase when the index no longer needs to be on the most performant hardware.
                   </p>
                 </EuiText>
               </EuiTextColor>
@@ -172,37 +169,29 @@ export class ColdPhase extends PureComponent {
 
           <EuiSpacer />
 
-          <EuiFlexGroup>
-            <EuiFlexItem grow={!phaseData[PHASE_NODE_ATTRS]}>
-              <ErrableFormRow
-                label="Where would you like to allocate these indices?"
-                errorKey={PHASE_NODE_ATTRS}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
+          <ErrableFormRow
+            label="Where would you like to allocate these indices?"
+            errorKey={PHASE_NODE_ATTRS}
+            isShowingErrors={isShowingErrors}
+            errors={errors}
+            helpText={phaseData[PHASE_NODE_ATTRS] ? (
+              <EuiButtonEmpty
+                flush="left"
+                onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
               >
-                <EuiSelect
-                  value={phaseData[PHASE_NODE_ATTRS]}
-                  options={nodeOptions}
-                  onChange={async e => {
-                    await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                    validate();
-                  }}
-                />
-              </ErrableFormRow>
-            </EuiFlexItem>
-            {phaseData[PHASE_NODE_ATTRS] ? (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiButtonEmpty
-                    flush="left"
-                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-                  >
-                    See more details about these nodes
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
+                View node details
+              </EuiButtonEmpty>
             ) : null}
-          </EuiFlexGroup>
+          >
+            <EuiSelect
+              value={phaseData[PHASE_NODE_ATTRS]}
+              options={nodeOptions}
+              onChange={async e => {
+                await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+                validate();
+              }}
+            />
+          </ErrableFormRow>
 
           <EuiFlexGroup>
             <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
@@ -229,7 +218,7 @@ export class ColdPhase extends PureComponent {
                     setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)
                   }
                 >
-                  Set to same as warm phase
+                  Use number in warm phase
                 </EuiButtonEmpty>
               </EuiFormRow>
             </EuiFlexItem>
