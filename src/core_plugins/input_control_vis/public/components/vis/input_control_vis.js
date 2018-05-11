@@ -47,7 +47,7 @@ export class InputControlVis extends Component {
               dynamicOptions={control.options.dynamicOptions}
               controlIndex={index}
               stageFilter={this.props.stageFilter}
-              fetchOptions={async (query) => { return await this.props.refreshControl(index, query); }}
+              fetchOptions={query => { this.props.refreshControl(index, query); }}
             />
           );
           break;
