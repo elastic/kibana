@@ -1,112 +1,98 @@
 /*
- * Canvas syntax parser
- *
- * You MUST use PegJS to generate a .js file to use this.
- * Yes, technically you can load this and build the parser in real time, but this makes it annoying
- * to share the grammar between the front end and back, so, you know, just generate the parser.
- * You shouldn't be futzing around in the grammar very often anyway.
- */
+* Canvas syntax parser
+*
+* You MUST use PegJS to generate a .js file to use this.
+* Yes, technically you can load this and build the parser in real time, but this makes it annoying
+* to share the grammar between the front end and back, so, you know, just generate the parser.
+* You shouldn't be futzing around in the grammar very often anyway.
+*/
 
- {
-  var parseCursor = Boolean(options.parseCursor);
- }
-
- /* ----- Expressions ----- */
+/* ----- Expressions ----- */
 
 start
- = expression
+  = expression
 
 expression
- = first:function space? rest:('|' space? fn:function {return fn})* {
-  return {
-   type: 'expression',
-   chain: [first].concat(rest)
+  = first:function rest:('|' fn:function { return fn; })* {
+    return {
+      type: 'expression',
+      chain: [first].concat(rest)
+    };
   }
- }
 
- /* ----- Functions ----- */
+/* ----- Functions ----- */
 
 function "function"
- = cursor
- / name:function_name arg_list:arg_list? {
-  return {
-    type: 'function',
-    function: name,
-    arguments: arg_list || {}
+  = space? name:identifier arg_list:arg_list {
+    return {
+      type: 'function',
+      function: name,
+      arguments: arg_list
+    };
   }
- }
 
-function_name
- = name:[a-zA-Z0-9_-]+ {
-  return name.join('')
- }
-
- /* ----- Arguments ----- */
+/* ----- Arguments ----- */
 
 argument_assignment
- = space? name:function_name space? '=' space? value:argument {
-  return {name: name, value: value};
- }
- / value:argument {return {name: '_', value: value}}
+  = name:identifier space? '=' space? value:argument {
+    return { name, value };
+  }
+  / value:argument {
+    return { name: '_', value };
+  }
 
 argument
- = cursor
- / '{' space? expression:expression space? '}' { return expression; }
- / '${' space? expression:expression space? '}' {
-  return {
-   type: 'partial',
-   chain: expression.chain
+  = '{' space? expression:expression space? '}' { return expression; }
+  / '${' space? expression:expression space? '}' {
+    return {
+      type: 'partial',
+      chain: expression.chain
+    };
   }
- }
- / literal
-
+  / literal
 
 arg_list
- = space first:argument_assignment? rest:(space arg:argument_assignment {return arg})* space? {
-  const orderedArgs = first !== null ? [first, ...rest] : [];
-  const args = {};
-  orderedArgs.forEach((arg) => {
-    args[arg.name] = args[arg.name] || [];
-    args[arg.name].push(arg.value)
-  });
-  return args;
- }
+  = args:(space arg:argument_assignment { return arg; })* space? {
+    return args.reduce((accumulator, { name, value }) => ({
+      ...accumulator,
+      [name]: (accumulator[name] || []).concat(value)
+    }), {});
+  }
 
- /* ----- Core types ----- */
+/* ----- Core types ----- */
+
+identifier
+  = name:[a-zA-Z0-9_-]+ {
+    return name.join('');
+  }
 
 literal "literal"
   = phrase
-  / boolean
-  / null
   / unquoted_string_or_number
 
 phrase
- = '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
- / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
+  = '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
+  / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
 
 unquoted_string_or_number
- // Make sure we're not matching the beginning of a search
- = string:unquoted+ { // this also matches numbers via Number()
-   var result = string.join('');
-   // Sort of hacky, but PEG doesn't have backtracking so
-   // a number rule is hard to read, and performs worse
-   if (isNaN(Number(result))) return result; // 5bears
-   return Number(result);
+  // Make sure we're not matching the beginning of a search
+  = string:unquoted+ { // this also matches nulls, booleans, and numbers
+    var result = string.join('');
+    // Sort of hacky, but PEG doesn't have backtracking so
+    // a null/boolean/number rule is hard to read, and performs worse
+    if (result === 'null') return null;
+    if (result === 'true') return true;
+    if (result === 'false') return false;
+    if (isNaN(Number(result))) return result; // 5bears
+    return Number(result);
   }
 
-boolean
- = 'true'  { return true; }
- / 'false' { return false; }
-
-null
- = 'null' {return null;}
-
 space
- = [\ \t\r\n]+
+  = [\ \t\r\n]+
 
 unquoted
- = "\\" sequence:([\"'(){}<>\[\]$`|=\ \t\n\r] / "\\") { return sequence; }
- / [^"'(){}<>\[\]$`|=\ \t\n\r]
+  = "\\" sequence:([\"'(){}<>\[\]$`|=\ \t\n\r] / "\\") { return sequence; }
+  / [^"'(){}<>\[\]$`|=\ \t\n\r]
 
 dq_char
   = "\\" sequence:('"' / "\\") { return sequence; }
@@ -115,13 +101,3 @@ dq_char
 sq_char
   = "\\" sequence:("'" / "\\") { return sequence; }
   / [^'] // everything except '
-
-cursor
- = &{ return parseCursor; } prefix:function_name? '$cursor$' suffix:function_name? {
-   return {
-    cursor: true,
-    prefix,
-    suffix,
-    location: location()
-   };
- }
