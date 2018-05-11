@@ -94,7 +94,8 @@ export default function (api) {
       },
       '{field}': {
         query: '',
-        analyzer: ''
+        analyzer: '',
+        slop: 1
       }
     },
     match_phrase_prefix: {
