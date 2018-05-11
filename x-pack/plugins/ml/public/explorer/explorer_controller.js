@@ -706,7 +706,7 @@ module.controller('MlExplorerController', function (
           interval,
           swimlaneLimit
         ).then((resp) => {
-          processViewByResults(resp.results);
+          processViewByResults(resp.results, fieldValues);
           finish();
         });
       } else {
@@ -718,7 +718,7 @@ module.controller('MlExplorerController', function (
           interval,
           swimlaneLimit
         ).then((resp) => {
-          processViewByResults(resp.results);
+          processViewByResults(resp.results, fieldValues);
           finish();
         });
 
@@ -850,7 +850,11 @@ module.controller('MlExplorerController', function (
     $scope.overallSwimlaneData = dataset;
   }
 
-  function processViewByResults(scoresByInfluencerAndTime) {
+  function processViewByResults(scoresByInfluencerAndTime, sortedLaneValues) {
+    // Processes the scores for the 'view by' swimlane.
+    // Sorts the lanes according to the supplied array of lane
+    // values in the order in which they should be displayed,
+    // or pass an empty array to sort lanes according to max score over all time.
     const dataset = {
       fieldName: $scope.swimlaneViewByFieldName,
       points: [],
@@ -879,13 +883,28 @@ module.controller('MlExplorerController', function (
       });
     });
 
-    // Ensure lanes are sorted in descending order of max score.
-    // Note the keys in scoresByInfluencerAndTime received from the ES request
-    // are not guaranteed to be sorted by score if they can be parsed as numbers
-    // (e.g. if viewing by HTTP response code).
-    dataset.laneLabels = laneLabels.sort((a, b) => {
-      return maxScoreByLaneLabel[b] - maxScoreByLaneLabel[a];
-    });
+    const sortValuesLength = sortedLaneValues.length;
+    if (sortValuesLength === 0) {
+      // Sort lanes in descending order of max score.
+      // Note the keys in scoresByInfluencerAndTime received from the ES request
+      // are not guaranteed to be sorted by score if they can be parsed as numbers
+      // (e.g. if viewing by HTTP response code).
+      dataset.laneLabels = laneLabels.sort((a, b) => {
+        return maxScoreByLaneLabel[b] - maxScoreByLaneLabel[a];
+      });
+    } else {
+      // Sort lanes according to supplied order
+      // e.g. when a cell in the overall swimlane has been selected.
+      // Find the index of each lane label from the actual data set,
+      // rather than using sortedLaneValues as-is, just in case they differ.
+      dataset.laneLabels = laneLabels.sort((a, b) => {
+        let aIndex = sortedLaneValues.indexOf(a);
+        let bIndex = sortedLaneValues.indexOf(b);
+        aIndex = (aIndex > -1) ? aIndex : sortValuesLength;
+        bIndex = (bIndex > -1) ? bIndex : sortValuesLength;
+        return aIndex - bIndex;
+      });
+    }
 
     $scope.viewBySwimlaneData = dataset;
   }
