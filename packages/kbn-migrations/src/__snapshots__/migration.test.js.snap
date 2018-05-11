@@ -421,14 +421,6 @@ Object {
       ".sample-index-3.2.1-original": Object {
         "doc": Object {
           "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -468,9 +460,6 @@ Object {
             },
             "type": Object {
               "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
             },
           },
         },
@@ -1007,14 +996,6 @@ Object {
       ".sample-index-3.2.1-original": Object {
         "doc": Object {
           "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -1044,9 +1025,6 @@ Object {
             },
             "type": Object {
               "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
             },
           },
         },

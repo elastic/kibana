@@ -290,14 +290,6 @@ Object {
       ".kibana-4.5.6-original": Object {
         "doc": Object {
           "properties": Object {
-            "config": Object {
-              "dynamic": true,
-              "properties": Object {
-                "buildNum": Object {
-                  "type": "keyword",
-                },
-              },
-            },
             "migration": Object {
               "properties": Object {
                 "plugins": Object {
@@ -327,9 +319,6 @@ Object {
             },
             "type": Object {
               "type": "keyword",
-            },
-            "updated_at": Object {
-              "type": "date",
             },
           },
         },

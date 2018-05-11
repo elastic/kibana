@@ -123,7 +123,11 @@ async function fetch(callCluster, index) {
 }
 
 async function save(callCluster, index, version, migrationState) {
-  await Persistence.applyMappings(callCluster, index, { properties: mappings });
+  // Apply the bare-minimum mappings required in order to store migrationState,
+  // as we are applying this to existing indices in some cases.
+  await Persistence.applyMappings(callCluster, index, {
+    properties: _.pick(mappings, ['migration', 'type']),
+  });
   return await callCluster('update', {
     index,
     version,
