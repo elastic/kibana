@@ -7,6 +7,11 @@
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 
+const getMissingPrivileges = (resource, application, privilegeCheck) => {
+  const privileges = privilegeCheck.application[application][resource];
+  return Object.keys(privileges).filter(key => privileges[key] === false);
+};
+
 export function createRequestHasPrivileges(server) {
   const callWithRequest = getClient(server).callWithRequest;
 
@@ -29,9 +34,15 @@ export function createRequestHasPrivileges(server) {
       });
 
       const success = privilegeCheck.has_all_requested;
+      const missingPrivileges = getMissingPrivileges(DEFAULT_RESOURCE, application, privilegeCheck);
+
+      if (missingPrivileges.includes(version)) {
+        throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
+      }
+
       return {
         success,
-        message: success ? null : `User ${privilegeCheck.username} doesn't have all ${privileges.join()} privileges}`
+        missing: missingPrivileges
       };
     };
   };
