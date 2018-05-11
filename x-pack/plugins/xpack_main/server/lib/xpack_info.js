@@ -120,7 +120,7 @@ export class XPackInfo {
         const licenseInfo = [
           `mode: ${get(response, 'license.mode')}`,
           `status: ${get(response, 'license.status')}`,
-          `expiry date: ${moment(get(response, 'license.expiry_date_in_millis'), 'x').format()}`
+          `expiry date: ${this._getExpiryDate(response)}`
         ].join(' | ');
 
         this._log(
@@ -259,5 +259,23 @@ export class XPackInfo {
     }
 
     return newLicense.expiry_date_in_millis !== cachedLicense.expiry_date_in_millis;
+  }
+
+  /**
+   * Handles the case where the license type is basic, and the date is so far into the
+   * future that moment cannot parse it. In that case we should treat it as never expiring.
+   * @param {Object} xpackInfo xPack info response object returned from the backend.
+   * @returns {string} 'never' if license is basic and date unparseable by moment;
+   *                   otherwise, a formatted date.
+   * @private
+   */
+  _getExpiryDate(xpackInfo) {
+    let expiryDate = moment(get(xpackInfo, 'license.expiry_date_in_millis')).format('YYYY MMM DD HH:mm');
+
+    if (expiryDate === 'Invalid date' && get(xpackInfo, 'license.mode') === 'basic') {
+      expiryDate = 'never';
+    }
+
+    return expiryDate;
   }
 }
