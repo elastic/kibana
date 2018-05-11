@@ -543,6 +543,21 @@ export default function (api) {
         __one_of: ['avg', 'total', 'max', 'none']
       }
     },
+    common: {
+      __template: {
+        'FIELD': {
+          query: {}
+        }
+      },
+      '{field}': {
+        query: {},
+        cutoff_frequency: 0.001,
+        minimum_should_match: {
+          low_freq: {},
+          high_freq: {}
+        }
+      }
+    },
     custom_filters_score: {
       __template: {
         query: {},
