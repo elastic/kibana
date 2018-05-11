@@ -20,7 +20,7 @@ Add dropdown inputs to your Controls Visualization by selecting *Options list* a
 image::images/controls/dropdown_control_editor.png[]
 
 *Control Label*:: By default, the control label will be the *Field*. Set this configuration to customize the control's label.
-*Index Pattern*:: Specify the data set by selecting an <<tutorial-define-index,Index Pattern>>.
+*Index Pattern*:: Specify the data set by selecting an <<index-patterns,Index Pattern>>.
 *Field*:: Select the Field that will be used to populate the options list
 and will be filtered on when users interact with the input.
 The list of available fields is derived from the selected *Index Pattern* configuration.
@@ -39,7 +39,7 @@ Add range sliders to your Controls Visualization by selecting *Range slider* and
 image::images/controls/range_slider_editor.png[]
 
 *Control Label*:: By default, the control label will be the *Field*. Set this configuration to customize the control's label.
-*Index Pattern*:: Specify the data set by selecting an <<tutorial-define-index,Index Pattern>>.
+*Index Pattern*:: Specify the data set by selecting an <<index-patterns,Index Pattern>>.
 *Field*:: Select the Field that will be used to populate the slider range
 and will be filtered on when users interact with the input.
 The list of available fields is derived from the selected *Index Pattern* configuration.
