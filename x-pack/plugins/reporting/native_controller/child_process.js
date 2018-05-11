@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { spawn } from 'child_process';
 import { safeChildProcess } from './safe_child_process';
 
