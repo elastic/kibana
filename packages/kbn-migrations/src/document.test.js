@@ -21,8 +21,7 @@ describe('Document', () => {
         id: 'whatisit',
         mappings: JSON.stringify({ dunnoes: { type: 'text' } }),
         migrationIds: [],
-        mappingsChecksum: 'w1',
-        migrationsChecksum: 'w2',
+        checksum: 'w1',
       }],
     };
     const doc = {
@@ -93,14 +92,12 @@ describe('Document', () => {
         id: 'jam',
         mappings: JSON.stringify({ space: { type: 'text' } }),
         migrationIds: ['a'],
-        mappingsChecksum: '1',
-        migrationsChecksum: 'ahoy',
+        checksum: 'ahoy',
       }, {
         id: 'maican',
         mappings: JSON.stringify({ book: { type: 'text' } }),
         migrationIds: ['m1'],
-        mappingsChecksum: '3',
-        migrationsChecksum: '4',
+        checksum: '4',
       }],
     };
     const docs = [
@@ -135,8 +132,7 @@ describe('Document', () => {
       plugins: [{
         id: 'jam',
         migrationIds: ['a'],
-        mappingsChecksum: '1',
-        migrationsChecksum: 'ahoy',
+        checksum: 'ahoy',
       }],
     };
     const docs = [{ id: 'enterprise', type: 'space', attributes: 'The final frontier' }];

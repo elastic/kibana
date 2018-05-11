@@ -25,7 +25,7 @@ async function fetch(opts) {
 
   const migrationPlan = MigrationPlan.build(plugins, migrationState, currentMappings);
   const nextMigrationState = MigrationState.build(plugins, currentIndex || initialIndex, migrationState);
-  const sha = objectHash(nextMigrationState.plugins);
+  const sha = objectHash(_.map(nextMigrationState.plugins, 'checksum'));
   return {
     index,
     callCluster,

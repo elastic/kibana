@@ -15,8 +15,7 @@ const pluginSchema = Joi.object({
 }).unknown();
 
 const sanitizedPluginSchema = pluginSchema.keys({
-  mappingsChecksum: Joi.string().required().allow(''),
-  migrationsChecksum: Joi.string().required().allow(''),
+  checksum: Joi.string().required().allow(''),
 });
 
 const documentSchema = Joi.object().unknown().keys({
@@ -35,9 +34,8 @@ const migrationStateSchema = Joi.object({
   plugins: Joi.array().items(Joi.object({
     id: Joi.string().required(),
     mappings: Joi.string(),
-    mappingsChecksum: Joi.string().required(),
+    checksum: Joi.string().required(),
     migrationIds: Joi.array().required().items(Joi.string()),
-    migrationsChecksum: Joi.string().required(),
   })),
 }).unknown();
 

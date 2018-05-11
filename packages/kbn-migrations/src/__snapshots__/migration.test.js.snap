@@ -3,28 +3,26 @@
 exports[`Migration.migrate creates the index and alias if it does not exist 1`] = `
 Object {
   "data": Object {
-    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+    ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
+                "checksum": "c373e5d9878e2f40700792661ae9e1f683d91af1",
                 "id": "p1",
                 "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
                 "migrationIds": Array [
                   "p1m1",
                 ],
-                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
               },
               Object {
+                "checksum": "ba6d64b1f02a5611c45c6d2dd9c951dfd5ea81ee",
                 "id": "p2",
                 "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
                 "migrationIds": Array [
                   "p2m1",
                 ],
-                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
             "previousIndex": ".sample-index-3.2.1-original",
@@ -69,7 +67,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".sample-index": Object {
-        ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+        ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
           "aliases": Object {
             ".sample-index": Object {},
           },
@@ -77,7 +75,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -93,19 +91,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -158,19 +153,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -209,7 +201,7 @@ Object {
       },
     },
     "settings": Object {
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "index": Object {
           "number_of_replicas": "1",
           "number_of_shards": "5",
@@ -241,31 +233,29 @@ Object {
 exports[`Migration.migrate existing indices are converted to aliases and migrated 1`] = `
 Object {
   "data": Object {
-    ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
+    ".sample-index-3.2.1-8c706a29446328b77ecc8e8a576d4e3dd9474125": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
+                "checksum": "57a0ebbae37ee90932f26380ffac8dda7d7e47ec",
                 "id": "p1",
                 "mappings": "{\\"p1\\":{\\"properties\\":{\\"fullName\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "a0bdf0a0f73308c651498cd933546db273c94c35",
                 "migrationIds": Array [
                   "p1m1",
                   "p1m2",
                   "p1m3",
                 ],
-                "migrationsChecksum": "8f79508f405b3e1a3488b5f384b4009f71cbc4d5",
               },
               Object {
+                "checksum": "34c27a6d19234fd78584c97af9f1d243b1c4e8a1",
                 "id": "p3",
                 "mappings": "{\\"p3\\":{\\"properties\\":{\\"shtuff\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "43d3b076d88915a50a3d21d1a5cb5ef6ae03095d",
                 "migrationIds": Array [
                   "p3m1",
                   "p3m2",
                 ],
-                "migrationsChecksum": "6b3d741eee260792b4a44566671be3cff587ff02",
               },
             ],
             "previousIndex": ".sample-index-3.2.1-original",
@@ -353,7 +343,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".sample-index": Object {
-        ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
+        ".sample-index-3.2.1-8c706a29446328b77ecc8e8a576d4e3dd9474125": Object {
           "aliases": Object {
             ".sample-index": Object {},
           },
@@ -361,7 +351,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
+      ".sample-index-3.2.1-8c706a29446328b77ecc8e8a576d4e3dd9474125": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -377,19 +367,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -446,19 +433,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -493,7 +477,7 @@ Object {
       },
     },
     "settings": Object {
-      ".sample-index-3.2.1-152b47de897b0a5302d827307c8fe523b9faff9c": Object {
+      ".sample-index-3.2.1-8c706a29446328b77ecc8e8a576d4e3dd9474125": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,
@@ -514,43 +498,40 @@ Object {
 exports[`Migration.migrate existing previously migrated index only runs new migrations 1`] = `
 Object {
   "data": Object {
-    ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
+    ".sample-index-3.2.1-1368420e105e4a8265e4757083adf1e4e49901cd": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
+                "checksum": "ba6d64b1f02a5611c45c6d2dd9c951dfd5ea81ee",
                 "id": "p2",
                 "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
                 "migrationIds": Array [
                   "p2m1",
                 ],
-                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
               Object {
+                "checksum": "57a0ebbae37ee90932f26380ffac8dda7d7e47ec",
                 "id": "p1",
                 "mappings": "{\\"p1\\":{\\"properties\\":{\\"fullName\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "a0bdf0a0f73308c651498cd933546db273c94c35",
                 "migrationIds": Array [
                   "p1m1",
                   "p1m2",
                   "p1m3",
                 ],
-                "migrationsChecksum": "8f79508f405b3e1a3488b5f384b4009f71cbc4d5",
               },
               Object {
+                "checksum": "34c27a6d19234fd78584c97af9f1d243b1c4e8a1",
                 "id": "p3",
                 "mappings": "{\\"p3\\":{\\"properties\\":{\\"shtuff\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "43d3b076d88915a50a3d21d1a5cb5ef6ae03095d",
                 "migrationIds": Array [
                   "p3m1",
                   "p3m2",
                 ],
-                "migrationsChecksum": "6b3d741eee260792b4a44566671be3cff587ff02",
               },
             ],
-            "previousIndex": ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f",
+            "previousIndex": ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173",
             "status": "migrated",
           },
           "type": "migration",
@@ -594,28 +575,26 @@ Object {
         },
       },
     },
-    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+    ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
+                "checksum": "c373e5d9878e2f40700792661ae9e1f683d91af1",
                 "id": "p1",
                 "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
                 "migrationIds": Array [
                   "p1m1",
                 ],
-                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
               },
               Object {
+                "checksum": "ba6d64b1f02a5611c45c6d2dd9c951dfd5ea81ee",
                 "id": "p2",
                 "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
                 "migrationIds": Array [
                   "p2m1",
                 ],
-                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
             "previousIndex": ".sample-index-3.2.1-original",
@@ -660,7 +639,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".sample-index": Object {
-        ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
+        ".sample-index-3.2.1-1368420e105e4a8265e4757083adf1e4e49901cd": Object {
           "aliases": Object {
             ".sample-index": Object {},
           },
@@ -668,7 +647,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
+      ".sample-index-3.2.1-1368420e105e4a8265e4757083adf1e4e49901cd": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -684,19 +663,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -740,7 +716,7 @@ Object {
           },
         },
       },
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -756,19 +732,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -821,19 +794,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -872,13 +842,13 @@ Object {
       },
     },
     "settings": Object {
-      ".sample-index-3.2.1-69e3fecfb46106b7d1eeac42f8520ddf948add70": Object {
+      ".sample-index-3.2.1-1368420e105e4a8265e4757083adf1e4e49901cd": Object {
         "index": Object {
           "number_of_replicas": "1",
           "number_of_shards": "5",
         },
       },
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "index": Object {
           "blocks.read_only": false,
           "number_of_replicas": "1",
@@ -900,28 +870,26 @@ Object {
 exports[`Migration.migrate migrations will run, if forced even if index is in migrating state 1`] = `
 Object {
   "data": Object {
-    ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+    ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
       "migration:migration-state": Object {
         "_source": Object {
           "migration": Object {
             "plugins": Array [
               Object {
+                "checksum": "c373e5d9878e2f40700792661ae9e1f683d91af1",
                 "id": "p1",
                 "mappings": "{\\"p1\\":{\\"properties\\":{\\"name\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "978bb44ab5e6917a867e5089ddde93a20b3b2bb8",
                 "migrationIds": Array [
                   "p1m1",
                 ],
-                "migrationsChecksum": "24baaf699366406b66a8bc2178c96f3472b3a389",
               },
               Object {
+                "checksum": "ba6d64b1f02a5611c45c6d2dd9c951dfd5ea81ee",
                 "id": "p2",
                 "mappings": "{\\"p2\\":{\\"properties\\":{\\"thing\\":{\\"type\\":\\"text\\"}}}}",
-                "mappingsChecksum": "c8833cb199ee87a967bae553c0c4fd4ac30a530b",
                 "migrationIds": Array [
                   "p2m1",
                 ],
-                "migrationsChecksum": "a127f2492bd13d4bcf9b16cd5c82bb6eacbf740f",
               },
             ],
             "previousIndex": ".sample-index-3.2.1-original",
@@ -966,7 +934,7 @@ Object {
   "meta": Object {
     "aliases": Object {
       ".sample-index": Object {
-        ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+        ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
           "aliases": Object {
             ".sample-index": Object {},
           },
@@ -974,7 +942,7 @@ Object {
       },
     },
     "mappings": Object {
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "doc": Object {
           "dynamic": "strict",
           "properties": Object {
@@ -990,19 +958,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -1054,19 +1019,16 @@ Object {
               "properties": Object {
                 "plugins": Object {
                   "properties": Object {
+                    "checksum": Object {
+                      "type": "keyword",
+                    },
                     "id": Object {
                       "type": "keyword",
                     },
                     "mappings": Object {
                       "type": "text",
                     },
-                    "mappingsChecksum": Object {
-                      "type": "keyword",
-                    },
                     "migrationIds": Object {
-                      "type": "keyword",
-                    },
-                    "migrationsChecksum": Object {
                       "type": "keyword",
                     },
                   },
@@ -1091,7 +1053,7 @@ Object {
       },
     },
     "settings": Object {
-      ".sample-index-3.2.1-f105a95560c50293c08d0ef7e346d8feda980e8f": Object {
+      ".sample-index-3.2.1-68f3abc960e2627f569c6f6602508d49b3ce8173": Object {
         "index": Object {
           "number_of_replicas": undefined,
           "number_of_shards": undefined,

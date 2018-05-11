@@ -5,7 +5,12 @@ module.exports = {
   sanitize,
   disabledIds,
   validate,
+  isOutOfDate,
 };
+
+function isOutOfDate(prevPlugin, currentPlugin) {
+  return !currentPlugin || !prevPlugin || currentPlugin.checksum !== prevPlugin.checksum;
+}
 
 function disabledIds(plugins, migrationState) {
   return _.difference(_.map(migrationState.plugins, 'id'), _.map(plugins, 'id'));
@@ -17,8 +22,7 @@ function sanitize(plugins) {
     .map(p => ({
       ...p,
       migrations: p.migrations || [],
-      migrationsChecksum: objectHash((p.migrations || []).map(({ id }) => id)),
-      mappingsChecksum: p.mappings ? objectHash(p.mappings) : '',
+      checksum: computeChecksum(p),
     }));
 }
 
@@ -59,4 +63,11 @@ function duplicatedId(migrations) {
   const ids = _.groupBy(_.map(migrations, 'id'), _.identity);
   const dup = _.first(_.reject(_.values(ids), arr => arr.length < 2));
   return _.first(dup);
+}
+
+function computeChecksum({ migrations, mappings }) {
+  return objectHash({
+    mappings,
+    migrations: _.map(migrations, 'id'),
+  });
 }

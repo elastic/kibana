@@ -54,7 +54,7 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
 
   return (doc) => {
     const { id } = propToPlugin[doc.type];
-    const requiresDisabledPlugin = isOutOfDate(previousPlugins[id], currentPlugins[id]) && disabledIds.has(id);
+    const requiresDisabledPlugin = Plugin.isOutOfDate(previousPlugins[id], currentPlugins[id]) && disabledIds.has(id);
     const requiresUnknownPlugin = !currentPlugins[id];
 
     if (requiresDisabledPlugin || requiresUnknownPlugin) {
@@ -63,13 +63,6 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
 
     return doc;
   };
-}
-
-function isOutOfDate(prevPlugin, currentPlugin) {
-  return !currentPlugin ||
-    !prevPlugin ||
-    currentPlugin.migrationsChecksum !== prevPlugin.migrationsChecksum ||
-    currentPlugin.mappingsChecksum !== prevPlugin.mappingsChecksum;
 }
 
 function mapPropsToPlugin(previousPlugins, currentPlugins) {

@@ -41,9 +41,8 @@ const mappings = {
         properties: {
           id: { type: 'keyword' },
           mappings: { type: 'text' },
-          mappingsChecksum: { type: 'keyword' },
+          checksum: { type: 'keyword' },
           migrationIds: { type: 'keyword' },
-          migrationsChecksum: { type: 'keyword' },
         },
       },
     },
@@ -64,7 +63,7 @@ module.exports = {
 
 function trimForExport({ plugins }) {
   return {
-    plugins: plugins.map(plugin => _.pick(plugin, ['id', 'mappingsChecksum', 'migrationIds', 'migrationsChecksum'])),
+    plugins: plugins.map(plugin => _.pick(plugin, ['id', 'checksum', 'migrationIds'])),
   };
 }
 
@@ -74,11 +73,10 @@ function build(plugins, previousIndex, previousState = empty) {
   const disabledIds = new Set(Plugin.disabledIds(plugins, previousState));
   const disabledPlugins = previousState.plugins.filter(({ id }) => disabledIds.has(id));
   const enabledPlugins = plugins.map((plugin) => {
-    const { id, mappings, migrations, migrationsChecksum, mappingsChecksum } = plugin;
+    const { id, mappings, migrations, checksum } = plugin;
     return {
       id,
-      migrationsChecksum,
-      mappingsChecksum,
+      checksum,
       mappings: JSON.stringify(mappings),
       migrationIds: migrations.map(({ id }) => id),
     };
@@ -99,11 +97,7 @@ function status(plugins, migrationState) {
   }
 
   const pluginState = _.indexBy(migrationState.plugins, 'id');
-  const isMigrated = plugins.every((plugin) => {
-    const { migrationsChecksum, mappingsChecksum } = plugin;
-    const state = pluginState[plugin.id];
-    return state && state.migrationsChecksum === migrationsChecksum && state.mappingsChecksum === mappingsChecksum;
-  });
+  const isMigrated = plugins.every(plugin => !Plugin.isOutOfDate(pluginState[plugin.id], plugin));
 
   return isMigrated ? MigrationStatus.migrated : MigrationStatus.outOfDate;
 }

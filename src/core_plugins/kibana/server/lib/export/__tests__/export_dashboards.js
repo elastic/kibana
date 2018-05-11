@@ -27,16 +27,14 @@ describe('exportDashboards(req)', () => {
                 attributes: {
                   plugins: [{
                     id: 'hello',
-                    mappingsChecksum: 'map-check',
+                    checksum: 'map-check',
                     mappings: '{"something": "grand"}',
                     migrationIds: ['hi1', 'hi2'],
-                    migrationsChecksum: 'mig-check'
                   }, {
                     id: 'goodbye',
-                    mappingsChecksum: 'bye-map-check',
+                    checksum: 'bye-map-check',
                     mappings: '{"bye": "hasta"}',
                     migrationIds: ['by1', 'by2'],
-                    migrationsChecksum: 'bye-mig-check'
                   }],
                 },
               };
@@ -69,14 +67,12 @@ describe('exportDashboards(req)', () => {
       expect(resp.migrationState).to.deep.equal({
         plugins: [{
           id: 'hello',
-          mappingsChecksum: 'map-check',
+          checksum: 'map-check',
           migrationIds: ['hi1', 'hi2'],
-          migrationsChecksum: 'mig-check'
         }, {
           id: 'goodbye',
-          mappingsChecksum: 'bye-map-check',
+          checksum: 'bye-map-check',
           migrationIds: ['by1', 'by2'],
-          migrationsChecksum: 'bye-mig-check'
         }]
       });
     });

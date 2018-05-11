@@ -83,7 +83,7 @@ describe('MigrationState.status', () => {
   function buildMinimalMigrationState(plugins) {
     const state = MigrationState.build(plugins);
     return {
-      plugins: state.plugins.map(plugin => _.pick(plugin, ['id', 'migrationsChecksum', 'mappingsChecksum']))
+      plugins: state.plugins.map(plugin => _.pick(plugin, ['id', 'checksum']))
     };
   }
 });
@@ -105,15 +105,13 @@ describe('MigrationState.build', () => {
         plugins: [{
           id: 'z',
           mappings: JSON.stringify({ foo: 'baz' }),
-          mappingsChecksum: '7697f9a12638d9876c05ba4d9315586d045b5fea',
+          checksum: '6e656d01cb4c13e4faeb8d75ae603a7426c3690d',
           migrationIds: ['gee'],
-          migrationsChecksum: 'cdcf85917c3d1c2c28c44beb310a5df63ccb3ab4',
         }, {
           id: 'q',
           mappings: JSON.stringify({ and: 'there', stuff: 'here' }),
-          mappingsChecksum: '5bf92875bb615a7adfc7f1e0bc5e6b2e62c81db6',
+          checksum: '71a16ddd5ef53fe2515efd14839a00391a151ec9',
           migrationIds: ['m1', 'm2'],
-          migrationsChecksum: 'c8a2decb41373254b0f4bda31ef3587d9ab1a993',
         }],
       });
   });

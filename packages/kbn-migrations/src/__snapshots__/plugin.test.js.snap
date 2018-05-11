@@ -3,26 +3,24 @@
 exports[`Plugin.sanitize ensures that migrations are not undefined 1`] = `
 Array [
   Object {
+    "checksum": "893c32f2b3cdf243ef1515a6fa089d45e9886568",
     "id": "a",
-    "mappingsChecksum": "",
     "migrations": Array [
       Object {
         "id": "shazm",
         "seed": [Function],
       },
     ],
-    "migrationsChecksum": "787f9971146420f5432960083228cb45d419670a",
   },
   Object {
+    "checksum": "b06c3bb0642beb06b1ac55ea210935256e9593e4",
     "id": "c",
     "mappings": Object {
       "hello": Object {
         "type": "keyword ",
       },
     },
-    "mappingsChecksum": "a73090e20fb1de1d847a851520ab731a6946402b",
     "migrations": Array [],
-    "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
   },
 ]
 `;
