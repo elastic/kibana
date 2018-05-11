@@ -12,6 +12,11 @@ const pluginSchema = Joi.object({
   id: Joi.string().required(),
   mappings: Joi.object(),
   migrations: Joi.array().items(migrationSchema),
+}).unknown();
+
+const sanitizedPluginSchema = pluginSchema.keys({
+  mappingsChecksum: Joi.string().required().allow(''),
+  migrationsChecksum: Joi.string().required().allow(''),
 });
 
 const documentSchema = Joi.object().unknown().keys({
@@ -23,6 +28,7 @@ const documentSchema = Joi.object().unknown().keys({
 const callClusterSchema = Joi.func();
 const indexSchema = Joi.string();
 const pluginArraySchema = Joi.array().items(pluginSchema);
+const sanitizedPluginArraySchema = Joi.array().items(sanitizedPluginSchema);
 const documentArraySchema = Joi.array().items(documentSchema);
 const migrationStateSchema = Joi.object({
   status: Joi.string(),
@@ -43,4 +49,5 @@ module.exports = {
   pluginArraySchema,
   documentArraySchema,
   migrationStateSchema,
+  sanitizedPluginArraySchema,
 };

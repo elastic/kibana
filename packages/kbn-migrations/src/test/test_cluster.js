@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { migrate } = require('../migration');
+const { Plugin } = require('../lib');
 const { mockCluster } = require('./mock_cluster');
 
 const opts = {
@@ -18,7 +19,7 @@ async function testCluster({ index = '.sample-index', plugins, existingDocs } = 
   const callCluster = existingDocs ? clusterWithDocs(index, existingDocs) : mockCluster({});
 
   if (plugins) {
-    await migrate({ ...opts, index, plugins, callCluster });
+    await migrate({ ...opts, index, plugins: Plugin.sanitize(plugins), callCluster });
   }
 
   return { index, callCluster };

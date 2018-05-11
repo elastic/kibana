@@ -61,7 +61,8 @@ describe('kibana_migrations plugin', () => {
 
       setTimeout(() => {
         expect(plugin.status.value).toEqual('yellow');
-        setStatus(callCluster, 'migrated').then(() => timedOut = true);
+        timedOut = true;
+        setStatus(callCluster, 'migrated');
       }, 20);
 
       await promise;
@@ -140,7 +141,7 @@ describe('kibana_migrations plugin', () => {
       const { callCluster } = await testCluster();
       const { kbnServer } = await testMigrationPlugin({ pluginSpecs, callCluster });
       const opts = kbnServer.server.exposed.migrationOptions();
-      expect(opts.plugins).toEqual(pluginSpecs);
+      expect(opts.plugins).toMatchSnapshot();
     });
   });
 });

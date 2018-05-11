@@ -367,3 +367,24 @@ Object {
   },
 }
 `;
+
+exports[`kibana_migrations plugin migrationOptions exposes pluginSpecs 1`] = `
+Array [
+  Object {
+    "id": "foo",
+    "mappings": Object {
+      "bar": Object {
+        "type": "text",
+      },
+    },
+    "mappingsChecksum": "8010631257f4b6dadba21bf339a2defb34d82792",
+    "migrations": Array [
+      Object {
+        "id": "mg1",
+        "seed": [Function],
+      },
+    ],
+    "migrationsChecksum": "3de7d9b63b0a153410b3f636669de57e9149ad54",
+  },
+]
+`;

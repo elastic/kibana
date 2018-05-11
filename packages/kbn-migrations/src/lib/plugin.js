@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const objectHash = require('object-hash');
 
 module.exports = {
   sanitize,
@@ -16,11 +17,12 @@ function sanitize(plugins) {
     .map(p => ({
       ...p,
       migrations: p.migrations || [],
+      migrationsChecksum: objectHash((p.migrations || []).map(({ id }) => id)),
+      mappingsChecksum: p.mappings ? objectHash(p.mappings) : '',
     }));
 }
 
-function validate(rawPlugins, migrationState = { plugins: [] }) {
-  const plugins = sanitize(rawPlugins);
+function validate(plugins, migrationState = { plugins: [] }) {
   const hash = _.indexBy(migrationState.plugins, 'id');
   plugins.forEach((plugin) => {
     assertValidPlugin(plugin, hash[plugin.id] || {});

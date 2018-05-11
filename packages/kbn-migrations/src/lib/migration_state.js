@@ -3,7 +3,6 @@
 // and mappings have already been applied? 3. mapping info for disabled plugins
 
 const _ = require('lodash');
-const objectHash = require('object-hash');
 const Plugin = require('./plugin');
 const MigrationStatus = require('./migration_status');
 const Persistence = require('./persistence');
@@ -75,10 +74,11 @@ function build(plugins, previousIndex, previousState = empty) {
   const disabledIds = new Set(Plugin.disabledIds(plugins, previousState));
   const disabledPlugins = previousState.plugins.filter(({ id }) => disabledIds.has(id));
   const enabledPlugins = plugins.map((plugin) => {
-    const { id, mappings, migrations } = plugin;
+    const { id, mappings, migrations, migrationsChecksum, mappingsChecksum } = plugin;
     return {
-      ...pluginChecksum(plugin),
       id,
+      migrationsChecksum,
+      mappingsChecksum,
       mappings: JSON.stringify(mappings),
       migrationIds: migrations.map(({ id }) => id),
     };
@@ -100,7 +100,7 @@ function status(plugins, migrationState) {
 
   const pluginState = _.indexBy(migrationState.plugins, 'id');
   const isMigrated = plugins.every((plugin) => {
-    const { migrationsChecksum, mappingsChecksum } = pluginChecksum(plugin);
+    const { migrationsChecksum, mappingsChecksum } = plugin;
     const state = pluginState[plugin.id];
     return state && state.migrationsChecksum === migrationsChecksum && state.mappingsChecksum === mappingsChecksum;
   });
@@ -143,11 +143,4 @@ async function save(callCluster, index, version, migrationState) {
       doc_as_upsert: true,
     },
   });
-}
-
-function pluginChecksum({ mappings, migrations }) {
-  return {
-    mappingsChecksum: mappings ? objectHash(mappings) : '',
-    migrationsChecksum: objectHash(migrations.map(({ id }) => id)),
-  };
 }

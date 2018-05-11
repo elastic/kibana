@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const Document = require('./document');
-const { MigrationState } = require('./lib');
+const { MigrationState, Plugin } = require('./lib');
 const { testPlugins, testCluster } = require('./test');
 
 describe('Document', () => {
@@ -35,7 +35,7 @@ describe('Document', () => {
   });
 
   test('importing a doc w/ no exported migration state runs all transforms', async () => {
-    const plugins = [{
+    const plugins = Plugin.sanitize([{
       id: 'jam',
       mappings: { space: { type: 'text' } },
       migrations: [{
@@ -47,7 +47,7 @@ describe('Document', () => {
         filter: () => true,
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
       }],
-    }];
+    }]);
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{
       id: 'enterprise',
@@ -64,7 +64,7 @@ describe('Document', () => {
   });
 
   test('Transforms old docs', async () => {
-    const plugins = [{
+    const plugins = Plugin.sanitize([{
       id: 'jam',
       migrations: [{
         id: 'a',
@@ -86,7 +86,7 @@ describe('Document', () => {
         filter: ({ type }) => type === 'book',
         transform: (doc) => ({ ...doc, attributes: `Title: ${doc.attributes}` }),
       }],
-    }];
+    }]);
     const { index, callCluster } = await testCluster({ plugins });
     const migrationState = {
       plugins: [{
@@ -117,7 +117,7 @@ describe('Document', () => {
   });
 
   test('Exported migration state does not need to specify mappings', async () => {
-    const plugins = [{
+    const plugins = Plugin.sanitize([{
       id: 'jam',
       mappings: { space: { type: 'text' } },
       migrations: [{
@@ -129,7 +129,7 @@ describe('Document', () => {
         filter: ({ type }) => type === 'space',
         transform: (doc) => ({ ...doc, attributes: `${doc.attributes.toUpperCase()}!!!` }),
       }],
-    }];
+    }]);
     const { index, callCluster } = await testCluster({ plugins });
     const migrationState = {
       plugins: [{
@@ -147,11 +147,11 @@ describe('Document', () => {
   });
 
   test('accepts if a disabled plugin is required, but doc is up to date', async () => {
-    const plugins = [{
+    const plugins = Plugin.sanitize([{
       id: 'jam',
       mappings: { aha: { type: 'text' } },
       migrations: [],
-    }];
+    }]);
     const migrationState = MigrationState.build(plugins);
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{ id: '123', type: 'aha', attributes: 'Move along' }];
@@ -161,11 +161,11 @@ describe('Document', () => {
   });
 
   test('throws if migration requires a disabled plugin', async () => {
-    const plugins = [{
+    const plugins = Plugin.sanitize([{
       id: 'jam',
       mappings: { space: { type: 'text' } },
       migrations: [],
-    }];
+    }]);
     const { index, callCluster } = await testCluster({ plugins });
     const docs = [{
       id: 'enterprise',

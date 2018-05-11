@@ -10,13 +10,13 @@ module.exports = {
 const computeStatusOptsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
-  plugins: Opts.pluginArraySchema.required(),
+  plugins: Opts.sanitizedPluginArraySchema.required(),
 });
 
 const migrateOptsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
-  plugins: Opts.pluginArraySchema.required(),
+  plugins: Opts.sanitizedPluginArraySchema.required(),
   log: Joi.func().required(),
   elasticVersion: Joi.string().required(),
   force: Joi.bool().default(false),
@@ -38,8 +38,8 @@ const migrateOptsSchema = Joi.object().unknown().keys({
  */
 async function computeStatus(opts) {
   Joi.assert(opts, computeStatusOptsSchema);
-  const { plugins, migrationState } = await MigrationContext.fetch(opts);
-  return MigrationState.status(plugins, migrationState);
+  const { migrationState } = await MigrationState.fetch(opts.callCluster, opts.index);
+  return MigrationState.status(opts.plugins, migrationState);
 }
 
 /**
@@ -71,7 +71,7 @@ async function measureElapsedTime(fn) {
 
 async function runMigrationIfOutOfDate(opts) {
   const context = await MigrationContext.fetch(opts);
-  const status = await MigrationState.status(context.plugins, context.migrationState);
+  const status = MigrationState.status(context.plugins, context.migrationState);
 
   try {
     if (status === MigrationStatus.migrated || (status === MigrationStatus.migrating && !context.force)) {

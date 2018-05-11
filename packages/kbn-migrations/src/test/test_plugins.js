@@ -2,6 +2,8 @@
 // should demonstrate:
 // - disabled plugins are properly handled (thus, plugin p2 gets disabled in v2)
 // - seeds are transformed (thus plugin p3 does a transform after its seed)
+const { Plugin } = require('../lib');
+
 const p1v1 = {
   id: 'p1',
   mappings: { p1: { properties: { name: { type: 'text' } } } },
@@ -71,15 +73,15 @@ const p3v2 = {
   }],
 };
 
-const v1 = [
+const v1 = Plugin.sanitize([
   p1v1,
   p2v1,
-];
+]);
 
-const v2 = [
+const v2 = Plugin.sanitize([
   p1v2,
   p3v2,
-];
+]);
 
 module.exports = {
   testPlugins: { v1, v2 },

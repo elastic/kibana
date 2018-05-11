@@ -20,9 +20,11 @@ async function fetch(opts) {
     MigrationState.fetch(callCluster, index),
     Persistence.getMapping(callCluster, index),
   ]);
-  const sanitizedPlugins = Plugin.validate(plugins, migrationState);
-  const migrationPlan = MigrationPlan.build(sanitizedPlugins, migrationState, currentMappings);
-  const nextMigrationState = MigrationState.build(sanitizedPlugins, currentIndex || initialIndex, migrationState);
+
+  Plugin.validate(plugins, migrationState);
+
+  const migrationPlan = MigrationPlan.build(plugins, migrationState, currentMappings);
+  const nextMigrationState = MigrationState.build(plugins, currentIndex || initialIndex, migrationState);
   const sha = objectHash(nextMigrationState.plugins);
   return {
     index,
@@ -33,7 +35,7 @@ async function fetch(opts) {
     migrationPlan,
     force,
     initialIndex,
-    plugins: sanitizedPlugins,
+    plugins,
     destIndex: `${index}-${elasticVersion}-${sha}`.toLowerCase(),
     log: log ? migrationLogger(log) : _.noop,
   };

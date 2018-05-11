@@ -2,16 +2,6 @@ const MigrationContext = require('./migration_context');
 const { testCluster } = require('../test');
 
 describe('migrationContext', () => {
-  test('ensures that migrations are not undefined', async () => {
-    const plugins = [
-      { id: 'a', migrations: [{ id: 'shazm' }] },
-      { id: 'b' },
-    ];
-    const actual = await testMigrationContext({ plugins });
-    expect(actual.plugins.length).toEqual(1);
-    expect(actual.plugins[0].migrations).toEqual([{ id: 'shazm' }]);
-  });
-
   test('generates predictable index names', async () => {
     const actual = await testMigrationContext({ index: 'dang' }, '2.0.4');
     expect(actual.destIndex)
@@ -51,7 +41,6 @@ describe('migrationContext', () => {
   test('accurately computes applied and unapplied migrations', async () => {
     const rawPlugins = [
       { id: 'x-pack', migrations: [{ id: 'foo' }, { id: 'bar' }, { id: 'baz' }] },
-      { id: 'baz' },
       { id: 'mana', migrations: [{ id: 'mushboom' }, { id: 'rabbite' }] }
     ];
     const migrationState = {

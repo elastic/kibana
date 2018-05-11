@@ -1,5 +1,5 @@
 import { SavedObjectsClient } from './client';
-import { Mapping, Document, MigrationState, MigrationStatus } from '@kbn/migrations';
+import { Mapping, Document, Migration, MigrationStatus } from '@kbn/migrations';
 import Boom from 'boom';
 import _ from 'lodash';
 import {
@@ -12,8 +12,12 @@ import {
 } from './routes';
 
 // Computing isn't terribly expensive, but it's not 100% free,
-// so, we may as well cache them.
+// so, we may as well cache the mappings and the computed opts,
+// as they don't change over the course of the application's life.
+// We can't compute them directly in `savedObjectsMixin` because
+// they rely on plugins that don't exist at the time the mixin is created.
 const cachedMappings = _.once(Mapping.fromPlugins);
+const cachedOpts = _.once((server) => server.plugins.kibanamigrations.migrationOptions({ callCluster: _.noop }));
 
 export function savedObjectsMixin(kbnServer, server) {
   const prereqs = {
@@ -33,8 +37,8 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createUpdateRoute(prereqs));
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    const opts = server.plugins.kibanamigrations.migrationOptions({ callCluster });
     const index = server.config().get('kibana.index');
+    const opts = { ...cachedOpts(server), callCluster };
 
     return new SavedObjectsClient({
       callCluster,
@@ -67,7 +71,7 @@ export function savedObjectsMixin(kbnServer, server) {
 // document has been deleted, this will bomb. This does not detect a lot of other
 // forms of tampering (mapping changes, migration state document tampering, etc).
 async function assertIndexMigrated(opts) {
-  const status =  await MigrationState.fetchStatus(opts);
+  const status = await Migration.computeStatus(opts);
   if (status !== MigrationStatus.migrated) {
     throw Boom.notFound(`
       Index ${opts.index} has not been migrated or may have been deleted.

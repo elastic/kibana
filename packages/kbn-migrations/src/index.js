@@ -6,4 +6,5 @@ module.exports = {
   Mapping: require('./mapping'),
   Document: require('./document'),
   Migration: require('./migration'),
+  Plugin: require('./plugin'),
 };

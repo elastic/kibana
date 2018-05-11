@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Plugin.sanitize ensures that migrations are not undefined 1`] = `
+Array [
+  Object {
+    "id": "a",
+    "mappingsChecksum": "",
+    "migrations": Array [
+      Object {
+        "id": "shazm",
+        "seed": [Function],
+      },
+    ],
+    "migrationsChecksum": "787f9971146420f5432960083228cb45d419670a",
+  },
+  Object {
+    "id": "c",
+    "mappings": Object {
+      "hello": Object {
+        "type": "keyword ",
+      },
+    },
+    "mappingsChecksum": "a73090e20fb1de1d847a851520ab731a6946402b",
+    "migrations": Array [],
+    "migrationsChecksum": "989db2448f309bfdd99b513f37c84b8f5794d2b5",
+  },
+]
+`;

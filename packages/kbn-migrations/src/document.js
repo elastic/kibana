@@ -9,7 +9,7 @@ module.exports = {
 const optsSchema = Joi.object().unknown().keys({
   callCluster: Opts.callClusterSchema.required(),
   index: Opts.indexSchema.required(),
-  plugins: Opts.pluginArraySchema.required(),
+  plugins: Opts.sanitizedPluginArraySchema.required(),
   docs: Opts.documentArraySchema.required(),
   migrationState: Opts.migrationStateSchema.required(),
 });

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { MigrationStatus, MigrationState, Migration } from '@kbn/migrations';
+import { MigrationStatus, Migration, Plugin } from '@kbn/migrations';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -43,22 +43,22 @@ async function waitForMigration(opts, pollInterval) {
   let status = MigrationStatus.migrating;
   while (status !== MigrationStatus.migrated) {
     await new Promise(resolve => setTimeout(resolve, pollInterval));
-    status = await MigrationState.fetchStatus(opts);
+    status = await Migration.computeStatus(opts);
   }
 }
 
 function optsFromKbnServer({ pluginSpecs, server, version }, callCluster) {
-  const plugins = pluginSpecs
-    .map((plugin) => ({
-      id: plugin.getId(),
-      mappings: _.get(plugin.getExportSpecs(), 'mappings'),
-      migrations: plugin.getMigrations(),
-    }));
   return {
-    plugins,
     elasticVersion: version,
     index: server.config().get('kibana.index'),
     log: (...args) => server.log(...args),
     callCluster: callCluster || server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+    plugins: Plugin.sanitize({
+      plugins: pluginSpecs.map((plugin) => ({
+        id: plugin.getId(),
+        mappings: _.get(plugin.getExportSpecs(), 'mappings'),
+        migrations: plugin.getMigrations(),
+      })),
+    }),
   };
 }
