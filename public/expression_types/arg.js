@@ -57,6 +57,7 @@ export class Arg {
       onValueChange,
       onValueRemove,
       templateProps,
+      argId: key,
     };
 
     return createElement(ArgForm, formProps);

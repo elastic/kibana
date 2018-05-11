@@ -15,41 +15,21 @@
     }
   }
 
-  .canvas__arg--header {
+  .canvas__arg--label {
+    margin: @spacingS;
+    flex-shrink: 0;
+  }
+
+  .canvas__arg--simple {
     display: flex;
+    flex: 1 0;
+    justify-content: flex-end;
+    align-items: center;
+  }
 
-    .canvas__arg--label {
-      margin: @spacingM @spacingS;
-      flex-shrink: 0;
-
-      i {
-        width: @spacingM;
-      }
-    }
-
-    .canvas__arg--simple, .canvas__arg--pending {
-      display: flex;
-      flex: 1 0;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .canvas__arg--simple-wrapper {
-      width: 100%;
-
-      .canvas__arg--simple-controls {
-        text-align: right;
-        margin-left: @spacingM;
-      }
-
-      .canvas__arg--simple-top {
-        align-self: flex-start;
-      }
-
-      .canvas__arg--simple-bottom {
-        align-self: flex-end;
-      }
-    }
+  .canvas__arg--simple-controls {
+    width: 100%;
+    margin: @spacingS;
   }
 
   .canvas__arg--controls {
@@ -63,15 +43,8 @@
       }
     }
   }
-}
 
-.canvas__arg--remove {
-  cursor: pointer;
-  visibility: hidden;
-  margin: @spacingM @spacingS;
-  flex-shrink: 0;
-
-  &:hover {
-    color: @red;
+  .canvas__arg--remove {
+    visibility: hidden;
   }
 }

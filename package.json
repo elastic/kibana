@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "^4.0.2",
+    "@elastic/eui": "^0.0.37",
     "@elastic/numeral": "^2.3.2",
     "@scant/router": "^0.1.0",
     "axios": "^0.18.0",
