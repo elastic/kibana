@@ -1,0 +1,15 @@
+[[controls]]
+== Controls
+
+Controls provide the ability to add interactive inputs to Kibana Dashboards.
+Controls can be used to create two types of inputs; dropdowns and range sliders.
+
+=== Configuration
+
+==== Dropdown
+
+The dropdown options lists are dynamically populated with the results of a terms aggregation.
+
+==== Range slider
+
+The range slider minimum and maximum values are dynamically populated with the results of a min and max aggregation.
