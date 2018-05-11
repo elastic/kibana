@@ -5,114 +5,131 @@ export default function (api) {
       query: {
         // populated by a global rule
       },
+      profile: {
+        __one_of: ['true', 'false'],
+      },
       aggs: {
         __template: {
-          'NAME': {
-            'AGG_TYPE': {}
-          }
-        }
+          NAME: {
+            AGG_TYPE: {},
+          },
+        },
       },
 
       post_filter: {
-        __scope_link: 'GLOBAL.filter'
+        __scope_link: 'GLOBAL.filter',
       },
       size: {
-        __template: 20
+        __template: 20,
       },
       from: 0,
       sort: {
         __template: [
           {
-            'FIELD': {
-              'order': 'desc'
-            }
-          }
+            FIELD: {
+              order: 'desc',
+            },
+          },
         ],
         __any_of: [
           {
             '{field}': {
-              'order': {
-                __one_of: ['desc', 'asc']
+              order: {
+                __one_of: ['desc', 'asc'],
               },
               missing: {
-                __one_of: ['_last', '_first']
+                __one_of: ['_last', '_first'],
               },
               mode: {
-                __one_of: ['min', 'max', 'avg', 'sum']
+                __one_of: ['min', 'max', 'avg', 'sum'],
               },
               nested_path: '',
               nested_filter: {
-                __scope_link: 'GLOBAL.filter'
-              }
-            }
+                __scope_link: 'GLOBAL.filter',
+              },
+            },
           },
           '{field}',
           '_score',
           {
-            '_geo_distance': {
+            _geo_distance: {
               __template: {
-                'FIELD': {
+                FIELD: {
                   lat: 40,
-                  lon: -70
+                  lon: -70,
                 },
-                order: 'asc'
+                order: 'asc',
               },
               '{field}': {
                 __one_of: [
                   {
                     __template: {
                       lat: 40,
-                      lon: -70
+                      lon: -70,
                     },
                     lat: 40,
-                    lon: -70
+                    lon: -70,
                   },
                   [
                     {
                       __template: {
                         lat: 40,
-                        lon: -70
+                        lon: -70,
                       },
                       lat: 40,
-                      lon: -70
-                    }
+                      lon: -70,
+                    },
                   ],
                   [''],
-                  ''
-                ]
+                  '',
+                ],
               },
               distance_type: { __one_of: ['sloppy_arc', 'arc', 'plane'] },
               sort_mode: { __one_of: ['min', 'max', 'avg'] },
               order: { __one_of: ['asc', 'desc'] },
-              unit: 'km'
-            }
-          }
-        ]
+              unit: 'km',
+            },
+          },
+        ],
       },
       stored_fields: ['{field}'],
-      docvalue_fields: ['{field}'],
-      script_fields: {
+      suggest: {
         __template: {
-          'FIELD': {
-            'script': {
-              // populated by a global rule
-            }
-          }
-        },
-        '*': {
-          __scope_link: 'GLOBAL.script'
-        }
-      },
-      partial_fields: {
-        __template: {
-          'NAME': {
-            include: []
-          }
+          YOUR_SUGGESTION: {
+            text: 'YOUR TEXT',
+            term: {
+              FIELD: 'MESSAGE',
+            },
+          },
         },
         '*': {
           include: [],
-          exclude: []
-        }
+          exclude: [],
+        },
+      },
+      docvalue_fields: ['{field}'],
+      script_fields: {
+        __template: {
+          FIELD: {
+            script: {
+              // populated by a global rule
+            },
+          },
+        },
+        '*': {
+          __scope_link: 'GLOBAL.script',
+        },
+      },
+      partial_fields: {
+        __template: {
+          NAME: {
+            include: [],
+          },
+        },
+        '*': {
+          include: [],
+          exclude: [],
+        },
       },
       highlight: {
         // populated by a global rule
@@ -122,58 +139,51 @@ export default function (api) {
           '{field}',
           ['{field}'],
           {
-            'includes': {
-              __one_of: [
-                '{field}',
-                ['{field}']
-              ]
+            includes: {
+              __one_of: ['{field}', ['{field}']],
             },
-            'excludes': {
-              __one_of: [
-                '{field}',
-                ['{field}']
-              ]
-            }
-          }
-        ]
+            excludes: {
+              __one_of: ['{field}', ['{field}']],
+            },
+          },
+        ],
       },
       explain: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       stats: [''],
       timeout: '1s',
-      version: { __one_of: [true, false] }
-    }
+      version: { __one_of: [true, false] },
+    },
   });
 
   api.addEndpointDescription('search_template', {
     data_autocomplete_rules: {
-      'template': {
+      template: {
         __one_of: [
           { __scope_link: 'search' },
-          { __scope_link: 'GLOBAL.script' }
-        ]
+          { __scope_link: 'GLOBAL.script' },
+        ],
       },
-      'params': {}
-    }
+      params: {},
+    },
   });
 
   api.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
       __one_of: [
-        { 'inline': { __scope_link: 'search' } },
-        { __scope_link: 'GLOBAL.script' }
+        { inline: { __scope_link: 'search' } },
+        { __scope_link: 'GLOBAL.script' },
       ],
-      'params': {}
-    }
+      params: {},
+    },
   });
-
 
   api.addEndpointDescription('_search/template/{id}', {
     data_autocomplete_rules: {
-      'template': {
-        __scope_link: 'search'
-      }
-    }
+      template: {
+        __scope_link: 'search',
+      },
+    },
   });
 }
