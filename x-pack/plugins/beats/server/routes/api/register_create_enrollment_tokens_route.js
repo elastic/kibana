@@ -10,7 +10,6 @@ import { flatten } from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { wrapEsError } from '../../lib/error_wrappers';
-// import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 async function persistTokens(callWithRequest, tokens) {
   const body = flatten(tokens.map(token => [
@@ -27,11 +26,9 @@ async function persistTokens(callWithRequest, tokens) {
   return await callWithRequest('bulk', params);
 }
 
-// TODO: remove license commented out code
+// TODO: add license check pre-hook
 // TODO: write API functional tests
 export function registerCreateEnrollmentTokensRoute(server) {
-  // const licensePreRouting = licensePreRoutingFactory(server);
-
   server.route({
     method: 'POST',
     path: '/api/beats/enrollment_tokens',
@@ -40,8 +37,7 @@ export function registerCreateEnrollmentTokensRoute(server) {
         payload: Joi.object({
           num_tokens: Joi.number().optional().default(1)
         }).optional()
-      },
-      // pre: [ licensePreRouting ]
+      }
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
