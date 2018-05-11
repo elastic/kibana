@@ -48,7 +48,7 @@ The list of available fields is derived from the selected *Index Pattern* config
 
 ==== Options
 
-Configuration settings that apply to all controls.
+Open the *Options* tab to configure settings that apply to all inputs in a Controls Visualization.
 
 image::images/controls/controls_options.png[]
 
