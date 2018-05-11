@@ -108,6 +108,12 @@ export default function (api) {
         },
       },
       docvalue_fields: ['{field}'],
+      rescore: {
+        __template: {
+          'query': {},
+          'window_size': 50
+        }
+      },
       script_fields: {
         __template: {
           FIELD: {
