@@ -1,6 +1,7 @@
 import { SavedObjectsClient } from './client';
-import { Mapping, Document } from '@kbn/migrations';
-import { once } from 'lodash';
+import { Mapping, Document, MigrationState, MigrationStatus } from '@kbn/migrations';
+import Boom from 'boom';
+import _ from 'lodash';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -12,7 +13,7 @@ import {
 
 // Computing isn't terribly expensive, but it's not 100% free,
 // so, we may as well cache them.
-const cachedMappings = once(Mapping.fromPlugins);
+const cachedMappings = _.once(Mapping.fromPlugins);
 
 export function savedObjectsMixin(kbnServer, server) {
   const prereqs = {
@@ -33,12 +34,14 @@ export function savedObjectsMixin(kbnServer, server) {
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     const opts = server.plugins.kibanamigrations.migrationOptions({ callCluster });
+    const index = server.config().get('kibana.index');
 
     return new SavedObjectsClient({
       callCluster,
-      mappings: cachedMappings(opts.plugins),
+      index,
+      onBeforeWrite: () => assertIndexMigrated(opts),
+      mappings: cachedMappings(opts),
       transformDocuments: ({ migrationState, docs }) => Document.transform({ ...opts, migrationState, docs }),
-      index: server.config().get('kibana.index'),
     });
   });
 
@@ -57,4 +60,18 @@ export function savedObjectsMixin(kbnServer, server) {
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
   });
+}
+
+// This is a relatively inexpensive check to ensure that the index hasn't been
+// tampered with (too much). If the index has been deleted or if the migration state
+// document has been deleted, this will bomb. This does not detect a lot of other
+// forms of tampering (mapping changes, migration state document tampering, etc).
+async function assertIndexMigrated(opts) {
+  const status =  await MigrationState.fetchStatus(opts);
+  if (status !== MigrationStatus.migrated) {
+    throw Boom.notFound(`
+      Index ${opts.index} has not been migrated or may have been deleted.
+      Restarting Kibana may fix the problem.
+    `);
+  }
 }
