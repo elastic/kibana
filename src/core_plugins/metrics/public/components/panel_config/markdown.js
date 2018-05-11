@@ -6,12 +6,14 @@ import 'brace/mode/less';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import { KuiCodeEditor } from '@kbn/ui-framework/components';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiColorPicker
+} from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
 class MarkdownPanelConfig extends Component {
@@ -38,6 +40,10 @@ class MarkdownPanelConfig extends Component {
       }
       this.props.onChange(parts);
     });
+  }
+
+  handleColorChange = (value) => {
+    this.props.onChange({ background_color: value });
   }
 
   render() {
@@ -77,10 +83,9 @@ class MarkdownPanelConfig extends Component {
           />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
+            <EuiColorPicker
+              onChange={this.handleColorChange}
+              color={model.background_color}
             />
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
               Panel Filter
