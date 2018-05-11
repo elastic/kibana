@@ -27,14 +27,12 @@ const highlightOptions = {
   require_field_match: {
     __one_of: [ 'true', 'false' ]
   },
-  tags_schema: {},
-
+  tags_schema: {}
 };
 export default function (api) {
   api.addGlobalAutocompleteRules('highlight', {
-
+    ...highlightOptions,
     fields: {
-      ...highlightOptions,
       '{field}': {
         fragment_size: 20,
         number_of_fragments: 3,
