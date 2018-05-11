@@ -3,7 +3,7 @@
 
 import _ from 'lodash';
 import { assert } from 'chai';
-import { Migration } from '@kbn/migrations';
+import { Migration, Plugin } from '@kbn/migrations';
 import { migrationTest, catPlugin, dogPlugin } from './test_helpers';
 
 export default function ({ getService }) {
@@ -22,7 +22,11 @@ export default function ({ getService }) {
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.test-existing';
       await helper.createUnmigratedIndex({ index, indexDefinition: [catPlugin.V0, dogPlugin.V0] });
-      const migrationResult = await Migration.migrate({ ...opts, index, plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin] });
+      const migrationResult = await Migration.migrate({
+        ...opts,
+        index,
+        plugins: Plugin.sanitize({ plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin] }),
+      });
       await helper.waitForMigration({ index, migrationResult, minDocs: 3 });
       await helper.assertValidMigrationState({ index, plugins: [catPlugin.V2.plugin, dogPlugin.V2.plugin] });
       await helper.assertDocument({ index, doc: catPlugin.V2.docs.transformedSeed  });
@@ -33,11 +37,19 @@ export default function ({ getService }) {
 
     it('Migrates a previously migrated index, if migrations change', async () => {
       const index = '.test-previous';
-      const firstMigration = await Migration.migrate({ ...opts, index, plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] });
+      const firstMigration = await Migration.migrate({
+        ...opts,
+        index,
+        plugins: Plugin.sanitize({ plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] }),
+      });
       await helper.waitForMigration({ index, migrationResult: firstMigration });
-      await helper.assertValidMigrationState({ index, plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] });
+      await helper.assertValidMigrationState({ index, plugins: Plugin.sanitize({ plugins: [catPlugin.V1.plugin, dogPlugin.V1.plugin] }) });
 
-      const secondMigration = await Migration.migrate({ ...opts, index, plugins: [catPlugin.V2.plugin] });
+      const secondMigration = await Migration.migrate({
+        ...opts,
+        index,
+        plugins: Plugin.sanitize({ plugins: [catPlugin.V2.plugin] }),
+      });
       await helper.waitForMigration({ index, migrationResult: secondMigration });
       const migrationState = await helper.assertValidMigrationState({ index, plugins: [catPlugin.V2.plugin, dogPlugin.V1.plugin] });
 
