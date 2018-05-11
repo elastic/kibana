@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolveKibanaPath } from '@kbn/plugin-helpers/lib/index';
-
 export default async function ({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
-  const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
 
   return {
