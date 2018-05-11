@@ -108,6 +108,11 @@ export default function (api) {
         },
       },
       docvalue_fields: ['{field}'],
+      collapse: {
+        __template: {
+          'field': 'FIELD'
+        }
+      },
       indices_boost: {
         __template: [
           { 'INDEX': 1.0 }
