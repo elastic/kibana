@@ -40,6 +40,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/clamarque/Kibana_health_metric_vis[Health Metric] (clamarque)
 * https://github.com/sbeyn/kibana-plugin-line-sg[Line] (sbeyn)
 * https://github.com/walterra/kibana-milestones-vis[Milestones] (walterra)
+* https://github.com/varundbest/navigation[Navigation] (varundbest)
 * https://github.com/dlumbrer/kbn_network[Network Plugin] (dlumbrer)
 * https://github.com/amannocci/kibana-plugin-metric-percent[Percent] (amannocci)
 * https://github.com/dlumbrer/kbn_polar[Polar] (dlumbrer)

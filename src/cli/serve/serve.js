@@ -10,6 +10,8 @@ import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
+const { startRepl } = canRequire('../repl') ? require('../repl') : { };
+
 function canRequire(path) {
   try {
     require.resolve(path);
@@ -154,6 +156,10 @@ export default function (program) {
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
 
+  if (!!startRepl) {
+    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
+  }
+
   if (XPACK_OPTIONAL) {
     command
       .option('--oss', 'Start Kibana without X-Pack');
@@ -225,8 +231,23 @@ export default function (program) {
         kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
       });
 
+      if (shouldStartRepl(opts)) {
+        startRepl(kbnServer);
+      }
+
       return kbnServer;
     });
+}
+
+function shouldStartRepl(opts) {
+  if (opts.repl && !startRepl) {
+    throw new Error('Kibana REPL mode can only be run in development mode.');
+  }
+
+  // The kbnWorkerType check is necessary to prevent the repl
+  // from being started multiple times in different processes.
+  // We only want one REPL.
+  return opts.repl && process.env.kbnWorkerType === 'server';
 }
 
 function logFatal(message, server) {
