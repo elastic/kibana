@@ -181,6 +181,9 @@ export default function (api) {
         }
       ]
     },
+    exists: {
+      field: ''
+    },
     field: {
       '{field}': {
         query: '',
