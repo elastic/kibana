@@ -27,6 +27,7 @@ module.exports = {
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-test-subj-selector/**/*',
+        'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'x-pack/plugins/apm/**/*',
       ],

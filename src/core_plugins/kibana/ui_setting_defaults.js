@@ -15,7 +15,7 @@ export function getUiSettingDefaults() {
     },
     'query:queryString:options': {
       name: 'Query string options',
-      value: '{ "analyze_wildcard": true, "default_field": "*" }',
+      value: '{ "analyze_wildcard": true }',
       description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">Options</a> for the lucene query string parser',
       type: 'json'
     },

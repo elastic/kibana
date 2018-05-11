@@ -17,6 +17,7 @@ export const CopySourceTask = {
         '!src/core_plugins/testbed/**',
         '!src/core_plugins/console/public/tests/**',
         '!src/cli/cluster/**',
+        '!src/cli/repl/**',
         '!src/es_archiver/**',
         '!src/functional_test_runner/**',
         '!src/dev/**',
