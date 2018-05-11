@@ -8,11 +8,11 @@ function getArgumentString(arg, argKey) {
     return argKey == null || argKey === '_' ? argString : `${argKey}=${argString}`;
   }
 
-  // TODO: this works, but seems a little hacky. it removes existing escaped chars on quotes
-  // and adds the escaping onto all other double quotes it finds in the string
-  const escapeQuotes = val => val.replace(/\\\"/g, '"').replace(/\"/g, '\\"');
+  function escapeSpecialCharacters(string) {
+    return string.replace(/[\\"]/g, '\\$&'); // $& means the whole matched string
+  }
 
-  if (type === 'string') return maybeArgKey(`"${escapeQuotes(arg)}"`);
+  if (type === 'string') return maybeArgKey(`"${escapeSpecialCharacters(arg)}"`);
   if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
   if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
   if (type === 'partial') return maybeArgKey('${' + getExpression(arg.chain) + '}');

@@ -180,7 +180,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="slash \\\\ slash"');
+      expect(expression).to.equal('csv input="slash \\\\\\\\ slash"');
     });
 
     it('single expression string value with a double quote', () => {
@@ -271,7 +271,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="stuff\nthings" separator="\\n"');
+      expect(expression).to.equal('csv input="stuff\nthings" separator="\\\\n"');
     });
 
     it('single expression with multiple and repeated arguments', () => {
@@ -291,7 +291,7 @@ describe('ast toExpression', () => {
 
       const expression = toExpression(astObj);
       expect(expression).to.equal(
-        'csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\n"'
+        'csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\\\n"'
       );
     });
 
