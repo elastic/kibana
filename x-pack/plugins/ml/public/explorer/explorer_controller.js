@@ -305,16 +305,21 @@ module.controller('MlExplorerController', function (
     return $scope.viewBySwimlaneData !== null && $scope.viewBySwimlaneData.laneLabels && $scope.viewBySwimlaneData.laneLabels.length > 0;
   };
 
-  const getTimeRange = function (cellData) {
-    // Time range for charts should be maximum time span at job bucket span, centred on the selected cell.
+  function getSelectionTimeRange(cellData) {
+    // Returns the time range of the cell(s) currently selected in the swimlane.
+    // If no cell(s) are currently selected, returns the dashboard time range.
     const bounds = timefilter.getActiveBounds();
+
+    // time property of the cell data is an array, with the elements being
+    // the start times of the first and last cell selected.
     const earliestMs = cellData.time[0] !== undefined ? ((cellData.time[0]) * 1000) : bounds.min.valueOf();
-    let latestMs = cellData.time[1] !== undefined ? ((cellData.time[1]) * 1000) : bounds.max.valueOf();
-    if (earliestMs === latestMs) {
-      latestMs = latestMs + (cellData.interval * 1000);
+    let latestMs = bounds.max.valueOf();
+    if (cellData.time[1] !== undefined) {
+      // Subtract 1 ms so search does not include start of next bucket.
+      latestMs = ((cellData.time[1] + cellData.interval) * 1000) - 1;
     }
     return { earliestMs, latestMs };
-  };
+  }
 
   // Listener for click events in the swimlane and load corresponding anomaly data.
   // Empty cellData is passed on clicking outside a cell with score > 0.
@@ -329,7 +334,7 @@ module.controller('MlExplorerController', function (
     } else {
       let jobIds = [];
       const influencers = [];
-      const timerange = getTimeRange(cellData);
+      const timerange = getSelectionTimeRange(cellData);
 
       if (cellData.fieldName === undefined) {
         // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
@@ -363,7 +368,7 @@ module.controller('MlExplorerController', function (
     if (showCharts && $scope.cellData !== undefined) {
       swimlaneCellClickListener($scope.cellData);
     } else {
-      const timerange = getTimeRange($scope.cellData);
+      const timerange = getSelectionTimeRange($scope.cellData);
       mlExplorerDashboardService.anomalyDataChange.changed(
         [], timerange.earliestMs, timerange.latestMs
       );
@@ -374,7 +379,7 @@ module.controller('MlExplorerController', function (
   const anomalyChartsSeverityListener = function () {
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
     if (showCharts && $scope.cellData !== undefined) {
-      const timerange = getTimeRange($scope.cellData);
+      const timerange = getSelectionTimeRange($scope.cellData);
       mlExplorerDashboardService.anomalyDataChange.changed(
         $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
       );
