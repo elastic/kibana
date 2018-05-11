@@ -108,6 +108,11 @@ export default function (api) {
         },
       },
       docvalue_fields: ['{field}'],
+      indices_boost: {
+        __template: [
+          { 'INDEX': 1.0 }
+        ]
+      },
       rescore: {
         __template: {
           'query': {},
