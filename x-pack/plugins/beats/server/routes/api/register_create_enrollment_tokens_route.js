@@ -6,7 +6,10 @@
 
 import Joi from 'joi';
 import uuid from 'uuid';
-import { flatten } from 'lodash';
+import {
+  get,
+  flatten
+} from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { wrapEsError } from '../../lib/error_wrappers';
@@ -29,19 +32,21 @@ function persistTokens(callWithRequest, tokens) {
 
 // TODO: add license check pre-hook
 export function registerCreateEnrollmentTokensRoute(server) {
+  const DEFAULT_NUM_TOKENS = 1;
+
   server.route({
     method: 'POST',
     path: '/api/beats/enrollment_tokens',
     config: {
       validate: {
         payload: Joi.object({
-          num_tokens: Joi.number().optional().default(1)
-        }).optional()
+          num_tokens: Joi.number().optional().default(DEFAULT_NUM_TOKENS).min(1)
+        }).allow(null)
       }
     },
     handler: async (request, reply) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { num_tokens: numTokens } = request.payload;
+      const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
       const tokens = [];
       while (tokens.length < numTokens) {
