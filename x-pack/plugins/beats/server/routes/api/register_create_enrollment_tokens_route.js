@@ -20,7 +20,8 @@ function persistTokens(callWithRequest, tokens) {
   const params = {
     index: INDEX_NAMES.ADMIN,
     type: '_doc',
-    body
+    body,
+    refresh: 'wait_for'
   };
 
   return callWithRequest('bulk', params);
