@@ -28,7 +28,6 @@ function persistTokens(callWithRequest, tokens) {
 }
 
 // TODO: add license check pre-hook
-// TODO: write API functional tests
 export function registerCreateEnrollmentTokensRoute(server) {
   server.route({
     method: 'POST',

@@ -15,15 +15,18 @@ export default function ({ getService }) {
   const ES_ADMIN_INDEX_NAME = '.management-beats-admin';
   const ES_TYPE_NAME = '_doc';
 
-  describe.only('create_enrollment_token', () => {
-    beforeEach(() => {
+  describe('create_enrollment_token', () => {
+    const cleanup = () => {
       return es.indices.delete({
         index: ES_INDEX_PATTERN
       });
-    });
+    };
+
+    beforeEach(cleanup);
+    afterEach(cleanup);
 
     it('should create the specified number of tokens', async () => {
-      const numTokens = chance.integer({ min: 1, max: 5000 });
+      const numTokens = chance.integer({ min: 1, max: 2000 });
 
       const { body: apiResponse } = await supertest
         .post(
@@ -38,7 +41,7 @@ export default function ({ getService }) {
       const tokensFromApi = apiResponse.tokens;
 
       const esResponse = await es.search({
-        index: ES_INDEX_PATTERN,
+        index: ES_ADMIN_INDEX_NAME,
         type: ES_TYPE_NAME,
         q: 'type:enrollment_token',
         size: numTokens
