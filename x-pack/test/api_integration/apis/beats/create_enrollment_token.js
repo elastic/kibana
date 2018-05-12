@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import expect from 'expect.js';
+
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+  const chance = getService('chance');
+  const es = getService('es');
+
+  const ES_INDEX_PATTERN = '.management-beats-*';
+  const ES_ADMIN_INDEX_NAME = '.management-beats-admin';
+  const ES_TYPE_NAME = '_doc';
+
+  describe.only('create_enrollment_token', () => {
+    beforeEach(() => {
+      return es.indices.delete({
+        index: ES_INDEX_PATTERN
+      });
+    });
+
+    it('should create the specified number of tokens', async () => {
+      const numTokens = chance.integer({ min: 1, max: 5000 });
+
+      const { body: apiResponse } = await supertest
+        .post(
+          '/api/beats/enrollment_tokens'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          num_tokens: numTokens
+        })
+        .expect(200);
+
+      const tokensFromApi = apiResponse.tokens;
+
+      const esResponse = await es.search({
+        index: ES_INDEX_PATTERN,
+        type: ES_TYPE_NAME,
+        q: 'type:enrollment_token',
+        size: numTokens
+      });
+
+      const tokensInEs = esResponse.hits.hits
+        .map(hit => hit._source.enrollment_token.token);
+
+      expect(tokensFromApi).to.eql(tokensInEs);
+    });
+  });
+}

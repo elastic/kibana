@@ -11,7 +11,7 @@ import { INDEX_NAMES } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { wrapEsError } from '../../lib/error_wrappers';
 
-async function persistTokens(callWithRequest, tokens) {
+function persistTokens(callWithRequest, tokens) {
   const body = flatten(tokens.map(token => [
     { index: { _id: `enrollment_token:${token}` } },
     { type: 'enrollment_token', enrollment_token: { token } }
@@ -23,7 +23,7 @@ async function persistTokens(callWithRequest, tokens) {
     body
   };
 
-  return await callWithRequest('bulk', params);
+  return callWithRequest('bulk', params);
 }
 
 // TODO: add license check pre-hook
