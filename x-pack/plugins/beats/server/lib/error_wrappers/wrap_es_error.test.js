@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { wrapEsError } from '../wrap_es_error';
+import { wrapEsError } from './wrap_es_error';
 
 describe('wrap_es_error', () => {
   describe('#wrapEsError', () => {
