@@ -162,6 +162,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('clonedDashboardTitle', title);
     }
 
+    async isCloneDuplicateTitleWarningDisplayed() {
+      const cloneModal = await testSubjects.find('dashboardCloneModal');
+      const validateMsgs = await cloneModal.findAllByClassName('euiFormErrorText');
+      return validateMsgs.length > 0;
+    }
+
     async clickEdit() {
       log.debug('Clicking edit');
       return await testSubjects.click('dashboardEditMode');

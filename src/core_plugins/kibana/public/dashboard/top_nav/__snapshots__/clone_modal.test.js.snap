@@ -4,7 +4,7 @@ exports[`renders DashboardCloneModal 1`] = `
 <EuiOverlayMask>
   <EuiModal
     className="dashboardCloneModal"
-    data-tests-subj="dashboardCloneModal"
+    data-test-subj="dashboardCloneModal"
     onClose={[Function]}
   >
     <EuiModalHeader>
