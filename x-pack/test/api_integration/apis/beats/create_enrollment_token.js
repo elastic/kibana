@@ -76,5 +76,27 @@ export default function ({ getService }) {
       expect(tokensFromApi.length).to.eql(numTokens);
       expect(tokensFromApi).to.eql(tokensInEs);
     });
+
+    it('should set token expiration to 4 hours from now', async () => {
+      await supertest
+        .post(
+          '/api/beats/enrollment_tokens'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send()
+        .expect(200);
+
+      const esResponse = await es.search({
+        index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
+        q: 'type:enrollment_token'
+      });
+
+      const tokenInEs = esResponse.hits.hits[0]._source.enrollment_token;
+
+      const tokenExpiresOn = moment(tokenInEs.expires_on).valueOf();
+      const fourHoursAgo = moment().subtract('4 hours').valueOf();
+      expect(tokenExpiresOn).to.be.lessThan(fourHoursAgo);
+    });
   });
 }
