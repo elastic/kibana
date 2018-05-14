@@ -1,17 +1,15 @@
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
 import { getSuggestionsProvider } from '../operator';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
 
 describe('Kuery operator suggestions', function () {
   let indexPatterns;
   let getSuggestions;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    indexPatterns = [Private(StubbedLogstashIndexPatternProvider)];
+  beforeEach(() => {
+    indexPatterns = [indexPatternResponse];
     getSuggestions = getSuggestionsProvider({ indexPatterns });
-  }));
+  });
 
   it('should return a function', function () {
     expect(typeof getSuggestions).to.be('function');
