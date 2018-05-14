@@ -41,13 +41,13 @@ export default function ({ getService, getPageObjects }) {
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9300',
-          jvmHeap: 'JVM Heap: 29 %',
-          freeDiskSpace: 'Free Disk Space: 173.9 GB',
-          documentCount: 'Documents: 24.8k',
-          dataSize: 'Data: 50.4 MB',
-          indicesCount: 'Indices: 20',
-          shardsCount: 'Shards: 38',
-          nodeType: 'Type: Master Node',
+          jvmHeap: '29%',
+          freeDiskSpace: '173.9 GB',
+          documentCount: '24.8k',
+          dataSize: '50.4 MB',
+          indicesCount: '20',
+          shardsCount: '38',
+          nodeType: 'Master Node',
           status: 'Status: Online',
         });
       });
@@ -57,13 +57,13 @@ export default function ({ getService, getPageObjects }) {
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9302',
-          jvmHeap: 'JVM Heap: 17 %',
-          freeDiskSpace: 'Free Disk Space: 173.9 GB',
-          documentCount: 'Documents: 240',
-          dataSize: 'Data: 1.4 MB',
-          indicesCount: 'Indices: 4',
-          shardsCount: 'Shards: 4',
-          nodeType: 'Type: Node',
+          jvmHeap: '17%',
+          freeDiskSpace: '173.9 GB',
+          documentCount: '240',
+          dataSize: '1.4 MB',
+          indicesCount: '4',
+          shardsCount: '4',
+          nodeType: 'Node',
           status: 'Status: Online',
         });
       });
@@ -92,13 +92,13 @@ export default function ({ getService, getPageObjects }) {
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: '127.0.0.1:9302',
-          jvmHeap: 'JVM Heap: N/A',
-          freeDiskSpace: 'Free Disk Space: N/A',
-          documentCount: 'Documents: N/A',
-          dataSize: 'Data: N/A',
-          indicesCount: 'Indices: N/A',
-          shardsCount: 'Shards: N/A',
-          nodeType: 'Type: Offline Node',
+          jvmHeap: 'N/A',
+          freeDiskSpace: 'N/A',
+          documentCount: 'N/A',
+          dataSize: 'N/A',
+          indicesCount: 'N/A',
+          shardsCount: 'N/A',
+          nodeType: 'Offline Node',
           status: 'Status: Offline',
         });
       });

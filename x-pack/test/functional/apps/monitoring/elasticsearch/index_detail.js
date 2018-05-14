@@ -42,11 +42,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('avocado-tweets-2017.10.02');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 8.8 MB',
-          dataSizePrimaries: 'Primaries: 4.4 MB',
-          documentCount: 'Documents: 628',
-          totalShards: 'Total Shards: 10',
-          unassignedShards: 'Unassigned Shards: 0',
+          dataSize: '8.8 MB',
+          dataSizePrimaries: '4.4 MB',
+          documentCount: '628',
+          totalShards: '10',
+          unassignedShards: '0',
           health: 'Health: green',
         });
       });
@@ -55,11 +55,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('relocation_test');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 4.8 KB',
-          dataSizePrimaries: 'Primaries: 4.8 KB',
-          documentCount: 'Documents: 1',
-          totalShards: 'Total Shards: 1',
-          unassignedShards: 'Unassigned Shards: 0',
+          dataSize: '4.8 KB',
+          dataSizePrimaries: '4.8 KB',
+          documentCount: '1',
+          totalShards: '1',
+          unassignedShards: '0',
           health: 'Health: green',
         });
       });
@@ -68,11 +68,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('phone-home');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 1.2 MB',
-          dataSizePrimaries: 'Primaries: 657.6 KB',
-          documentCount: 'Documents: 10',
-          totalShards: 'Total Shards: 10',
-          unassignedShards: 'Unassigned Shards: 1',
+          dataSize: '1.2 MB',
+          dataSizePrimaries: '657.6 KB',
+          documentCount: '10',
+          totalShards: '10',
+          unassignedShards: '1',
           health: 'Health: yellow',
         });
       });
@@ -101,11 +101,11 @@ export default function ({ getService, getPageObjects }) {
         await indicesList.clickRowByName('many-0001_clruksahirti');
 
         expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total: 3.6 KB',
-          dataSizePrimaries: 'Primaries: 3.6 KB',
-          documentCount: 'Documents: 1',
-          totalShards: 'Total Shards: N/A',
-          unassignedShards: 'Unassigned Shards: N/A',
+          dataSize: '3.6 KB',
+          dataSizePrimaries: '3.6 KB',
+          documentCount: '1',
+          totalShards: 'N/A',
+          unassignedShards: 'N/A',
           health: 'Health: Not Available',
         });
       });
