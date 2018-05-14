@@ -32,7 +32,7 @@ export class EmbeddedVisualizeHandler {
    *    attribute will get. Use null to remove a specific data attribute from the visualization.
    */
   update(params = {}) {
-    this._scope.$apply(() => {
+    this._scope.$evalAsync(() => {
       if (params.timeRange) {
         this._scope.timeRange = params.timeRange;
       }
