@@ -6,6 +6,7 @@
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { getVersionPrivilege, getLoginPrivilege } from '../privileges';
 
 const getMissingPrivileges = (resource, application, privilegeCheck) => {
   const privileges = privilegeCheck.application[application][resource];
@@ -21,14 +22,16 @@ export function createRequestHasPrivileges(server) {
 
   return function requestHasPrivileges(request) {
     return async function hasPrivileges(privileges) {
-      const version = `version:${kibanaVersion}`;
+
+      const versionPrivilege = getVersionPrivilege(kibanaVersion);
+      const loginPrivilege = getLoginPrivilege();
 
       const privilegeCheck = await callWithRequest(request, 'shield.hasPrivileges', {
         body: {
           applications: [{
             application,
             resources: [DEFAULT_RESOURCE],
-            privileges: [version, ...privileges]
+            privileges: [versionPrivilege, loginPrivilege, ...privileges]
           }]
         }
       });
@@ -36,7 +39,10 @@ export function createRequestHasPrivileges(server) {
       const success = privilegeCheck.has_all_requested;
       const missingPrivileges = getMissingPrivileges(DEFAULT_RESOURCE, application, privilegeCheck);
 
-      if (missingPrivileges.includes(version)) {
+      // We include the login privilege on all privileges, so the existence of it and not the version privilege
+      // lets us know that we're running in an incorrect configuration. Without the login privilege check, we wouldn't
+      // know whether the user just wasn't authorized for this instance of Kibana in general
+      if (missingPrivileges.includes(versionPrivilege) && !missingPrivileges.includes(loginPrivilege)) {
         throw new Error('Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.');
       }
 

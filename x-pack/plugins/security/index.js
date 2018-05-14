@@ -19,7 +19,7 @@ import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
 import { secureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
 import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objects_client/secure_options_builder';
-import { registerPrivilegesWithCluster } from './server/lib/privileges/privilege_action_registry';
+import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
 import { createRequestHasPrivileges } from './server/lib/authorization/has_privileges';

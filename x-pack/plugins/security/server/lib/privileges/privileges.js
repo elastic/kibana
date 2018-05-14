@@ -7,6 +7,14 @@
 /*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
+export function getVersionPrivilege(kibanaVersion) {
+  return `version:${kibanaVersion}`;
+}
+
+export function getLoginPrivilege() {
+  return `action:login`;
+}
+
 export function buildPrivilegeMap(application, kibanaVersion) {
   const readSavedObjectsPrivileges = buildSavedObjectsReadPrivileges();
 
@@ -15,13 +23,13 @@ export function buildPrivilegeMap(application, kibanaVersion) {
   privilegeActions.all = {
     application,
     name: 'all',
-    actions: [`version:${kibanaVersion}`, 'action:*'],
+    actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), 'action:*'],
   };
 
   privilegeActions.read = {
     application,
     name: 'read',
-    actions: [`version:${kibanaVersion}`, ...readSavedObjectsPrivileges],
+    actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), ...readSavedObjectsPrivileges],
   };
 
   return privilegeActions;

@@ -7,6 +7,7 @@
 import { createRequestHasPrivileges } from './has_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
+import { getLoginPrivilege, getVersionPrivilege } from '../privileges';
 
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn()
@@ -57,7 +58,8 @@ const mockResponse = (hasAllRequested, privileges, application = defaultApplicat
 test(`calls shield.hasPrivileges with request`, async () => {
   const mockServer = createMockServer();
   mockResponse(true, {
-    [`version:${defaultVersion}`]: true,
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
     foo: true,
   });
 
@@ -80,7 +82,8 @@ test(`calls shield.hasPrivileges with clientParams`, async () => {
   });
 
   mockResponse(true, {
-    [`version:${version}`]: true,
+    [getVersionPrivilege(version)]: true,
+    [getLoginPrivilege()]: true,
     foo: true,
   }, application);
 
@@ -94,13 +97,51 @@ test(`calls shield.hasPrivileges with clientParams`, async () => {
   const applicationParam = clientParams.body.applications[0];
   expect(applicationParam).toHaveProperty('application', application);
   expect(applicationParam).toHaveProperty('resources', [DEFAULT_RESOURCE]);
-  expect(applicationParam).toHaveProperty('privileges', [`version:${version}`, privilege]);
+  expect(applicationParam).toHaveProperty('privileges');
+  expect(applicationParam.privileges).toContain(privilege);
+});
+
+test(`includes version privilege when checking privileges`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(true, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: true,
+  });
+
+  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const request = {};
+  const hasPrivileges = requestHasPrivileges(request);
+  await hasPrivileges(['foo']);
+
+  const clientParams = mockCallWithRequest.mock.calls[0][2];
+  const applicationParam = clientParams.body.applications[0];
+  expect(applicationParam.privileges).toContain(getVersionPrivilege(defaultVersion));
+});
+
+test(`includes login privilege when checking privileges`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(true, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: true,
+  });
+
+  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const request = {};
+  const hasPrivileges = requestHasPrivileges(request);
+  await hasPrivileges(['foo']);
+
+  const clientParams = mockCallWithRequest.mock.calls[0][2];
+  const applicationParam = clientParams.body.applications[0];
+  expect(applicationParam.privileges).toContain(getLoginPrivilege());
 });
 
 test(`returns false success when has_all_requested`, async () => {
   const mockServer = createMockServer();
   mockResponse(true, {
-    [`version:${defaultVersion}`]: true,
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
     foo: true,
   });
 
@@ -113,7 +154,8 @@ test(`returns false success when has_all_requested`, async () => {
 test(`returns false success when has_all_requested is false`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
-    [`version:${defaultVersion}`]: true,
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
     foo: false,
   });
   mockCallWithRequest.mockImplementationOnce(async () => ({
@@ -136,7 +178,8 @@ test(`returns false success when has_all_requested is false`, async () => {
 test(`returns missing privileges`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
-    [`version:${defaultVersion}`]: true,
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
     foo: false,
   });
 
@@ -149,7 +192,8 @@ test(`returns missing privileges`, async () => {
 test(`excludes granted privileges from missing privileges`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
-    [`version:${defaultVersion}`]: true,
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
     foo: false,
     bar: true,
   });
@@ -160,14 +204,28 @@ test(`excludes granted privileges from missing privileges`, async () => {
   expect(result.missing).toEqual(['foo']);
 });
 
-test(`throws error if missing version privilege`, async () => {
+test(`throws error if missing version privilege and has login privilege`, async () => {
   const mockServer = createMockServer();
   mockResponse(false, {
-    [`version:${defaultVersion}`]: false,
+    [getVersionPrivilege(defaultVersion)]: false,
+    [getLoginPrivilege()]: true,
     foo: true,
   });
 
   const requestHasPrivileges = createRequestHasPrivileges(mockServer);
   const hasPrivileges = requestHasPrivileges({});
-  expect(hasPrivileges(['foo'])).rejects.toThrowErrorMatchingSnapshot();
+  await expect(hasPrivileges(['foo'])).rejects.toThrowErrorMatchingSnapshot();
+});
+
+test(`doesn't throw error if missing version privilege and missing login privilege`, async () => {
+  const mockServer = createMockServer();
+  mockResponse(false, {
+    [getVersionPrivilege(defaultVersion)]: true,
+    [getLoginPrivilege()]: true,
+    foo: true,
+  });
+
+  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const hasPrivileges = requestHasPrivileges({});
+  await hasPrivileges(['foo']);
 });
