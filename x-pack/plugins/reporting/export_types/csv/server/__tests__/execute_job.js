@@ -9,13 +9,14 @@ import Puid from 'puid';
 import sinon from 'sinon';
 import 'sinon-as-promised';
 import nodeCrypto from '@elastic/node-crypto';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
-import { executeJobFactory } from '../execute_job';
+
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
-const { SavedObjectsClient } = require(resolveKibanaPath('src/server/saved_objects/client/saved_objects_client.js'));
-const { FieldFormat } = require(resolveKibanaPath('src/ui/field_formats/field_format.js'));
-const { FieldFormatsService } = require(resolveKibanaPath('src/ui/field_formats/field_formats_service.js'));
-const { createStringFormat } = require(resolveKibanaPath('src/core_plugins/kibana/common/field_formats/types/string.js'));
+import { SavedObjectsClient } from  '../../../../../../../src/server/saved_objects/client/saved_objects_client.js';
+import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
+import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
+import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
+
+import { executeJobFactory } from '../execute_job';
 
 const delay = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
