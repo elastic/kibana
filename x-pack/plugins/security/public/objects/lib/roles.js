@@ -7,6 +7,10 @@ import chrome from 'ui/chrome';
 
 const apiBase = chrome.addBasePath(`/api/security/v1/roles`);
 
+export async function saveRole($http, role) {
+  return await $http.post(`${apiBase}/${role.name}`, role);
+}
+
 export async function getRole($http, name) {
   try {
     return await $http.get(`${apiBase}/${name}`);
@@ -16,4 +20,8 @@ export async function getRole($http, name) {
     }
     throw response;
   }
+}
+
+export async function deleteRole($http, name) {
+  return await $http.delete(`${apiBase}/${name}`);
 }

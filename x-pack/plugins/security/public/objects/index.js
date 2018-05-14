@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getRole } from './lib/get_roles';
+export { getRole, saveRole, deleteRole } from './lib/roles';
 
 export { getUsers } from './lib/get_users';
 

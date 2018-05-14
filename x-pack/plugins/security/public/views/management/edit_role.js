@@ -69,6 +69,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   controller($injector, $scope, $http, rbacEnabled) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
+    const Notifier = $injector.get('Notifier');
 
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
@@ -105,6 +106,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       breadcrumbs={routes.getBreadcrumbs()}
       allowDocumentLevelSecurity={allowDocumentLevelSecurity}
       allowFieldLevelSecurity={allowFieldLevelSecurity}
+      notifier={Notifier}
     />, domNode);
 
     // unmount react on controller destroy
