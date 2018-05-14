@@ -2,8 +2,8 @@ import expect from 'expect.js';
 import * as not from '../not';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 
 let indexPattern;
 
@@ -13,10 +13,10 @@ describe('kuery functions', function () {
 
   describe('not', function () {
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNodeParams', function () {
 

@@ -2,8 +2,8 @@ import expect from 'expect.js';
 import * as and from '../and';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 
 let indexPattern;
 
@@ -11,13 +11,11 @@ const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
 const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', function () {
-
   describe('and', function () {
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNodeParams', function () {
 
@@ -27,7 +25,6 @@ describe('kuery functions', function () {
         expect(actualChildNode1).to.be(childNode1);
         expect(actualChildNode2).to.be(childNode2);
       });
-
     });
 
     describe('toElasticsearchQuery', function () {
