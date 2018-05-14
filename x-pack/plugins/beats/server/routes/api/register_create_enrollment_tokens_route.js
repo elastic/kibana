@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import uuid from 'uuid';
+import moment from 'moment';
 import {
   get,
   flatten
@@ -14,10 +15,11 @@ import { INDEX_NAMES } from '../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { wrapEsError } from '../../lib/error_wrappers';
 
-function persistTokens(callWithRequest, tokens) {
+function persistTokens(callWithRequest, tokens, enrollmentTokensTtlInSeconds) {
+  const enrollmentTokenExpiration = moment().add(enrollmentTokensTtlInSeconds, 'seconds').toJSON();
   const body = flatten(tokens.map(token => [
     { index: { _id: `enrollment_token:${token}` } },
-    { type: 'enrollment_token', enrollment_token: { token } }
+    { type: 'enrollment_token', enrollment_token: { token, expires_on: enrollmentTokenExpiration } }
   ]));
 
   const params = {
@@ -34,6 +36,7 @@ function persistTokens(callWithRequest, tokens) {
 // TODO: write to Kibana audit log file
 export function registerCreateEnrollmentTokensRoute(server) {
   const DEFAULT_NUM_TOKENS = 1;
+  const enrollmentTokensTtlInSeconds = server.config().get('xpack.beats.enrollmentTokensTtlInSeconds');
 
   server.route({
     method: 'POST',
@@ -55,7 +58,7 @@ export function registerCreateEnrollmentTokensRoute(server) {
       }
 
       try {
-        await persistTokens(callWithRequest, tokens);
+        await persistTokens(callWithRequest, tokens, enrollmentTokensTtlInSeconds);
       } catch (err) {
         return reply(wrapEsError(err));
       }
