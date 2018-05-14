@@ -10,6 +10,9 @@ module.exports = {
 
   settings: {
     'import/resolver': 'eslint-import-resolver-node',
+    react: {
+      version: '16.3',
+    },
   },
 
   overrides: [
@@ -27,6 +30,7 @@ module.exports = {
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-test-subj-selector/**/*',
+        'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'x-pack/plugins/apm/**/*',
       ],
@@ -65,7 +69,7 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'ui'],
+        'import/core-modules': ['plugins', 'ui', 'uiExports'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {

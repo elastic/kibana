@@ -5,6 +5,8 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const remote = getService('remote');
+  const queryBar = getService('queryBar');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize']);
   const dashboardName = 'Dashboard View Edit Test';
 
@@ -28,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
     it('create test dashboard', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardAddPanel.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
       const isDashboardSaved = await PageObjects.dashboard.saveDashboard(dashboardName);
       expect(isDashboardSaved).to.eql(true);
     });
@@ -78,16 +80,16 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when the query is edited and applied', async function () {
-          const originalQuery = await PageObjects.dashboard.getQuery();
-          await PageObjects.dashboard.setQuery(`${originalQuery} and extra stuff`);
-          await PageObjects.dashboard.clickFilterButton();
+          const originalQuery = await queryBar.getQueryString();
+          await queryBar.setQuery(`${originalQuery} and extra stuff`);
+          await queryBar.submitQuery();
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
 
-          const query = await PageObjects.dashboard.getQuery();
+          const query = await queryBar.getQueryString();
           expect(query).to.equal(originalQuery);
         });
 
@@ -125,8 +127,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when a new vis is added', async function () {
-          await PageObjects.dashboard.clickAddVisualization();
-          await PageObjects.dashboard.clickAddNewVisualizationLink();
+          await dashboardAddPanel.ensureAddPanelIsShowing();
+          await dashboardAddPanel.clickAddNewEmbeddableLink();
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualization('new viz panel');
@@ -142,7 +144,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('when an existing vis is added', async function () {
-          await PageObjects.dashboard.addVisualization('new viz panel');
+          await dashboardAddPanel.addVisualization('new viz panel');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
@@ -231,8 +233,8 @@ export default function ({ getService, getPageObjects }) {
       it('when the query is edited but not applied', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
 
-        const originalQuery = await PageObjects.dashboard.getQuery();
-        await PageObjects.dashboard.setQuery(`${originalQuery} extra stuff`);
+        const originalQuery = await queryBar.getQueryString();
+        await queryBar.setQuery(`${originalQuery} extra stuff`);
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -240,7 +242,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isOpen).to.be(false);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-        const query = await PageObjects.dashboard.getQuery();
+        const query = await queryBar.getQueryString();
         expect(query).to.equal(originalQuery);
       });
     });

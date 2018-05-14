@@ -159,7 +159,7 @@ export class RangeControl extends Component {
         id={this.props.control.id}
         label={this.props.control.label}
         controlIndex={this.props.controlIndex}
-        control={this.props.control}
+        disableMsg={this.props.control.isEnabled() ? null : this.props.control.disabledReason}
       >
         {this.renderControl()}
       </FormRow>

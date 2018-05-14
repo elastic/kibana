@@ -26,6 +26,8 @@ import {
   DashboardVisualizationProvider,
   DashboardExpectProvider,
   FailureDebuggingProvider,
+  VisualizeListingTableProvider,
+  DashboardAddPanelProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -76,8 +78,20 @@ export default async function ({ readConfigFile }) {
       dashboardVisualizations: DashboardVisualizationProvider,
       dashboardExpect: DashboardExpectProvider,
       failureDebugging: FailureDebuggingProvider,
+      visualizeListingTable: VisualizeListingTableProvider,
+      dashboardAddPanel: DashboardAddPanelProvider,
     },
     servers: commonConfig.get('servers'),
+
+    env: commonConfig.get('env'),
+
+    esTestCluster: commonConfig.get('esTestCluster'),
+
+    kibanaServerArgs: [
+      ...commonConfig.get('kibanaServerArgs'),
+      '--oss',
+    ],
+
     apps: {
       status_page: {
         pathname: '/status',

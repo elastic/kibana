@@ -40,4 +40,6 @@ contains time-series data.
 
 NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
-available, go to *Dev Tools > Console* and enter `GET _cat/indices`.
+available, go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
+`curl -XGET "http://localhost:9200/_cat/indices"`.
+

@@ -444,7 +444,7 @@ export default class WatcherFlyout extends Component {
 
     return (
       <React.Fragment>
-        {this.props.isFlyoutOpen && flyout}
+        {this.props.isOpen && flyout}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={this.removeToasts}
@@ -456,7 +456,7 @@ export default class WatcherFlyout extends Component {
 }
 
 WatcherFlyout.propTypes = {
-  isFlyoutOpen: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool.isRequired,
   serviceName: PropTypes.string,
   onClose: PropTypes.func.isRequired
 };

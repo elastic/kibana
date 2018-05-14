@@ -4,7 +4,7 @@ import { set } from 'lodash';
 
 describe('Config schema', function () {
   let schema;
-  beforeEach(() => schema = schemaProvider());
+  beforeEach(async () => schema = await schemaProvider());
 
   function validate(data, options) {
     return Joi.validate(data, schema, options);

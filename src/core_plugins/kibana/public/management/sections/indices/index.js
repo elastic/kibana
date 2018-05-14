@@ -69,7 +69,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'index_patterns',
     title: 'Index Patterns',
     description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
-    icon: '/plugins/kibana/assets/app_index_pattern.svg',
+    icon: 'indexPatternApp',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

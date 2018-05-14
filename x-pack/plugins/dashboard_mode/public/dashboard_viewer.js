@@ -13,6 +13,18 @@ import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
+// import the uiExports that we want to "use"
+import 'uiExports/visTypes';
+import 'uiExports/visResponseHandlers';
+import 'uiExports/visRequestHandlers';
+import 'uiExports/visEditorTypes';
+import 'uiExports/savedObjectTypes';
+import 'uiExports/embeddableFactories';
+import 'uiExports/spyModes';
+import 'uiExports/navbarExtensions';
+import 'uiExports/docViews';
+import 'uiExports/fieldFormats';
+
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';

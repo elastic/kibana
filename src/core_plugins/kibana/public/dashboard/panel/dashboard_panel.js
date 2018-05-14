@@ -35,8 +35,7 @@ export class DashboardPanel extends React.Component {
           if (this.mounted) {
             this.embeddable = embeddable;
             embeddableIsInitialized(embeddable.metadata);
-            this.embeddable.onContainerStateChanged(this.props.containerState);
-            this.embeddable.render(this.panelElement);
+            this.embeddable.render(this.panelElement, this.props.containerState);
           } else {
             embeddable.destroy();
           }

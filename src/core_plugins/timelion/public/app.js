@@ -7,6 +7,10 @@ import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 
+// import the uiExports that we want to "use"
+import 'uiExports/fieldFormats';
+import 'uiExports/savedObjectTypes';
+
 require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
