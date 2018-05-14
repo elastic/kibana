@@ -58,7 +58,11 @@ export class DashboardCloneModal extends React.Component {
   };
 
   onInputChange = (event) => {
-    this.setState({ newDashboardName: event.target.value });
+    this.setState({
+      newDashboardName: event.target.value,
+      isTitleDuplicateConfirmed: false,
+      hasTitleDuplicate: false,
+    });
   };
 
   render() {
