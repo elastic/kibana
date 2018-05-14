@@ -47,7 +47,7 @@ export class HttpServer {
       legacyKbnServer.newPlatformProxyListener.bind(this.server.listener);
 
       // We register Kibana proxy middleware right before we start server to allow
-      // all new platform plugins register their routes, so that kbnServer
+      // all new platform plugins register their routes, so that `legacyKbnServer`
       // handles only requests that aren't handled by the new platform.
       this.server.route({
         method: '*',

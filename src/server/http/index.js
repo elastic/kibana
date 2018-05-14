@@ -12,7 +12,8 @@ import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  server = kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server();
+  server = kbnServer.server;
 
   const shortUrlLookup = shortUrlLookupProvider(server);
 

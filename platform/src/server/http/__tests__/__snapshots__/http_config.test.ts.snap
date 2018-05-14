@@ -44,13 +44,13 @@ Object {
 }
 `;
 
+exports[`throws if basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`throws if basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
+
+exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `"cannot use [rewriteBasePath] when [basePath] is not specified"`;
+
 exports[`throws if invalid hostname 1`] = `"[host]: must be a valid hostname"`;
-
-exports[`throws is basepath appends a slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws is basepath is missing prepended slash 1`] = `"[basePath]: must start with a slash, don't end with one"`;
-
-exports[`throws is basepath is not specified, but rewriteBasePath is set 1`] = `"can not use [rewriteBasePath] when [basePath] is not specified"`;
 
 exports[`with TLS should accept known protocols\` 1`] = `
 "[ssl.supportedProtocols.0]: types that failed validation:

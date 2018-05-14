@@ -196,7 +196,7 @@ rxjs@5.4.3:
   dependencies:
     symbol-observable "^1.0.1"
 
-rxjs@^6.0.0:
+rxjs@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.1.0.tgz#833447de4e4f6427b9cec3e5eb9f56415cd28315"
   dependencies:

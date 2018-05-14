@@ -23,7 +23,7 @@ test('can specify max payload as string', () => {
   expect(config.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
 });
 
-test('throws is basepath is missing prepended slash', () => {
+test('throws if basepath is missing prepended slash', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
     basePath: 'foo',
@@ -31,7 +31,7 @@ test('throws is basepath is missing prepended slash', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
-test('throws is basepath appends a slash', () => {
+test('throws if basepath appends a slash', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
     basePath: '/foo/',
@@ -39,7 +39,7 @@ test('throws is basepath appends a slash', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
-test('throws is basepath is not specified, but rewriteBasePath is set', () => {
+test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   const httpSchema = HttpConfig.schema;
   const obj = {
     rewriteBasePath: true,

@@ -42,7 +42,7 @@ const createHttpSchema = object({
 }, {
   validate: config => {
     if (!config.basePath && config.rewriteBasePath) {
-      return 'can not use [rewriteBasePath] when [basePath] is not specified';
+      return 'cannot use [rewriteBasePath] when [basePath] is not specified';
     }
   },
 });

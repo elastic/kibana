@@ -574,7 +574,7 @@ describe('when run within legacy platform', () => {
     );
   });
 
-  test('forwards request to legacy platform if new one can not handle it', async () => {
+  test('forwards request to legacy platform if new one cannot handle it', async () => {
     await server.start(config);
 
     await supertest(getServerListener(server))
