@@ -41,6 +41,6 @@ require('babel-register')({
   ignore,
   babelrc: false,
   presets: [
-    require.resolve('@kbn/babel-preset/node')
+    require.resolve('@kbn/babel-preset/node_preset')
   ],
 });
