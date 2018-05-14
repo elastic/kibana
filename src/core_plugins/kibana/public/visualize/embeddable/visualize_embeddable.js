@@ -90,7 +90,7 @@ export class VisualizeEmbeddable extends Embeddable  {
       this.panelTitle = derivedPanelTitle;
     }
 
-    if (this.handler && Object.keys(updatedParams).length > 0) {
+    if (this.handler && !_.isEmpty(updatedParams)) {
       this.handler.update(updatedParams);
     }
   }
