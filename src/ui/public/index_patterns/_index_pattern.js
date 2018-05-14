@@ -74,7 +74,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     return FieldFormat && new FieldFormat(mapping.params, getConfig);
   }
 
-  function updateFromElasticSearch(indexPattern, response) {
+  function updateFromElasticSearch(indexPattern, response, forceFieldRefresh = false) {
     if (!response.found) {
       const markdownSaveId = indexPattern.id.replace('*', '%2A');
 
@@ -111,7 +111,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       }
     }
 
-    return indexFields(indexPattern);
+    return indexFields(indexPattern, forceFieldRefresh);
   }
 
   function isFieldRefreshRequired(indexPattern) {
@@ -130,14 +130,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     });
   }
 
-  function indexFields(indexPattern) {
+  function indexFields(indexPattern, forceFieldRefresh = false) {
     let promise = Promise.resolve();
 
     if (!indexPattern.id) {
       return promise;
     }
 
-    if (isFieldRefreshRequired(indexPattern)) {
+    if (forceFieldRefresh || isFieldRefreshRequired(indexPattern)) {
       promise = indexPattern.refreshFields();
     }
 
@@ -207,7 +207,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return getRoutes();
     }
 
-    init() {
+    init(forceFieldRefresh = false) {
       watch(this);
 
       if (!this.id) {
@@ -233,7 +233,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           this.originalBody = this.prepBody();
           return response;
         })
-        .then(response => updateFromElasticSearch(this, response))
+        .then(response => updateFromElasticSearch(this, response, forceFieldRefresh))
         // Do it after to ensure we have the most up to date information
         .then(() => {
           this.originalBody = this.prepBody();
