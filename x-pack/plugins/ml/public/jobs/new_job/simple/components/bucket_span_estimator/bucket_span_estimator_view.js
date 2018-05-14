@@ -8,22 +8,27 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
+  EuiButton,
   EuiToolTip
 } from '@elastic/eui';
 
 export function BucketSpanEstimator({ buttonDisabled, buttonText, estimatorRunning, guessBucketSpan }) {
   return (
     <div className="bucket-span-estimator">
-      <EuiToolTip content="Experimental feature for estimating bucket span." position="bottom">
-        <button
-          onClick={guessBucketSpan}
+      <EuiToolTip
+        content="Experimental feature for estimating bucket span."
+        position="bottom"
+      >
+        <EuiButton
           disabled={buttonDisabled}
-          type="button"
-          className="kuiButton kuiButton--basic kuiButton--small"
+          fill
+          iconSide="right"
+          isLoading={estimatorRunning}
+          onClick={guessBucketSpan}
+          size="s"
         >
           {buttonText}
-          {estimatorRunning ? <i className="fa fa-spinner fa-spin" /> : ''}
-        </button>
+        </EuiButton>
       </EuiToolTip>
     </div>
   );
