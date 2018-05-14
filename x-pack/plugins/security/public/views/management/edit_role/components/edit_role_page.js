@@ -173,10 +173,13 @@ export class EditRolePage extends Component {
   };
 
   onNameChange = (e) => {
+    const rawValue = e.target.value;
+    const name = rawValue.replace(/\s/g, '-');
+
     this.setState({
       role: {
         ...this.state.role,
-        name: e.target.value
+        name
       }
     });
   }
