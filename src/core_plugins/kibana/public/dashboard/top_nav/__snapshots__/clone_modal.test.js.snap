@@ -23,15 +23,24 @@ exports[`renders DashboardCloneModal 1`] = `
       <EuiSpacer
         size="l"
       />
-      <EuiFieldText
-        autoFocus={true}
-        compressed={false}
-        data-test-subj="clonedDashboardTitle"
+      <EuiFormRow
+        describedByIds={Array []}
+        error={null}
         fullWidth={false}
-        isLoading={false}
-        onChange={[Function]}
-        value="dash title"
-      />
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+      >
+        <EuiFieldText
+          autoFocus={true}
+          compressed={false}
+          data-test-subj="clonedDashboardTitle"
+          fullWidth={false}
+          isInvalid={false}
+          isLoading={false}
+          onChange={[Function]}
+          value="dash title"
+        />
+      </EuiFormRow>
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButton
@@ -49,6 +58,7 @@ exports[`renders DashboardCloneModal 1`] = `
         data-test-subj="cloneConfirmButton"
         fill={true}
         iconSide="left"
+        isLoading={false}
         onClick={[Function]}
         type="button"
       >

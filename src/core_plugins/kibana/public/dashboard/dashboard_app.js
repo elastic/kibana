@@ -269,8 +269,8 @@ app.directive('dashboardApp', function ($injector) {
         );
       };
 
-      $scope.save = function () {
-        return saveDashboard(angular.toJson, timefilter, dashboardStateManager)
+      $scope.save = function (saveOptions) {
+        return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
           .then(function (id) {
             $scope.kbnTopNav.close('save');
             if (id) {
@@ -307,10 +307,15 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = $scope.model.title;
-        const onClone = (newTitle) => {
+        const onClone = (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) => {
           dashboardStateManager.savedDashboard.copyOnSave = true;
           dashboardStateManager.setTitle(newTitle);
-          return $scope.save().then(id => {
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.save(saveOptions).then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
               $scope.model.title = currentTitle;
@@ -322,7 +327,7 @@ app.directive('dashboardApp', function ($injector) {
           });
         };
 
-        showCloneModal(onClone, currentTitle, $rootScope, $compile);
+        showCloneModal(onClone, currentTitle);
       };
       updateViewMode(dashboardStateManager.getViewMode());
 

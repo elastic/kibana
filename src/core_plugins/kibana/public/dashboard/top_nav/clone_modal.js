@@ -12,19 +12,49 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
+  EuiFormRow,
 } from '@elastic/eui';
+
+const DUPLICATE_TITLE_WARNING = 'A Dashboard with the title already exists. Would you like to save anyway?';
 
 export class DashboardCloneModal extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      newDashboardName: props.title
+      newDashboardName: props.title,
+      isTitleDuplicateConfirmed: false,
+      hasTitleDuplicate: false,
+      isLoading: false,
     };
   }
+  componentDidMount() {
+    this._isMounted = true;
+  }
 
-  cloneDashboard = () => {
-    this.props.onClone(this.state.newDashboardName);
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  onTitleDuplicate = () => {
+    this.setState({
+      isTitleDuplicateConfirmed: true,
+      hasTitleDuplicate: true,
+    });
+  }
+
+  cloneDashboard = async () => {
+    this.setState({
+      isLoading: true,
+    });
+
+    await this.props.onClone(this.state.newDashboardName, this.state.isTitleDuplicateConfirmed, this.onTitleDuplicate);
+
+    if (this._isMounted) {
+      this.setState({
+        isLoading: false,
+      });
+    }
   };
 
   onInputChange = (event) => {
@@ -54,12 +84,18 @@ export class DashboardCloneModal extends React.Component {
 
             <EuiSpacer />
 
-            <EuiFieldText
-              autoFocus
-              data-test-subj="clonedDashboardTitle"
-              value={this.state.newDashboardName}
-              onChange={this.onInputChange}
-            />
+            <EuiFormRow
+              error={this.state.hasTitleDuplicate ? DUPLICATE_TITLE_WARNING : null}
+              isInvalid={this.state.hasTitleDuplicate}
+            >
+              <EuiFieldText
+                autoFocus
+                data-test-subj="clonedDashboardTitle"
+                value={this.state.newDashboardName}
+                onChange={this.onInputChange}
+                isInvalid={this.state.hasTitleDuplicate}
+              />
+            </EuiFormRow>
           </EuiModalBody>
 
           <EuiModalFooter>
@@ -74,6 +110,7 @@ export class DashboardCloneModal extends React.Component {
               fill
               data-test-subj="cloneConfirmButton"
               onClick={this.cloneDashboard}
+              isLoading={this.state.isLoading}
             >
               Confirm Clone
             </EuiButton>
