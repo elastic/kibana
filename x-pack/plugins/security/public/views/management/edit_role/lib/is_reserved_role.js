@@ -5,5 +5,5 @@
  */
 
 export function isReservedRole(role) {
-  return role && role.metadata && role.metadata._reserved;
+  return (role && role.metadata && role.metadata._reserved) || false;
 }

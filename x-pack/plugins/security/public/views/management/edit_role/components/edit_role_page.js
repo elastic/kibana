@@ -117,7 +117,7 @@ export class EditRolePage extends Component {
                 <EuiFormRow label={'Name'} {...validator.validateRoleName(this.state.role)}>
                   <EuiFieldText
                     name={'name'}
-                    value={this.state.role.name}
+                    value={this.state.role.name || ''}
                     onChange={this.onNameChange}
                     readOnly={isReservedRole(this.props.role)}
                   />
