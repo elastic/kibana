@@ -16,7 +16,7 @@ import Boom from 'boom';
 export function wrapEsError(err) {
   const statusCode = err.statusCode;
   if (statusCode === 403) {
-    return Boom.forbidden('Insufficient user permissions for managing Logstash pipelines');
+    return Boom.forbidden('Insufficient user permissions for managing Beats configuration');
   }
   return Boom.wrap(err, err.statusCode);
 }
