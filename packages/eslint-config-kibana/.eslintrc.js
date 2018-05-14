@@ -116,8 +116,6 @@ module.exports = {
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
-    'react/no-did-mount-set-state': 'error',
-    'react/no-did-update-set-state': 'error',
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],
