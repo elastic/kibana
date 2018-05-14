@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import moment from 'moment';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -78,7 +79,7 @@ export default function ({ getService }) {
       expect(tokensFromApi).to.eql(tokensInEs);
     });
 
-    it('should set token expiration to 4 hours from now', async () => {
+    it('should set token expiration to 4 hours from now by default', async () => {
       await supertest
         .post(
           '/api/beats/enrollment_tokens'
@@ -96,8 +97,8 @@ export default function ({ getService }) {
       const tokenInEs = esResponse.hits.hits[0]._source.enrollment_token;
 
       const tokenExpiresOn = moment(tokenInEs.expires_on).valueOf();
-      const fourHoursAgo = moment().subtract('4 hours').valueOf();
-      expect(tokenExpiresOn).to.be.lessThan(fourHoursAgo);
+      const fourHoursFromNow = moment().add('4', 'hours').valueOf();
+      expect(tokenExpiresOn).to.be.lessThan(fourHoursFromNow);
     });
   });
 }
