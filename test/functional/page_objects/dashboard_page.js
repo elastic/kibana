@@ -139,27 +139,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getQueryInputElement() {
-      return await testSubjects.find('queryInput');
-    }
-
-    async getQuery() {
-      log.debug(`getQuery`);
-      const queryInputElement = await this.getQueryInputElement();
-      return await queryInputElement.getProperty('value');
-    }
-
-    async setQuery(query) {
-      log.debug(`setQuery(${query})`);
-      return await testSubjects.setValue('queryInput', query);
-    }
-
-    async clickFilterButton() {
-      log.debug('Clicking filter button');
-      await testSubjects.click('querySubmitButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async clickClone() {
       log.debug('Clicking clone');
       await testSubjects.click('dashboardClone');

@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
   const log = getService('log');
+  const queryBar = getService('queryBar');
 
   let kibanaBaseUrl;
 
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await PageObjects.dashboard.getQuery();
+        const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
         await dashboardExpect.pieSliceCount(5);
@@ -60,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await PageObjects.dashboard.getQuery();
+        const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
         await dashboardExpect.pieSliceCount(5);
