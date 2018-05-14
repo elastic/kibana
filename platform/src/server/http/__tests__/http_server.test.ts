@@ -1,3 +1,7 @@
+jest.mock('fs', () => ({
+  readFileSync: jest.fn(),
+}));
+
 import http from 'http';
 import supertest from 'supertest';
 import Chance from 'chance';
@@ -15,7 +19,11 @@ let server: HttpServer;
 let config: HttpConfig;
 
 function getServerListener(server: HttpServer) {
-  return (server as any).server.listener;
+  return (server as any)._server.listener;
+}
+
+function getRedirectServerListener(server: HttpServer) {
+  return (server as any)._redirectServer.listener;
 }
 
 beforeEach(() => {
@@ -424,8 +432,12 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async () => ({ key: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, async () => ({ key: 'value:/foo' }));
+    router.get({ path: '/', validate: false }, async () => ({
+      key: 'value:/',
+    }));
+    router.get({ path: '/foo', validate: false }, async () => ({
+      key: 'value:/foo',
+    }));
 
     server.registerRouter(router);
 
@@ -480,8 +492,12 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/');
-    router.get({ path: '/', validate: false }, async () => ({ key: 'value:/' }));
-    router.get({ path: '/foo', validate: false }, async () => ({ key: 'value:/foo' }));
+    router.get({ path: '/', validate: false }, async () => ({
+      key: 'value:/',
+    }));
+    router.get({ path: '/foo', validate: false }, async () => ({
+      key: 'value:/foo',
+    }));
 
     server.registerRouter(router);
 
@@ -525,6 +541,44 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(getServerListener(server))
       .get('/foo')
       .expect(404);
+  });
+});
+
+describe('with defined `redirectHttpFromPort`', () => {
+  let configWithSSL: HttpConfig;
+
+  beforeEach(async () => {
+    configWithSSL = {
+      ...config,
+      ssl: {
+        enabled: true,
+        key: '/key',
+        certificate: '/certificate',
+        cipherSuites: ['cipherSuite'],
+        redirectHttpFromPort: config.port + 1,
+        getSecureOptions: () => 0,
+      },
+    } as HttpConfig;
+
+    const router = new Router('/');
+    router.get({ path: '/', validate: false }, async () => ({
+      key: 'value:/',
+    }));
+
+    server.registerRouter(router);
+
+    await server.start(configWithSSL);
+  });
+
+  test('http requests are forwarded to https', async () => {
+    await supertest(getRedirectServerListener(server))
+      .get('/')
+      .expect(302)
+      .then(res => {
+        expect(res.header.location).toEqual(
+          `https://${configWithSSL.host}:${configWithSSL.port}/`
+        );
+      });
   });
 });
 

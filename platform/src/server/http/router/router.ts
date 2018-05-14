@@ -8,7 +8,10 @@ import { KibanaResponse, ResponseFactory, responseFactory } from './response';
 export interface RouterRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   path: string;
-  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
+  handler: (
+    req: Request,
+    responseToolkit: ResponseToolkit
+  ) => Promise<ResponseObject>;
 }
 
 export class Router {
@@ -52,7 +55,8 @@ export class Router {
     this.routes.push({
       method: 'GET',
       path: route.path,
-      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -68,7 +72,8 @@ export class Router {
     this.routes.push({
       method: 'POST',
       path: route.path,
-      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -84,7 +89,8 @@ export class Router {
     this.routes.push({
       method: 'PUT',
       path: route.path,
-      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 
@@ -100,7 +106,8 @@ export class Router {
     this.routes.push({
       method: 'DELETE',
       path: route.path,
-      handler: async (req, responseToolkit) => await this.handle(routeSchemas, req, responseToolkit, handler),
+      handler: async (req, responseToolkit) =>
+        await this.handle(routeSchemas, req, responseToolkit, handler),
     });
   }
 

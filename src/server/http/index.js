@@ -7,7 +7,6 @@ import { setupVersionCheck } from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 import { shortUrlLookupProvider } from './short_url_lookup';
-import { setupRedirectServer } from './setup_redirect_server';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupXsrf } from './xsrf';
 
@@ -23,7 +22,6 @@ export default async function (kbnServer, server, config) {
     listener: kbnServer.newPlatform.proxyListener
   });
 
-  await setupRedirectServer(config);
   registerHapiPlugins(server);
 
   // provide a simple way to expose static directories

@@ -47,7 +47,7 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
-describe('with TLS', function () {
+describe('with TLS', function() {
   test('throws if TLS is enabled but `key` is not specified', () => {
     const httpSchema = HttpConfig.schema;
     const obj = {
@@ -65,6 +65,20 @@ describe('with TLS', function () {
       ssl: {
         enabled: true,
         key: '/path/to/key',
+      },
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
+    const httpSchema = HttpConfig.schema;
+    const obj = {
+      port: 1234,
+      ssl: {
+        enabled: true,
+        certificate: '/path/to/certificate',
+        key: '/path/to/key',
+        redirectHttpFromPort: 1234,
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
@@ -97,7 +111,10 @@ describe('with TLS', function () {
     };
 
     const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
+    expect(config.ssl.certificateAuthorities).toEqual([
+      '/authority/1',
+      '/authority/2',
+    ]);
   });
 
   test('accepts known protocols`', () => {
@@ -124,9 +141,11 @@ describe('with TLS', function () {
     expect(singleKnownProtocolConfig.ssl.supportedProtocols).toEqual(['TLSv1']);
 
     const allKnownProtocolsConfig = httpSchema.validate(allKnownProtocols);
-    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual(
-      ['TLSv1', 'TLSv1.1', 'TLSv1.2']
-    );
+    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual([
+      'TLSv1',
+      'TLSv1.1',
+      'TLSv1.2',
+    ]);
   });
 
   test('should accept known protocols`', () => {
@@ -150,7 +169,11 @@ describe('with TLS', function () {
       },
     };
 
-    expect(() => httpSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingSnapshot();
-    expect(() => httpSchema.validate(allKnownWithOneUnknownProtocols)).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      httpSchema.validate(singleUnknownProtocol)
+    ).toThrowErrorMatchingSnapshot();
+    expect(() =>
+      httpSchema.validate(allKnownWithOneUnknownProtocols)
+    ).toThrowErrorMatchingSnapshot();
   });
 });

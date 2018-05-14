@@ -196,7 +196,7 @@
   version "5.0.14"
   resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.14.tgz#b05e03a1770ddf1139510cff6bd5f476fa927685"
 
-"@types/jest@^22.1.3":
+"@types/jest@^22.2.3":
   version "22.2.3"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.2.3.tgz#0157c0316dc3722c43a7b71de3fdf3acbccef10d"
 
@@ -230,9 +230,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/supertest@2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.2.tgz#c81c797c185f5776a236a0884eddadc35280f6f7"
+"@types/supertest@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@types/supertest/-/supertest-2.0.4.tgz#28770e13293365e240a842d7d5c5a1b3d2dee593"
   dependencies:
     "@types/superagent" "*"
 
@@ -11249,7 +11249,7 @@ rxjs@^5.4.3:
   dependencies:
     symbol-observable "1.0.1"
 
-rxjs@^6.0.0:
+rxjs@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.1.0.tgz#833447de4e4f6427b9cec3e5eb9f56415cd28315"
   dependencies:
