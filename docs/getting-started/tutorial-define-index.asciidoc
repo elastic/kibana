@@ -25,7 +25,7 @@ image::images/tutorial-pattern-1.png[]
 . Click *Next step*.
 . In *Configure settings*, click *Create index pattern*.  For this pattern,
 you don't need to configure any settings.
-. Define a second index pattern named  `ba*`.
+. Define a second index pattern named  `ba*` You don't need to configure any settings for this pattern.
 
 Now create an index pattern for the Logstash data set. This data set
 contains time-series data.

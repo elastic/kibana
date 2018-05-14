@@ -67,7 +67,7 @@ holders.
 . In the *Field* dropdown, select *age*.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
-Now you can see the break down of the account holders' ages, displayed
+Now you can see the break down of the ages of the account holders, displayed
 in a ring around the balance ranges.
 
 [role="screenshot"]
@@ -90,12 +90,12 @@ image::images/tutorial-visualize-bar-1.png[]
 
 Show the number of speaking parts per play along the Y-axis.
 This requires you to configure the Y-axis
-{ref}/search-aggregations.html[metric aggregation,]
-which computes metrics based on values extracted from the search results.
+{ref}/search-aggregations.html[metric aggregation.]
+This aggregation computes metrics based on values from the search results.
 
 . In the *Metrics* pane, expand *Y-Axis*.
-. Set *Aggregation* to `Unique Count`.
-. Set *Field* to `speaker`.
+. Set *Aggregation* to *Unique Count*.
+. Set *Field* to *speaker*.
 . In the *Custom Label* box, enter `Speaking Parts`.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
@@ -107,8 +107,8 @@ image::images/tutorial-visualize-bar-1.5.png[]
 Show the plays along the X-axis.
 
 . In the *Buckets* pane, click *X-Axis*.
-. Set *Aggregation* to `Terms` and *Field* to `play_name`.
-. To list plays alphabetically, in the *Order* dropdown menu, select `Ascending`.
+. Set *Aggregation* to *Terms* and *Field* to *play_name*.
+. To list plays alphabetically, in the *Order* dropdown menu, select *Ascending*.
 . Give the axis a custom label, `Play Name`.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 

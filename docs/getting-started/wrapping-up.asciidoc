@@ -10,5 +10,5 @@ your data.
 types Kibana has to offer.
 * See {kibana-ref}/management.html[Management] for information about configuring Kibana
 and managing your saved objects.
-* See Dev Tools > {kibana-ref}/console-kibana.html[Console] to learn about the interactive
+* See {kibana-ref}/console-kibana.html[Console] to learn about the interactive
 console you can use to submit REST requests to Elasticsearch.

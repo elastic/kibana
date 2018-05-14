@@ -4,11 +4,11 @@
 This tutorial requires three data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[shakespeare.json].
+  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[`shakespeare.json`].
 * A set of fictitious accounts with randomly generated data. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[accounts.zip].
+  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[`accounts.zip`].
 * A set of randomly generated log files. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[logs.jsonl.gz].
+  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[`logs.jsonl.gz`].
 
 Two of the data sets are compressed. To extract the files, use these commands:
 
@@ -55,8 +55,9 @@ The logs data set has dozens of different fields. Here are the notable fields fo
 }
 
 Before you load the Shakespeare and logs data sets, you must set up {ref}/mapping.html[_mappings_] for the fields.
-Mappings divide the documents in the index into logical groups and specify a field's characteristics, such as the
-field's searchability or whether it's _tokenized_, or broken up into separate words.
+Mappings divide the documents in the index into logical groups and specify the characteristics
+of the fields. These characteristics include the searchability of the field
+and whether it's _tokenized_, or broken up into separate words.
 
 In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
 
@@ -79,9 +80,9 @@ PUT /shakespeare
 
 This mapping specifies field characteristics for the data set:
 
-* The _speaker_ and _play_name_ fields are keyword fields. These fields are not analyzed.
+* The `speaker` and `play_name` fields are keyword fields. These fields are not analyzed.
 The strings are treated as a single unit even if they contain multiple words.
-* The _line_id_ and _speech_number_ fields are integers.
+* The `line_id` and `speech_number` fields are integers.
 
 The logs data set requires a mapping to label the latitude and longitude pairs
 as geographic locations by applying the `geo_point` type.
@@ -148,7 +149,7 @@ PUT /logstash-2015.05.20
 
 The accounts data set doesn't require any mappings.
 
-At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[`bulk`]
+At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[bulk]
 API to load the data sets:
 
 [source,shell]

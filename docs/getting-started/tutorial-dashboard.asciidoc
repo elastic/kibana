@@ -8,7 +8,7 @@ this tutorial.
 . Open *Dashboard*.
 . Click *Create new dashboard*.
 . Click *Add*.
-. Click `Bar Example`, `Map Example`, `Markdown Example`, and `Pie Example`.
+. Click *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
 
 
 Your sample dashboard look like this:
