@@ -8,9 +8,10 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 
 import { indexLifecycleManagement } from './reducers/';
+import { autoEnablePhase } from './middleware';
 
 export const indexLifecycleManagementStore = (initialState = {}) => {
-  const enhancers = [ applyMiddleware(thunk) ];
+  const enhancers = [ applyMiddleware(thunk, autoEnablePhase) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   return createStore(

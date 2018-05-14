@@ -83,7 +83,7 @@ export const defaultDeletePhase = {
   [PHASE_ROLLOVER_AFTER_UNITS]: 's'
 };
 
-const defaultPolicy = {
+export const defaultPolicy = {
   name: '',
   saveAsNew: true,
   phases: {
