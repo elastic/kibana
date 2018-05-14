@@ -282,10 +282,6 @@ export class SavedObjectsClient {
       throw new TypeError('options.searchFields must be an array');
     }
 
-    if (!type) {
-      throw new Error('options.type is required');
-    }
-
     const esOptions = {
       index: this._index,
       size: perPage,
