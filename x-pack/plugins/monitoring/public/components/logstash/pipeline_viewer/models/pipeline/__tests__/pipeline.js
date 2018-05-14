@@ -1579,6 +1579,80 @@ describe('Pipeline class', () => {
     });
   });
 
+  describe('Pipeline with if having two nested output statements', () => {
+    beforeEach(() => {
+      graph = new Graph();
+      graph.update({
+        vertices: [
+          {
+            id: "the_if",
+            explicit_id: false,
+            type: "if",
+            condition: "[is_rt] == \"RT\"",
+            stats: {}
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "stdout",
+            id: "plugin_1",
+            meta: {
+              source: {
+                line: 124,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: false,
+            stats: null
+          },
+          {
+            plugin_type: "output",
+            type: "plugin",
+            config_name: "elasticsearch",
+            id: "plugin_2",
+            meta: {
+              source: {
+                line: 117,
+                protocol: "str",
+                id: "pipeline",
+                column: 5
+              }
+            },
+            explicit_id: true,
+            stats: null
+          },
+        ],
+        edges: [
+          {
+            id: "35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5",
+            from: "the_if",
+            to: "plugin_1",
+            type: "boolean",
+            when: true
+          },
+          {
+            id: "591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535",
+            from: "the_if",
+            to: "plugin_2",
+            type: "boolean",
+            when: true
+          }
+        ]
+      });
+    });
+
+    it('has two child statements', () => {
+      console.log(Object.keys(graph));
+      const pipeline = Pipeline.fromPipelineGraph(graph);
+
+      expect(pipeline.outputStatements.length).to.be(1);
+      expect(pipeline.outputStatements[0].trueStatements.length).to.be(2);
+      expect(pipeline.outputStatements[0].elseStatements.length).to.be(0);
+    });
+  });
+
   describe('Pipeline with nested ifs', () => {
     beforeEach(() => {
       graph = new Graph();

@@ -6,6 +6,7 @@
 
 import { intersection } from 'lodash';
 import { Vertex } from './vertex';
+import { verticesForIds } from './vertices_for_ids';
 import ifIcon from '@elastic/eui/src/components/icon/assets/logstash_if.svg';
 
 export class IfVertex extends Vertex {
@@ -40,16 +41,34 @@ export class IfVertex extends Vertex {
     return this.outgoingEdges.find(e => e.when === true);
   }
 
+  get trueEdges() {
+    return this.outgoingEdges.filter(e => e.when);
+  }
+
   get falseEdge() {
     return this.outgoingEdges.find(e => e.when === false);
+  }
+
+  get falseEdges() {
+    return this.outgoingEdges.filter(e => e.when === false);
   }
 
   get trueOutgoingVertex() {
     return this.trueEdge ? this.trueEdge.to : null;
   }
 
+  get trueOutgoingVertices() {
+    const trueEdgeIds = this.trueEdges.map(e => e.to.id);
+    return verticesForIds(this.outgoingVertices, trueEdgeIds);
+  }
+
   get falseOutgoingVertex() {
     return this.falseEdge ? this.falseEdge.to : null;
+  }
+
+  get falseOutgoingVertices() {
+    const falseEdgeIds = this.falseEdges.map(e => e.to.id);
+    return verticesForIds(this.outgoingVertices, falseEdgeIds);
   }
 
   get next() {
