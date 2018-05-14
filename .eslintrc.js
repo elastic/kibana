@@ -10,6 +10,9 @@ module.exports = {
 
   settings: {
     'import/resolver': 'eslint-import-resolver-node',
+    react: {
+      version: '16.3',
+    },
   },
 
   overrides: [
