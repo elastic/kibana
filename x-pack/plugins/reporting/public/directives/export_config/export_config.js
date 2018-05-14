@@ -104,6 +104,13 @@ module.directive('exportConfig', ($rootScope, reportingDocumentControl, reportin
               });
             }
 
+            if (err.status === 403) {
+              return toastNotifications.addDanger({
+                title: 'Reporting error',
+                text: `You don't have permission to generate this report.`,
+              });
+            }
+
             toastNotifications.addDanger({
               title: 'Reporting error',
               text: err.message || `Can't reach the server. Please try again.`,
