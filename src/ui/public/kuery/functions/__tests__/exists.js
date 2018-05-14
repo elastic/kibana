@@ -2,22 +2,19 @@ import expect from 'expect.js';
 import * as exists from '../exists';
 import { nodeTypes } from '../../node_types';
 import _ from 'lodash';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import ngMock from 'ng_mock';
+import indexPatternResponse from '../../__tests__/index_pattern_response.json';
+
 
 let indexPattern;
 
 describe('kuery functions', function () {
-
   describe('exists', function () {
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(() => {
+      indexPattern = indexPatternResponse;
+    });
 
     describe('buildNodeParams', function () {
-
       it('should return a single "arguments" param', function () {
         const result = exists.buildNodeParams('response');
         expect(result).to.only.have.key('arguments');
@@ -28,11 +25,9 @@ describe('kuery functions', function () {
         expect(arg).to.have.property('type', 'literal');
         expect(arg).to.have.property('value', 'response');
       });
-
     });
 
     describe('toElasticsearchQuery', function () {
-
       it('should return an ES exists query', function () {
         const expected = {
           exists: { field: 'response' }

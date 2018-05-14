@@ -1,5 +1,21 @@
 import _ from 'lodash';
 const OPERANDS_IN_RANGE = 2;
+const operators = {
+  gt: '>',
+  gte: '>=',
+  lte: '<=',
+  lt: '<',
+};
+const comparators = {
+  gt: 'boolean gt(Supplier s, def v) {return s.get() > v}',
+  gte: 'boolean gte(Supplier s, def v) {return s.get() >= v}',
+  lte: 'boolean lte(Supplier s, def v) {return s.get() <= v}',
+  lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
+};
+
+function formatValue(field, params) {
+  return _.map(params, (val, key) => operators[key] + field.format.convert(val)).join(' ');
+}
 
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {
   const filter = { meta: { index: indexPattern.id } };
@@ -29,6 +45,8 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
     filter.meta.field = field.name;
   } else if (field.scripted) {
     filter.script = getRangeScript(field, params);
+    filter.script.script.params.value = formatValue(field, filter.script.script.params);
+
     filter.meta.field = field.name;
   } else {
     filter.range = {};
@@ -39,19 +57,6 @@ export function buildRangeFilter(field, params, indexPattern, formattedValue) {
 }
 
 export function getRangeScript(field, params) {
-  const operators = {
-    gt: '>',
-    gte: '>=',
-    lte: '<=',
-    lt: '<',
-  };
-  const comparators = {
-    gt: 'boolean gt(Supplier s, def v) {return s.get() > v}',
-    gte: 'boolean gte(Supplier s, def v) {return s.get() >= v}',
-    lte: 'boolean lte(Supplier s, def v) {return s.get() <= v}',
-    lt: 'boolean lt(Supplier s, def v) {return s.get() < v}',
-  };
-
   const knownParams = _.pick(params, (val, key) => {
     return key in operators;
   });
@@ -70,17 +75,10 @@ export function getRangeScript(field, params) {
     script = `${currentComparators}${comparisons}`;
   }
 
-  const value = _.map(knownParams, function (val, key) {
-    return operators[key] + field.format.convert(val);
-  }).join(' ');
-
   return {
     script: {
       inline: script,
-      params: {
-        ...knownParams,
-        value,
-      },
+      params: knownParams,
       lang: field.lang
     }
   };
