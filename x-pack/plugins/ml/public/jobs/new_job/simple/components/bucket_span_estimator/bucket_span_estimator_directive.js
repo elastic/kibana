@@ -7,14 +7,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { BucketSpanEstimator } from './bucket_span_estimator_view';
 import { getQueryFromSavedSearch } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { EVENT_RATE_COUNT_FIELD } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
 import { ml } from 'plugins/ml/services/ml_api_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
-
-import { BucketSpanEstimator } from './bucket_span_estimator_view';
 
 module.directive('mlBucketSpanEstimator', function () {
   return {
