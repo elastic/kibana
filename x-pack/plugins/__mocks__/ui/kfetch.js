@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const metadata = {
-  branch: 'my-metadata-branch',
-  version: 'my-metadata-version'
+export const kfetch = () => {
+  return Promise.resolve('mock value');
 };
