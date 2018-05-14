@@ -50,7 +50,7 @@ const setApplicationPrivileges = (applicationPrivileges, role, application) => {
 
   // we first remove the matching application entries
   role.applications = role.applications.filter(x => {
-    x.application !== application;
+    return x.application !== application;
   });
 
   // put the application entry back
