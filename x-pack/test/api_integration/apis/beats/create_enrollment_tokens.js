@@ -53,7 +53,7 @@ export default function ({ getService }) {
       const tokensFromApi = apiResponse.tokens;
 
       const esResponse = await es.search({
-        index: ES_ADMIN_INDEX_NAME,
+        index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
         q: 'type:enrollment_token'
       });
