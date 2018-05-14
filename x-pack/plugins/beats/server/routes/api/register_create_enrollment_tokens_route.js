@@ -21,7 +21,7 @@ function persistTokens(callWithRequest, tokens) {
   ]));
 
   const params = {
-    index: INDEX_NAMES.ADMIN,
+    index: INDEX_NAMES.BEATS,
     type: '_doc',
     body,
     refresh: 'wait_for'

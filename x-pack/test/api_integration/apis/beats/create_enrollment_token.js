@@ -11,14 +11,13 @@ export default function ({ getService }) {
   const chance = getService('chance');
   const es = getService('es');
 
-  const ES_INDEX_PATTERN = '.management-beats-*';
-  const ES_ADMIN_INDEX_NAME = '.management-beats-admin';
+  const ES_INDEX_NAME = '.management-beats';
   const ES_TYPE_NAME = '_doc';
 
   describe('create_enrollment_token', () => {
     const cleanup = () => {
       return es.indices.delete({
-        index: ES_INDEX_PATTERN
+        index: ES_INDEX_NAME
       });
     };
 
@@ -37,7 +36,7 @@ export default function ({ getService }) {
       const tokensFromApi = apiResponse.tokens;
 
       const esResponse = await es.search({
-        index: ES_ADMIN_INDEX_NAME,
+        index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
         q: 'type:enrollment_token'
       });
@@ -65,7 +64,7 @@ export default function ({ getService }) {
       const tokensFromApi = apiResponse.tokens;
 
       const esResponse = await es.search({
-        index: ES_ADMIN_INDEX_NAME,
+        index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
         q: 'type:enrollment_token',
         size: numTokens
