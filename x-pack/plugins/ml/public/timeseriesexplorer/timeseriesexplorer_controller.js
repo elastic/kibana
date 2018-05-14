@@ -344,20 +344,11 @@ module.controller('MlTimeSeriesExplorerController', function (
     // Counter to keep track of what data sets have been loaded.
     let awaitingCount = 3;
 
-    // If there's a forecastId stored in the appState it's used later on to decide
-    // whether to fetch forecasting data and update the corresponding $scope attributes
-    // in the finish() function.
-    const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
-
-    // These variables are used to store the results of individual remote requests
+    // This object is used to store the results of individual remote requests
     // before we transform it into the final data and apply it to $scope. Otherwise
     // we might trigger multiple $digest cycles and depending on how deep $watches
     // listen for changes we could miss updates.
-    let anomalyRecords;
-    let focusChartData;
-    let scheduledEvents;
-    let focusForecastData;
-    let showForecastCheckbox;
+    const refreshFocusData = {};
 
     // finish() function, called after each data set has been loaded and processed.
     // The last one to call it will trigger the page render.
@@ -366,24 +357,18 @@ module.controller('MlTimeSeriesExplorerController', function (
       if (awaitingCount === 0) {
         // Tell the results container directives to render the focus chart.
         // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
-        focusChartData = processDataForFocusAnomalies(
-          focusChartData,
-          anomalyRecords,
+        refreshFocusData.focusChartData = processDataForFocusAnomalies(
+          refreshFocusData.focusChartData,
+          refreshFocusData.anomalyRecords,
           $scope.timeFieldName);
 
-        focusChartData = processScheduledEventsForChart(
-          focusChartData,
-          scheduledEvents);
+        refreshFocusData.focusChartData = processScheduledEventsForChart(
+          refreshFocusData.focusChartData,
+          refreshFocusData.scheduledEvents);
 
         // All the data is ready now for a scope update
         $scope.$evalAsync(() => {
-          $scope.anomalyRecords = anomalyRecords;
-          $scope.focusChartData = focusChartData;
-          $scope.scheduledEvents = scheduledEvents;
-          if (forecastId !== undefined) {
-            $scope.focusForecastData = focusForecastData;
-            $scope.showForecastCheckbox = showForecastCheckbox;
-          }
+          $scope = Object.assign($scope, refreshFocusData);
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
@@ -412,9 +397,9 @@ module.controller('MlTimeSeriesExplorerController', function (
       searchBounds.max.valueOf(),
       $scope.focusAggregationInterval.expression
     ).then((resp) => {
-      focusChartData = processMetricPlotResults(resp.results, $scope.modelPlotEnabled);
+      refreshFocusData.focusChartData = processMetricPlotResults(resp.results, $scope.modelPlotEnabled);
       $scope.showModelBoundsCheckbox = ($scope.modelPlotEnabled === true) &&
-        (focusChartData.length > 0);
+        (refreshFocusData.focusChartData.length > 0);
       finish();
     }).catch((resp) => {
       console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
@@ -430,11 +415,11 @@ module.controller('MlTimeSeriesExplorerController', function (
       ANOMALIES_MAX_RESULTS
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
-      anomalyRecords = _.chain(resp.records)
+      refreshFocusData.anomalyRecords = _.chain(resp.records)
         .sortBy(record => record[$scope.timeFieldName])
         .reverse()
         .value();
-      console.log('Time series explorer anomalies:', anomalyRecords);
+      console.log('Time series explorer anomalies:', refreshFocusData.anomalyRecords);
       finish();
     });
 
@@ -447,13 +432,14 @@ module.controller('MlTimeSeriesExplorerController', function (
       1,
       MAX_SCHEDULED_EVENTS
     ).then((resp) => {
-      scheduledEvents = resp.events[$scope.selectedJob.job_id];
+      refreshFocusData.scheduledEvents = resp.events[$scope.selectedJob.job_id];
       finish();
     }).catch((resp) => {
       console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
     });
 
     // Plus query for forecast data if there is a forecastId stored in the appState.
+    const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
     if (forecastId !== undefined) {
       awaitingCount++;
       let aggType = undefined;
@@ -473,8 +459,8 @@ module.controller('MlTimeSeriesExplorerController', function (
         $scope.focusAggregationInterval.expression,
         aggType)
         .then((resp) => {
-          focusForecastData = processForecastResults(resp.results);
-          showForecastCheckbox = (focusForecastData.length > 0);
+          refreshFocusData.focusForecastData = processForecastResults(resp.results);
+          refreshFocusData.showForecastCheckbox = (refreshFocusData.focusForecastData.length > 0);
           finish();
         }).catch((resp) => {
           console.log(`Time series explorer - error loading data for forecast ID ${forecastId}`, resp);
