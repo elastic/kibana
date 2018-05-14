@@ -76,7 +76,7 @@ export class SecureSavedObjectsClient {
     const result = await this._hasPrivileges(actions);
 
     if (!result.success) {
-      throw Boom.forbidden(`Unable to ${action} ${typeOrTypes.join(',')}, missing ${result.missing.join(',')}`);
+      throw Boom.forbidden(`Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`);
     }
   }
 }
