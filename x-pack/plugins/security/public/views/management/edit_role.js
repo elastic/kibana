@@ -33,7 +33,7 @@ const getApplicationPrivileges = (kibanaPrivileges, role, application) => {
     return applicationPrivileges;
   }
 
-  const applications = role.applications.filter(x => x.application === application && x.resources.indexOf(DEFAULT_RESOURCE) !== -1);
+  const applications = role.applications.filter(x => x.application === application && x.resources.includes(DEFAULT_RESOURCE));
 
   const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
