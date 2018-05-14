@@ -4,13 +4,17 @@ Kibana migrations provide a systematic and predictable way to upgrade data from 
 
 The core logic for migrations is index / alias (refered to simply as index from here on) agnostic, but it does make an assumption that the index documents are compatible with the Kibana saved-object-client conventions.
 
+## Why
+
+The main use-case for migrations is changing the mappings or shape of saved object data (e.g. renaming a property or changing it from keyword to text) without littering the codebase with defensive checks for differing versions.
+
+There are two data sources which we need to deal with:
+
+- Data in the existing index
+- Data which is imported into the index from an external source (such as a file)
+
 
 ## How it works
-
-There are two primary use-cases for migrations. The first is migrating all documents in an index from one version to another (e.g. from Kibana 6.4 -> 7.2). The second is migrating documents that are being imported into an index.
-
-
-### Types of migrations
 
 There are two types of migrations: seed and transform.
 
@@ -57,9 +61,8 @@ When a migration is attempted on an index, the first thing the migration index d
 - A destination index will be created with a name like `index-7.0.0-SHAOFMIGRATIONSTATE`
   - `7.0.0` is whatever the current version of the Elasticstack is
   - `SHAOFMIGRATIONSTATE` ia a hash computed from the array of migrations and mappings being applied to the index
-- Mappings are written to the destination index
-  - These include mappings defined by enabled *and* disabled / missing plugins
-  - Disabled / removed plugin mappings are retained so that documents managed by those plugins are not lost during the migration process
+  - The destination index is created with mappings which include mappings defined by enabled *and* disabled / missing plugins
+    - Disabled / removed plugin mappings are retained so that documents managed by those plugins are not lost during the migration process
 - Seed migrations will be run
   - The resulting docs are passed through any subsequent transform migrations before being written to the destination index
 - All documents from the original index will be run through the relevant transform migrations, then written to the destination index
@@ -308,6 +311,7 @@ It should now be possible to start the previous version of Kibana.
     - Those migrations have been applied to an index
     - The plugin is upgraded to a later version, which defines migrations 'a', 'c', 'b'
     - In this case, the plugin's migrations have been reordered
+- Migration state is cumulative (migration ids and plugin->mapping associations are never removed)
 - Mappings are never removed
   - This is because we need to support old indices which might have mappings that are no longer associated with a plugin
   - We could put in logic to clean up mappings at the end of a migration:
@@ -319,4 +323,6 @@ It should now be possible to start the previous version of Kibana.
 
 Apart from the core migration logic in the `kbn-migrations` package, there is logic which is specific to the Kibana index itself.
 
-When Kibana starts, it will check to see if it needs to migrate its index. If it does, it will perform the migration prior to serving any HTTP requests. Only one instance of Kibana will perform migrations at any given time. All other Kibana instances will fail to start and will log an error indicating that the Kibana index is migrating. Once the Kibana index migration has completed, the other instances will be able to start successfully.
+When Kibana starts, it will check to see if it needs to migrate its index. If it does, it will perform the migration prior to serving any HTTP requests. Only one instance of Kibana will perform migrations at any given time. All other Kibana instances will wait for the migration to complete. This wait is done by polling the index at a configurable interval (defaults to 2 seconds, and is configurable via the `kibanamigrations.pollInterval` setting). Once the Kibana index migration has completed, the other instances will be able to start successfully.
+
+If the Kibana instance that is performing the migration crashes or is killed prior to finishing the migration, all Kibana instances will be stuck in a polling loop, waiting for the migration to complete. There is no automatic recovery from this scenario, as such a mechanism seemed too complex and likely to introduce subtle bugs. Instead, one of the Kibana instances can be started with a `--force-migration` option which will make it run migrations even if the index has a `migrating` status.
