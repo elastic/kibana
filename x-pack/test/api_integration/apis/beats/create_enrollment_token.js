@@ -17,7 +17,8 @@ export default function ({ getService }) {
   describe('create_enrollment_token', () => {
     const cleanup = () => {
       return es.indices.delete({
-        index: ES_INDEX_NAME
+        index: ES_INDEX_NAME,
+        ignore: [ 404 ]
       });
     };
 
