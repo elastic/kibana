@@ -1,8 +1,10 @@
 <kbn-management-app section="security" omit-breadcrumb-pages="['edit']">
   <!-- This content gets injected below the localNav. -->
   <div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+
     <!-- Subheader -->
     <div class="kuiBar kuiVerticalRhythm">
+
       <div class="kuiBarSection">
         <!-- Title -->
         <h1 class="kuiTitle">
@@ -35,6 +37,18 @@
         >
           <span class="kuiIcon fa-lock"></span>
           Reserved
+        </div>
+      </div>
+    </div>
+
+    <div class="kuiBar kuiVerticalRhythm" ng-if="otherApplications.length > 0">
+      <div class="kuiInfoPanel kuiInfoPanel--warning">
+        <div class="kuiInfoPanelHeader">
+          <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-warning"></span>
+          <span class="kuiInfoPanelHeader__title">
+            This role contains application privileges for the {{ otherApplications.join(', ') }} application(s) that can't be edited.
+            If they are for other instances of Kibana, you must manage those privileges on that Kibana.
+          </span>
         </div>
       </div>
     </div>

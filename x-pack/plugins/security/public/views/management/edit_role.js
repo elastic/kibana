@@ -61,6 +61,14 @@ const setApplicationPrivileges = (applicationPrivileges, role, application) => {
   }];
 };
 
+const getOtherApplications = (kibanaPrivileges, role, application) => {
+  if (!role.applications || role.applications.length === 0) {
+    return [];
+  }
+
+  return role.applications.map(x => x.application).filter(x => x !== application);
+};
+
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
   resolve: {
@@ -121,6 +129,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const kibanaPrivileges = $route.current.locals.kibanaPrivileges;
     const role = $route.current.locals.role;
     $scope.applicationPrivileges = getApplicationPrivileges(kibanaPrivileges, role, rbacApplication);
+    $scope.otherApplications = getOtherApplications(kibanaPrivileges, role, rbacApplication);
 
     $scope.rolesHref = `#${ROLES_PATH}`;
 
