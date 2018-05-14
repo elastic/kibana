@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { getClusterPrivileges } from '../../../../services/role_privileges';
 import { isReservedRole } from '../lib/is_reserved_role';
 import {
-  EuiCheckboxGroup
+  EuiCheckboxGroup,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
+import { CLUSTER_PRIVS_DOC_LINK } from '../lib/constants';
 
 export class ClusterPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
   };
 
   render() {
@@ -31,12 +35,21 @@ export class ClusterPrivileges extends Component {
       .reduce((acc, o) => ({ ...acc, ...o }), {});
 
     return (
-      <EuiCheckboxGroup
-        options={checkboxes}
-        idToSelectedMap={selectionMap}
-        onChange={this.onClusterPrivilegesChange}
-        disabled={isReservedRole(role)}
-      />
+      <Fragment>
+        <EuiText>
+          <p>
+            Manage the actions this role can perform against your cluster.&nbsp;
+            <EuiLink href={CLUSTER_PRIVS_DOC_LINK} target={'_blank'}>Learn more</EuiLink>
+          </p>
+        </EuiText>
+        <EuiSpacer/>
+        <EuiCheckboxGroup
+          options={checkboxes}
+          idToSelectedMap={selectionMap}
+          onChange={this.onClusterPrivilegesChange}
+          disabled={isReservedRole(role)}
+        />
+      </Fragment>
     );
   }
 

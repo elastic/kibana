@@ -27,8 +27,10 @@ export class IndexPrivilegeForm extends Component {
     availableFields: PropTypes.array,
     onChange: PropTypes.func.isRequired,
     isReservedRole: PropTypes.bool.isRequired,
+    allowDelete: PropTypes.bool.isRequired,
     allowDocumentLevelSecurity: PropTypes.bool.isRequired,
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
+    validator: PropTypes.object.isRequired,
   };
 
   render() {
@@ -38,9 +40,14 @@ export class IndexPrivilegeForm extends Component {
           <EuiFlexItem>
             {this.getPrivilegeForm()}
           </EuiFlexItem>
-          {(
+          {this.props.allowDelete && (
             <EuiFlexItem grow={false}>
-              <EuiButton size={'s'} color={'danger'} iconType={'trash'} />
+              <EuiButton
+                size={'s'}
+                color={'danger'}
+                iconType={'trash'}
+                onClick={this.props.onDelete}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -54,7 +61,7 @@ export class IndexPrivilegeForm extends Component {
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label={'Indices'} fullWidth={true}>
+            <EuiFormRow label={'Indices'} fullWidth={true} {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}>
               <EuiComboBox
                 options={this.props.indexPatterns.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}

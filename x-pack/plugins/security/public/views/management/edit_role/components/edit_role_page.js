@@ -21,13 +21,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiBadge,
+  EuiTitle,
 } from '@elastic/eui';
 import { PageHeader } from './page_header';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { ClusterPrivileges } from './cluster_privileges';
 import { getFields } from '../../../../objects';
 import { isReservedRole } from '../lib/is_reserved_role';
+import { RoleValidator } from '../lib/validate_role';
+import { ReservedRoleBadge } from './reserved_role_badge';
+import { ROLES_PATH } from '../../management_urls';
+import { DeleteRoleButton } from './delete_role_button';
 
 export class EditRolePage extends Component {
   static propTypes = {
@@ -45,8 +49,10 @@ export class EditRolePage extends Component {
     super(props);
     this.state = {
       role: props.role,
-      availableFields: {}
+      availableFields: {},
+      formError: null
     };
+    this.validator = new RoleValidator({ shouldValidate: false });
   }
 
   componentDidMount() {
@@ -89,11 +95,15 @@ export class EditRolePage extends Component {
   }
 
   render() {
+    const {
+      validator
+    } = this;
+
     return (
       <EuiPage>
         <PageHeader breadcrumbs={this.props.breadcrumbs}/>
         <EuiPageContent>
-          <EuiForm>
+          <EuiForm {...this.state.formError}>
             <EuiFlexGroup justifyContent={'spaceBetween'}>
               <EuiFlexItem grow={false}>
                 <EuiText><h1>{this.getTitle()}</h1></EuiText>
@@ -104,7 +114,7 @@ export class EditRolePage extends Component {
             <EuiSpacer/>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiFormRow label={'Name'}>
+                <EuiFormRow label={'Name'} {...validator.validateRoleName(this.state.role)}>
                   <EuiFieldText
                     name={'name'}
                     value={this.state.role.name}
@@ -113,8 +123,7 @@ export class EditRolePage extends Component {
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              {isReservedRole(this.props.role)
-                && <EuiFlexItem grow={false}><EuiBadge iconType={'lock'}>Reserved Role</EuiBadge></EuiFlexItem>}
+              <ReservedRoleBadge role={this.props.role} />
             </EuiFlexGroup>
 
             <EuiSpacer/>
@@ -123,12 +132,14 @@ export class EditRolePage extends Component {
 
             {this.getKibanaPrivileges()}
 
+            <EuiSpacer size={'xl'} />
+
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={this.saveSpace} disabled={isReservedRole(this.props.role)}>Save</EuiButton>
+                <EuiButton fill onClick={this.saveRole} disabled={isReservedRole(this.props.role)}>Save</EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.backToSpacesList}>
+                <EuiButton onClick={this.backToRoleList}>
                   Cancel
                 </EuiButton>
               </EuiFlexItem>
@@ -150,7 +161,7 @@ export class EditRolePage extends Component {
     if (this.editingExistingRole() && !isReservedRole(this.props.role)) {
       return (
         <EuiFlexItem grow={false}>
-          <EuiButton size={'s'} color={'danger'} iconType={'trash'}>Delete role</EuiButton>
+          <DeleteRoleButton canDelete={true} onDelete={this.deleteRole} />
         </EuiFlexItem>
       );
     }
@@ -158,11 +169,11 @@ export class EditRolePage extends Component {
     return null;
   };
 
-  onNameChange = (name) => {
+  onNameChange = (e) => {
     this.setState({
       role: {
         ...this.state.role,
-        name
+        name: e.target.value
       }
     });
   }
@@ -174,17 +185,23 @@ export class EditRolePage extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow label={'Elasticsearch'} fullWidth={true}>
+        <EuiTitle>
+          <h3>Elasticsearch</h3>
+        </EuiTitle>
+
+        <EuiSpacer />
+
+        <EuiPanel>
           <EuiAccordion
             id={'clusterPrivilegesAccordion'}
             buttonContent={<div><EuiIcon type={'logoElastic'} size={'m'}/> Cluster Privileges ({role.cluster.length})</div>}
           >
-            <EuiPanel>
-              <ClusterPrivileges role={this.state.role} onChange={this.onClusterPrivilegesChange}/>
-            </EuiPanel>
+            <ClusterPrivileges role={this.state.role} onChange={this.onClusterPrivilegesChange}/>
           </EuiAccordion>
-        </EuiFormRow>
-        <EuiFormRow fullWidth={true}>
+        </EuiPanel>
+        <EuiSpacer />
+
+        <EuiPanel>
           <EuiAccordion
             id={'indexPrivilegesAccordion'}
             buttonContent={
@@ -194,33 +211,36 @@ export class EditRolePage extends Component {
               </div>
             }
           >
-            <EuiPanel>
-              <EuiText>
-                <p>
-                  Index Privileges allow you to foo the bar while baring the baz
-                </p>
-              </EuiText>
-              <EuiSpacer/>
-              {this.getIndexPrivileges()}
-            </EuiPanel>
+            <EuiText>
+              <p>
+                Index Privileges allow you to foo the bar while baring the baz
+              </p>
+            </EuiText>
+            <EuiSpacer/>
+            {this.getIndexPrivileges()}
           </EuiAccordion>
-        </EuiFormRow>
+        </EuiPanel>
+        <EuiSpacer />
 
-        <EuiFormRow fullWidth={true}>
+        <EuiPanel>
           <EuiAccordion
             id={'runAsPrivilegesAccordion'}
             buttonContent={<div><EuiIcon type={'play'} size={'m'}/> Run As Privileges ({role.run_as.length})</div>}
           >
-            <EuiPanel>
-              <EuiComboBox
-                placeholder={'Add a user...'}
-                options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
-                selectedOptions={this.state.role.run_as.map(u => ({ label: u }))}
-                onChange={this.onRunAsUserChange}
-              />
-            </EuiPanel>
+            <EuiText>
+              <p>
+                Run As Privileges allow you to foo the bar while baring the baz
+              </p>
+            </EuiText>
+            <EuiSpacer/>
+            <EuiComboBox
+              placeholder={'Add a user...'}
+              options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
+              selectedOptions={this.state.role.run_as.map(u => ({ label: u }))}
+              onChange={this.onRunAsUserChange}
+            />
           </EuiAccordion>
-        </EuiFormRow>
+        </EuiPanel>
       </Fragment>
     );
   };
@@ -245,9 +265,12 @@ export class EditRolePage extends Component {
       <IndexPrivilegeForm
         key={idx}
         {...props}
+        validator={this.validator}
+        allowDelete={!props.isReservedRole && !(this.isPlaceholderPrivilege(indexPrivilege) && indices.length === 1)}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
+        onDelete={this.onIndexPrivilegeDelete(idx)}
       />
     ));
 
@@ -307,13 +330,20 @@ export class EditRolePage extends Component {
     };
   };
 
-  deleteIndexPrivilege = (privilegeIndex) => {
-    this.setState({
-      role: {
-        ...this.state.role,
-        indices: this.state.indices.splice(privilegeIndex, 1)
-      }
-    });
+  onIndexPrivilegeDelete = (privilegeIndex) => {
+    return () => {
+      const { role } = this.state;
+
+      const newIndicesState = [...role.indices];
+      newIndicesState.splice(privilegeIndex, 1);
+
+      this.setState({
+        role: {
+          ...role,
+          indices: newIndicesState
+        }
+      });
+    };
   }
 
   onClusterPrivilegesChange = (cluster) => {
@@ -356,5 +386,32 @@ export class EditRolePage extends Component {
 
   editingExistingRole = () => {
     return !!this.props.role.name;
+  };
+
+  isPlaceholderPrivilege = (indexPrivilege) => {
+    return indexPrivilege.names.length === 0;
+  };
+
+  saveRole = () => {
+    this.validator.enableValidation();
+
+    const result = this.validator.validateForSave(this.state.role);
+    if (result.isInvalid) {
+      this.setState({
+        formError: result
+      });
+    } else {
+      this.setState({
+        formError: null
+      });
+    }
+  };
+
+  deleteRole = () => {
+
+  };
+
+  backToRoleList = () => {
+    window.location.hash = ROLES_PATH;
   };
 }
