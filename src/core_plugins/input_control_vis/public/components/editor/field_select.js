@@ -36,7 +36,13 @@ export class FieldSelect extends Component {
       return;
     }
 
-    const indexPattern = await this.props.getIndexPattern(indexPatternId);
+    let indexPattern;
+    try {
+      indexPattern = await this.props.getIndexPattern(indexPatternId);
+    } catch (err) {
+      // index pattern no longer exists
+      return;
+    }
 
     // props.indexPatternId may be updated before getIndexPattern returns
     // ignore response when fetched index pattern does not match active index pattern
