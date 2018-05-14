@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartData = ['png 1,373', 'php 445', 'jpg 9,109', 'gif 918', 'css 2,159'];
 
         log.debug('Order By = Term');
-        return PageObjects.visualize.selectOrderBy('_term')
+        return PageObjects.visualize.selectOrderBy('_key')
           .then(function clickGo() {
             return PageObjects.visualize.clickGo();
           })

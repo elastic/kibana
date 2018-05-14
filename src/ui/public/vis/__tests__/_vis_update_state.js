@@ -51,4 +51,16 @@ describe('updateOldState', () => {
 
   });
 
+  describe('terms agg conversion', () => {
+    it('should update _term to _key', () => {
+      const oldState = {
+        aggs: [
+          { type: 'terms', params: { orderBy: '_term' } }
+        ]
+      };
+      const state = updateOldState(oldState);
+      expect(state.aggs[0].params.orderBy).to.be('_key');
+    });
+  });
+
 });
