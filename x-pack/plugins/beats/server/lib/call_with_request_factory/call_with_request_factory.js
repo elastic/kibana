@@ -7,8 +7,8 @@
 import { once } from 'lodash';
 
 const callWithRequest = once((server) => {
-  const pipeline = server.config().get('elasticsearch');
-  const cluster = server.plugins.elasticsearch.createCluster('beats', pipeline);
+  const config = server.config().get('elasticsearch');
+  const cluster = server.plugins.elasticsearch.createCluster('beats', config);
   return cluster.callWithRequest;
 });
 
