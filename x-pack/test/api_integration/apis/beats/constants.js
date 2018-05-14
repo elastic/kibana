@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { callWithRequestFactory } from './call_with_request_factory';
+export const ES_INDEX_NAME = '.management-beats';
+export const ES_TYPE_NAME = '_doc';
+
