@@ -268,6 +268,38 @@ describe('visualize loader', () => {
         await timeout();
         expect(spy.calledOnce).to.be(true);
       });
+
+      it('should allow updating and deleting data attributes', () => {
+        const container = newContainer();
+        const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {
+          dataAttrs: {
+            foo: 42
+          }
+        });
+        expect(container.find('visualize').attr('data-foo')).to.be('42');
+        handler.update({
+          dataAttrs: {
+            foo: null,
+            added: 'value',
+          }
+        });
+        expect(container.find('visualize')[0].hasAttribute('data-foo')).to.be(false);
+        expect(container.find('visualize').attr('data-added')).to.be('value');
+      });
+
+      it('should allow updating the time range of the visualization', () => {
+        const handler = loader.embedVisualizationWithSavedObject(newContainer(), createSavedObject(), {
+          timeRange: { from: 'now-7d', to: 'now' }
+        });
+        handler.update({
+          timeRange: { from: 'now-10d/d', to: 'now' }
+        });
+        // This is not the best test, since it tests internal structure of our scope.
+        // Unfortunately we currently don't expose the timeRange in a better way.
+        // Once we rewrite this to a react component we should spy on the timeRange
+        // property in the component to match the passed in value.
+        expect(handler._scope.timeRange).to.eql({ from: 'now-10d/d', to: 'now' });
+      });
     });
 
   });
