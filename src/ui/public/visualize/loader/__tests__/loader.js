@@ -283,6 +283,8 @@ describe('visualize loader', () => {
             added: 'value',
           }
         });
+        // Synce we are relying on $evalAsync we need to trigger a digest loop during tests
+        $rootScope.$digest();
         expect(container.find('visualize')[0].hasAttribute('data-foo')).to.be(false);
         expect(container.find('visualize').attr('data-added')).to.be('value');
       });
@@ -294,6 +296,8 @@ describe('visualize loader', () => {
         handler.update({
           timeRange: { from: 'now-10d/d', to: 'now' }
         });
+        // Synce we are relying on $evalAsync we need to trigger a digest loop during tests
+        $rootScope.$digest();
         // This is not the best test, since it tests internal structure of our scope.
         // Unfortunately we currently don't expose the timeRange in a better way.
         // Once we rewrite this to a react component we should spy on the timeRange
