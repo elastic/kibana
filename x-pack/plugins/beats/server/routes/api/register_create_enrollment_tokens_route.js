@@ -31,6 +31,7 @@ function persistTokens(callWithRequest, tokens) {
 }
 
 // TODO: add license check pre-hook
+// TODO: write to Kibana audit log file
 export function registerCreateEnrollmentTokensRoute(server) {
   const DEFAULT_NUM_TOKENS = 1;
 
