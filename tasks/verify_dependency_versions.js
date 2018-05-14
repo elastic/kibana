@@ -2,7 +2,7 @@ import { size } from 'lodash';
 import kibana from '../package.json';
 import xpack from '../x-pack/package.json';
 
-function compareDependencies(depType) {
+function getMismatches(depType) {
   return Object.keys(kibana[depType])
     .map(key => {
       const xpackValue = xpack[depType][key];
@@ -28,11 +28,11 @@ export default function verifyDependencyVersions(grunt) {
     'verifyDependencyVersions',
     'Checks dependency versions',
     () => {
-      const devDependenciesComparison = compareDependencies('devDependencies');
-      if (size(devDependenciesComparison) > 0) {
+      const devDependenciesMismatches = getMismatches('devDependencies');
+      if (size(devDependenciesMismatches) > 0) {
         grunt.log.error(
           'The following devDependencies do not match:',
-          JSON.stringify(devDependenciesComparison, null, 4)
+          JSON.stringify(devDependenciesMismatches, null, 4)
         );
         return false;
       } else {
