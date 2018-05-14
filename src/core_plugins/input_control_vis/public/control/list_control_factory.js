@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import {
   Control,
-  noValuesDisableMsg
+  noValuesDisableMsg,
+  noIndexPatternMsg,
 } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
@@ -41,6 +42,12 @@ class ListControl extends Control {
   }
 
   async fetch() {
+    const indexPattern = this.filterManager.getIndexPattern();
+    if (!indexPattern) {
+      this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
+      return;
+    }
+
     let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
@@ -58,7 +65,6 @@ class ListControl extends Control {
       ancestorFilters = this.getAncestorFilters();
     }
 
-    const indexPattern = this.filterManager.getIndexPattern();
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState = {
       timeout: '1s',
@@ -95,7 +101,12 @@ class ListControl extends Control {
 }
 
 export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
-  const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  let indexPattern;
+  try {
+    indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  } catch (err) {
+    // ignore not found error and return control so it can be displayed in disabled state.
+  }
 
   return new ListControl(
     controlParams,
