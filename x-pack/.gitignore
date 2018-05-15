@@ -1,6 +1,7 @@
 /.gradle
 /build
 /target
+/test/functional/failure_debug
 /test/functional/screenshots
 /test/functional/apps/reporting/reports/session
 /plugins/reporting/.chromium/
