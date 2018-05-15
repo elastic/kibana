@@ -167,5 +167,25 @@ export default function ({ getService, getPageObjects }) {
         expect(legendEntries).to.eql(expectedEntries);
       });
     });
+
+    describe('vertical bar with derivative', function () {
+      it('should show correct series', async function () {
+        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.toggleOpenEditor(1);
+        await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+
+        await PageObjects.common.sleep(1003);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const expectedEntries = [
+          'Derivative of Count'
+        ];
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        expect(legendEntries).to.eql(expectedEntries);
+      });
+    });
   });
 }
