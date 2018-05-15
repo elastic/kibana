@@ -67,7 +67,7 @@ export class IndexPrivilegeForm extends Component {
                 selectedOptions={this.props.indexPrivilege.names.map(toOption)}
                 onCreateOption={this.onCreateIndexPatternOption}
                 onChange={this.onIndexPatternsChange}
-                disabled={this.props.isReservedRole}
+                isDisabled={this.props.isReservedRole}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -77,7 +77,7 @@ export class IndexPrivilegeForm extends Component {
                 options={getIndexPrivileges().map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
-                disabled={this.props.isReservedRole}
+                isDisabled={this.props.isReservedRole}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -128,7 +128,7 @@ export class IndexPrivilegeForm extends Component {
               selectedOptions={grant.map(toOption)}
               onCreateOption={this.onCreateGrantedField}
               onChange={this.onGrantedFieldsChange}
-              disabled={this.props.isReservedRole}
+              isDisabled={this.props.isReservedRole}
             />
           </EuiFormRow>
         </EuiFlexItem>

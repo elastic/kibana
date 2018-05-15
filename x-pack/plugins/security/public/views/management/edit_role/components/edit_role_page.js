@@ -244,6 +244,7 @@ export class EditRolePage extends Component {
               options={this.props.runAsUsers.map(username => ({ id: username, label: username }))}
               selectedOptions={this.state.role.run_as.map(u => ({ label: u }))}
               onChange={this.onRunAsUserChange}
+              isDisabled={isReservedRole(this.props.role)}
             />
           </EuiAccordion>
         </EuiPanel>
