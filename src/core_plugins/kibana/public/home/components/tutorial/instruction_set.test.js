@@ -4,6 +4,7 @@ import { shallow } from 'enzyme';
 import {
   InstructionSet,
 } from './instruction_set';
+import * as StatusCheckStates from './status_check_states';
 
 const instructions = [
   {
@@ -43,7 +44,7 @@ test('render', () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-describe('status check', () => {
+describe('statusCheckState', () => {
   const statusCheckConfig = {
     success: 'custom success msg',
     error: 'custom error msg',
@@ -61,9 +62,7 @@ describe('status check', () => {
       paramValues={{}}
       statusCheckConfig={statusCheckConfig}
       replaceTemplateStrings={() => {}}
-      statusCheckState="incomplete"
-      hasStatusCheckFailed={false}
-      isCheckingStatus={false}
+      statusCheckState={StatusCheckStates.FETCHING}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
@@ -77,14 +76,12 @@ describe('status check', () => {
       paramValues={{}}
       statusCheckConfig={statusCheckConfig}
       replaceTemplateStrings={() => {}}
-      statusCheckState="incomplete"
-      hasStatusCheckFailed={false}
-      isCheckingStatus={true}
+      statusCheckState={StatusCheckStates.FETCHING}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
-  test('failed status check', () => {
+  test('failed status check - error', () => {
     const component = shallow(<InstructionSet
       title="title1"
       instructionVariants={instructionVariants}
@@ -93,9 +90,21 @@ describe('status check', () => {
       paramValues={{}}
       statusCheckConfig={statusCheckConfig}
       replaceTemplateStrings={() => {}}
-      statusCheckState="incomplete"
-      hasStatusCheckFailed={true}
-      isCheckingStatus={false}
+      statusCheckState={StatusCheckStates.ERROR}
+    />);
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+
+  test('failed status check - no data', () => {
+    const component = shallow(<InstructionSet
+      title="title1"
+      instructionVariants={instructionVariants}
+      onStatusCheck={() => {}}
+      offset={1}
+      paramValues={{}}
+      statusCheckConfig={statusCheckConfig}
+      replaceTemplateStrings={() => {}}
+      statusCheckState={StatusCheckStates.NO_DATA}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
@@ -109,9 +118,7 @@ describe('status check', () => {
       paramValues={{}}
       statusCheckConfig={statusCheckConfig}
       replaceTemplateStrings={() => {}}
-      statusCheckState="complete"
-      hasStatusCheckFailed={false}
-      isCheckingStatus={false}
+      statusCheckState={StatusCheckStates.HAS_DATA}
     />);
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
