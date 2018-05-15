@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
+import { registerCreateEnrollmentTokensRoute } from './register_create_enrollment_tokens_route';
+
+export function registerApiRoutes(server) {
+  registerCreateEnrollmentTokensRoute(server);
+}
