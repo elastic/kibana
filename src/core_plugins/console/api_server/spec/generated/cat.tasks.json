@@ -1,11 +1,10 @@
 {
-  "_cat/tasks": {
+  "cat.tasks": {
     "url_params": {
       "format": "",
       "node_id": [],
       "actions": [],
       "detailed": "__flag__",
-      "parent_node": "",
       "parent_task": "",
       "h": [],
       "help": "__flag__",
@@ -17,6 +16,7 @@
     ],
     "patterns": [
       "_cat/tasks"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "_cluster/reroute": {
+  "cluster.reroute": {
     "url_params": {
       "dry_run": "__flag__",
       "explain": "__flag__",
@@ -13,6 +13,7 @@
     ],
     "patterns": [
       "_cluster/reroute"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-reroute.html"
   }
 }
