@@ -905,8 +905,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
-    async clickLegendOption(name) {
-      await testSubjects.click(`legend-${name}`);
+    async openLegendOptionColors(name) {
+      await retry.try(async () => {
+        await testSubjects.click(`legend-${name}`);
+        // arbitrary color chosen, any available would do
+        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        if (!isOpen) {
+          throw new Error('legend color selector not open');
+        }
+      });
+    }
+
+    async doesLegendColorChoiceExist(color) {
+      return await testSubjects.exist(`legendSelectColor-${color}`);
     }
 
     async selectNewLegendColorChoice(color) {
