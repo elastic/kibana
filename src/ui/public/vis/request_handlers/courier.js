@@ -61,7 +61,9 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         }
       });
 
-      requestSearchSource.aggs(vis.getAggConfig().toDsl());
+      requestSearchSource.aggs(function () {
+        return vis.getAggConfig().toDsl();
+      });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
         return vis.onSearchRequestStart(searchSource, searchRequest);
