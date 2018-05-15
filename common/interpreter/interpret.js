@@ -1,4 +1,4 @@
-import { each, keys, last, mapValues, values, zipObject } from 'lodash';
+import { each, keys, last, mapValues, values } from 'lodash';
 import clone from 'lodash.clone';
 import omitBy from 'lodash.omitby';
 import { getType } from '../lib/get_type';
@@ -143,7 +143,12 @@ export function interpretProvider(config) {
     });
 
     const argValues = await Promise.all(argListPromises);
-    const resolvedArgs = zipObject(nonAliasArgNames, argValues);
+    const resolvedArgs = nonAliasArgNames.reduce((args, argName, i) => {
+      return {
+        ...args,
+        [argName]: (args[argName] || []).concat(argValues[i]),
+      };
+    }, {});
 
     return mapValues(resolvedArgs, (val, name) => {
       // TODO: Implement a system to allow for undeclared arguments
