@@ -49,7 +49,7 @@ function buildImportFunction(plugins, exportedState, migrationState) {
 function buildValidationFunction(plugins, exportedState, migrationState) {
   const previousPlugins = _.indexBy(exportedState.plugins, 'id');
   const currentPlugins = _.indexBy(migrationState.plugins, 'id');
-  const propToPlugin = mapPropsToPlugin(previousPlugins, currentPlugins);
+  const propToPlugin = mapPropsToPlugin(exportedState.plugins, migrationState.plugins);
   const disabledIds = new Set(Plugin.disabledIds(plugins, migrationState));
 
   return (doc) => {
@@ -65,11 +65,9 @@ function buildValidationFunction(plugins, exportedState, migrationState) {
   };
 }
 
-function mapPropsToPlugin(previousPlugins, currentPlugins) {
-  const pluginProps = ({ mappings }) => mappings ? _.keys(JSON.parse(mappings)) : [];
-  const pluginStates = _([_.values(currentPlugins), _.values(previousPlugins)]).flatten().compact();
+function mapPropsToPlugin(...pluginLists) {
+  const jsonKeys = json => json ? _.keys(JSON.parse(json)) : [];
+  const setAll = (obj, keys, val) => _.reduce(keys, (o, k) => _.set(o, k, val), obj);
 
-  return pluginStates.reduce((acc, plugin) => {
-    return _.reduce(pluginProps(plugin), (h, prop) => _.set(h, prop, plugin), acc);
-  }, {});
+  return _(pluginLists).flatten().compact().reduce((acc, p) => setAll(acc, jsonKeys(p.mappings), p), {});
 }
