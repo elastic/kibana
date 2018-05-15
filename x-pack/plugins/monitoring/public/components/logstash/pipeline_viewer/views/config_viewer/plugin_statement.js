@@ -48,15 +48,18 @@ const StatOverview = ({ value, isHighlighted }) => (
   <div style={getStatStyle(isHighlighted)} >{value}</div>
 );
 
-export const PluginStatement = ({ statement, stats, vertexSelected }) => (
-  <li className="statement">
+export const PluginStatement = ({ statement, stats, vertexSelected, isEvenChild }) => (
+  <li className={`statement ${isEvenChild ? 'evenStatement' : ''}`}>
     <div>
       <EuiPanel
-        className="statement__content"
+        className="statement__body"
         paddingSize="s"
       >
         <div>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            className="statement__content"
+          >
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem
@@ -91,7 +94,9 @@ export const PluginStatement = ({ statement, stats, vertexSelected }) => (
               {
                 stats &&
                 stats.length > 0 &&
-                <EuiFlexGrid>
+                <EuiFlexGrid
+                  gutterSize="none"
+                >
                   <StatementStatsList
                     stats={stats}
                   />

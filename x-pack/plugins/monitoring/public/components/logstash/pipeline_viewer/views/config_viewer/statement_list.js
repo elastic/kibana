@@ -16,6 +16,7 @@ const StatementList = ({ statements, vertexSelected }) => (
       statement={statement}
       key={statement.id}
       isTop={true}
+      isEvenChild={index + 1 % 2 === 0}
       isLast={statements.length === index + 1}
       vertexSelected={vertexSelected}
     />

@@ -42,7 +42,7 @@ const getDefaultStats = ({ pluginType, vertex }) => {
   return [];
 };
 
-export const Statement = ({ isLast, statement, vertexSelected }) => {
+export const Statement = ({ isLast, statement, vertexSelected, isEvenChild }) => {
   const klass = statement.constructor.name;
   const { vertex } = statement;
 
@@ -65,6 +65,7 @@ export const Statement = ({ isLast, statement, vertexSelected }) => {
           stats={getDefaultStats(statement)}
           vertexSelected={handler}
           isLast={isLast}
+          isEvenChild={isEvenChild}
         />
       );
     case 'Queue':

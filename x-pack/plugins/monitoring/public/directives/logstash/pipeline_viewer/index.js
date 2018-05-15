@@ -32,6 +32,7 @@ uiModule.directive('monitoringLogstashPipelineViewer', ($injector) => {
         pipelineState.update(updatedPipeline);
 
         const configModel = Pipeline.fromPipelineGraph(pipelineState.config.graph);
+
         const configViewer = (
           <ConfigViewer
             pipeline={configModel}

@@ -58,9 +58,24 @@ function getQueue(pipelineGraph) {
 }
 
 function getOutputStatements(pipelineGraph) {
-  return pipelineGraph.getVertices()
-    .filter(v => (v.pipelineStage === 'output') && !v.incomingVertices.some(p => p.pipelineStage === 'output'))
+  const vertices = pipelineGraph.getVertices()
+    .filter(v => (v.pipelineStage === 'output') && !v.incomingVertices.some(p => p.pipelineStage === 'output'));
+  const ret = vertices
     .map(v => makeStatement(v, 'output'));
+
+  // console.log(pipelineGraph.getVertices());
+  // console.log(vertices);
+  // console.log(ret[2]);
+  // console.log(Object.keys(ret[2]));
+  // console.log(ret[2].allTrueVertices);
+
+  // const allTrue = vertices[2].allTrueVertices;
+  // console.log(allTrue);
+  // console.log(allTrue[0]);
+
+  //console.log(vertices[2].allTrueVertices);
+
+  return ret;
 }
 
 export class Pipeline {

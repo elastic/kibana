@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel
-} from '@elastic/eui';
-
-export const Queue = ({ vertexSelected }) => (
+export const Queue = () => (
   <li className="statement">
     <div>
-      <EuiPanel
+      Queue stats not available
+      {/* <EuiPanel
         className="statement__content"
         paddingSize="s"
         onClick={vertexSelected}
@@ -27,7 +20,7 @@ export const Queue = ({ vertexSelected }) => (
             <strong>Queue</strong>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </EuiPanel> */}
     </div>
   </li>
 );
