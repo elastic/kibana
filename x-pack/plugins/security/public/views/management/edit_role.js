@@ -23,27 +23,27 @@ import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 
-const getApplicationPrivileges = (kibanaPrivileges, role, application) => {
-  const applicationPrivileges = kibanaPrivileges.reduce((acc, p) => {
+const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
+  const kibanaPrivileges = kibanaApplicationPrivilege.reduce((acc, p) => {
     acc[p.name] = false;
     return acc;
   }, {});
 
   if (!role.applications || role.applications.length === 0) {
-    return applicationPrivileges;
+    return kibanaPrivileges;
   }
 
   const applications = role.applications.filter(x => x.application === application);
 
   const assigned =  _.uniq(_.flatten(_.pluck(applications, 'privileges')));
   assigned.forEach(a => {
-    applicationPrivileges[a] = true;
+    kibanaPrivileges[a] = true;
   });
 
-  return applicationPrivileges;
+  return kibanaPrivileges;
 };
 
-const setApplicationPrivileges = (applicationPrivileges, role, application) => {
+const setApplicationPrivileges = (kibanaPrivileges, role, application) => {
   if (!role.applications) {
     role.applications = [];
   }
@@ -53,12 +53,16 @@ const setApplicationPrivileges = (applicationPrivileges, role, application) => {
     return x.application !== application;
   });
 
-  // put the application entry back
-  role.applications = [...role.applications, {
-    application,
-    privileges: Object.keys(applicationPrivileges).filter(key => applicationPrivileges[key]),
-    resources: [ DEFAULT_RESOURCE ]
-  }];
+  const privileges = Object.keys(kibanaPrivileges).filter(key => kibanaPrivileges[key]);
+
+  // if we still have them, put the application entry back
+  if (privileges.length > 0) {
+    role.applications = [...role.applications, {
+      application,
+      privileges,
+      resources: [ DEFAULT_RESOURCE ]
+    }];
+  }
 };
 
 const getOtherApplications = (kibanaPrivileges, role, application) => {
@@ -95,7 +99,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         applications: []
       });
     },
-    kibanaPrivileges(ApplicationPrivilege, kbnUrl, Promise, Private) {
+    kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
       return ApplicationPrivilege.query().$promise
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
@@ -126,10 +130,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.privileges = shieldPrivileges;
 
     $scope.rbacEnabled = rbacEnabled;
-    const kibanaPrivileges = $route.current.locals.kibanaPrivileges;
+    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
-    $scope.applicationPrivileges = getApplicationPrivileges(kibanaPrivileges, role, rbacApplication);
-    $scope.otherApplications = getOtherApplications(kibanaPrivileges, role, rbacApplication);
+    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
+    $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
 
     $scope.rolesHref = `#${ROLES_PATH}`;
 
@@ -156,7 +160,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       role.indices = role.indices.filter((index) => index.names.length);
       role.indices.forEach((index) => index.query || delete index.query);
 
-      setApplicationPrivileges($scope.applicationPrivileges, role, rbacApplication);
+      setApplicationPrivileges($scope.kibanaPrivileges, role, rbacApplication);
 
       return role.$save()
         .then(() => toastNotifications.addSuccess('Updated role'))

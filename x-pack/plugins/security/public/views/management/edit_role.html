@@ -116,12 +116,12 @@
             Kibana Privileges
           </label>
 
-          <div ng-repeat="(key, value) in applicationPrivileges">
+          <div ng-repeat="(key, value) in kibanaPrivileges">
             <label>
               <input
                 class="kuiCheckBox"
                 type="checkbox"
-                ng-model="applicationPrivileges[key]"
+                ng-model="kibanaPrivileges[key]"
                 ng-disabled="role.metadata._reserved || !isRoleEnabled(role)"
               />
               <span class="kuiOptionLabel">{{key}}</span>

@@ -22,7 +22,7 @@ export function initPrivilegesApi(server) {
     path: '/api/security/v1/privileges',
     handler(request, reply) {
       const privileges = buildPrivilegeMap(application, kibanaVersion);
-      reply(Object.values(privileges));
+      reply(Object.values(privileges[application]));
     }
   });
 }
