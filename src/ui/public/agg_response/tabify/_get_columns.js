@@ -19,15 +19,19 @@
 
 import _ from 'lodash';
 
-export function tabifyGetColumns(aggs, minimal, hierarchical) {
+const getColumn = (agg, i) => {
+  return {
+    aggConfig: agg,
+    id: `col-${i}`,
+    title: agg.makeLabel()
+  };
+};
 
-  if (minimal == null) minimal = !hierarchical;
+export function tabifyGetColumns(aggs, minimal) {
 
   // pick the columns
   if (minimal) {
-    return aggs.map(function (agg) {
-      return { aggConfig: agg };
-    });
+    return aggs.map((agg, i) => getColumn(agg, i));
   }
 
   // supposed to be bucket,...metrics,bucket,...metrics
@@ -40,16 +44,15 @@ export function tabifyGetColumns(aggs, minimal, hierarchical) {
 
   if (!grouped.buckets) {
     // return just the metrics, in column format
-    return grouped.metrics.map(function (agg) {
-      return { aggConfig: agg };
-    });
+    return grouped.metrics.map((agg, i) => getColumn(agg, i));
   }
 
+  let columnIndex = 0;
   // return the buckets, and after each place all of the metrics
   grouped.buckets.forEach(function (agg) {
-    columns.push({ aggConfig: agg });
+    columns.push(getColumn(agg, columnIndex++));
     grouped.metrics.forEach(function (metric) {
-      columns.push({ aggConfig: metric });
+      columns.push(getColumn(metric, columnIndex++));
     });
   });
 

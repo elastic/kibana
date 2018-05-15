@@ -18,7 +18,6 @@
  */
 
 import { AggResponseIndexProvider } from '../../agg_response';
-import { TabifyTable } from '../../agg_response/tabify/_table';
 
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
 
@@ -28,34 +27,9 @@ const BasicResponseHandlerProvider = function (Private) {
   function convertTableGroup(vis, tableGroup) {
     const tables = tableGroup.tables;
     const firstChild = tables[0];
-    if (firstChild instanceof TabifyTable) {
 
-      const chart = convertTable(vis, firstChild);
-      // if chart is within a split, assign group title to its label
-      if (tableGroup.$parent) {
-        chart.label = tableGroup.title;
-      }
-      return chart;
-    }
-
-    if (!tables.length) return;
-    const out = {};
-    let outList;
-
-    tables.forEach(function (table) {
-      if (!outList) {
-        const aggConfig = table.aggConfig;
-        const direction = aggConfig.params.row ? 'rows' : 'columns';
-        outList = out[direction] = [];
-      }
-
-      let output;
-      if (output = convertTableGroup(vis, table)) {
-        outList.push(output);
-      }
-    });
-
-    return out;
+    const chart = convertTable(vis, firstChild);
+    return chart;
   }
 
   function convertTable(vis, table) {
