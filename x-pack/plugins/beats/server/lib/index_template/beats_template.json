@@ -1,0 +1,84 @@
+{
+  "index_patterns": [
+    ".management-beats"
+  ],
+  "version": 65000,
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "auto_expand_replicas": "0-1",
+      "codec": "best_compression"
+    }
+  },
+  "mappings": {
+    "_doc": {
+      "dynamic": "strict",
+      "properties": {
+        "type": {
+          "type": "keyword"
+        },
+        "enrollment_token": {
+          "properties": {
+            "token": {
+              "type": "keyword"
+            },
+            "expires_on": {
+              "type": "date"
+            }
+          }
+        },
+        "configuration_block": {
+          "properties": {
+            "tag": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "block_yml": {
+              "type": "text"
+            }
+          }
+        },
+        "beat": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "enrollment_token": {
+              "type": "keyword"
+            },
+            "access_token": {
+              "type": "keyword"
+            },
+            "verified_on": {
+              "type": "date"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "host_ip": {
+              "type": "keyword"
+            },
+            "host_name": {
+              "type": "keyword"
+            },
+            "ephemeral_id": {
+              "type": "keyword"
+            },
+            "local_configuration_yml": {
+              "type": "text"
+            },
+            "central_configuration_yml": {
+              "type": "text"
+            },
+            "metadata": {
+              "dynamic": "true",
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}
