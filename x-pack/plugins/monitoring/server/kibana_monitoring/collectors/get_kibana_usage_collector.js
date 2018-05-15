@@ -19,7 +19,7 @@ const TYPES = [
 /**
  * Fetches saved object client counts by querying the saved object index
  */
-export function getUsageCollector(server, callCluster) {
+export function getKibanaUsageCollector(server, callCluster) {
   return {
     type: KIBANA_USAGE_TYPE,
     async fetch() {

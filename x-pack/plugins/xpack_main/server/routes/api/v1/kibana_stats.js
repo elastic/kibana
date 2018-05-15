@@ -6,7 +6,7 @@
 
 import { wrap } from 'boom';
 import { callClusterFactory } from '../../../lib/call_cluster_factory';
-import { getUsageCollector, getReportingCollector } from '../../../../../monitoring/server/kibana_monitoring';
+import { getKibanaUsageCollector, getReportingUsageCollector } from '../../../../../monitoring/server/kibana_monitoring';
 
 export function kibanaStatsRoute(server) {
   server.route({
@@ -18,8 +18,8 @@ export function kibanaStatsRoute(server) {
       const callCluster = callClusterFactory(server).getCallClusterWithReq(req);
 
       try {
-        const kibanaUsageCollector = getUsageCollector(server, callCluster);
-        const reportingCollector = getReportingCollector(server, callCluster); // TODO instead of hardcoding, loop through a set of usage collectors that have been registered to a server method
+        const kibanaUsageCollector = getKibanaUsageCollector(server, callCluster);
+        const reportingCollector = getReportingUsageCollector(server, callCluster); // TODO instead of hardcoding, loop through a set of usage collectors that have been registered to a server method
 
         const [ kibana, reporting ] = await Promise.all([
           kibanaUsageCollector.fetch(),
