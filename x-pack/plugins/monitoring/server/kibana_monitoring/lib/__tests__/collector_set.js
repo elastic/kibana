@@ -7,7 +7,7 @@
 import { identity, noop } from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import { TypeCollector } from '../type_collector';
+import { CollectorSet } from '../collector_set';
 
 const DEBUG_LOG = [ 'debug', 'monitoring-ui', 'kibana-monitoring' ];
 const INFO_LOG = [ 'info', 'monitoring-ui', 'kibana-monitoring' ];
@@ -15,8 +15,8 @@ const INFO_LOG = [ 'info', 'monitoring-ui', 'kibana-monitoring' ];
 const COLLECTOR_INTERVAL = 10000;
 const CHECK_DELAY = 100; // can be lower than COLLECTOR_INTERVAL because the collectors use fetchAfterInit
 
-describe('TypeCollector', () => {
-  describe('registers a collector and runs lifecycle events', () => {
+describe('CollectorSet', () => {
+  describe('registers a collector set and runs lifecycle events', () => {
     let log;
     let init;
     let cleanup;
@@ -28,15 +28,15 @@ describe('TypeCollector', () => {
       fetch = noop;
     });
 
-    it('for skipping bulk upload because payload is empty', (done) => {
-      const collector = new TypeCollector({
+    it('should skip bulk upload if payload is empty', (done) => {
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes: identity,
         onPayload: identity
       });
 
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -44,24 +44,24 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
+      collectors.start();
 
       // allow interval to tick a few times
       setTimeout(() => {
-        collector.cleanup();
+        collectors.cleanup();
 
-        expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
+        expect(log.calledWith(INFO_LOG, 'Starting all stats collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Initializing type_collector_test collector')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Fetching data from type_collector_test collector')).to.be(true);
-        expect(log.calledWith(DEBUG_LOG, 'Skipping bulk uploading of empty Kibana monitoring payload')).to.be(true); // proof of skip
-        expect(log.calledWith(INFO_LOG, 'Stopping all Kibana monitoring collectors')).to.be(true);
+        expect(log.calledWith(DEBUG_LOG, 'Skipping bulk uploading of an empty stats payload')).to.be(true); // proof of skip
+        expect(log.calledWith(INFO_LOG, 'Stopping all stats collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Running type_collector_test cleanup')).to.be(true);
 
         done(); // for async exit
       }, CHECK_DELAY);
     });
 
-    it('for running the bulk upload handler', (done) => {
+    it('should run the bulk upload handler', (done) => {
       const log = sinon.spy();
       const combineTypes = sinon.spy(data => {
         return [
@@ -71,7 +71,7 @@ describe('TypeCollector', () => {
       });
       const onPayload = sinon.spy();
 
-      const collector = new TypeCollector({
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes,
@@ -79,7 +79,7 @@ describe('TypeCollector', () => {
       });
 
       fetch = () => ({ testFetch: true });
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -87,17 +87,17 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
+      collectors.start();
 
       // allow interval to tick a few times
       setTimeout(() => {
-        collector.cleanup();
+        collectors.cleanup();
 
-        expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
+        expect(log.calledWith(INFO_LOG, 'Starting all stats collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Initializing type_collector_test collector')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Fetching data from type_collector_test collector')).to.be(true);
-        expect(log.calledWith(DEBUG_LOG, 'Uploading bulk Kibana monitoring payload')).to.be(true);
-        expect(log.calledWith(INFO_LOG, 'Stopping all Kibana monitoring collectors')).to.be(true);
+        expect(log.calledWith(DEBUG_LOG, 'Uploading bulk stats payload to the local cluster')).to.be(true);
+        expect(log.calledWith(INFO_LOG, 'Stopping all stats collectors')).to.be(true);
         expect(log.calledWith(DEBUG_LOG, 'Running type_collector_test cleanup')).to.be(true);
 
         // un-flattened
@@ -114,15 +114,15 @@ describe('TypeCollector', () => {
       }, CHECK_DELAY);
     });
 
-    it('logs info-level status of stopping and restarting', (done) => {
-      const collector = new TypeCollector({
+    it('should log the info-level status of stopping and restarting', (done) => {
+      const collectors = new CollectorSet({
         interval: COLLECTOR_INTERVAL,
         logger: log,
         combineTypes: identity,
         onPayload: identity
       });
 
-      collector.register({
+      collectors.register({
         type: 'type_collector_test',
         fetchAfterInit: true,
         init,
@@ -130,17 +130,17 @@ describe('TypeCollector', () => {
         cleanup
       });
 
-      collector.start();
-      expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
+      collectors.start();
+      expect(log.calledWith(INFO_LOG, 'Starting all stats collectors')).to.be(true);
 
-      collector.cleanup();
-      expect(log.calledWith(INFO_LOG, 'Stopping all Kibana monitoring collectors')).to.be(true);
+      collectors.cleanup();
+      expect(log.calledWith(INFO_LOG, 'Stopping all stats collectors')).to.be(true);
 
-      collector.start();
-      expect(log.calledWith(INFO_LOG, 'Starting all Kibana monitoring collectors')).to.be(true);
+      collectors.start();
+      expect(log.calledWith(INFO_LOG, 'Starting all stats collectors')).to.be(true);
 
       // exit
-      collector.cleanup();
+      collectors.cleanup();
       done();
     });
   });
