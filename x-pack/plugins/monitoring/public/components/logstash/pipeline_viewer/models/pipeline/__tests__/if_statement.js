@@ -65,6 +65,7 @@ describe('IfStatement class', () => {
         expect(ifStatement.trueStatements.length).to.be(1);
         expect(ifStatement.elseStatements).to.be.an(Array);
         expect(ifStatement.elseStatements.length).to.be(0);
+        expect(ifStatement.vertex).to.eql(ifVertex);
       });
     });
 
@@ -107,6 +108,7 @@ describe('IfStatement class', () => {
         expect(ifStatement.trueStatements.length).to.be(1);
         expect(ifStatement.elseStatements).to.be.an(Array);
         expect(ifStatement.elseStatements.length).to.be(1);
+        expect(ifStatement.vertex).to.eql(ifVertex);
       });
     });
 
@@ -147,6 +149,7 @@ describe('IfStatement class', () => {
         expect(ifStatement.trueStatements.length).to.be(2);
         expect(ifStatement.elseStatements).to.be.an(Array);
         expect(ifStatement.elseStatements.length).to.be(0);
+        expect(ifStatement.vertex).to.eql(ifVertex);
       });
     });
 
@@ -195,6 +198,7 @@ describe('IfStatement class', () => {
         expect(ifStatement.trueStatements.length).to.be(1);
         expect(ifStatement.elseStatements).to.be.an(Array);
         expect(ifStatement.elseStatements.length).to.be(2);
+        expect(ifStatement.vertex).to.eql(ifVertex);
       });
     });
   });

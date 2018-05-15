@@ -39,6 +39,7 @@ describe('PluginStatement class', () => {
       expect(pluginStatement.meta).to.be(meta);
       expect(pluginStatement.pluginType).to.be('output');
       expect(pluginStatement.name).to.be('elasticsearch');
+      expect(pluginStatement.vertex).to.eql(pluginVertex);
     });
   });
 });
