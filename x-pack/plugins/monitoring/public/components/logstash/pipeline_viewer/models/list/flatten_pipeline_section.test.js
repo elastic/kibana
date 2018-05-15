@@ -37,8 +37,7 @@ describe('flattenPipelineSection', () => {
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
       new IfStatement(
         { id: 'if_parent' },
-        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
-        []
+        [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })]
       )
     ];
 
