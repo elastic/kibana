@@ -804,16 +804,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('spyModeSelect-table');
     }
 
-    async getDataTableData() {
-      const inspectorTable = await testSubjects.find('inspectorTable');
-      const tableBody = await inspectorTable.findByTagName('tbody');
+    async getTableVisData() {
+      const dataTable = await testSubjects.find('paginated-table-body');
+      return await dataTable.getVisibleText();
+    }
+
+    async getInspectorTableData() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
+      const inspectorPanel = await testSubjects.find('inspectorPanel');
+      const tableBody = await inspectorPanel.findByTagName('tbody');
       return await tableBody.getVisibleText();
     }
 
-    async getDataTableHeaders() {
+    async getInspectorTableHeaders() {
+      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const dataTableHeader = await retry.try(async () => {
-        const inspectorTable = await testSubjects.find('inspectorTable');
-        return await inspectorTable.findByTagName('thead');
+        const inspectorPanel = await testSubjects.find('inspectorPanel');
+        return await inspectorPanel.findByTagName('thead');
       });
       return await dataTableHeader.getVisibleText();
     }

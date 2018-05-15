@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       it('should update table header when columns change', async function () {
 
         await PageObjects.visualize.openInspector();
-        let headers = await PageObjects.visualize.getDataTableHeaders();
+        let headers = await PageObjects.visualize.getInspectorTableHeaders();
         expect(headers.trim()).to.equal('Count');
 
         log.debug('Add Average Metric on machine.ram field');
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         await PageObjects.visualize.openInspector();
 
-        headers = await PageObjects.visualize.getDataTableHeaders();
+        headers = await PageObjects.visualize.getInspectorTableHeaders();
         expect(headers.trim()).to.equal('Count Average machine.ram');
       });
     });

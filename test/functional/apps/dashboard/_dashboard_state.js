@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
 
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.dashboard.openInspectorForPanel(0);
-      const tileMapData = await PageObjects.visualize.getDataTableData();
+      const tileMapData = await PageObjects.visualize.getInspectorTableData();
       await PageObjects.visualize.closeInspector();
 
       await PageObjects.dashboard.clickEdit();
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }) {
 
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.dashboard.openInspectorForPanel(0);
-      const changedTileMapData = await PageObjects.visualize.getDataTableData();
+      const changedTileMapData = await PageObjects.visualize.getInspectorTableData();
       await PageObjects.visualize.closeInspector();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });

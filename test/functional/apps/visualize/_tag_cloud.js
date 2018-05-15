@@ -163,8 +163,8 @@ export default function ({ getService, getPageObjects }) {
           .then(function () {
             return PageObjects.visualize.setSpyPanelPageSize('All');
           })
-          .then(function getDataTableData() {
-            return PageObjects.visualize.getDataTableData();
+          .then(function getInspectorTableData() {
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
             log.debug(data.split('\n'));

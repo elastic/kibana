@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }) {
         before(async () => await PageObjects.visualize.openInspector());
 
         it('when checked adds filters to aggregation', async () => {
-          const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
           expect(tableHeaders.trim()).to.equal('filter geohash_grid Count Geo Centroid');
         });
 
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
           await PageObjects.visualize.clickGo();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          const tableHeaders = await PageObjects.visualize.getDataTableHeaders();
+          const tableHeaders = await PageObjects.visualize.getInspectorTableHeaders();
           expect(tableHeaders.trim()).to.equal('geohash_grid Count Geo Centroid');
         });
 
@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.openInspector();
           await PageObjects.visualize.setSpyPanelPageSize('All');
           await PageObjects.visualize.selectTableInSpyPaneSelect();
-          const actualTableData = await PageObjects.visualize.getDataTableData();
+          const actualTableData = await PageObjects.visualize.getInspectorTableData();
           compareTableData(expectedTableData, actualTableData.trim().split('\n'));
           await PageObjects.visualize.closeInspector();
         });
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickMapFitDataBounds();
           await PageObjects.visualize.openInspector();
           await PageObjects.visualize.selectTableInSpyPaneSelect();
-          const data = await PageObjects.visualize.getDataTableData();
+          const data = await PageObjects.visualize.getInspectorTableData();
           await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
           await PageObjects.visualize.closeInspector();
         });

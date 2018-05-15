@@ -133,8 +133,8 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
         return PageObjects.visualize.openInspector()
-          .then(function getDataTableData() {
-            return PageObjects.visualize.getDataTableData();
+          .then(function getInspectorTableData() {
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
             log.debug(data.split('\n'));

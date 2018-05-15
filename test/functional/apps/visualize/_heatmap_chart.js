@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
 
         return PageObjects.visualize.openInspector()
           .then(function showData() {
-            return PageObjects.visualize.getDataTableData();
+            return PageObjects.visualize.getInspectorTableData();
           })
           .then(function showData(data) {
             log.debug(data.split('\n'));

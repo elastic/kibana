@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
         await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
@@ -178,7 +178,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
         await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
         await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
@@ -306,7 +306,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.visualize.toggleSpyPanel();
         await PageObjects.visualize.setSpyPanelPageSize('All');
-        const data = await PageObjects.visualize.getDataTableData();
+        const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
