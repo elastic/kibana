@@ -907,6 +907,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openLegendOptionColors(name) {
       await retry.try(async () => {
+        // This click has been flaky in opening the legend, hence the retry.  See
+        // https://github.com/elastic/kibana/issues/17468
         await testSubjects.click(`legend-${name}`);
         // arbitrary color chosen, any available would do
         const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
