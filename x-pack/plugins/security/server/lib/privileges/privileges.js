@@ -24,15 +24,19 @@ export function buildPrivilegeMap(application, kibanaVersion) {
     application,
     name: 'all',
     actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), 'action:*'],
+    metadata: {}
   };
 
   privilegeActions.read = {
     application,
     name: 'read',
     actions: [getVersionPrivilege(kibanaVersion), getLoginPrivilege(), ...readSavedObjectsPrivileges],
+    metadata: {}
   };
 
-  return privilegeActions;
+  return {
+    [application]: privilegeActions
+  };
 }
 
 function buildSavedObjectsReadPrivileges() {
@@ -41,7 +45,7 @@ function buildSavedObjectsReadPrivileges() {
 }
 
 function buildSavedObjectsPrivileges(actions) {
-  const objectTypes = ['config', 'dashboard', 'index-pattern', 'search', 'visualization'];
+  const objectTypes = ['config', 'dashboard', 'index-pattern', 'search', 'visualization', 'graph-workspace'];
   return objectTypes
     .map(type => actions.map(action => `action:saved-objects/${type}/${action}`))
     .reduce((acc, types) => [...acc, ...types], []);
