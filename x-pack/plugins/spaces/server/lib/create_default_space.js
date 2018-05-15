@@ -5,8 +5,7 @@
  */
 
 import { getClient } from '../../../../server/lib/get_client_shield';
-
-const DEFAULT_SPACE_ID = 'default';
+import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 export async function createDefaultSpace(server) {
   const { callWithInternalUser: callCluster } = getClient(server);
@@ -32,7 +31,7 @@ async function doesDefaultSpaceExist(savedObjectsClient) {
   try {
     await savedObjectsClient.get('space', DEFAULT_SPACE_ID);
     return true;
-  } catch(e) {
+  } catch (e) {
     if (savedObjectsClient.errors.isNotFoundError(e)) {
       return false;
     }
