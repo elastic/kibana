@@ -7,7 +7,7 @@
 /*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
  * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
 
-import { uniq } from 'lodash';
+import { get, uniq } from 'lodash';
 
 export class SecureSavedObjectsClient {
   constructor(options) {
@@ -72,7 +72,13 @@ export class SecureSavedObjectsClient {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => `action:saved-objects/${type}/${action}`);
 
-    const result = await this._hasPrivileges(actions);
+    let result;
+    try {
+      result = await this._hasPrivileges(actions);
+    } catch(error) {
+      const { reason } = get(error, 'body.error', {});
+      throw this._client.errors.decorateGeneralError(error, reason);
+    }
 
     if (!result.success) {
       const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;
