@@ -472,7 +472,7 @@ export class SavedObjectsClient {
   }
 
   _generateEsId(type, id) {
-    return `${type}:${id || uuid.v1()}`;
+    return `${type}:${id || uuid.v4()}`;
   }
 
   _getCurrentTime() {

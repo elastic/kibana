@@ -2,9 +2,9 @@ import uuid from 'uuid';
 import _ from 'lodash';
 export default source => {
   const series = _.cloneDeep(source);
-  series.id = uuid.v1();
+  series.id = uuid.v4();
   series.metrics.forEach((metric) => {
-    const id = uuid.v1();
+    const id = uuid.v4();
     const metricId = metric.id;
     metric.id = id;
     if (series.terms_order_by === metricId) series.terms_order_by = id;
@@ -13,7 +13,7 @@ export default source => {
       r.variables.some(v => v.field === metricId))
       .forEach(r => {
         r.variables.filter(v => v.field === metricId).forEach(v => {
-          v.id = uuid.v1();
+          v.id = uuid.v4();
           v.field = id;
         });
       });

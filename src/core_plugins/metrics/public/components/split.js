@@ -14,7 +14,7 @@ class Split extends Component {
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
-          { color: model.color, id: uuid.v1() }
+          { color: model.color, id: uuid.v4() }
         ]
       });
     }

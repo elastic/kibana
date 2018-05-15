@@ -3,7 +3,7 @@ import _ from 'lodash';
 import newMetricAggFn from './new_metric_agg_fn';
 export default (obj = {}) => {
   return _.assign({
-    id: uuid.v1(),
+    id: uuid.v4(),
     color: '#68BC00',
     split_mode: 'everything',
     metrics: [ newMetricAggFn() ],

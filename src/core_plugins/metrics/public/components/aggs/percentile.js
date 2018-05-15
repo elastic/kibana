@@ -12,7 +12,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator } from '@elastic/eui';
 const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return _.assign({ id: uuid.v4(), mode: 'line', shade: 0.2 }, opts);
 };
 
 class Percentiles extends Component {

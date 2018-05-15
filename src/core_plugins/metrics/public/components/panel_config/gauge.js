@@ -23,7 +23,7 @@ class GaugePanelConfig extends Component {
     const parts = {};
     if (!model.gauge_color_rules ||
       (model.gauge_color_rules && model.gauge_color_rules.length === 0)) {
-      parts.gauge_color_rules = [{ id: uuid.v1() }];
+      parts.gauge_color_rules = [{ id: uuid.v4() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;

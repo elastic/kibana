@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 export default () => {
   return {
-    id: uuid.v1(),
+    id: uuid.v4(),
     type: 'count'
   };
 };

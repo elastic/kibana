@@ -6,10 +6,10 @@ describe('reIdSeries()', () => {
 
   it('reassign ids for series with just basic metrics', () => {
     const series = {
-      id: uuid.v1(),
+      id: uuid.v4(),
       metrics: [
-        { id: uuid.v1() },
-        { id: uuid.v1() }
+        { id: uuid.v4() },
+        { id: uuid.v4() }
       ]
     };
     const newSeries = reIdSeries(series);
@@ -21,12 +21,12 @@ describe('reIdSeries()', () => {
   });
 
   it('reassign ids for series with just basic metrics and group by', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuid.v4();
     const series = {
-      id: uuid.v1(),
+      id: uuid.v4(),
       metrics: [
         { id: firstMetricId },
-        { id: uuid.v1() }
+        { id: uuid.v4() }
       ],
       terms_order_by: firstMetricId
     };
@@ -40,12 +40,12 @@ describe('reIdSeries()', () => {
   });
 
   it('reassign ids for series with pipeline metrics', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuid.v4();
     const series = {
-      id: uuid.v1(),
+      id: uuid.v4(),
       metrics: [
         { id: firstMetricId },
-        { id: uuid.v1(), field: firstMetricId }
+        { id: uuid.v4(), field: firstMetricId }
       ]
     };
     const newSeries = reIdSeries(series);
@@ -55,15 +55,15 @@ describe('reIdSeries()', () => {
   });
 
   it('reassign ids for series with calculation vars', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuid.v4();
     const series = {
-      id: uuid.v1(),
+      id: uuid.v4(),
       metrics: [
         { id: firstMetricId },
         {
-          id: uuid.v1(),
+          id: uuid.v4(),
           type: 'calculation',
-          variables: [{ id: uuid.v1(), field: firstMetricId }]
+          variables: [{ id: uuid.v4(), field: firstMetricId }]
         }
       ]
     };

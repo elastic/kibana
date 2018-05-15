@@ -19,7 +19,7 @@ class MetricPanelConfig extends Component {
     const { model } = this.props;
     if (!model.background_color_rules || (model.background_color_rules && model.background_color_rules.length === 0)) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }]
+        background_color_rules: [{ id: uuid.v4() }]
       });
     }
   }

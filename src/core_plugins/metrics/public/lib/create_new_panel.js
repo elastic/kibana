@@ -1,7 +1,7 @@
 import newSeriesFn from '../components/lib/new_series_fn';
 import uuid from 'uuid';
 export default () => {
-  const id = uuid.v1();
+  const id = uuid.v4();
   return {
     id,
     type: 'timeseries',

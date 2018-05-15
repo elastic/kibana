@@ -16,7 +16,7 @@ import {
 
 function newAnnotation() {
   return {
-    id: uuid.v1(),
+    id: uuid.v4(),
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',

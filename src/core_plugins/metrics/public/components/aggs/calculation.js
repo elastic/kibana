@@ -17,7 +17,7 @@ class CalculationAgg extends Component {
   componentWillMount() {
     if (!this.props.model.variables) {
       this.props.onChange(_.assign({}, this.props.model, {
-        variables: [{ id: uuid.v1() }]
+        variables: [{ id: uuid.v4() }]
       }));
     }
   }

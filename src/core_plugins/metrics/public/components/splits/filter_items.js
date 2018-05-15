@@ -28,7 +28,7 @@ class FilterItems extends Component {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
-    const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
+    const newFilter = () => ({ color: this.props.model.color, id: uuid.v4() });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete

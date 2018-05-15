@@ -16,7 +16,7 @@ class TableSeriesConfig extends Component {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({
-        color_rules: [{ id: uuid.v1() }]
+        color_rules: [{ id: uuid.v4() }]
       });
     }
   }
