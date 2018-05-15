@@ -28,27 +28,28 @@ export function convertToGeoJson(tabifiedResponse) {
   let max = -Infinity;
   let geoAgg;
 
-  if (tabifiedResponse && tabifiedResponse.tables && tabifiedResponse.tables[0] && tabifiedResponse.tables[0].rows) {
+  if (tabifiedResponse && tabifiedResponse.rows) {
 
-    const table = tabifiedResponse.tables[0];
-    const geohashIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geohash_grid');
-    geoAgg = table.columns.find(column => column.aggConfig.type.dslName === 'geohash_grid');
+    const table = tabifiedResponse;
+    const geohashColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geohash_grid');
 
-    if (geohashIndex === -1) {
+    if (!geohashColumn) {
       features = [];
     } else {
 
-      const metricIndex = table.columns.findIndex(column => column.aggConfig.type.type === 'metrics');
-      const geocentroidIndex = table.columns.findIndex(column => column.aggConfig.type.dslName === 'geo_centroid');
+      geoAgg = geohashColumn.aggConfig;
+
+      const metricColumn = table.columns.find(column => column.aggConfig.type.type === 'metrics');
+      const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
 
       features = table.rows.map(row => {
 
-        const geohash = row[geohashIndex];
+        const geohash = row[geohashColumn.id];
         const geohashLocation = decodeGeoHash(geohash);
 
         let pointCoordinates;
-        if (geocentroidIndex > -1) {
-          const location = row[geocentroidIndex];
+        if (geocentroidColumn) {
+          const location = row[geocentroidColumn.id];
           pointCoordinates = [location.lon, location.lat];
         } else {
           pointCoordinates = [geohashLocation.longitude[2], geohashLocation.latitude[2]];
@@ -66,13 +67,13 @@ export function convertToGeoJson(tabifiedResponse) {
           geohashLocation.longitude[2]
         ];
 
-        if (geoAgg.aggConfig.params.useGeocentroid) {
+        if (geoAgg.params.useGeocentroid) {
           // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
           pointCoordinates[0] = clampGrid(pointCoordinates[0], geohashLocation.longitude[0], geohashLocation.longitude[1]);
           pointCoordinates[1] = clampGrid(pointCoordinates[1], geohashLocation.latitude[0], geohashLocation.latitude[1]);
         }
 
-        const value = row[metricIndex];
+        const value = row[metricColumn.id];
         min = Math.min(min, value);
         max = Math.max(max, value);
 
@@ -111,8 +112,8 @@ export function convertToGeoJson(tabifiedResponse) {
     meta: {
       min: min,
       max: max,
-      geohashPrecision: geoAgg && geoAgg.aggConfig.params.precision,
-      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.aggConfig.params.precision)
+      geohashPrecision: geoAgg && geoAgg.params.precision,
+      geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
     }
   };
 }
