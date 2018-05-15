@@ -7,28 +7,28 @@ export const createListRoute = () => ({
     handler: async (request, reply) => {
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
-      const sampleDataSets = request.server.getSampleDataSets().map(sampleDataSet => {
+      const sampleDatasets = request.server.getSampleDatasets().map(sampleDataset => {
         return {
-          id: sampleDataSet.id,
-          name: sampleDataSet.name,
-          description: sampleDataSet.description,
-          previewImagePath: sampleDataSet.previewImagePath,
-          overviewDashboard: sampleDataSet.overviewDashboard,
-          defaultIndex: sampleDataSet.defaultIndex,
+          id: sampleDataset.id,
+          name: sampleDataset.name,
+          description: sampleDataset.description,
+          previewImagePath: sampleDataset.previewImagePath,
+          overviewDashboard: sampleDataset.overviewDashboard,
+          defaultIndex: sampleDataset.defaultIndex,
         };
       });
 
-      const isInstalledPromises = sampleDataSets.map(async sampleDataSet => {
-        const index = createIndexName(request.server, sampleDataSet.id);
+      const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
+        const index = createIndexName(request.server, sampleDataset.id);
         try {
-          sampleDataSet.isInstalled = await callWithRequest(request, 'indices.exists', { index: index });
+          sampleDataset.isInstalled = await callWithRequest(request, 'indices.exists', { index: index });
         } catch (err) {
-          sampleDataSet.isInstalled = false;
+          sampleDataset.isInstalled = false;
         }
       });
 
       await Promise.all(isInstalledPromises);
-      reply(sampleDataSets);
+      reply(sampleDatasets);
     }
   }
 });

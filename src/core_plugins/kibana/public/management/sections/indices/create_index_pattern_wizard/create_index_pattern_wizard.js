@@ -105,10 +105,8 @@ export class CreateIndexPatternWizard extends Component {
       return <LoadingState />;
     }
 
-    const dataIndices = allIndices.filter(index => {
-      return index.name.charAt(0) !== '.';
-    });
-    if (dataIndices.length === 0) {
+    const hasDataIndices = allIndices.some(({ indexName }) => !indexName.startsWith('.'));
+    if (!hasDataIndices) {
       return <EmptyState onRefresh={this.fetchIndices} />;
     }
 

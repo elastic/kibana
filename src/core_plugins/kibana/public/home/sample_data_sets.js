@@ -2,10 +2,11 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 const sampleDataUrl = chrome.addBasePath('/api/sample_data');
-const headers = new Headers();
-headers.append('Accept', 'application/json');
-headers.append('Content-Type', 'application/json');
-headers.append('kbn-xsrf', 'kibana');
+const headers = new Headers({
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+  'kbn-xsrf': 'kibana',
+});
 
 export async function listSampleDataSets() {
   try {

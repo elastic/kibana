@@ -2,9 +2,9 @@ import readline from 'readline';
 import fs from 'fs';
 import zlib from 'zlib';
 
-const BULK_LOAD_SIZE = 500;
+const BULK_INSERT_SIZE = 500;
 
-export function loadData(path, bulkLoad, callback) {
+export function loadData(path, bulkInsert, callback) {
   let count = 0;
   let docs = [];
   let isPaused = false;
@@ -20,7 +20,7 @@ export function loadData(path, bulkLoad, callback) {
   const onClose = async () => {
     if (docs.length > 0) {
       try {
-        await bulkLoad(docs);
+        await bulkInsert(docs);
       } catch (err) {
         callback(err);
         return;
@@ -52,7 +52,7 @@ export function loadData(path, bulkLoad, callback) {
     count++;
     docs.push(doc);
 
-    if (docs.length >= BULK_LOAD_SIZE && !isPaused) {
+    if (docs.length >= BULK_INSERT_SIZE && !isPaused) {
       lineStream.pause();
 
       // readline pause is leaky and events in buffer still get sent after pause
@@ -60,7 +60,7 @@ export function loadData(path, bulkLoad, callback) {
       const docstmp = docs.slice();
       docs = [];
       try {
-        await bulkLoad(docstmp);
+        await bulkInsert(docstmp);
         lineStream.resume();
       } catch (err) {
         closeWithError(err);

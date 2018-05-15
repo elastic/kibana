@@ -15,20 +15,20 @@ export const createInstallRoute = () => ({
     },
     handler: async (request, reply) => {
       const server = request.server;
-      const sampleDataSet = server.getSampleDataSets().find(sampleDataSet => {
-        return sampleDataSet.id === request.params.id;
+      const sampleDataset = server.getSampleDatasets().find(sampleDataset => {
+        return sampleDataset.id === request.params.id;
       });
+      if (!sampleDataset) {
+        return reply().code(404);
+      }
+
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = createIndexName(server, sampleDataSet.id);
+      const index = createIndexName(server, sampleDataset.id);
       const insertCmd = {
         index: {
           _index: index
         }
       };
-
-      if (!sampleDataSet) {
-        return reply().code(404);
-      }
 
       try {
         await callWithRequest(request, 'indices.delete', { index: index });
@@ -48,52 +48,54 @@ export const createInstallRoute = () => ({
             },
             mappings: {
               _doc: {
-                properties: sampleDataSet.fields
+                properties: sampleDataset.fields
               }
             }
           }
         };
         await callWithRequest(request, 'indices.create', createIndexParams);
       } catch (err) {
-        console.warn(`sample_data install errors while creating index. Error: ${err.message}`);
+        server.log(['warning'], `sample_data install errors while creating index. Error: ${err.message}`);
         return reply(`Unable to create sample data index "${index}", see kibana logs for details`).code(500);
       }
 
       const now = new Date();
-      const currentTimeMarker = new Date(Date.parse(sampleDataSet.currentTimeMarker));
+      const currentTimeMarker = new Date(Date.parse(sampleDataset.currentTimeMarker));
       function updateTimestamps(doc) {
-        sampleDataSet.timeFields.forEach(timeFieldName => {
+        sampleDataset.timeFields.forEach(timeFieldName => {
           if (doc[timeFieldName]) {
-            doc[timeFieldName] = adjustTimestamp(doc[timeFieldName], currentTimeMarker, now, sampleDataSet.preserveDayOfWeekTimeOfDay);
+            doc[timeFieldName] = adjustTimestamp(doc[timeFieldName], currentTimeMarker, now, sampleDataset.preserveDayOfWeekTimeOfDay);
           }
         });
         return doc;
       }
-      const bulkLoad = async (docs) => {
+      const bulkInsert = async (docs) => {
         const bulk = [];
         docs.forEach(doc => {
-          bulk.push(insertCmd);
+          bulk.push(insertCmd(index));
           bulk.push(updateTimestamps(doc));
         });
         const resp = await callWithRequest(request, 'bulk', { body: bulk });
         if (resp.errors) {
-          console.warn(`sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, ' ')}`);
+          server.log(
+            ['warning'],
+            `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, ' ')}`);
           return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
         }
       };
-      loadData(sampleDataSet.dataPath, bulkLoad, async (err, count) => {
+      loadData(sampleDataset.dataPath, bulkInsert, async (err, count) => {
         if (err) {
           return reply(err.message).code(500);
         }
 
         try {
-          await request.getSavedObjectsClient().bulkCreate(sampleDataSet.savedObjects, { overwrite: true });
+          await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
         } catch (err) {
-          console.warn(`sample_data install errors while loading saved objects. Error: ${err.message}`);
+          server.log(['warning'], `sample_data install errors while loading saved objects. Error: ${err.message}`);
           return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(500);
         }
 
-        return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataSet.savedObjects.length });
+        return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
       });
     }
   }

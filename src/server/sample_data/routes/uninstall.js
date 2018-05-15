@@ -13,16 +13,17 @@ export const createUninstallRoute = () => ({
     },
     handler: async (request, reply) => {
       const server = request.server;
-      const sampleDataSet = server.getSampleDataSets().find(sampleDataSet => {
-        return sampleDataSet.id === request.params.id;
+      const sampleDataset = server.getSampleDatasets().find(({ id }) => {
+        return id === request.params.id;
       });
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = createIndexName(server, sampleDataSet.id);
 
-      if (!sampleDataSet) {
+      if (!sampleDataset) {
         reply().code(404);
         return;
       }
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const index = createIndexName(server, sampleDataset.id);
 
       try {
         await callWithRequest(request, 'indices.delete', { index: index });
@@ -30,7 +31,7 @@ export const createUninstallRoute = () => ({
         // ignore delete error. Happens if index does not exist.
       }
 
-      const deletePromises = sampleDataSet.savedObjects.map(async (savedObjectJson) => {
+      const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
         return request.getSavedObjectsClient().delete(savedObjectJson.type, savedObjectJson.id);
       });
       try {

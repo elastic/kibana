@@ -1,5 +1,5 @@
 
-const MILLI_SECONDS_IN_DAY = 86400000;
+const MILLISECONDS_IN_DAY = 86400000;
 
 /**
  * Convert timestamp to timestamp that is relative to now
@@ -20,9 +20,9 @@ export function adjustTimestamp(timestamp, currentTimeMarker, now, preserveDayOf
   }
 
   // Move timestamp to current week, preserving day of week and time of day
-  const weekDelta = Math.round((timestampDate.getTime() - currentTimeMarker.getTime()) / (MILLI_SECONDS_IN_DAY * 7));
+  const weekDelta = Math.round((timestampDate.getTime() - currentTimeMarker.getTime()) / (MILLISECONDS_IN_DAY * 7));
   const dayOfWeekDelta = timestampDate.getUTCDay() - now.getUTCDay();
-  const daysDelta = dayOfWeekDelta * MILLI_SECONDS_IN_DAY + (weekDelta * MILLI_SECONDS_IN_DAY * 7);
+  const daysDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY + (weekDelta * MILLISECONDS_IN_DAY * 7);
   const yearMonthDay = (new Date(now.getTime() + daysDelta)).toISOString().substring(0, 10);
   return `${yearMonthDay}T${timestamp.substring(11)}`;
 

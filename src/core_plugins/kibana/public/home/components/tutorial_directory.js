@@ -150,10 +150,7 @@ export class TutorialDirectory extends React.Component {
   renderTutorialsTab = () => {
     return this.state.tutorialCards
       .filter((tutorial) => {
-        if (this.state.selectedTabId === ALL_TAB_ID) {
-          return true;
-        }
-        return this.state.selectedTabId === tutorial.category;
+        return this.state.selectedTabId === ALL_TAB_ID || this.state.selectedTabId === tutorial.category;
       })
       .map((tutorial) => {
         return (

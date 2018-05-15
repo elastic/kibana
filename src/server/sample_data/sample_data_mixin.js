@@ -14,17 +14,17 @@ export function sampleDataMixin(kbnServer, server) {
   server.route(createInstallRoute());
   server.route(createUninstallRoute());
 
-  const sampleDataSets = [];
+  const sampleDatasets = [];
 
-  server.decorate('server', 'getSampleDataSets', () => {
-    return sampleDataSets;
+  server.decorate('server', 'getSampleDatasets', () => {
+    return sampleDatasets;
   });
 
-  server.decorate('server', 'registerSampleDataSet', (specProvider) => {
+  server.decorate('server', 'registerSampleDataset', (specProvider) => {
     const { error, value } = Joi.validate(specProvider(server), dataSetSchema);
 
     if (error) {
-      throw new Error(`Unable to register sample data set spec because its invalid. ${error}`);
+      throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
 
     const defaultIndexSavedObjectJson = value.savedObjects.find(savedObjectJson => {
@@ -32,7 +32,7 @@ export function sampleDataMixin(kbnServer, server) {
     });
     if (!defaultIndexSavedObjectJson) {
       throw new Error(
-        `Unable to register sample data set spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`);
+        `Unable to register sample dataset spec, defaultIndex: "${value.defaultIndex}" does not exist in savedObjects list.`);
     }
 
     const dashboardSavedObjectJson = value.savedObjects.find(savedObjectJson => {
@@ -40,11 +40,11 @@ export function sampleDataMixin(kbnServer, server) {
     });
     if (!dashboardSavedObjectJson) {
       throw new Error(
-        `Unable to register sample data set spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObjects list.`);
+        `Unable to register sample dataset spec, overviewDashboard: "${value.overviewDashboard}" does not exist in savedObjects list.`);
     }
 
-    sampleDataSets.push(value);
+    sampleDatasets.push(value);
   });
 
-  server.registerSampleDataSet(flightsSpecProvider);
+  server.registerSampleDataset(flightsSpecProvider);
 }
