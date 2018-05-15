@@ -47,7 +47,7 @@ function persistBeat(callWithInternalUser, beat, beatId, accessToken) {
     body,
     refresh: 'wait_for'
   };
-  return callWithInternalUser('index', params);
+  return callWithInternalUser('create', params);
 }
 
 // TODO: add license check pre-hook
