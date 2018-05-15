@@ -53,12 +53,15 @@ export function runMochaCli() {
       'packages/kbn-datemath/test/**/*.js',
       'packages/kbn-dev-utils/src/**/__tests__/**/*.js',
       'tasks/**/__tests__/**/*.js',
-      '!**/__tests__/fixtures/**/*',
-      '!src/**/public/**',
-      '!**/_*.js'
     ], {
       cwd: resolve(__dirname, '../../..'),
+      onlyFiles: true,
       absolute: true,
+      ignore: [
+        '**/__tests__/fixtures/**',
+        'src/**/public/**',
+        '**/_*.js'
+      ]
     }).forEach(file => {
       process.argv.push(file);
     });
