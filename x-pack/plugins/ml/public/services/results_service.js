@@ -283,6 +283,13 @@ function getTopInfluencers(
             format: 'epoch_millis'
           }
         }
+      },
+      {
+        range: {
+          influencer_score: {
+            gt: 0
+          }
+        }
       }
     ];
 
