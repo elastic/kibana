@@ -24,7 +24,7 @@ export const TranspileSourceTask = {
 
       gulpBabel({
         babelrc: false,
-        presets: [require.resolve('@kbn/babel-preset/node')],
+        presets: [require.resolve('@kbn/babel-preset/node_preset')],
       }),
 
       vfs.dest(build.resolvePath()),
