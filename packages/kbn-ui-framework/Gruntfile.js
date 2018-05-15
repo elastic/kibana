@@ -36,7 +36,7 @@ module.exports = function (grunt) {
         dest: '.',
         options: {
           presets: [
-            require.resolve('@kbn/babel-preset/webpack')
+            require.resolve('@kbn/babel-preset/webpack_preset')
           ]
         },
       }

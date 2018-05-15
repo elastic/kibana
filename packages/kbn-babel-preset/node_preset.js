@@ -18,7 +18,7 @@ module.exports = {
         useBuiltIns: true,
       },
     ],
-    require('./common'),
+    require('./common_preset'),
   ],
   plugins: [
     [
