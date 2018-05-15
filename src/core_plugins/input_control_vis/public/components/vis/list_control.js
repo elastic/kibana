@@ -66,9 +66,13 @@ ListControl.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
-  options: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
+  options: PropTypes.arrayOf(comboBoxOptionShape),
   disableMsg: PropTypes.string,
   multiselect: PropTypes.bool.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
+};
+
+ListControl.defaultProps = {
+  options: [],
 };

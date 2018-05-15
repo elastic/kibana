@@ -38,9 +38,7 @@ export function toElasticsearchQuery(node, indexPattern) {
   const queries = fields.map((field) => {
     if (field.scripted) {
       return {
-        script: {
-          ...getRangeScript(field, queryParams)
-        }
+        script: getRangeScript(field, queryParams),
       };
     }
 

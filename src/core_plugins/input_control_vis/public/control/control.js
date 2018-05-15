@@ -6,9 +6,14 @@ which doesn't exist on any documents in the "${indexPatternName}" index pattern.
 Choose a different field or index documents that contain values for this field.`;
 }
 
+export function noIndexPatternMsg(indexPatternId) {
+  return `Could not locate index-pattern id: ${indexPatternId}.`;
+}
+
 export class Control {
   constructor(controlParams, filterManager, kbnApi, useTimeFilter) {
     this.id = controlParams.id;
+    this.controlParams = controlParams;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
