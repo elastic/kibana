@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiCallOut,
 } from '@elastic/eui';
+import * as StatusCheckStates from './status_check_states';
 
 export class InstructionSet extends React.Component {
 
@@ -63,34 +64,42 @@ export class InstructionSet extends React.Component {
         {tab.name}
       </EuiTab>
     ));
-  }
+  };
 
-  renderStatusCheckMsg(msg, color) {
+  renderStatusCheckMessage() {
+    let message;
+    let color;
+    switch (this.props.statusCheckState) {
+      case StatusCheckStates.NOT_CHECKED:
+      case StatusCheckStates.FETCHING:
+        return null; // Don't show any message while fetching or if you haven't yet checked.
+      case StatusCheckStates.HAS_DATA:
+        message = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
+        color = 'success';
+        break;
+      case StatusCheckStates.ERROR:
+      case StatusCheckStates.NO_DATA:
+        message = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
+        color = 'warning';
+        break;
+    }
     return (
       <EuiCallOut
-        title={msg}
+        title={message}
         color={color}
       />
     );
   }
 
   renderStatusCheck() {
-    let statusMsg;
-    if (this.props.statusCheckState === 'complete') {
-      const msg = this.props.statusCheckConfig.success ? this.props.statusCheckConfig.success : 'Success';
-      statusMsg = this.renderStatusCheckMsg(msg, 'success');
-    } else if (this.props.hasStatusCheckFailed) {
-      const msg = this.props.statusCheckConfig.error ? this.props.statusCheckConfig.error : 'No data found';
-      statusMsg = this.renderStatusCheckMsg(msg, 'warning');
-    }
-
-    const checkStausStep = (
+    const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
+    const checkStatusStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText>
               <p>
-                {this.props.statusCheckConfig.text}
+                {statusCheckConfig.text}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -99,23 +108,26 @@ export class InstructionSet extends React.Component {
             grow={false}
           >
             <EuiButton
-              onClick={this.props.onStatusCheck}
-              isLoading={this.props.isCheckingStatus}
+              onClick={onStatusCheck}
+              isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
-              {this.props.statusCheckConfig.btnLabel || 'Check status'}
+              {statusCheckConfig.btnLabel || 'Check status'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
 
-        {statusMsg}
+        {this.renderStatusCheckMessage()}
       </Fragment>
     );
+
+    const stepStatus = statusCheckState === StatusCheckStates.NOT_CHECKED ||
+      statusCheckState === StatusCheckStates.FETCHING ? 'incomplete' : 'complete';
     return {
-      title: this.props.statusCheckConfig.title || 'Status Check',
-      status: this.props.statusCheckState,
-      children: checkStausStep,
+      title: statusCheckConfig.title || 'Status Check',
+      status: stepStatus,
+      children: checkStatusStep,
       key: 'checkStatusStep'
     };
   }
@@ -155,7 +167,7 @@ export class InstructionSet extends React.Component {
         firstStepNumber={this.props.offset}
       />
     );
-  }
+  };
 
   renderHeader = () => {
     let paramsVisibilityToggle;
@@ -193,7 +205,7 @@ export class InstructionSet extends React.Component {
         </KuiBarSection>
       </KuiBar>
     );
-  }
+  };
 
   render() {
     let paramsForm;
@@ -251,10 +263,14 @@ InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   statusCheckConfig: statusCheckConfigShape,
-  statusCheckState: PropTypes.string,
+  statusCheckState: PropTypes.oneOf([
+    StatusCheckStates.FETCHING,
+    StatusCheckStates.NOT_CHECKED,
+    StatusCheckStates.HAS_DATA,
+    StatusCheckStates.NO_DATA,
+    StatusCheckStates.ERROR,
+  ]),
   onStatusCheck: PropTypes.func.isRequired,
-  isCheckingStatus: PropTypes.bool,
-  hasStatusCheckFailed: PropTypes.bool,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,

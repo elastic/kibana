@@ -7,6 +7,7 @@ import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
 import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
+import * as StatusCheckStates from './status_check_states';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -22,7 +23,7 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
-      statusCheck: [],
+      statusCheckStates: [],
       tutorial: null
     };
 
@@ -76,7 +77,9 @@ export class Tutorial extends React.Component {
       default:
         throw new Error(`Unhandled instruction type ${this.state.visibleInstructions}`);
     }
-  }
+  };
+
+  getInstructionSets = () => this.getInstructions().instructionSets;
 
   initInstructionsState = () => {
     const instructions = this.getInstructions();
@@ -88,26 +91,19 @@ export class Tutorial extends React.Component {
       }));
     }
 
-    const statusCheck = instructions.instructionSets.map((instructionSet) => {
-      return {
-        hasStatusCheck: instructionSet.statusCheck ? true : false,
-        isComplete: false,
-        hasFailed: false,
-        isFetchingStatus: false,
-      };
-    });
+    const statusCheckStates = new Array(instructions.instructionSets.length).fill(StatusCheckStates.NOT_CHECKED);
 
     this.setState({
       paramValues,
-      statusCheck,
+      statusCheckStates,
     });
-  }
+  };
 
   setVisibleInstructions = (instructionsType) => {
     this.setState({
       visibleInstructions: instructionsType
     }, this.initInstructionsState);
-  }
+  };
 
   setParameter = (paramId, newValue) => {
     this.setState(previousState => {
@@ -115,27 +111,30 @@ export class Tutorial extends React.Component {
       paramValues[paramId] = newValue;
       return { paramValues: paramValues };
     });
-  }
+  };
 
   checkInstructionSetStatus = async (instructionSetIndex) => {
-    const instructions = this.getInstructions();
-    const esHitsCheckConfig = _.get(instructions, `instructionSets[${instructionSetIndex}].statusCheck.esHitsCheck`);
-    const { hasFailed, isComplete } = await this.fetchEsHitsStatus(esHitsCheckConfig);
+    const instructionSet = this.getInstructionSets()[instructionSetIndex];
+    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
-    this.setState((prevState) => {
-      const statusCheck = _.cloneDeep(prevState.statusCheck);
-      statusCheck[instructionSetIndex].isComplete = isComplete;
-      statusCheck[instructionSetIndex].hasFailed = hasFailed;
-      statusCheck[instructionSetIndex].isFetchingStatus = false;
-      return { statusCheck };
-    });
-  }
+    if (esHitsCheckConfig) {
+      const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
 
-  fetchEsHitsStatus = async (esHitsCheckConfig) => {
-    if (!esHitsCheckConfig) {
-      return { hasFailed: false, isComplete: false };
+      this.setState((prevState) => ({
+        statusCheckStates: {
+          ...prevState.statusCheckStates,
+          [instructionSetIndex]: statusCheckState,
+        }
+      }));
     }
+  };
 
+  /**
+   *
+   * @param esHitsCheckConfig
+   * @return {Promise<string>}
+   */
+  fetchEsHitsStatus = async (esHitsCheckConfig) => {
     const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
     const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
     const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
@@ -150,24 +149,21 @@ export class Tutorial extends React.Component {
     });
 
     if (response.status > 300) {
-      return { hasFailed: true, isComplete: false };
+      return StatusCheckStates.ERROR;
     }
 
     const results = await response.json();
     const numHits = _.get(results, 'responses.[0].hits.hits.length', 0);
-    return {
-      hasFailed: numHits === 0,
-      isComplete: numHits > 0
-    };
-  }
+    return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
+  };
 
   onPrem = () => {
     this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
-  }
+  };
 
   onPremElasticCloud = () => {
     this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
-  }
+  };
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
@@ -182,35 +178,33 @@ export class Tutorial extends React.Component {
         />
       );
     }
-  }
+  };
+
+  onStatusCheck = (instructionSetIndex) => {
+    this.setState(
+      (prevState) => ({
+        statusCheckStates: {
+          ...prevState.statusCheckStates,
+          [instructionSetIndex]: StatusCheckStates.FETCHING,
+        }
+      }),
+      this.checkInstructionSetStatus.bind(null, instructionSetIndex)
+    );
+  };
 
   renderInstructionSets = (instructions) => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
-      let statusCheckState = undefined;
-      let isCheckingStatus = false;
-      let hasFailed = false;
-      if (_.get(this.state, `statusCheck[${index}].hasStatusCheck`, false)) {
-        statusCheckState = this.state.statusCheck[index].isComplete ? 'complete' : 'incomplete';
-        isCheckingStatus = this.state.statusCheck[index].isFetchingStatus;
-        hasFailed = this.state.statusCheck[index].hasFailed;
-      }
+
       return (
         <InstructionSet
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
           statusCheckConfig={instructionSet.statusCheck}
-          statusCheckState={statusCheckState}
-          isCheckingStatus={isCheckingStatus}
-          hasStatusCheckFailed={hasFailed}
-          onStatusCheck={() => {
-            this.setState((prevState) => {
-              prevState.statusCheck[index].isFetchingStatus = true;
-              return { statusCheck: prevState.statusCheck };
-            }, this.checkInstructionSetStatus.bind(null, index));
-          }}
+          statusCheckState={this.state.statusCheckStates[index]}
+          onStatusCheck={() => { this.onStatusCheck(index); }}
           offset={currentOffset}
           params={instructions.params}
           paramValues={this.state.paramValues}
@@ -220,7 +214,7 @@ export class Tutorial extends React.Component {
         />
       );
     });
-  }
+  };
 
   renderFooter = () => {
     let label;
@@ -246,7 +240,7 @@ export class Tutorial extends React.Component {
         />
       );
     }
-  }
+  };
 
   render() {
     let content;
