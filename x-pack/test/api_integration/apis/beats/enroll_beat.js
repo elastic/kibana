@@ -148,5 +148,36 @@ export default function ({ getService }) {
 
       expect(esResponse.found).to.be(false);
     });
+
+    it('should fail if the beat with the same ID is enrolled twice', async () => {
+      await supertest
+        .post(
+          `/api/beats/agent/${beatId}`
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send(beat)
+        .expect(201);
+
+      await es.index({
+        index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
+        id: `enrollment_token:${validEnrollmentToken}`,
+        body: {
+          type: 'enrollment_token',
+          enrollment_token: {
+            token: validEnrollmentToken,
+            expires_on: moment().add(4, 'hours').toJSON()
+          }
+        }
+      });
+
+      await supertest
+        .post(
+          `/api/beats/agent/${beatId}`
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send(beat)
+        .expect(409);
+    });
   });
 }
