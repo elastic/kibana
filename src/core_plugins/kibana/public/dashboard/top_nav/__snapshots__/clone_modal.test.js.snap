@@ -23,24 +23,16 @@ exports[`renders DashboardCloneModal 1`] = `
       <EuiSpacer
         size="l"
       />
-      <EuiFormRow
-        describedByIds={Array []}
-        error={null}
+      <EuiFieldText
+        autoFocus={true}
+        compressed={false}
+        data-test-subj="clonedDashboardTitle"
         fullWidth={false}
-        hasEmptyLabelSpace={false}
         isInvalid={false}
-      >
-        <EuiFieldText
-          autoFocus={true}
-          compressed={false}
-          data-test-subj="clonedDashboardTitle"
-          fullWidth={false}
-          isInvalid={false}
-          isLoading={false}
-          onChange={[Function]}
-          value="dash title"
-        />
-      </EuiFormRow>
+        isLoading={false}
+        onChange={[Function]}
+        value="dash title"
+      />
     </EuiModalBody>
     <EuiModalFooter>
       <EuiButton

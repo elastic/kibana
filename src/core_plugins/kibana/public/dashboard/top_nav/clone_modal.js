@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -12,10 +12,8 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
-  EuiFormRow,
+  EuiCallOut,
 } from '@elastic/eui';
-
-const DUPLICATE_TITLE_WARNING = 'A Dashboard with the title already exists. Would you like to save anyway?';
 
 export class DashboardCloneModal extends React.Component {
   constructor(props) {
@@ -65,6 +63,27 @@ export class DashboardCloneModal extends React.Component {
     });
   };
 
+  renderDuplicateTitleCallout = () => {
+    if (!this.state.hasTitleDuplicate) {
+      return;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={`A Dashboard with the title '${this.state.newDashboardName}' already exists.`}
+          color="warning"
+          data-test-subj="cloneModalTitleDupicateWarnMsg"
+        >
+          <p>
+            Click <strong>Confirm Clone</strong> to clone the dashboard with the duplicate title.
+          </p>
+        </EuiCallOut>
+        <EuiSpacer />
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <EuiOverlayMask>
@@ -88,18 +107,16 @@ export class DashboardCloneModal extends React.Component {
 
             <EuiSpacer />
 
-            <EuiFormRow
-              error={this.state.hasTitleDuplicate ? DUPLICATE_TITLE_WARNING : null}
+            {this.renderDuplicateTitleCallout()}
+
+            <EuiFieldText
+              autoFocus
+              data-test-subj="clonedDashboardTitle"
+              value={this.state.newDashboardName}
+              onChange={this.onInputChange}
               isInvalid={this.state.hasTitleDuplicate}
-            >
-              <EuiFieldText
-                autoFocus
-                data-test-subj="clonedDashboardTitle"
-                value={this.state.newDashboardName}
-                onChange={this.onInputChange}
-                isInvalid={this.state.hasTitleDuplicate}
-              />
-            </EuiFormRow>
+            />
+
           </EuiModalBody>
 
           <EuiModalFooter>

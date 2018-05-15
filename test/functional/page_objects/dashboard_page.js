@@ -163,9 +163,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async isCloneDuplicateTitleWarningDisplayed() {
-      const cloneModal = await testSubjects.find('dashboardCloneModal');
-      const validateMsgs = await cloneModal.findAllByClassName('euiFormErrorText');
-      return validateMsgs.length > 0;
+      return await testSubjects.exists('cloneModalTitleDupicateWarnMsg');
     }
 
     async clickEdit() {
