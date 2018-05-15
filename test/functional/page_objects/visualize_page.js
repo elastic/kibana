@@ -919,7 +919,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async doesLegendColorChoiceExist(color) {
-      return await testSubjects.exist(`legendSelectColor-${color}`);
+      return await testSubjects.exists(`legendSelectColor-${color}`);
     }
 
     async selectNewLegendColorChoice(color) {
