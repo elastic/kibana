@@ -21,7 +21,7 @@ and an Elasticsearch client node on the same machine. For more information, see
 [[configuring-kibana-shield]]
 === Using Kibana with X-Pack
 
-You can use {xpack-ref}/xpack-security.html[X-Pack Security] to control what
+You can use {xpack-ref}/elasticsearch-security.html[X-Pack Security] to control what
 Elasticsearch data users can access through Kibana.
 
 When you install X-Pack, Kibana users have to log in. They need to
