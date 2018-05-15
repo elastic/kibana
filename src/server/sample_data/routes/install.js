@@ -72,7 +72,7 @@ export const createInstallRoute = () => ({
       const bulkInsert = async (docs) => {
         const bulk = [];
         docs.forEach(doc => {
-          bulk.push(insertCmd(index));
+          bulk.push(insertCmd);
           bulk.push(updateTimestamps(doc));
         });
         const resp = await callWithRequest(request, 'bulk', { body: bulk });
@@ -85,6 +85,7 @@ export const createInstallRoute = () => ({
       };
       loadData(sampleDataset.dataPath, bulkInsert, async (err, count) => {
         if (err) {
+          server.log(['warning'], `sample_data install errors while loading data. Error: ${err}`);
           return reply(err.message).code(500);
         }
 

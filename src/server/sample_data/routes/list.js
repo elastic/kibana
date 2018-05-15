@@ -21,7 +21,8 @@ export const createListRoute = () => ({
       const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
         const index = createIndexName(request.server, sampleDataset.id);
         try {
-          sampleDataset.isInstalled = await callWithRequest(request, 'indices.exists', { index: index });
+          const { count } = await callWithRequest(request, 'count', { index: index });
+          sampleDataset.isInstalled = count > 0;
         } catch (err) {
           sampleDataset.isInstalled = false;
         }
