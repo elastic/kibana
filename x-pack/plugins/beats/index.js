@@ -8,7 +8,7 @@ import { installIndexTemplate } from './server/lib/index_template';
 import { registerApiRoutes } from './server/routes/api';
 import { PLUGIN } from './common/constants';
 
-const HOURS_IN_SECONDS = 60 * 60;
+const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
 export function beats(kibana)  {
   return new kibana.Plugin({
@@ -17,7 +17,7 @@ export function beats(kibana)  {
     configPrefix: 'xpack.beats',
     config: Joi => Joi.object({
       enabled: Joi.boolean().default(true),
-      enrollmentTokensTtlInSeconds: Joi.number().integer().min(1).default(4 * HOURS_IN_SECONDS)
+      enrollmentTokensTtlInSeconds: Joi.number().integer().min(1).default(DEFAULT_ENROLLMENT_TOKENS_TTL_S)
     }).default(),
     init: async function (server) {
       await installIndexTemplate(server);
