@@ -162,6 +162,22 @@ registerPrivilegesWithClusterTest(`updates privileges when nested privileges arr
   }
 });
 
+registerPrivilegesWithClusterTest(`updates privileges when nested propertry array values are reordered`, {
+  expectedPrivileges: {
+    kibana: {
+      foo: ['one', 'two']
+    }
+  },
+  existingPrivileges: {
+    kibana: {
+      foo: ['two', 'one']
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges();
+  }
+});
+
 registerPrivilegesWithClusterTest(`doesn't update privileges when simple top-level privileges match`, {
   expectedPrivileges: {
     expected: true
