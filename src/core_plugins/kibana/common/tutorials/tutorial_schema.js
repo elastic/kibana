@@ -25,6 +25,18 @@ const artifactsSchema = Joi.object({
   }),
 });
 
+const statusCheckSchema = Joi.object({
+  title: Joi.string(),
+  text: Joi.string(),
+  btnLabel: Joi.string(),
+  success: Joi.string(),
+  error: Joi.string(),
+  esHitsCheck: Joi.object({
+    index: Joi.string().required(),
+    query: Joi.object().required(),
+  }).required(),
+});
+
 const instructionSchema = Joi.object({
   title: Joi.string(),
   textPre: Joi.string(),
@@ -40,7 +52,8 @@ const instructionVariantSchema = Joi.object({
 const instructionSetSchema = Joi.object({
   title: Joi.string(),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: Joi.array().items(instructionVariantSchema).required()
+  instructionVariants: Joi.array().items(instructionVariantSchema).required(),
+  statusCheck: statusCheckSchema,
 });
 
 const paramSchema = Joi.object({
