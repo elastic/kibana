@@ -1,0 +1,11 @@
+[[saved-objects-api]]
+== Saved Objects APIs
+
+* <<saved-objects-api-create>>
+* <<saved-objects-api-delete>>
+//* <<saved-objects-get,Get an object>>, <<api-saved-objects-bulk-get,Get multiple objects>>
+//* <<saved-objects-find,Find an object>>
+//* <<saved-objects-update,Update an object>>
+
+include::saved-objects/create.asciidoc[]
+include::saved-objects/delete.asciidoc[]
