@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }) {
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       es: kibanaCommonConfig.get('services.es'),
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      chance: kibanaAPITestsConfig.get('services.chance'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

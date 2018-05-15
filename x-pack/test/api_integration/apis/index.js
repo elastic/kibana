@@ -11,5 +11,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./logstash'));
+    loadTestFile(require.resolve('./beats'));
   });
 }
