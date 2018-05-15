@@ -36,7 +36,7 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
 
   // Fill out the remaining properties in each display record
   // for the columns to be displayed in the table.
-  displayRecords.forEach((record) => {
+  return displayRecords.map((record) => {
     const source = record.source;
     const jobId = source.job_id;
 
@@ -56,9 +56,9 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
       sourceInfluencers.forEach((influencer) => {
         const influencerFieldName = influencer.influencer_field_name;
         influencer.influencer_field_values.forEach((influencerFieldValue) => {
-          const influencerToAdd = {};
-          influencerToAdd[influencerFieldName] = influencerFieldValue;
-          influencers.push(influencerToAdd);
+          influencers.push({
+            [influencerFieldName]: influencerFieldValue
+          });
         });
       });
       record.influencers = influencers;
@@ -87,9 +87,9 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval) {
       }
     }
 
-  });
+    return record;
 
-  return displayRecords;
+  });
 }
 
 function aggregateAnomalies(anomalyRecords, interval) {

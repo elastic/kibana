@@ -221,8 +221,8 @@ module.directive('mlAnomaliesTable', function (
 
           // Get the definition of the category and use the terms or regex to view the
           // matching events in the Kibana Discover tab depending on whether the
-          // categorization field is of mapping type text (preferred) or keyword.getCt
-          ml.results.getCategoryDefinition({ jobId: record.job_id, categoryId })
+          // categorization field is of mapping type text (preferred) or keyword.
+          ml.results.getCategoryDefinition(record.job_id, categoryId)
             .then((resp) => {
               let query = null;
               // Build query using categorization regex (if keyword type) or terms (if text type).
@@ -338,7 +338,7 @@ module.directive('mlAnomaliesTable', function (
           // mlcategory in the source record will be an array
           // - use first value (will only ever be more than one if influenced by category other than by/partition/over).
           const categoryId = record.mlcategory[0];
-          ml.results.getCategoryDefinition({ jobId, categoryId })
+          ml.results.getCategoryDefinition(jobId, categoryId)
             .then((resp) => {
             // Prefix each of the terms with '+' so that the Elasticsearch Query String query
             // run in a drilldown Kibana dashboard has to match on all terms.
@@ -719,7 +719,7 @@ module.directive('mlAnomaliesTable', function (
         rowScope.initRow = function () {
           if (_.has(record, 'entityValue') && record.entityName === 'mlcategory') {
             // Obtain the category definition and display the examples in the expanded row.
-            ml.results.getCategoryDefinition({ jobId: record.jobId, categoryId: record.entityValue })
+            ml.results.getCategoryDefinition(record.jobId, record.entityValue)
               .then((resp) => {
                 rowScope.categoryDefinition = {
                   'examples': _.slice(resp.examples, 0, Math.min(resp.examples.length, MAX_NUMBER_CATEGORY_EXAMPLES)) };
@@ -933,7 +933,7 @@ module.directive('mlAnomaliesTable', function (
         // Load the example events for the specified map of job_ids and categoryIds from Elasticsearch.
         scope.categoryExamplesByJob = {};
         _.each(categoryIdsByJobId, (categoryIds, jobId) => {
-          ml.results.getCategoryExamples({ jobId, categoryIds, maxExamples: MAX_NUMBER_CATEGORY_EXAMPLES })
+          ml.results.getCategoryExamples(jobId, categoryIds, MAX_NUMBER_CATEGORY_EXAMPLES)
             .then((resp) => {
               scope.categoryExamplesByJob[jobId] = resp;
             }).catch((resp) => {

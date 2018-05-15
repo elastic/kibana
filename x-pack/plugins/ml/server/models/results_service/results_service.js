@@ -16,6 +16,8 @@ import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patter
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
 
+const DEFAULT_QUERY_SIZE = 500;
+
 export function resultsServiceProvider(callWithRequest) {
 
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
@@ -106,7 +108,7 @@ export function resultsServiceProvider(callWithRequest) {
 
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
-      size: maxRecords !== undefined ? maxRecords : 500,
+      size: maxRecords !== undefined ? maxRecords : DEFAULT_QUERY_SIZE,
       body: {
         query: {
           bool: {
@@ -187,7 +189,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryExamples(jobId, categoryIds, maxExamples) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
-      size: 500,    // Matches size of records in anomaly summary table.
+      size: DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
       body: {
         query: {
           bool: {
