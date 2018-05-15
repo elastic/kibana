@@ -27,7 +27,6 @@ export default function ({ getService }) {
       beat = {
         enrollment_token: validEnrollmentToken,
         type: 'filebeat',
-        host_ip: '11.22.33.44',
         host_name: 'foo.bar.com',
       };
 
@@ -61,6 +60,7 @@ export default function ({ getService }) {
       });
 
       expect(esResponse._source.beat).to.not.have.property('verified_on');
+      expect(esResponse._source.beat).to.have.property('host_ip');
     });
 
     it('should contain an access token in the response', async () => {

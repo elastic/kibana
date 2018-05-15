@@ -37,13 +37,14 @@ function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
   return callWithInternalUser('delete', params);
 }
 
-function persistBeat(callWithInternalUser, beat, beatId, accessToken) {
+function persistBeat(callWithInternalUser, beat, beatId, accessToken, remoteAddress) {
   const body = {
     type: 'beat',
     beat: {
       ...omit(beat, 'enrollment_token'),
       id: beatId,
-      access_token: accessToken
+      access_token: accessToken,
+      host_ip: remoteAddress
     }
   };
 
@@ -68,8 +69,7 @@ export function registerEnrollBeatRoute(server) {
         payload: Joi.object({
           enrollment_token: Joi.string().required(),
           type: Joi.string().required(),
-          host_name: Joi.string().required(),
-          host_ip: Joi.string().required()
+          host_name: Joi.string().required()
         }).required()
       },
       auth: false
@@ -89,7 +89,8 @@ export function registerEnrollBeatRoute(server) {
         }
 
         accessToken = uuid.v4().replace(/-/g, "");
-        await persistBeat(callWithInternalUser, request.payload, request.params.beatId, accessToken);
+        const remoteAddress = request.info.remoteAddress;
+        await persistBeat(callWithInternalUser, request.payload, request.params.beatId, accessToken, remoteAddress);
 
         await deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken);
       } catch (err) {
