@@ -1,0 +1,85 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".management-beats",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "_doc": {
+        "dynamic": "strict",
+        "properties": {
+          "beat": {
+            "properties": {
+              "access_token": {
+                "type": "keyword"
+              },
+              "central_configuration_yml": {
+                "type": "text"
+              },
+              "enrollment_token": {
+                "type": "keyword"
+              },
+              "ephemeral_id": {
+                "type": "keyword"
+              },
+              "host_ip": {
+                "type": "keyword"
+              },
+              "host_name": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "local_configuration_yml": {
+                "type": "text"
+              },
+              "metadata": {
+                "type": "object",
+                "dynamic": "true"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "verified_on": {
+                "type": "date"
+              }
+            }
+          },
+          "configuration_block": {
+            "properties": {
+              "block_yml": {
+                "type": "text"
+              },
+              "tag": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              }
+            }
+          },
+          "enrollment_token": {
+            "properties": {
+              "expires_on": {
+                "type": "date"
+              },
+              "token": {
+                "type": "keyword"
+              }
+            }
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
