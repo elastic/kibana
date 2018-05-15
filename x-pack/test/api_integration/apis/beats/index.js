@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { INDEX_NAMES } from './index_names';
+export default function ({ loadTestFile }) {
+  describe('beats', () => {
+    loadTestFile(require.resolve('./create_enrollment_token'));
+  });
+}
