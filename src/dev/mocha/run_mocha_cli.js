@@ -4,8 +4,6 @@ import getopts from 'getopts';
 import globby from 'globby';
 
 export function runMochaCli() {
-  process.chdir(resolve(__dirname, '../../..'));
-
   const opts = getopts(process.argv.slice(2), {
     alias: {
       t: 'timeout',
@@ -58,7 +56,10 @@ export function runMochaCli() {
       '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
       '!**/_*.js'
-    ]).forEach(file => {
+    ], {
+      cwd: resolve(__dirname, '../../..'),
+      absolute: true,
+    }).forEach(file => {
       process.argv.push(file);
     });
   }
