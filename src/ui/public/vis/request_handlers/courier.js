@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { SearchSourceProvider } from '../../courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
+import { calculateObjectHash } from '../lib/calculate_object_hash';
 
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
@@ -72,22 +73,11 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         searchSource.set('query', appState.query);
       }
 
-      // AggConfig contains circular reference to vis, which contains visualization parameters,
-      // which we should not look at
-      const copyAggs = (aggs) => {
-        return aggs.map(agg => {
-          return {
-            type: agg.type,
-            params: agg.params
-          };
-        });
-      };
-
       const shouldQuery = () => {
         if (!searchSource.lastQuery || vis.reload) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('filter')), searchSource.lastQuery.filter)) return true;
         if (!_.isEqual(_.cloneDeep(searchSource.get('query')), searchSource.lastQuery.query)) return true;
-        if (!_.isEqual(_.cloneDeep(copyAggs(vis.aggs.getRequestAggs())), searchSource.lastQuery.aggs)) return true;
+        if (!_.isEqual(calculateObjectHash(vis.getAggConfig()), searchSource.lastQuery.aggs)) return true;
         if (!_.isEqual(_.cloneDeep(timeRange), searchSource.lastQuery.timeRange)) return true;
 
         return false;
@@ -100,7 +90,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
               query: _.cloneDeep(searchSource.get('query')),
-              aggs: _.cloneDeep(copyAggs(vis.aggs.getRequestAggs())),
+              aggs: calculateObjectHash(vis.getAggConfig()),
               timeRange: _.cloneDeep(timeRange)
             };
 
