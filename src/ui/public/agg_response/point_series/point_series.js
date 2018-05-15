@@ -42,7 +42,7 @@ export function AggResponsePointSeriesProvider(Private) {
     initXAxis(chart);
     initYAxis(chart);
 
-    const datedX = aspects.x.agg.type.ordered && aspects.x.agg.type.ordered.date;
+    const datedX = aspects.x.aggConfig.type.ordered && aspects.x.aggConfig.type.ordered.date;
     if (datedX) {
       setupOrderedDateXAxis(vis, chart);
     }

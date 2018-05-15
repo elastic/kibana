@@ -22,7 +22,7 @@ import moment from 'moment';
 export function PointSeriesOrderedDateAxisProvider() {
 
   return function orderedDateAxis(vis, chart) {
-    const xAgg = chart.aspects.x.agg;
+    const xAgg = chart.aspects.x.aggConfig;
     const buckets = xAgg.buckets;
     const format = buckets.getScaledDateFormat();
 

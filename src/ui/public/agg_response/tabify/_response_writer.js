@@ -30,6 +30,9 @@ function TabbedAggResponseWriter(aggs, opts) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
 
+  // by default minimalColumns is set to true
+  this.opts.minimalColumns = !(this.opts.minimalColumns === false);
+
   this.aggs = aggs;
   this.columns = tabifyGetColumns(aggs, this.opts.minimalColumns);
   this.aggStack = [...this.columns];

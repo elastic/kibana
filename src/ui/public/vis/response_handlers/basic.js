@@ -24,14 +24,6 @@ import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response
 const BasicResponseHandlerProvider = function (Private) {
   const aggResponse = Private(AggResponseIndexProvider);
 
-  function convertTableGroup(vis, tableGroup) {
-    const tables = tableGroup.tables;
-    const firstChild = tables[0];
-
-    const chart = convertTable(vis, firstChild);
-    return chart;
-  }
-
   function convertTable(vis, table) {
     return vis.type.responseConverter ? vis.type.responseConverter(vis, table) : table;
   }
@@ -42,16 +34,13 @@ const BasicResponseHandlerProvider = function (Private) {
       return new Promise((resolve) => {
         if (vis.isHierarchical()) {
           // the hierarchical converter is very self-contained (woot!)
+          // todo: it should be updated to be based on tabified data just as other responseConverters
           resolve(aggResponse.hierarchical(vis, response));
         }
 
-        const tableGroup = aggResponse.tabify(vis.getAggConfig(), response, {
-          canSplit: true,
-          asAggConfigResults: true,
-          isHierarchical: vis.isHierarchical()
-        });
+        const table = aggResponse.tabify(vis.getAggConfig(), response);
 
-        let converted = convertTableGroup(vis, tableGroup);
+        let converted = convertTable(vis, table);
         if (!converted) {
           // mimic a row of tables that doesn't have any tables
           // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32

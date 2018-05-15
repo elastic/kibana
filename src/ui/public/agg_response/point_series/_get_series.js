@@ -35,7 +35,7 @@ export function PointSeriesGetSeriesProvider(Private) {
       .transform(function (series, row) {
         if (!multiY) {
           const point = partGetPoint(row, aspects.y, aspects.z);
-          if (point) addToSiri(series, point, point.series, point.series, aspects.y.agg);
+          if (point) addToSiri(series, point, point.series, point.series, aspects.y.aggConfig);
           return;
         }
 
@@ -46,8 +46,8 @@ export function PointSeriesGetSeriesProvider(Private) {
           // use the point's y-axis as it's series by default,
           // but augment that with series aspect if it's actually
           // available
-          let seriesId = y.agg.id;
-          let seriesLabel = y.col.title;
+          let seriesId = y.aggConfig.id;
+          let seriesLabel = y.title;
 
           if (aspects.series) {
             const prefix = point.series ? point.series + ': ' : '';
@@ -55,7 +55,7 @@ export function PointSeriesGetSeriesProvider(Private) {
             seriesLabel = prefix + seriesLabel;
           }
 
-          addToSiri(series, point, seriesId, seriesLabel, y.agg);
+          addToSiri(series, point, seriesId, seriesLabel, y.aggConfig);
         });
 
       }, new Map())
@@ -70,7 +70,7 @@ export function PointSeriesGetSeriesProvider(Private) {
         if (firstVal) {
           const agg = firstVal.aggConfigResult.aggConfig;
           y = _.find(aspects.y, function (y) {
-            return y.agg === agg;
+            return y.aggConfig === agg;
           });
         }
 

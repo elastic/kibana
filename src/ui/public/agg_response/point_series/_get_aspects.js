@@ -31,20 +31,14 @@ export function PointSeriesGetAspectsProvider(Private) {
     group: 'series'
   };
 
-  function columnToAspect(aspects, col, i) {
+  function columnToAspect(aspects, col) {
     const schema = col.aggConfig.schema.name;
 
     const name = map[schema];
     if (!name) throw new TypeError('unknown schema name "' + schema + '"');
 
-    const aspect = {
-      i: i,
-      col: col,
-      agg: col.aggConfig
-    };
-
     if (!aspects[name]) aspects[name] = [];
-    aspects[name].push(aspect);
+    aspects[name].push(col);
   }
 
   /**

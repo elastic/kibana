@@ -24,21 +24,21 @@ export function PointSeriesInitYAxisProvider() {
 
     if (Array.isArray(y)) {
       // TODO: vis option should allow choosing this format
-      chart.yAxisFormatter = y[0].agg.fieldFormatter();
+      chart.yAxisFormatter = y[0].aggConfig.fieldFormatter();
       chart.yAxisLabel = ''; // use the legend
     } else {
-      chart.yAxisFormatter = y.agg.fieldFormatter();
-      chart.yAxisLabel = y.col.title;
+      chart.yAxisFormatter = y.aggConfig.fieldFormatter();
+      chart.yAxisLabel = y.title;
     }
 
     const z = chart.aspects.series;
     if (z) {
       if (Array.isArray(z)) {
-        chart.zAxisFormatter = z[0].agg.fieldFormatter();
+        chart.zAxisFormatter = z[0].aggConfig.fieldFormatter();
         chart.zAxisLabel = ''; // use the legend
       } else {
-        chart.zAxisFormatter = z.agg.fieldFormatter();
-        chart.zAxisLabel = z.col.title;
+        chart.zAxisFormatter = z.aggConfig.fieldFormatter();
+        chart.zAxisLabel = z.title;
       }
     }
   };

@@ -18,21 +18,20 @@
  */
 
 import _ from 'lodash';
+import AggConfigResult from '../../vis/agg_config_result';
 
 export function PointSeriesGetPointProvider() {
-  function unwrap(aggConfigResult, def) {
-    return aggConfigResult ? aggConfigResult.value : def;
-  }
 
   return function getPoint(x, series, yScale, row, y, z) {
-    const zRow = z && row[z.i];
-    const xRow = row[x.i];
+    const zRow = z && row[z.id];
+    const xRow = row[x.id];
 
+    // todo: wrap in aggConfigResult
     const point = {
-      x: unwrap(xRow, '_all'),
-      y: unwrap(row[y.i]),
-      z: zRow && unwrap(zRow),
-      aggConfigResult: row[y.i],
+      x: xRow ? xRow : '_all',
+      y: row[y.id],
+      z: zRow,
+      aggConfigResult: new AggConfigResult(y.aggConfig, null, row[y.id]),
       extraMetrics: _.compact([zRow]),
       yScale: yScale
     };
@@ -45,13 +44,13 @@ export function PointSeriesGetPointProvider() {
 
     if (series) {
       const seriesArray = series.length ? series : [ series ];
-      point.aggConfig = seriesArray[0].agg;
-      point.series = seriesArray.map(s => s.agg.fieldFormatter()(unwrap(row[s.i]))).join(' - ');
+      point.aggConfig = seriesArray[0].aggConfig;
+      point.series = seriesArray.map(s => s.aggConfig.fieldFormatter()(row[s.id])).join(' - ');
     } else if (y) {
       // If the data is not split up with a series aspect, then
       // each point's "series" becomes the y-agg that produced it
-      point.aggConfig = y.col.aggConfig;
-      point.series = y.col.title;
+      point.aggConfig = y.aggConfig;
+      point.series = y.title;
     }
 
     if (yScale) {
