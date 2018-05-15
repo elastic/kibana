@@ -24,9 +24,7 @@
   },
   "devDependencies": {
     "@kbn/dev-utils": "link:../packages/kbn-dev-utils",
-    "@kbn/es": "link:../packages/kbn-es",
     "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
-    "@kbn/test": "link:../packages/kbn-test",
     "@types/jest": "^22.2.3",
     "abab": "^1.0.4",
     "ansicolors": "0.3.2",

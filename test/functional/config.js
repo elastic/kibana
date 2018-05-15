@@ -82,16 +82,6 @@ export default async function ({ readConfigFile }) {
       dashboardAddPanel: DashboardAddPanelProvider,
     },
     servers: commonConfig.get('servers'),
-
-    env: commonConfig.get('env'),
-
-    esTestCluster: commonConfig.get('esTestCluster'),
-
-    kibanaServerArgs: [
-      ...commonConfig.get('kibanaServerArgs'),
-      '--oss',
-    ],
-
     apps: {
       status_page: {
         pathname: '/status',

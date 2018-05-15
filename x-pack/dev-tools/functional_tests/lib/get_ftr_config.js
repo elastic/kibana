@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('@kbn/plugin-helpers').babelRegister();
-require('../dev-tools/functional_tests').runFunctionTests();
+import { readFtrConfigFile } from '@kbn/plugin-helpers';
+
+import { FTR_CONFIG_PATH } from './paths';
+import { log } from './log';
+
+export async function getFtrConfig() {
+  return await readFtrConfigFile(log, FTR_CONFIG_PATH);
+}

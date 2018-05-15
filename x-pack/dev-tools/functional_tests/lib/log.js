@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('@kbn/plugin-helpers').babelRegister();
-require('../dev-tools/functional_tests').runFunctionTests();
+import { createToolingLog } from '@kbn/dev-utils';
+
+export const log = createToolingLog('debug');
+log.pipe(process.stdout);

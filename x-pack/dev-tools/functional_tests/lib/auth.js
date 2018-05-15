@@ -12,25 +12,20 @@ import { delay, fromNode as fcb } from 'bluebird';
 export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
 
 async function updateCredentials(port, auth, username, password, retries = 10) {
-  const result = await fcb(cb =>
-    request(
-      {
-        method: 'PUT',
-        uri: formatUrl({
-          protocol: 'http:',
-          auth,
-          hostname: 'localhost',
-          port,
-          pathname: `/_xpack/security/user/${username}/_password`,
-        }),
-        json: true,
-        body: { password },
-      },
-      (err, httpResponse, body) => {
-        cb(err, { httpResponse, body });
-      }
-    )
-  );
+  const result = await fcb(cb => request({
+    method: 'PUT',
+    uri: formatUrl({
+      protocol: 'http:',
+      auth,
+      hostname: 'localhost',
+      port,
+      pathname: `/_xpack/security/user/${username}/_password`,
+    }),
+    json: true,
+    body: { password }
+  }, (err, httpResponse, body) => {
+    cb(err, { httpResponse, body });
+  }));
 
   const { body, httpResponse } = result;
   const { statusCode } = httpResponse;
@@ -43,22 +38,20 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
     return await updateCredentials(port, auth, username, password, retries - 1);
   }
 
-  throw new Error(
-    `${statusCode} response, expected 200 -- ${JSON.stringify(body)}`
-  );
+  throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
-export async function setupUsers(log, config) {
-  const esPort = config.get('servers.elasticsearch.port');
+export async function setupUsers(log, ftrConfig) {
+  const esPort = ftrConfig.get('servers.elasticsearch.port');
 
   // track the current credentials for the `elastic` user as
   // they will likely change as we apply updates
-  let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
+  let auth = 'elastic:iamsuperuser';
 
   // list of updates we need to apply
   const updates = [
-    config.get('servers.elasticsearch'),
-    config.get('servers.kibana'),
+    ftrConfig.get('servers.elasticsearch'),
+    ftrConfig.get('servers.kibana'),
   ];
 
   for (const { username, password } of updates) {
