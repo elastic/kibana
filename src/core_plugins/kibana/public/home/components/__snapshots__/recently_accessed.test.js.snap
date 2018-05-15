@@ -9,13 +9,13 @@ exports[`render 1`] = `
   <EuiText
     grow={true}
   >
-    <p>
+    <h3>
       <EuiTextColor
         color="subdued"
       >
         Recently viewed
       </EuiTextColor>
-    </p>
+    </h3>
   </EuiText>
   <EuiSpacer
     size="s"

@@ -175,11 +175,11 @@ export class RecentlyAccessed extends Component {
     return (
       <EuiPanel paddingSize="l">
         <EuiText>
-          <p>
+          <h3>
             <EuiTextColor color="subdued">
               Recently viewed
             </EuiTextColor>
-          </p>
+          </h3>
         </EuiText>
 
         <EuiSpacer size="s"/>
