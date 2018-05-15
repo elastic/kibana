@@ -21,7 +21,7 @@ export function runInterpreter(ast, context = null, options = {}) {
       }
 
       if (options.castToRender) {
-        return runInterpreter(fromExpression('render'), renderable || context, {
+        return runInterpreter(fromExpression('render'), renderable, {
           castToRender: false,
         });
       }
