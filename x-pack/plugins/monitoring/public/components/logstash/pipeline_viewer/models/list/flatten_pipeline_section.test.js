@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flattenPipelineSection } from '../flatten_pipeline_section';
-import { PluginStatement } from '../../pipeline/plugin_statement';
-import { IfStatement } from '../../pipeline/if_statement';
+import { flattenPipelineSection } from './flatten_pipeline_section';
+import { PluginStatement } from '../pipeline/plugin_statement';
+import { IfStatement } from '../pipeline/if_statement';
 
-describe('treeToList', () => {
-  let tree;
+describe('flattenPipelineSection', () => {
+  let pipelineSection;
 
   beforeEach(() => {
-    tree = [];
+    pipelineSection = [];
   });
 
-  it('creates list for only-plugin tree', () => {
-    tree = [
+  it('creates list for only-plugin pipeline section', () => {
+    pipelineSection = [
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
       PluginStatement.fromPipelineGraphVertex({ id: 'second' })
     ];
 
-    const result = flattenPipelineSection(tree, 0, null);
+    const result = flattenPipelineSection(pipelineSection, 0, null);
 
     expect(result).toHaveLength(2);
     expect(result[0].parentId).toBe(null);
@@ -33,7 +33,7 @@ describe('treeToList', () => {
   });
 
   it('flattens pipeline with if statement', () => {
-    tree = [
+    pipelineSection = [
       PluginStatement.fromPipelineGraphVertex({ id: 'first' }),
       new IfStatement(
         { id: 'if_parent' },
@@ -41,7 +41,7 @@ describe('treeToList', () => {
       )
     ];
 
-    const result = flattenPipelineSection(tree, 0, null);
+    const result = flattenPipelineSection(pipelineSection, 0, null);
 
     expect(result).toHaveLength(3);
     expect(result[0].id).toBe('first');
@@ -54,7 +54,7 @@ describe('treeToList', () => {
   });
 
   it('flattens pipeline with else statement', () => {
-    tree = [
+    pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
         [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
@@ -62,7 +62,7 @@ describe('treeToList', () => {
       )
     ];
 
-    const result = flattenPipelineSection(tree, 0, null);
+    const result = flattenPipelineSection(pipelineSection, 0, null);
 
     expect(result).toHaveLength(4);
     expect(result[0].id).toBe('if_parent');
@@ -80,8 +80,8 @@ describe('treeToList', () => {
     expect(result[3].depth).toBe(1);
   });
 
-  it('flattens tree with if/else and nested if', () => {
-    tree = [
+  it('flattens pipeline section with if/else and nested if', () => {
+    pipelineSection = [
       new IfStatement(
         { id: 'if_parent' },
         [ PluginStatement.fromPipelineGraphVertex({ id: 'if_child1' })],
@@ -95,7 +95,7 @@ describe('treeToList', () => {
       )
     ];
 
-    const result = flattenPipelineSection(tree, 0, null);
+    const result = flattenPipelineSection(pipelineSection, 0, null);
 
     expect(result).toHaveLength(6);
     expect(result[1].id).toBe('if_child1');

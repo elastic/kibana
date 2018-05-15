@@ -18,6 +18,7 @@ export function flattenPipelineSection(tree, depth, parentId) {
     } else if (type === 'IfStatement') {
       list.push(new IfElement(node, depth, parentId));
       list = list.concat(flattenPipelineSection(node.trueStatements, depth + 1, node.id));
+
       if (node.elseStatements && node.elseStatements.length) {
         const elseElement = new ElseElement(node, depth, parentId);
         list.push(elseElement);

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pipelineToList } from '../pipeline_to_list';
-import { PluginStatement } from '../../pipeline/plugin_statement';
-import { IfStatement } from '../../pipeline/if_statement';
-import { PluginElement } from '../plugin_element';
-import { IfElement } from '../if_element';
-import { ElseElement } from '../else_element';
+import { pipelineToList } from './pipeline_to_list';
+import { PluginStatement } from '../pipeline/plugin_statement';
+import { IfStatement } from '../pipeline/if_statement';
+import { PluginElement } from './plugin_element';
+import { IfElement } from './if_element';
+import { ElseElement } from './else_element';
 
 describe('pipelineToList', () => {
   let pipeline;
