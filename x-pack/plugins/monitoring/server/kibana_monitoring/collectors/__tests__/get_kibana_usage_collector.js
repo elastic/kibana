@@ -6,10 +6,10 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { getUsageCollector } from '../get_usage_collector';
+import { getKibanaUsageCollector } from '../get_kibana_usage_collector';
 import { callClusterFactory } from '../../../../../xpack_main';
 
-describe('getUsageCollector', () => {
+describe('getKibanaUsageCollector', () => {
   let clusterStub;
   let serverStub;
   let callClusterStub;
@@ -29,7 +29,7 @@ describe('getUsageCollector', () => {
   });
 
   it('correctly defines usage collector.', () => {
-    const usageCollector = getUsageCollector(serverStub, callClusterStub);
+    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
 
     expect(usageCollector.type).to.be('kibana');
     expect(usageCollector.fetch).to.be.a(Function);
@@ -44,7 +44,7 @@ describe('getUsageCollector', () => {
       }
     });
 
-    const usageCollector = getUsageCollector(serverStub, callClusterStub);
+    const usageCollector = getKibanaUsageCollector(serverStub, callClusterStub);
     await usageCollector.fetch();
 
     sinon.assert.calledOnce(clusterStub.callWithInternalUser);

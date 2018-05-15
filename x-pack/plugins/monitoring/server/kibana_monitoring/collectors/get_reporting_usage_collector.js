@@ -7,7 +7,7 @@
 import { KIBANA_REPORTING_TYPE } from '../../../common/constants';
 import { getReportingUsage } from '../../../../reporting';
 
-export function getReportingCollector(server, callCluster) {
+export function getReportingUsageCollector(server, callCluster) {
   return {
     type: KIBANA_REPORTING_TYPE,
     fetch() {
