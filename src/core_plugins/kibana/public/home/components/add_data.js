@@ -35,6 +35,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
           <KuiCardDescriptionTitle>
             <img
               src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
+              alt="APM application icon"
             />
             <p>
               APM
@@ -67,6 +68,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
               <KuiCardDescriptionTitle>
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
+                  alt="Logging icon"
                 />
                 <p>
                   Logging
@@ -92,6 +94,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
               <KuiCardDescriptionTitle>
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
+                  alt="Monitoring icon"
                 />
                 <p>
                   Metrics
@@ -117,6 +120,7 @@ export function AddData({ addBasePath, apmUiEnabled }) {
               <KuiCardDescriptionTitle>
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
+                  alt="Security icon"
                 />
                 <p>
                   Security Analytics
