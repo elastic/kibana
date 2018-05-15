@@ -1,1 +1,0 @@
-export { injectIntoKbnServer } from './legacy';

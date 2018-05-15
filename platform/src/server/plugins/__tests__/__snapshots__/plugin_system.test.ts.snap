@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if adding a plugin that's already added 1`] = `"a plugin named [foo] has already been added"`;
-
-exports[`throws if starting a plugin that depends on a plugin that's not yet started 1`] = `"Topological ordering did not complete, these edges could not be ordered: [[\\"foo\\",[\\"does-not-exist\\"]]]"`;

@@ -15,12 +15,11 @@ bower_components
 /src/core_plugins/console/public/tests/webpackShims
 /src/ui/public/utils/decode_geo_hash.js
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
+/src/core/lib/kbn_internal_native_observable
 /packages/*/target
 /packages/eslint-config-kibana
 /packages/eslint-plugin-kibana-custom
 /packages/kbn-pm/dist
-/packages/kbn-types/dist
-/packages/kbn-internal-native-observable
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
 /packages/kbn-ui-framework/doc_site/build

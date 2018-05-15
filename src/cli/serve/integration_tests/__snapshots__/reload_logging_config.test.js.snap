@@ -15,6 +15,47 @@ Object {
     },
     Object {
       "@timestamp": "## @timestamp ##",
+      "message": "starting the server",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "root",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "starting server :tada:",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "server",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "registering route handler for [/core]",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "http",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
+      "message": "starting http server [localhost:8274]",
+      "pid": "## PID ##",
+      "tags": Array [
+        "info",
+        "http",
+        "server",
+      ],
+      "type": "log",
+    },
+    Object {
+      "@timestamp": "## @timestamp ##",
       "message": "Server running at http://localhost:8274",
       "pid": "## PID ##",
       "tags": Array [

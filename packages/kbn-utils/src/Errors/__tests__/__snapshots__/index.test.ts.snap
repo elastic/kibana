@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`includes stack 1`] = `
-"Error: test
-    at KibanaError (platform/lib/Errors/index.ts:11:5)
-    at Object.<anonymous>.e (platform/lib/Errors/__tests__/index.test.ts:6:11)"
-`;
