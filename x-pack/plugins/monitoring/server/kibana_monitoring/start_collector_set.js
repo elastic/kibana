@@ -21,8 +21,9 @@ import { getCollectorTypesCombiner } from './lib/get_collector_types_combiner';
  * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param server {Object} HapiJS server instance
  * @param client {Object} Dedicated ES Client with monitoringBulk plugin
+ * @return {Object} CollectorSet instance
  */
-export function startCollectors(kbnServer, server, client, _sendBulkPayload = sendBulkPayload) {
+export function startCollectorSet(kbnServer, server, client, _sendBulkPayload = sendBulkPayload) {
   const config = server.config();
   const interval = config.get('xpack.monitoring.kibana.collection.interval');
 

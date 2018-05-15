@@ -6,14 +6,14 @@
 
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG, } from '../../common/constants';
 import { monitoringBulk } from './lib/monitoring_bulk';
-import { startCollectors } from './start_collectors';
+import { startCollectorSet } from './start_collector_set';
 
 /**
  * @param kbnServer {Object} manager of Kibana services - see `src/server/kbn_server` in Kibana core
  * @param server {Object} HapiJS server instance
- * @return {Object} TypeCollector instance to be exposed at a higher level, for other plugins to register their own type collectors
+ * @return {Object} CollectorSet instance to be exposed at a higher level, for other plugins to register their own type collectors
  */
-export function initKibanaMonitoring(kbnServer, server) {
+export function createCollectorSet(kbnServer, server) {
   const mainXpackInfo = server.plugins.xpack_main.info;
   const mainMonitoring = mainXpackInfo.feature('monitoring');
 
@@ -23,7 +23,7 @@ export function initKibanaMonitoring(kbnServer, server) {
     const client = server.plugins.elasticsearch.getCluster('admin').createClient({
       plugins: [monitoringBulk]
     });
-    collectorSet = startCollectors(kbnServer, server, client);
+    collectorSet = startCollectorSet(kbnServer, server, client);
   } else {
     server.log(
       ['error', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],

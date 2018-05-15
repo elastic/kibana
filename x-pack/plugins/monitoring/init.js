@@ -7,7 +7,7 @@
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './server/init_monitoring_xpack_info';
-import { initKibanaMonitoring } from './server/kibana_monitoring';
+import { createCollectorSet } from './server/kibana_monitoring';
 
 /**
  * Initialize the Kibana Monitoring plugin by starting up asynchronous server tasks
@@ -35,7 +35,7 @@ export const init = (monitoringPlugin, server) => {
     }
 
     if (config.get('xpack.monitoring.kibana.collection.enabled')) {
-      const collectorSet = initKibanaMonitoring(monitoringPlugin.kbnServer, server); // instantiate an object for collecting/sending metrics and usage stats
+      const collectorSet = createCollectorSet(monitoringPlugin.kbnServer, server); // instantiate an object for collecting/sending metrics and usage stats
       server.expose('collectorSet', collectorSet); // expose the collector set object on the server. other plugins will call statsCollectors.register(collector) to define their own collection
     }
 
