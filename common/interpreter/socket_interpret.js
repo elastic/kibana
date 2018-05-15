@@ -26,9 +26,9 @@ export function socketInterpreterProvider({
     functions,
     handlers,
 
-    onFunctionNotFound: (chain, context) => {
+    onFunctionNotFound: (ast, context) => {
       // Get the name of the function that wasn't found
-      const functionName = chain.chain[0].function;
+      const functionName = ast.chain[0].function;
 
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
@@ -42,26 +42,21 @@ export function socketInterpreterProvider({
 
         return new Promise((resolve, reject) => {
           const listener = resp => {
-            // Resolve or reject the promise once we get our ID back
-            if (resp.id === id) {
-              socket.removeListener('resp', listener);
-
-              if (resp.error) {
-                // cast error strings back into error instances
-                const err = resp.error instanceof Error ? resp.error : new Error(resp.error);
-                if (resp.stack) err.stack = resp.stack;
-                reject(err);
-              } else {
-                resolve(resp.value);
-              }
+            if (resp.error) {
+              // cast error strings back into error instances
+              const err = resp.error instanceof Error ? resp.error : new Error(resp.error);
+              if (resp.stack) err.stack = resp.stack;
+              reject(err);
+            } else {
+              resolve(resp.value);
             }
           };
 
-          socket.on('resp', listener);
+          socket.once(`resp:${id}`, listener);
 
           // Go run the remaining AST and context somewhere else, meaning either the browser or the server, depending on
           // where this file was loaded
-          socket.emit('run', { ast: chain, context: context, id: id });
+          socket.emit('run', { ast, context, id });
         });
       });
     },

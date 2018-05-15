@@ -30,7 +30,7 @@ export function socketApi(server) {
       socket.emit('functionList', functionsRegistry.toJS());
     });
 
-    const handler = msg => {
+    const handler = ({ ast, context, id }) => {
       Promise.all([getClientFunctions, authHeader]).then(([clientFunctions, authHeader]) => {
         if (server.plugins.security) request.headers.authorization = authHeader;
 
@@ -42,16 +42,12 @@ export function socketApi(server) {
           socket: socket,
         });
 
-        return interpret(msg.ast, msg.context)
-          .then(resp => {
-            socket.emit('resp', {
-              id: msg.id,
-              value: resp,
-            });
+        return interpret(ast, context)
+          .then(value => {
+            socket.emit(`resp:${id}`, { value });
           })
           .catch(e => {
-            socket.emit('resp', {
-              id: msg.id,
+            socket.emit(`resp:${id}`, {
               error: e.message,
               stack: e.stack,
             });

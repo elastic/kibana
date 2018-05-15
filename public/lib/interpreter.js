@@ -23,8 +23,8 @@ export function interpretAst(ast, context) {
     .then(interpretFn => interpretFn(ast, context));
 }
 
-socket.on('run', msg => {
-  interpretAst(msg.ast, msg.context).then(resp => {
-    socket.emit('resp', { value: resp, id: msg.id });
+socket.on('run', ({ ast, context, id }) => {
+  interpretAst(ast, context).then(value => {
+    socket.emit(`resp:${id}`, { value });
   });
 });
