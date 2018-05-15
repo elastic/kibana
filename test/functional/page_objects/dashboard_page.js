@@ -235,6 +235,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async openInspectorForPanel(index) {
+      const panels = await testSubjects.findAll('dashboardPanel');
+      const panel = panels[index];
+      // TODO: Replace this by the proper code when we have proper dashboard panel triggers
+      const openInspectorButton = await panel.findByClassName('visualize-show-spy-tab');
+      return await openInspectorButton.click();
+    }
+
     // avoids any 'Object with id x not found' errors when switching tests.
     async clearSavedObjectsFromAppLinks() {
       await PageObjects.header.clickVisualize();
