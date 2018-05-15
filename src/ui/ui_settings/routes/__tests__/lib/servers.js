@@ -1,5 +1,4 @@
-import { createEsTestCluster } from '@kbn/test';
-import { createToolingLog } from '@kbn/dev-utils';
+import { createTestCluster } from '../../../../../test_utils/es';
 import * as kbnTestServer from '../../../../../test_utils/kbn_server';
 
 let kbnServer;
@@ -7,17 +6,9 @@ let services;
 let es;
 
 export async function startServers() {
-  const log = createToolingLog('debug');
-  log.pipe(process.stdout);
-  log.indent(6);
-
-  log.info('starting elasticsearch');
-  log.indent(4);
-
-  es = createEsTestCluster({ log });
+  es = createTestCluster();
   this.timeout(es.getStartTimeout());
 
-  log.indent(-4);
   await es.start();
 
   kbnServer = kbnTestServer.createServerWithCorePlugins();
@@ -44,7 +35,7 @@ export function getServices() {
     kbnServer,
     callCluster,
     savedObjectsClient,
-    uiSettings,
+    uiSettings
   };
 
   return services;

@@ -76,9 +76,7 @@ export class ProcRunner {
           .first()
           .catch(err => {
             if (err.name !== 'EmptyError') {
-              throw createCliError(
-                `[${name}] exited without matching pattern: ${wait}`
-              );
+              throw createCliError(`[${name}] exitted without matching pattern: ${wait}`);
             } else {
               throw err;
             }
@@ -173,12 +171,7 @@ export class ProcRunner {
     proc.outcome$.subscribe({
       next: (code) => {
         const duration = moment.duration(Date.now() - startMs);
-        this._log.info(
-          '[%s] exited with %s after %s',
-          name,
-          code,
-          duration.humanize()
-        );
+        this._log.info('[%s] exitted with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();

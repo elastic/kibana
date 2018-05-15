@@ -9,9 +9,10 @@ import { SupertestWithoutAuthProvider } from './services';
 
 export default async function ({ readConfigFile }) {
 
+  // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(resolveKibanaPath('test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(resolveKibanaPath('test/common/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -20,15 +21,12 @@ export default async function ({ readConfigFile }) {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
-      es: kibanaCommonConfig.get('services.es'),
-      esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      es: kibanaFunctionalConfig.get('services.es'),
+      esArchiver: kibanaFunctionalConfig.get('services.esArchiver'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },
-    env: xPackFunctionalTestsConfig.get('env'),
-    kibanaServerArgs: xPackFunctionalTestsConfig.get('kibanaServerArgs'),
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }

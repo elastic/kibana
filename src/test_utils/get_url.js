@@ -9,7 +9,7 @@ import url from 'url';
 *      protocol: 'http',
 *      hostname: 'localhost',
 *      port: 9220,
-*      auth: kibanaTestUser.username + ':' + kibanaTestUser.password
+*      auth: shield.kibanaUser.username + ':' + shield.kibanaUser.password
 *   }
 * @param {object} app The params to append
 *   example:

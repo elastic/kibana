@@ -23,7 +23,6 @@ module.exports = {
         'packages/kbn-es/**/*',
         'packages/kbn-datemath/**/*.js',
         'packages/kbn-plugin-generator/**/*',
-        'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
         'x-pack/plugins/apm/**/*',
       ],

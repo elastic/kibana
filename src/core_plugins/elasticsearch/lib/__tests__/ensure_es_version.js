@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import { esTestConfig } from '@kbn/test';
+import { esTestConfig } from '../../../../test_utils/es';
 import { ensureEsVersion } from '../ensure_es_version';
 
 describe('plugins/elasticsearch', () => {

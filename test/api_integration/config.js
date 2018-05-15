@@ -6,7 +6,6 @@ import {
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     testFiles: [
@@ -23,14 +22,6 @@ export default async function ({ readConfigFile }) {
     servers: commonConfig.get('servers'),
     junit: {
       reportName: 'API Integration Tests'
-    },
-    env: commonConfig.get('env'),
-    esTestCluster: commonConfig.get('esTestCluster'),
-    kibanaServerArgs: [
-      ...functionalConfig.get('kibanaServerArgs'),
-      '--optimize.enabled=false',
-      '--elasticsearch.healthCheck.delay=3600000',
-      '--server.xsrf.disableProtection=true',
-    ],
+    }
   };
 }

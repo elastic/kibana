@@ -1,7 +1,8 @@
 import { resolve } from 'path';
 import { defaultsDeep, set } from 'lodash';
 import { header as basicAuthHeader } from './base_auth';
-import { esTestConfig, kibanaTestUser, kibanaServerTestUser } from '@kbn/test';
+import { kibanaUser, kibanaServer } from '../../test/shield';
+import { esTestConfig } from '../test_utils/es';
 import KbnServer from '../../src/server/kbn_server';
 
 const DEFAULTS_SETTINGS = {
@@ -28,8 +29,8 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   },
   elasticsearch: {
     url: esTestConfig.getUrl(),
-    username: kibanaServerTestUser.username,
-    password: kibanaServerTestUser.password
+    username: kibanaServer.username,
+    password: kibanaServer.password
   }
 };
 
@@ -59,7 +60,7 @@ export function createServerWithCorePlugins(settings = {}) {
  * Creates request configuration with a basic auth header
  */
 export function authOptions() {
-  const { username, password } = kibanaTestUser;
+  const { username, password } = kibanaUser;
   const authHeader = basicAuthHeader(username, password);
   return set({}, 'headers.Authorization', authHeader);
 }

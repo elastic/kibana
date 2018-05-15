@@ -1,4 +1,5 @@
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { esTestConfig } from '../../src/test_utils/es';
+import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 import { resolve } from 'path';
 
 const SECOND = 1000;
@@ -46,14 +47,14 @@ module.exports = function (grunt) {
     '--optimize.enabled=false',
     '--elasticsearch.url=' + esTestConfig.getUrl(),
     '--elasticsearch.healthCheck.delay=' + HOUR,
-    '--server.port=' + kbnTestConfig.getPort(),
+    '--server.port=' + kibanaTestServerUrlParts.port,
     '--server.xsrf.disableProtection=true',
   ];
 
   const funcTestServerFlags = [
     '--server.maxPayloadBytes=1648576', //default is 1048576
     '--elasticsearch.url=' + esTestConfig.getUrl(),
-    '--server.port=' + kbnTestConfig.getPort(),
+    '--server.port=' + kibanaTestServerUrlParts.port,
   ];
 
   const browserTestServerFlags = [
