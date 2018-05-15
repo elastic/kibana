@@ -7,7 +7,10 @@
 import Joi from 'joi';
 import uuid from 'uuid';
 import moment from 'moment';
-import { get } from 'lodash';
+import {
+  get,
+  omit
+} from 'lodash';
 import { INDEX_NAMES } from '../../../common/constants';
 import { callWithInternalUserFactory } from '../../lib/client';
 import { wrapEsError } from '../../lib/error_wrappers';
@@ -37,7 +40,11 @@ function deleteUsedEnrollmentToken(callWithInternalUser, enrollmentToken) {
 function persistBeat(callWithInternalUser, beat, beatId, accessToken) {
   const body = {
     type: 'beat',
-    beat: { ...beat, id: beatId, access_token: accessToken }
+    beat: {
+      ...omit(beat, 'enrollment_token'),
+      id: beatId,
+      access_token: accessToken
+    }
   };
 
   const params = {
