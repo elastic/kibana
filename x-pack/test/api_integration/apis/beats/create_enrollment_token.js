@@ -79,7 +79,7 @@ export default function ({ getService }) {
       expect(tokensFromApi).to.eql(tokensInEs);
     });
 
-    it('should set token expiration to 4 hours from now by default', async () => {
+    it('should set token expiration to 10 minutes from now by default', async () => {
       await supertest
         .post(
           '/api/beats/enrollment_tokens'
@@ -96,9 +96,14 @@ export default function ({ getService }) {
 
       const tokenInEs = esResponse.hits.hits[0]._source.enrollment_token;
 
+      // We do a fuzzy check to see if the token expires between 9 and 10 minutes
+      // from now because a bit of time has elapsed been the creation of the
+      // tokens and this check.
       const tokenExpiresOn = moment(tokenInEs.expires_on).valueOf();
-      const fourHoursFromNow = moment().add('4', 'hours').valueOf();
-      expect(tokenExpiresOn).to.be.lessThan(fourHoursFromNow);
+      const tenMinutesFromNow = moment().add('10', 'minutes').valueOf();
+      const almostTenMinutesFromNow = moment(tenMinutesFromNow).subtract('2', 'seconds').valueOf();
+      expect(tokenExpiresOn).to.be.lessThan(tenMinutesFromNow);
+      expect(tokenExpiresOn).to.be.greaterThan(almostTenMinutesFromNow);
     });
   });
 }
