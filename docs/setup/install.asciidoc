@@ -39,7 +39,7 @@ downloaded from the Elastic Docker Registry. The default image ships with
 +
 <<docker,Running Kibana on Docker>>
 
-IMPORTANT: If your Elasticsearch installation is protected by {xpack-ref}/xpack-security.html[X-Pack Security]
+IMPORTANT: If security is enabled on your Elasticsearch cluster,
 see {kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana]
 for additional setup instructions.
 
