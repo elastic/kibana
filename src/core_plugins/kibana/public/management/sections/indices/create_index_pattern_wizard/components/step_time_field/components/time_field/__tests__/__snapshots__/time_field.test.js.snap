@@ -46,6 +46,7 @@ exports[`TimeField should render a loading state 1`] = `
     }
   >
     <EuiSelect
+      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={true}
       fullWidth={false}
@@ -116,6 +117,7 @@ exports[`TimeField should render a selected time field 1`] = `
     }
   >
     <EuiSelect
+      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
       fullWidth={false}
@@ -188,6 +190,7 @@ exports[`TimeField should render normally 1`] = `
     }
   >
     <EuiSelect
+      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
       fullWidth={false}
