@@ -45,9 +45,6 @@
             "id": {
               "type": "keyword"
             },
-            "enrollment_token": {
-              "type": "keyword"
-            },
             "access_token": {
               "type": "keyword"
             },
@@ -58,7 +55,7 @@
               "type": "keyword"
             },
             "host_ip": {
-              "type": "keyword"
+              "type": "ip"
             },
             "host_name": {
               "type": "keyword"
