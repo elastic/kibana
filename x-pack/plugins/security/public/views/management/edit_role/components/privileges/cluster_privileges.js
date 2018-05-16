@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { getClusterPrivileges } from '../../../../../services/role_privileges';
-import { isReservedRole } from '../../lib/is_reserved_role';
+import { isReservedRole } from '../../../../../lib/role';
 import {
   EuiCheckboxGroup,
   EuiText,

@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { isReservedRole } from '../../lib/is_reserved_role';
+import { isReservedRole } from '../../../../../lib/role';
 import { getKibanaPrivileges } from '../../lib/get_application_privileges';
 import { togglePrivilege } from '../../lib/set_application_privileges';
 import {

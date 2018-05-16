@@ -6,7 +6,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { isReservedRole } from '../../lib/is_reserved_role';
+import { isReservedRole } from '../../../../../lib/role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { getFields } from '../../../../../objects';
 import {

@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { isReservedRole } from '../lib/is_reserved_role';
+import { isReservedRole } from '../../../../lib/role';
 import {
   EuiBadge,
   EuiToolTip,

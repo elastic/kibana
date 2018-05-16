@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { PageHeader } from './page_header';
 import { saveRole, deleteRole } from '../../../../objects';
-import { isReservedRole } from '../lib/is_reserved_role';
+import { isReservedRole } from '../../../../lib/role';
 import { RoleValidator } from '../lib/validate_role';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import { ROLES_PATH } from '../../management_urls';

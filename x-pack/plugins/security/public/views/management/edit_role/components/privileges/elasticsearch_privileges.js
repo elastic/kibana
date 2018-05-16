@@ -15,9 +15,9 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import { isReservedRole } from '../../lib/is_reserved_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
+import { isReservedRole } from '../../../../../lib/role';
 
 export class ElasticsearchPrivileges extends Component {
   static propTypes = {

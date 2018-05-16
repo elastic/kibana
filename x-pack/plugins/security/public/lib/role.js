@@ -15,3 +15,12 @@ import { get } from 'lodash';
 export function isRoleEnabled(role) {
   return get(role, 'transient_metadata.enabled', true);
 }
+
+/**
+ * Returns whether given role is reserved or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isReservedRole(role) {
+  return get(role, 'metadata._reserved', false);
+}
