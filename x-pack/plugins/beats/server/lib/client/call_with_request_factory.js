@@ -7,9 +7,8 @@
 import { once } from 'lodash';
 
 const callWithRequest = once((server) => {
-  const config = server.config().get('elasticsearch');
-  const cluster = server.plugins.elasticsearch.createCluster('beats', config);
-  return cluster.callWithRequest;
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  return callWithRequest;
 });
 
 export const callWithRequestFactory = (server, request) => {
