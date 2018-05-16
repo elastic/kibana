@@ -55,3 +55,15 @@ export const TS_PROJECTS = [
   Project.fromConfig(require.resolve('../../../packages/kbn-pm/tsconfig.json')),
   Project.fromConfig(require.resolve('../../../packages/kbn-system-loader/tsconfig.json')),
 ];
+
+export function findProjectForAbsolutePath(path: string) {
+  const project = TS_PROJECTS.find(p => p.isAbsolutePathSelected(path));
+
+  if (!project) {
+    throw new Error(
+      `Unable to find tsconfig.json file selecting file "${path}". Ensure one exists and it is listed in "src/dev/typescript/projects.ts"`
+    );
+  }
+
+  return project
+}

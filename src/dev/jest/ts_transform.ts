@@ -2,7 +2,7 @@ import { getCacheKey, install, process } from 'ts-jest';
 import { JestConfig, TransformOptions } from 'ts-jest/dist/jest-types';
 
 import { transform } from 'typescript';
-import { Project, TS_PROJECTS } from '../typescript';
+import { findProjectForAbsolutePath } from '../typescript';
 
 function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
   const jestConfig = JSON.parse(jestConfigJSON) as JestConfig;
@@ -10,20 +10,12 @@ function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
 }
 
 function extendJestConfig(jestConfig: JestConfig, filePath: string) {
-  const project = TS_PROJECTS.find(p => p.isAbsolutePathSelected(filePath));
-
-  if (!project) {
-    throw new Error(
-      'Unable to find tsconfig.json file selecting file "${filePath}". Ensure one exists and it is listed in "src/dev/typescript/projects.ts"'
-    );
-  }
-
   return {
     ...jestConfig,
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
-        tsConfigFile: project.getTsConfigPath(),
+        tsConfigFile: findProjectForAbsolutePath(filePath).getTsConfigPath(),
         skipBabel: true,
       },
     },

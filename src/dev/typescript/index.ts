@@ -1,1 +1,1 @@
-export { TS_PROJECTS, Project } from './project';
+export { findProjectForAbsolutePath } from './project';
