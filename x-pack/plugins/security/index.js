@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import dedent from 'dedent';
 import { resolve } from 'path';
 import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
@@ -49,9 +48,7 @@ export const security = (kibana) => new kibana.Plugin({
         createDefaultRoles: Joi.boolean().default(true),
         application: Joi.string().default('kibana').regex(
           /[a-zA-Z0-9-_]+/,
-          dedent(
-            `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
-          )
+          `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
         ),
       }).default(),
     }).default();
