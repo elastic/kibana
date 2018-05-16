@@ -20,7 +20,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
 
-import { EditRolePage } from './edit_role/components/edit_role_page';
+import { EditRolePage } from './edit_role/components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
