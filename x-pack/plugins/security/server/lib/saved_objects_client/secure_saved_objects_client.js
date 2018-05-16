@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
- * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
-
 import { get, uniq } from 'lodash';
 
 export class SecureSavedObjectsClient {
   constructor(options) {
     const {
       request,
-      requestHasPrivileges,
+      hasPrivilegesWithRequest,
       baseClient,
     } = options;
 
     this.errors = baseClient.errors;
 
     this._client = baseClient;
-    this._hasPrivileges = requestHasPrivileges(request);
+    this._hasPrivileges = hasPrivilegesWithRequest(request);
   }
 
   async create(type, attributes = {}, options = {}) {

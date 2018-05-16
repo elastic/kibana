@@ -13,14 +13,14 @@ const getMissingPrivileges = (resource, application, privilegeCheck) => {
   return Object.keys(privileges).filter(key => privileges[key] === false);
 };
 
-export function createRequestHasPrivileges(server) {
+export function hasPrivilegesWithServer(server) {
   const callWithRequest = getClient(server).callWithRequest;
 
   const config = server.config();
   const kibanaVersion = config.get('pkg.version');
   const application = config.get('xpack.security.rbac.application');
 
-  return function requestHasPrivileges(request) {
+  return function hasPrivilegesWithRequest(request) {
     return async function hasPrivileges(privileges) {
 
       const versionPrivilege = getVersionPrivilege(kibanaVersion);

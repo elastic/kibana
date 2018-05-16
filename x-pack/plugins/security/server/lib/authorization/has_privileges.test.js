@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRequestHasPrivileges } from './has_privileges';
+import { hasPrivilegesWithServer } from './has_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { DEFAULT_RESOURCE } from '../../../common/constants';
 import { getLoginPrivilege, getVersionPrivilege } from '../privileges';
@@ -63,9 +63,9 @@ test(`calls shield.hasPrivileges with request`, async () => {
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const request = {};
-  const hasPrivileges = requestHasPrivileges(request);
+  const hasPrivileges = hasPrivilegesWithRequest(request);
   await hasPrivileges(['foo']);
 
   expect(mockCallWithRequest).toHaveBeenCalledWith(request, expect.anything(), expect.anything());
@@ -87,8 +87,8 @@ test(`calls shield.hasPrivileges with clientParams`, async () => {
     foo: true,
   }, application);
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
 
   const privilege = 'foo';
   await hasPrivileges([privilege]);
@@ -109,9 +109,9 @@ test(`includes version privilege when checking privileges`, async () => {
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const request = {};
-  const hasPrivileges = requestHasPrivileges(request);
+  const hasPrivileges = hasPrivilegesWithRequest(request);
   await hasPrivileges(['foo']);
 
   const clientParams = mockCallWithRequest.mock.calls[0][2];
@@ -127,9 +127,9 @@ test(`includes login privilege when checking privileges`, async () => {
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
   const request = {};
-  const hasPrivileges = requestHasPrivileges(request);
+  const hasPrivileges = hasPrivilegesWithRequest(request);
   await hasPrivileges(['foo']);
 
   const clientParams = mockCallWithRequest.mock.calls[0][2];
@@ -145,8 +145,8 @@ test(`returns success when has_all_requested`, async () => {
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.success).toBe(true);
 });
@@ -169,8 +169,8 @@ test(`returns false success when has_all_requested is false`, async () => {
     }
   }));
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.success).toBe(false);
 });
@@ -183,8 +183,8 @@ test(`returns missing privileges`, async () => {
     foo: false,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.missing).toEqual(['foo']);
 });
@@ -198,8 +198,8 @@ test(`excludes granted privileges from missing privileges`, async () => {
     bar: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   const result = await hasPrivileges(['foo']);
   expect(result.missing).toEqual(['foo']);
 });
@@ -212,8 +212,8 @@ test(`throws error if missing version privilege and has login privilege`, async 
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   await expect(hasPrivileges(['foo'])).rejects.toThrowErrorMatchingSnapshot();
 });
 
@@ -225,7 +225,7 @@ test(`doesn't throw error if missing version privilege and missing login privile
     foo: true,
   });
 
-  const requestHasPrivileges = createRequestHasPrivileges(mockServer);
-  const hasPrivileges = requestHasPrivileges({});
+  const hasPrivilegesWithRequest = hasPrivilegesWithServer(mockServer);
+  const hasPrivileges = hasPrivilegesWithRequest({});
   await hasPrivileges(['foo']);
 });
