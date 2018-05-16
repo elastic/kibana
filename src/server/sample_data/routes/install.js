@@ -31,12 +31,6 @@ export const createInstallRoute = () => ({
       };
 
       try {
-        await callWithRequest(request, 'indices.delete', { index: index });
-      } catch (err) {
-        // ignore delete error. Happens if index does not exist.
-      }
-
-      try {
         const createIndexParams = {
           index: index,
           body: {
