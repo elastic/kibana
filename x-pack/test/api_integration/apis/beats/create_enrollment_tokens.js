@@ -6,26 +6,17 @@
 
 import expect from 'expect.js';
 import moment from 'moment';
+import {
+  ES_INDEX_NAME,
+  ES_TYPE_NAME
+} from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const chance = getService('chance');
   const es = getService('es');
 
-  const ES_INDEX_NAME = '.management-beats';
-  const ES_TYPE_NAME = '_doc';
-
-  describe('create_enrollment_tokens', () => {
-    const cleanup = () => {
-      return es.indices.delete({
-        index: ES_INDEX_NAME,
-        ignore: [ 404 ]
-      });
-    };
-
-    beforeEach(cleanup);
-    afterEach(cleanup);
-
+  describe('create_enrollment_token', () => {
     it('should create one token by default', async () => {
       const { body: apiResponse } = await supertest
         .post(

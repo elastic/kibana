@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { callWithRequestFactory } from './call_with_request_factory';
 export { callWithInternalUserFactory } from './call_with_internal_user_factory';
