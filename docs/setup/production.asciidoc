@@ -19,12 +19,12 @@ and an Elasticsearch client node on the same machine. For more information, see
 
 [float]
 [[configuring-kibana-shield]]
-=== Using Kibana with {xpack}
+=== Using Kibana with {security}
 
-You can use {xpack-ref}/xpack-security.html[{security}] to control what
+You can use {stack-ov}/xpack-security.html[{security}] to control what
 Elasticsearch data users can access through Kibana.
 
-When you install {xpack}, Kibana users have to log in. They need to
+When {security} is enabled, Kibana users have to log in. They need to
 have the `kibana_user` role as well as access to the indices they
 will be working with in Kibana.
 
@@ -33,15 +33,15 @@ are not authorized to view, they get an error that indicates the index does
 not exist. {security} does not currently provide a way to control which
 users can load which dashboards.
 
-For information about setting up Kibana users and how to configure Kibana
-to work with {xpack}, see
+For information about setting up Kibana users, see
 {kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana].
 
 [float]
 [[enabling-ssl]]
 === Enabling SSL
-Kibana supports SSL encryption for both client requests and the requests the Kibana server
-sends to Elasticsearch.
+
+Kibana supports TLS/SSL encryption for both client requests and the requests the 
+Kibana server sends to Elasticsearch.
 
 To encrypt communications between the browser and the Kibana server, you configure the `server.ssl.enabled`,
 `server.ssl.certificate` and `server.ssl.key` properties in `kibana.yml`:
