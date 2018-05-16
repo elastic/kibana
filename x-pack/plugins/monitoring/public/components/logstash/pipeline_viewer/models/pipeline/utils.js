@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { makeStatement } from './make_statement';
-
 export function isVertexPipelineStage(vertex, pipelineStage) {
   return vertex && vertex.pipelineStage === pipelineStage;
 }
 
-export function addVertices(statements, verticesToAdd, pipelineStage) {
+export function addVertices(statements, verticesToAdd, pipelineStage, makeStatement) {
   if (!verticesToAdd) { return; }
 
   verticesToAdd.forEach(vertex => {

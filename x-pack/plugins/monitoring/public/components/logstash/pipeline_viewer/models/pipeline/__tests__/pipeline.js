@@ -1646,9 +1646,11 @@ describe('Pipeline class', () => {
     it('has two child statements', () => {
       const pipeline = Pipeline.fromPipelineGraph(graph);
 
-      console.log(pipeline.outputStatements);
       expect(pipeline.outputStatements.length).to.be(1);
-      expect(pipeline.outputStatements[0].trueStatements.length).to.be(2);
+      const { trueStatements } = pipeline.outputStatements[0];
+      expect(trueStatements.length).to.be(2);
+      expect(trueStatements[0].id).to.be('plugin_1');
+      expect(trueStatements[1].id).to.be('plugin_2');
       expect(pipeline.outputStatements[0].elseStatements.length).to.be(0);
     });
   });
@@ -1744,8 +1746,15 @@ describe('Pipeline class', () => {
       const pipeline = Pipeline.fromPipelineGraph(graph);
 
       expect(pipeline.outputStatements.length).to.be(1);
-      expect(pipeline.outputStatements[0].trueStatements.length).to.be(1);
-      expect(pipeline.outputStatements[0].elseStatements.length).to.be(2);
+      const {
+        trueStatements,
+        elseStatements
+      } = pipeline.outputStatements[0];
+      expect(trueStatements.length).to.be(1);
+      expect(trueStatements[0].id).to.be('plugin_3');
+      expect(elseStatements.length).to.be(2);
+      expect(elseStatements[0].id).to.be('plugin_1');
+      expect(elseStatements[1].id).to.be('plugin_2');
     });
   });
 

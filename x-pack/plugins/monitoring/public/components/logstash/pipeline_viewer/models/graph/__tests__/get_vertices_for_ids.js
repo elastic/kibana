@@ -34,4 +34,11 @@ describe('getVerticesForIds', () => {
     expect(result[1].id).to.eql('second');
     expect(result[2].id).to.eql('fourth');
   });
+
+  it('returns no items for empty id array', () => {
+    ids = [];
+    const result = getVerticesForIds(vertices, ids);
+
+    expect(result.length).to.be(0);
+  });
 });

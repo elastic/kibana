@@ -27,28 +27,28 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
-    const trueVertices = ifVertex.trueOutgoingVertices;
-    const elseVertices = ifVertex.falseOutgoingVertices;
+    const { trueOutgoingVertices } = ifVertex;
+    const { falseOutgoingVertices } = ifVertex;
     const trueVertex = ifVertex.trueOutgoingVertex;
     const falseVertex = ifVertex.falseOutgoingVertex;
     const next = ifVertex.next;
 
     let currentVertex = trueVertex;
     while (isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      pull(trueVertices, currentVertex);
+      pull(trueOutgoingVertices, currentVertex);
       trueStatements.push(makeStatement(currentVertex, pipelineStage));
       currentVertex = currentVertex.next;
     }
 
     currentVertex = falseVertex;
     while (currentVertex && isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
-      pull(elseVertices, currentVertex);
+      pull(falseOutgoingVertices, currentVertex);
       elseStatements.push(makeStatement(currentVertex, pipelineStage));
       currentVertex = currentVertex.next;
     }
 
-    addVertices(trueStatements, trueVertices, pipelineStage);
-    addVertices(elseStatements, elseVertices, pipelineStage);
+    addVertices(trueStatements, trueOutgoingVertices, pipelineStage, makeStatement);
+    addVertices(elseStatements, falseOutgoingVertices, pipelineStage, makeStatement);
 
     return new IfStatement(
       ifVertex,

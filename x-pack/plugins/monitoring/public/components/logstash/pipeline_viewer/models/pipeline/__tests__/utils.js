@@ -5,7 +5,12 @@
  */
 
 import expect from 'expect.js';
-import { isVertexPipelineStage } from '../utils';
+import sinon from 'sinon';
+
+import {
+  addVertices,
+  isVertexPipelineStage
+} from '../utils';
 
 describe('Utils', () => {
   let vertex;
@@ -66,6 +71,37 @@ describe('Utils', () => {
       const actual = isVertexPipelineStage(vertex, pipelineStage);
 
       expect(actual).to.be(true);
+    });
+  });
+
+  describe('addVertices', () => {
+    let statements;
+    let verticesToAdd;
+    let pipelineStage;
+
+    beforeEach(() => {
+      statements = [];
+      verticesToAdd = [
+        {
+          id: 'first',
+          pipelineStage: 'output',
+        },
+        {
+          id: 'second',
+          pipelineStage: 'input'
+        }
+      ];
+      pipelineStage = 'output';
+    });
+
+    it('adds all vertices', () => {
+      const makeStatementSpy = sinon.spy();
+
+      addVertices(statements, verticesToAdd, pipelineStage, makeStatementSpy);
+
+      sinon.assert.calledOnce(makeStatementSpy);
+      sinon.assert.calledWith(makeStatementSpy, verticesToAdd[0]);
+      expect(statements.length).to.be(1);
     });
   });
 });
