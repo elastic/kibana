@@ -15,7 +15,7 @@ export default function ({ getService }) {
   const ES_INDEX_NAME = '.management-beats';
   const ES_TYPE_NAME = '_doc';
 
-  describe('create_enrollment_token', () => {
+  describe('create_enrollment_tokens', () => {
     const cleanup = () => {
       return es.indices.delete({
         index: ES_INDEX_NAME,
