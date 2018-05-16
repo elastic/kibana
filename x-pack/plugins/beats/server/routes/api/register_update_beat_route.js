@@ -53,6 +53,7 @@ export function registerUpdateBeatRoute(server) {
         payload: Joi.object({
           access_token: Joi.string().required(),
           type: Joi.string(),
+          version: Joi.string(),
           host_name: Joi.string(),
           ephemeral_id: Joi.string(),
           local_configuration_yml: Joi.string(),
