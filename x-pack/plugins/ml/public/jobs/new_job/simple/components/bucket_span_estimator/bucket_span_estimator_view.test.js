@@ -9,13 +9,11 @@ import React from 'react';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
 
-jest.mock('ui/chrome', () => { }, { virtual: true });
-
 describe('BucketSpanEstimator', () => {
   const props = {
     buttonDisabled: false,
     estimatorRunning: false,
-    guessBucketSpan: function () {},
+    guessBucketSpan: () => {},
     buttonText: 'Estimate bucket span'
   };
 

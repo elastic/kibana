@@ -103,7 +103,6 @@ module.directive('mlBucketSpanEstimator', function () {
       // watch for these changes
       $scope.$watch('formConfig.agg.type', updateButton, true);
       $scope.$watch('jobStateWrapper.jobState', updateButton, true);
-      $scope.$watch('JOB_STATE', updateButton, true);
       $scope.$watch('[ui.showJobInput,ui.formValid,ui.bucketSpanEstimator.status]', updateButton, true);
 
       function updateButton() {
@@ -117,7 +116,7 @@ module.directive('mlBucketSpanEstimator', function () {
           $scope.ui.bucketSpanEstimator.status === STATUS.RUNNING
         );
         const estimatorRunning = ($scope.ui.bucketSpanEstimator.status === STATUS.RUNNING);
-        const buttonText = (estimatorRunning) ? 'Estimating bucket span ' : 'Estimate bucket span';
+        const buttonText = (estimatorRunning) ? 'Estimating bucket span' : 'Estimate bucket span';
 
         const props = {
           buttonDisabled,
