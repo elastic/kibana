@@ -4,7 +4,7 @@ import * as wildcard from '../../node_types/wildcard';
 export function getFields(node, indexPattern) {
   if (node.type === 'literal') {
     const fieldName = literal.toElasticsearchQuery(node);
-    const field = indexPattern.fields.byName[fieldName];
+    const field = indexPattern.fields.find(field => field.name === fieldName);
     if (!field) {
       return [];
     }

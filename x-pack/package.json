@@ -43,7 +43,6 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "3.3.1",
     "expect.js": "0.3.1",
-    "fetch-mock": "5.13.1",
     "gulp": "3.9.1",
     "gulp-load-plugins": "1.2.0",
     "gulp-mocha": "2.2.0",
@@ -77,7 +76,7 @@
     "yargs": "4.7.1"
   },
   "dependencies": {
-    "@elastic/eui": "0.0.46",
+    "@elastic/eui": "0.0.47",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",

@@ -1,16 +1,15 @@
-let ace = require('ace');
-require('ace/mode-json');
+const ace = require('ace');
 require('./output_highlight_rules');
 
 
-var oop = ace.require("ace/lib/oop");
-var JSONMode = ace.require("ace/mode/json").Mode;
-var HighlightRules = require("./output_highlight_rules").OutputJsonHighlightRules;
-var MatchingBraceOutdent = ace.require("ace/mode/matching_brace_outdent").MatchingBraceOutdent;
-var CstyleBehaviour = ace.require("ace/mode/behaviour/cstyle").CstyleBehaviour;
-var CStyleFoldMode = ace.require("ace/mode/folding/cstyle").FoldMode;
-ace.require("ace/worker/worker_client");
-var AceTokenizer = ace.require("ace/tokenizer").Tokenizer;
+const oop = ace.acequire('ace/lib/oop');
+const JSONMode = ace.acequire('ace/mode/json').Mode;
+const HighlightRules = require('./output_highlight_rules').OutputJsonHighlightRules;
+const MatchingBraceOutdent = ace.acequire('ace/mode/matching_brace_outdent').MatchingBraceOutdent;
+const CstyleBehaviour = ace.acequire('ace/mode/behaviour/cstyle').CstyleBehaviour;
+const CStyleFoldMode = ace.acequire('ace/mode/folding/cstyle').FoldMode;
+ace.acequire('ace/worker/worker_client');
+const AceTokenizer = ace.acequire('ace/tokenizer').Tokenizer;
 
 export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());
@@ -25,5 +24,5 @@ oop.inherits(Mode, JSONMode);
     return null;
   };
 
-  this.$id = "sense/mode/input";
+  this.$id = 'sense/mode/input';
 }).call(Mode.prototype);

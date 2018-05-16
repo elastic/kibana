@@ -1,14 +1,14 @@
 import _ from 'lodash';
-let ace = require('ace');
-let settings = require('./settings');
-let OutputMode = require('./sense_editor/mode/output');
+const ace = require('ace');
+const settings = require('./settings');
+const OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
 
 let output;
 export function initializeOutput($el) {
-  output = ace.require('ace/ace').edit($el[0]);
+  output = ace.acequire('ace/ace').edit($el[0]);
 
-  var outputMode = new OutputMode.Mode();
+  const outputMode = new OutputMode.Mode();
 
   output.resize = smartResize(output);
   output.update = function (val, mode, cb) {
@@ -17,7 +17,7 @@ export function initializeOutput($el) {
       mode = void 0;
     }
 
-    var session = output.getSession();
+    const session = output.getSession();
 
     session.setMode(val ? (mode || outputMode) : 'ace/mode/text');
     session.setValue(val);
@@ -34,14 +34,14 @@ export function initializeOutput($el) {
     if (_.isUndefined(fold_previous)) {
       fold_previous = true;
     }
-    var session = output.getSession();
-    var lastLine = session.getLength();
+    const session = output.getSession();
+    const lastLine = session.getLength();
     if (fold_previous) {
       output.moveCursorTo(Math.max(0, lastLine - 1), 0);
       session.toggleFold(false);
 
     }
-    session.insert({ row: lastLine, column: 0 }, "\n" + val);
+    session.insert({ row: lastLine, column: 0 }, '\n' + val);
     output.moveCursorTo(lastLine + 1, 0);
     if (typeof cb === 'function') {
       setTimeout(cb);
@@ -51,7 +51,7 @@ export function initializeOutput($el) {
   output.$el = $el;
 
   (function (session) {
-    session.setMode("ace/mode/text");
+    session.setMode('ace/mode/text');
     session.setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);

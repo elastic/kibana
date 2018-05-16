@@ -184,7 +184,7 @@ export default function SenseEditor($el) {
   };
 
   editor.iterForPosition = function (row, column) {
-    return new (ace.require("ace/token_iterator").TokenIterator)(editor.getSession(), row, column);
+    return new (ace.acequire('ace/token_iterator').TokenIterator)(editor.getSession(), row, column);
   };
 
   editor.getRequestRange = onceDoneTokenizing(function (row, cb) {
@@ -201,9 +201,9 @@ export default function SenseEditor($el) {
       return
     }
 
-    var reqStart = editor.prevRequestStart(row, editor);
-    var reqEnd = editor.nextRequestEnd(reqStart, editor);
-    cb(new (ace.require("ace/range").Range)(
+    const reqStart = editor.prevRequestStart(row, editor);
+    const reqEnd = editor.nextRequestEnd(reqStart, editor);
+    cb(new (ace.acequire('ace/range').Range)(
       reqStart.row, reqStart.column,
       reqEnd.row, reqEnd.column
     ));
@@ -265,8 +265,8 @@ export default function SenseEditor($el) {
       return;
     }
 
-    var endColumn = (session.getLine(endRow) || "").replace(/\s+$/, "").length;
-    cb(new (ace.require("ace/range").Range)(startRow, 0, endRow, endColumn));
+    const endColumn = (session.getLine(endRow) || '').replace(/\s+$/, '').length;
+    cb(new (ace.acequire('ace/range').Range)(startRow, 0, endRow, endColumn));
   });
 
 
@@ -309,7 +309,7 @@ export default function SenseEditor($el) {
         row: bodyStartRow,
         column: 0
       });
-      var bodyRange = new (ace.require("ace/range").Range)(
+      const bodyRange = new (ace.acequire('ace/range').Range)(
         bodyStartRow, 0,
         dataEndPos.row, dataEndPos.column
       );
