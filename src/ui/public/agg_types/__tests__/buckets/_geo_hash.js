@@ -41,8 +41,8 @@ describe('Geohash Agg', () => {
   };
 
   before(function () {
-    sinon.stub(AggConfigModule, 'AggConfig', AggConfigMock);
-    sinon.stub(BucketAggTypeModule, 'BucketAggType', BucketAggTypeMock);
+    sinon.stub(AggConfigModule, 'AggConfig').callsFake(AggConfigMock);
+    sinon.stub(BucketAggTypeModule, 'BucketAggType').callsFake(BucketAggTypeMock);
   });
 
   after(function () {

@@ -22,7 +22,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   });
 
   afterEach(() => {
-    savedObjectsClient.bulkGet.reset();
+    savedObjectsClient.bulkGet.resetHistory();
   });
 
   it('formats successful response', async () => {

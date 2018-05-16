@@ -292,7 +292,7 @@
     "prettier": "^1.12.1",
     "proxyquire": "1.7.11",
     "simple-git": "1.37.0",
-    "sinon": "1.17.3",
+    "sinon": "^5.0.7",
     "source-map": "0.5.6",
     "source-map-support": "0.2.10",
     "strip-ansi": "^3.0.1",

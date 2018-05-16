@@ -56,7 +56,7 @@ describe('JsonWatch', () => {
 
     let props;
     beforeEach(() => {
-      constructorMock.reset();
+      constructorMock.resetHistory();
 
       props = {
         watch: 'foo'
@@ -99,7 +99,7 @@ describe('JsonWatch', () => {
   describe('upstreamJson getter method', () => {
 
     beforeEach(() => {
-      upstreamJsonMock.reset();
+      upstreamJsonMock.resetHistory();
     });
 
     it('should call the getter from WatchBase and return the correct result', () => {
@@ -119,7 +119,7 @@ describe('JsonWatch', () => {
 
     let props;
     beforeEach(() => {
-      downstreamJsonMock.reset();
+      downstreamJsonMock.resetHistory();
 
       props = {
         watch: 'foo',
@@ -145,7 +145,7 @@ describe('JsonWatch', () => {
 
     let upstreamJson;
     beforeEach(() => {
-      getPropsFromUpstreamJsonMock.reset();
+      getPropsFromUpstreamJsonMock.resetHistory();
 
       upstreamJson = {
         watchJson: { foo: { bar: 'baz' } }
@@ -199,7 +199,7 @@ describe('JsonWatch', () => {
 
     let downstreamJson;
     beforeEach(() => {
-      getPropsFromDownstreamJsonMock.reset();
+      getPropsFromDownstreamJsonMock.resetHistory();
 
       downstreamJson = {
         watch: { foo: { bar: 'baz' } }
