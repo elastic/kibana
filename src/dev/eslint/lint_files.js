@@ -25,10 +25,10 @@ export function lintFiles(log, files) {
   if (report.warningCount > 0) failTypes.push('warning');
 
   if (!failTypes.length) {
-    log.success('%d files linted successfully', files.length);
+    log.success('[eslint] %d files linted successfully', files.length);
     return;
   }
 
   log.error(cli.getFormatter()(report.results));
-  throw createFailError(`eslint ${failTypes.join(' & ')}`, 1);
+  throw createFailError(`[eslint] ${failTypes.join(' & ')}`, 1);
 }

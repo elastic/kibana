@@ -1,41 +1,44 @@
 import { resolve } from 'path';
 
+import expect from 'expect.js';
 import sinon from 'sinon';
-import chalk from 'chalk';
+import stripAnsi from 'strip-ansi';
 
 import { createToolingLog } from '@kbn/dev-utils';
 import { exec } from '../exec';
 
 describe('dev/build/lib/exec', () => {
-  // disable colors so logging is easier to test
-  const chalkWasEnabled = chalk.enabled;
-  before(() => chalk.enabled = false);
-  after(() => chalk.enabled = chalkWasEnabled);
-
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.reset());
 
   const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', onLogLine);
+  log.on('data', line => onLogLine(stripAnsi(line)));
+
+  function getWritten() {
+    return stripAnsi(onLogLine.args.reduce((acc, [chunk]) => acc + chunk, ''));
+  }
 
   it('executes a command, logs the command, and logs the output', async () => {
-    await exec(log, process.execPath, ['-e', 'console.log("hi")']);
+    await exec(log, process.execPath, ['-e', 'console.log("foobar")']);
 
     // logs the command before execution
-    sinon.assert.calledWithExactly(onLogLine, sinon.match(`$ ${process.execPath}`));
+    expect(getWritten()).to.match(/debg\s+\$ .+bin\/node/);
 
     // log output of the process
-    sinon.assert.calledWithExactly(onLogLine, sinon.match(/debg\s+hi/));
+    expect(getWritten()).to.match(/debg\s+foobar/);
   });
 
   it('logs using level: option', async () => {
-    await exec(log, process.execPath, ['-e', 'console.log("hi")'], {
+    await exec(log, process.execPath, ['-e', 'console.log("foobar")'], {
       level: 'info'
     });
 
+    // logs the command before execution
+    expect(getWritten()).to.match(/info\s+\$ .+bin\/node/);
+
     // log output of the process
-    sinon.assert.calledWithExactly(onLogLine, sinon.match(/info\s+hi/));
+    expect(getWritten()).to.match(/info\s+foobar/);
   });
 
   it('send the proc SIGKILL if it logs a line matching exitAfter regexp', async function () {

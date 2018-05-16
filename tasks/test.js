@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:server', [
     'checkPlugins',
-    'simplemocha:all',
+    'run:mocha',
   ]);
 
   grunt.registerTask('test:browser', [
@@ -100,6 +100,7 @@ module.exports = function (grunt) {
 
     grunt.task.run(_.compact([
       !grunt.option('quick') && 'run:eslint',
+      !grunt.option('quick') && 'run:tslint',
       'licenses',
       'test:quick',
       'verifyTranslations',
