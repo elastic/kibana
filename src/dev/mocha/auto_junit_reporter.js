@@ -4,7 +4,7 @@ import { setupJunitReportGeneration } from './junit_report_generation';
 const MochaSpecReporter = mocha.reporters.spec;
 
 export function createAutoJunitReporter(junitReportOptions) {
-  return class createAutoJunitReporter {
+  return class AutoJunitReporter {
     constructor(runner, options) {
       // setup a spec reporter for console output
       new MochaSpecReporter(runner, options);

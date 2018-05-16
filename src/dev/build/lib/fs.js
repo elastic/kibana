@@ -2,10 +2,12 @@ import fs from 'fs';
 import { createHash } from 'crypto';
 import { resolve, dirname, isAbsolute } from 'path';
 import { createGunzip } from 'zlib';
+import { inspect } from 'util';
 
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
+import del from 'del';
 import { createPromiseFromStreams, createMapStream } from '../../../utils';
 
 import { Extract } from 'tar';
@@ -24,6 +26,12 @@ function assertAbsolute(path) {
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'
     );
   }
+}
+
+function longInspect(value) {
+  return inspect(value, {
+    maxArrayLength: Infinity
+  });
 }
 
 export async function mkdirp(path) {
@@ -65,6 +73,22 @@ export async function copy(source, destination) {
   ]);
 
   await chmodAsync(destination, stat.mode);
+}
+
+export async function deleteAll(log, patterns) {
+  if (!Array.isArray(patterns)) {
+    throw new TypeError('Expected patterns to be an array');
+  }
+
+  log.debug('Deleting patterns:', longInspect(patterns));
+
+  for (const pattern of patterns) {
+    assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
+  }
+
+  const files = await del(patterns);
+  log.debug('Deleted %d files/directories', files.length);
+  log.verbose('Deleted:', longInspect(files));
 }
 
 export async function copyAll(sourceDir, destination, options = {}) {

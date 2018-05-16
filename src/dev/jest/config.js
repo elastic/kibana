@@ -35,7 +35,6 @@ export default {
   ],
   globals: {
     'ts-jest': {
-      tsConfigFile: 'src/dev/jest/tsconfig.json',
       skipBabel: true,
     },
   },

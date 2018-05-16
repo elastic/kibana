@@ -10,4 +10,5 @@ export {
   copyAll,
   getFileHash,
   untar,
+  deleteAll,
 } from './fs';
