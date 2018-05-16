@@ -6,6 +6,6 @@
 
 export default function ({ loadTestFile }) {
   describe('beats', () => {
-    loadTestFile(require.resolve('./create_enrollment_token'));
+    loadTestFile(require.resolve('./create_enrollment_tokens'));
   });
 }
