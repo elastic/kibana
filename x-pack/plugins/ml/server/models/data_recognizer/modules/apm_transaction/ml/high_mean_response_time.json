@@ -3,7 +3,7 @@
   "groups": [
     "apm"
   ],
-  "description": "detect anomalies in high mean of transaction duration",
+  "description": "Detect anomalies in high mean of transaction duration",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
