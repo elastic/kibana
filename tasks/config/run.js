@@ -74,6 +74,15 @@ module.exports = function (grunt) {
       ]
     },
 
+    // used by the test:server task
+    //    runs all node.js/server mocha tests
+    mocha: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/mocha')
+      ]
+    },
+
     // used by the test:api task
     //    runs the kibana server prepared for the api_integration tests
     apiTestServer: createKbnServerTask({

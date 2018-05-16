@@ -1,23 +1,18 @@
 import { resolve } from 'path';
 
 import sinon from 'sinon';
-import chalk from 'chalk';
+import stripAnsi from 'strip-ansi';
 
 import { createToolingLog } from '../../../tooling_log';
 import { exec } from '../exec';
 
 describe('dev/build/lib/exec', () => {
-  // disable colors so logging is easier to test
-  const chalkWasEnabled = chalk.enabled;
-  before(() => chalk.enabled = false);
-  after(() => chalk.enabled = chalkWasEnabled);
-
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.reset());
 
   const log = createToolingLog('verbose');
   const onLogLine = sandbox.stub();
-  log.on('data', onLogLine);
+  log.on('data', line => onLogLine(stripAnsi(line)));
 
   it('executes a command, logs the command, and logs the output', async () => {
     await exec(log, process.execPath, ['-e', 'console.log("hi")']);
