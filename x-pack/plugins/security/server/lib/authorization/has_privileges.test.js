@@ -137,7 +137,7 @@ test(`includes login privilege when checking privileges`, async () => {
   expect(applicationParam.privileges).toContain(getLoginPrivilege());
 });
 
-test(`returns false success when has_all_requested`, async () => {
+test(`returns success when has_all_requested`, async () => {
   const mockServer = createMockServer();
   mockResponse(true, {
     [getVersionPrivilege(defaultVersion)]: true,
