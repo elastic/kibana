@@ -17,7 +17,7 @@ export default function ({ getService, loadTestFile }) {
 
     beforeEach(cleanup);
 
-    loadTestFile(require.resolve('./create_enrollment_token'));
+    loadTestFile(require.resolve('./create_enrollment_tokens'));
     loadTestFile(require.resolve('./enroll_beat'));
   });
 }
