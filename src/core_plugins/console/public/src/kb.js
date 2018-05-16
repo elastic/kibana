@@ -7,7 +7,7 @@ const autocomplete_engine = require('./autocomplete/engine');
 let ACTIVE_API = new Api();
 
 function nonValidIndexType(token) {
-  return !(token === "_all" || token[0] !== "_");
+  return !(token === '_all' || token[0] !== '_');
 }
 
 function IndexAutocompleteComponent(name, parent, multi_valued) {
@@ -27,13 +27,13 @@ IndexAutocompleteComponent.prototype = _.create(
   };
 
   cls.getDefaultTermMeta = function () {
-    return "index"
+    return 'index';
   };
 
   cls.getContextKey = function () {
-    return "indices";
+    return 'indices';
   };
-})(IndexAutocompleteComponent.prototype);
+}(IndexAutocompleteComponent.prototype));
 
 
 function TypeGenerator(context) {
@@ -58,13 +58,13 @@ TypeAutocompleteComponent.prototype = _.create(
   };
 
   cls.getDefaultTermMeta = function () {
-    return "type"
+    return 'type';
   };
 
   cls.getContextKey = function () {
-    return "types";
+    return 'types';
   };
-})(TypeAutocompleteComponent.prototype);
+}(TypeAutocompleteComponent.prototype));
 
 function FieldGenerator(context) {
   return _.map(mappings.getFields(context.indices, context.types), function (field) {
@@ -92,18 +92,18 @@ FieldAutocompleteComponent.prototype = _.create(
   };
 
   cls.getDefaultTermMeta = function () {
-    return "field"
+    return 'field';
   };
 
   cls.getContextKey = function () {
-    return "fields";
+    return 'fields';
   };
-})(FieldAutocompleteComponent.prototype);
+}(FieldAutocompleteComponent.prototype));
 
 
 function IdAutocompleteComponent(name, parent, multi) {
   autocomplete_engine.SharedComponent.call(this, name, parent);
-  this.multi_match = multi
+  this.multi_match = multi;
 }
 
 IdAutocompleteComponent.prototype = _.create(
@@ -120,18 +120,18 @@ IdAutocompleteComponent.prototype = _.create(
     }
     token = Array.isArray(token) ? token : [token];
     if (_.find(token, function (t) {
-        return t.match(/[\/,]/);
-      })) {
+      return t.match(/[\/,]/);
+    })) {
       return null;
     }
-    var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+    let r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
     r.context_values = r.context_values || {};
-    r.context_values['id'] = token;
+    r.context_values.id = token;
     return r;
   };
-})(IdAutocompleteComponent.prototype);
+}(IdAutocompleteComponent.prototype));
 
-var parametrizedComponentFactories = {
+let parametrizedComponentFactories = {
 
   'index': function (name, parent) {
     return new IndexAutocompleteComponent(name, parent, false);
@@ -158,11 +158,11 @@ var parametrizedComponentFactories = {
     return new FieldAutocompleteComponent(name, parent, false);
   },
   'nodes': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
-      "master:true", "master:false"], parent)
+    return new autocomplete_engine.ListComponent(name, ['_local', '_master', 'data:true', 'data:false',
+      'master:true', 'master:false'], parent);
   },
   'node': function (name, parent) {
-    return new autocomplete_engine.ListComponent(name, [], parent, false)
+    return new autocomplete_engine.ListComponent(name, [], parent, false);
   }
 };
 
@@ -171,13 +171,13 @@ export function getUnmatchedEndpointComponents() {
 }
 
 export function getEndpointDescriptionByEndpoint(endpoint) {
-  return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint)
+  return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint);
 }
 
 export function getEndpointBodyCompleteComponents(endpoint) {
-  var desc = getEndpointDescriptionByEndpoint(endpoint);
+  let desc = getEndpointDescriptionByEndpoint(endpoint);
   if (!desc) {
-    throw new Error("failed to resolve endpoint ['" + endpoint + "']");
+    throw new Error('failed to resolve endpoint [\'' + endpoint + '\']');
   }
   return desc.bodyAutocompleteRootComponents;
 }
@@ -193,8 +193,8 @@ export function getGlobalAutocompleteComponents(term, throwOnMissing) {
 function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
   urlParametrizedComponentFactories = urlParametrizedComponentFactories || parametrizedComponentFactories;
   bodyParametrizedComponentFactories = bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
-  let api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
-  let names = [];
+  const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
+  const names = [];
   _.each(json, function (apiJson, name) {
     names.unshift(name);
     _.each(apiJson.globals || {}, function (globalJson, globalName) {
@@ -204,32 +204,32 @@ function loadApisFromJson(json, urlParametrizedComponentFactories, bodyParametri
       api.addEndpointDescription(endpointName, endpointJson);
     });
   });
-  api.name = names.join(",");
+  api.name = names.join(',');
   return api;
 }
 
 export function setActiveApi(api) {
   if (_.isString(api)) {
     $.ajax({
-        url: '../api/console/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + "&apis=" + encodeURIComponent(api),
-        dataType: "json", // disable automatic guessing
-      }
+      url: '../api/console/api_server?sense_version=' + encodeURIComponent('@@SENSE_VERSION') + '&apis=' + encodeURIComponent(api),
+      dataType: 'json', // disable automatic guessing
+    }
     ).then(
       function (data) {
         setActiveApi(loadApisFromJson(data));
       },
       function (jqXHR) {
-        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
+        console.log('failed to load API \'' + api + '\': ' + jqXHR.responseText);
       });
     return;
 
   }
-  console.log("setting active api to [" + api.name + "]");
+  console.log('setting active api to [' + api.name + ']');
 
   ACTIVE_API = api;
 }
 
-setActiveApi('es_5_0');
+setActiveApi('es_6_0');
 
 export const _test = {
   loadApisFromJson: loadApisFromJson

@@ -1893,7 +1893,7 @@ brace@0.10.0, brace@^0.10.0:
   dependencies:
     w3c-blob "0.0.1"
 
-brace@^0.11.0:
+brace@0.11.1, brace@^0.11.0:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/brace/-/brace-0.11.1.tgz#4896fcc9d544eef45f4bb7660db320d3b379fe58"
 

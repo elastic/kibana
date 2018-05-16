@@ -9,11 +9,11 @@ import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/url_pattern_matcher';
 import _ from 'lodash';
 import ace from 'ace';
-import 'ace/ext-language_tools';
+import 'brace/ext/language_tools';
 
-var AceRange = ace.require('ace/range').Range;
+const AceRange = ace.acequire('ace/range').Range;
 
-var LAST_EVALUATED_TOKEN = null;
+let LAST_EVALUATED_TOKEN = null;
 
 export default function (editor) {
 
@@ -963,18 +963,18 @@ export default function (editor) {
     };
   });
 
-  var langTools = ace.require('ace/ext/language_tools');
-  var aceUtils = ace.require('ace/autocomplete/util');
-  var aceAutoComplete = ace.require('ace/autocomplete');
+  const langTools = ace.acequire('ace/ext/language_tools');
+  const aceUtils = ace.acequire('ace/autocomplete/util');
+  const aceAutoComplete = ace.acequire('ace/autocomplete');
 
-  langTools.addCompleter({
+  langTools.setCompleters([{
     getCompletions: getCompletions
-  });
+  }]);
 
   editor.setOptions({
     enableBasicAutocompletion: true
   });
-
+  editor.$blockScrolling = Infinity;
   // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
   // we patch this behavior.
   // CHECK ON ACE UPDATE
@@ -987,6 +987,7 @@ export default function (editor) {
     // change starts here
     var token = session.getTokenAt(pos.row, pos.column);
     this.base = _.clone(pos);
+    this.base.detach = () => {};
     if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
       if (token.value.indexOf('"') == 0) {
         this.base.column = token.start + 1;

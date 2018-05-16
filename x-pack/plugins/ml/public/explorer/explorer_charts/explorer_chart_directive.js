@@ -19,7 +19,7 @@ import angular from 'angular';
 import moment from 'moment';
 
 import { formatValue } from 'plugins/ml/formatters/format_value';
-import { getSeverityWithLow } from 'plugins/ml/util/anomaly_utils';
+import { getSeverityWithLow } from 'plugins/ml/../common/util/anomaly_utils';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import loadingIndicatorWrapperTemplate from 'plugins/ml/components/loading_indicator/loading_indicator_wrapper.html';
