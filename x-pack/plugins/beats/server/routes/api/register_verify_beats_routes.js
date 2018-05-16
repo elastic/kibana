@@ -49,6 +49,38 @@ async function verifyBeats(callWithRequest, beatIds) {
   return get(response, 'items', []);
 }
 
+function determineNonExistentBeatIds(beatsFromEs, beatIdsFromRequest) {
+  return beatsFromEs.reduce((nonExistentBeatIds, beatFromEs, idx) => {
+    if (!beatFromEs.found) {
+      nonExistentBeatIds.push(beatIdsFromRequest[idx]);
+    }
+    return nonExistentBeatIds;
+  }, []);
+}
+
+function determineAlreadyVerifiedBeatIds(beatsFromEs) {
+  return beatsFromEs
+    .filter(beat => beat.found)
+    .filter(beat => beat._source.beat.hasOwnProperty('verified_on'))
+    .map(beat => beat._source.beat.id);
+}
+
+function determineToBeVerifiedBeatIds(beatsFromEs) {
+  return beatsFromEs
+    .filter(beat => beat.found)
+    .filter(beat => !beat._source.beat.hasOwnProperty('verified_on'))
+    .map(beat => beat._source.beat.id);
+}
+
+function determineVerifiedBeatIds(verifications, toBeVerifiedBeatIds) {
+  return verifications.reduce((verifiedBeatIds, verification, idx) => {
+    if (verification.update.status === 200) {
+      verifiedBeatIds.push(toBeVerifiedBeatIds[idx]);
+    }
+    return verifiedBeatIds;
+  }, []);
+}
+
 // TODO: add license check pre-hook
 // TODO: write to Kibana audit log file
 export function registerVerifyBeatsRoute(server) {
@@ -77,33 +109,12 @@ export function registerVerifyBeatsRoute(server) {
       try {
         const beatsFromEs = await getBeats(callWithRequest, beatIds);
 
-        // TODO: extract into helper function
-        nonExistentBeatIds = beatsFromEs.reduce((beatIdsSoFar, beatFromEs, idx) => {
-          if (!beatFromEs.found) {
-            beatIdsSoFar.push(beatIds[idx]);
-          }
-          return beatIdsSoFar;
-        }, []);
+        nonExistentBeatIds = determineNonExistentBeatIds(beatsFromEs, beatIds);
+        alreadyVerifiedBeatIds = determineAlreadyVerifiedBeatIds(beatsFromEs);
+        const toBeVerifiedBeatIds = determineToBeVerifiedBeatIds(beatsFromEs);
 
-        alreadyVerifiedBeatIds = beatsFromEs
-          .filter(beat => beat.found)
-          .filter(beat => beat._source.beat.hasOwnProperty('verified_on'))
-          .map(beat => beat._source.beat.id);
-
-        const beatIdsToVerify = beatsFromEs
-          .filter(beat => beat.found)
-          .filter(beat => !beat._source.beat.hasOwnProperty('verified_on'))
-          .map(beat => beat._source.beat.id);
-
-        const verifications = await verifyBeats(callWithRequest, beatIdsToVerify);
-
-        // TODO: extract into helper function
-        verifiedBeatIds = verifications.reduce((beatIdsSoFar, verification, idx) => {
-          if (verification.update.status === 200) {
-            beatIdsSoFar.push(beatIdsToVerify[idx]);
-          }
-          return beatIdsSoFar;
-        }, []);
+        const verifications = await verifyBeats(callWithRequest, toBeVerifiedBeatIds);
+        verifiedBeatIds = determineVerifiedBeatIds(verifications, toBeVerifiedBeatIds);
 
       } catch (err) {
         return reply(wrapEsError(err));
