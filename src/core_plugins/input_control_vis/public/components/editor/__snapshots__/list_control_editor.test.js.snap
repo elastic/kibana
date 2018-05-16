@@ -26,6 +26,7 @@ exports[`parentCandidates 1`] = `
     label="Parent control"
   >
     <EuiSelect
+      compressed={false}
       fullWidth={false}
       hasNoInitialSelection={false}
       isLoading={false}
@@ -69,6 +70,7 @@ exports[`parentCandidates 1`] = `
     label="Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="listControlSizeInput"
       fullWidth={false}
       isLoading={false}
@@ -118,6 +120,7 @@ exports[`renders ListControlEditor 1`] = `
     label="Size"
   >
     <EuiFieldNumber
+      compressed={false}
       data-test-subj="listControlSizeInput"
       fullWidth={false}
       isLoading={false}
