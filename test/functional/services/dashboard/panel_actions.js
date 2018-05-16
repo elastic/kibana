@@ -33,7 +33,7 @@ export function DashboardPanelActionsProvider({ getService }) {
       if (!panelOpen) {
         await retry.try(async () => {
           await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-          const toggleMenuItem = this.findContextMenu(parent);
+          const toggleMenuItem = await this.findContextMenu(parent);
           await toggleMenuItem.click();
           const panelOpen = await this.isContextMenuOpen(parent);
           if (!panelOpen) { throw new Error('Context menu still not open'); }
