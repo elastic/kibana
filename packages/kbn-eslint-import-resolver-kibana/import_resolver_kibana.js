@@ -36,7 +36,7 @@ function initContext(file, config) {
 function tryNodeResolver(importRequest, file, config) {
   return nodeResolver.resolve(importRequest, file, {
     ...config,
-    extensions: ['.js', '.json'],
+    extensions: ['.js', '.json', '.ts', '.tsx'],
     isFile,
   });
 }
