@@ -174,8 +174,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.visualize.clickMapZoomOut();
 
           await PageObjects.visualize.openInspector();
-          await PageObjects.visualize.setSpyPanelPageSize('All');
-          await PageObjects.visualize.selectTableInSpyPaneSelect();
+          await PageObjects.visualize.setInspectorTablePageSize(50);
           const actualTableData = await PageObjects.visualize.getInspectorTableData();
           compareTableData(expectedTableData, actualTableData.trim().split('\n'));
           await PageObjects.visualize.closeInspector();
@@ -204,7 +203,6 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.visualize.clickMapFitDataBounds();
           await PageObjects.visualize.openInspector();
-          await PageObjects.visualize.selectTableInSpyPaneSelect();
           const data = await PageObjects.visualize.getInspectorTableData();
           await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
           await PageObjects.visualize.closeInspector();

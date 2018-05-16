@@ -348,14 +348,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async toggleSpyPanel() {
-      await testSubjects.click('spyToggleButton');
-    }
-
-    async setSpyPanelPageSize(size) {
-      await remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`[data-test-subj="paginateControlsPageSizeSelect"] option[label="${size}"]`)
-        .click();
+    async setInspectorTablePageSize(size) {
+      const panel = await testSubjects.find('inspectorPanel');
+      await find.clickByButtonText('Rows per page: 10', panel);
+      await find.clickByButtonText(`${size} rows`, panel);
     }
 
     async getMetric() {
@@ -800,10 +796,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
-    async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect-table');
-    }
-
     async getTableVisData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
@@ -812,7 +804,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getInspectorTableData() {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await inspectorPanel.findByTagName('tbody');
+      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
       return await tableBody.getVisibleText();
     }
 

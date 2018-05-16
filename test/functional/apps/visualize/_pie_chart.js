@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
 
         return PageObjects.visualize.openInspector()
           .then(function () {
-            return PageObjects.visualize.setSpyPanelPageSize('All');
+            return PageObjects.visualize.setInspectorTablePageSize(50);
           })
           .then(function getInspectorTableData() {
             return PageObjects.visualize.getInspectorTableData();

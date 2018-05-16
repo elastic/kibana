@@ -112,8 +112,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
         const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -176,8 +176,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
+        await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -240,8 +239,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
+        await PageObjects.visualize.openInspector();
         const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
@@ -304,8 +302,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.toggleSpyPanel();
-        await PageObjects.visualize.setSpyPanelPageSize('All');
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
         const data = await PageObjects.visualize.getInspectorTableData();
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
