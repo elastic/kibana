@@ -13,13 +13,10 @@ export function runMochaCli() {
     ],
   });
 
-  const runInBand = process.execArgv.some(arg => {
-    switch (arg) {
-      case '--inspect':
-      case '--inspect-brk':
-        return true;
-    }
-  });
+  const runInBand = (
+    process.execArgv.includes('--inspect') ||
+    process.execArgv.includes('--inspect-brk')
+  );
 
   // ensure that mocha exits when test have completed
   process.argv.push('--exit');
