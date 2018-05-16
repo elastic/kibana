@@ -10,7 +10,6 @@ import { getClient } from '../../../../../../../server/lib/get_client_shield';
 import { roleSchema } from '../../../../lib/role_schema';
 import { wrapError } from '../../../../lib/errors';
 import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
-import { containsOtherApplications } from './contains_other_applications';
 
 export function initRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
@@ -20,16 +19,10 @@ export function initRolesApi(server) {
     method: 'GET',
     path: '/api/security/v1/roles',
     handler(request, reply) {
-      const config = server.config();
-
       return callWithRequest(request, 'shield.getRole').then(
         (response) => {
-          const application = config.get('xpack.security.rbac.application');
-
           const roles = _.map(response, (role, name) => {
-            const hasUnsupportedCustomPrivileges = containsOtherApplications(role, application);
-
-            return _.assign(role, { name, hasUnsupportedCustomPrivileges });
+            return _.assign(role, { name });
           });
 
           return reply(roles);
@@ -64,8 +57,7 @@ export function initRolesApi(server) {
     path: '/api/security/v1/roles/{name}',
     handler(request, reply) {
       const name = request.params.name;
-      // TODO(legrego) - temporarily remove applications from role until ES API is implemented
-      const body = _.omit(request.payload, ['name', 'applications', 'hasUnsupportedCustomPrivileges']);
+      const body = _.omit(request.payload, 'name');
 
       return callWithRequest(request, 'shield.putRole', { name, body }).then(
         () => reply(request.payload),

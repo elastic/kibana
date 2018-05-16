@@ -21,8 +21,8 @@ export function initPrivilegesApi(server) {
     method: 'GET',
     path: '/api/security/v1/privileges',
     handler(request, reply) {
-
-      reply(buildPrivilegeMap(application, kibanaVersion));
+      const privileges = buildPrivilegeMap(application, kibanaVersion);
+      reply(Object.values(privileges[application]));
     }
   });
 }

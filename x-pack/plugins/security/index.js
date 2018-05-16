@@ -19,9 +19,10 @@ import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { mirrorStatusAndInitialize } from './server/lib/mirror_status_and_initialize';
 import { secureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/saved_objects_client_wrapper';
 import { secureSavedObjectsClientOptionsBuilder } from './server/lib/saved_objects_client/secure_options_builder';
-import { registerPrivilegesWithCluster } from './server/lib/privileges/privilege_action_registry';
+import { registerPrivilegesWithCluster } from './server/lib/privileges';
 import { createDefaultRoles } from './server/lib/authorization/create_default_roles';
 import { initPrivilegesApi } from './server/routes/api/v1/privileges';
+import { hasPrivilegesWithServer } from './server/lib/authorization/has_privileges';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -45,7 +46,10 @@ export const security = (kibana) => new kibana.Plugin({
       rbac: Joi.object({
         enabled: Joi.boolean().default(false),
         createDefaultRoles: Joi.boolean().default(true),
-        application: Joi.string().default('kibana'),
+        application: Joi.string().default('kibana').regex(
+          /[a-zA-Z0-9-_]+/,
+          `may contain alphanumeric characters (a-z, A-Z, 0-9), underscores and hyphens`
+        ),
       }).default(),
     }).default();
   },
@@ -75,7 +79,8 @@ export const security = (kibana) => new kibana.Plugin({
       return {
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
-        rbacEnabled: config.get('xpack.security.rbac.enabled')
+        rbacEnabled: config.get('xpack.security.rbac.enabled'),
+        rbacApplication: config.get('xpack.security.rbac.application'),
       };
     }
   },
@@ -107,8 +112,11 @@ export const security = (kibana) => new kibana.Plugin({
     server.auth.strategy('session', 'login', 'required');
 
     if (config.get('xpack.security.rbac.enabled')) {
+      const hasPrivilegesWithRequest = hasPrivilegesWithServer(server);
       const savedObjectsClientProvider = server.getSavedObjectsClientProvider();
-      savedObjectsClientProvider.addClientOptionBuilder((options) => secureSavedObjectsClientOptionsBuilder(server, options));
+      savedObjectsClientProvider.addClientOptionBuilder(options =>
+        secureSavedObjectsClientOptionsBuilder(server, hasPrivilegesWithRequest, options)
+      );
       savedObjectsClientProvider.addClientWrapper(secureSavedObjectsClientWrapper);
     }
 
