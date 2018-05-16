@@ -267,7 +267,7 @@ dashboard-viewport-provider {
     margin: 0;
     // maintain the 100% height of the panel
     height: 100%;
-    flex: 1;
+    flex: auto;
 
     // flex layout allows us to define the visualize element as "fill available space"
     display: flex;
@@ -384,6 +384,7 @@ dashboard-viewport-provider {
       flex: 1 1 100%;
       height: auto;
       z-index: 1; /* 1. */
+      overflow: hidden;
     }
 
     .panel-content--fullWidth {
