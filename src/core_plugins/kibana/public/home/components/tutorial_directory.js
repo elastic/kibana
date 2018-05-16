@@ -54,15 +54,13 @@ export class TutorialDirectory extends React.Component {
     };
   }
 
-  componentWillMount() {
-    this._isMounted = true;
-  }
-
   componentWillUnmount() {
     this._isMounted = false;
   }
 
   async componentDidMount() {
+    this._isMounted = true;
+
     this.loadSampleDataSets();
 
     const tutorialConfigs = await getTutorials();
