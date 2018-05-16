@@ -1,15 +1,15 @@
+import { SavedObjectsRepository, SavedObjectsClient } from './client';
+
 /**
  * Provider for the Saved Object Client.
  */
 export class SavedObjectsClientProvider {
   constructor({
-    SavedObjectsRepository,
     index,
     mappings,
     onBeforeWrite,
     defaultClientFactory
   }) {
-    this._savedObjectsRepositoryClass = SavedObjectsRepository;
     this._index = index;
     this._mappings = mappings;
     this._onBeforeWrite = onBeforeWrite;
@@ -29,7 +29,8 @@ export class SavedObjectsClientProvider {
     const factory = this._customClientFactory || this._defaultClientFactory;
     return factory({
       request,
-      SavedObjectsRepository: this._savedObjectsRepositoryClass,
+      SavedObjectsRepository,
+      errors: SavedObjectsClient.errors,
       index: this._index,
       mappings: this._mappings,
       onBeforeWrite: this._onBeforeWrite,

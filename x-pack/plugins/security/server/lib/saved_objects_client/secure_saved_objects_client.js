@@ -5,15 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import * as errors from '../../../../../../src/server/saved_objects/client/lib/errors';
 
 export class SecureSavedObjectsClient {
-  errors = errors
-
   constructor({
+    errors,
     repository,
     hasPrivileges,
   }) {
+    this.errors = errors;
     this._repository = repository;
     this._hasPrivileges = hasPrivileges;
   }
@@ -72,12 +71,12 @@ export class SecureSavedObjectsClient {
       result = await this._hasPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
-      throw errors.decorateGeneralError(error, reason);
+      throw this.errors.decorateGeneralError(error, reason);
     }
 
     if (!result.success) {
       const msg = `Unable to ${action} ${types.join(',')}, missing ${result.missing.join(',')}`;
-      throw errors.decorateForbiddenError(new Error(msg));
+      throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
 }

@@ -1,4 +1,5 @@
-import { SavedObjectsClient, SavedObjectsRepository, SavedObjectsClientProvider } from './client';
+import { SavedObjectsClient } from './client';
+import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import {
   createBulkGetRoute,
   createCreateRoute,
@@ -65,7 +66,6 @@ export function savedObjectsMixin(kbnServer, server) {
     index: server.config().get('kibana.index'),
     mappings: server.getKibanaIndexMappingsDsl(),
     onBeforeWrite,
-    SavedObjectsRepository,
     defaultClientFactory({
       SavedObjectsRepository,
       request,

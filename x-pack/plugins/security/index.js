@@ -117,6 +117,7 @@ export const security = (kibana) => new kibana.Plugin({
       savedObjectsClientProvider.registerCustomClientFactory(({
         request,
         SavedObjectsRepository,
+        errors,
         index,
         mappings,
         onBeforeWrite
@@ -135,6 +136,7 @@ export const security = (kibana) => new kibana.Plugin({
 
         return new SecureSavedObjectsClient({
           repository,
+          errors,
           hasPrivileges
         });
       });
