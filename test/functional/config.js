@@ -1,3 +1,5 @@
+import path from 'path';
+
 import {
   CommonPageProvider,
   ConsolePageProvider,
@@ -42,6 +44,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
+      require.resolve('./apps/plugins'),
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
@@ -90,6 +93,13 @@ export default async function ({ readConfigFile }) {
     kibanaServerArgs: [
       ...commonConfig.get('kibanaServerArgs'),
       '--oss',
+      `--plugins.scanDirs=${JSON.stringify([
+        path.resolve(__dirname, '../../plugins'),
+        path.resolve(__dirname, '../../src/core_plugins'),
+        // Load plugins from the plugins folder in the functional test folder.
+        // These plugins will only be present during functional test runs.
+        path.resolve(__dirname, './plugins'),
+      ])}`
     ],
 
     apps: {

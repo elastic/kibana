@@ -25,6 +25,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getGlobalNavigationLink(linkText) {
+      const nav = await testSubjects.find('globalNav');
+      return await nav.findByPartialLinkText(linkText);
+    }
+
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
