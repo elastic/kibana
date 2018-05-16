@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should navigate to the app', async () => {
-      const link = await PageObjects.header.getGlobalNavigationLink('Test Plugin App');
-      await link.click();
+      await PageObjects.header.clickGlobalNavigationLink('Test Plugin App');
       const pluginContent = await testSubjects.find('pluginContent');
       expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
     });

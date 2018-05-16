@@ -30,6 +30,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await nav.findByPartialLinkText(linkText);
     }
 
+    async clickGlobalNavigationLink(appTitle) {
+      const link = await this.getGlobalNavigationLink(appTitle);
+      await link.click();
+    }
+
     async clickDiscover() {
       log.debug('click Discover tab');
       await this.clickSelector('a[href*=\'discover\']');
