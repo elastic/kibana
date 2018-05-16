@@ -19,10 +19,40 @@ import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from './management_urls';
+
 import { EditRolePage } from './edit_role/components/edit_role_page';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
+
+const getKibanaPrivileges = (kibanaApplicationPrivilege, role, application) => {
+  const kibanaPrivileges = kibanaApplicationPrivilege.reduce((acc, p) => {
+    acc[p.name] = false;
+    return acc;
+  }, {});
+
+  if (!role.applications || role.applications.length === 0) {
+    return kibanaPrivileges;
+  }
+
+  const applications = role.applications.filter(x => x.application === application);
+
+  const assigned = _.uniq(_.flatten(_.pluck(applications, 'privileges')));
+  assigned.forEach(a => {
+    kibanaPrivileges[a] = true;
+  });
+
+  return kibanaPrivileges;
+};
+
+const getOtherApplications = (kibanaPrivileges, role, application) => {
+  if (!role.applications || role.applications.length === 0) {
+    return [];
+  }
+
+  return role.applications.map(x => x.application).filter(x => x !== application);
+};
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
@@ -50,7 +80,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         applications: []
       });
     },
-    kibanaPrivileges(ApplicationPrivilege, kbnUrl, Promise, Private) {
+    kibanaApplicationPrivilege(ApplicationPrivilege, kbnUrl, Promise, Private) {
       return ApplicationPrivilege.query().$promise
         .catch(checkLicenseError(kbnUrl, Promise, Private));
     },
@@ -66,10 +96,26 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, rbacEnabled) {
+  controller($injector, $scope, $http, rbacEnabled, rbacApplication) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
+
     const Notifier = $injector.get('Notifier');
+
+    $scope.role = $route.current.locals.role;
+    $scope.users = $route.current.locals.users;
+    $scope.indexPatterns = $route.current.locals.indexPatterns;
+
+    $scope.rbacEnabled = rbacEnabled;
+    const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
+    const role = $route.current.locals.role;
+    $scope.kibanaPrivileges = getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
+    $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
+
+    $scope.rolesHref = `#${ROLES_PATH}`;
+
+    this.isNewRole = $route.current.params.name == null;
+    this.fieldOptions = {};
 
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
@@ -78,7 +124,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const domNode = document.getElementById('editRoleReactRoot');
 
     const {
-      role,
       users,
       indexPatterns,
     } = $route.current.locals;
@@ -99,6 +144,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     render(<EditRolePage
       runAsUsers={users}
       role={role.toJSON()}
+      kibanaPrivileges={getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication)}
+      otherApplications={getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication)}
       indexPatterns={indexPatterns}
       rbacEnabled={rbacEnabled}
       spacesEnabled={true}
@@ -113,5 +160,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$on('$destroy', () => {
       unmountComponentAtNode(domNode);
     });
+
+    $scope.union = _.flow(_.union, _.compact);
   }
 });

@@ -33,6 +33,7 @@ import { RoleValidator } from '../lib/validate_role';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import { ROLES_PATH } from '../../management_urls';
 import { DeleteRoleButton } from './delete_role_button';
+import { setApplicationPrivileges } from '../lib/set_application_privileges';
 
 const notifier = new Notifier();
 
@@ -43,9 +44,12 @@ export class EditRolePage extends Component {
     indexPatterns: PropTypes.array.isRequired,
     httpClient: PropTypes.func.isRequired,
     rbacEnabled: PropTypes.bool.isRequired,
+    rbacApplication: PropTypes.string,
     spacesEnabled: PropTypes.bool.isRequired,
     allowDocumentLevelSecurity: PropTypes.bool.isRequired,
     allowFieldLevelSecurity: PropTypes.bool.isRequired,
+    kibanaPrivileges: PropTypes.array.isRequired,
+    otherPrivileges: PropTypes.array.isRequired,
   };
 
   constructor(props) {
@@ -421,6 +425,9 @@ export class EditRolePage extends Component {
       };
 
       role.indices = role.indices.filter(i => !this.isPlaceholderPrivilege(i));
+      role.indices.forEach((index) => index.query || delete index.query);
+
+      setApplicationPrivileges(this.props.kibanaPrivileges, role, this.props.rbacApplication);
 
       saveRole(httpClient, role)
         .then(() => {
