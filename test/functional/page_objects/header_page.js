@@ -13,7 +13,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickSelector(selector) {
       log.debug(`clickSelector(${selector})`);
-      await retry.try(async () => await remote.findByCssSelector(selector).click());
+      await find.clickByCssSelector(selector);
     }
 
     async confirmTopNavTextContains(text) {
