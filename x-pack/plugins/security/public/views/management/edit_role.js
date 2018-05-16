@@ -25,15 +25,6 @@ import { EditRolePage } from './edit_role/components/edit_role_page';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-
-const getOtherApplications = (kibanaPrivileges, role, application) => {
-  if (!role.applications || role.applications.length === 0) {
-    return [];
-  }
-
-  return role.applications.map(x => x.application).filter(x => x !== application);
-};
-
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
   resolve: {
@@ -83,17 +74,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
     const Notifier = $injector.get('Notifier');
 
-    $scope.role = $route.current.locals.role;
-    $scope.users = $route.current.locals.users;
-    $scope.indexPatterns = $route.current.locals.indexPatterns;
-
-    $scope.rbacEnabled = rbacEnabled;
     const kibanaApplicationPrivilege = $route.current.locals.kibanaApplicationPrivilege;
     const role = $route.current.locals.role;
-    $scope.kibanaPrivileges = {};// getKibanaPrivileges(kibanaApplicationPrivilege, role, rbacApplication);
-    $scope.otherApplications = getOtherApplications(kibanaApplicationPrivilege, role, rbacApplication);
-
-    $scope.rolesHref = `#${ROLES_PATH}`;
 
     this.isNewRole = $route.current.params.name == null;
     this.fieldOptions = {};
@@ -141,7 +123,5 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$on('$destroy', () => {
       unmountComponentAtNode(domNode);
     });
-
-    $scope.union = _.flow(_.union, _.compact);
   }
 });

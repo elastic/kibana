@@ -13,9 +13,8 @@ import {
   EuiCheckboxGroup,
   EuiText,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-
-
 export class KibanaPrivileges extends Component {
   static propTypes = {
     role: PropTypes.object.isRequired,
@@ -53,6 +52,12 @@ export class KibanaPrivileges extends Component {
 
     return (
       <Fragment>
+        <EuiTitle>
+          <h3>Kibana</h3>
+        </EuiTitle>
+
+        <EuiSpacer />
+
         <EuiText>
           <p>
             Manage the actions this role can perform against Kibana.&nbsp;
@@ -70,7 +75,6 @@ export class KibanaPrivileges extends Component {
   }
 
   onKibanaPrivilegesChange = (privilege) => {
-    console.log('kib priv change', privilege);
     const role = {
       ...this.props.role,
       applications: [...this.props.role.applications]
@@ -78,6 +82,6 @@ export class KibanaPrivileges extends Component {
 
     togglePrivilege(role, this.props.rbacApplication, this.idToPrivilege(privilege));
 
-    this.props.onChange(role.applications);
+    this.props.onChange(role);
   }
 }
