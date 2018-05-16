@@ -22,7 +22,7 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
                 class="euiIcon euiIcon--medium"
@@ -103,7 +103,7 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
                 class="euiIcon euiIcon--medium"
@@ -210,7 +210,7 @@ exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = 
             class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
                 class="euiIcon euiIcon--medium"
