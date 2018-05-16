@@ -41,30 +41,6 @@ export default function ({ getService }) {
       expect(tokensFromApi).to.eql(tokensInEs);
     });
 
-    it('should create one token by default', async () => {
-      const { body: apiResponse } = await supertest
-        .post(
-          '/api/beats/enrollment_tokens'
-        )
-        .set('kbn-xsrf', 'xxx')
-        .send()
-        .expect(200);
-
-      const tokensFromApi = apiResponse.tokens;
-
-      const esResponse = await es.search({
-        index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
-        q: 'type:enrollment_token'
-      });
-
-      const tokensInEs = esResponse.hits.hits
-        .map(hit => hit._source.enrollment_token.token);
-
-      expect(tokensFromApi.length).to.eql(1);
-      expect(tokensFromApi).to.eql(tokensInEs);
-    });
-
     it('should create the specified number of tokens', async () => {
       const numTokens = chance.integer({ min: 1, max: 2000 });
 

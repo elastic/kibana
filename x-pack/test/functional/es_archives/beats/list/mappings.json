@@ -14,69 +14,66 @@
       "_doc": {
         "dynamic": "strict",
         "properties": {
-          "beat": {
+          "type": {
+            "type": "keyword"
+          },
+          "enrollment_token": {
             "properties": {
-              "access_token": {
+              "token": {
                 "type": "keyword"
               },
-              "central_configuration_yml": {
-                "type": "text"
-              },
-              "enrollment_token": {
-                "type": "keyword"
-              },
-              "ephemeral_id": {
-                "type": "keyword"
-              },
-              "host_ip": {
-                "type": "keyword"
-              },
-              "host_name": {
-                "type": "keyword"
-              },
-              "id": {
-                "type": "keyword"
-              },
-              "local_configuration_yml": {
-                "type": "text"
-              },
-              "metadata": {
-                "type": "object",
-                "dynamic": "true"
-              },
-              "type": {
-                "type": "keyword"
-              },
-              "verified_on": {
+              "expires_on": {
                 "type": "date"
               }
             }
           },
           "configuration_block": {
             "properties": {
-              "block_yml": {
-                "type": "text"
-              },
               "tag": {
                 "type": "keyword"
               },
               "type": {
                 "type": "keyword"
+              },
+              "block_yml": {
+                "type": "text"
               }
             }
           },
-          "enrollment_token": {
+          "beat": {
             "properties": {
-              "expires_on": {
+              "id": {
+                "type": "keyword"
+              },
+              "access_token": {
+                "type": "keyword"
+              },
+              "verified_on": {
                 "type": "date"
               },
-              "token": {
+              "type": {
                 "type": "keyword"
+              },
+              "host_ip": {
+                "type": "ip"
+              },
+              "host_name": {
+                "type": "keyword"
+              },
+              "ephemeral_id": {
+                "type": "keyword"
+              },
+              "local_configuration_yml": {
+                "type": "text"
+              },
+              "central_configuration_yml": {
+                "type": "text"
+              },
+              "metadata": {
+                "dynamic": "true",
+                "type": "object"
               }
             }
-          },
-          "type": {
-            "type": "keyword"
           }
         }
       }
