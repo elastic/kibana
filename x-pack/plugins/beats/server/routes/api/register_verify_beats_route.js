@@ -82,7 +82,7 @@ function determineVerifiedBeatIds(verifications, toBeVerifiedBeatIds) {
 }
 
 // TODO: add license check pre-hook
-// TODO: write to Kibana audit log file
+// TODO: write to Kibana audit log file (include who did the verification as well)
 export function registerVerifyBeatsRoute(server) {
   server.route({
     method: 'POST',
