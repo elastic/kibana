@@ -1,16 +1,12 @@
 import React from 'react';
-import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { EuiToolTip } from '@elastic/eui';
 import { PropTypes } from 'prop-types';
 
-export const TooltipComponent = ({ children, text, placement = 'top' }) => {
-  const tooltip = <Tooltip id="tooltip">{text}</Tooltip>;
-
-  return (
-    <OverlayTrigger placement={placement} overlay={tooltip}>
-      {children}
-    </OverlayTrigger>
-  );
-};
+export const TooltipComponent = ({ children, text, placement = 'top' }) => (
+  <EuiToolTip position={placement} content={text}>
+    {children}
+  </EuiToolTip>
+);
 
 TooltipComponent.propTypes = {
   children: PropTypes.node.isRequired,

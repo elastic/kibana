@@ -1,22 +1,23 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import { Tooltip } from '../tooltip';
+import { EuiIconTip } from '@elastic/eui';
 
 export const TooltipIcon = ({ icon = 'info', text, placement }) => {
-  const classes = ['fa'];
-
   const icons = {
-    error: ['fa-exclamation-circle'],
-    warning: ['fa-warning', 'text-warning'],
-    info: ['fa-info-circle'],
+    error: { type: 'alert', color: 'danger' },
+    warning: { type: 'alert', color: 'warning' },
+    info: { type: 'iInCircle', color: 'default' },
   };
 
   if (!Object.keys(icons).includes(icon)) throw new Error('Unsupported icon type');
 
   return (
-    <Tooltip text={text} placement={placement}>
-      <i className={classes.concat(icons[icon]).join(' ')} />
-    </Tooltip>
+    <EuiIconTip
+      type={icons[icon].type}
+      color={icons[icon].color}
+      content={text}
+      position={placement}
+    />
   );
 };
 
