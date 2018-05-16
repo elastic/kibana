@@ -1,4 +1,3 @@
-:kib: Kibana
 :kib-privs: {kib} Privileges
 
 [role="xpack"]
