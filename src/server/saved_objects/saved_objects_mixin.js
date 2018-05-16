@@ -62,7 +62,8 @@ export function savedObjectsMixin(kbnServer, server) {
     }
   }
 
-  server.decorate('server', 'getSavedObjectsClientProvider', () => SavedObjectsClientProvider);
+  const savedObjectsClientProvider = new SavedObjectsClientProvider();
+  server.decorate('server', 'getSavedObjectsClientProvider', () => savedObjectsClientProvider);
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster, request }) => {
     const createBaseClient = (options) => {
@@ -81,7 +82,7 @@ export function savedObjectsMixin(kbnServer, server) {
       });
     };
 
-    return SavedObjectsClientProvider.createSavedObjectsClient(createBaseClient, {
+    return savedObjectsClientProvider.createSavedObjectsClient(createBaseClient, {
       server,
       request,
       mappings: server.getKibanaIndexMappingsDsl(),

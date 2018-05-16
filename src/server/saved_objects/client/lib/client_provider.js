@@ -3,7 +3,7 @@ import { PrioritizedCollection } from './prioritized_collection';
 /**
  * Provider for the Saved Object Client.
  */
-class ClientProvider {
+export class SavedObjectsClientProvider {
   constructor() {
     this._optionBuilders = new PrioritizedCollection('optionBuilders');
     this._wrappers = new PrioritizedCollection('savedObjectClientWrappers');
@@ -27,5 +27,3 @@ class ClientProvider {
     return orderedWrappers.reduce((client, wrapper) => wrapper(client, clientOptions), baseClient);
   }
 }
-
-export const SavedObjectsClientProvider = new ClientProvider();
